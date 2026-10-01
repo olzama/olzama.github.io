@@ -1,84 +1,402 @@
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<title style="display:inline-block; margin-left:50px; padding-top:15px; vertical-align:top">
-Olga Zamaraeva's Web Page
-</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Olga Zamaraeva</title>
+<meta name="description" content="Olga Zamaraeva — computational linguist, postdoctoral researcher at the University of A Coruña.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  body {font-family: sans-serif;}
+  :root {
+    --bg: #faf7f2;
+    --surface: #ffffff;
+    --text: #1f1d1a;
+    --muted: #6b655c;
+    --line: #e7e1d7;
+    --accent: #c2410c;
+    --accent-soft: #fbe6d8;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #151412;
+      --surface: #1e1c19;
+      --text: #ece7df;
+      --muted: #a39b8f;
+      --line: #2f2c27;
+      --accent: #fb923c;
+      --accent-soft: #3a2415;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 17px/1.65 Inter, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:hover { text-decoration-thickness: 2px; }
+  img { max-width: 100%; display: block; }
+
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+
+  /* Nav */
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 68px; gap: 16px; }
+  nav .brand { font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: 20px; color: var(--text); text-decoration: none; white-space: nowrap; }
+  .tabs {
+    display: flex; gap: 4px; padding: 4px; margin: 0; list-style: none;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
+    box-shadow: var(--shadow);
+  }
+  .tabs a {
+    display: block; padding: 8px 18px; border-radius: 999px;
+    font-size: 15px; font-weight: 500; color: var(--muted); text-decoration: none;
+    white-space: nowrap; transition: background .15s, color .15s;
+  }
+  .tabs a:hover { color: var(--text); background: var(--bg); }
+  .tabs a[aria-current="page"] { background: var(--accent); color: #fff; }
+  @media (prefers-color-scheme: dark) { .tabs a[aria-current="page"] { color: #1a0f07; } }
+  .tabs a.cv, .cv-sm { color: var(--accent); }
+  .cv-sm { display: none; font-size: 15px; font-weight: 500; text-decoration: none; }
+  nav .top { display: flex; align-items: center; justify-content: space-between; }
+
+  /* Tab panels: without JS every panel shows, stacked */
+  .js .panel { display: none; }
+  .js .panel.active { display: block; animation: fade .25s ease-out; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* Hero */
+  .hero { display: grid; grid-template-columns: 1.25fr 1fr; gap: 64px; align-items: center; padding: 72px 0; }
+  .js .hero.active { display: grid; }
+  .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
+  h1, h2, h3 { font-family: Fraunces, Georgia, serif; font-weight: 600; line-height: 1.15; margin: 0; }
+  h1 { font-size: clamp(42px, 6vw, 64px); letter-spacing: -.02em; }
+  .lede { font-size: 20px; color: var(--muted); margin: 20px 0 32px; max-width: 34em; }
+  .lede strong { color: var(--text); font-weight: 500; }
+  .buttons { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 20px; border-radius: 999px;
+    font-size: 15px; font-weight: 500; text-decoration: none;
+    border: 1px solid var(--line); color: var(--text); background: var(--surface);
+    transition: transform .15s, border-color .15s;
+  }
+  .btn:hover { transform: translateY(-1px); border-color: var(--muted); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  @media (prefers-color-scheme: dark) { .btn.primary { color: #1a0f07; } }
+
+  .portrait { position: relative; justify-self: end; width: 100%; max-width: 380px; }
+  .portrait::before {
+    content: ""; position: absolute; inset: 18px -18px -18px 18px;
+    border-radius: 28px; background: var(--accent-soft);
+  }
+  .portrait img {
+    position: relative; width: 100%; aspect-ratio: 4 / 5;
+    object-fit: cover; object-position: 56% 50%;
+    border-radius: 28px; box-shadow: var(--shadow);
+  }
+
+  /* Sections */
+  section { padding: 64px 0; }
+  html:not(.js) section { border-top: 1px solid var(--line); }
+  .subsection { margin-top: 56px; }
+  .section-head { margin-bottom: 36px; }
+  .section-head h2 { font-size: 34px; letter-spacing: -.01em; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+  .cards.two-col { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 640px) { .cards.two-col { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
+    padding: 28px; box-shadow: var(--shadow);
+  }
+  .card .tag { font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+  .card h3 { font-size: 22px; margin-bottom: 10px; }
+  .card p { margin: 0; color: var(--muted); }
+  a.card { text-decoration: none; color: inherit; transition: transform .15s, border-color .15s; }
+  a.card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  a.card h3::after { content: " →"; color: var(--accent); }
+
+  /* Publications */
+  .pubs { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .pubs li {
+    display: grid; grid-template-columns: 1fr auto; column-gap: 24px; align-items: start;
+    padding: 20px 0; border-bottom: 1px solid var(--line);
+  }
+  .pubs a { grid-column: 1; font-family: Fraunces, Georgia, serif; font-size: 19px; font-weight: 600; line-height: 1.35; color: var(--text); text-decoration: none; }
+  .pubs a:hover { color: var(--accent); }
+  .pubs p { grid-column: 1; margin: 6px 0 0; font-size: 15px; color: var(--muted); }
+  .pubs p b { color: var(--text); font-weight: 600; }
+  .pubs .venue {
+    grid-column: 2; grid-row: 1 / span 2; white-space: nowrap;
+    font-size: 13px; font-weight: 600; color: var(--accent);
+    background: var(--accent-soft); padding: 4px 10px; border-radius: 999px;
+  }
+  @media (max-width: 800px) {
+    .pubs li { grid-template-columns: 1fr; }
+    .pubs .venue { grid-column: 1; grid-row: auto; justify-self: start; margin-top: 10px; white-space: normal; }
+  }
+
+  /* Music */
+  .music { display: flex; gap: 28px; align-items: center; }
+  .music .chord {
+    flex: none; width: 72px; height: 110px; border-radius: 14px;
+    background: #fff; display: grid; place-items: center; box-shadow: var(--shadow);
+  }
+  .music .chord img { height: 96px; width: auto; }
+  .music p { margin: 0; font-family: Fraunces, Georgia, serif; font-size: 22px; font-style: italic; color: var(--muted); }
+
+  /* Akademgorodok */
+  .banner { margin: 0 0 40px; }
+  .banner img { width: 100%; aspect-ratio: 16 / 7; object-fit: cover; border-radius: 22px; box-shadow: var(--shadow); }
+  .banner figcaption { font-size: 14px; color: var(--muted); margin-top: 10px; }
+  .home { display: grid; grid-template-columns: 1.4fr 1fr; gap: 48px; align-items: start; }
+  .home p { margin: 0 0 16px; }
+  .home aside { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .home aside figure { margin: 0; }
+  .home aside img, .home aside iframe {
+    width: 100%; aspect-ratio: 1; object-fit: cover; border: 0;
+    border-radius: 16px; box-shadow: var(--shadow); background: var(--surface);
+  }
+  .home aside figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+  footer { border-top: 1px solid var(--line); padding: 32px 0 48px; font-size: 14px; color: var(--muted); }
+  footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+
+  @media (max-width: 800px) {
+    nav .wrap { flex-direction: column; align-items: stretch; height: auto; padding-top: 12px; padding-bottom: 12px; gap: 10px; }
+    .cv-sm { display: block; }
+    .tabs .cv-item { display: none; }
+    .tabs { box-shadow: none; }
+    .tabs li { flex: 1; }
+    .tabs a { padding: 8px 4px; text-align: center; font-size: 14px; }
+    .hero { grid-template-columns: 1fr; gap: 48px; padding: 48px 0; }
+    .portrait { justify-self: center; max-width: 300px; order: -1; }
+    .home { grid-template-columns: 1fr; }
+    section { padding: 56px 0; }
+  }
+  @media (max-width: 420px) {
+    .wrap { padding: 0 16px; }
+  }
 </style>
-
-
 </head>
-<body style="max-width:985px">
-<!-<img align=right src=/icons/construct.gif>
-<h1 style="margin-left:10px">Olga Zamaraeva</h1>
-<div style="display:inline-block; margin-left:50px"><image src="userpic.jpg" width="228" height="236"></div>
-<div style="display:inline-block; padding-left:40px;vertical-align:top;">
-<p>
-<a href="Zamaraeva_CV.pdf" target="_blank">Curriculum vitae</a> (including contact info and all publications).
-</p>
-<p>
-I am a computational linguist. I am currently a postdoctoral researcher<br>at <a href="http://fastparse.grupolys.org/" target-"_blank">University of A Coruña, Spain</a>.
-</p>
+<body>
+<script>document.documentElement.classList.add('js');</script>
 
-<p>
-I am interested in linguistic theory, particularly of syntax, and in literary machine translation.
-</p>
+<nav>
+  <div class="wrap">
+    <div class="top">
+      <a class="brand" href="#home">Olga Zamaraeva</a>
+      <a class="cv-sm" href="Zamaraeva_CV.pdf" target="_blank">CV ↗</a>
+    </div>
+    <ul class="tabs">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#research">Research</a></li>
+      <li><a href="#teaching">Teaching</a></li>
+      <li><a href="#personal">Personal</a></li>
+      <li class="cv-item"><a class="cv" href="Zamaraeva_CV.pdf" target="_blank">CV ↗</a></li>
+    </ul>
+  </div>
+</nav>
 
-<p>
-  My <a href="OZ-diss.pdf" target="_blank">dissertation</a> is on<br> constituent questions in <a href="http://matrix.ling.washington.edu/customize/matrix.cgi" target="_blank">the Grammar Matrix</a>.
-</p>
+<main class="wrap">
 
+  <header class="hero panel" id="tab-home">
+    <div>
+      <p class="eyebrow">Computational linguist</p>
+      <h1>Olga Zamaraeva</h1>
+      <p class="lede">
+        I am a <strong>postdoctoral researcher</strong> at the
+        <a href="http://fastparse.grupolys.org/" target="_blank">University of A Coruña, Spain</a>.
+        I am interested in linguistic theory, particularly of syntax, in literary machine translation, and in creative AI.
+      </p>
+      <div class="buttons">
+        <a class="btn primary" href="Zamaraeva_CV.pdf" target="_blank">Curriculum vitae</a>
+        <a class="btn" href="https://scholar.google.com/citations?user=kjg7CmUAAAAJ&hl" target="_blank">Google Scholar</a>
+        <a class="btn" href="https://github.com/olzama" target="_blank">GitHub</a>
+        <a class="btn" href="OZ-diss.pdf" target="_blank">Dissertation</a>
+      </div>
+    </div>
+    <div class="portrait">
+      <img src="userpic.jpg" alt="Olga Zamaraeva holding a curly white dog">
+    </div>
+  </header>
 
-<p>
-<a href="https://scholar.google.com/citations?user=kjg7CmUAAAAJ&hl" target="_blank">My Google Scholar profile</a>
-</p>
+  <section class="panel" id="tab-research">
+    <div class="section-head">
+      <p class="eyebrow">Research</p>
+      <h2>What I work on</h2>
+    </div>
+    <div class="cards two-col">
+      <div class="card">
+        <p class="tag">Interest</p>
+        <h3>Syntactic theory</h3>
+        <p>Linguistic theory, particularly of syntax.</p>
+      </div>
+      <div class="card">
+        <p class="tag">Interest</p>
+        <h3>Literary machine translation</h3>
+        <p>Machine translation of literary texts.</p>
+      </div>
+      <div class="card">
+        <p class="tag">Interest</p>
+        <h3>Creative AI</h3>
+        <p>AI for creative work.</p>
+      </div>
+      <a class="card" href="OZ-diss.pdf" target="_blank">
+        <p class="tag">Dissertation</p>
+        <h3>Constituent questions</h3>
+        <p>Constituent questions in the Grammar Matrix.</p>
+      </a>
+    </div>
 
-<!--
-<p>
-Contact: <b>olzama<img src=http://www.washington.edu/computing/gifs/at.gif
-                                                            alt='(at)'>uw.edu</b>
--->
-  
-<p>
-I have designed two courses: <a href="https://olzama.github.io/Ling471/"target="_blank">Intro to data science for undergraduates</a> <br> 
-  and <a href="https://olzama.github.io/CL-seminar/"target="_blank">Philosophy of CL</a> for graduate students.
-</p>
+    <div class="section-head subsection">
+      <p class="eyebrow">Publications</p>
+      <h2>Selected papers</h2>
+    </div>
+    <ol class="pubs">
+      <li>
+        <a href="https://aclanthology.org/2026.acl-long.1803/" target="_blank">More aligned, less diverse? Analyzing the grammar and lexicon of two generations of LLMs</a>
+        <p>Adrián Gude, Roi Santos-Ríos, Francis Bond, Dan Flickinger, Carlos Gómez-Rodríguez, <b>Olga Zamaraeva</b></p>
+        <span class="venue">ACL 2026</span>
+      </li>
+      <li>
+        <a href="https://academic.oup.com/jamiaopen/article/9/1/ooaf149/8496818" target="_blank">SynNER: Syntax-infused named entity recognition in the biomedical domain</a>
+        <p>Muhammad Imran, <b>Olga Zamaraeva</b>, Carlos Gómez-Rodríguez</p>
+        <span class="venue">JAMIA Open 2026</span>
+      </li>
+      <li>
+        <a href="https://aclanthology.org/2025.acl-long.443/" target="_blank">Comparing LLM-generated and human-authored news text using formal syntactic theory</a>
+        <p><b>Olga Zamaraeva</b>, Dan Flickinger, Francis Bond, Carlos Gómez-Rodríguez</p>
+        <span class="venue">ACL 2025</span>
+      </li>
+      <li>
+        <a href="https://aclanthology.org/2024.emnlp-main.635/" target="_blank">Revisiting supertagging for faster HPSG parsing</a>
+        <p><b>Olga Zamaraeva</b>, Carlos Gómez-Rodríguez</p>
+        <span class="venue">EMNLP 2024</span>
+      </li>
+      <li>
+        <a href="https://aclanthology.org/2024.lrec-main.1312/" target="_blank">Spanish Resource Grammar version 2023</a>
+        <p><b>Olga Zamaraeva</b>, Lorena S. Allegue, Carlos Gómez-Rodríguez</p>
+        <span class="venue">LREC-COLING 2024</span>
+      </li>
+      <li>
+        <a href="https://doi.org/10.15398/jlm.v10i1.292" target="_blank">20 years of the Grammar Matrix: Cross-linguistic hypothesis testing of increasingly complex interactions</a>
+        <p><b>Olga Zamaraeva</b>, Chris Curtis, Guy Emerson, Antske Fokkens, Michael Wayne Goodman, Kristen Howell, T.J. Trimble, Emily M. Bender</p>
+        <span class="venue">Journal of Language Modelling 2022</span>
+      </li>
+      <li>
+        <a href="OZ-diss.pdf" target="_blank">A cross-linguistic account of wh-questions for a grammar engineering resource</a>
+        <p><b>Olga Zamaraeva</b>. PhD dissertation, University of Washington</p>
+        <span class="venue">2021</span>
+      </li>
+    </ol>
+    <p style="margin-top:24px;color:var(--muted);font-size:15px">
+      The full list of publications is in my <a href="Zamaraeva_CV.pdf" target="_blank">CV</a>
+      and on <a href="https://scholar.google.com/citations?user=kjg7CmUAAAAJ&hl" target="_blank">Google Scholar</a>.
+      More about <a href="http://matrix.ling.washington.edu/customize/matrix.cgi" target="_blank">the Grammar Matrix</a>.
+    </p>
+  </section>
 
-</div>
-<hr>
+  <section class="panel" id="tab-teaching">
+    <div class="section-head">
+      <p class="eyebrow">Teaching</p>
+      <h2>Courses I designed</h2>
+    </div>
+    <div class="cards">
+      <a class="card" href="https://olzama.github.io/Ling471/" target="_blank">
+        <p class="tag">Undergraduate</p>
+        <h3>Intro to data science</h3>
+        <p>An introduction to data science for undergraduates.</p>
+      </a>
+      <a class="card" href="https://olzama.github.io/CL-seminar/" target="_blank">
+        <p class="tag">Graduate</p>
+        <h3>Philosophy of CL</h3>
+        <p>A seminar on the philosophy of computational linguistics for graduate students.</p>
+      </a>
+    </div>
+  </section>
 
-<div style="display:inline-block; margin-left:50px; padding-top:15px; vertical-align:top"><img src="tristan.jpeg" height="100" width="25"></div>
+  <section class="panel" id="tab-personal">
+    <div class="section-head">
+      <p class="eyebrow">Music</p>
+      <h2>Next performance</h2>
+    </div>
+    <div class="music">
+      <div class="chord"><img src="tristan.jpeg" alt="The Tristan chord"></div>
+      <p>Here I sometimes say a few words about the next musical performance that I plan on attending.</p>
+    </div>
 
-<div style="display:inline-block;padding-left:40px;vertical-align:top">
-<p><i>
-Here I sometimes say a few words about the next musical performance<br>
-that I plan on attending.
-</div></p>
+    <div class="section-head subsection">
+      <p class="eyebrow">Where I come from</p>
+      <h2>Akademgorodok</h2>
+    </div>
+    <figure class="banner">
+      <a href="http://bocharik.livejournal.com/346480.html" target="_blank"><img src="Zvetnoy.JPG" alt="Akademgorodok in autumn: apartment blocks among yellow and red trees"></a>
+      <figcaption>Akademgorodok in autumn &copy; A. Bocharov</figcaption>
+    </figure>
+    <div class="home">
+      <div>
+        <p>
+          I was born and grew up in a fantastic place called
+          <a href="http://en.wikipedia.org/wiki/Akademgorodok" target="_blank">Akademgorodok</a> near Novosibirsk, Russia.
+          You can see a lot of forest if you zoom out.
+        </p>
+        <p>
+          It is a town built specifically for a <a href="https://english.nsu.ru/" target="_blank">University</a>
+          and a number of research institutes. My parents both worked in such institutes, and so did parents
+          of most of my friends, and maybe that's why I decided to become a researcher myself.
+        </p>
+      </div>
+      <aside>
+        <figure>
+          <a href="http://www.en.catalysis.ru/block/index.php?ID=19&SECTION_ID=256" target="_blank"><img src="kiz1.jpg" alt="My father at a blackboard"></a>
+          <figcaption>My father</figcaption>
+        </figure>
+        <figure>
+          <iframe loading="lazy" title="Map of Akademgorodok" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2444.5201106583136!2d83.09464079999998!3d54.834286699999915!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x42dfc468820deb0b%3A0x4c558390c691fa8d!2sZhemchuzhnaya+ulitsa%2C+2%2C+Novosibirsk%2C+Novosibirskaya+oblast&#39;%2C+Russia!5e1!3m2!1sen!2sus!4v1399172315485"></iframe>
+          <figcaption>Zoom out to see the forest</figcaption>
+        </figure>
+      </aside>
+    </div>
+  </section>
 
-<hr>
-<p style="padding-left:50px;padding-bottom:10px">
-I was born and grew up in a fantastic place called <a href="http://en.wikipedia.org/wiki/Akademgorodok" target="_blank">Akademgorodok</a> near Novosibirsk, Russia. 
-You can see a lot of forest if you zoom out. 
-It is a town built specifically for a <a href="http://www.nsu.ru/exp/index.jz" target="_blank">University</a> and a number of research institutes.
-My parents both worked in such institutes, and so did parents of most of my friends, and maybe that's why I decided to become a researcher myself.
-</p>
-<div style="display:inline-block; vertical-align:top; margin-left:50px">
-<a href="http://www.en.catalysis.ru/block/index.php?ID=19&SECTION_ID=256" target="_blank"><img src="kiz1.jpg" title="This is my father" style="margin-bottom:10px"></a>
-<br>
-<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2444.5201106583136!2d83.09464079999998!3d54.834286699999915!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x42dfc468820deb0b%3A0x4c558390c691fa8d!2sZhemchuzhnaya+ulitsa%2C+2%2C+Novosibirsk%2C+Novosibirskaya+oblast&#39;%2C+Russia!5e1!3m2!1sen!2sus!4v1399172315485" width="228" height="225" frameborder="0"></iframe>
-</div>
-<div style="vertical-align:top; display:inline-block; padding-left:40px; text-align:right">
-<a href="http://bocharik.livejournal.com/346480.html" target="_blank"><img src="http://lh6.ggpht.com/_vougCeS8IRE/TKsGYbJ1STI/AAAAAAAADn4/TaISJmoWguw/s800/Zvetnoy.JPG" width="650" height="472"></a>
-<p>
-Akademgorodok in autumn &copy; A. Bocharov
-</p>
-</div>
-<p>
-Last updated:
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>&copy; Olga Zamaraeva</span>
+    <span id="updated"></span>
+  </div>
+</footer>
+
 <script>
-document.write(document.lastModified);
+  const panels = [...document.querySelectorAll('.panel')];
+  const tabLinks = [...document.querySelectorAll('.tabs a[href^="#"]')];
+  function showTab() {
+    const id = location.hash.slice(1);
+    const current = panels.find(p => p.id === 'tab-' + id) || panels[0];
+    panels.forEach(p => p.classList.toggle('active', p === current));
+    tabLinks.forEach(a => 'tab-' + a.hash.slice(1) === current.id ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', showTab);
+  showTab();
+
+  document.getElementById('updated').textContent = 'Last updated ' +
+    new Date(document.lastModified).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 </script>
-</p>
 </body>
 </html>
