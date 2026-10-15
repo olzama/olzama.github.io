@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Green AI Algorithms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#edf7f5; --surface:#fff; --text:#12302d; --muted:#557370; --line:#d2e7e3; --accent:#d9480f; --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.06); }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0e1b1a; --surface:#152624; --text:#e3f0ee; --muted:#93aeaa; --line:#233836; --accent:#fb8a5a; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3); } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:17px/1.65 Inter,system-ui,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; }
+  a { color:var(--accent); text-decoration-thickness:1px; text-underline-offset:3px; }
+  .wrap { max-width:860px; margin:0 auto; padding:0 24px; }
+  header { padding:56px 0 32px; }
+  .back { font-size:15px; }
+  h1,h2 { font-family:Fraunces,Georgia,serif; font-weight:600; line-height:1.2; margin:0 0 12px; }
+  h1 { font-size:40px; letter-spacing:-.01em; margin-top:24px; }
+  h2 { font-size:28px; }
+  h4 { font-size:14px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:24px 0 8px; }
+  .lede { color:var(--muted); }
+  .eyebrow { font-size:13px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin:0 0 8px; }
+  .session { background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); padding:28px; margin-bottom:24px; }
+  .btn { display:inline-block; padding:8px 16px; border:1px solid var(--accent); border-radius:999px; text-decoration:none; font-weight:500; }
+  ul { margin:0; padding-left:20px; }
+  .nbs { list-style:none; padding:0; }
+  .nbs li { display:flex; flex-wrap:wrap; gap:4px 12px; padding:6px 0; border-top:1px solid var(--line); }
+  .code { font-variant-numeric:tabular-nums; color:var(--muted); }
+  .links { margin-left:auto; font-size:15px; }
+  .hint { text-transform:none; letter-spacing:0; font-weight:400; }
+  footer { color:var(--muted); font-size:14px; padding:16px 0 48px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="../../index.html#teaching">&larr; Olga Zamaraeva</a>
+    <h1>Green AI Algorithms: NLP</h1>
+    <p class="lede">Three sessions of the microcredential <em>Algoritmos verdes para la IA: diseño e implementación</em>, Universidade da Coruña, 2026–2027. Each notebook comes in a beginner and an advanced version with the same exercises.</p>
+  </header>
+    <section class="session">
+      <p class="eyebrow">Session 1</p>
+      <h2>Green NLP today</h2>
+      <p>From n-grams and embeddings to attention and transformers, with a baseline energy measurement.</p>
+      <p><a class="btn" href="slides/session1_transformers.pdf" target="_blank">Slides (PDF)</a></p>
+        <h4>Interactive pages</h4>
+        <ul>
+          <li><a href="artifacts/ngram.html" target="_blank">N-grams, step by step</a></li>
+          <li><a href="artifacts/skipgram.html" target="_blank">Skip-gram, step by step</a></li>
+          <li><a href="artifacts/attention.html" target="_blank">Attention, step by step</a></li>
+        </ul>
+        <h4>Notebooks <span class="hint">open in Colab</span></h4>
+        <ul class="nbs">
+          <li><span class="code">01a</span> Baseline measurement <span class="links"><a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01a_baseline_measurement-beginner.ipynb" target="_blank">beginner</a> · <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01a_baseline_measurement-advanced.ipynb" target="_blank">advanced</a></span></li>
+          <li><span class="code">01b</span> Ngrams playground <span class="links"><a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01b_ngrams_playground-beginner.ipynb" target="_blank">beginner</a> · <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01b_ngrams_playground-advanced.ipynb" target="_blank">advanced</a></span></li>
+          <li><span class="code">01c</span> Embeddings playground <span class="links"><a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01c_embeddings_playground-beginner.ipynb" target="_blank">beginner</a> · <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01c_embeddings_playground-advanced.ipynb" target="_blank">advanced</a></span></li>
+          <li><span class="code">01d</span> Attention playground <span class="links"><a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01d_attention_playground-beginner.ipynb" target="_blank">beginner</a> · <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01d_attention_playground-advanced.ipynb" target="_blank">advanced</a></span></li>
+        </ul>
+    </section>
+    <section class="session">
+      <p class="eyebrow">Session 2</p>
+      <h2>Quantization</h2>
+      <p>Measuring what lower-precision weights save in memory, energy and quality, and on which hardware.</p>
+      <p><a class="btn" href="slides/session2_quantization.pdf" target="_blank">Slides (PDF)</a></p>
+        <h4>Notebooks <span class="hint">open in Colab</span></h4>
+        <ul class="nbs">
+          <li><span class="code">02a</span> Quantized measurement <span class="links"><a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session2/beginner/02a_quantized_measurement-beginner.ipynb" target="_blank">beginner</a> · <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session2/advanced/02a_quantized_measurement-advanced.ipynb" target="_blank">advanced</a></span></li>
+          <li><span class="code">02b</span> Quantization playground <span class="links"><a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session2/beginner/02b_quantization_playground-beginner.ipynb" target="_blank">beginner</a> · <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session2/advanced/02b_quantization_playground-advanced.ipynb" target="_blank">advanced</a></span></li>
+          <li><span class="code">02c</span> Hardware playground <span class="links"><a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session2/beginner/02c_hardware_playground-beginner.ipynb" target="_blank">beginner</a> · <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session2/advanced/02c_hardware_playground-advanced.ipynb" target="_blank">advanced</a></span></li>
+          <li><span class="code">02d</span> Memory estimates playground <span class="links"><a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session2/beginner/02d_memory_estimates_playground-beginner.ipynb" target="_blank">beginner</a> · <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session2/advanced/02d_memory_estimates_playground-advanced.ipynb" target="_blank">advanced</a></span></li>
+        </ul>
+    </section>
+    <section class="session">
+      <p class="eyebrow">Session 3</p>
+      <h2>Retrieval</h2>
+      <p>Retrieval as a lever for smaller models, and combining all three levers in one run.</p>
+      <p><a class="btn" href="slides/session3_retrieval.pdf" target="_blank">Slides (PDF)</a></p>
+        <h4>Notebooks <span class="hint">open in Colab</span></h4>
+        <ul class="nbs">
+          <li><span class="code">03a</span> Retrieval measurement <span class="links"><a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session3/beginner/03a_retrieval_measurement-beginner.ipynb" target="_blank">beginner</a> · <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session3/advanced/03a_retrieval_measurement-advanced.ipynb" target="_blank">advanced</a></span></li>
+          <li><span class="code">03b</span> Retrieval playground <span class="links"><a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session3/beginner/03b_retrieval_playground-beginner.ipynb" target="_blank">beginner</a> · <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session3/advanced/03b_retrieval_playground-advanced.ipynb" target="_blank">advanced</a></span></li>
+          <li><span class="code">03c</span> All levers closed book <span class="links"><a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session3/beginner/03c_all_levers_closed_book-beginner.ipynb" target="_blank">beginner</a> · <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session3/advanced/03c_all_levers_closed_book-advanced.ipynb" target="_blank">advanced</a></span></li>
+        </ul>
+    </section>
+  <footer>&copy; 2026 Olga Zamaraeva, Universidade da Coruña. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</footer>
+</div>
+</body>
+</html>
