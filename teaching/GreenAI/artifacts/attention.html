@@ -193,128 +193,13 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 <div class="wrap">
   <header>
     <h1>Attention, Step by Step</h1>
-    <p>How a translation model decides which source words to look at while it writes each output word. The running example is the start of our sentence: <span class="gl">Unha <b>tía miña</b>, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»</span>.</p>
+    <p>How a translation model decides which source words to look at while it writes each output word. The running example is the start of our sentence: <span class="gl">Unha <b>tía miña</b>, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»</span>. It continues the <a href="mt.html">neural translation page</a>, which shows how an encoder and a decoder translate without attention.</p>
   </header>
-
-  <div class="group"><p class="label">Part one</p><h2>Neural translation without attention</h2><p class="note">How an encoder and a decoder translate when the decoder gets only one summary of the sentence: the design attention was invented to fix.</p></div>
-
-  <!-- 1 -->
-  <section class="panel" id="train">
-    <h2><span class="n">1</span>Without attention: where a translation model's vectors come from</h2>
-    <p class="lead">A neural translation model has two parts. The <b>encoder</b> reads the Galician words into a <b>summary</b>, a vector; the <b>decoder</b> starts from that summary and writes the English words one at a time. Section 2 shows the encoder's rule with simple made-up numbers; section 3 takes the encoder and decoder of the model trained here apart. Every word in this model is a 2-D vector, and all of them start random: before it can translate, the model has to learn them from examples.</p>
-    <div class="controls">
-      <label class="note" for="trA">Phrase</label><select id="trA"></select>
-    </div>
-      <p class="note" style="color:var(--fg)">The model learned from these sixteen example translations, written by people. They are the ground truth: the answers the model is trained to reproduce.</p>
-      <div class="phrases" id="trainData"></div>
-      <p class="note" style="color:var(--fg)">Training shows the model each pair. At every English position it computes the probability of the <b>correct</b> next word (section 3 shows how). Then it nudges every vector, Galician and English, a little in the direction that makes those probabilities higher, just as skip-gram pushed up the probability of the correct neighbor. During training the decoder is always given the correct previous word, not its own guess. All vectors start random.</p>
-      <div class="controls">
-        <button id="trBack" aria-label="Previous training step">← Back</button>
-        <button class="primary" id="trNext">Next →</button>
-        <button id="pathPlay">Play</button>
-        <input type="range" id="pathStep" min="0" max="1" step="1" value="0" aria-label="Training step" style="flex:1 1 200px; accent-color: var(--blue)">
-        <span class="mono" id="pathStepVal"></span>
-      </div>
-      <div class="cols">
-        <div class="col">
-          <p class="label">All the vectors at this training step</p>
-          <svg id="trainSvg" viewBox="0 0 400 400" role="img" aria-label="Galician and English word vectors during training" style="max-width:420px"></svg>
-          <p class="note">Squares: Galician words; rings: English words; faint lines: the path each vector has taken since its random start. The chosen phrase's words are labeled, with the path of its summary (orange; section 2 explains it). The plane zooms out as training goes on: the vectors start small (about ±1, numbers on the axes) and grow. (Each English word also has an update vector, used in part b, which moves too but is not drawn.)</p>
-        </div>
-        <div class="col">
-          <p class="label" id="trainLbl"></p>
-          <div class="bars" id="trainBars"></div>
-          <p class="label" style="margin-top:8px">What the model writes on its own at this step</p>
-          <div class="phrases" id="pathAll"></div>
-        </div>
-      </div>
-      <p class="note">2-D vectors; Adam, learning rate 0.05, 1500 steps; <span class="mono">torch.manual_seed(0)</span>; <code>attention_s2s_train.py</code>.</p>
-  </section>
-
-  <!-- 1 -->
-  <section class="panel" id="enc">
-    <h2><span class="n">2</span>Without attention: the encoder reads a sentence into one vector</h2>
-    <p class="lead">A translation model starts by reading the Galician sentence. Each word has an embedding, a row in a table like p on the skip-gram page; here it has 2 dimensions, so every word is a point. The <b>encoder</b> reads the words in order and keeps a <b>summary</b>: one more vector, updated after every word. In this simplified encoder, each new word moves the summary halfway toward that word's point.</p>
-    <div class="controls">
-      <div class="seg" role="group" aria-label="Input">
-        <button id="eShort" aria-pressed="true">tía miña</button>
-        <button id="eLong" aria-pressed="false">whole sentence</button>
-      </div>
-      <button class="primary" id="encPlay">Read the sentence</button>
-      <button id="encStep">Next word</button>
-    </div>
-    <div class="cols">
-      <div class="col">
-        <svg id="encSvg" viewBox="0 0 400 400" role="img" aria-label="Word points and the summary moving between them" style="max-width:440px"></svg>
-        <div class="legendrow">
-          <span><span class="sw" style="background:var(--blue)"></span>a word's embedding</span>
-          <span><span class="sw" style="background:var(--orange)"></span>the encoder's summary</span>
-        </div>
-      </div>
-      <div class="col">
-        <p class="label">The update, with this step's numbers</p>
-        <div class="formula" id="encFormula"></div>
-        <p class="label">How much of each word is in the summary now</p>
-        <div class="mix" id="encMix"></div>
-        <div class="weights" id="encShares"></div>
-        <p class="note" id="encNote"></p>
-      </div>
-    </div>
-    <p class="note">The word vectors are made up for this example. Real encoders, recurrent neural networks, learn their update rule instead of always taking half and half, and they can learn to keep some things longer. But their summary is still one vector of a fixed size, whatever the length of the sentence.</p>
-  </section>
-
-  <!-- 2 -->
-  <section class="panel" id="bound">
-    <h2><span class="n">3</span>Without attention: from Galician to English, word by word</h2>
-    <p class="lead">The model trained in section 1, at work. The encoder reads the phrase into a summary, and Galician and English words share one plane. The <b>decoder</b> then writes English one word at a time. It keeps a <b>state</b>, a vector, and its first state is the summary. At every step it chooses a word the way skip-gram predicted neighbors, then folds that word into its state with the same ½ + ½ rule the encoder used.</p>
-    <div class="controls">
-      <label class="note" for="bA">Phrase</label><select id="bA"></select>
-    </div>
-    <div class="controls">
-      <button id="bBack">← Back</button>
-      <button class="primary" id="bNext">Next →</button>
-    </div>
-    <div class="pathstrip" id="bStrip"></div>
-    <div class="cols">
-      <div class="col">
-        <p class="label" id="bPlaneLbl">a. One plane for both languages: how the next word is chosen</p>
-        <svg id="bSvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state and the English words' vectors" style="max-width:420px"></svg>
-        <p class="label" id="bRulerLbl">Every word's score, on one line</p>
-        <svg id="bRuler" viewBox="0 0 400 124" role="img" aria-label="All scores on a line" style="max-width:420px"></svg>
-        <p class="note" id="bEncNote"></p>
-        <p class="note">Galician words (squares) and English words (rings) are all 2-D vectors in the same plane: the Galician ones are bright while the encoder reads, the English ones while the decoder writes. The encoder's summary of the phrase (dashed path) is where the decoder's state starts (orange arrow). Each English word's score is the dot product with the state: how far the word lies along the state's direction (dashed line), times the state's length. Click any ring, or any word on the line, to see its score worked out.</p>
-      </div>
-      <div class="col">
-        <div class="bars" id="bBars"></div>
-        <div class="formula" id="bFormula"></div>
-        <p class="label" style="margin-top:6px" id="bUpdLbl">b. How the state was recomputed</p>
-        <svg id="bUpd" viewBox="0 0 400 230" role="img" aria-label="New state as half the old state plus half the written word's vector" style="max-width:420px"></svg>
-        <div class="formula" id="bUpdF"></div>
-        <p class="note" id="bUpdNote">The vector used here is a second learned vector for each English word, separate from its ring in (a): like skip-gram, which also keeps two tables, p and p′. Drawn at its own scale.</p>
-        <p class="label" style="margin-top:6px" id="bMixLbl">What is in the state now</p>
-        <div class="mix" id="bMix"></div>
-        <div class="weights" id="bMixTxt"></div>
-        <p class="note" id="bNote" style="color:var(--fg)"></p>
-      </div>
-    </div>
-    <div class="callout">
-      <p class="label">c. If the summary is mostly the end of the phrase, how does the first word come out right?</p>
-      <p class="note" style="color:var(--fg)">In <i>unha tía miña</i>, <i>unha</i> makes up only ⅛ of the summary, yet the first word must be “an”. In these 3-word phrases ⅛ is still enough: training placed every vector so that this small share tips the choice. In long sentences the first words fade to almost nothing (section 2), and translations got worse. Sutskever and colleagues (2014) found a trick: feed the Galician sentence in <b>reverse</b>, so its first words are read last and are freshest when the decoder starts. Their BLEU score rose from 25.9 to 30.6. Attention (section 4) removes the need for the trick: the decoder looks back at every word directly.</p>
-    </div>
-    <div class="callout">
-      <p class="label">d. Is “an aunt of mine” the best translation?</p>
-      <p class="note" style="color:var(--fg)">The toy model learned to write “an aunt of mine” for <i>unha tía miña</i>, and the real model in section 6 writes the same. It is correct and faithful: “an” keeps the new character that <i>unha</i> introduces. But English rarely says it. For every 100 “my …”, English books write “a … of mine” this often (log scale):</p>
-      <div class="bars" style="max-width:520px"><div class="bar" style="grid-template-columns: 12em minmax(0,1fr) 3.5em"><span class="w">a friend of mine</span><span class="track"><span class="fill" style="width:92.1%;background:var(--green)"></span></span><span>12.47</span></div><div class="bar" style="grid-template-columns: 12em minmax(0,1fr) 3.5em"><span class="w">an aunt of mine</span><span class="track"><span class="fill" style="width:32.9%;background:var(--orange)"></span></span><span>0.36</span></div><div class="bar" style="grid-template-columns: 12em minmax(0,1fr) 3.5em"><span class="w">a brother of mine</span><span class="track"><span class="fill" style="width:7.8%;background:var(--blue)"></span></span><span>0.08</span></div></div>
-      <p class="note" style="color:var(--fg)">“A … of mine” picks one out of several, which is natural for friends and marked for close family. A translator would rebuild the sentence: “<b>I had an aunt who…</b>”. No word of the Galician corresponds to “I had”, so a word-by-word decoder like ours cannot produce it. Counts from Google Books; the <a href="ngram.html#ofmine">n-gram page, section 7</a>, has the full chart and how it was counted.</p>
-    </div>
-  </section>
-
-  <div class="group"><p class="label">Part two</p><h2>Neural translation with attention</h2><p class="note">At every step, the decoder can look back at every word of the sentence.</p></div>
 
   <!-- 4 -->
   <section class="panel" id="look">
-    <h2><span class="n">4</span>Attention: look back at every word</h2>
-    <p class="lead">A translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. Each box below is the encoder's summary after one more word, as in section 2. Without attention, the decoder gets only the last box, so it uses the words in the proportions that box happens to hold: mostly the last ones. With attention, it can look back at every box, and it chooses new proportions for every word it writes.</p>
+    <h2><span class="n">1</span>Attention: look back at every word</h2>
+    <p class="lead">A translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. Each box below is the encoder's summary after one more word, as on the <a href="mt.html">translation page</a>. Without attention, the decoder gets only the last box, so it uses the words in the proportions that box happens to hold: mostly the last ones. With attention, it can look back at every box, and it chooses new proportions for every word it writes.</p>
     <div class="controls">
       <div class="seg" role="group" aria-label="Input">
         <button id="lShort" aria-pressed="true">tía miña</button>
@@ -330,12 +215,12 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <div class="heatwrap"><svg id="lookAtt" role="img" aria-label="Encoder chain; the decoder reads every box, weighted"></svg></div>
     <div class="usebar"><span class="label">What the decoder uses for this word</span><div class="mix" id="mixAtt"></div><div class="weights" id="mixAttTxt"></div></div>
     <p class="note" id="lookNote"></p>
-    <p class="note">Weights for <i>tía miña</i> are the hand-set ones from the worked example; for the whole sentence they are the real model's (section 6, averaged over its heads). The English words are that model's translation. The top bar comes from the simplified encoder of section 2; the bottom bar from the attention weights. Before attention, a long sentence had to fit into the last box alone, and translations of long sentences got much worse.</p>
+    <p class="note">Weights for <i>tía miña</i> are the hand-set ones from the worked example; for the whole sentence they are the real model's (section 3, averaged over its heads). The English words are that model's translation. The top bar comes from the simplified encoder of the <a href="mt.html">translation page</a>; the bottom bar from the attention weights. Before attention, a long sentence had to fit into the last box alone, and translations of long sentences got much worse.</p>
   </section>
 
   <!-- 4 -->
   <section class="panel" id="qk">
-    <h2><span class="n">5</span>Query, key, score, softmax, value</h2>
+    <h2><span class="n">2</span>Query, key, score, softmax, value</h2>
     <p class="lead">Each source word offers a <b>key</b>: what it has. The word being written asks with a <b>query</b>: what it is looking for. The score is the dot product of query and key; softmax turns the scores into weights that sum to 1; the output is the weighted average of the source words' <b>values</b>. Drag the orange query.</p>
     <div class="cols">
       <div class="col">
@@ -366,8 +251,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <!-- 4 -->
   <section class="panel" id="real">
-    <h2><span class="n">6</span>A real model on our sentence</h2>
-    <p class="lead">The same arithmetic inside a trained Galician–English model, Helsinki-NLP/opus-mt-gl-en. Its decoder has 6 layers with 8 attention heads each, and every head looks back at the source in its own way. Click an output word, or play the translation, to see where the model looked. It writes “An aunt of mine”: correct, but rare in English (section 3, part d).</p>
+    <h2><span class="n">3</span>A real model on our sentence</h2>
+    <p class="lead">The same arithmetic inside a trained Galician–English model, Helsinki-NLP/opus-mt-gl-en. Its decoder has 6 layers with 8 attention heads each, and every head looks back at the source in its own way. Click an output word, or play the translation, to see where the model looked. It writes “An aunt of mine”: correct, but rare in English (<a href="mt.html">translation page</a>, sections 3 to 5).</p>
     <div class="controls">
       <button class="primary" id="realPlay">Play the translation</button>
       <label class="note" for="realLayer">Layer</label>
@@ -394,7 +279,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <!-- 4 -->
   <section class="panel" id="self">
-    <h2><span class="n">7</span>Self-attention, and many heads at once</h2>
+    <h2><span class="n">4</span>Self-attention, and many heads at once</h2>
     <p class="lead">The encoder uses the same mechanism inside one sentence: every Galician word attends to every Galician word, itself included. Each head has its own queries and keys, so each head learns its own pattern. The heads' outputs are then combined into one vector per word.</p>
     <div class="controls">
       <label class="note" for="selfLayer">Encoder layer</label>
@@ -416,7 +301,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <!-- 5 -->
   <section class="panel" id="who">
-    <h2><span class="n">8</span>Who decides what a head does?</h2>
+    <h2><span class="n">5</span>Who decides what a head does?</h2>
     <p class="lead">Nobody. The people who build a model choose how many layers and heads it has, how big they are, and what it is trained to predict. They do not assign jobs to heads. Every head starts as random numbers, and training nudges all of them at once in whatever direction lowers the error. A head ends up with a job because, from its own random start, doing that job was the quickest way down. Researchers find the jobs afterwards, by looking, as we do here.</p>
     <p class="lead">Below, a tiny model with 2 layers of 2 heads learns the classic sentence <i>The animal didn't cross the street because it was tired</i>: it has to say what “it” refers to. The adjective decides: <i>tired</i> means the animal, <i>wide</i> means the street. It trains on 96 such sentences. The three runs differ only in their random start.</p>
     <div class="controls">
@@ -449,7 +334,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <p id="askhint">Answers use your own Claude account.</p>
   </section>
   <footer>
-    <p>Section 2 uses made-up 2-D vectors and the simplified update rule described there. Sections 1 and 3 use a toy model with the same rules, trained by <code>attention_s2s_train.py</code>. Section 5 uses the hand-set numbers of the worked-example slide and <code>01d_attention_playground.ipynb</code>, Part A. Section 8 is a real training run of a toy model, recorded every 5 steps by <code>attention_it_train.py</code>. Sections 6 and 7 show real weights from <code>Helsinki-NLP/opus-mt-gl-en</code>, recorded by <code>attention_real.py</code> as in Part B of that notebook: greedy translation, then one teacher-forced pass with the model's own output, so each row is the attention used to write that word.</p>
+    <p>Section 2 uses the hand-set numbers of the worked-example slide and <code>01d_attention_playground.ipynb</code>, Part A. Sections 3 and 4 show real weights from <code>Helsinki-NLP/opus-mt-gl-en</code>, recorded by <code>attention_real.py</code> as in Part B of that notebook: greedy translation, then one teacher-forced pass with the model's own output, so each row is the attention used to write that word. Section 5 is a real training run of a toy model, recorded every 5 steps by <code>attention_it_train.py</code>.</p>
     <p class="label" style="margin-top:14px">References</p>
     <ul class="refs">
       <li>Sutskever, I., Vinyals, O., &amp; Le, Q. V. (2014). Sequence to sequence learning with neural networks. <i>Advances in Neural Information Processing Systems 27</i>. <a href="https://arxiv.org/abs/1409.3215">arxiv.org/abs/1409.3215</a></li>
@@ -487,44 +372,6 @@ function mixHTML(names, vals, empty) {
   const segs = names.map((nm, j) => vals[j] > 0.0005 ? `<span style="width:${(vals[j] * 100).toFixed(2)}%;background:color-mix(in srgb, var(${PAL[j % PAL.length]}) ${40 + Math.round(40 * Math.min(1, vals[j] * 2))}%, transparent)" title="${nm} ${fmtShare(vals[j])}">${vals[j] > 0.07 ? nm : ""}</span>` : "").join("");
   return segs + (empty > 0.0005 ? `<span class="empty" style="width:${(empty * 100).toFixed(2)}%" title="the empty start">${empty > 0.07 ? "start" : ""}</span>` : "");
 }
-
-// ---------- 1: the encoder ----------
-let encLong = false, encK = 2, encT = null;
-const encSrc = () => encLong ? REAL.sentence.src.map(clean) : ["tía", "miña"];
-function summaryAfter(src, k) { let hv = [0, 0]; for (let j = 0; j < k; j++) { const e = emb2(src[j]); hv = [0.5 * hv[0] + 0.5 * e[0], 0.5 * hv[1] + 0.5 * e[1]]; } return hv; }
-function renderEnc() {
-  const src = encSrc(), n = src.length, k = encK, hv = summaryAfter(src, k), prev = summaryAfter(src, Math.max(0, k - 1));
-  const X = x => 200 + x * 170, Y = y => 200 - y * 170;
-  let g = `<line class="axis" x1="${X(-1.1)}" y1="${Y(0)}" x2="${X(1.1)}" y2="${Y(0)}"/><line class="axis" x1="${X(0)}" y1="${Y(-1.1)}" x2="${X(0)}" y2="${Y(1.1)}"/>`;
-  const seen = new Set();
-  src.forEach((w, j) => {
-    if (seen.has(w)) return; seen.add(w);
-    const e = emb2(w), on = src.slice(0, k).includes(w), cur = j === k - 1 || src[k - 1] === w;
-    g += `<circle cx="${X(e[0])}" cy="${Y(e[1])}" r="${encLong ? 3.5 : 6}" fill="${css("--blue")}" fill-opacity="${on ? 1 : 0.25}"/>`;
-    if (!encLong || cur || ["tía", "miña"].includes(w)) g += `<text x="${X(e[0]) + 8}" y="${Y(e[1]) + 4}" font-style="italic" fill="${css(on ? "--fg" : "--muted")}">${w}</text>`;
-  });
-  const trail = []; for (let j = 0; j <= k; j++) { const t = summaryAfter(src, j); trail.push(`${X(t[0]).toFixed(1)},${Y(t[1]).toFixed(1)}`); }
-  g += `<polyline points="${trail.join(" ")}" fill="none" stroke="${css("--orange")}" stroke-opacity="0.45" stroke-width="1.5"/>`;
-  if (k > 0) { const e = emb2(src[k - 1]); g += `<line x1="${X(prev[0])}" y1="${Y(prev[1])}" x2="${X(e[0])}" y2="${Y(e[1])}" stroke="${css("--orange")}" stroke-dasharray="4 3"/>`; }
-  g += `<circle cx="${X(hv[0])}" cy="${Y(hv[1])}" r="8" fill="${css("--orange")}"/><text x="${X(hv[0]) + 11}" y="${Y(hv[1]) - 9}" fill="${css("--orange")}">summary</text>`;
-  $("encSvg").innerHTML = g;
-  const r2 = x => x.toFixed(2);
-  $("encFormula").innerHTML = k === 0 ? "summary = (0, 0) before reading anything" :
-    `reading <i>${src[k - 1]}</i> = (${r2(emb2(src[k - 1])[0])}, ${r2(emb2(src[k - 1])[1])})<br>new summary = ½ × (${r2(prev[0])}, ${r2(prev[1])}) + ½ × (${r2(emb2(src[k - 1])[0])}, ${r2(emb2(src[k - 1])[1])}) = <b>(${r2(hv[0])}, ${r2(hv[1])})</b>`;
-  const shares = src.map((_, j) => shareOf(j, k));
-  $("encMix").innerHTML = mixHTML(src, shares, Math.pow(0.5, k));
-  const ti = src.indexOf("tía");
-  $("encShares").innerHTML = k === 0 ? "" : [...shares.keys()].filter(j => j < k).sort((a, b) => shares[b] - shares[a]).slice(0, 3).map(j => `<b>${src[j]}</b> ${fmtShare(shares[j])}`).join(" · ") + (ti >= 0 && ti < k && shares[ti] < 0.1 ? ` · <b>tía</b> ${fmtShare(shares[ti])}` : "");
-  $("encNote").textContent = k === 0 ? "Press “Read the sentence”, or go word by word." :
-    k < n ? `After ${k} of ${n} words. Every new word halves the share of everything read before it.` :
-    encLong ? `Done: one summary for all ${n} pieces. The last pieces dominate, and tía, read second, makes up ${fmtShare(shares[ti])} of it: practically nothing is left of it.` :
-    "Done. The summary is one point, closer to miña (read last, ½) than to tía (¼). This one vector is what the decoder will get.";
-}
-function setEnc(l) { clearInterval(encT); encLong = l; encK = l ? REAL.sentence.src.length : 2; $("eShort").setAttribute("aria-pressed", !l); $("eLong").setAttribute("aria-pressed", l); renderEnc(); }
-$("eShort").addEventListener("click", () => setEnc(false));
-$("eLong").addEventListener("click", () => setEnc(true));
-$("encStep").addEventListener("click", () => { clearInterval(encT); encK = encK >= encSrc().length ? 1 : encK + 1; renderEnc(); });
-$("encPlay").addEventListener("click", () => { clearInterval(encT); encK = 0; renderEnc(); encT = setInterval(() => { encK++; renderEnc(); if (encK >= encSrc().length) clearInterval(encT); }, reduce ? 150 : encLong ? 350 : 1000); });
 
 // ---------- 3: one vector vs attention ----------
 const SHORT = { src: ["tía", "miña"], tgt: ["my", "aunt"], w: [softmax([0, 3]), softmax([3, 0])] };
@@ -756,18 +603,17 @@ function renderSelf() {
 }
 $("selfLayer").addEventListener("change", () => { sLayer = +$("selfLayer").value; renderSelf(); });
 renderSelf();
-cur1 = 2; renderLook(); renderEnc();
+cur1 = 2; renderLook();
 (window.__askState ||= []).push(() => {
   const sc = K.map(k => q[0] * k[0] + q[1] * k[1]), w = softmax(sc);
   const M = avgOf(D.cross, $("realLayer").value, $("realHead").value), rw = M[tSel], sw = D.self[sLayer][sHead][sSel];
   const top = (toks, ws) => [...ws.keys()].sort((a, b) => ws[b] - ws[a]).slice(0, 4).map(j => `${clean(toks[j])} ${ws[j].toFixed(2)}`).join(", ");
   const lab = v => v === "all" ? "average" : +v + 1;
   return [
-    `Section 2 (without attention: encoder): input ${encLong ? "whole sentence" : "tía miña"}, ${encK} of ${encSrc().length} words read; summary = (${summaryAfter(encSrc(), encK).map(x => x.toFixed(2)).join(", ")}).`,
-    `Section 4 (look back at every word): two diagrams on the same input (${long1 ? "whole sentence, real averaged weights" : "tía miña → my aunt, hand-set weights 0.95/0.05"}). Top, without attention: the encoder is a chain of boxes (one per source word, each a running summary vector); the decoder uses only the last box for every English word. Bottom, with attention: lines from every box, width = weight. English words written so far: ${cur1} of ${lookData().tgt.length}.`,
-    `Section 5 (query, key, score, softmax, value): q = (${q[0]}, ${q[1]}); scores tía ${sc[0].toFixed(2)}, miña ${sc[1].toFixed(2)}; weights tía ${w[0].toFixed(2)}, miña ${w[1].toFixed(2)}.`,
-    `Section 6 (real cross-attention): translation "${D.translation}". Layer ${lab($("realLayer").value)}, head ${lab($("realHead").value)}. Selected output token "${clean(D.tgt[tSel])}" looks at: ${top(D.src, rw)}.`,
-    `Section 7 (encoder self-attention): layer ${sLayer + 1}, head ${sHead + 1}; selected word "${clean(D.src[sSel])}" looks at: ${top(D.src, sw)}.`,
+    `Section 1 (look back at every word): two diagrams on the same input (${long1 ? "whole sentence, real averaged weights" : "tía miña → my aunt, hand-set weights 0.95/0.05"}). Top, without attention: the encoder is a chain of boxes (one per source word, each a running summary vector); the decoder uses only the last box for every English word. Bottom, with attention: lines from every box, width = weight. English words written so far: ${cur1} of ${lookData().tgt.length}.`,
+    `Section 2 (query, key, score, softmax, value): q = (${q[0]}, ${q[1]}); scores tía ${sc[0].toFixed(2)}, miña ${sc[1].toFixed(2)}; weights tía ${w[0].toFixed(2)}, miña ${w[1].toFixed(2)}.`,
+    `Section 3 (real cross-attention): translation "${D.translation}". Layer ${lab($("realLayer").value)}, head ${lab($("realHead").value)}. Selected output token "${clean(D.tgt[tSel])}" looks at: ${top(D.src, rw)}.`,
+    `Section 4 (encoder self-attention): layer ${sLayer + 1}, head ${sHead + 1}; selected word "${clean(D.src[sSel])}" looks at: ${top(D.src, sw)}.`,
   ].join("\n");
 });
 })();
@@ -835,266 +681,13 @@ i = IT.runs[0].snaps.length - 1;
 render();
 (window.__askState ||= []).push(() => {
   const run = IT.runs[r], snap = run.snaps[i];
-  return `Section 8 (who decides what a head does?): start ${NAMES[r]} (seed ${run.seed}), step ${snap.step} of ${IT.steps}, loss ${snap.loss}, ${Math.round(snap.acc * 96)}/96 right. Final head jobs: ` +
+  return `Section 5 (who decides what a head does?): start ${NAMES[r]} (seed ${run.seed}), step ${snap.step} of ${IT.steps}, loss ${snap.loss}, ${Math.round(snap.acc * 96)}/96 right. Final head jobs: ` +
     run.heads.map(h => `layer ${h.layer} head ${h.head}: looks at the animal ${h.animal_when_animal.toFixed(2)} (animal sentences), at the place ${h.place_when_place.toFixed(2)} (place sentences), at the adjective ${h.mass.adjective.toFixed(2)}; ${Math.round(h.acc_without * 96)}/96 right if switched off`).join("; ") +
     `. At this step, for "...because it was tired" the model says ${snap.pred[0]}; for "...wide" it says ${snap.pred[1]}.`;
 });
 })();
 </script>
 
-<script>
-const S2S = /*S2SDATA*/{"gl":["a","amigo","irmán","meu","miña","o","teu","tía","túa","un","unha","veciña"],"en":["a","an","aunt","brother","friend","mine","my","neighbor","of","your","yours","‹end›"],"data":[[["a","miña","tía"],["my","aunt","‹end›"]],[["unha","tía","miña"],["an","aunt","of","mine","‹end›"]],[["a","túa","tía"],["your","aunt","‹end›"]],[["unha","tía","túa"],["an","aunt","of","yours","‹end›"]],[["o","meu","amigo"],["my","friend","‹end›"]],[["un","amigo","meu"],["a","friend","of","mine","‹end›"]],[["o","teu","amigo"],["your","friend","‹end›"]],[["un","amigo","teu"],["a","friend","of","yours","‹end›"]],[["o","meu","irmán"],["my","brother","‹end›"]],[["un","irmán","meu"],["a","brother","of","mine","‹end›"]],[["o","teu","irmán"],["your","brother","‹end›"]],[["un","irmán","teu"],["a","brother","of","yours","‹end›"]],[["a","miña","veciña"],["my","neighbor","‹end›"]],[["unha","veciña","miña"],["a","neighbor","of","mine","‹end›"]],[["a","túa","veciña"],["your","neighbor","‹end›"]],[["unha","veciña","túa"],["a","neighbor","of","yours","‹end›"]]],"steps":1500,"lr":0.05,"seed":0,"snaps":[{"step":0,"loss":2.5113,"G":[[-0.563,-0.576],[-0.125,-0.217],[0.424,0.346],[-0.158,-1.058],[0.234,-0.079],[0.722,0.133],[0.083,0.437],[-0.072,-0.056],[0.466,0.63],[1.002,0.027],[0.309,-0.206],[-0.421,-1.158]],"O":[[-0.108,-0.371],[0.281,0.13],[-0.087,-0.339],[0.469,0.244],[-0.285,0.46],[0.555,0.645],[-0.739,1.284],[-0.237,0.168],[-0.815,-0.275],[-0.24,-0.25],[-0.533,0.557],[-0.07,0.403]],"I":[[-0.047,0.344],[-0.419,0.0],[0.421,-0.2],[0.52,0.179],[0.037,0.557],[0.141,0.217],[-0.401,-0.648],[-0.375,-0.656],[0.103,-0.167],[-0.214,0.116],[0.398,-0.092],[-0.185,-0.605]],"acc":0.109},{"step":25,"loss":1.8,"G":[[-1.873,0.671],[-1.369,0.398],[-0.443,1.005],[0.02,-1.934],[0.561,-0.834],[-0.613,1.425],[1.004,-0.813],[-1.423,0.7],[1.193,-0.413],[2.162,-1.269],[1.578,-1.38],[-1.661,-1.825]],"O":[[0.827,-1.459],[0.073,1.251],[-1.354,0.437],[-0.671,1.373],[-1.581,1.284],[1.079,1.249],[-2.081,0.854],[-1.388,-0.23],[-1.465,-0.814],[-1.335,1.069],[0.79,1.898],[1.282,-0.751]],"I":[[-1.375,0.467],[-1.748,-0.85],[0.643,-1.489],[0.574,-1.175],[0.501,-0.797],[1.459,-0.411],[0.539,-0.12],[0.195,-1.304],[1.437,1.078],[0.168,-0.416],[1.705,-0.629],[-0.185,-0.605]],"acc":0.328},{"step":50,"loss":1.1425,"G":[[-2.993,1.914],[-2.565,1.747],[-1.932,2.612],[-0.104,-2.237],[0.376,-0.703],[-1.81,2.479],[0.163,-1.633],[-2.586,1.628],[0.567,-0.26],[2.687,-2.07],[2.285,-1.833],[-2.851,-1.104]],"O":[[-0.385,-1.483],[-0.573,1.243],[-2.659,1.72],[-2.072,2.861],[-2.314,2.121],[1.979,2.597],[-2.855,1.732],[-2.724,0.962],[-0.785,-2.279],[-2.77,2.317],[1.705,3.058],[2.444,-1.854]],"I":[[-2.694,1.184],[-3.151,-0.154],[1.477,-2.902],[1.232,-2.674],[1.478,-2.294],[2.54,-1.75],[0.737,0.269],[1.403,-2.817],[2.442,2.417],[0.65,0.199],[2.758,-1.913],[-0.185,-0.605]],"acc":0.547},{"step":75,"loss":0.9482,"G":[[-3.739,2.528],[-3.247,2.17],[-2.684,3.393],[-0.754,-2.413],[-0.073,-0.845],[-2.347,3.122],[-0.607,-2.235],[-2.752,1.644],[0.021,-0.822],[2.552,-2.622],[2.643,-2.521],[-4.153,-0.644]],"O":[[-2.001,-2.259],[-1.177,0.139],[-2.936,2.182],[-2.713,3.421],[-2.914,2.478],[2.6,3.008],[-3.051,3.289],[-2.941,1.244],[-0.545,-3.066],[-3.065,3.334],[2.414,3.319],[3.075,-2.15]],"I":[[-3.456,0.477],[-4.147,-0.422],[2.275,-3.484],[2.08,-3.433],[2.043,-3.004],[2.8,-2.273],[1.22,-0.036],[2.22,-3.387],[2.66,3.162],[1.158,-0.029],[2.997,-2.385],[-0.185,-0.605]],"acc":0.641},{"step":100,"loss":0.7614,"G":[[-4.153,4.232],[-3.995,2.658],[-3.176,3.561],[-2.021,-3.183],[-0.848,-1.556],[-2.485,3.919],[-2.0,-3.024],[-2.583,2.173],[-0.85,-1.485],[1.543,-3.451],[2.5,-3.952],[-5.171,0.943]],"O":[[-2.52,-2.347],[-1.906,-1.371],[-3.42,1.908],[-3.493,2.656],[-3.445,1.372],[2.959,3.136],[-3.288,4.789],[-3.363,0.802],[-0.032,-3.558],[-3.299,4.733],[2.818,3.393],[3.565,-2.359]],"I":[[-4.199,0.337],[-4.816,0.165],[3.037,-3.883],[3.1,-3.712],[3.098,-3.244],[2.863,-2.449],[1.009,-1.18],[3.176,-3.416],[2.683,3.568],[1.027,-1.199],[3.054,-2.543],[-0.185,-0.605]],"acc":0.656},{"step":125,"loss":0.6409,"G":[[-4.154,5.739],[-4.202,2.877],[-3.56,3.765],[-2.728,-4.079],[-0.953,-2.293],[-2.51,4.712],[-2.682,-3.855],[-2.469,3.29],[-0.915,-2.226],[0.971,-4.325],[2.448,-5.285],[-5.283,2.038]],"O":[[-2.62,-2.786],[-1.606,-2.711],[-4.102,2.833],[-4.048,1.538],[-3.809,0.284],[3.197,3.258],[-3.475,5.851],[-3.955,1.035],[-0.092,-3.991],[-3.457,5.884],[3.028,3.553],[4.003,-2.534]],"I":[[-5.182,-0.119],[-5.482,1.154],[3.608,-4.324],[4.021,-3.843],[4.005,-3.389],[2.898,-2.532],[0.124,-1.709],[3.861,-3.495],[2.676,3.864],[0.128,-1.745],[3.085,-2.619],[-0.185,-0.605]],"acc":0.766},{"step":150,"loss":0.5575,"G":[[-4.022,6.899],[-3.657,3.543],[-3.785,4.139],[-2.933,-4.949],[-0.774,-2.536],[-2.255,5.593],[-2.751,-4.606],[-2.232,4.531],[-0.702,-2.431],[0.695,-5.176],[2.455,-6.093],[-5.194,2.84]],"O":[[-2.741,-3.463],[-1.816,-3.182],[-4.596,3.881],[-4.418,0.571],[-4.204,-0.27],[3.434,3.356],[-3.63,6.734],[-4.543,1.203],[0.081,-4.48],[-3.593,6.794],[3.219,3.721],[4.36,-2.673]],"I":[[-6.002,-0.256],[-6.51,1.912],[4.314,-5.05],[4.859,-3.883],[4.722,-3.492],[2.919,-2.575],[-0.453,-2.133],[4.472,-3.598],[2.659,4.149],[-0.433,-2.177],[3.103,-2.658],[-0.185,-0.605]],"acc":0.75},{"step":175,"loss":0.4897,"G":[[-4.057,7.908],[-2.711,3.7],[-3.614,4.709],[-2.731,-5.855],[-0.417,-2.582],[-1.685,6.376],[-2.508,-5.349],[-2.123,5.51],[-0.337,-2.457],[0.525,-6.0],[2.712,-6.713],[-5.197,3.76]],"O":[[-2.926,-4.118],[-1.908,-3.699],[-5.085,4.316],[-4.755,-0.086],[-4.311,-1.624],[3.647,3.423],[-3.714,7.511],[-5.149,1.758],[0.145,-4.902],[-3.642,7.598],[3.37,3.878],[4.675,-2.75]],"I":[[-6.698,-0.172],[-7.485,2.223],[5.083,-5.473],[5.483,-3.899],[5.229,-3.577],[2.934,-2.603],[-1.323,-2.578],[5.032,-3.677],[2.645,4.376],[-1.283,-2.642],[3.116,-2.684],[-0.185,-0.605]],"acc":0.828},{"step":200,"loss":0.4298,"G":[[-4.133,8.782],[-1.529,3.867],[-3.228,5.302],[-2.285,-6.636],[0.022,-2.595],[-0.919,7.172],[-2.074,-6.161],[-2.066,6.552],[0.059,-2.462],[0.408,-6.831],[3.042,-7.249],[-5.2,4.382]],"O":[[-3.063,-4.899],[-1.71,-4.282],[-5.502,5.197],[-5.179,-0.62],[-4.513,-2.772],[3.842,3.466],[-3.785,8.203],[-5.755,2.312],[0.227,-5.336],[-3.71,8.27],[3.488,4.032],[4.972,-2.748]],"I":[[-7.384,0.057],[-8.258,2.735],[5.75,-5.817],[6.068,-3.933],[5.721,-3.639],[2.946,-2.627],[-2.022,-2.864],[5.581,-3.792],[2.636,4.554],[-1.986,-2.93],[3.127,-2.706],[-0.185,-0.605]],"acc":0.844},{"step":225,"loss":0.3846,"G":[[-3.994,9.597],[-0.602,3.686],[-2.789,5.691],[-1.886,-7.294],[0.229,-2.815],[-0.23,7.759],[-1.79,-6.872],[-2.057,7.572],[0.23,-2.692],[0.251,-7.518],[3.041,-7.893],[-4.938,4.765]],"O":[[-3.164,-5.639],[-1.482,-4.86],[-5.921,5.787],[-5.753,-0.828],[-4.822,-3.697],[4.03,3.515],[-3.795,8.85],[-6.347,2.431],[0.39,-5.742],[-3.738,8.891],[3.61,4.182],[5.255,-2.704]],"I":[[-7.963,0.281],[-8.908,3.208],[6.451,-6.103],[6.651,-3.972],[6.234,-3.674],[2.957,-2.647],[-2.647,-2.987],[6.158,-3.904],[2.627,4.716],[-2.596,-3.051],[3.136,-2.724],[-0.185,-0.605]],"acc":0.859},{"step":250,"loss":0.3495,"G":[[-3.668,10.333],[0.166,3.367],[-2.43,5.89],[-1.549,-7.857],[0.312,-3.085],[0.34,8.211],[-1.554,-7.499],[-1.917,8.475],[0.294,-2.958],[0.121,-8.101],[2.805,-8.515],[-4.539,5.088]],"O":[[-3.221,-6.332],[-1.446,-5.444],[-6.314,6.283],[-6.327,-0.966],[-5.177,-4.437],[4.222,3.573],[-3.781,9.393],[-6.905,2.585],[0.571,-6.113],[-3.746,9.415],[3.74,4.331],[5.52,-2.626]],"I":[[-8.425,0.577],[-9.493,3.539],[7.126,-6.316],[7.208,-3.993],[6.771,-3.66],[2.966,-2.665],[-3.242,-3.025],[6.696,-4.02],[2.614,4.876],[-3.193,-3.086],[3.144,-2.74],[-0.185,-0.605]],"acc":0.844},{"step":275,"loss":0.3233,"G":[[-3.225,10.989],[0.575,3.298],[-2.126,6.083],[-1.335,-8.332],[0.341,-3.355],[0.692,8.658],[-1.393,-8.046],[-1.674,9.267],[0.307,-3.22],[0.048,-8.621],[2.433,-9.086],[-4.064,5.371]],"O":[[-3.282,-6.977],[-1.479,-6.038],[-6.664,6.786],[-6.817,-1.108],[-5.521,-5.06],[4.404,3.623],[-3.773,9.857],[-7.395,2.851],[0.727,-6.469],[-3.762,9.866],[3.873,4.445],[5.766,-2.512]],"I":[[-8.815,0.865],[-10.018,3.851],[7.734,-6.481],[7.72,-3.992],[7.26,-3.614],[2.975,-2.683],[-3.7,-3.08],[7.192,-4.134],[2.6,5.025],[-3.659,-3.135],[3.152,-2.756],[-0.185,-0.605]],"acc":0.844},{"step":300,"loss":0.3039,"G":[[-2.782,11.596],[0.552,3.396],[-1.954,6.473],[-1.241,-8.762],[0.304,-3.606],[0.737,9.123],[-1.332,-8.513],[-1.32,9.93],[0.259,-3.455],[0.085,-9.095],[2.021,-9.612],[-3.687,5.71]],"O":[[-3.392,-7.529],[-1.564,-6.632],[-6.969,7.268],[-7.203,-1.172],[-5.785,-5.56],[4.565,3.648],[-3.777,10.274],[-7.792,3.199],[0.834,-6.825],[-3.78,10.277],[4.002,4.506],[5.992,-2.402]],"I":[[-9.125,1.062],[-10.47,4.143],[8.249,-6.636],[8.149,-3.973],[7.731,-3.534],[2.984,-2.7],[-3.935,-3.227],[7.63,-4.237],[2.587,5.158],[-3.894,-3.28],[3.159,-2.772],[-0.185,-0.605]],"acc":0.844},{"step":325,"loss":0.2887,"G":[[-2.399,12.162],[0.585,3.524],[-1.916,6.822],[-1.116,-9.161],[0.258,-3.859],[0.738,9.558],[-1.268,-8.943],[-0.94,10.496],[0.195,-3.681],[0.168,-9.534],[1.654,-10.109],[-3.419,6.082]],"O":[[-3.507,-8.054],[-1.636,-7.209],[-7.225,7.706],[-7.546,-1.194],[-6.006,-6.018],[4.723,3.658],[-3.785,10.658],[-8.125,3.537],[0.928,-7.141],[-3.811,10.654],[4.118,4.565],[6.191,-2.305]],"I":[[-9.372,1.251],[-10.843,4.422],[8.695,-6.768],[8.518,-3.938],[8.117,-3.458],[2.992,-2.718],[-4.199,-3.367],[8.023,-4.32],[2.575,5.28],[-4.162,-3.42],[3.167,-2.788],[-0.185,-0.605]],"acc":0.844},{"step":350,"loss":0.2763,"G":[[-2.064,12.69],[0.605,3.648],[-1.924,7.153],[-0.998,-9.535],[0.215,-4.129],[0.717,9.967],[-1.252,-9.344],[-0.558,10.989],[0.127,-3.907],[0.242,-9.946],[1.327,-10.585],[-3.221,6.452]],"O":[[-3.644,-8.541],[-1.691,-7.768],[-7.44,8.107],[-7.852,-1.215],[-6.212,-6.446],[4.884,3.646],[-3.797,11.016],[-8.412,3.845],[1.036,-7.424],[-3.852,11.007],[4.213,4.637],[6.374,-2.215]],"I":[[-9.579,1.445],[-11.165,4.684],[9.098,-6.88],[8.853,-3.897],[8.458,-3.382],[3.001,-2.736],[-4.429,-3.492],[8.389,-4.397],[2.565,5.388],[-4.388,-3.546],[3.175,-2.805],[-0.185,-0.605]],"acc":0.844},{"step":375,"loss":0.2655,"G":[[-1.764,13.178],[0.624,3.772],[-1.937,7.465],[-0.894,-9.898],[0.184,-4.451],[0.707,10.358],[-1.293,-9.726],[-0.154,11.395],[0.056,-4.149],[0.279,-10.339],[1.034,-11.055],[-3.089,6.823]],"O":[[-3.815,-9.003],[-1.721,-8.324],[-7.631,8.471],[-8.134,-1.258],[-6.413,-6.871],[5.058,3.606],[-3.809,11.355],[-8.668,4.112],[1.185,-7.666],[-3.899,11.342],[4.28,4.741],[6.545,-2.13]],"I":[[-9.759,1.647],[-11.448,4.943],[9.475,-6.963],[9.17,-3.851],[8.778,-3.304],[3.011,-2.757],[-4.633,-3.597],[8.747,-4.465],[2.557,5.487],[-4.589,-3.659],[3.184,-2.824],[-0.185,-0.605]],"acc":0.859},{"step":400,"loss":0.255,"G":[[-1.484,13.631],[0.643,3.898],[-1.94,7.753],[-0.831,-10.265],[0.182,-4.893],[0.727,10.737],[-1.41,-10.09],[0.313,11.682],[-0.012,-4.444],[0.246,-10.721],[0.77,-11.546],[-3.027,7.202]],"O":[[-4.05,-9.452],[-1.698,-8.895],[-7.809,8.801],[-8.398,-1.331],[-6.619,-7.339],[5.261,3.521],[-3.823,11.678],[-8.904,4.323],[1.41,-7.86],[-3.948,11.663],[4.303,4.903],[6.711,-2.044]],"I":[[-9.916,1.881],[-11.703,5.21],[9.84,-6.993],[9.495,-3.793],[9.104,-3.219],[3.021,-2.781],[-4.802,-3.674],[9.117,-4.513],[2.549,5.578],[-4.756,-3.75],[3.193,-2.847],[-0.185,-0.605]],"acc":0.875},{"step":425,"loss":0.2429,"G":[[-1.209,14.05],[0.664,4.026],[-1.92,8.013],[-0.87,-10.669],[0.241,-5.544],[0.803,11.115],[-1.614,-10.445],[0.896,11.799],[-0.061,-4.853],[0.094,-11.106],[0.534,-12.105],[-3.046,7.602]],"O":[[-4.385,-9.916],[-1.59,-9.497],[-7.984,9.101],[-8.649,-1.453],[-6.843,-7.909],[5.513,3.368],[-3.848,11.989],[-9.127,4.465],[1.756,-7.995],[-3.992,11.978],[4.257,5.16],[6.879,-1.946]],"I":[[-10.048,2.184],[-11.939,5.513],[10.205,-6.926],[9.862,-3.714],[9.472,-3.12],[3.034,-2.811],[-4.922,-3.706],[9.527,-4.526],[2.541,5.663],[-4.884,-3.812],[3.206,-2.876],[-0.185,-0.605]],"acc":0.906},{"step":450,"loss":0.2286,"G":[[-0.929,14.434],[0.707,4.161],[-1.858,8.245],[-1.021,-11.136],[0.358,-6.315],[0.956,11.511],[-1.898,-10.808],[1.619,11.764],[-0.102,-5.376],[-0.192,-11.515],[0.315,-12.712],[-3.149,8.018]],"O":[[-4.783,-10.431],[-1.454,-10.113],[-8.159,9.381],[-8.906,-1.644],[-7.104,-8.563],[5.824,3.126],[-3.881,12.293],[-9.354,4.53],[2.193,-8.085],[-4.027,12.29],[4.105,5.548],[7.06,-1.818]],"I":[[-10.171,2.541],[-12.181,5.869],[10.539,-6.753],[10.264,-3.61],[9.896,-3.009],[3.053,-2.855],[-5.001,-3.699],[9.975,-4.496],[2.532,5.739],[-4.973,-3.84],[3.225,-2.922],[-0.185,-0.605]],"acc":0.906},{"step":475,"loss":0.2159,"G":[[-0.647,14.781],[0.766,4.334],[-1.771,8.509],[-1.092,-11.63],[0.49,-6.915],[1.134,11.95],[-2.266,-11.21],[2.359,11.785],[-0.202,-5.75],[-0.494,-11.962],[0.08,-13.2],[-3.276,8.4]],"O":[[-5.092,-10.975],[-1.448,-10.674],[-8.328,9.656],[-9.181,-1.874],[-7.391,-9.118],[6.171,2.812],[-3.895,12.59],[-9.6,4.554],[2.515,-8.194],[-4.06,12.593],[3.824,6.071],[7.267,-1.668]],"I":[[-10.351,2.835],[-12.461,6.204],[10.796,-6.643],[10.598,-3.513],[10.284,-2.929],[3.084,-2.929],[-5.127,-3.719],[10.379,-4.49],[2.522,5.81],[-5.071,-3.891],[3.257,-3.002],[-0.185,-0.605]],"acc":0.953},{"step":500,"loss":0.2041,"G":[[-0.37,15.11],[0.794,4.577],[-1.699,8.868],[-0.955,-12.107],[0.69,-7.419],[1.26,12.423],[-2.753,-11.623],[2.97,11.937],[-0.372,-5.832],[-0.716,-12.421],[-0.149,-13.544],[-3.318,8.747]],"O":[[-5.3,-11.51],[-1.559,-11.161],[-8.497,9.895],[-9.426,-2.066],[-7.654,-9.533],[6.546,2.452],[-3.882,12.874],[-9.824,4.589],[2.67,-8.352],[-4.099,12.883],[3.39,6.748],[7.491,-1.539]],"I":[[-10.593,3.065],[-12.771,6.446],[10.994,-6.651],[10.859,-3.48],[10.574,-2.896],[3.131,-3.049],[-5.316,-3.803],[10.67,-4.539],[2.506,5.894],[-5.233,-4.021],[3.307,-3.136],[-0.185,-0.605]],"acc":0.953},{"step":525,"loss":0.1914,"G":[[-0.094,15.447],[0.806,4.91],[-1.649,9.306],[-0.632,-12.535],[0.978,-7.927],[1.346,12.917],[-3.356,-12.036],[3.432,12.154],[-0.53,-5.793],[-0.877,-12.876],[-0.346,-13.849],[-3.235,9.094]],"O":[[-5.49,-12.052],[-1.667,-11.603],[-8.637,10.089],[-9.624,-2.209],[-7.901,-9.914],[6.929,2.089],[-3.872,13.141],[-9.992,4.65],[2.788,-8.533],[-4.166,13.159],[2.767,7.613],[7.726,-1.466]],"I":[[-10.871,3.311],[-13.089,6.65],[11.146,-6.697],[11.097,-3.51],[10.822,-2.916],[3.197,-3.232],[-5.516,-3.918],[10.874,-4.621],[2.488,5.993],[-5.414,-4.187],[3.382,-3.345],[-0.185,-0.605]],"acc":0.953},{"step":550,"loss":0.1777,"G":[[0.179,15.81],[0.812,5.343],[-1.589,9.779],[-0.19,-12.885],[1.272,-8.38],[1.424,13.429],[-4.035,-12.467],[3.736,12.411],[-0.617,-5.769],[-1.011,-13.326],[-0.519,-14.163],[-3.022,9.456]],"O":[[-5.694,-12.608],[-1.743,-12.023],[-8.714,10.269],[-9.801,-2.334],[-8.157,-10.332],[7.288,1.814],[-3.902,13.389],[-10.111,4.73],[2.939,-8.731],[-4.283,13.418],[2.035,8.63],[7.974,-1.46]],"I":[[-11.185,3.583],[-13.397,6.877],[11.296,-6.771],[11.332,-3.59],[11.063,-2.994],[3.28,-3.471],[-5.689,-4.041],[11.046,-4.733],[2.487,6.1],[-5.585,-4.338],[3.475,-3.619],[-0.185,-0.605]],"acc":0.953},{"step":575,"loss":0.1644,"G":[[0.429,16.199],[0.787,5.834],[-1.467,10.248],[0.263,-13.17],[1.5,-8.725],[1.511,13.943],[-4.703,-12.907],[3.836,12.717],[-0.617,-5.792],[-1.143,-13.768],[-0.665,-14.488],[-2.688,9.823]],"O":[[-5.933,-13.148],[-1.804,-12.418],[-8.732,10.484],[-9.978,-2.45],[-8.413,-10.816],[7.617,1.66],[-3.96,13.624],[-10.207,4.816],[3.113,-8.952],[-4.443,13.665],[1.315,9.656],[8.229,-1.494]],"I":[[-11.53,3.849],[-13.702,7.119],[11.482,-6.872],[11.569,-3.698],[11.317,-3.107],[3.367,-3.729],[-5.826,-4.166],[11.214,-4.864],[2.498,6.229],[-5.752,-4.463],[3.574,-3.907],[-0.185,-0.605]],"acc":0.953},{"step":600,"loss":0.1523,"G":[[0.625,16.6],[0.727,6.325],[-1.201,10.679],[0.684,-13.417],[1.679,-8.986],[1.642,14.436],[-5.278,-13.339],[3.698,13.093],[-0.536,-5.828],[-1.281,-14.19],[-0.756,-14.807],[-2.252,10.156]],"O":[[-6.205,-13.653],[-1.847,-12.768],[-8.725,10.755],[-10.158,-2.557],[-8.648,-11.361],[7.913,1.573],[-4.008,13.862],[-10.305,4.903],[3.274,-9.194],[-4.638,13.919],[0.686,10.548],[8.484,-1.529]],"I":[[-11.89,4.085],[-14.015,7.345],[11.725,-6.999],[11.807,-3.822],[11.595,-3.236],[3.447,-3.969],[-5.942,-4.287],[11.39,-5.009],[2.515,6.382],[-5.94,-4.567],[3.669,-4.162],[-0.185,-0.605]],"acc":0.953},{"step":625,"loss":0.14,"G":[[0.749,16.996],[0.623,6.788],[-0.616,11.05],[1.166,-13.632],[1.89,-9.209],[1.882,14.9],[-5.745,-13.764],[3.213,13.575],[-0.355,-5.814],[-1.418,-14.592],[-0.743,-15.097],[-1.642,10.397]],"O":[[-6.481,-14.15],[-1.857,-13.038],[-8.726,11.073],[-10.342,-2.658],[-8.853,-11.969],[8.174,1.512],[-3.975,14.105],[-10.426,4.998],[3.405,-9.442],[-4.931,14.201],[0.221,11.252],[8.729,-1.547]],"I":[[-12.259,4.286],[-14.339,7.542],[12.036,-7.169],[12.021,-3.969],[11.896,-3.388],[3.52,-4.175],[-6.048,-4.395],[11.566,-5.175],[2.544,6.551],[-6.165,-4.649],[3.763,-4.37],[-0.185,-0.605]],"acc":0.953},{"step":650,"loss":0.1138,"G":[[0.84,17.376],[0.458,7.187],[0.611,11.321],[1.858,-13.806],[2.427,-9.52],[2.364,15.334],[-6.045,-14.213],[1.918,14.305],[0.079,-5.593],[-1.549,-14.988],[-0.521,-15.317],[-0.382,10.398]],"O":[[-6.701,-14.785],[-1.795,-13.113],[-8.795,11.549],[-10.544,-2.774],[-8.998,-12.757],[8.406,1.461],[-3.475,14.265],[-10.64,5.125],[3.47,-9.651],[-5.704,14.555],[0.065,11.786],[8.952,-1.55]],"I":[[-12.666,4.443],[-14.687,7.672],[12.456,-7.442],[12.176,-4.186],[12.234,-3.603],[3.587,-4.349],[-6.199,-4.476],[11.676,-5.405],[2.608,6.717],[-6.53,-4.715],[3.855,-4.539],[-0.185,-0.605]],"acc":0.969},{"step":675,"loss":0.0867,"G":[[1.129,17.785],[0.292,7.36],[1.253,11.398],[1.723,-14.149],[3.086,-9.969],[2.571,15.708],[-5.659,-14.631],[1.568,15.109],[0.214,-5.344],[-1.585,-15.389],[-0.522,-15.575],[0.403,10.348]],"O":[[-6.814,-15.611],[-1.626,-13.262],[-9.259,12.64],[-10.873,-2.957],[-9.043,-13.818],[8.697,1.464],[-2.286,14.168],[-11.189,5.535],[3.403,-9.71],[-6.933,14.908],[0.621,12.166],[9.143,-1.548]],"I":[[-13.062,4.419],[-15.168,7.586],[12.857,-7.847],[12.567,-4.374],[12.727,-3.835],[3.643,-4.499],[-6.756,-4.604],[11.843,-5.696],[2.774,6.828],[-7.271,-4.86],[3.934,-4.69],[-0.185,-0.605]],"acc":1.0},{"step":700,"loss":0.0749,"G":[[1.415,18.257],[0.493,7.304],[1.269,11.709],[1.361,-14.662],[3.104,-10.135],[2.663,16.023],[-5.046,-14.892],[1.848,15.564],[0.306,-5.698],[-1.553,-15.733],[-0.738,-16.04],[0.599,10.624]],"O":[[-7.043,-16.18],[-1.654,-13.759],[-9.782,13.093],[-11.233,-3.109],[-9.219,-14.426],[8.943,1.488],[-1.812,14.346],[-11.614,6.106],[3.596,-9.825],[-7.367,15.337],[1.172,12.139],[9.329,-1.535]],"I":[[-13.38,4.449],[-15.572,7.642],[13.333,-7.993],[13.004,-4.417],[13.143,-3.825],[3.689,-4.657],[-7.129,-4.766],[12.332,-5.804],[2.905,6.964],[-7.587,-5.055],[3.995,-4.859],[-0.185,-0.605]],"acc":1.0},{"step":725,"loss":0.067,"G":[[1.642,18.705],[0.462,7.37],[1.472,12.005],[1.443,-15.007],[3.237,-10.424],[2.721,16.321],[-4.956,-15.153],[2.104,16.027],[0.356,-5.964],[-1.515,-16.033],[-0.88,-16.483],[0.746,10.851]],"O":[[-7.249,-16.724],[-1.575,-14.123],[-10.163,13.409],[-11.537,-3.224],[-9.445,-15.066],[9.169,1.457],[-1.627,14.56],[-11.951,6.537],[3.795,-9.938],[-7.608,15.732],[1.477,12.185],[9.514,-1.519]],"I":[[-13.699,4.569],[-15.924,7.788],[13.661,-8.108],[13.33,-4.486],[13.507,-3.859],[3.732,-4.813],[-7.352,-4.881],[12.668,-5.873],[3.013,7.08],[-7.781,-5.178],[4.051,-5.024],[-0.185,-0.605]],"acc":1.0},{"step":750,"loss":0.0606,"G":[[1.845,19.124],[0.462,7.497],[1.555,12.286],[1.558,-15.314],[3.318,-10.674],[2.746,16.623],[-4.974,-15.417],[2.331,16.423],[0.412,-6.235],[-1.485,-16.326],[-1.014,-16.901],[0.873,11.099]],"O":[[-7.479,-17.209],[-1.516,-14.466],[-10.448,13.703],[-11.802,-3.315],[-9.668,-15.585],[9.378,1.415],[-1.539,14.777],[-12.223,6.878],[3.992,-10.067],[-7.783,16.088],[1.623,12.307],[9.703,-1.518]],"I":[[-14.009,4.688],[-16.237,7.952],[13.951,-8.199],[13.631,-4.538],[13.824,-3.888],[3.777,-4.961],[-7.562,-4.991],[12.967,-5.926],[3.102,7.199],[-7.944,-5.289],[4.111,-5.176],[-0.185,-0.605]],"acc":1.0},{"step":775,"loss":0.0552,"G":[[2.007,19.513],[0.458,7.652],[1.636,12.559],[1.677,-15.602],[3.387,-10.903],[2.773,16.926],[-5.026,-15.681],[2.512,16.797],[0.451,-6.46],[-1.47,-16.616],[-1.123,-17.279],[0.976,11.337]],"O":[[-7.707,-17.655],[-1.472,-14.779],[-10.677,13.99],[-12.042,-3.39],[-9.88,-16.058],[9.579,1.373],[-1.505,14.999],[-12.456,7.158],[4.167,-10.202],[-7.937,16.415],[1.701,12.464],[9.893,-1.526]],"I":[[-14.315,4.811],[-16.531,8.103],[14.204,-8.29],[13.9,-4.594],[14.108,-3.926],[3.825,-5.098],[-7.751,-5.092],[13.234,-5.987],[3.183,7.318],[-8.112,-5.39],[4.176,-5.312],[-0.185,-0.605]],"acc":1.0},{"step":800,"loss":0.0504,"G":[[2.143,19.88],[0.454,7.805],[1.701,12.821],[1.784,-15.882],[3.453,-11.125],[2.797,17.22],[-5.099,-15.938],[2.665,17.144],[0.483,-6.662],[-1.467,-16.898],[-1.211,-17.632],[1.062,11.57]],"O":[[-7.928,-18.067],[-1.444,-15.074],[-10.871,14.263],[-12.262,-3.456],[-10.085,-16.488],[9.773,1.332],[-1.505,15.222],[-12.662,7.398],[4.324,-10.339],[-8.078,16.721],[1.741,12.637],[10.079,-1.541]],"I":[[-14.614,4.934],[-16.807,8.251],[14.431,-8.38],[14.151,-4.651],[14.371,-3.967],[3.875,-5.223],[-7.931,-5.187],[13.479,-6.052],[3.259,7.438],[-8.274,-5.486],[4.245,-5.434],[-0.185,-0.605]],"acc":1.0},{"step":825,"loss":0.0462,"G":[[2.257,20.227],[0.45,7.956],[1.758,13.07],[1.881,-16.152],[3.517,-11.339],[2.823,17.505],[-5.182,-16.188],[2.795,17.471],[0.512,-6.848],[-1.475,-17.171],[-1.281,-17.965],[1.135,11.794]],"O":[[-8.139,-18.453],[-1.426,-15.353],[-11.042,14.523],[-12.468,-3.515],[-10.281,-16.887],[9.959,1.291],[-1.525,15.445],[-12.85,7.612],[4.468,-10.476],[-8.208,17.009],[1.759,12.816],[10.261,-1.56]],"I":[[-14.903,5.055],[-17.068,8.395],[14.64,-8.469],[14.387,-4.709],[14.617,-4.012],[3.926,-5.337],[-8.102,-5.275],[13.706,-6.12],[3.33,7.556],[-8.432,-5.575],[4.314,-5.545],[-0.185,-0.605]],"acc":1.0},{"step":850,"loss":0.0425,"G":[[2.354,20.557],[0.448,8.103],[1.808,13.305],[1.968,-16.411],[3.579,-11.546],[2.849,17.779],[-5.273,-16.43],[2.907,17.782],[0.538,-7.021],[-1.491,-17.435],[-1.338,-18.281],[1.197,12.007]],"O":[[-8.34,-18.815],[-1.413,-15.617],[-11.198,14.77],[-12.662,-3.57],[-10.47,-17.259],[10.138,1.252],[-1.559,15.665],[-13.024,7.805],[4.601,-10.611],[-8.329,17.282],[1.763,12.996],[10.437,-1.582]],"I":[[-15.183,5.174],[-17.316,8.534],[14.835,-8.557],[14.612,-4.768],[14.85,-4.058],[3.976,-5.443],[-8.265,-5.357],[13.92,-6.189],[3.398,7.671],[-8.585,-5.658],[4.381,-5.649],[-0.185,-0.605]],"acc":1.0},{"step":875,"loss":0.0391,"G":[[2.437,20.87],[0.447,8.245],[1.852,13.527],[2.045,-16.66],[3.64,-11.745],[2.876,18.043],[-5.366,-16.665],[3.006,18.078],[0.562,-7.183],[-1.513,-17.689],[-1.385,-18.581],[1.25,12.21]],"O":[[-8.533,-19.159],[-1.404,-15.868],[-11.341,15.006],[-12.845,-3.622],[-10.65,-17.608],[10.309,1.215],[-1.6,15.88],[-13.188,7.984],[4.726,-10.744],[-8.444,17.542],[1.76,13.175],[10.608,-1.605]],"I":[[-15.451,5.29],[-17.552,8.669],[15.018,-8.644],[14.828,-4.826],[15.072,-4.105],[4.026,-5.541],[-8.42,-5.433],[14.123,-6.257],[3.462,7.783],[-8.733,-5.734],[4.446,-5.748],[-0.185,-0.605]],"acc":1.0},{"step":900,"loss":0.0361,"G":[[2.51,21.17],[0.448,8.383],[1.893,13.737],[2.114,-16.9],[3.699,-11.937],[2.903,18.298],[-5.46,-16.892],[3.093,18.362],[0.584,-7.336],[-1.54,-17.935],[-1.423,-18.867],[1.297,12.403]],"O":[[-8.718,-19.485],[-1.397,-16.107],[-11.475,15.232],[-13.019,-3.67],[-10.823,-17.939],[10.474,1.18],[-1.644,16.09],[-13.343,8.151],[4.844,-10.873],[-8.552,17.789],[1.753,13.349],[10.772,-1.629]],"I":[[-15.709,5.402],[-17.777,8.798],[15.193,-8.729],[15.034,-4.882],[15.285,-4.152],[4.074,-5.634],[-8.568,-5.505],[14.316,-6.324],[3.523,7.891],[-8.875,-5.806],[4.507,-5.841],[-0.185,-0.605]],"acc":1.0},{"step":925,"loss":0.0334,"G":[[2.575,21.455],[0.45,8.515],[1.929,13.935],[2.175,-17.131],[3.756,-12.122],[2.932,18.543],[-5.555,-17.111],[3.172,18.634],[0.604,-7.481],[-1.571,-18.172],[-1.455,-19.14],[1.338,12.585]],"O":[[-8.894,-19.796],[-1.391,-16.335],[-11.601,15.449],[-13.186,-3.716],[-10.989,-18.254],[10.631,1.146],[-1.691,16.294],[-13.49,8.308],[4.955,-10.999],[-8.656,18.026],[1.743,13.52],[10.93,-1.653]],"I":[[-15.956,5.51],[-17.992,8.923],[15.359,-8.812],[15.233,-4.937],[15.488,-4.199],[4.119,-5.721],[-8.709,-5.571],[14.501,-6.39],[3.58,7.994],[-9.013,-5.873],[4.565,-5.931],[-0.185,-0.605]],"acc":1.0},{"step":950,"loss":0.031,"G":[[2.632,21.728],[0.453,8.643],[1.963,14.122],[2.23,-17.353],[3.812,-12.3],[2.96,18.779],[-5.648,-17.324],[3.244,18.896],[0.623,-7.619],[-1.604,-18.4],[-1.482,-19.4],[1.375,12.759]],"O":[[-9.062,-20.093],[-1.387,-16.553],[-11.721,15.656],[-13.345,-3.759],[-11.148,-18.553],[10.783,1.114],[-1.738,16.492],[-13.63,8.456],[5.061,-11.12],[-8.755,18.252],[1.732,13.685],[11.082,-1.677]],"I":[[-16.193,5.615],[-18.198,9.043],[15.519,-8.892],[15.425,-4.991],[15.684,-4.244],[4.163,-5.805],[-8.844,-5.634],[14.678,-6.454],[3.635,8.094],[-9.145,-5.936],[4.62,-6.016],[-0.185,-0.605]],"acc":1.0},{"step":975,"loss":0.0288,"G":[[2.684,21.99],[0.458,8.765],[1.995,14.299],[2.279,-17.567],[3.867,-12.471],[2.989,19.006],[-5.739,-17.53],[3.31,19.148],[0.64,-7.751],[-1.64,-18.621],[-1.504,-19.65],[1.407,12.923]],"O":[[-9.224,-20.377],[-1.382,-16.763],[-11.835,15.856],[-13.497,-3.8],[-11.301,-18.839],[10.928,1.084],[-1.784,16.683],[-13.765,8.597],[5.162,-11.238],[-8.849,18.468],[1.72,13.845],[11.228,-1.701]],"I":[[-16.421,5.717],[-18.395,9.159],[15.672,-8.971],[15.609,-5.043],[15.872,-4.289],[4.204,-5.884],[-8.972,-5.693],[14.849,-6.516],[3.687,8.19],[-9.272,-5.995],[4.672,-6.097],[-0.185,-0.605]],"acc":1.0},{"step":1000,"loss":0.0268,"G":[[2.731,22.24],[0.463,8.883],[2.024,14.467],[2.323,-17.773],[3.921,-12.636],[3.019,19.225],[-5.829,-17.729],[3.372,19.392],[0.657,-7.877],[-1.678,-18.834],[-1.523,-19.889],[1.437,13.08]],"O":[[-9.378,-20.65],[-1.379,-16.963],[-11.944,16.047],[-13.644,-3.84],[-11.448,-19.113],[11.068,1.056],[-1.83,16.868],[-13.894,8.732],[5.258,-11.352],[-8.939,18.676],[1.709,13.999],[11.368,-1.725]],"I":[[-16.638,5.814],[-18.584,9.27],[15.82,-9.048],[15.788,-5.093],[16.054,-4.333],[4.244,-5.96],[-9.095,-5.748],[15.014,-6.576],[3.736,8.283],[-9.394,-6.05],[4.722,-6.175],[-0.185,-0.605]],"acc":1.0},{"step":1025,"loss":0.025,"G":[[2.774,22.481],[0.469,8.997],[2.052,14.627],[2.363,-17.972],[3.973,-12.794],[3.048,19.435],[-5.916,-17.921],[3.429,19.626],[0.672,-7.997],[-1.717,-19.039],[-1.54,-20.119],[1.464,13.229]],"O":[[-9.526,-20.912],[-1.376,-17.156],[-12.049,16.231],[-13.785,-3.877],[-11.589,-19.376],[11.202,1.029],[-1.874,17.047],[-14.019,8.86],[5.351,-11.462],[-9.026,18.875],[1.697,14.149],[11.503,-1.748]],"I":[[-16.848,5.909],[-18.766,9.378],[15.962,-9.122],[15.96,-5.142],[16.229,-4.376],[4.282,-6.032],[-9.213,-5.801],[15.172,-6.635],[3.783,8.372],[-9.512,-6.103],[4.768,-6.249],[-0.185,-0.605]],"acc":1.0},{"step":1050,"loss":0.0233,"G":[[2.814,22.713],[0.476,9.106],[2.078,14.78],[2.399,-18.163],[4.023,-12.947],[3.077,19.638],[-6.002,-18.107],[3.483,19.853],[0.686,-8.112],[-1.756,-19.237],[-1.554,-20.339],[1.488,13.371]],"O":[[-9.668,-21.163],[-1.373,-17.342],[-12.149,16.408],[-13.921,-3.913],[-11.725,-19.628],[11.331,1.004],[-1.917,17.221],[-14.139,8.983],[5.439,-11.569],[-9.109,19.067],[1.687,14.293],[11.633,-1.77]],"I":[[-17.048,5.999],[-18.94,9.481],[16.1,-9.195],[16.127,-5.189],[16.398,-4.418],[4.317,-6.101],[-9.327,-5.851],[15.325,-6.692],[3.828,8.457],[-9.626,-6.152],[4.813,-6.32],[-0.185,-0.605]],"acc":1.0},{"step":1075,"loss":0.0218,"G":[[2.851,22.935],[0.483,9.212],[2.103,14.925],[2.432,-18.348],[4.073,-13.094],[3.106,19.834],[-6.086,-18.287],[3.533,20.072],[0.699,-8.223],[-1.797,-19.429],[-1.567,-20.551],[1.51,13.508]],"O":[[-9.805,-21.406],[-1.37,-17.521],[-12.246,16.579],[-14.052,-3.948],[-11.856,-19.87],[11.455,0.981],[-1.959,17.388],[-14.255,9.101],[5.523,-11.672],[-9.188,19.252],[1.676,14.432],[11.758,-1.792]],"I":[[-17.241,6.087],[-19.107,9.581],[16.232,-9.265],[16.288,-5.235],[16.561,-4.459],[4.352,-6.168],[-9.435,-5.898],[15.473,-6.747],[3.871,8.54],[-9.735,-6.199],[4.855,-6.388],[-0.185,-0.605]],"acc":1.0},{"step":1100,"loss":0.0204,"G":[[2.885,23.15],[0.491,9.313],[2.127,15.064],[2.462,-18.526],[4.121,-13.236],[3.135,20.024],[-6.167,-18.462],[3.581,20.284],[0.711,-8.329],[-1.837,-19.614],[-1.578,-20.756],[1.531,13.638]],"O":[[-9.936,-21.639],[-1.367,-17.694],[-12.34,16.743],[-14.178,-3.981],[-11.982,-20.103],[11.575,0.958],[-1.999,17.55],[-14.367,9.215],[5.605,-11.772],[-9.265,19.43],[1.667,14.567],[11.878,-1.813]],"I":[[-17.427,6.172],[-19.268,9.677],[16.36,-9.334],[16.444,-5.279],[16.719,-4.499],[4.385,-6.232],[-9.54,-5.943],[15.616,-6.801],[3.913,8.619],[-9.841,-6.244],[4.895,-6.454],[-0.185,-0.605]],"acc":1.0},{"step":1125,"loss":0.0192,"G":[[2.917,23.357],[0.498,9.412],[2.149,15.197],[2.49,-18.698],[4.167,-13.373],[3.164,20.206],[-6.247,-18.631],[3.627,20.489],[0.722,-8.431],[-1.878,-19.794],[-1.588,-20.953],[1.55,13.763]],"O":[[-10.062,-21.865],[-1.365,-17.86],[-12.43,16.901],[-14.3,-4.013],[-12.104,-20.327],[11.69,0.937],[-2.038,17.706],[-14.475,9.324],[5.683,-11.869],[-9.339,19.601],[1.658,14.697],[11.995,-1.833]],"I":[[-17.606,6.254],[-19.423,9.769],[16.484,-9.401],[16.596,-5.322],[16.872,-4.538],[4.416,-6.293],[-9.641,-5.987],[15.754,-6.853],[3.952,8.696],[-9.943,-6.287],[4.934,-6.517],[-0.185,-0.605]],"acc":1.0},{"step":1150,"loss":0.018,"G":[[2.948,23.556],[0.507,9.507],[2.171,15.325],[2.515,-18.864],[4.213,-13.505],[3.192,20.383],[-6.325,-18.794],[3.671,20.688],[0.733,-8.53],[-1.918,-19.967],[-1.597,-21.143],[1.568,13.882]],"O":[[-10.184,-22.083],[-1.363,-18.022],[-12.518,17.054],[-14.418,-4.043],[-12.222,-20.544],[11.802,0.917],[-2.075,17.858],[-14.58,9.429],[5.758,-11.963],[-9.409,19.767],[1.649,14.823],[12.107,-1.852]],"I":[[-17.778,6.333],[-19.573,9.859],[16.604,-9.466],[16.743,-5.364],[17.021,-4.575],[4.446,-6.352],[-9.738,-6.028],[15.888,-6.903],[3.99,8.771],[-10.041,-6.328],[4.971,-6.577],[-0.185,-0.605]],"acc":1.0},{"step":1175,"loss":0.017,"G":[[2.977,23.749],[0.515,9.599],[2.192,15.447],[2.539,-19.025],[4.257,-13.632],[3.22,20.554],[-6.401,-18.953],[3.713,20.881],[0.743,-8.625],[-1.959,-20.135],[-1.605,-21.327],[1.585,13.998]],"O":[[-10.301,-22.293],[-1.361,-18.177],[-12.602,17.201],[-14.532,-4.073],[-12.336,-20.753],[11.909,0.899],[-2.111,18.005],[-14.681,9.53],[5.831,-12.054],[-9.478,19.927],[1.641,14.945],[12.216,-1.871]],"I":[[-17.945,6.409],[-19.717,9.946],[16.72,-9.529],[16.885,-5.405],[17.165,-4.612],[4.475,-6.409],[-9.832,-6.067],[16.018,-6.952],[4.027,8.843],[-10.136,-6.367],[5.007,-6.636],[-0.185,-0.605]],"acc":1.0},{"step":1200,"loss":0.016,"G":[[3.004,23.936],[0.523,9.688],[2.211,15.565],[2.561,-19.18],[4.3,-13.756],[3.248,20.719],[-6.475,-19.107],[3.753,21.068],[0.752,-8.717],[-1.999,-20.298],[-1.612,-21.504],[1.601,14.109]],"O":[[-10.414,-22.497],[-1.359,-18.328],[-12.684,17.344],[-14.643,-4.101],[-12.447,-20.955],[12.013,0.881],[-2.146,18.147],[-14.78,9.627],[5.901,-12.143],[-9.544,20.082],[1.633,15.063],[12.321,-1.889]],"I":[[-18.105,6.483],[-19.856,10.029],[16.833,-9.59],[17.023,-5.444],[17.304,-4.648],[4.503,-6.464],[-9.922,-6.105],[16.145,-6.999],[4.062,8.912],[-10.228,-6.404],[5.041,-6.692],[-0.185,-0.605]],"acc":1.0},{"step":1225,"loss":0.0151,"G":[[3.03,24.117],[0.532,9.775],[2.231,15.678],[2.581,-19.331],[4.342,-13.875],[3.275,20.88],[-6.548,-19.256],[3.791,21.25],[0.761,-8.805],[-2.039,-20.455],[-1.619,-21.676],[1.615,14.215]],"O":[[-10.524,-22.694],[-1.358,-18.474],[-12.763,17.482],[-14.751,-4.129],[-12.554,-21.151],[12.114,0.864],[-2.18,18.285],[-14.875,9.721],[5.968,-12.228],[-9.607,20.231],[1.626,15.178],[12.422,-1.907]],"I":[[-18.261,6.554],[-19.99,10.11],[16.943,-9.65],[17.158,-5.482],[17.439,-4.683],[4.53,-6.517],[-10.01,-6.142],[16.267,-7.045],[4.095,8.98],[-10.318,-6.44],[5.074,-6.746],[-0.185,-0.605]],"acc":1.0},{"step":1250,"loss":0.0143,"G":[[3.055,24.292],[0.541,9.858],[2.249,15.788],[2.601,-19.477],[4.382,-13.991],[3.302,21.035],[-6.619,-19.401],[3.829,21.427],[0.769,-8.891],[-2.079,-20.608],[-1.625,-21.842],[1.63,14.318]],"O":[[-10.63,-22.886],[-1.356,-18.616],[-12.84,17.615],[-14.855,-4.156],[-12.657,-21.341],[12.211,0.848],[-2.212,18.418],[-14.968,9.812],[6.033,-12.312],[-9.668,20.377],[1.619,15.289],[12.521,-1.924]],"I":[[-18.411,6.624],[-20.12,10.189],[17.049,-9.708],[17.288,-5.519],[17.571,-4.717],[4.555,-6.568],[-10.095,-6.177],[16.386,-7.09],[4.128,9.045],[-10.404,-6.474],[5.105,-6.798],[-0.185,-0.605]],"acc":1.0},{"step":1275,"loss":0.0135,"G":[[3.079,24.462],[0.549,9.94],[2.267,15.893],[2.619,-19.618],[4.422,-14.103],[3.328,21.186],[-6.688,-19.543],[3.865,21.598],[0.777,-8.974],[-2.118,-20.757],[-1.631,-22.003],[1.643,14.418]],"O":[[-10.732,-23.071],[-1.355,-18.754],[-12.915,17.745],[-14.956,-4.181],[-12.758,-21.524],[12.306,0.833],[-2.244,18.548],[-15.058,9.9],[6.096,-12.393],[-9.728,20.517],[1.613,15.397],[12.616,-1.94]],"I":[[-18.556,6.691],[-20.245,10.265],[17.152,-9.765],[17.415,-5.555],[17.699,-4.751],[4.58,-6.617],[-10.177,-6.211],[16.502,-7.134],[4.159,9.109],[-10.488,-6.508],[5.136,-6.849],[-0.185,-0.605]],"acc":1.0},{"step":1300,"loss":0.0128,"G":[[3.103,24.627],[0.558,10.019],[2.284,15.995],[2.635,-19.755],[4.46,-14.212],[3.354,21.333],[-6.756,-19.68],[3.9,21.765],[0.784,-9.054],[-2.157,-20.901],[-1.637,-22.16],[1.656,14.514]],"O":[[-10.831,-23.251],[-1.354,-18.888],[-12.988,17.87],[-15.054,-4.206],[-12.855,-21.702],[12.397,0.819],[-2.274,18.674],[-15.146,9.986],[6.158,-12.472],[-9.785,20.654],[1.607,15.501],[12.709,-1.956]],"I":[[-18.697,6.756],[-20.367,10.338],[17.252,-9.82],[17.539,-5.591],[17.823,-4.783],[4.604,-6.665],[-10.256,-6.244],[16.614,-7.176],[4.19,9.17],[-10.569,-6.54],[5.165,-6.897],[-0.185,-0.605]],"acc":1.0},{"step":1325,"loss":0.0121,"G":[[3.125,24.787],[0.567,10.096],[2.301,16.093],[2.651,-19.888],[4.498,-14.317],[3.38,21.475],[-6.823,-19.813],[3.933,21.928],[0.791,-9.132],[-2.196,-21.041],[-1.643,-22.312],[1.668,14.607]],"O":[[-10.928,-23.426],[-1.353,-19.017],[-13.058,17.992],[-15.15,-4.231],[-12.95,-21.875],[12.486,0.806],[-2.304,18.797],[-15.231,10.068],[6.217,-12.548],[-9.841,20.786],[1.601,15.603],[12.798,-1.971]],"I":[[-18.834,6.82],[-20.484,10.41],[17.35,-9.874],[17.659,-5.625],[17.944,-4.815],[4.628,-6.711],[-10.333,-6.275],[16.724,-7.217],[4.219,9.23],[-10.648,-6.57],[5.194,-6.945],[-0.185,-0.605]],"acc":1.0},{"step":1350,"loss":0.0115,"G":[[3.146,24.942],[0.576,10.171],[2.317,16.189],[2.666,-20.018],[4.534,-14.42],[3.406,21.613],[-6.888,-19.943],[3.966,22.086],[0.797,-9.208],[-2.234,-21.178],[-1.648,-22.459],[1.68,14.697]],"O":[[-11.021,-23.596],[-1.352,-19.144],[-13.127,18.11],[-15.243,-4.254],[-13.042,-22.043],[12.573,0.793],[-2.332,18.916],[-15.314,10.148],[6.274,-12.623],[-9.894,20.915],[1.596,15.702],[12.886,-1.985]],"I":[[-18.966,6.881],[-20.598,10.479],[17.445,-9.926],[17.776,-5.658],[18.062,-4.846],[4.65,-6.756],[-10.408,-6.306],[16.831,-7.258],[4.247,9.289],[-10.725,-6.6],[5.221,-6.99],[-0.185,-0.605]],"acc":1.0},{"step":1375,"loss":0.0109,"G":[[3.167,25.093],[0.584,10.244],[2.333,16.281],[2.68,-20.143],[4.57,-14.519],[3.431,21.748],[-6.951,-20.069],[3.998,22.241],[0.803,-9.281],[-2.272,-21.311],[-1.653,-22.602],[1.691,14.785]],"O":[[-11.112,-23.762],[-1.351,-19.267],[-13.194,18.225],[-15.333,-4.277],[-13.132,-22.206],[12.657,0.781],[-2.36,19.032],[-15.395,10.226],[6.33,-12.696],[-9.947,21.04],[1.591,15.798],[12.971,-1.999]],"I":[[-19.095,6.941],[-20.709,10.547],[17.537,-9.977],[17.891,-5.691],[18.177,-4.876],[4.672,-6.8],[-10.481,-6.335],[16.935,-7.297],[4.275,9.345],[-10.8,-6.629],[5.248,-7.035],[-0.185,-0.605]],"acc":1.0},{"step":1400,"loss":0.0104,"G":[[3.187,25.24],[0.593,10.315],[2.348,16.371],[2.694,-20.266],[4.604,-14.616],[3.455,21.879],[-7.014,-20.193],[4.029,22.391],[0.809,-9.353],[-2.309,-21.44],[-1.657,-22.742],[1.702,14.87]],"O":[[-11.2,-23.923],[-1.351,-19.387],[-13.259,18.337],[-15.421,-4.299],[-13.22,-22.365],[12.738,0.769],[-2.387,19.145],[-15.474,10.301],[6.384,-12.767],[-9.997,21.162],[1.586,15.892],[13.053,-2.013]],"I":[[-19.22,6.999],[-20.816,10.612],[17.627,-10.027],[18.002,-5.722],[18.289,-4.905],[4.693,-6.842],[-10.552,-6.364],[17.036,-7.335],[4.302,9.401],[-10.872,-6.657],[5.274,-7.078],[-0.185,-0.605]],"acc":1.0},{"step":1425,"loss":0.0099,"G":[[3.207,25.384],[0.601,10.385],[2.363,16.458],[2.707,-20.385],[4.638,-14.71],[3.48,22.007],[-7.075,-20.313],[4.059,22.538],[0.815,-9.422],[-2.346,-21.566],[-1.662,-22.877],[1.713,14.952]],"O":[[-11.286,-24.08],[-1.35,-19.504],[-13.322,18.445],[-15.507,-4.321],[-13.305,-22.519],[12.818,0.758],[-2.413,19.255],[-15.551,10.374],[6.436,-12.836],[-10.047,21.28],[1.581,15.983],[13.134,-2.026]],"I":[[-19.342,7.056],[-20.92,10.676],[17.715,-10.076],[18.111,-5.753],[18.399,-4.934],[4.713,-6.883],[-10.621,-6.392],[17.135,-7.372],[4.327,9.454],[-10.943,-6.684],[5.299,-7.12],[-0.185,-0.605]],"acc":1.0},{"step":1450,"loss":0.0095,"G":[[3.226,25.523],[0.61,10.452],[2.378,16.542],[2.719,-20.501],[4.671,-14.802],[3.504,22.131],[-7.135,-20.43],[4.088,22.681],[0.82,-9.49],[-2.382,-21.689],[-1.667,-23.01],[1.723,15.032]],"O":[[-11.369,-24.232],[-1.35,-19.618],[-13.384,18.551],[-15.591,-4.342],[-13.388,-22.67],[12.895,0.748],[-2.438,19.362],[-15.626,10.445],[6.487,-12.904],[-10.095,21.396],[1.577,16.072],[13.212,-2.039]],"I":[[-19.461,7.111],[-21.022,10.738],[17.801,-10.124],[18.217,-5.784],[18.506,-4.963],[4.733,-6.923],[-10.688,-6.419],[17.232,-7.409],[4.352,9.507],[-11.012,-6.71],[5.323,-7.16],[-0.185,-0.605]],"acc":1.0},{"step":1475,"loss":0.009,"G":[[3.244,25.659],[0.619,10.519],[2.392,16.624],[2.73,-20.614],[4.703,-14.891],[3.527,22.253],[-7.193,-20.545],[4.117,22.821],[0.825,-9.555],[-2.418,-21.809],[-1.671,-23.138],[1.733,15.11]],"O":[[-11.451,-24.382],[-1.35,-19.729],[-13.444,18.654],[-15.673,-4.363],[-13.469,-22.817],[12.97,0.738],[-2.462,19.466],[-15.699,10.514],[6.537,-12.97],[-10.141,21.508],[1.572,16.159],[13.289,-2.051]],"I":[[-19.576,7.165],[-21.12,10.799],[17.884,-10.17],[18.321,-5.813],[18.61,-4.99],[4.753,-6.962],[-10.754,-6.445],[17.326,-7.444],[4.377,9.558],[-11.079,-6.735],[5.347,-7.2],[-0.185,-0.605]],"acc":1.0},{"step":1500,"loss":0.0086,"G":[[3.262,25.792],[0.627,10.583],[2.406,16.704],[2.741,-20.724],[4.734,-14.979],[3.55,22.371],[-7.251,-20.657],[4.145,22.957],[0.83,-9.62],[-2.453,-21.926],[-1.675,-23.264],[1.742,15.186]],"O":[[-11.53,-24.527],[-1.35,-19.838],[-13.503,18.755],[-15.753,-4.383],[-13.548,-22.96],[13.044,0.728],[-2.486,19.568],[-15.771,10.582],[6.586,-13.034],[-10.187,21.618],[1.568,16.244],[13.363,-2.063]],"I":[[-19.689,7.217],[-21.216,10.858],[17.966,-10.216],[18.422,-5.842],[18.712,-5.017],[4.771,-7.0],[-10.818,-6.471],[17.418,-7.479],[4.4,9.608],[-11.145,-6.76],[5.37,-7.238],[-0.185,-0.605]],"acc":1.0}]}/*S2SDATA*/;
-(() => {
-const $ = id => document.getElementById(id);
-const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const softmax = xs => { const m = Math.max(...xs), e = xs.map(x => Math.exp(x - m)), t = e.reduce((a, b) => a + b, 0); return e.map(x => x / t); };
-const S = S2S.snaps, GL = S2S.gl, EN = S2S.en, NOUNS = new Set(["tía", "amigo", "irmán", "veciña"]), ARTS = new Set(["o", "a", "un", "unha"]);
-const NWORDS = S2S.data.reduce((a, [, t]) => a + t.length, 0);
-function translate(sn, src) {
-  let h = [0, 0]; const path = [h];
-  for (const w of src) { const g = sn.G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; path.push(h); }
-  let st = h; const steps = [];
-  for (let t = 0; t < 6; t++) {
-    const p = softmax(sn.O.map(o => st[0] * o[0] + st[1] * o[1])), j = p.indexOf(Math.max(...p));
-    steps.push({ st, w: EN[j], p });
-    if (EN[j] === "‹end›") break;
-    st = [0.5 * st[0] + 0.5 * sn.I[j][0], 0.5 * st[1] + 0.5 * sn.I[j][1]];
-  }
-  return { path, summary: h, steps };
-}
-let ti = 0, trTimer = null;
-$("pathStep").max = S.length - 1;
-$("trainData").innerHTML = S2S.data.map(([s2, t2]) => `<div class="phrase"><span><span class="src">${s2.join(" ")}</span> → ${t2.filter(w => w !== "‹end›").join(" ")}</span></div>`).join("");
-// the probability the model gives each correct English word, with the correct previous word fed in (as in training)
-function correctProbs(sn, src, tgt) {
-  let h = [0, 0]; for (const w of src) { const g = sn.G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; }
-  let st = h; return tgt.map(w => { const p = softmax(sn.O.map(o => st[0] * o[0] + st[1] * o[1]))[EN.indexOf(w)], iv = sn.I[EN.indexOf(w)]; st = [0.5 * st[0] + 0.5 * iv[0], 0.5 * st[1] + 0.5 * iv[1]]; return p; });
-}
-const TMAX = Math.max(...S.flatMap(sn => [...sn.G, ...sn.O]).flat().map(Math.abs));
-function renderTrainPlane(sn) {
-  const [src, tgt] = S2S.data[bA];
-  // zoom to this step: the vectors start small and grow during training
-  const cur = [...sn.G, ...sn.O, ...translate(sn, src).path].flat().map(Math.abs), Z = 1.15 * Math.max(...cur);
-  const P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z;
-  const orange = css("--orange"), fg = css("--fg"), muted = css("--muted");
-  let g = `<line class="axis" x1="10" y1="200" x2="390" y2="200"/><line class="axis" x1="200" y1="10" x2="200" y2="390"/>`;
-  const tick = +(Z / 1.15).toPrecision(2);
-  g += `<text x="${P(tick)}" y="214" text-anchor="middle" font-size="10">${tick}</text><text x="${P(-tick)}" y="214" text-anchor="middle" font-size="10">${-tick}</text><text x="206" y="${Q(tick) + 4}" font-size="10">${tick}</text>`;
-  const trail = (key, j, col) => `<polyline points="${S.slice(0, ti + 1).map(x => `${P(x[key][j][0]).toFixed(1)},${Q(x[key][j][1]).toFixed(1)}`).join(" ")}" fill="none" stroke="${col}" stroke-opacity="0.22"/>`;
-  GL.forEach((w, j) => { const c = NOUNS.has(w) ? css("--blue") : ARTS.has(w) ? muted : css("--green"); g += trail("G", j, c); });
-  EN.forEach((w, j) => { g += trail("O", j, fg); });
-  // the chosen phrase's summary path at this step
-  const path = translate(sn, src).path;
-  g += `<polyline points="${path.map(q => `${P(q[0]).toFixed(1)},${Q(q[1]).toFixed(1)}`).join(" ")}" fill="none" stroke="${orange}" stroke-width="1.8" stroke-dasharray="4 3"/>`;
-  const h = path[path.length - 1];
-  g += `<circle cx="${P(h[0])}" cy="${Q(h[1])}" r="5" fill="${orange}"/>`;
-  GL.forEach((w, j) => { const v = sn.G[j], c = NOUNS.has(w) ? css("--blue") : ARTS.has(w) ? muted : css("--green"), on = src.includes(w);
-    g += `<rect x="${P(v[0]) - (on ? 5 : 3.5)}" y="${Q(v[1]) - (on ? 5 : 3.5)}" width="${on ? 10 : 7}" height="${on ? 10 : 7}" rx="2" fill="${c}" fill-opacity="${on ? 1 : 0.45}"/>`;
-    if (on) g += `<text x="${P(v[0]) - 8}" y="${Q(v[1]) + 4}" text-anchor="end" font-style="italic" font-size="11" fill="${c}">${w}</text>`; });
-  EN.forEach((w, j) => { const o = sn.O[j], on = tgt.includes(w);
-    g += `<circle cx="${P(o[0])}" cy="${Q(o[1])}" r="${on ? 5.5 : 4}" fill="none" stroke="${fg}" stroke-opacity="${on ? 1 : 0.45}" stroke-width="${on ? 2 : 1.2}"/>`;
-    if (on) g += `<text x="${P(o[0]) + 8}" y="${Q(o[1]) + 4}" font-size="11" fill="${fg}">${w}</text>`; });
-  $("trainSvg").innerHTML = g;
-}
-function renderTrain() {
-  const sn = S[ti];
-  renderTrainPlane(sn);
-  $("pathStep").value = ti;
-  $("trBack").disabled = ti <= 0; $("trNext").disabled = ti >= S.length - 1;
-  const [src, tgt] = S2S.data[bA], cp = correctProbs(sn, src, tgt);
-  $("trainLbl").innerHTML = `<i>${src.join(" ")}</i>: probability of each correct word`;
-  $("trainBars").innerHTML = tgt.map((w, m) => `<div class="bar"><span class="w">${w}</span><span class="track"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%;background:var(--green)"></span></span><span>${cp[m].toFixed(2)}</span></div>`).join("");
-  $("pathStepVal").textContent = `step ${sn.step} of ${S2S.steps} · ${Math.round(sn.acc * NWORDS)}/${NWORDS} words predicted right, given the correct previous word`;
-  $("pathAll").innerHTML = S2S.data.map(([s2, t2]) => {
-    const out = translate(sn, s2).steps.map(t => t.w).filter(w => w !== "‹end›");
-    const ok = out.join(" ") === t2.filter(w => w !== "‹end›").join(" ");
-    return `<div class="phrase"><span><span class="src">${s2.join(" ")}</span> → <span class="${ok ? "ok" : "bad"}">${out.join(" ") || "(nothing)"}</span></span></div>`;
-  }).join("");
-}
-function stopTrain() { clearInterval(trTimer); trTimer = null; $("pathPlay").textContent = "Play"; }
-$("trNext").addEventListener("click", () => { stopTrain(); ti = Math.min(ti + 1, S.length - 1); renderTrain(); });
-$("trBack").addEventListener("click", () => { stopTrain(); ti = Math.max(ti - 1, 0); renderTrain(); });
-$("pathStep").addEventListener("input", e => { stopTrain(); ti = +e.target.value; renderTrain(); });
-$("pathPlay").addEventListener("click", () => {
-  if (trTimer) { stopTrain(); return; }
-  if (ti >= S.length - 1) ti = 0;
-  $("pathPlay").textContent = "Pause";
-  trTimer = setInterval(() => { ti++; renderTrain(); if (ti >= S.length - 1) stopTrain(); }, reduce ? 30 : 120);
-});
-
-// ---------- section 3: the decoder, one step at a time ----------
-const LAST = S[S.length - 1];
-const TRS = S2S.data.map(([src]) => translate(LAST, src));
-let bA = Math.max(0, S2S.data.findIndex(([x]) => x.join(" ") === "unha tía miña")), bStep = 0, bStage = 0, bSel = -1;   // bStage: reading the Galician words, then writing the English ones   // bSel: the word whose score is shown (-1 = the winner)
-$("bA").innerHTML = S2S.data.map(([src, tgt], q) => `<option value="${q}">${src.join(" ")} → ${tgt.filter(w => w !== "‹end›").join(" ")}</option>`).join("");
-$("bA").value = bA;
-const OMAX = Math.max(...LAST.O.flat().map(Math.abs));
-const ENCOL = ["#c96f1f", "#d98b45", "#e3a66d", "#ebc095", "#f1d6bb"];   // English words in the state, newest first
-const GMAX = Math.max(1, ...LAST.G.flat().map(Math.abs)), SMAX = Math.max(OMAX, GMAX);
-// new = ½ old + ½ vec, drawn as arrows on its own scale
-function addSVG(old, vec, neu, oldLab, vecLab, newLab) {
-  const orange = css("--orange"), green = css("--green"), muted = css("--muted");
-  const ho = [old[0] / 2, old[1] / 2], zero = !old[0] && !old[1];
-  const R = 1.2 * Math.max(1e-6, ...[old, ho, neu].flat().map(Math.abs)), UX = x => 200 + x * 95 / R, UY = y => 115 - y * 95 / R;
-  const anc = x => x > 280 ? "end" : x < 120 ? "start" : "middle";
-  let z = `<defs><marker id="ua" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${orange}"/></marker><marker id="ug" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${green}"/></marker><marker id="um" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${muted}"/></marker></defs>`;
-  z += `<line class="axis" x1="20" y1="115" x2="380" y2="115"/><line class="axis" x1="200" y1="10" x2="200" y2="220"/>`;
-  if (!zero) {
-    z += `<line x1="200" y1="115" x2="${UX(old[0])}" y2="${UY(old[1])}" stroke="${muted}" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#um)"/>`;
-    const dx = UX(old[0]) - 200, dy = UY(old[1]) - 115, L = Math.hypot(dx, dy) || 1, olx = UX(old[0]) + 14 * dx / L, oly = UY(old[1]) + 14 * dy / L + 4;
-    z += `<text x="${olx}" y="${oly}" text-anchor="${anc(olx)}" fill="${muted}" font-size="11">${oldLab}</text>`;
-    z += `<line x1="200" y1="115" x2="${UX(ho[0])}" y2="${UY(ho[1])}" stroke="${orange}" stroke-width="2" stroke-opacity="0.6" marker-end="url(#ua)"/>`;
-    const hx = UX(ho[0]), hy = UY(ho[1]), gx = UX(neu[0]) - hx, gy = UY(neu[1]) - hy, G = Math.hypot(gx, gy) || 1, lx = hx - 16 * gx / G, ly = hy - 16 * gy / G + 4;
-    z += `<text x="${lx}" y="${ly}" text-anchor="${anc(lx)}" fill="${orange}" font-size="11">½ old</text>`;
-  }
-  z += `<line x1="${UX(ho[0])}" y1="${UY(ho[1])}" x2="${UX(neu[0])}" y2="${UY(neu[1])}" stroke="${green}" stroke-width="2.5" marker-end="url(#ug)"/>`;
-  { const ax = UX(ho[0]), ay = UY(ho[1]), bx = UX(neu[0]), by = UY(neu[1]), L = Math.hypot(bx - ax, by - ay) || 1;
-    let nx = -(by - ay) / L, ny = (bx - ax) / L; const mx = (ax + bx) / 2, my = (ay + by) / 2;
-    if ((mx + nx - 200) * nx + (my + ny - 115) * ny < 0) { nx = -nx; ny = -ny; }
-    z += `<text x="${mx + 12 * nx}" y="${my + 12 * ny + 4 + (Math.abs(nx) < 0.4 ? (ny > 0 ? 8 : -4) : 0)}" text-anchor="${Math.abs(nx) < 0.4 ? "middle" : nx > 0 ? "start" : "end"}" fill="${green}" font-size="11">${vecLab}</text>`; }
-  if (!zero) z += `<line x1="200" y1="115" x2="${UX(neu[0])}" y2="${UY(neu[1])}" stroke="${orange}" stroke-width="3" marker-end="url(#ua)"/>`;
-  z += `<text x="${UX(neu[0]) + (neu[0] >= 0 ? 8 : -8)}" y="${UY(neu[1]) + (neu[1] >= 0 ? -8 : 16)}" text-anchor="${neu[0] >= 0 ? "start" : "end"}" fill="${orange}">${newLab}</text>`;
-  return z;
-}
-// the reading phase: the encoder builds the summary on the same plane
-function renderRead(r) {
-  const src = S2S.data[bA][0], nR = src.length, path = translate(LAST, src).path;
-  const orange = css("--orange"), fg = css("--fg"), muted = css("--muted"), r2 = x => x.toFixed(2);
-  const P = x => 200 + x * 175 / SMAX, Q = y => 200 - y * 175 / SMAX;
-  let g = `<line class="axis" x1="15" y1="200" x2="385" y2="200"/><line class="axis" x1="200" y1="15" x2="200" y2="385"/>`;
-  EN.forEach((w, j) => { const o = LAST.O[j]; g += `<circle cx="${P(o[0])}" cy="${Q(o[1])}" r="5" fill="none" stroke="${fg}" stroke-opacity="0.15"/><text x="${P(o[0]) + 8}" y="${Q(o[1]) + 4}" fill="${fg}" fill-opacity="0.18" font-size="11">${w}</text>`; });
-  src.forEach((w, j) => { const v = LAST.G[GL.indexOf(w)], c = NOUNS.has(w) ? css("--blue") : ARTS.has(w) ? muted : css("--green"), read = j < r, cur = j === r - 1;
-    g += `<rect x="${P(v[0]) - 6}" y="${Q(v[1]) - 6}" width="12" height="12" rx="2" fill="${c}" fill-opacity="${read ? 1 : 0.35}" stroke="${cur ? orange : "none"}" stroke-width="2"/>`;
-    g += `<text x="${P(v[0]) - 10}" y="${Q(v[1]) + 4}" text-anchor="end" font-style="italic" font-size="13" fill="${c}" fill-opacity="${read ? 1 : 0.5}">${w}</text>`; });
-  g += `<polyline points="${path.slice(0, r + 1).map(q => `${P(q[0]).toFixed(1)},${Q(q[1]).toFixed(1)}`).join(" ")}" fill="none" stroke="${orange}" stroke-width="2" stroke-dasharray="4 3"/>`;
-  const h = path[r];
-  g += `<circle cx="${P(h[0])}" cy="${Q(h[1])}" r="7" fill="${orange}"/><text x="${P(h[0]) + 10}" y="${Q(h[1]) - 8}" fill="${orange}">summary</text>`;
-  $("bSvg").innerHTML = g;
-  $("bPlaneLbl").textContent = "One plane for both languages: the encoder reads";
-  for (const id of ["bRuler", "bRulerLbl", "bBars"]) $(id).hidden = true;
-  const w = src[r - 1], v = LAST.G[GL.indexOf(w)], old = path[r - 1];
-  $("bFormula").innerHTML = `reading <i>${w}</i> = (${r2(v[0])}, ${r2(v[1])})`;
-  $("bUpdLbl").textContent = "b. How the summary was recomputed";
-  $("bUpd").innerHTML = addSVG(old, v, h, r > 1 ? "old summary" : "", `+ ½ vector of “${w}”`, r === nR ? "summary" : "new summary");
-  $("bUpdF").innerHTML = `summary = ½ × (${r2(old[0])}, ${r2(old[1])}) + ½ × vector(<i>${w}</i>) (${r2(v[0])}, ${r2(v[1])})<br>= <b>(${r2(h[0])}, ${r2(h[1])})</b>`;
-  $("bUpdNote").hidden = true;
-  $("bMixLbl").textContent = "What is in the summary now";
-  const segs = src.slice(0, r).map((ww, j) => [ww, Math.pow(0.5, r - j), NOUNS.has(ww) ? css("--blue") : ARTS.has(ww) ? muted : css("--green")]);
-  segs.push(["", Math.pow(0.5, r), css("--grid")]);
-  $("bMix").innerHTML = segs.map(([ww, x, c]) => `<span style="width:${(x * 100).toFixed(2)}%;background:color-mix(in srgb, ${c} 55%, transparent)">${x > 0.07 ? ww : ""}</span>`).join("");
-  $("bMixTxt").innerHTML = src.slice(0, r).map((ww, j) => `<i>${ww}</i> 1/${Math.pow(2, r - j)}`).join(" · ");
-  $("bEncNote").innerHTML = "";
-  $("bNote").innerHTML = r < nR ? `Reading word ${r} of ${nR}: the summary moves halfway toward <i>${w}</i>. The English words are faded: the decoder has not started.` :
-    `The encoder has read the whole phrase. This summary, (${r2(h[0])}, ${r2(h[1])}), is all the decoder will get. Next, the decoder starts writing from here.`;
-}
-function renderB() {
-  const src = S2S.data[bA][0], t = TRS[bA], n = t.steps.length, nR = src.length;
-  bStage = Math.min(bStage, nR + n - 1);
-  $("bStrip").innerHTML = `<span class="note">reads:</span> ` + src.map((w, j) => `<button class="src ${j === bStage ? "on" : j < bStage ? "done" : "todo"}" data-g="${j}">${w}</button>`).join(`<span class="ar">→</span>`) +
-    `<span class="ar" style="margin:0 6px">|</span><span class="note">writes:</span> ` + t.steps.map((x, m) => `<button class="${nR + m === bStage ? "on" : nR + m < bStage ? "done" : "todo"}" data-g="${nR + m}">${nR + m <= bStage ? x.w : "?"}</button>`).join(`<span class="ar">→</span>`);
-  $("bStrip").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { bStage = +b.dataset.g; bSel = -1; renderB(); }));
-  $("bBack").disabled = bStage <= 0; $("bNext").disabled = bStage >= nR + n - 1;
-  if (bStage < nR) { renderRead(bStage + 1); return; }
-  for (const id of ["bRuler", "bRulerLbl", "bBars"]) $(id).hidden = false;
-  $("bUpdNote").hidden = false;
-  $("bPlaneLbl").textContent = "a. One plane for both languages: how the next word is chosen";
-  $("bUpdLbl").textContent = "b. How the state was recomputed";
-  $("bMixLbl").textContent = "What is in the state now";
-  bStep = bStage - nR;
-  const k = bStep, s = t.steps[k];
-  const orange = css("--orange"), fg = css("--fg"), muted = css("--muted"), r2 = x => x.toFixed(2);
-  const path = translate(LAST, src).path, hsum = path[path.length - 1];
-  $("bEncNote").innerHTML = `The encoder read <i>${src.join(" ")}</i> into the summary (${r2(hsum[0])}, ${r2(hsum[1])}): state 1 of the decoder.`;
-  // a. the plane: word vectors as rings, the state's direction as an arrow, the winner's projection
-  const P = x => 200 + x * 175 / SMAX, Q = y => 200 - y * 175 / SMAX, OM = SMAX;
-  const ang = Math.atan2(s.st[1], s.st[0]), u = [Math.cos(ang), Math.sin(ang)];
-  let g = `<line class="axis" x1="15" y1="200" x2="385" y2="200"/><line class="axis" x1="200" y1="15" x2="200" y2="385"/>`;
-  g += `<line x1="${P(-1.2 * OM * u[0])}" y1="${Q(-1.2 * OM * u[1])}" x2="${P(1.2 * OM * u[0])}" y2="${Q(1.2 * OM * u[1])}" stroke="${orange}" stroke-opacity="0.4" stroke-dasharray="5 4"/>`;
-  // the Galician words of the phrase and the encoder's path to the summary (strong at word 1, faint after)
-  src.forEach(w => { const v = LAST.G[GL.indexOf(w)], c = NOUNS.has(w) ? css("--blue") : ARTS.has(w) ? muted : css("--green");
-    g += `<rect x="${P(v[0]) - 5}" y="${Q(v[1]) - 5}" width="10" height="10" rx="2" fill="${c}" fill-opacity="0.22"/><text x="${P(v[0]) - 9}" y="${Q(v[1]) + 4}" text-anchor="end" font-style="italic" font-size="11" fill="${c}" fill-opacity="0.35">${w}</text>`; });
-  g += `<polyline points="${path.map(q => `${P(q[0]).toFixed(1)},${Q(q[1]).toFixed(1)}`).join(" ")}" fill="none" stroke="${orange}" stroke-width="1.5" stroke-dasharray="4 3" stroke-opacity="0.22"/>`;
-  const order = [...s.p.keys()].sort((a, b) => s.p[b] - s.p[a]);
-  const selJ = bSel >= 0 ? bSel : EN.indexOf(s.w), winJ = EN.indexOf(s.w), blue = css("--blue");
-  // every word's foot on the state's line (small ticks); dotted lines for the winner and the selected word
-  EN.forEach((w, j) => { const o = LAST.O[j], pr = o[0] * u[0] + o[1] * u[1];
-    g += `<circle cx="${P(pr * u[0])}" cy="${Q(pr * u[1])}" r="2.5" fill="${j === winJ ? orange : j === selJ ? blue : muted}" fill-opacity="${j === winJ || j === selJ ? 1 : 0.5}"/>`; });
-  [...new Set([winJ, selJ])].forEach(j => { const o = LAST.O[j], pr = o[0] * u[0] + o[1] * u[1];
-    g += `<line x1="${P(o[0])}" y1="${Q(o[1])}" x2="${P(pr * u[0])}" y2="${Q(pr * u[1])}" stroke="${j === winJ ? orange : blue}" stroke-width="1.5" stroke-dasharray="2 3"/>`; });
-  EN.forEach((w, j) => { const o = LAST.O[j], on = j === winJ, sel = j === selJ && !on, c = on ? orange : sel ? blue : fg;
-    g += `<circle cx="${P(o[0])}" cy="${Q(o[1])}" r="${on || sel ? 9 : 6}" fill="${css("--panel")}" fill-opacity="0.01" stroke="${c}" stroke-width="${on || sel ? 3 : 1.5}" style="cursor:pointer" data-j="${j}"/>`;
-    g += `<text x="${P(o[0]) + (on || sel ? 12 : 9)}" y="${Q(o[1]) + 4}" fill="${c}" font-size="12" style="cursor:pointer" data-j="${j}">${w}</text>`; });
-  g += `<defs><marker id="bsa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${orange}"/></marker></defs>`;
-  g += `<line x1="200" y1="200" x2="${P(s.st[0])}" y2="${Q(s.st[1])}" stroke="${orange}" stroke-width="3.5" marker-end="url(#bsa)"/>`;
-  g += `<text x="${P(s.st[0]) + (u[0] >= 0 ? 10 : -10)}" y="${Q(s.st[1]) + (u[1] >= 0 ? -8 : 16)}" text-anchor="${u[0] >= 0 ? "start" : "end"}" fill="${orange}">state ${k + 1}${k === 0 ? " = summary" : ""}</text>`;
-  $("bSvg").innerHTML = g;
-  $("bSvg").querySelectorAll("[data-j]").forEach(el => el.addEventListener("click", () => { bSel = +el.dataset.j; renderB(); }));
-  // the score ruler: every word at its score
-  const scores = LAST.O.map(o => s.st[0] * o[0] + s.st[1] * o[1]);
-  const lo = Math.min(...scores), hi = Math.max(...scores), RX = v => 20 + (v - lo) / (hi - lo || 1) * 360;
-  const YL = 56, ROWS = [38, 76, 22, 92];   // label rows: above, below, further above, further below
-  let r = `<line x1="20" y1="${YL}" x2="380" y2="${YL}" stroke="${css("--line")}" stroke-width="2"/>`;
-  if (lo < 0 && hi > 0) r += `<line x1="${RX(0)}" y1="${YL - 8}" x2="${RX(0)}" y2="${YL + 8}" stroke="${muted}"/><text x="${RX(0)}" y="118" text-anchor="middle" fill="${muted}" font-size="10">0</text>`;
-  const rowEnd = ROWS.map(() => -Infinity);
-  [...scores.keys()].sort((a, b) => scores[a] - scores[b]).forEach(j => {
-    const x = RX(scores[j]), c = j === winJ ? orange : j === selJ ? blue : fg, wdt = 7 * EN[j].length + 6;
-    let row = ROWS.findIndex((_, q) => rowEnd[q] < x - wdt / 2); if (row < 0) row = rowEnd.indexOf(Math.min(...rowEnd));
-    rowEnd[row] = x + wdt / 2;
-    const y = ROWS[row];
-    r += `<line x1="${x}" y1="${YL}" x2="${x}" y2="${y + (y < YL ? 3 : -10)}" stroke="${c}" stroke-opacity="0.3"/>`;
-    r += `<circle cx="${x}" cy="${YL}" r="${j === winJ || j === selJ ? 6 : 4}" fill="${c}" style="cursor:pointer" data-j="${j}"/>`;
-    r += `<text x="${x}" y="${y}" text-anchor="middle" fill="${c}" font-size="11" style="cursor:pointer" data-j="${j}">${EN[j]}</text>`;
-  });
-  r += `<text x="20" y="118" fill="${muted}" font-size="10">lower score</text><text x="380" y="118" text-anchor="end" fill="${muted}" font-size="10">higher score</text>`;
-  $("bRuler").innerHTML = r;
-  $("bRuler").querySelectorAll("[data-j]").forEach(el => el.addEventListener("click", () => { bSel = +el.dataset.j; renderB(); }));
-  // a. scores and probabilities, top 4
-  $("bBars").innerHTML = `<p class="label">Probability of each word next (top 4 of ${EN.length})</p>` + order.slice(0, 4).map(j => `<div class="bar"><span class="w">${EN[j]}</span><span class="track"><span class="fill" style="width:${(s.p[j] * 100).toFixed(1)}%;background:var(${EN[j] === s.w ? "--orange" : "--blue"})"></span></span><span>${s.p[j].toFixed(2)}</span></div>`).join("");
-  const line = j => { const o = LAST.O[j], v = s.st[0] * o[0] + s.st[1] * o[1]; return `score(${EN[j]}) = ${r2(s.st[0])}×${r2(o[0])} + ${r2(s.st[1])}×${r2(o[1])} = <b>${r2(v)}</b>`; };
-  $("bFormula").innerHTML = `state = (${r2(s.st[0])}, ${r2(s.st[1])})<br>` + line(winJ) + `, the highest` +
-    (selJ !== winJ ? (() => { const d = scores[winJ] - scores[selJ], ratio = Math.exp(d);
-      return `<br><span style="color:var(--blue)">${line(selJ)}</span>, ${r2(d)} lower<br>after softmax, ${s.w} is e<sup>${r2(d)}</sup> ≈ ${ratio < 1e4 ? Math.round(ratio).toLocaleString("en") : ratio.toExponential(1)} times as likely as ${EN[selJ]}`; })() : "") +
-    `<br>softmax → it writes <b>${s.w}</b>`;
-  // b. how the state was recomputed: new state = ½ old state + ½ the written word's update vector
-  if (k === 0) {
-    $("bUpd").innerHTML = addSVG([0, 0], [2 * s.st[0], 2 * s.st[1]], s.st, "", "the summary", "state 1 = the summary");
-    $("bUpdF").innerHTML = `state 1 = the encoder's summary of <i>${src.join(" ")}</i> = (${r2(s.st[0])}, ${r2(s.st[1])}). Nothing has been written yet.`;
-  } else {
-    const old = t.steps[k - 1].st, w = t.steps[k - 1].w, iv = LAST.I[EN.indexOf(w)], ho = [old[0] / 2, old[1] / 2], hi = [iv[0] / 2, iv[1] / 2];
-    $("bUpd").innerHTML = addSVG(old, iv, s.st, `old state ${k}`, `+ ½ vector of “${w}”`, `new state ${k + 1}`);
-    $("bUpdF").innerHTML = `state ${k + 1} = ½ × state ${k} + ½ × vector(${w})<br>= ½ × (${r2(old[0])}, ${r2(old[1])}) + ½ × (${r2(iv[0])}, ${r2(iv[1])})<br>= (${r2(ho[0])}, ${r2(ho[1])}) + (${r2(hi[0])}, ${r2(hi[1])}) = <b>(${r2(s.st[0])}, ${r2(s.st[1])})</b>`;
-  }
-  // b. what is in the state: the summary's share halves at every step, the written words fill in
-  const sumShare = Math.pow(0.5, k), nG = src.length;
-  const segs = [];
-  src.forEach((w, j) => segs.push([w, sumShare * Math.pow(0.5, nG - j), NOUNS.has(w) ? css("--blue") : ARTS.has(w) ? muted : css("--green"), true]));
-  segs.push(["", sumShare * Math.pow(0.5, nG), css("--grid"), true]);   // the encoder's empty start
-  for (let m = 0; m < k; m++) segs.push([t.steps[m].w, Math.pow(0.5, k - m), ENCOL[Math.min(k - 1 - m, ENCOL.length - 1)], false]);
-  $("bMix").innerHTML = segs.map(([w, v, c, gal]) => v > 0.0005 ? `<span style="width:${(v * 100).toFixed(2)}%;background:color-mix(in srgb, ${c} 55%, transparent);${gal ? "" : "font-style:normal"}" title="${w} ${v.toFixed(3)}">${v > 0.07 ? w : ""}</span>` : "").join("");
-  const frac = x => x === 1 ? "all" : `1/${Math.round(1 / x)}`;
-  $("bMixTxt").innerHTML = `the summary (Galician, italic): <b>${frac(sumShare)}</b> of the state` + (k ? ` · English words written so far: ${t.steps.slice(0, k).map((x, m) => `<b>${x.w}</b> ${frac(Math.pow(0.5, k - m))}`).join(", ")}` : "");
-  // the word nearest the arrow's angle is not always the winner: length counts too
-  const angJ = [...EN.keys()].reduce((m, j) => { const o = LAST.O[j], c = (o[0] * u[0] + o[1] * u[1]) / Math.hypot(o[0], o[1]); return c > m[1] ? [j, c] : m; }, [-1, -Infinity])[0];
-  const aside = angJ !== winJ ? ` (“${EN[angJ]}” is closer to the arrow's direction, but nearer the center: its vector is shorter, so it lies less far along the line.)` : "";
-  $("bNote").innerHTML = k === 0
-    ? `Word 1: the state is the summary of <i>${src.join(" ")}</i>, nothing else. Along the state's direction (dashed line), “${s.w}” lies farthest out, so it gets the highest score and comes out first.` + aside
-    : s.w === "‹end›" ? `After “${t.steps[k - 1].w}”, ‹end› lies farthest along the state's direction: the translation is finished. The summary is now only ${frac(sumShare)} of the state.` + aside
-    : `Word ${k + 1}: writing “${t.steps[k - 1].w}” took half of the state, so the summary shrank to ${frac(sumShare)}. Now “${s.w}” lies farthest along the state's direction.` + aside;
-}
-$("trA").innerHTML = $("bA").innerHTML; $("trA").value = bA;
-(window.__askState ||= []).push(() => { const [src, tgt] = S2S.data[bA], cp = correctProbs(S[ti], src, tgt); return `Section 1 (training): step ${S[ti].step} of ${S2S.steps}; for "${src.join(" ")}" the probability of each correct word: ${tgt.map((w, m) => `${w} ${cp[m].toFixed(2)}`).join(", ")}; ${Math.round(S[ti].acc * NWORDS)}/${NWORDS} words predicted right given the correct previous word.`; });
-$("bA").addEventListener("change", e => { bA = +e.target.value; $("trA").value = bA; bStage = 0; bSel = -1; renderB(); renderTrain(); });
-$("trA").addEventListener("change", e => { bA = +e.target.value; $("bA").value = bA; bStage = 0; bSel = -1; renderB(); renderTrain(); });
-$("bNext").addEventListener("click", () => { bStage++; bSel = -1; renderB(); });
-$("bBack").addEventListener("click", () => { bStage = Math.max(bStage - 1, 0); bSel = -1; renderB(); });
-renderB();
-renderTrain();
-(window.__askState ||= []).push(() => { const t = TRS[bA], nR0 = S2S.data[bA][0].length; if (bStage < nR0) return `Section 3 (from Galician to English, word by word): reading phase, the encoder has read ${bStage + 1} of ${nR0} words of "${S2S.data[bA][0].join(" ")}" (Galician words drawn as bright squares, English words faded); summary = ½ old summary + ½ word vector.`; const k = Math.min(bStep, t.steps.length - 1), s = t.steps[k];
-  return `Section 3 (from Galician to English, word by word: encoder plane of the phrase, then the decoder): phrase "${S2S.data[bA][0].join(" ")}" → ${t.steps.map(x => x.w).join(" ")}; showing word ${k + 1} ("${s.w}"). (a) The word is chosen like skip-gram: score of each English word = dot product of the decoder state with that word's learned 2-D vector; softmax; top probabilities ${[...s.p.keys()].sort((a, b) => s.p[b] - s.p[a]).slice(0, 3).map(j => `${EN[j]} ${s.p[j].toFixed(2)}`).join(", ")}. (b) The state = ½ old state + ½ the written word's vector, so the summary makes up 1/${Math.pow(2, k)} of the state now and the written English words fill the rest (newest ½, previous ¼, ...). (c) Why the first word is right although the summary is mostly the end of the phrase: in 3-word phrases the first word's ⅛ share is still enough after training; in long sentences it fades, which is why Sutskever et al. (2014) fed the source sentence in reverse (BLEU 25.9 → 30.6), and why attention was invented (section 4).`; });
-
-})();
-</script>
 <script>
 // ---------------------------------------------------------------- ask Claude
 // A chat about the page. Each question is sent with a description of the page and a snapshot
@@ -1105,14 +698,12 @@ How to answer: short, plain sentences. Define any technical term the first time 
 
 The page:
 - Running example: the Galician sentence "Unha tía miña, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»" (from the novel Speechwriter by Paulo Naseiro). "tía miña" is noun then possessive; English "my aunt" reverses the order.
-- Section 1, where the model's vectors come from (training): a translation model has an encoder (reads Galician into a summary vector) and a decoder (writes English from it); sections 2 and 3 take them apart. A small toy model with 2-D vectors is trained on 16 human-written translations, the ground truth (a miña tía → my aunt, unha tía miña → an aunt of mine, likewise amigo/friend, irmán/brother, veciña/neighbor, and túa/teu → your / of yours). Training computes the probability of each correct next English word (the decoder is fed the correct previous word) and nudges every vector to raise it, like skip-gram. A replay (Back/Next/Play over 1500 steps) shows a plane with all Galician (squares) and English (rings) vectors moving from small random positions (the plane zooms out as they grow), the probability of each correct word for the chosen phrase, and what the model writes on its own.
-- Section 2, the encoder: each Galician word has an embedding (made-up 2-D vectors here; tía = (0.9, 0.2), miña = (0.1, 0.9)). A simplified encoder reads word by word and keeps one summary vector: new summary = ½ old summary + ½ new word, starting from (0, 0). So the last word makes up ½ of the summary, the one before ¼, then ⅛, and so on; after the whole sentence (35 tokens) "tía" makes up 0.5^34, practically nothing. Real encoders (recurrent neural networks) learn their update rule, but still keep one fixed-size vector.
-- Section 3, the decoder: how the English words come out, with one plane for both languages: the chosen phrase's Galician word vectors (filled dots) and the encoder's dashed path to the summary, the English word vectors (rings), and the decoder's state at its true position, starting exactly at the summary (all 2-D vectors in one coordinate system; Galician and English words have separate tables, but the summary's two numbers are used directly as the decoder's state), in a small toy model trained on 16 idiomatic Galician noun phrases ("a miña tía" → "my aunt", "unha tía miña" → "an aunt of mine", likewise amigo/friend, irmán/brother, veciña/neighbor, and túa/teu → your / of yours; 2-D learned vectors). One phrase, word by word, in the trained model: (a) how the next word is chosen: each English word has a learned vector; its score is the dot product with the decoder's state (how far it lies along the state's direction); softmax gives probabilities; the most likely word is written. (b) How the state is recomputed: the first state is the encoder's summary; after each word, state = ½ state + ½ that word's update vector (a second learned vector per English word, separate from its scoring vector, like skip-gram's two tables), drawn as vector addition with the numbers; so the summary's share halves at every step (all, 1/2, 1/4, ...) while the written words fill the rest, shown as a mix bar like section 2. (d) Is "an aunt of mine" the best translation? Correct and faithful (an keeps the new character introduced by unha), but rare in English: per 100 "my N", English books write "a friend of mine" 12.5 times, "an aunt of mine" 0.36, "a brother of mine" 0.08 (Google Books, 1990-2019; full chart on the n-gram page, section 7). "A ... of mine" picks one out of several. A translator writes "I had an aunt who...", which no word-by-word decoder can produce. (c) Why the first word comes out right although the summary is mostly the end of the phrase: in 3-word phrases the first word's ⅛ is still enough after training; in long sentences it fades; Sutskever, Vinyals & Le (2014) fed the source sentence reversed (BLEU 25.9 → 30.6); attention (section 4) removes the need.
-- Section 4: early neural MT squeezed the whole source sentence into one vector (a bottleneck for long sentences); attention (Bahdanau, Cho & Bengio 2015) lets the decoder look back at every source word at each step. Toy weights: writing "my" puts 0.95 on miña, writing "aunt" puts 0.95 on tía.
-- Section 5: keys k_tía = (1, 0), k_miña = (0, 1); queries q_aunt = (3, 0), q_my = (0, 3), all hand-set as on the course slide. Score = q · k; softmax turns scores into weights that sum to 1 (e^3 / (e^3 + e^0) = 0.95); the output is the weighted average of the value vectors. The two value vectors in the small plot are made up, with dimensions named "family member" and "belongs to me". A shorter query in the same direction gives a less sharp split.
-- Section 6: real cross-attention from the Helsinki-NLP/opus-mt-gl-en model (6 decoder layers × 8 heads) on the full sentence, recorded with one teacher-forced pass over its own greedy translation. Tokens are subword pieces; ‹/s› ends the sentence and often receives "parked" attention. Averaged over all heads, "aunt" looks most at "tía" (0.31); single late-layer heads are much sharper (layer 6 head 2: 0.99), early layers barely align.
-- Section 7: the encoder's self-attention (6 layers × 8 heads), each word attending to every source word. Heads have different habits, e.g. layer 3 head 4 mostly looks at the next word, layer 6 head 7 at the previous word (miña → tía 0.94).
-- Section 8: who decides what a head does. Nobody: designers choose the number of layers and heads, their sizes and the training task; every head starts random and gradient descent changes all of them to lower the loss; jobs emerge and are found afterwards by analysis (Clark et al. 2019; Voita et al. 2019; Michel et al. 2019 found many heads can be removed). A toy model (2 layers × 2 heads, 2-D keys and queries) learns "the animal didn't cross the street because it was tired/wide" (96 sentences; tired, scared, lazy → the animal; wide, busy, wet → the place; example after Uszkoreit 2017). Three runs differ only in the random seed: in start A one head of layer 2 looks at the animal for animal adjectives and at the place for place adjectives (the classic picture); in start B the job is split between two heads; in start C no head looks at either noun much, yet all answers are right, because information can travel through other words in layer 1.`;
+- The page continues a separate translation page (training, the encoder's one summary vector, word-by-word decoding without attention, why "an aunt of mine" is rare in English).
+- Section 1: early neural MT squeezed the whole source sentence into one vector (a bottleneck for long sentences); attention (Bahdanau, Cho & Bengio 2015) lets the decoder look back at every source word at each step. Toy weights: writing "my" puts 0.95 on miña, writing "aunt" puts 0.95 on tía.
+- Section 2: keys k_tía = (1, 0), k_miña = (0, 1); queries q_aunt = (3, 0), q_my = (0, 3), all hand-set as on the course slide. Score = q · k; softmax turns scores into weights that sum to 1 (e^3 / (e^3 + e^0) = 0.95); the output is the weighted average of the value vectors. The two value vectors in the small plot are made up, with dimensions named "family member" and "belongs to me". A shorter query in the same direction gives a less sharp split.
+- Section 3: real cross-attention from the Helsinki-NLP/opus-mt-gl-en model (6 decoder layers × 8 heads) on the full sentence, recorded with one teacher-forced pass over its own greedy translation. Tokens are subword pieces; ‹/s› ends the sentence and often receives "parked" attention. Averaged over all heads, "aunt" looks most at "tía" (0.31); single late-layer heads are much sharper (layer 6 head 2: 0.99), early layers barely align.
+- Section 4: the encoder's self-attention (6 layers × 8 heads), each word attending to every source word. Heads have different habits, e.g. layer 3 head 4 mostly looks at the next word, layer 6 head 7 at the previous word (miña → tía 0.94).
+- Section 5: who decides what a head does. Nobody: designers choose the number of layers and heads, their sizes and the training task; every head starts random and gradient descent changes all of them to lower the loss; jobs emerge and are found afterwards by analysis (Clark et al. 2019; Voita et al. 2019; Michel et al. 2019 found many heads can be removed). A toy model (2 layers × 2 heads, 2-D keys and queries) learns "the animal didn't cross the street because it was tired/wide" (96 sentences; tired, scared, lazy → the animal; wide, busy, wet → the place; example after Uszkoreit 2017). Three runs differ only in the random seed: in start A one head of layer 2 looks at the animal for animal adjectives and at the place for place adjectives (the classic picture); in start B the job is split between two heads; in start C no head looks at either noun much, yet all answers are right, because information can travel through other words in layer 1.`;
 (async () => {
   // window.claude exists only inside a Claude viewer; elsewhere the button stays hidden
   const sample = window.claude ? await window.claude.use("sample") : null;
