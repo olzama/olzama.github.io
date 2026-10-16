@@ -291,38 +291,27 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <div class="part" id="part-intro"><h1>Introduction</h1></div>
 
 <section class="screen" id="overview" data-step="0">
-  <header><h2>Module overview</h2><p class="sub">Three sessions, one running project</p></header>
+  <header><h2>Module overview</h2><p class="sub">Three sessions, one running project: the Green NLP Benchmark Lab</p></header>
   <div class="body">
     <ul class="points">
       <li>Session 1: <b>Measure</b> the baseline</li>
       <li>Session 2: <b>Shrink</b> it: quantization</li>
       <li>Session 3: <b>Retrieve</b> on demand</li>
+      <li>Same tasks, same measurement, one change per session: quality, energy and carbon in your own leaderboard</li>
     </ul>
     <div class="flow"><div class="box">Session 1<br>Measure</div><span class="arr">→</span><div class="box">Session 2<br>Shrink</div><span class="arr">→</span><div class="box g">Session 3<br>Retrieve</div></div>
     <p class="src">olga.zamaraeva@udc.es · UDC Teams · CITIC, 2nd floor</p>
   </div>
   <div class="notes">
     <p>Three sessions, one running project. Session 1, today: talk about NLP generally, then build a working pipeline and measure its baseline energy/carbon cost — and experiment a bit with machine translation, because it's fun. Session 2: apply quantization — we'll define that properly then, but in short it means storing and computing with the model's numbers using fewer bits of precision — and measure again. Session 3: instead of giving the model everything it might need up front, retrieve only the relevant pieces on demand, and measure again. Same task, same measurement method, three different efficiency techniques, so you can compare them on equal footing.</p>
-  </div>
-</section>
-
-<section class="screen" id="project" data-step="0">
-  <header><h2>The running project: Green NLP Benchmark Lab</h2><p class="sub">One pipeline, one change at a time</p></header>
-  <div class="body">
-    <ul class="points">
-      <li>Same pipeline, all three sessions: change <b>one</b> thing, measure again</li>
-      <li>Quality vs. energy vs. carbon: your own leaderboard</li>
-    </ul>
-    <div class="flow"><div class="box">Documents<br>+ question</div><span class="arr">→</span><div class="box">Model</div><span class="arr">→</span><div class="box">Answer</div><span class="arr">→</span><div class="box g">Measure:<br>quality / energy / carbon</div></div>
-  </div>
-  <div class="notes">
     <p>We'll work with machine translation and also with question answering. Partly so we don't get too bored doing just one task, but also because unlike MT, QA can be evaluated more easily: the answer is either right or wrong, so you get a percentage of correct answers and that's your score, accuracy. MT is a lot more complicated to evaluate but also arguably more interesting. Either way, both are classic NLP tasks that now rely on AI, which is costly, and we're going to try to measure how costly. What we change each session is exactly one part of "model" — its size, its precision, how much of the documents it actually sees for the QA task — and re-measure. Every run adds one row to a leaderboard, a CSV file you keep and reuse across all three sessions, so by the end you'll have your own before/after comparison.</p>
   </div>
 </section>
 
+
 <section class="screen" id="howworks" data-step="0">
   <header><h2>How this session works</h2><p class="sub">One page: explanations, interactive panels, code</p></header>
-  <div class="body cols">
+  <div class="body">
     <div class="col">
       <ul class="points">
         <li>This page is the whole session. Open it on your laptop or phone, now or later:</li>
@@ -334,18 +323,11 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
         <li>The longer notebooks run in Google Colab.</li>
       </ul>
     </div>
-    <div class="col">
-      <p class="label">The six technical steps of today</p>
-      <ol class="points">
-        <li>N-grams</li><li>Embeddings</li><li>Encoder–decoder translation</li><li>Attention</li><li>Self-attention</li><li>Transformers</li>
-      </ol>
-    </div>
   </div>
   <div class="notes">
     <p>A note on how this session works. This year there are no slides. We use one web page for the whole session. You see it on the screen, and you can open the same page on your laptop or phone.</p>
     <p>The address is on the screen: olzama.github.io, teaching, GreenAI. You can follow along during the session and come back to the page later.</p>
     <p>Some screens are explanations, like slides. Some are interactive: animations you can step through, change, and replay, with real numbers. Some are exercises: Python code that runs in your browser. Nothing to install. The longer notebooks run in Google Colab.</p>
-    <p>The technical part of today has six steps, from n-grams to transformers. We will see the plan when we get there.</p>
   </div>
 </section>
 
@@ -387,32 +369,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
 </section>
 
-<section class="screen" id="market" data-step="0">
-  <header><h2>How big is NLP, really?</h2></header>
-  <div class="body">
-    <div class="vbars" aria-label="NLP market size">
-      <div class="vb"><span class="v">$37B</span><span class="col" style="height:19%"></span><span class="l">2025</span></div>
-      <div class="vb"><span class="v">$193B</span><span class="col g" style="height:100%"></span><span class="l">2034 (projected)</span></div>
-    </div>
-    <p class="axisnote">NLP market size, US dollars</p>
-    <ul class="points"><li>About 20% growth per year, but estimates vary widely across firms (as low as $25B for the same year, elsewhere)</li></ul>
-    <p class="src">Source: Fortune Business Insights, 2025</p>
-  </div>
-  <div class="notes">
-    <p>NLP is worth talking about at this scale because it's what produced large language models. It started with smaller models, which we'll get to, but once GPT appeared it became a major player well beyond its original scope. This is one widely-cited estimate; different market-research firms report wildly different numbers for the exact same year — some as low as 25B, others well above 60B, for "2025 NLP market size." Why such a spread? "NLP market" isn't a precisely defined category — different analysts include or exclude voice assistants, chatbot platforms, search, or broader "AI" spending differently, and each firm uses its own proprietary method that isn't published in full. Hold onto this pattern: wildly different numbers from equally confident-sounding sources. We'll see the exact same phenomenon later today, with carbon-footprint numbers instead of dollars, for the same underlying reason — undisclosed methodology.</p>
-  </div>
-</section>
 
-<section class="screen" id="where" data-step="0">
-  <header><h2>Where NLP shows up</h2></header>
-  <div class="body">
-    <div class="flow"><div class="box">Tech &amp; Telecom</div><div class="box">Banking &amp; Finance</div><div class="box g">Healthcare<br>(fastest-growing)</div></div>
-    <div class="flow"><div class="box">Chatbots</div><div class="box">Translation</div><div class="box">Speech &amp; Sentiment</div></div>
-  </div>
-  <div class="notes">
-    <p>By industry, the heaviest adopters are tech and telecom, with banking and finance close behind; healthcare is the fastest-growing vertical — think clinical note summarization, patient-facing chat triage. By task, the largest application areas are chatbots, machine translation, and speech/sentiment analysis. I'm choosing translation as our thread not just because it's my area — it's genuinely one of the largest, oldest, and most economically significant NLP tasks in the world, and it happens to be the task where most of today's core techniques, attention especially, were actually invented.</p>
-  </div>
-</section>
 
 <section class="screen" id="oneengine" data-step="0">
   <header><h2>One engine now runs many tasks</h2></header>
@@ -445,28 +402,14 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     <p class="axisnote">kWh per 1,000 inferences</p>
     <ul class="points">
       <li>Discriminative tasks (classify, answer) are cheap; generative tasks (write, summarize) cost 15–20× more</li>
-      <li>Image generation: 2.9 kWh per 1,000, about 1,450× the cheapest text task</li>
     </ul>
     <p class="src">Source: Luccioni, Jernite &amp; Strubell, FAccT 2024 (arXiv:2311.16863), Table 2</p>
   </div>
   <div class="notes">
-    <p>Different tasks cost different amounts. Discriminative tasks — ones where the model picks from a small, fixed set of possible outputs, like classifying or picking a span of text as the answer — are cheap. Generative tasks, where the model produces new text one word at a time, cost 15 to 20 times more. Why the gap? A discriminative task is usually one forward pass through the model — I'm assuming here you've studied neural network architecture a bit, but I'll have a screen on transformer architecture later, which is the basis for modern NLP and really all of modern AI. A generative task requires the model to generate output word by word, feeding each new word back in to generate the next — many forward passes chained together for a single answer. And if you widen the lens past text entirely: image generation in the same study averages 2.9 kWh per 1,000 inferences, about 1,450 times the cheapest text task. The lesson to carry forward: which task you pick is one of the single biggest levers on cost that exists — arguably bigger than model size alone, and entirely within a system designer's control before any "green AI" technique is even applied.</p>
+    <p>Different tasks cost different amounts. Discriminative tasks — ones where the model picks from a small, fixed set of possible outputs, like classifying or picking a span of text as the answer — are cheap. Generative tasks, where the model produces new text one word at a time, cost 15 to 20 times more. Why the gap? A discriminative task is usually one forward pass through the model — I'm assuming here you've studied neural network architecture a bit, but I'll have a screen on transformer architecture later, which is the basis for modern NLP and really all of modern AI. A generative task requires the model to generate output word by word, feeding each new word back in to generate the next — many forward passes chained together for a single answer. The lesson to carry forward: which task you pick is one of the single biggest levers on cost that exists — arguably bigger than model size alone, and entirely within a system designer's control before any "green AI" technique is even applied.</p>
   </div>
 </section>
 
-<section class="screen" id="history" data-step="0">
-  <header><h2>How we got here</h2></header>
-  <div class="body">
-    <div class="flow"><div class="box">Symbolic</div><span class="arr">→</span><div class="box">Statistical</div><span class="arr">→</span><div class="box">Neural</div><span class="arr">→</span><div class="box">Deep<br>learning</div><span class="arr">→</span><div class="box g">Transformers<br>(LLMs)</div></div>
-    <ul class="points">
-      <li>Symbolic: rules written by hand (1950s–80s) → Statistical: counting from real text (1990s–2000s) → Neural: learned representations, more data and compute (2010s+) → Transformers: attention-based (2017+)</li>
-      <li>Each shift trades hand-engineering for more data and compute: directly relevant to a course about the cost of that compute</li>
-    </ul>
-  </div>
-  <div class="notes">
-    <p>Five eras, and it's worth knowing what actually distinguishes each one, because we'll retrace this same arc later specifically for machine translation. Symbolic, roughly 1950s–1980s: systems built from hand-written rules — a linguist or engineer writes "if you see X, do Y." Statistical, 1990s–2000s: instead of hand-written rules, a model learns probabilities from large collections of real text — "how often does word B follow word A" — no built-in knowledge, just counting, which we'll do by hand in a couple of screens. Neural, 2010s onward: models replace explicit counting with a trained network that learns its own internal numerical representations of words and patterns — more flexible, but needs more compute and more data. Deep learning: networks with many stacked layers, letting the model build up increasingly abstract representations. Transformers, 2017 onward: a specific architecture built around attention, which lets the model use larger and more complex contexts instead of just the previous word or two — it's the architecture behind essentially every modern LLM. Each transition traded hand-engineering effort for more data and more compute, which is directly relevant to a course about the environmental cost of that compute.</p>
-  </div>
-</section>
 
 <div class="part" id="part-guess"><h1>Guess the footprint</h1></div>
 
@@ -511,7 +454,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     </div>
     <p class="axisnote">share of global electricity</p>
     <ul class="points"><li>Growing 17% in 2025 alone, driven mainly by AI</li></ul>
-    <p class="src">Source: International Energy Agency, “Energy and AI,” 2024–2025</p>
+    <p class="src">Source: International Energy Agency, “Energy and AI,” 2025, and its 2026 update</p>
   </div>
   <div class="notes">
     <p>About 1.5% of world electricity consumption in 2024 goes to data centers of all kinds — not just AI, this includes cloud storage, websites, everything — per the International Energy Agency. That share grew 17% in just 2025 alone, and the IEA attributes most of that recent growth specifically to AI workloads. Projected to reach roughly 3% by 2030 — small as a percentage, but the absolute scale, a meaningful fraction of a mid-sized country's total electricity use, and the growth rate are what make it worth tracking.</p>
@@ -532,32 +475,9 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
   <div class="notes">
     <p>Same task — question answering, our own project's task — done two ways: by a model built and tuned specifically for that one task, about 0.3g CO2eq per 1,000 inferences, versus a general-purpose chatbot doing the identical task, about 10g. That's a 33x gap, for output that's often comparable in quality. Nothing about the task changed; only which tool was used to do it. We'll see this same shape of pattern again today, in a different disguise, once we get to machine translation specifically.</p>
-    <p>A Claude Code session, by one ChatGPT estimate, is about 40g — equivalent to driving 40 meters in a car. An AI-powered Google search can be estimated at around 0.03g.</p>
   </div>
 </section>
 
-<section class="screen" id="deploy" data-step="0">
-  <header><h2>Example: the 33×, at deployment scale</h2></header>
-  <div class="body cols">
-    <div class="col">
-      <ul class="points">
-        <li>A chatbot answering <b>100,000 questions/day</b> with a general-purpose LLM API</li>
-        <li>Anchor: 10 g CO₂eq per 1,000 inferences (Reveal 3)</li>
-        <li>100k/day × 10 g/1,000 ≈ 365 kg/year: about a month of driving a car</li>
-        <li>Swap to task-specific (Reveal 3's 33×) → ≈ 11 kg/year</li>
-      </ul>
-    </div>
-    <div class="col">
-      <div class="vbars">
-        <div class="vb"><span class="v">365 kg/yr</span><span class="col" style="height:100%"></span><span class="l">general-purpose</span></div>
-        <div class="vb"><span class="v">11 kg/yr</span><span class="col g" style="height:3%"></span><span class="l">task-specific</span></div>
-      </div>
-    </div>
-  </div>
-  <div class="notes">
-    <p>Suppose a chatbot is answering 100,000 questions a day using a general-purpose LLM API: that comes out to about 365 kg CO2eq a year — roughly a month's worth of an average car's emissions. Now swap in a task-specific model instead, applying the same 33x improvement from the last screen: the same yearly workload drops to roughly 11 kg. The task didn't change. The tool did.</p>
-  </div>
-</section>
 
 <div class="part" id="part-inference"><h1>Why inference dominates</h1></div>
 
@@ -1134,7 +1054,6 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
         <li>What it learns about aunt does not help with uncle.</li>
         <li><b>Step 2, embeddings:</b> give each word a vector, so that words used in similar ways get similar vectors.</li>
       </ul>
-      <p class="muted">Next: step 2, embeddings.</p>
     </div>
   </div>
   <div class="notes">
@@ -1313,34 +1232,6 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   </div>
 </section>
 
-<section class="screen" id="redrawn" data-step="2">
-  <header><span class="kind">Step 2 · Embeddings</span><h2>The same table, redrawn during training</h2></header>
-  <div class="body">
-    <div class="scatters">
-      <div class="fig"><svg class="scatter" role="img" aria-label="At the start: random points" data-range="-0.5,0.5,-0.5,0.55"
-        data-points='[["cats",-0.41,-0.26,"blue","s"],["dogs",0.30,0.08,"blue","e"],["chase",-0.41,-0.07,"gray","n"],["eat",-0.02,-0.34,"gray","e"],["mice",0.23,-0.39,"orange","e"],["balls",-0.11,0.02,"orange","w"],["fish",-0.07,0.09,"green","n"],["meat",0.24,0.46,"green","e"]]'></svg>
-        <span>start</span><span class="cap">axes: −0.5 to 0.5</span></div>
-      <div class="fig"><svg class="scatter" role="img" aria-label="After 100 passes: colors grouped" data-range="-2,2.5,-2,2.5" data-ray="1.55,0.90"
-        data-points='[["cats",1.02,0.62,"blue","s"],["dogs",1.55,0.90,"blue","n"],["chase",-1.51,0.54,"gray","n"],["eat",-0.50,-1.50,"gray","e"],["mice, balls",2.13,-0.73,"orange","s"],["fish, meat",0.60,2.21,"green","e"]]'></svg>
-        <span>100 passes</span><span class="cap">axes: −2 to 2.5</span></div>
-      <div class="fig"><svg class="scatter" role="img" aria-label="After 3000 passes: groups further apart" data-range="-2,5,-3.5,5.5" data-ray="0.86,0.48"
-        data-points='[["",0.63,0.37,"blue","e"],["cats, dogs",0.86,0.48,"blue","e"],["chase",-1.25,0.47,"gray","n"],["eat",-0.34,-1.29,"gray","w"],["mice, balls",3.91,-3.05,"orange","n"],["fish, meat",-0.25,4.96,"green","e"]]'></svg>
-        <span>3000 passes</span><span class="cap">axes: −2 to 5</span></div>
-    </div>
-    <ul class="points">
-      <li>One pass = all 16 training pairs once</li>
-      <li>Same color → same direction from the origin. Nobody told the model which words belong together.</li>
-    </ul>
-  </div>
-  <div class="notes">
-    <p>This screen shows the same table at three moments in training. Each plot draws every row of the table as a point, like on the page.</p>
-    <p>One pass means the model has seen all 16 training pairs once.</p>
-    <p>On the left is the start. The points are random, and the colors are mixed together.</p>
-    <p>In the middle is the table after 100 passes. Mice and balls now sit almost on the same spot. So do fish and meat. Cats and dogs sit on the same line from the origin: they point in the same direction, and dogs is a little further out. The dashed line shows that direction. Each color has come together.</p>
-    <p>On the right is the table after 3000 passes. The groups are the same, and they have moved further apart. Cats and dogs still point in the same direction. Notice that the axes change from plot to plot. The numbers grow during training, so each plot is zoomed out more than the one before.</p>
-    <p>Remember that the model never saw the colors. It was never told that cats and dogs are similar. It only tried to predict neighbors. The next screen explains why that was enough.</p>
-  </div>
-</section>
 
 <section class="screen" id="similar" data-step="2">
   <header><span class="kind">Step 2 · Embeddings</span><h2>Similar company, similar vectors</h2></header>
@@ -1451,8 +1342,7 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <div class="flow"><div class="box">Rules<br>1950s</div><span class="arr">→</span><div class="box">Statistics<br>1990s</div><span class="arr">→</span><div class="box">Neural +<br>attention, 2015</div><span class="arr">→</span><div class="box g">LLMs<br>2020s</div></div>
     <ul class="points">
       <li>One of AI's oldest goals: first public demo in 1954 (Georgetown–IBM)</li>
-      <li>1966: the ALPAC report cuts U.S. funding for over a decade</li>
-      <li>2006: Google Translate, built on statistical MT</li>
+      <li>Each shift trades hand-written knowledge for more data and more compute</li>
       <li>Galician is living through this same arc right now</li>
     </ul>
     <p class="src">Source: Hutchins, “Machine Translation: A Concise History,” 2007</p>
@@ -1873,12 +1763,11 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <ul class="points">
       <li>In mainstream LLMs, Galician's presence is “almost residual”: close enough to Spanish and Portuguese that models blur the three together</li>
       <li>Fix: a <b>smaller</b>, dedicated model (1.3B parameters), trained on real Galician text, that beat the giant general model at producing correct Galician</li>
-      <li>Even bias research mostly skips languages like this: 2 papers out of dozens reviewed</li>
     </ul>
     <p class="src">Source: Gamallo et al., “A Galician-Portuguese Generative Model,” EPIA 2024; Proxecto Nós (USC)</p>
   </div>
   <div class="notes">
-    <p>The honest follow-up to the question we asked a while back. "100+ languages" sounds comprehensive, but for most mainstream LLMs, Galician's actual share of the training data is, in the words of a paper studying this directly, "almost residual" — a vanishingly small fraction, sitting close enough to Spanish and Portuguese that general models tend to blur the three together rather than reliably producing genuine, correct Galician. The fix researchers found wasn't a bigger general model, it was a much smaller, dedicated one: 1.3 billion parameters, trained specifically on real Galician and Portuguese text — Proxecto Nós at USC is one source of this kind of work. That small, dedicated model beat the giant general-purpose base model specifically at producing correct Galician. Same task-specificity pattern as Reveal 3, except here the general-purpose model doesn't just cost more — it also actually serves this language's speakers worse. One more thing worth mentioning: a recent survey of MT bias research found languages like Galician and Catalan appearing in only 2 papers out of dozens reviewed — even the research dedicated to fairness in MT mostly looks past languages like this one.</p>
+    <p>The honest follow-up to the question we asked a while back. "100+ languages" sounds comprehensive, but for most mainstream LLMs, Galician's actual share of the training data is, in the words of a paper studying this directly, "almost residual" — a vanishingly small fraction, sitting close enough to Spanish and Portuguese that general models tend to blur the three together rather than reliably producing genuine, correct Galician. The fix researchers found wasn't a bigger general model, it was a much smaller, dedicated one: 1.3 billion parameters, trained specifically on real Galician and Portuguese text — Proxecto Nós at USC is one source of this kind of work. That small, dedicated model beat the giant general-purpose base model specifically at producing correct Galician. Same task-specificity pattern as Reveal 3, except here the general-purpose model doesn't just cost more — it also actually serves this language's speakers worse.</p>
   </div>
 </section>
 
@@ -1888,7 +1777,7 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <p class="bignum center">140× faster &nbsp; 98.7% less energy</p>
     <p class="center muted">for a small quality trade-off</p>
     <ul class="points">
-      <li>An MT-specific result: Guta, Petrick &amp; Polák, Findings of EMNLP 2025</li>
+      <li>An MT-specific efficiency recipe: Guta, Petrick &amp; Polák, Findings of EMNLP 2025</li>
       <li>The 2019 “5 cars” number itself came from a machine-translation architecture search</li>
       <li>Quantization for MT, specifically: Shterionov &amp; Vanmassenhove, 2022, Session 2's topic</li>
     </ul>
@@ -1915,38 +1804,16 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
 
 <div class="part" id="part-turn"><h1>Your turn</h1></div>
 
-<section class="screen" id="nb1" data-step="0">
-  <header><h2>Notebook 1: Baseline measurement</h2></header>
-  <div class="body">
-    <ul class="points">
-      <li>Task: answer questions about a small set of documents (about Green NLP itself)</li>
-      <li>Instrumented with <b>CodeCarbon</b>: energy, CO₂eq, quality, as one row on your leaderboard</li>
-    </ul>
-    <div class="flow"><div class="box">Documents<br>+ question</div><span class="arr">→</span><div class="box">Model</div><span class="arr">→</span><div class="box">Answer</div><span class="arr">→</span><div class="box g">CodeCarbon:<br>energy / CO₂eq</div></div>
-  </div>
-  <div class="notes">
-    <p>Back to the course's own running task: question-answering over a small set of documents about Green NLP itself. Every run is instrumented with CodeCarbon — the same kind of transparent, logged measurement tool we said, back in the discussion activity, you'd need in order to actually trust a carbon number. It reports energy and CO2-equivalent, alongside an answer-quality score, and logs one row to your own leaderboard.csv. That's Part 1.</p>
-  </div>
-</section>
 
-<section class="screen" id="nb1b" data-step="0">
-  <header><h2>Notebook 1, continued: four ways to translate, three ways to grade</h2></header>
-  <div class="body">
-    <ul class="points">
-      <li>Part 2: the same sentence from this morning, through <b>rule-based</b>, <b>statistical</b>, <b>neural</b> and <b>LLM</b> translation: the whole history, hands-on</li>
-      <li>Part 3: <b>BLEU</b>, <b>BERTScore</b> and an <b>LLM-as-judge</b> score the results, and we measure what grading itself costs</li>
-    </ul>
-    <div class="flow"><div class="box">Rule-based</div><span class="arr">→</span><div class="box">Statistical</div><span class="arr">→</span><div class="box">Neural</div><span class="arr">→</span><div class="box g">LLM</div></div>
-  </div>
-  <div class="notes">
-    <p>Part 2 takes today's sentence and translates it four ways, mirroring the exact history arc from earlier: a real rule-based MT system this time, not a classroom toy — Apertium's actively maintained Galician–English pair, called through its public API — which still can't restructure the sentence, something like "A mine aunt..." for the opening, the alignment problem completely unsolved, but now by a real system; a tiny hand-built statistical system that adds a bigram language model, the exact technique from the n-grams screen, to reorder a short fragment's words for fluency; the dedicated neural MT model, Helsinki-NLP/opus-mt-gl-en; and the general-purpose LLM already loaded in Part 1. Worth saying explicitly in class: the fact that even a real, currently-used rule-based engine can't do what the neural and LLM approaches do is a stronger point than the same claim about a toy dictionary would have been.</p>
-    <p>Part 3 then grades the neural and LLM outputs three different ways — BLEU, fast, pure n-gram overlap counting against a reference translation, near-zero cost; BERTScore, a learned neural metric using contextual embeddings, real but modest GPU cost; and an LLM asked to judge the translations itself — and, in keeping with the whole session's theme, we measure what each grading method itself costs, not just what score it reports. BERTScore is standing in for COMET here, by the way — COMET's own pinned dependencies reliably crash on current Colab images, which is itself a small, live example of the same fragility point we've been making all session.</p>
-  </div>
-</section>
 
 <section class="screen" id="act-nb1" data-step="0">
-  <header><span class="kind">Activity · 60–75 min baseline, +40–60 min Parts 2–3, individual</span><h2>Notebook 1</h2></header>
+  <header><span class="kind">Activity · 60–75 min baseline, +40–60 min Parts 2–3, individual</span><h2>Notebook 1: Baseline measurement</h2></header>
   <div class="body">
+    <ul class="points">
+      <li>Part 1: answer questions about a small set of documents, measured with <b>CodeCarbon</b>: energy, CO₂eq and quality, as one row of your leaderboard</li>
+      <li>Part 2: today's sentence through <b>rule-based</b>, <b>statistical</b>, <b>neural</b> and <b>LLM</b> translation</li>
+      <li>Part 3: <b>BLEU</b>, <b>BERTScore</b> and an <b>LLM-as-judge</b> grade the translations, and we measure what grading itself costs</li>
+    </ul>
     <div class="activity"><h3>Notebook 01a, in Colab, with a GPU</h3><div>
       <ul class="points">
         <li>In Colab: Runtime → Change runtime type → T4 GPU</li>
@@ -1960,6 +1827,9 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     </div></div>
   </div>
   <div class="notes">
+    <p>Back to the course's own running task: question-answering over a small set of documents about Green NLP itself. Every run is instrumented with CodeCarbon — the same kind of transparent, logged measurement tool we said, back in the discussion activity, you'd need in order to actually trust a carbon number. It reports energy and CO2-equivalent, alongside an answer-quality score, and logs one row to your own leaderboard.csv. That's Part 1.</p>
+    <p>Part 2 takes today's sentence and translates it four ways, mirroring the exact history arc from earlier: a real rule-based MT system this time, not a classroom toy — Apertium's actively maintained Galician–English pair, called through its public API — which still can't restructure the sentence, something like "A mine aunt..." for the opening, the alignment problem completely unsolved, but now by a real system; a tiny hand-built statistical system that adds a bigram language model, the exact technique from the n-grams screen, to reorder a short fragment's words for fluency; the dedicated neural MT model, Helsinki-NLP/opus-mt-gl-en; and the general-purpose LLM already loaded in Part 1. Worth saying explicitly in class: the fact that even a real, currently-used rule-based engine can't do what the neural and LLM approaches do is a stronger point than the same claim about a toy dictionary would have been.</p>
+    <p>Part 3 then grades the neural and LLM outputs three different ways — BLEU, fast, pure n-gram overlap counting against a reference translation, near-zero cost; BERTScore, a learned neural metric using contextual embeddings, real but modest GPU cost; and an LLM asked to judge the translations itself — and, in keeping with the whole session's theme, we measure what each grading method itself costs, not just what score it reports. BERTScore is standing in for COMET here, by the way — COMET's own pinned dependencies reliably crash on current Colab images, which is itself a small, live example of the same fragility point we've been making all session.</p>
     <p>Open 01_baseline_measurement.ipynb in Google Colab; Runtime, Change runtime type, T4 GPU — needed for the neural models in Parts 1 and 2. Part 1 first, it's the baseline every future session builds on, so it takes priority if time is short. If time allows, continue into Parts 2 and 3. Optional stretch goal: swap in a bigger model for Part 1 and compare, or in Part 2 flip translation direction or try a longer or different text.</p>
   </div>
 </section>
@@ -1995,92 +1865,10 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   </div>
 </section>
 
-<div class="part" id="part-backup"><h1>Backup</h1></div>
+<div class="part" id="part-backup"><h1>Refresher</h1></div>
 
-<section class="screen" id="backup" data-step="0">
-  <header><h2>Backup screens</h2><p class="sub">The same steps as on the skip-gram panels, as static pictures</p></header>
-  <div class="body">
-    <ul class="points">
-      <li>Skip-gram: the table at the start, and one training step</li>
-      <li>A refresher on multiplying matrices</li>
-    </ul>
-  </div>
-  <div class="notes">
-    <p>These screens are a backup. They show, as static pictures, steps that we normally do on the skip-gram page. Use them if the page does not load.</p>
-  </div>
-</section>
 
-<section class="screen" id="b-params" data-step="0">
-  <header><h2>The model's parameters: a table of numbers</h2><p class="sub">One row per word. It starts random.</p></header>
-  <div class="body cols">
-    <div class="col">
-      <table class="plain">
-        <tr><th>word</th><th>dim 1</th><th>dim 2</th></tr>
-        <tr><td class="c-blue">cats</td><td class="num">−0.41</td><td class="num">−0.26</td></tr>
-        <tr><td class="c-blue">dogs</td><td class="num">0.30</td><td class="num">0.08</td></tr>
-        <tr><td class="c-gray">chase</td><td class="num">−0.41</td><td class="num">−0.07</td></tr>
-        <tr><td class="c-gray">eat</td><td class="num">−0.02</td><td class="num">−0.34</td></tr>
-        <tr><td class="c-orange">mice</td><td class="num">0.23</td><td class="num">−0.39</td></tr>
-        <tr><td class="c-orange">balls</td><td class="num">−0.11</td><td class="num">0.02</td></tr>
-        <tr><td class="c-green">fish</td><td class="num">−0.07</td><td class="num">0.09</td></tr>
-        <tr><td class="c-green">meat</td><td class="num">0.24</td><td class="num">0.46</td></tr>
-      </table>
-      <ul class="points">
-        <li>Two dimensions so we can draw it. word2vec used 300.</li>
-        <li>Color = same neighbors in the corpus. The model never sees the colors.</li>
-      </ul>
-    </div>
-    <div class="col">
-      <svg class="scatter" role="img" aria-label="The starting table drawn as points" data-range="-0.5,0.5,-0.5,0.55" style="max-width:420px"
-        data-points='[["cats",-0.41,-0.26,"blue","s"],["dogs",0.30,0.08,"blue","e"],["chase",-0.41,-0.07,"gray","n"],["eat",-0.02,-0.34,"gray","e"],["mice",0.23,-0.39,"orange","e"],["balls",-0.11,0.02,"orange","w"],["fish",-0.07,0.09,"green","n"],["meat",0.24,0.46,"green","e"]]'></svg>
-    </div>
-  </div>
-  <div class="notes">
-    <p>Here is where the numbers live. The model keeps a table. The table has one row for each word in the vocabulary. The vocabulary is the list of all distinct words. Our vocabulary has eight words.</p>
-    <p>Each row is a vector. A vector is just a list of values. Each position in the list is called a dimension. Here each vector has two dimensions, dimension 1 and dimension 2, so each word gets two values. We use two dimensions only so that we can draw each word as a point on a flat picture. The original word2vec vectors had 300 dimensions.</p>
-    <p>At the start, every number in the table is random. The plot on the right draws each row as a point. The points are scattered with no pattern. At this moment the numbers mean nothing.</p>
-    <p>These numbers are parameters. A parameter is a number that training is allowed to change.</p>
-    <p>The colors are my addition. Words with the same color have the same neighbors in our corpus. Cats and dogs are blue: both are followed by chase and eat. Mice and balls are orange: both come after chase. Fish and meat are green: both come after eat. Chase and eat are gray. The model never sees these colors. Watch where the colors end up after training.</p>
-    <p>These exact numbers come from a small skip-gram model I trained on this corpus. All numbers on the next screens come from the same run.</p>
-  </div>
-</section>
 
-<section class="screen" id="b-step" data-step="0">
-  <header><h2>One training step: cats → chase</h2></header>
-  <div class="body cols">
-    <div class="col">
-      <p class="label">The model's prediction: P( · | cats)</p>
-      <div class="vbars" style="height:13em;gap:4px;font-size:0.85em">
-        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em">.118</span><span class="col" style="height:71%;background:var(--grid)"></span><span class="l">cats</span></div>
-        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em">.110</span><span class="col" style="height:66%;background:var(--grid)"></span><span class="l">dogs</span></div>
-        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em;color:var(--blue)">.111</span><span class="col" style="height:66%"></span><span class="l c-blue">chase</span></div>
-        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em">.122</span><span class="col" style="height:73%;background:var(--grid)"></span><span class="l">eat</span></div>
-        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em">.167</span><span class="col" style="height:100%;background:var(--grid)"></span><span class="l">mice</span></div>
-        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em">.093</span><span class="col" style="height:56%;background:var(--grid)"></span><span class="l">balls</span></div>
-        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em">.135</span><span class="col" style="height:81%;background:var(--grid)"></span><span class="l">fish</span></div>
-        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em">.144</span><span class="col" style="height:86%;background:var(--grid)"></span><span class="l">meat</span></div>
-      </div>
-      <p class="axisnote c-blue">correct answer, chase: push up</p>
-    </div>
-    <div class="col">
-      <p><b>Training pair:</b> cats → chase</p>
-      <p>Training nudges the parameters so that P(chase | cats) grows.</p>
-      <p>One of the nudged rows is <i>cats</i>:</p>
-      <table class="plain mono"><tr><td>before:</td><td>(−0.414, −0.263)</td></tr><tr><td>after:</td><td>(−0.384, −0.261)</td></tr></table>
-      <p>P(chase | cats): 0.111 → 0.115</p>
-    </div>
-  </div>
-  <ul class="points"><li>Then: cats → eat, dogs → chase, dogs → eat, … all 16 pairs, thousands of times</li></ul>
-  <div class="notes">
-    <p>Now we give the model one training pair: the input is "cats", and the correct answer is "chase".</p>
-    <p>The model takes the current row for "cats" from the table. It uses that row to compute a probability for every word in the vocabulary. The bar chart shows these probabilities. The probabilities add up to 1.</p>
-    <p>The model is untrained, so the probabilities are nearly equal. Each word gets about one eighth, which is 0.125. The correct answer, "chase", gets 0.111. That is too low. The highest bar is "mice", which is wrong.</p>
-    <p>Training now changes the parameters a little bit, in the direction that makes the probability of "chase" higher. The method that computes this direction is called gradient descent. We do not need its details today.</p>
-    <p>One of the things that changes is the row for "cats". Before the step, it was minus 0.414 and minus 0.263. After the step, it is minus 0.384 and minus 0.261. The change is small on purpose. Each step moves the numbers only a little.</p>
-    <p>After this one step, the probability of "chase" given "cats" went from 0.111 to 0.115.</p>
-    <p>Then the model sees the next pair, for example cats to eat, and nudges the "cats" row again. Then dogs to chase, then dogs to eat. It goes through all 16 pairs, many thousands of times.</p>
-  </div>
-</section>
 
 <section class="screen" id="b-matrix" data-step="0">
   <header><h2>Quick refresher: multiplying matrices</h2></header>
