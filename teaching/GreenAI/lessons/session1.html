@@ -1,0 +1,906 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Green NLP Today</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Questrial&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* One page per session. Reading mode: the screens stacked as a document.
+   Present mode: one screen at a time, sized for a projector; speaker notes open in a second window.
+   Colors and faces are the deck's, shared with the interactive pages. */
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --fg: #2b2d31; --muted: #6b7079; --line: #dde1e7; --grid: #e9ecf0;
+  --blue: #4f74ad; --orange: #c96f1f; --green: #3f7f3d; --hi: #fff3c4; --neg: #b0466e; --code: #f2f4f7;
+  --font-body: "Questrial", "Century Gothic", "Avenir Next", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17191d; --panel: #1f2227; --fg: #e7e9ec; --muted: #9aa0a9; --line: #343840; --grid: #2a2e34;
+    --blue: #86a8dc; --orange: #e8a15e; --green: #7fbf7c; --hi: #4a4122; --neg: #e07fa3; --code: #262a30;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17191d; --panel: #1f2227; --fg: #e7e9ec; --muted: #9aa0a9; --line: #343840; --grid: #2a2e34;
+  --blue: #86a8dc; --orange: #e8a15e; --green: #7fbf7c; --hi: #4a4122; --neg: #e07fa3; --code: #262a30;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 17px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 40px;
+}
+a { color: var(--blue); }
+b { font-weight: 400; color: var(--blue); } /* Questrial has one weight */
+h1, h2, h3 { font-weight: 400; margin: 0; text-wrap: balance; }
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.6rem; }
+h3 { font-size: 1.1rem; }
+p { margin: 0; }
+.mono, code { font-family: var(--font-mono); font-size: 0.92em; }
+.muted { color: var(--muted); }
+.label { font-size: 0.74rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); }
+button {
+  font: inherit; font-size: 0.92rem; color: var(--fg); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer;
+}
+button:hover { border-color: var(--blue); }
+button.primary { background: var(--blue); border-color: var(--blue); color: var(--panel); }
+button:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* top bar */
+.top { position: sticky; top: 0; z-index: 5; background: var(--bg); padding-block: 12px 10px; border-bottom: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; max-width: 1180px; margin: 0 auto; }
+.top .title { display: grid; min-width: 0; }
+.top .title b { font-weight: 400; font-size: 1.15rem; }
+.top .actions { margin-left: auto; display: flex; gap: 8px; }
+.road { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.8rem; }
+.road span { padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.road span.on { background: var(--blue); border-color: var(--blue); color: var(--panel); }
+
+/* screens, reading mode */
+main { max-width: 1180px; margin: 0 auto; display: grid; gap: 22px; padding-top: 22px; }
+.screen { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 22px; display: flex; flex-direction: column; gap: 16px; min-width: 0; scroll-margin-top: 90px; }
+.screen > header { display: grid; gap: 4px; }
+.screen > header .kind { font-size: 0.74rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--orange); }
+.screen > header .sub { color: var(--muted); }
+.body { display: flex; flex-direction: column; gap: 14px; min-width: 0; flex: 1 1 auto; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 860px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.col { display: grid; gap: 12px; min-width: 0; align-content: start; }
+ul.points { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; }
+.notes { display: none; }
+.tablewrap { overflow-x: auto; }
+table.road6 { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+table.road6 th, table.road6 td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+table.road6 th { color: var(--muted); font-weight: 400; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; }
+table.road6 tr.now td { background: color-mix(in srgb, var(--blue) 10%, transparent); }
+table.road6 td:first-child { white-space: nowrap; }
+
+/* small figures */
+.bars { display: grid; gap: 5px; }
+.bar { display: grid; grid-template-columns: 5.5em minmax(0, 1fr) 3.5em; gap: 10px; align-items: center; font-family: var(--font-mono); font-size: 0.92rem; font-variant-numeric: tabular-nums; }
+.bar .w { text-align: right; }
+.bar .track { height: 16px; background: var(--grid); border-radius: 3px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--blue); }
+.bar.zero { color: var(--muted); }
+.corpus { font-family: var(--font-mono); display: grid; gap: 4px; font-size: 1.02rem; }
+.corpus mark { background: var(--hi); color: inherit; border-radius: 3px; padding: 0 2px; }
+.formula { font-size: 1.25rem; text-align: center; padding: 6px 0; }
+.frac { display: inline-grid; vertical-align: middle; text-align: center; margin: 0 4px; }
+.frac span:first-child { border-bottom: 1px solid var(--fg); padding: 0 4px; }
+.big { font-family: var(--font-mono); font-size: 1.05rem; display: grid; gap: 4px; }
+.ask { border-left: 3px solid var(--orange); padding: 8px 14px; display: grid; gap: 8px; }
+.ask b { font-weight: 400; color: var(--orange); }
+
+/* embedded interactive pages */
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tabs button[aria-pressed=true] { background: var(--blue); border-color: var(--blue); color: var(--panel); }
+.frame { width: 100%; height: 78vh; min-height: 420px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); display: block; }
+.open { font-size: 0.85rem; }
+
+/* exercises */
+.colab { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 0.92rem; padding: 10px 14px; border: 1px dashed var(--line); border-radius: 8px; }
+.ex { display: grid; gap: 10px; border-top: 1px solid var(--line); padding-top: 16px; min-width: 0; }
+.ex .prompt { display: grid; gap: 8px; max-width: 80ch; }
+details { border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; }
+details > summary { cursor: pointer; color: var(--muted); font-size: 0.92rem; }
+details[open] > summary { margin-bottom: 6px; }
+details ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; font-size: 0.95rem; }
+.cell { display: grid; gap: 6px; min-width: 0; }
+.cell textarea {
+  font-family: var(--font-mono); font-size: 0.88rem; line-height: 1.5; color: var(--fg); background: var(--code);
+  border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; width: 100%; resize: vertical; tab-size: 4; white-space: pre; overflow-x: auto;
+}
+.cellbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.cellbar .status { font-size: 0.88rem; color: var(--muted); }
+.cellbar .status.ok { color: var(--green); }
+.cellbar .status.bad { color: var(--neg); }
+pre.out, pre.sol { font-family: var(--font-mono); font-size: 0.86rem; margin: 0; padding: 10px 12px; border-radius: 6px; overflow-x: auto; white-space: pre; }
+pre.out { background: var(--bg); border: 1px solid var(--line); min-height: 2.6em; }
+pre.out .err { color: var(--neg); }
+pre.out .pass { color: var(--green); }
+pre.sol { background: var(--code); }
+.reflect { border-left: 3px solid var(--green); padding: 8px 14px; max-width: 80ch; }
+
+footer { max-width: 1180px; margin: 30px auto 0; color: var(--muted); font-size: 0.86rem; display: grid; gap: 8px; }
+footer ul { margin: 0; padding-left: 1.2em; }
+footer .license { padding-top: 10px; border-top: 1px solid var(--line); }
+
+/* present mode: one screen fills the window */
+html.present { font-size: clamp(15px, 1.4vw, 28px); }
+body.present { padding: 0; overflow: hidden; font-size: 1.1rem; }
+body.present .top, body.present footer { display: none; }
+body.present main { max-width: none; padding: 0; display: block; }
+body.present .screen { display: none; border: 0; border-radius: 0; height: 100vh; height: 100dvh; overflow-y: auto;
+  padding: 3.2vh max(4vw, env(safe-area-inset-right, 0px)) 7vh max(4vw, env(safe-area-inset-left, 0px)); }
+body.present .screen.current { display: flex; }
+body.present h2 { font-size: 2em; }
+body.present .frame { height: auto; flex: 1 1 auto; min-height: 0; }
+body.present .screen.fill .body { min-height: 0; }
+body.present .screen.fill { overflow: hidden; }
+.pbar { display: none; }
+body.present .pbar { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; gap: 14px; align-items: center;
+  padding: 6px max(4vw, env(safe-area-inset-left, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)); background: var(--bg); border-top: 1px solid var(--line); font-size: 14px; }
+body.present .pbar button, body.present .pbar .road { font-size: 13px; }
+body.present .pbar .road { margin-right: auto; }
+body.present .pbar .count { font-family: var(--font-mono); color: var(--muted); }
+
+/* speaker-notes window */
+body.notesview { padding: 0; font-size: 22px; }
+body.notesview .top, body.notesview main, body.notesview footer, body.notesview .pbar { display: none !important; }
+#nv { display: none; }
+body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-area-inset-right, 0px)) 40px max(22px, env(safe-area-inset-left, 0px)); max-width: 1000px; margin: 0 auto; }
+#nv .bar1 { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 16px; position: sticky; top: 0; background: var(--bg); padding-block: 8px; }
+#nv .clock { font-family: var(--font-mono); font-size: 20px; margin-left: auto; }
+#nv h2 { font-size: 1.4em; }
+#nv .ntext { display: grid; gap: 0.8em; line-height: 1.5; }
+#nv .next { color: var(--muted); font-size: 16px; border-top: 1px solid var(--line); padding-top: 10px; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="title"><b>Green NLP Today</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña</span></div>
+  <div class="road" aria-label="The six steps"><span class="on">1 N-grams</span><span>2 Embeddings</span><span>3 Encoder–decoder</span><span>4 Attention</span><span>5 Self-attention</span><span>6 Transformers</span></div>
+  <div class="actions"><button id="presentBtn" class="primary">Present</button></div>
+</div>
+
+<main>
+
+<!-- ================================================================= -->
+<section class="screen" id="roadmap" data-step="0">
+  <header><span class="kind">The plan</span><h2>From n-grams to transformers</h2><p class="sub">Each step fixes a problem of the step before.</p></header>
+  <div class="body">
+    <div class="tablewrap">
+      <table class="road6">
+        <thead><tr><th>Step</th><th>What it adds</th><th>What is still missing</th></tr></thead>
+        <tbody>
+          <tr class="now"><td>1 N-grams</td><td>predict the next word by counting</td><td>aunt and uncle are unrelated words</td></tr>
+          <tr><td>2 Embeddings</td><td>a learned vector per word: similar words get similar vectors</td><td>vectors for words, not for sentences</td></tr>
+          <tr><td>3 Encoder–decoder</td><td>read a sentence into one vector, write the translation from it</td><td>one vector for a whole sentence: early words fade</td></tr>
+          <tr><td>4 Attention</td><td>the decoder looks back at every source word</td><td>the source is still read one word after another</td></tr>
+          <tr><td>5 Self-attention</td><td>every word looks at every word of its own sentence, all at once</td><td>one round of looking</td></tr>
+          <tr><td>6 Transformers</td><td>many blocks of self-attention, stacked: today's LLMs</td><td>cost grows with size and length</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">Each step has three parts: a short explanation, an interactive page, and code you run here, in the browser.</p>
+  </div>
+  <div class="notes">
+    <p>Here is the plan for the technical part of today. We go in six steps. Each step fixes a problem of the step before.</p>
+    <p>Step 1 is n-grams. An n-gram model predicts the next word by counting which words follow which. Its problem: it has no idea that aunt and uncle are similar. They are just two different words.</p>
+    <p>Step 2 is embeddings. Each word gets a vector, a list of values, learned from the words around it. Similar words get similar vectors. But these are vectors for single words. They say nothing about a sentence.</p>
+    <p>Step 3 is the encoder–decoder model for translation. The encoder reads the whole sentence into one vector. The decoder writes the translation from that vector. Its problem: one vector has to hold the whole sentence, and the early words fade.</p>
+    <p>Step 4 is attention. The decoder may look back at every source word, and it decides how much to use each one. But the source sentence is still read one word after another.</p>
+    <p>Step 5 is self-attention. Every word looks at every other word of its own sentence, all at the same time.</p>
+    <p>Step 6 is the transformer: many blocks of self-attention stacked on top of each other. This is the architecture of today's large language models. Its cost grows with the size of the model and the length of the text. That is where the rest of the course starts.</p>
+    <p>This page is the lesson. Students can open it on their laptops at olzama.github.io/teaching/GreenAI. Each step has a short explanation, then an interactive page, then code that runs in the browser.</p>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<section class="screen" id="lm" data-step="1">
+  <header><span class="kind">Step 1 · N-grams</span><h2>What is a language model?</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <ul class="points">
+        <li>It predicts the next word.</li>
+        <li>It gives a probability to <em>every</em> word in the vocabulary. The probabilities add up to 1.</li>
+        <li>An n-gram model is the simplest kind: it counts word sequences in a corpus, then divides.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <p class="label">After “my”: one probability per word</p>
+      <div class="bars" id="lmBars"></div>
+      <p class="muted" style="font-size:0.9rem">Counted from three sentences, on the next screen. The vocabulary has 7 words.</p>
+    </div>
+  </div>
+  <div class="notes">
+    <p>We start with the statistical era of NLP, and with one idea: the language model.</p>
+    <p>A language model predicts the next word. It does not make one guess. It gives a probability to every word in the vocabulary. The probabilities add up to 1. Most words get a very small probability.</p>
+    <p>The chart shows this for the word “my”. Aunt gets 0.67. Uncle gets 0.33. Every other word gets 0. These numbers come from three sentences. We count them on the next screen.</p>
+    <p>This same task is behind everything from the n-gram models of the 1990s to GPT. An n-gram model is the simplest version. It does not learn anything in the neural sense. It counts how often word sequences occur, and it divides.</p>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<section class="screen" id="worked" data-step="1">
+  <header><span class="kind">Step 1 · N-grams</span><h2>Count, then divide</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <p class="label">The corpus</p>
+      <div class="corpus"><span><mark>my aunt</mark> stayed quiet</span><span><mark>my aunt</mark> spoke wisely</span><span><mark>my uncle</mark> stayed quiet</span></div>
+      <div class="formula">P(w<sub>i</sub> | w<sub>i−1</sub>) = <span class="frac"><span>Count(w<sub>i−1</sub> w<sub>i</sub>)</span><span>Count(w<sub>i−1</sub>)</span></span></div>
+      <div class="big"><span>P(aunt | my) = 2/3 ≈ 0.67</span><span>P(uncle | my) = 1/3 ≈ 0.33</span></div>
+    </div>
+    <div class="col">
+      <ul class="points">
+        <li>This is a <b>bigram</b> model: the next word depends on the one word before it.</li>
+        <li>Counting, then dividing: that is the whole model.</li>
+        <li>A Galician model has far fewer sentences to count from than a Spanish or English one, so its estimates are noisier.</li>
+      </ul>
+      <div class="ask"><b>Question</b><span>Is a bigger n better?</span><button id="nAnswerBtn" style="justify-self:start">Show one answer</button><span id="nAnswer" hidden>More context helps in principle. But a longer word sequence is rarer, so the model has seen fewer of them, and more of its counts are 0.</span></div>
+    </div>
+  </div>
+  <div class="notes">
+    <p>An n-gram is a sequence of n words in a row. A bigram is 2 words. A trigram is 3. This is a bigram model. It predicts the next word from the one word before it.</p>
+    <p>Our corpus has three sentences about an aunt and an uncle. The formula asks: of all the times “my” appeared, how often was the next word “aunt”? “My” appears 3 times. “My aunt” appears 2 times. So the probability of aunt after my is 2 out of 3, about 0.67. “My uncle” appears once, so uncle gets 1 out of 3, about 0.33.</p>
+    <p>Counting, then dividing. That is the whole model. There is no hidden step.</p>
+    <p>Ask the class: is a bigger n better? Let them answer. Then press Show one answer. A longer n gives more context. But the exact longer sequence is rarer in any corpus. So more of the counts are 0. This is called sparsity.</p>
+    <p>Galician has much less text to count from than Spanish or English. So a Galician n-gram model has more zero counts and noisier numbers. Every count in this toy example stands for that bigger problem.</p>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<section class="screen fill" id="explore" data-step="1">
+  <header><span class="kind">Interactive</span><h2>Count, generate, score</h2></header>
+  <div class="body">
+    <div class="tabs" role="group" aria-label="Go to a section">
+      <button data-go="count" aria-pressed="true">Count, then divide</button>
+      <button data-go="gen" aria-pressed="false">Generate text</button>
+      <button data-go="score" aria-pressed="false">Score a sentence</button>
+      <a class="open" href="../artifacts/ngram.html#count" target="_blank" rel="noopener" style="align-self:center;margin-left:auto">Open the full page</a>
+    </div>
+    <iframe class="frame" id="ngFrame" title="N-grams, step by step: count, generate, score" loading="lazy" src="../artifacts/ngram.html?embed=count,gen,score"></iframe>
+  </div>
+  <div class="notes">
+    <p>Count, then divide. Press Replay counting. A window slides over the three sentences and fills the count table, one pair at a time. Click the row for “my”. The page divides: aunt gets 0.67, uncle gets 0.33. These are the numbers from the last screen.</p>
+    <p>Now choose Edit the corpus. Add the sentence “my uncle spoke kindly”. Press Use this corpus. Click “my” again. Aunt and uncle now get half each.</p>
+    <p>Then move the smoothing slider. Smoothing adds a small count k to every pair, so some probability moves to pairs the corpus never saw.</p>
+    <p>Press the tab Generate text. Pick a start word and press Generate, first with Greedy, then with Sample. Greedy always takes the most frequent next word. Sample draws a word using the probabilities.</p>
+    <p>Press the tab Score a sentence. Type “her aunt stayed quiet”. The corpus never saw “her”, so one factor is 0, and the whole sentence gets probability 0. This is the sparsity problem again.</p>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<section class="screen" id="tryA" data-step="1">
+  <header><span class="kind">Try it · about 15 minutes for the three screens</span><h2>Build the bigram model</h2></header>
+  <div class="body">
+    <div class="colab"><span>The Python here runs in your browser. The first Run loads Python, which takes a few seconds.</span><span>The same exercises as a notebook: <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01b_ngrams_playground-beginner.ipynb" target="_blank" rel="noopener">beginner</a> · <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01b_ngrams_playground-advanced.ipynb" target="_blank" rel="noopener">advanced</a> (Colab)</span></div>
+    <p style="max-width:80ch">Some lines have gaps marked <code>___</code>. Replace each gap with code, then press Run. The page checks your answer. Hints and solutions are under each exercise. Run the exercises in order: later ones use your earlier code.</p>
+
+    <div class="ex" data-ex="1">
+      <div class="prompt">
+        <h3>Exercise 1 · Count bigrams, then divide</h3>
+        <p>Complete <code>build_bigram_counts</code> and <code>bigram_prob</code>. <code>counts[w1][w2]</code> is how many times the pair <code>w1 w2</code> occurs. <code>unigram_counts[w1]</code> is how many pairs start with <code>w1</code>. <code>bigram_prob</code> returns P(w2 | w1) = count(w1 w2) / count(w1). The cell should print 0.67 and 0.33.</p>
+      </div>
+      <details><summary>Hints</summary><ul>
+        <li>The inner loop looks at position <code>i</code> and the word right after it, <code>words[i + 1]</code>.</li>
+        <li>The pair count is indexed by the first word, then the second word.</li>
+        <li>The probability divides the pair count by the count of the first word.</li></ul></details>
+<script type="text/plain" class="start">
+from collections import defaultdict
+
+CORPUS = [
+    "my aunt stayed quiet",
+    "my aunt spoke wisely",
+    "my uncle stayed quiet",
+]
+
+
+def build_bigram_counts(corpus):
+    counts = defaultdict(lambda: defaultdict(int))
+    unigram_counts = defaultdict(int)
+    for sentence in corpus:
+        words = sentence.lower().split()
+        for i in range(len(words) - 1):
+            counts[words[i]][___] += 1
+            unigram_counts[___] += 1
+    return counts, unigram_counts
+
+
+def bigram_prob(w1, w2, counts, unigram_counts):
+    if unigram_counts[w1] == 0:
+        return 0.0
+    return ___ / ___
+
+
+counts, unigram_counts = build_bigram_counts(CORPUS)
+
+print(f"P(aunt | my)  = {bigram_prob('my', 'aunt', counts, unigram_counts):.3f}")
+print(f"P(uncle | my) = {bigram_prob('my', 'uncle', counts, unigram_counts):.3f}")
+</script>
+<script type="text/plain" class="check">
+assert abs(bigram_prob("my", "aunt", counts, unigram_counts) - 2 / 3) < 1e-9, "P(aunt | my) should be 2/3"
+assert abs(bigram_prob("my", "uncle", counts, unigram_counts) - 1 / 3) < 1e-9, "P(uncle | my) should be 1/3"
+assert counts["stayed"]["quiet"] == 2, "'stayed quiet' occurs twice in the corpus"
+assert unigram_counts["quiet"] == 0, "the last word of a sentence starts no pair, so it gets no count"
+</script>
+<script type="text/plain" class="solution">
+from collections import defaultdict
+
+CORPUS = [
+    "my aunt stayed quiet",
+    "my aunt spoke wisely",
+    "my uncle stayed quiet",
+]
+
+
+def build_bigram_counts(corpus):
+    counts = defaultdict(lambda: defaultdict(int))
+    unigram_counts = defaultdict(int)
+    for sentence in corpus:
+        words = sentence.lower().split()
+        for i in range(len(words) - 1):
+            counts[words[i]][words[i + 1]] += 1
+            unigram_counts[words[i]] += 1
+    return counts, unigram_counts
+
+
+def bigram_prob(w1, w2, counts, unigram_counts):
+    if unigram_counts[w1] == 0:
+        return 0.0
+    return counts[w1][w2] / unigram_counts[w1]
+
+
+counts, unigram_counts = build_bigram_counts(CORPUS)
+
+print(f"P(aunt | my)  = {bigram_prob('my', 'aunt', counts, unigram_counts):.3f}")
+print(f"P(uncle | my) = {bigram_prob('my', 'uncle', counts, unigram_counts):.3f}")
+</script>
+    </div>
+
+    <div class="ex" data-ex="2">
+      <div class="prompt">
+        <h3>Exercise 2 · Change the data, change the model</h3>
+        <p>Add at least two sentences to <code>EXTENDED_CORPUS</code> so that, in the new model, P(uncle | my) is <b>larger</b> than P(aunt | my).</p>
+      </div>
+      <details><summary>Hints</summary><ul>
+        <li>The original corpus has “my aunt” twice and “my uncle” once.</li>
+        <li>Each new sentence is a Python string, for example <code>"my uncle spoke kindly"</code>.</li></ul></details>
+<script type="text/plain" class="start">
+EXTENDED_CORPUS = CORPUS + [
+    ___,  # a sentence, as a string
+    ___,  # another sentence
+]
+
+ext_counts, ext_unigrams = build_bigram_counts(EXTENDED_CORPUS)
+print(f"P(aunt | my)  = {bigram_prob('my', 'aunt', ext_counts, ext_unigrams):.3f}")
+print(f"P(uncle | my) = {bigram_prob('my', 'uncle', ext_counts, ext_unigrams):.3f}")
+</script>
+<script type="text/plain" class="check">
+assert len(EXTENDED_CORPUS) >= len(CORPUS) + 2, "add at least two sentences"
+assert bigram_prob("my", "uncle", ext_counts, ext_unigrams) > bigram_prob("my", "aunt", ext_counts, ext_unigrams), \
+    "P(uncle | my) should now be larger than P(aunt | my)"
+</script>
+<script type="text/plain" class="solution">
+EXTENDED_CORPUS = CORPUS + [
+    "my uncle spoke kindly",
+    "my uncle stayed calm",
+]
+
+ext_counts, ext_unigrams = build_bigram_counts(EXTENDED_CORPUS)
+print(f"P(aunt | my)  = {bigram_prob('my', 'aunt', ext_counts, ext_unigrams):.3f}")
+print(f"P(uncle | my) = {bigram_prob('my', 'uncle', ext_counts, ext_unigrams):.3f}")
+</script>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Now everyone works alone, for about 15 minutes. There are three screens of exercises: this one and the next two.</p>
+    <p>The code runs in the browser. Nothing to install. The first Run loads Python and takes a few seconds. If a laptop has trouble, the same exercises are in the Colab notebooks linked at the top.</p>
+    <p>How it works: replace every gap, the three underscores, with code. Press Run. The page runs the code and then checks it. A green line means the exercise passed. Hints and the solution are under each exercise. Ask them to try before they open the solution.</p>
+    <p>Exercise 1 rebuilds the model from the slides. It should print 0.67 and 0.33. Exercise 2 changes the corpus, so the numbers change: the data is the model.</p>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<section class="screen" id="tryGen" data-step="1">
+  <header><span class="kind">Try it</span><h2>Generate text with the model</h2></header>
+  <div class="body">
+    <div class="ex" data-ex="3" style="border-top:0;padding-top:0">
+      <div class="prompt">
+        <h3>Exercise 3 · Generate text greedily</h3>
+        <p>Given a start word, the model repeatedly picks the next word with the highest count. Complete the loop in <code>generate</code>: pick that word, and add it to the sentence.</p>
+      </div>
+      <details><summary>Hints</summary><ul>
+        <li><code>candidates</code> maps each possible next word to its count, for example <code>{'aunt': 2, 'uncle': 1}</code>.</li>
+        <li><code>max(candidates, key=...)</code> returns the key with the largest value of <code>key(word)</code>.</li></ul></details>
+<script type="text/plain" class="start">
+def generate(start_word, counts, unigram_counts, max_words=10):
+    word = start_word
+    sentence = [word]
+    for _ in range(max_words):
+        candidates = counts[word]
+        if not candidates:
+            break
+        word = max(candidates, key=lambda w: ___)
+        sentence.append(___)
+    return " ".join(sentence)
+
+
+print(generate("my", counts, unigram_counts))
+</script>
+<script type="text/plain" class="check">
+assert generate("my", counts, unigram_counts) == "my aunt stayed quiet", generate("my", counts, unigram_counts)
+assert generate("her", counts, unigram_counts) == "her", "a word never seen as a first word has no continuation"
+</script>
+<script type="text/plain" class="solution">
+def generate(start_word, counts, unigram_counts, max_words=10):
+    word = start_word
+    sentence = [word]
+    for _ in range(max_words):
+        candidates = counts[word]
+        if not candidates:
+            break
+        word = max(candidates, key=lambda w: candidates[w])
+        sentence.append(word)
+    return " ".join(sentence)
+
+
+print(generate("my", counts, unigram_counts))
+</script>
+    </div>
+    <div class="reflect"><b>Think about it.</b> Change the last line to <code>generate("her", counts, unigram_counts)</code> and run it. Why does the model stop at once? There is far less Galician text online than Spanish or English text. What would you predict about an n-gram model trained on Galician?</div>
+  </div>
+  <div class="notes">
+    <p>Exercise 3 makes the model write. Start from a word. Look at the words that followed it in the corpus. Take the most frequent one. Repeat.</p>
+    <p>From “my” it writes “my aunt stayed quiet”. From “her” it writes nothing more. The corpus never saw “her”, so there is no row to look up.</p>
+    <p>The question at the bottom links this to Galician. Less text means more words and pairs the model has never seen. So it gets stuck more often.</p>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<section class="screen" id="tryB" data-step="1">
+  <header><span class="kind">Try it</span><h2>Use the model to fix word order</h2></header>
+  <div class="body">
+    <p style="max-width:80ch">A word-for-word translator turns Galician “unha tía miña” into “a aunt my”: the right words in the wrong order. A bigram model can score each possible order by how fluent it sounds, and keep the best one.</p>
+    <div class="ex" data-ex="4">
+      <div class="prompt">
+        <h3>Exercise 4 · Score word orders with a smoothed bigram model</h3>
+        <p>Two gaps. In <code>sentence_log_prob</code>, compute the <b>add-one smoothed</b> probability of each pair and add its logarithm to <code>log_prob</code>. In the search loop, keep the best-scoring order seen so far.</p>
+      </div>
+      <details><summary>Hints</summary><ul>
+        <li>Add-one smoothing adds 1 to every pair count, and adds the vocabulary size to the denominator.</li>
+        <li>Logs turn the product of probabilities into a sum: <code>log_prob += math.log(prob)</code>.</li>
+        <li>Update the best order only when the new score is higher than <code>best_score</code>.</li></ul></details>
+<script type="text/plain" class="start">
+import itertools
+import math
+
+FLUENCY_CORPUS = CORPUS + [
+    "my aunt was very kind",
+    "my aunt lived nearby",
+    "an old friend of mine visited",
+    "a friend of mine called",
+]
+
+fluency_counts, fluency_unigrams = build_bigram_counts(FLUENCY_CORPUS)
+vocab_size = len(fluency_unigrams) + 10
+
+
+def sentence_log_prob(words, counts, unigram_counts, vocab_size):
+    tokens = ["<s>"] + words + ["</s>"]
+    log_prob = 0.0
+    for i in range(len(tokens) - 1):
+        w1, w2 = tokens[i], tokens[i + 1]
+        prob = (counts[w1][w2] + ___) / (unigram_counts[w1] + ___)
+        log_prob += ___
+    return log_prob
+
+
+words_to_order = ["a", "aunt", "my"]
+
+best_order, best_score = None, float("-inf")
+for perm in itertools.permutations(words_to_order):
+    score = sentence_log_prob(list(perm), fluency_counts, fluency_unigrams, vocab_size)
+    print(f"{perm}  ->  {score:.3f}")
+    if ___:
+        best_score, best_order = ___, ___
+
+print("\nBest order found:", " ".join(best_order))
+</script>
+<script type="text/plain" class="check">
+_v = vocab_size
+assert abs(sentence_log_prob(["zzz"], fluency_counts, fluency_unigrams, _v) - 2 * math.log(1 / _v)) < 1e-9, \
+    "an unseen word gives two unseen pairs, each with probability 1 / vocab_size"
+assert sentence_log_prob(["my", "aunt"], fluency_counts, fluency_unigrams, _v) > \
+    sentence_log_prob(["aunt", "my"], fluency_counts, fluency_unigrams, _v)
+_best = max(itertools.permutations(words_to_order),
+            key=lambda p: sentence_log_prob(list(p), fluency_counts, fluency_unigrams, _v))
+assert tuple(best_order) == _best, f"best order should be {_best}"
+</script>
+<script type="text/plain" class="solution">
+import itertools
+import math
+
+FLUENCY_CORPUS = CORPUS + [
+    "my aunt was very kind",
+    "my aunt lived nearby",
+    "an old friend of mine visited",
+    "a friend of mine called",
+]
+
+fluency_counts, fluency_unigrams = build_bigram_counts(FLUENCY_CORPUS)
+vocab_size = len(fluency_unigrams) + 10
+
+
+def sentence_log_prob(words, counts, unigram_counts, vocab_size):
+    tokens = ["<s>"] + words + ["</s>"]
+    log_prob = 0.0
+    for i in range(len(tokens) - 1):
+        w1, w2 = tokens[i], tokens[i + 1]
+        prob = (counts[w1][w2] + 1) / (unigram_counts[w1] + vocab_size)
+        log_prob += math.log(prob)
+    return log_prob
+
+
+words_to_order = ["a", "aunt", "my"]
+
+best_order, best_score = None, float("-inf")
+for perm in itertools.permutations(words_to_order):
+    score = sentence_log_prob(list(perm), fluency_counts, fluency_unigrams, vocab_size)
+    print(f"{perm}  ->  {score:.3f}")
+    if score > best_score:
+        best_score, best_order = score, perm
+
+print("\nBest order found:", " ".join(best_order))
+</script>
+    </div>
+    <div class="reflect"><b>Think about it.</b> The best order is “a my aunt”: better than “a aunt my”, still wrong. The model only knows which words tend to sit next to each other. It does not know that “a” belongs with a noun.</div>
+
+    <div class="ex" data-ex="5">
+      <div class="prompt">
+        <h3>Exercise 5 · Count the orderings</h3>
+        <p>Count every ordering of <code>BIGGER_WORDS</code> in the loop, and compute <code>expected</code>, the number of orderings, from a formula. The two numbers must match.</p>
+      </div>
+      <details><summary>Hints</summary><ul>
+        <li>n different words have n! orderings: n × (n − 1) × … × 1.</li>
+        <li><code>math</code> was imported in Exercise 4.</li></ul></details>
+<script type="text/plain" class="start">
+import time
+
+BIGGER_WORDS = ["a", "an", "aunt", "old", "friend", "of", "mine", "visited"]
+
+start_time = time.time()
+count = 0
+for perm in itertools.permutations(___):
+    count += ___
+expected = math.factorial(___)
+elapsed = time.time() - start_time
+
+print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed:.2f}s")
+</script>
+<script type="text/plain" class="check">
+assert count == expected == 40320, (count, expected)
+</script>
+<script type="text/plain" class="solution">
+import time
+
+BIGGER_WORDS = ["a", "an", "aunt", "old", "friend", "of", "mine", "visited"]
+
+start_time = time.time()
+count = 0
+for perm in itertools.permutations(BIGGER_WORDS):
+    count += 1
+expected = math.factorial(len(BIGGER_WORDS))
+elapsed = time.time() - start_time
+
+print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed:.2f}s")
+</script>
+    </div>
+    <div class="reflect"><b>Think about it.</b> 3 words have 6 orderings and 8 words have 40,320. How many does a 20-word sentence have? Could a system try them all? The Colab version of this exercise also measures the energy the loop uses.</div>
+  </div>
+  <div class="notes">
+    <p>Part B uses the model for translation. A word-for-word translator gives “a aunt my”. The right words, in the wrong order.</p>
+    <p>Exercise 4 tries every order of the three words. The bigram model scores each one. The best score wins. The best order is “a my aunt”. Better, still wrong. The model only knows which words sit next to each other. It knows no grammar.</p>
+    <p>Exercise 5 counts the orders. 3 words have 6. 8 words have 40,320. A 20-word sentence has about 2.4 billion billion. Nobody can try them all. A translation system has to decide where each word goes in a smarter way. That is what attention will do, in step 4.</p>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<section class="screen fill" id="shakespeare" data-step="1">
+  <header><span class="kind">Interactive · if there is time</span><h2>Shakespeare, one word at a time</h2></header>
+  <div class="body">
+    <div class="tabs" role="group" aria-label="Go to a section">
+      <button data-go="shk" aria-pressed="true">Write like Shakespeare</button>
+      <button data-go="game" aria-pressed="false">Shakespeare or n-gram?</button>
+      <a class="open" href="../artifacts/ngram.html#shk" target="_blank" rel="noopener" style="align-self:center;margin-left:auto">Open the full page</a>
+    </div>
+    <iframe class="frame" title="N-grams, step by step: Shakespeare" loading="lazy" src="../artifacts/ngram.html?embed=shk,game"></iframe>
+  </div>
+  <div class="notes">
+    <p>The same counting, on the complete works of Shakespeare: about a million words.</p>
+    <p>Press Write new lines. There are four models. The unigram model looks at no context. The bigram model looks at one word, the trigram model at two, the 4-gram model at three. The longer the context, the more it sounds like Shakespeare.</p>
+    <p>Click a word to see the choices the model had at that step. The 4-gram model often has only one choice. A long context was usually seen once, so the model copies Shakespeare word for word. This is sparsity again, from the other side.</p>
+    <p>Then press the tab Shakespeare or n-gram. One line is real, one comes from the model. Let the class vote.</p>
+  </div>
+</section>
+
+<!-- ================================================================= -->
+<section class="screen" id="missing" data-step="1">
+  <header><span class="kind">Step 1 → Step 2</span><h2>What n-grams cannot see</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <div class="corpus"><span>my <mark>aunt</mark> stayed quiet</span><span>my <mark>aunt</mark> spoke wisely</span><span>my <mark>uncle</mark> stayed quiet</span></div>
+      <div class="big"><span>P(spoke | aunt) = 1/2</span><span>P(spoke | uncle) = 0</span></div>
+    </div>
+    <div class="col">
+      <ul class="points">
+        <li>Aunt and uncle appear in the same places. To the model they are two unrelated rows of counts.</li>
+        <li>What it learns about aunt does not help with uncle.</li>
+        <li><b>Step 2, embeddings:</b> give each word a vector, so that words used in similar ways get similar vectors.</li>
+      </ul>
+      <p class="muted">Step 2 continues on the slides, from “From counts to vectors” (slide 28).</p>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Here is what step 1 cannot do. In our corpus, aunt and uncle are used in the same way. Both follow “my”. Both are followed by “stayed”.</p>
+    <p>The corpus has “aunt spoke”, but never “uncle spoke”. So the model gives “spoke” after uncle a probability of 0. It does not know that aunt and uncle are similar words. For the model, they are just two different rows in a table of counts.</p>
+    <p>Step 2 fixes this. Each word gets a vector, learned from the words around it. Words used in similar ways get similar vectors. Then what the model learns about aunt can help with uncle. We continue on the slides, at slide 28.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>The interactive panels come from the course page <a href="../artifacts/ngram.html">N-grams, step by step</a>. The Python exercises run in the browser with Pyodide; the Colab notebooks hold the same exercises.</p>
+  <p class="label" style="margin-top:6px">References</p>
+  <ul>
+    <li>Jurafsky, D., &amp; Martin, J. H. (2026). <i>Speech and Language Processing</i> (3rd ed. draft), Ch. 3, N-gram Language Models. <a href="https://web.stanford.edu/~jurafsky/slp3/">web.stanford.edu/~jurafsky/slp3</a></li>
+  </ul>
+  <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
+  <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
+</footer>
+
+<div class="pbar" aria-label="Presentation controls">
+  <div class="road" id="pRoad"></div>
+  <span class="count" id="pCount"></span>
+  <button id="pPrev" aria-label="Previous screen">←</button>
+  <button id="pNext" aria-label="Next screen">→</button>
+  <button id="pNotes">Notes</button>
+  <button id="pExit">Exit</button>
+</div>
+
+<div id="nv" aria-live="polite">
+  <div class="bar1">
+    <button id="nPrev">← Previous</button><button id="nNext" class="primary">Next →</button>
+    <span class="muted" id="nCount"></span><span class="clock" id="nClock">0:00</span><button id="nReset">Reset timer</button>
+  </div>
+  <span class="label" id="nKind"></span>
+  <h2 id="nTitle"></h2>
+  <div class="ntext" id="nText"></div>
+  <div class="next" id="nNextTitle"></div>
+</div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const screens = [...document.querySelectorAll(".screen")];
+const STEPS = ["N-grams", "Embeddings", "Encoder–decoder", "Attention", "Self-attention", "Transformers"];
+const isNotes = new URLSearchParams(location.search).has("notes");
+let chan = null;
+try { chan = new BroadcastChannel("greenai-lesson-session1"); } catch (e) {}
+let cur = 0;
+
+/* ---- small figures ---- */
+const VOCAB = [["aunt", 2 / 3], ["uncle", 1 / 3], ["my", 0], ["stayed", 0], ["spoke", 0], ["quiet", 0], ["wisely", 0]];
+$("lmBars").innerHTML = VOCAB.map(([w, p]) =>
+  `<div class="bar${p ? "" : " zero"}"><span class="w">${w}</span><span class="track"><span class="fill" style="display:block;width:${(p * 100).toFixed(1)}%"></span></span><span>${p.toFixed(2)}</span></div>`).join("");
+$("nAnswerBtn").onclick = () => { $("nAnswer").hidden = false; $("nAnswerBtn").hidden = true; };
+
+/* ---- embedded pages: tabs scroll the frame to a section ---- */
+document.querySelectorAll(".tabs").forEach(tabs => {
+  const frame = tabs.parentElement.querySelector("iframe");
+  tabs.querySelectorAll("button[data-go]").forEach(b => b.onclick = () => {
+    tabs.querySelectorAll("button[data-go]").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+    try { const w = frame.contentWindow, el = frame.contentDocument.getElementById(b.dataset.go); w.scrollTo(0, el.getBoundingClientRect().top + w.scrollY); } catch (e) {}
+  });
+});
+
+/* ---- Python exercises ---- */
+const dedent = t => {
+  const lines = t.replace(/^\n+|\s+$/g, "").split("\n");
+  const ind = Math.min(...lines.filter(l => l.trim()).map(l => l.match(/^ */)[0].length));
+  return lines.map(l => l.slice(ind)).join("\n");
+};
+let pyPromise = null, queue = Promise.resolve();
+function loadPython() {
+  if (!pyPromise) pyPromise = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js";
+    s.onload = () => loadPyodide().then(resolve, reject);
+    s.onerror = () => { pyPromise = null; reject(new Error("Python could not be loaded. Check the internet connection, or use the Colab notebook.")); };
+    document.head.append(s);
+  });
+  return pyPromise;
+}
+const shortError = msg => {
+  const lines = String(msg).trim().split("\n");
+  const i = lines.map(l => l.includes('File "<exec>"')).lastIndexOf(true);
+  return (i >= 0 ? lines.slice(i) : lines.slice(-3)).join("\n");
+};
+document.querySelectorAll(".ex").forEach(ex => {
+  const start = dedent(ex.querySelector(".start").textContent);
+  const check = dedent(ex.querySelector(".check").textContent);
+  const solution = dedent(ex.querySelector(".solution").textContent);
+  const n = ex.dataset.ex;
+  const cell = document.createElement("div");
+  cell.className = "cell";
+  cell.innerHTML = `<textarea spellcheck="false" aria-label="Code for exercise ${n}"></textarea>
+    <div class="cellbar"><button class="primary run">Run</button><button class="reset">Start over</button><span class="status" aria-live="polite"></span></div>
+    <pre class="out" aria-label="Output"></pre>
+    <details><summary>Solution to Exercise ${n} (open it after you have tried)</summary><pre class="sol"></pre><button class="use" style="margin-top:8px">Put the solution in the editor</button></details>`;
+  ex.append(cell);
+  const ta = cell.querySelector("textarea"), out = cell.querySelector(".out"), status = cell.querySelector(".status");
+  cell.querySelector(".sol").textContent = solution;
+  const fit = () => { ta.rows = Math.min(30, ta.value.split("\n").length + 1); };
+  ta.value = start; fit();
+  ta.addEventListener("input", fit);
+  ta.addEventListener("keydown", e => {
+    if (e.key === "Tab" && !e.shiftKey) { e.preventDefault(); ta.setRangeText("    ", ta.selectionStart, ta.selectionEnd, "end"); }
+    if (e.key === "Enter" && (e.shiftKey || e.metaKey || e.ctrlKey)) { e.preventDefault(); run(); }
+  });
+  cell.querySelector(".reset").onclick = () => { ta.value = start; fit(); out.textContent = ""; setStatus("", ""); };
+  cell.querySelector(".use").onclick = () => { ta.value = solution; fit(); ta.focus(); };
+  const setStatus = (text, cls) => { status.textContent = text; status.className = "status " + cls; };
+  const line = (text, cls) => { const s = document.createElement("span"); if (cls) s.className = cls; s.textContent = text + "\n"; out.append(s); };
+  async function runOnce() {
+    out.textContent = "";
+    setStatus(pyPromise ? "Running…" : "Loading Python (once, a few seconds)…", "");
+    let py;
+    try { py = await loadPython(); } catch (e) { setStatus("", ""); line(e.message, "err"); return; }
+    setStatus("Running…", "");
+    py.setStdout({ batched: t => line(t) });
+    py.setStderr({ batched: t => line(t, "err") });
+    try {
+      await py.runPythonAsync(ta.value);
+    } catch (e) {
+      const msg = shortError(e.message);
+      line(msg, "err");
+      if (/name '___' is not defined/.test(msg)) line("Replace every ___ with code, then run again.", "err");
+      else if (/NameError/.test(msg)) line("This cell may use code from an earlier exercise. Run that one first.", "err");
+      setStatus("Error", "bad");
+      return;
+    }
+    try {
+      await py.runPythonAsync(check);
+      line(`✓ Exercise ${n} passed`, "pass");
+      setStatus("Passed", "ok");
+    } catch (e) {
+      const msg = shortError(e.message).split("\n").pop().replace(/^AssertionError:?\s*/, "");
+      line("✗ Not yet" + (msg ? ": " + msg : ""), "err");
+      setStatus("Not yet", "bad");
+    }
+  }
+  const run = () => { queue = queue.then(runOnce, runOnce); };
+  cell.querySelector(".run").onclick = run;
+});
+
+/* ---- present mode and notes window ---- */
+const meta = i => {
+  const s = screens[i];
+  return { kind: s.querySelector(".kind")?.textContent || "", title: s.querySelector("h2").textContent, notes: s.querySelector(".notes")?.innerHTML || "", step: +s.dataset.step };
+};
+$("pRoad").innerHTML = STEPS.map((t, k) => `<span>${k + 1} ${t}</span>`).join("");
+function show(i, quiet) {
+  cur = Math.max(0, Math.min(screens.length - 1, i));
+  screens.forEach((s, k) => s.classList.toggle("current", k === cur));
+  const m = meta(cur);
+  $("pRoad").querySelectorAll("span").forEach((s, k) => s.classList.toggle("on", k + 1 === m.step));
+  $("pCount").textContent = `${cur + 1} / ${screens.length}`;
+  screens[cur].scrollTop = 0;
+  try { history.replaceState(null, "", "#" + screens[cur].id); } catch (e) {}
+  if (presenting()) zoomFrames();
+  if (chan && !quiet) chan.postMessage({ at: cur });
+}
+const presenting = () => document.body.classList.contains("present");
+function enter() {
+  const k = screens.findIndex(s => "#" + s.id === location.hash);
+  document.body.classList.add("present");
+  document.documentElement.classList.add("present");
+  show(k >= 0 ? k : 0);
+  zoomFrames();
+  try { document.documentElement.requestFullscreen?.().catch(() => {}); } catch (e) {}
+}
+function exit() {
+  document.body.classList.remove("present");
+  document.documentElement.classList.remove("present");
+  screens.forEach(s => s.classList.remove("current"));
+  try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
+  zoomFrames();
+  screens[cur].scrollIntoView({ block: "start" });
+}
+function openNotes() {
+  const w = window.open(location.pathname + "?notes", "lesson-notes", "width=980,height=760");
+  if (!w) alertNotes();
+}
+function alertNotes() { $("pNotes").textContent = "Allow pop-ups for notes"; }
+$("presentBtn").onclick = enter;
+$("pPrev").onclick = () => show(cur - 1);
+$("pNext").onclick = () => show(cur + 1);
+$("pNotes").onclick = openNotes;
+$("pExit").onclick = exit;
+document.addEventListener("keydown", e => {
+  if (isNotes || !presenting()) return;
+  if (e.target.closest && e.target.closest("textarea, input, select")) return;
+  if (["ArrowRight", "PageDown"].includes(e.key) || (e.key === " " && !e.target.closest("button, summary"))) { e.preventDefault(); show(cur + 1); }
+  else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); show(cur - 1); }
+  else if (e.key === "Escape") exit();
+  else if (e.key === "n" || e.key === "N") openNotes();
+});
+// present mode zooms the embedded pages to the lesson's text size
+function zoomFrames() {
+  // larger text, but keep at least 1000 CSS pixels of width so the two-column panels stay side by side
+  const font = parseFloat(getComputedStyle(document.documentElement).fontSize) / 15;
+  document.querySelectorAll("iframe.frame").forEach(f => {
+    const z = presenting() ? Math.max(1, Math.min(1.8, font, f.clientWidth / 1000)) : 1;
+    try { f.contentDocument.documentElement.style.zoom = z === 1 ? "" : z.toFixed(2); } catch (e) {}
+  });
+}
+window.addEventListener("resize", zoomFrames);
+// a click inside an embedded page moves the keyboard focus there: forward the presenter's keys
+document.querySelectorAll("iframe.frame").forEach(f => f.addEventListener("load", () => {
+  zoomFrames();
+  try {
+    f.contentDocument.addEventListener("keydown", e => {
+      if (!presenting()) return;
+      if (e.key === "PageDown") { e.preventDefault(); show(cur + 1); }
+      else if (e.key === "PageUp") { e.preventDefault(); show(cur - 1); }
+      else if (e.key === "Escape") exit();
+    });
+  } catch (err) {}
+}));
+if (chan && !isNotes) chan.onmessage = ({ data }) => {
+  if (data.hello) chan.postMessage({ at: cur, presenting: presenting() });
+  if (typeof data.go === "number") { if (!presenting()) enter(); show(data.go); }
+};
+
+if (isNotes) {
+  document.body.classList.add("notesview");
+  document.title = "Notes · " + document.title;
+  let t0 = Date.now();
+  const render = i => {
+    cur = i;
+    const m = meta(i);
+    $("nKind").textContent = m.kind;
+    $("nTitle").textContent = m.title;
+    $("nText").innerHTML = m.notes;
+    $("nCount").textContent = `${i + 1} / ${screens.length}`;
+    $("nNextTitle").textContent = i + 1 < screens.length ? "Next: " + meta(i + 1).title : "Last screen";
+    window.scrollTo(0, 0);
+  };
+  render(0);
+  const go = i => { i = Math.max(0, Math.min(screens.length - 1, i)); render(i); chan?.postMessage({ go: i }); };
+  $("nPrev").onclick = () => go(cur - 1);
+  $("nNext").onclick = () => go(cur + 1);
+  $("nReset").onclick = () => { t0 = Date.now(); };
+  document.addEventListener("keydown", e => {
+    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); go(cur + 1); }
+    else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); go(cur - 1); }
+  });
+  setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $("nClock").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; }, 1000);
+  if (chan) { chan.onmessage = ({ data }) => { if (typeof data.at === "number") render(data.at); }; chan.postMessage({ hello: true }); }
+}
+})();
+</script>
+</body>
+</html>

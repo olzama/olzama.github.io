@@ -7,6 +7,19 @@
 <body>
 <title>N-grams, Step by Step</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<script>
+// ?embed=count,gen shows only those sections, for use inside a lesson page
+(() => {
+  let ids = [];
+  try { ids = (new URLSearchParams(location.search).get("embed") || "").split(",").filter(x => /^[a-z]+$/.test(x)); } catch (e) {}
+  if (!ids.length) return;
+  document.documentElement.classList.add("embed");
+  const st = document.createElement("style");
+  st.textContent = ".wrap > " + ids.map(i => ":not(#" + i + ")").join("") + " { display: none !important; }"
+    + " html.embed body { padding-block: 8px 16px; } html.embed .wrap { gap: 16px; }";
+  document.head.appendChild(st);
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English&family=Questrial&family=IBM+Plex+Mono:wght@400;500&display=swap">
