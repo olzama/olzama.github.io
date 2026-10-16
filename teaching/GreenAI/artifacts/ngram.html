@@ -1,3 +1,10 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
 <title>N-grams, Step by Step</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -241,6 +248,7 @@ button.gcard:hover { border-color: var(--blue); }
 #askform { display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--line); }
 #askform textarea { flex: 1; min-width: 0; resize: none; height: 3.2em; font: inherit; font-size: 0.95rem; padding: 6px 8px; border-radius: 7px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); }
 #askhint { padding: 0 14px 10px; font-size: 0.78rem; color: var(--muted); }
+.omtip { font-family: var(--font-mono); }
 footer { color: var(--muted); font-size: 0.82rem; max-width: 90ch; }
 footer code { font-family: var(--font-mono); font-size: 0.8rem; }
 footer p { margin: 0 0 8px; }
@@ -472,8 +480,31 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <form id="askform"><textarea id="askinput" placeholder="Why does the 4-gram line copy Shakespeare?" aria-label="Your question"></textarea><button type="submit" class="primary" id="asksend">Ask</button><button type="button" id="askstop" hidden>Stop</button></form>
     <p id="askhint">Answers use your own Claude account.</p>
   </section>
+  <!-- 7 -->
+  <section class="panel" id="ofmine">
+    <h2><span class="n">7</span>A bigger example: how natural is “an aunt of mine”?</h2>
+    <p class="lead">The aunt and uncle corpus has three sentences. Real counts come from much more text. Google Books has counted how often every short word sequence appears in millions of books. Here we compare two n-grams for each noun: “a friend of mine” (4 words) and “my friend” (2 words).</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="View">
+        <button id="omRatio" aria-pressed="true">“a … of mine” per 100 “my …”</button>
+        <button id="omRaw" aria-pressed="false">raw counts</button>
+      </div>
+    </div>
+    <div class="cols">
+      <div class="col">
+        <svg id="omSvg" viewBox="0 0 520 300" role="img" aria-label="How often English books write a ... of mine, compared with my ..."></svg>
+      </div>
+      <div class="col">
+        <p class="note" id="omNote" style="color:var(--fg)"></p>
+        <p class="note">Why? “A friend of mine” picks one friend out of several, and most people have many friends. With close family, “my brother” or “my aunt” usually means one specific person, so “a brother of mine” or “an aunt of mine” sounds marked.</p>
+        <p class="note" style="color:var(--fg)">This matters for translation. In Galician, <i>unha tía miña</i> is an ordinary way to introduce an aunt. Its word-for-word English version, “an aunt of mine”, is correct but rare, so a translator writes something like “I had an aunt who…”. The attention page comes back to this.</p>
+      </div>
+    </div>
+    <p class="note">Source: Google Books Ngram Viewer, English, 1990–2019, case-insensitive, averaged over the years. Counted in books, like our sentence, which is from a novel.</p>
+  </section>
+
   <footer>
-    <p>The Shakespeare text is lower-cased, punctuation is counted as words, and section 2 drops speaker names and stage directions. <code>ngram_shakespeare.py</code> prepares the text and the per-play counts; the n-gram models are counted in your browser. Sections 4–6 use the same three-sentence corpus as the slides and <code>01b_ngrams_playground.ipynb</code>. The vocabulary also has an <code>&lt;UNK&gt;</code> token, which stands for every word the corpus does not contain.</p>
+    <p>The Shakespeare text is lower-cased, punctuation is counted as words, and section 2 drops speaker names and stage directions. <code>ngram_shakespeare.py</code> prepares the text and the per-play counts; the n-gram models are counted in your browser. Sections 4–6 use the same three-sentence corpus as the slides; section 7's counts come from <code>of_mine_counts.py</code> and <code>01b_ngrams_playground.ipynb</code>. The vocabulary also has an <code>&lt;UNK&gt;</code> token, which stands for every word the corpus does not contain.</p>
     <p class="label" style="margin-top:14px">References</p>
     <ul class="refs">
       <li>Jurafsky, D., &amp; Martin, J. H. (2026). <i>Speech and Language Processing</i> (3rd ed. draft), Ch. 3, N-gram Language Models, Fig. 3.4. <a href="https://web.stanford.edu/~jurafsky/slp3/">web.stanford.edu/~jurafsky/slp3</a></li>
@@ -481,6 +512,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <li>Salton, G. (1971). <i>The SMART Retrieval System: Experiments in Automatic Document Processing</i>. Prentice-Hall.</li>
       <li>Shannon, C. E. (1948). A mathematical theory of communication. <i>Bell System Technical Journal</i>, 27(3), 379–423.</li>
       <li>Miller, G. A., &amp; Selfridge, J. A. (1950). Verbal context and the recall of meaningful material. <i>American Journal of Psychology</i>, 63(2), 176–185.</li>
+      <li>Michel, J.-B., et al. (2011). Quantitative analysis of culture using millions of digitized books. <i>Science</i>, 331(6014), 176–182. Google Books Ngram Viewer: <a href="https://books.google.com/ngrams">books.google.com/ngrams</a> (section 7).</li>
       <li>Shakespeare, W. <i>The Complete Works of William Shakespeare</i>. Project Gutenberg eBook #100 (public domain). <a href="https://www.gutenberg.org/ebooks/100">gutenberg.org/ebooks/100</a></li>
     </ul>
     <p>Fonts: Questrial (Joe Prince), IBM Plex Mono (IBM) and IM FELL English (Igino Marini), SIL Open Font License, served by Google Fonts.</p>
@@ -1162,6 +1194,45 @@ newPair();
 </script>
 
 <script>
+const OFMINE = /*OFMINE*/{"years": "1990-2019", "rows": [{"noun": "friend", "of_mine": 9.178426940541681e-07, "my": 7.361918427242995e-06, "per100": 12.46743906666589}, {"noun": "colleague", "of_mine": 6.384142093400028e-08, "my": 1.103533371015509e-06, "per100": 5.785182633421518}, {"noun": "neighbor", "of_mine": 9.057685667936595e-09, "my": 3.4888485876752305e-07, "per100": 2.5961819323240163}, {"noun": "cousin", "of_mine": 2.3926629364595665e-08, "my": 1.2419844248728422e-06, "per100": 1.926483849992349}, {"noun": "uncle", "of_mine": 9.012461273568325e-09, "my": 1.8141925549788885e-06, "per100": 0.49677534222232556}, {"noun": "aunt", "of_mine": 5.335550984942686e-09, "my": 1.4652799230004353e-06, "per100": 0.364131856390767}, {"noun": "brother", "of_mine": 5.047256697657265e-09, "my": 6.6328219649387555e-06, "per100": 0.07609516317997342}]}/*OFMINE*/;
+(() => {
+const $ = id => document.getElementById(id);
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const R = OFMINE.rows, art = n => ["aunt", "uncle"].includes(n) ? "an" : "a";
+let raw = false;
+function render() {
+  const blue = css("--blue"), orange = css("--orange"), green = css("--green"), muted = css("--muted"), fg = css("--fg");
+  const L = 170, W = 300, y0 = 22, dy = 36;
+  let g = "";
+  if (!raw) {
+    const lo = Math.log10(0.05), hi = Math.log10(20), X = v => L + (Math.log10(v) - lo) / (hi - lo) * W;
+    [0.1, 1, 10].forEach(t => { g += `<line x1="${X(t)}" y1="8" x2="${X(t)}" y2="${y0 + dy * R.length - 10}" stroke="${css("--grid")}"/><text x="${X(t)}" y="${y0 + dy * R.length + 4}" text-anchor="middle">${t}</text>`; });
+    R.forEach((r, k) => { const y = y0 + dy * k, c = r.noun === "aunt" ? orange : r.noun === "friend" ? green : blue;
+      g += `<text x="${L - 8}" y="${y + 5}" text-anchor="end" fill="${fg}" font-size="13" style="font-family:var(--font-body)">${art(r.noun)} ${r.noun} of mine</text>`;
+      g += `<rect x="${L}" y="${y - 10}" width="${X(r.per100) - L}" height="20" rx="2" fill="${c}" fill-opacity="0.8"><title>${r.per100.toFixed(2)} per 100 “my ${r.noun}”</title></rect>`;
+      g += `<text x="${X(r.per100) + 6}" y="${y + 5}" fill="${fg}">${r.per100 < 1 ? r.per100.toFixed(2) : r.per100.toFixed(1)}</text>`; });
+    g += `<text x="${L + W / 2}" y="${y0 + dy * R.length + 22}" text-anchor="middle">per 100 uses of “my …” (log scale)</text>`;
+    $("omNote").innerHTML = `For every 100 “my friend”, books write “a friend of mine” about 12 times. For “my aunt” it is 0.36 times, and for “my brother” 0.08: once in 1,300.`;
+  } else {
+    const perM = f => f * 1e6, mx = Math.max(...R.map(r => perM(r.my))), X = v => L + v / mx * W;
+    R.forEach((r, k) => { const y = y0 + dy * k;
+      g += `<text x="${L - 8}" y="${y + 5}" text-anchor="end" fill="${fg}" font-size="13" style="font-family:var(--font-body)">${r.noun}</text>`;
+      g += `<rect x="${L}" y="${y - 11}" width="${X(perM(r.my)) - L}" height="10" rx="2" fill="${muted}" fill-opacity="0.6"><title>my ${r.noun}: ${perM(r.my).toFixed(2)} per million words</title></rect>`;
+      g += `<rect x="${L}" y="${y + 1}" width="${Math.max(1.5, X(perM(r.of_mine)) - L)}" height="10" rx="2" fill="${r.noun === "aunt" ? orange : r.noun === "friend" ? green : blue}"><title>${art(r.noun)} ${r.noun} of mine: ${perM(r.of_mine).toFixed(3)} per million words</title></rect>`;
+      g += `<text x="${X(perM(r.my)) + 6}" y="${y - 2}" fill="${muted}" font-size="11">${perM(r.my).toFixed(2)}</text><text x="${Math.max(X(perM(r.of_mine)), L + 1.5) + 6}" y="${y + 10}" fill="${fg}" font-size="11">${perM(r.of_mine).toFixed(3)}</text>`; });
+    g += `<text x="${L + W / 2}" y="${y0 + dy * R.length + 8}" text-anchor="middle">per million words: grey “my …”, colored “a … of mine”</text>`;
+    $("omNote").innerHTML = `The raw counts behind the bars, per million words of text. “my brother” is about as common as “my friend”, yet “a brother of mine” is almost never written, while “a friend of mine” is.`;
+  }
+  $("omSvg").innerHTML = g;
+  $("omRatio").setAttribute("aria-pressed", !raw); $("omRaw").setAttribute("aria-pressed", raw);
+}
+$("omRatio").addEventListener("click", () => { raw = false; render(); });
+$("omRaw").addEventListener("click", () => { raw = true; render(); });
+render();
+(window.__askState ||= []).push(() => `Section 7 (how natural is "an aunt of mine"?): Google Books counts (English, ${OFMINE.years}); "a/an N of mine" per 100 "my N": ` + R.map(r => `${r.noun} ${r.per100.toFixed(2)}`).join(", ") + `. Showing ${raw ? "raw counts per million words" : "the ratio"}.`);
+})();
+</script>
+<script>
 // ---------------------------------------------------------------- ask Claude
 // A chat about the page. Each question is sent with a description of the page and a snapshot
 // of its current state (every section registers a function in window.__askState).
@@ -1175,6 +1246,7 @@ The page:
 - Section 3, a game: one real Shakespeare sentence and one generated by a bigram, trigram or 4-gram model.
 - Section 4, count then divide: the corpus "my aunt stayed quiet", "my aunt spoke wisely", "my uncle stayed quiet". P(w2 | w1) = Count(w1 w2) / Count(w1), e.g. P(aunt | my) = 2/3. The vocabulary also has <UNK>, standing for every word not in the corpus. Add-k smoothing adds k to every count: P = (Count + k) / (Count(w1) + k·V), V = vocabulary size including <UNK>. The bars show probability kept, given away (striped) and received (green, purple for <UNK>); total probability is always 1.
 - Section 5, generation: greedy takes the most likely next word, sampling draws by probability; both use the smoothing from section 4. Unknown words such as "her" are read as <UNK>.
+- Section 7, a bigger example: Google Books Ngram counts (English books, 1990-2019, case-insensitive) of the 4-gram "a/an N of mine" against the 2-gram "my N" for friend, colleague, neighbor, cousin, uncle, aunt, brother. Per 100 "my N": friend 12.5, colleague 5.8, neighbor 2.6, cousin 1.9, uncle 0.50, aunt 0.36, brother 0.08. "A ... of mine" picks one out of several, so it is natural for friends and marked for close family. That is why Galician "unha tía miña" (ordinary) is better translated "I had an aunt who..." than "an aunt of mine". The same counting as the toy corpus, at the scale of millions of books.
 - Section 6, scoring a sentence: the product of its bigram probabilities; one unseen pair makes it 0 unless smoothing is on.`;
 (async () => {
   // window.claude exists only inside a Claude viewer; elsewhere the button stays hidden
@@ -1218,3 +1290,6 @@ The page:
   };
 })();
 </script>
+
+</body>
+</html>
