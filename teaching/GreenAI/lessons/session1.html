@@ -8,12 +8,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Questrial&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* One page per session. Reading mode: the screens stacked as a document.
+/* The page Session 1 is taught from. Reading mode: the screens stacked as a document.
    Present mode: one screen at a time, sized for a projector; speaker notes open in a second window.
    Colors and faces are the deck's, shared with the interactive pages. */
 :root {
   --bg: #f6f7f9; --panel: #ffffff; --fg: #2b2d31; --muted: #6b7079; --line: #dde1e7; --grid: #e9ecf0;
   --blue: #4f74ad; --orange: #c96f1f; --green: #3f7f3d; --hi: #fff3c4; --neg: #b0466e; --code: #f2f4f7;
+  --blue-soft: #e8eef7; --green-soft: #e6f0e5; --orange-soft: #f8ecdf;
   --font-body: "Questrial", "Century Gothic", "Avenir Next", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
@@ -21,12 +22,14 @@
   :root:not([data-theme="light"]) {
     --bg: #17191d; --panel: #1f2227; --fg: #e7e9ec; --muted: #9aa0a9; --line: #343840; --grid: #2a2e34;
     --blue: #86a8dc; --orange: #e8a15e; --green: #7fbf7c; --hi: #4a4122; --neg: #e07fa3; --code: #262a30;
+    --blue-soft: #263247; --green-soft: #243326; --orange-soft: #3a2c1f;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #17191d; --panel: #1f2227; --fg: #e7e9ec; --muted: #9aa0a9; --line: #343840; --grid: #2a2e34;
   --blue: #86a8dc; --orange: #e8a15e; --green: #7fbf7c; --hi: #4a4122; --neg: #e07fa3; --code: #262a30;
+  --blue-soft: #263247; --green-soft: #243326; --orange-soft: #3a2c1f;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -37,7 +40,7 @@ body {
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 0 40px;
 }
-a { color: var(--blue); }
+a { color: var(--blue); overflow-wrap: anywhere; }
 b { font-weight: 400; color: var(--blue); } /* Questrial has one weight */
 h1, h2, h3 { font-weight: 400; margin: 0; text-wrap: balance; }
 h1 { font-size: 1.9rem; }
@@ -53,44 +56,84 @@ button {
 }
 button:hover { border-color: var(--blue); }
 button.primary { background: var(--blue); border-color: var(--blue); color: var(--panel); }
-button:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+button:focus-visible, textarea:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
 /* top bar */
 .top { position: sticky; top: 0; z-index: 5; background: var(--bg); padding-block: 12px 10px; border-bottom: 1px solid var(--line);
   display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; max-width: 1180px; margin: 0 auto; }
 .top .title { display: grid; min-width: 0; }
-.top .title b { font-weight: 400; font-size: 1.15rem; }
-.top .actions { margin-left: auto; display: flex; gap: 8px; }
+.top .title b { color: var(--fg); font-size: 1.15rem; }
+.top .actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 .road { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.8rem; }
 .road span { padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
 .road span.on { background: var(--blue); border-color: var(--blue); color: var(--panel); }
+.toc { position: relative; }
+.toc > summary { list-style: none; cursor: pointer; border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; font-size: 0.92rem; background: var(--panel); }
+.toc > summary::-webkit-details-marker { display: none; }
+.toc nav { position: absolute; right: 0; top: calc(100% + 6px); background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 8px; display: grid; gap: 2px; width: min(320px, calc(100vw - 32px)); max-height: 70vh; overflow-y: auto; box-shadow: 0 8px 24px rgb(0 0 0 / 0.12); }
+.toc nav a { text-decoration: none; color: var(--fg); padding: 5px 8px; border-radius: 5px; font-size: 0.92rem; }
+.toc nav a:hover { background: var(--blue-soft); }
 
 /* screens, reading mode */
 main { max-width: 1180px; margin: 0 auto; display: grid; gap: 22px; padding-top: 22px; }
+.part { padding-top: 18px; scroll-margin-top: 80px; }
+.part h1 { font-size: 1.5rem; color: var(--muted); }
 .screen { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 22px; display: flex; flex-direction: column; gap: 16px; min-width: 0; scroll-margin-top: 90px; }
 .screen > header { display: grid; gap: 4px; }
 .screen > header .kind { font-size: 0.74rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--orange); }
 .screen > header .sub { color: var(--muted); }
-.body { display: flex; flex-direction: column; gap: 14px; min-width: 0; flex: 1 1 auto; }
+.body { display: flex; flex-direction: column; gap: 16px; min-width: 0; flex: 1 1 auto; }
 .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
-@media (max-width: 860px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.cols.wide-left { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+@media (max-width: 860px) { .cols, .cols.wide-left { grid-template-columns: minmax(0, 1fr); } }
 .col { display: grid; gap: 12px; min-width: 0; align-content: start; }
-ul.points { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; }
+ul.points { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; max-width: 75ch; }
+ol.points { margin: 0; padding-left: 1.4em; display: grid; gap: 8px; }
 .notes { display: none; }
+.src { font-size: 0.78rem; color: var(--muted); }
+.center { text-align: center; justify-self: center; align-self: center; }
 .tablewrap { overflow-x: auto; }
-table.road6 { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
-table.road6 th, table.road6 td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
-table.road6 th { color: var(--muted); font-weight: 400; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; }
-table.road6 tr.now td { background: color-mix(in srgb, var(--blue) 10%, transparent); }
-table.road6 td:first-child { white-space: nowrap; }
+table.plain { border-collapse: collapse; font-size: 0.95rem; }
+table.plain th, table.plain td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+table.plain th { color: var(--muted); font-weight: 400; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; }
+table.plain td.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+table.plain tr.now td { background: var(--blue-soft); }
+.c-blue { color: var(--blue); } .c-orange { color: var(--orange); } .c-green { color: var(--green); } .c-gray { color: var(--muted); }
 
-/* small figures */
+/* the Galician sentence */
+.sent { font-style: italic; text-align: center; max-width: 60ch; justify-self: center; align-self: center; font-size: 1.15em; line-height: 1.6; }
+.sent .hl { color: var(--blue); font-style: italic; }
+.sent.small { font-size: 0.85em; color: var(--muted); }
+
+/* diagrams */
+.flow { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 12px; }
+.box { border: 1px solid var(--blue); background: var(--blue-soft); border-radius: 8px; padding: 10px 16px; text-align: center; line-height: 1.3; }
+.box.g { border-color: var(--green); background: var(--green-soft); }
+.box.o { border-color: var(--orange); background: var(--orange-soft); }
+.box.round { border-radius: 999px; }
+.arr { color: var(--muted); font-size: 1.3em; }
+.vbars { display: flex; align-items: flex-end; justify-content: center; gap: clamp(16px, 4vw, 48px); height: 15em; padding-top: 1.5em; }
+.vb { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; width: 6.5em; flex: 0 1 auto; min-width: 0; gap: 4px; text-align: center; }
+.vb .v { font-family: var(--font-mono); }
+.vb .col { width: 70%; background: var(--blue); border-radius: 4px 4px 0 0; min-height: 2px; }
+.vb .col.g { background: var(--green); }
+.vb .col.o { background: var(--orange); }
+.vb .l { font-size: 0.85em; color: var(--muted); min-height: 2.6em; line-height: 1.3; }
+.axisnote { text-align: center; font-size: 0.85em; color: var(--muted); }
 .bars { display: grid; gap: 5px; }
 .bar { display: grid; grid-template-columns: 5.5em minmax(0, 1fr) 3.5em; gap: 10px; align-items: center; font-family: var(--font-mono); font-size: 0.92rem; font-variant-numeric: tabular-nums; }
 .bar .w { text-align: right; }
-.bar .track { height: 16px; background: var(--grid); border-radius: 3px; overflow: hidden; }
-.bar .fill { height: 100%; background: var(--blue); }
+.bar .track { height: 16px; background: var(--grid); border-radius: 3px; overflow: hidden; display: block; }
+.bar .fill { height: 100%; background: var(--blue); display: block; }
 .bar.zero { color: var(--muted); }
+.bignum { font-size: 2.4em; color: var(--blue); line-height: 1.1; }
+.fig { display: grid; gap: 6px; justify-items: center; min-width: 0; }
+.fig img { max-width: 100%; max-height: 42vh; width: auto; height: auto; border-radius: 4px; background: #fff; }
+.fig .cap { font-size: 0.78rem; color: var(--muted); text-align: center; }
+.figrow { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
+.figrow img { max-height: 22vh; max-width: 100%; height: auto; }
+.quote { background: var(--green-soft); padding: 10px 16px; border-radius: 6px; text-align: center; justify-self: center; }
 .corpus { font-family: var(--font-mono); display: grid; gap: 4px; font-size: 1.02rem; }
 .corpus mark { background: var(--hi); color: inherit; border-radius: 3px; padding: 0 2px; }
 .formula { font-size: 1.25rem; text-align: center; padding: 6px 0; }
@@ -98,22 +141,55 @@ table.road6 td:first-child { white-space: nowrap; }
 .frac span:first-child { border-bottom: 1px solid var(--fg); padding: 0 4px; }
 .big { font-family: var(--font-mono); font-size: 1.05rem; display: grid; gap: 4px; }
 .ask { border-left: 3px solid var(--orange); padding: 8px 14px; display: grid; gap: 8px; }
-.ask b { font-weight: 400; color: var(--orange); }
+.ask > b { color: var(--orange); }
+.eq { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; font-family: var(--font-mono); }
+.mat { display: inline-grid; grid-template-columns: repeat(var(--c), auto); gap: 2px 14px; padding: 4px 10px; border-left: 2px solid var(--fg); border-right: 2px solid var(--fg); border-radius: 8px; text-align: right; }
+.mat .hl { color: var(--orange); }
+.svgfig { width: 100%; max-width: 640px; height: auto; justify-self: center; display: block; margin: 0 auto; }
+.svgfig text { fill: var(--fg); font-family: var(--font-body); }
+.svgfig .muted { fill: var(--muted); }
+.scatters { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.scatter { width: 100%; height: auto; display: block; }
+.scatter text { font-family: var(--font-body); font-size: 11px; }
+.kvc { display: block; width: 2.6em; height: 1.8em; border: 1px solid var(--blue); border-radius: 4px; background: var(--blue-soft); }
+.squares { display: grid; gap: 3px; justify-content: center; }
+.squares i { width: 1.1em; height: 1.1em; border-radius: 2px; display: block; }
+.icons { display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap; }
+.icon { width: 3.2em; height: 3.2em; }
+.qmarks { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; }
+.qmarks div { display: grid; justify-items: center; gap: 8px; text-align: center; }
+.qmarks span.q { width: 3.2em; height: 3.2em; border-radius: 50%; border: 1px solid var(--blue); background: var(--blue-soft); display: grid; place-items: center; font-size: 1.6em; color: var(--blue); }
+
+/* activities and links out */
+.activity { border: 1px solid var(--green); border-radius: 10px; overflow: hidden; }
+.activity > h3 { background: var(--green); color: var(--panel); padding: 8px 16px; }
+.activity > div { padding: 14px 16px; background: var(--green-soft); display: grid; gap: 10px; }
+.links { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.links a.btn { text-decoration: none; border: 1px solid var(--green); color: var(--fg); background: var(--panel); border-radius: 6px; padding: 6px 12px; }
+
+/* title and closing screens */
+.titlescreen { align-items: center; text-align: center; justify-content: center; }
+.titlescreen h1 { font-size: 2.2em; }
+.logos { display: flex; flex-wrap: wrap; gap: 18px 30px; justify-content: center; align-items: center; }
+.logos img { height: 3.2em; width: auto; max-width: 100%; object-fit: contain; background: #fff; border-radius: 4px; padding: 4px; }
+
+/* step-by-step reveals: in present mode, Next shows them one at a time */
+body.present .frag.hide { visibility: hidden; }
 
 /* embedded interactive pages */
-.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .tabs button[aria-pressed=true] { background: var(--blue); border-color: var(--blue); color: var(--panel); }
+.tabs .open { margin-left: auto; font-size: 0.85rem; }
 .frame { width: 100%; height: 78vh; min-height: 420px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); display: block; }
-.open { font-size: 0.85rem; }
 
 /* exercises */
 .colab { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 0.92rem; padding: 10px 14px; border: 1px dashed var(--line); border-radius: 8px; }
 .ex { display: grid; gap: 10px; border-top: 1px solid var(--line); padding-top: 16px; min-width: 0; }
 .ex .prompt { display: grid; gap: 8px; max-width: 80ch; }
-details { border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; }
-details > summary { cursor: pointer; color: var(--muted); font-size: 0.92rem; }
-details[open] > summary { margin-bottom: 6px; }
-details ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; font-size: 0.95rem; }
+details.hint { border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; }
+details.hint > summary { cursor: pointer; color: var(--muted); font-size: 0.92rem; }
+details.hint[open] > summary { margin-bottom: 6px; }
+details.hint ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; font-size: 0.95rem; }
 .cell { display: grid; gap: 6px; min-width: 0; }
 .cell textarea {
   font-family: var(--font-mono); font-size: 0.88rem; line-height: 1.5; color: var(--fg); background: var(--code);
@@ -129,28 +205,36 @@ pre.out .err { color: var(--neg); }
 pre.out .pass { color: var(--green); }
 pre.sol { background: var(--code); }
 .reflect { border-left: 3px solid var(--green); padding: 8px 14px; max-width: 80ch; }
+.reflect > b { color: var(--green); }
 
 footer { max-width: 1180px; margin: 30px auto 0; color: var(--muted); font-size: 0.86rem; display: grid; gap: 8px; }
-footer ul { margin: 0; padding-left: 1.2em; }
+footer ul { margin: 0; padding-left: 1.2em; display: grid; gap: 3px; }
 footer .license { padding-top: 10px; border-top: 1px solid var(--line); }
 
 /* present mode: one screen fills the window */
 html.present { font-size: clamp(15px, 1.4vw, 28px); }
 body.present { padding: 0; overflow: hidden; font-size: 1.1rem; }
-body.present .top, body.present footer { display: none; }
+body.present .top, body.present footer, body.present .part { display: none; }
 body.present main { max-width: none; padding: 0; display: block; }
 body.present .screen { display: none; border: 0; border-radius: 0; height: 100vh; height: 100dvh; overflow-y: auto;
-  padding: 3.2vh max(4vw, env(safe-area-inset-right, 0px)) 7vh max(4vw, env(safe-area-inset-left, 0px)); }
+  padding: 3.2vh max(4vw, env(safe-area-inset-right, 0px)) 8vh max(4vw, env(safe-area-inset-left, 0px)); }
 body.present .screen.current { display: flex; }
-body.present h2 { font-size: 2em; }
+body.present .screen h2 { font-size: 2em; }
+body.present .titlescreen h1 { font-size: 2.6em; }
 body.present .frame { height: auto; flex: 1 1 auto; min-height: 0; }
-body.present .screen.fill .body { min-height: 0; }
 body.present .screen.fill { overflow: hidden; }
+body.present .fig img { max-height: 48vh; }
+body.present .screen:not(.fill):not(.titlescreen) > .body { justify-content: safe center; }
+body.present .flow, body.present .qmarks, body.present .icons { font-size: 1.3em; }
+body.present .vbars { height: 42vh; }
+body.present .svgfig { max-width: min(900px, 62vw) !important; }
+body.present .sent.small { font-size: 1em; }
+body.present .eq { font-size: 1.25em; }
 .pbar { display: none; }
 body.present .pbar { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; gap: 14px; align-items: center;
-  padding: 6px max(4vw, env(safe-area-inset-left, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)); background: var(--bg); border-top: 1px solid var(--line); font-size: 14px; }
-body.present .pbar button, body.present .pbar .road { font-size: 13px; }
-body.present .pbar .road { margin-right: auto; }
+  padding: 6px max(4vw, env(safe-area-inset-left, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)); background: var(--bg); border-top: 1px solid var(--line); font-size: 13px; }
+body.present .pbar .where { margin-right: auto; color: var(--muted); }
+body.present .pbar button { font-size: 13px; }
 body.present .pbar .count { font-family: var(--font-mono); color: var(--muted); }
 
 /* speaker-notes window */
@@ -163,6 +247,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 #nv h2 { font-size: 1.4em; }
 #nv .ntext { display: grid; gap: 0.8em; line-height: 1.5; }
 #nv .next { color: var(--muted); font-size: 16px; border-top: 1px solid var(--line); padding-top: 10px; }
+#nv .fragnote { color: var(--orange); font-size: 16px; }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 </style>
 </head>
@@ -170,21 +255,432 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 
 <div class="top">
   <div class="title"><b>Green NLP Today</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña</span></div>
-  <div class="road" aria-label="The six steps"><span class="on">1 N-grams</span><span>2 Embeddings</span><span>3 Encoder–decoder</span><span>4 Attention</span><span>5 Self-attention</span><span>6 Transformers</span></div>
-  <div class="actions"><button id="presentBtn" class="primary">Present</button></div>
+  <div class="road" id="topRoad" aria-label="The six steps"></div>
+  <div class="actions">
+    <details class="toc"><summary>Contents</summary><nav id="tocNav"></nav></details>
+    <button id="presentBtn" class="primary">Present</button>
+  </div>
 </div>
 
 <main>
+<div class="part" id="part-start"><h1>Start</h1></div>
 
-<!-- ================================================================= -->
+<section class="screen titlescreen" id="title" data-step="0">
+  <div class="logos"><img src="img/logo-inditexudc.png" alt="Cátedra Inditex–UDC de Algoritmos Verdes"></div>
+  <p class="label">Microcredencial Algoritmos verdes para la IA: diseño e implementación</p>
+  <h1>Green NLP Today</h1>
+  <p class="muted">Tema: Natural language processing · Sesión 1 · Ponente: Olga Zamaraeva</p>
+  <div class="logos"><img src="img/logo-citicudc.png" alt="CITIC, Universidade da Coruña"><img src="img/logo-financiacion.png" alt="Funding"></div>
+  <div class="notes">
+    <p>Welcome, everyone. This is Session 1 of the microcredential on green algorithms for AI — "Green NLP Today." I'm Olga Zamaraeva; I'll teach this session and the next two.</p>
+    <p>First, a disclaimer: I taught this module last year too, and it did not go well, in my opinion — it was super technical and boring for everyone. It's important to study model architectures and the underlying math, what makes one architecture more computationally and environmentally expensive than another, but I don't think that's the best focus for this course. So this year I changed everything, which means I'm doing this material for the first time today, which can be a little embarrassing. I'll even use a prompter on my iPad to help me explain things properly and not forget something important. Just a disclaimer.</p>
+  </div>
+</section>
+
+<section class="screen" id="sentence" data-step="0">
+  <header><h2>Let's start with a sentence</h2></header>
+  <div class="body" style="justify-content:center">
+    <p class="sent">Unha <span class="hl">tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”</p>
+    <p class="src center">from <i>Speechwriter</i> by Paulo Naseiro</p>
+  </div>
+  <div class="notes">
+    <p>This is a Galician sentence: "An aunt of mine, who solved everything with sayings and proverbs, used to say something like 'one is a slave to what one says, and master of what one keeps quiet.'" "Tía miña" is highlighted, but it doesn't matter much yet — we'll come back and look at just that noun phrase later. This sentence doesn't have some deep significance; it happened to be the first sentence of the book on my desk. The one thing that does matter about it: it's in Galician, a language AI still doesn't handle perfectly.</p>
+  </div>
+</section>
+
+<div class="part" id="part-intro"><h1>Introduction</h1></div>
+
+<section class="screen" id="overview" data-step="0">
+  <header><h2>Module overview</h2><p class="sub">Three sessions, one running project</p></header>
+  <div class="body">
+    <ul class="points">
+      <li>Session 1: <b>Measure</b> the baseline</li>
+      <li>Session 2: <b>Shrink</b> it: quantization</li>
+      <li>Session 3: <b>Retrieve</b> on demand</li>
+    </ul>
+    <div class="flow"><div class="box">Session 1<br>Measure</div><span class="arr">→</span><div class="box">Session 2<br>Shrink</div><span class="arr">→</span><div class="box g">Session 3<br>Retrieve</div></div>
+    <p class="src">olga.zamaraeva@udc.es · UDC Teams · CITIC, 2nd floor</p>
+  </div>
+  <div class="notes">
+    <p>Three sessions, one running project. Session 1, today: talk about NLP generally, then build a working pipeline and measure its baseline energy/carbon cost — and experiment a bit with machine translation, because it's fun. Session 2: apply quantization — we'll define that properly then, but in short it means storing and computing with the model's numbers using fewer bits of precision — and measure again. Session 3: instead of giving the model everything it might need up front, retrieve only the relevant pieces on demand, and measure again. Same task, same measurement method, three different efficiency techniques, so you can compare them on equal footing.</p>
+  </div>
+</section>
+
+<section class="screen" id="project" data-step="0">
+  <header><h2>The running project: Green NLP Benchmark Lab</h2><p class="sub">One pipeline, one change at a time</p></header>
+  <div class="body">
+    <ul class="points">
+      <li>Same pipeline, all three sessions: change <b>one</b> thing, measure again</li>
+      <li>Quality vs. energy vs. carbon: your own leaderboard</li>
+    </ul>
+    <div class="flow"><div class="box">Documents<br>+ question</div><span class="arr">→</span><div class="box">Model</div><span class="arr">→</span><div class="box">Answer</div><span class="arr">→</span><div class="box g">Measure:<br>quality / energy / carbon</div></div>
+  </div>
+  <div class="notes">
+    <p>We'll work with machine translation and also with question answering. Partly so we don't get too bored doing just one task, but also because unlike MT, QA can be evaluated more easily: the answer is either right or wrong, so you get a percentage of correct answers and that's your score, accuracy. MT is a lot more complicated to evaluate but also arguably more interesting. Either way, both are classic NLP tasks that now rely on AI, which is costly, and we're going to try to measure how costly. What we change each session is exactly one part of "model" — its size, its precision, how much of the documents it actually sees for the QA task — and re-measure. Every run adds one row to a leaderboard, a CSV file you keep and reuse across all three sessions, so by the end you'll have your own before/after comparison.</p>
+  </div>
+</section>
+
+<section class="screen" id="howworks" data-step="0">
+  <header><h2>How this session works</h2><p class="sub">One page: explanations, interactive panels, code</p></header>
+  <div class="body cols">
+    <div class="col">
+      <ul class="points">
+        <li>This page is the whole session. Open it on your laptop or phone, now or later:</li>
+      </ul>
+      <p style="font-size:1.4em"><a href="https://olzama.github.io/teaching/GreenAI/lessons/session1.html">olzama.github.io/teaching/GreenAI</a></p>
+      <ul class="points">
+        <li><span class="c-orange">Interactive</span> screens are animations you can step through, change and replay.</li>
+        <li><span class="c-orange">Try it</span> screens have Python that runs in your browser. Nothing to install.</li>
+        <li>The longer notebooks run in Google Colab.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <p class="label">The six technical steps of today</p>
+      <ol class="points">
+        <li>N-grams</li><li>Embeddings</li><li>Encoder–decoder translation</li><li>Attention</li><li>Self-attention</li><li>Transformers</li>
+      </ol>
+    </div>
+  </div>
+  <div class="notes">
+    <p>A note on how this session works. This year there are no slides. We use one web page for the whole session. You see it on the screen, and you can open the same page on your laptop or phone.</p>
+    <p>The address is on the screen: olzama.github.io, teaching, GreenAI. You can follow along during the session and come back to the page later.</p>
+    <p>Some screens are explanations, like slides. Some are interactive: animations you can step through, change, and replay, with real numbers. Some are exercises: Python code that runs in your browser. Nothing to install. The longer notebooks run in Google Colab.</p>
+    <p>The technical part of today has six steps, from n-grams to transformers. We will see the plan when we get there.</p>
+  </div>
+</section>
+
+<section class="screen" id="profile" data-step="0">
+  <header><h2>Instructor's profile</h2></header>
+  <div class="body">
+    <ul class="points"><li>Computational linguist: syntax and machine translation</li></ul>
+    <div class="flow"><div class="box">Seattle, USA<br>(PhD)</div><span class="arr">⇢</span><div class="box g">A Coruña, Spain<br>(UDC, since 2021)</div></div>
+  </div>
+  <div class="notes">
+    <p>PhD in computational linguistics, University of Washington, Seattle; postdoc at UDC since 2021; my own research is in syntax and machine translation, which is part of why MT is today's running example — it's the area I can go deepest on if you have questions. I also study how AI-generated language differs from human-written text, though so far only in English, and only in formal genres like news and scientific papers.</p>
+  </div>
+</section>
+
+<div class="part" id="part-nlp"><h1>What is NLP?</h1></div>
+
+<section class="screen" id="nlpcl" data-step="0">
+  <header><h2>Natural Language Processing &amp; Computational Linguistics</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <ul class="points">
+        <li>NLP: building systems that <i>do</i> things with language</li>
+        <li>CL: using computation to <i>study</i> language</li>
+      </ul>
+    </div>
+    <div class="col">
+      <svg class="svgfig" viewBox="0 0 360 230" role="img" aria-label="Two overlapping circles: NLP and CL, with language models in the overlap">
+        <circle cx="135" cy="115" r="100" fill="var(--blue)" fill-opacity="0.22" stroke="var(--blue)"/>
+        <circle cx="225" cy="115" r="100" fill="var(--green)" fill-opacity="0.22" stroke="var(--green)"/>
+        <text x="80" y="45" font-size="18">NLP</text><text x="255" y="45" font-size="18">CL</text>
+        <text x="90" y="170" font-size="11" text-anchor="middle">translation, dialogue,</text><text x="90" y="184" font-size="11" text-anchor="middle">summarization</text>
+        <text x="270" y="170" font-size="11" text-anchor="middle">syntax, semantics,</text><text x="270" y="184" font-size="11" text-anchor="middle">typology</text>
+        <text x="180" y="112" font-size="12" text-anchor="middle">language</text><text x="180" y="127" font-size="12" text-anchor="middle">models</text>
+      </svg>
+    </div>
+  </div>
+  <div class="notes">
+    <p>These terms are sometimes used interchangeably, and sometimes to denote two related but distinct fields, which can be confusing. Originally, Computational Linguistics uses computers as a tool to study language scientifically — syntax, semantics, how languages differ typologically. The object of study is language as a natural phenomenon, something people do. Natural Language Processing used to be an engineering discipline: building systems that do something useful with language — translate it, summarize it, answer questions about it. Recently NLP has become very close to AI, which is why this module exists in this course. AI used to ask questions like "how similar is a model's performance to some measured human capacity, and how do we close the gap." Now, thanks to this merge with NLP, AI got good enough at so many tasks that the field shifted to questions like "how do we tell AI apart from a person" or "how should people work with AI." Question for you: is it easy to tell if you're talking to AI or a person? Is it easy to tell if you're reading AI-generated text? What if it's a Galician text?</p>
+  </div>
+</section>
+
+<section class="screen" id="market" data-step="0">
+  <header><h2>How big is NLP, really?</h2></header>
+  <div class="body">
+    <div class="vbars" aria-label="NLP market size">
+      <div class="vb"><span class="v">$37B</span><span class="col" style="height:19%"></span><span class="l">2025</span></div>
+      <div class="vb"><span class="v">$193B</span><span class="col g" style="height:100%"></span><span class="l">2034 (projected)</span></div>
+    </div>
+    <p class="axisnote">NLP market size, US dollars</p>
+    <ul class="points"><li>About 20% growth per year, but estimates vary widely across firms (as low as $25B for the same year, elsewhere)</li></ul>
+    <p class="src">Source: Fortune Business Insights, 2025</p>
+  </div>
+  <div class="notes">
+    <p>NLP is worth talking about at this scale because it's what produced large language models. It started with smaller models, which we'll get to, but once GPT appeared it became a major player well beyond its original scope. This is one widely-cited estimate; different market-research firms report wildly different numbers for the exact same year — some as low as 25B, others well above 60B, for "2025 NLP market size." Why such a spread? "NLP market" isn't a precisely defined category — different analysts include or exclude voice assistants, chatbot platforms, search, or broader "AI" spending differently, and each firm uses its own proprietary method that isn't published in full. Hold onto this pattern: wildly different numbers from equally confident-sounding sources. We'll see the exact same phenomenon later today, with carbon-footprint numbers instead of dollars, for the same underlying reason — undisclosed methodology.</p>
+  </div>
+</section>
+
+<section class="screen" id="where" data-step="0">
+  <header><h2>Where NLP shows up</h2></header>
+  <div class="body">
+    <div class="flow"><div class="box">Tech &amp; Telecom</div><div class="box">Banking &amp; Finance</div><div class="box g">Healthcare<br>(fastest-growing)</div></div>
+    <div class="flow"><div class="box">Chatbots</div><div class="box">Translation</div><div class="box">Speech &amp; Sentiment</div></div>
+  </div>
+  <div class="notes">
+    <p>By industry, the heaviest adopters are tech and telecom, with banking and finance close behind; healthcare is the fastest-growing vertical — think clinical note summarization, patient-facing chat triage. By task, the largest application areas are chatbots, machine translation, and speech/sentiment analysis. I'm choosing translation as our thread not just because it's my area — it's genuinely one of the largest, oldest, and most economically significant NLP tasks in the world, and it happens to be the task where most of today's core techniques, attention especially, were actually invented.</p>
+  </div>
+</section>
+
+<section class="screen" id="oneengine" data-step="0">
+  <header><h2>One engine now runs many tasks</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <p class="label">Before: separate models, one per task</p>
+      <div class="flow" style="justify-content:flex-start"><div class="box">Translate</div><div class="box">Summarize</div><div class="box">Classify</div><div class="box">Chat</div></div>
+    </div>
+    <div class="col">
+      <p class="label">Now: one model, prompted</p>
+      <div class="flow" style="justify-content:flex-start"><div class="box g">Language model</div><span class="arr">→</span><div class="box">Translate</div><div class="box">Summarize</div><div class="box">Classify</div><div class="box">Chat</div></div>
+      <p class="muted">This is where “NLP” and “AI” blur.</p>
+    </div>
+  </div>
+  <p class="src">Radford et al., “Language Models are Unsupervised Multitask Learners,” 2019; Brown et al., “Language Models are Few-Shot Learners,” NeurIPS 2020</p>
+  <div class="notes">
+    <p>Until recently, "NLP" meant a separate, purpose-built model for each task: one system for translation, a different one for summarization, another for classifying sentiment. What changed is this: a single model, trained on nothing more sophisticated than "predict the next word of text" — the definition of a language model — turned out to be able to do all of these tasks. You just phrase your request differently to the same model, which is what "prompting" means. OpenAI showed this could work in 2019 with GPT-2; the real scale came in 2020 with GPT-3. This is the moment the public conversation stopped distinguishing "NLP" from "AI" — a general-purpose language model looks, from the outside, like general intelligence. Question: how would you define intelligence? Do you think AI is intelligent?</p>
+  </div>
+</section>
+
+<section class="screen" id="taskcost" data-step="0">
+  <header><h2>NLP tasks: what they actually cost</h2></header>
+  <div class="body">
+    <div class="vbars" aria-label="kWh per 1,000 inferences">
+      <div class="vb"><span class="v">0.002</span><span class="col g" style="height:4%"></span><span class="l">classify</span></div>
+      <div class="vb"><span class="v">0.003</span><span class="col g" style="height:6%"></span><span class="l">QA</span></div>
+      <div class="vb"><span class="v">0.047</span><span class="col" style="height:96%"></span><span class="l">generate</span></div>
+      <div class="vb"><span class="v">0.049</span><span class="col" style="height:100%"></span><span class="l">summarize</span></div>
+    </div>
+    <p class="axisnote">kWh per 1,000 inferences</p>
+    <ul class="points">
+      <li>Discriminative tasks (classify, answer) are cheap; generative tasks (write, summarize) cost 15–20× more</li>
+      <li>Image generation: 2.9 kWh per 1,000, about 1,450× the cheapest text task</li>
+    </ul>
+    <p class="src">Source: Luccioni, Jernite &amp; Strubell, FAccT 2024 (arXiv:2311.16863), Table 2</p>
+  </div>
+  <div class="notes">
+    <p>Different tasks cost different amounts. Discriminative tasks — ones where the model picks from a small, fixed set of possible outputs, like classifying or picking a span of text as the answer — are cheap. Generative tasks, where the model produces new text one word at a time, cost 15 to 20 times more. Why the gap? A discriminative task is usually one forward pass through the model — I'm assuming here you've studied neural network architecture a bit, but I'll have a screen on transformer architecture later, which is the basis for modern NLP and really all of modern AI. A generative task requires the model to generate output word by word, feeding each new word back in to generate the next — many forward passes chained together for a single answer. And if you widen the lens past text entirely: image generation in the same study averages 2.9 kWh per 1,000 inferences, about 1,450 times the cheapest text task. The lesson to carry forward: which task you pick is one of the single biggest levers on cost that exists — arguably bigger than model size alone, and entirely within a system designer's control before any "green AI" technique is even applied.</p>
+  </div>
+</section>
+
+<section class="screen" id="history" data-step="0">
+  <header><h2>How we got here</h2></header>
+  <div class="body">
+    <div class="flow"><div class="box">Symbolic</div><span class="arr">→</span><div class="box">Statistical</div><span class="arr">→</span><div class="box">Neural</div><span class="arr">→</span><div class="box">Deep<br>learning</div><span class="arr">→</span><div class="box g">Transformers<br>(LLMs)</div></div>
+    <ul class="points">
+      <li>Symbolic: rules written by hand (1950s–80s) → Statistical: counting from real text (1990s–2000s) → Neural: learned representations, more data and compute (2010s+) → Transformers: attention-based (2017+)</li>
+      <li>Each shift trades hand-engineering for more data and compute: directly relevant to a course about the cost of that compute</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>Five eras, and it's worth knowing what actually distinguishes each one, because we'll retrace this same arc later specifically for machine translation. Symbolic, roughly 1950s–1980s: systems built from hand-written rules — a linguist or engineer writes "if you see X, do Y." Statistical, 1990s–2000s: instead of hand-written rules, a model learns probabilities from large collections of real text — "how often does word B follow word A" — no built-in knowledge, just counting, which we'll do by hand in a couple of screens. Neural, 2010s onward: models replace explicit counting with a trained network that learns its own internal numerical representations of words and patterns — more flexible, but needs more compute and more data. Deep learning: networks with many stacked layers, letting the model build up increasingly abstract representations. Transformers, 2017 onward: a specific architecture built around attention, which lets the model use larger and more complex contexts instead of just the previous word or two — it's the architecture behind essentially every modern LLM. Each transition traded hand-engineering effort for more data and more compute, which is directly relevant to a course about the environmental cost of that compute.</p>
+  </div>
+</section>
+
+<div class="part" id="part-guess"><h1>Guess the footprint</h1></div>
+
+<section class="screen" id="guess" data-step="0">
+  <header><h2>Before we start: guess the footprint</h2></header>
+  <div class="body">
+    <ol class="points">
+      <li>How many metric tons of CO₂eq did training GPT-3 emit?</li>
+      <li>What share of global electricity do data centers consume today?</li>
+      <li>How many times more carbon does a general-purpose LLM emit per query than a model built just for that task?</li>
+    </ol>
+    <div class="qmarks">
+      <div><span class="q">?</span><span>training<br>emissions</span></div>
+      <div><span class="q">?</span><span>global<br>electricity</span></div>
+      <div><span class="q">?</span><span>task-specific vs.<br>general-purpose</span></div>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Have everyone write down a guess for each of the three questions before revealing anything — the point is that people's intuitions are usually off by an order of magnitude in one direction or another. Question 1: CO2-equivalent to train GPT-3. Question 2: what share of global electricity goes to data centers today. Question 3: for the identical task, how many times more carbon does a general-purpose chatbot emit per query compared to a model built specifically for that one task. Not on the screen, but worth throwing out too: how much does an average daily session with something like Claude Code "emit"?</p>
+  </div>
+</section>
+
+<section class="screen" id="reveal1" data-step="0">
+  <header><span class="kind">Reveal 1</span><h2>Training a large model</h2></header>
+  <div class="body" style="align-items:center">
+    <div class="flow"><span class="bignum">552 t CO₂eq</span><span class="arr">≈</span><span style="font-size:2em" aria-hidden="true">✈ ✈ ✈</span></div>
+    <p>3 × San Francisco ↔ New York round trips</p>
+    <ul class="points"><li>A <i>one-time</i> cost, paid once, by whoever trains the model</li></ul>
+    <p class="src">Source: Patterson et al., “Carbon Emissions and Large Neural Network Training,” 2021 (arXiv:2104.10350)</p>
+  </div>
+  <div class="notes">
+    <p>552 metric tons of CO2-equivalent to train GPT-3 once, per Patterson et al. 2021 — roughly three San Francisco–New York round-trip flights, using standard commercial-aviation emissions factors. The key word is once: this is a one-time cost paid by whoever trains the model, not something repeated every time someone uses it afterward.</p>
+  </div>
+</section>
+
+<section class="screen" id="reveal2" data-step="0">
+  <header><span class="kind">Reveal 2</span><h2>Data centers, globally</h2></header>
+  <div class="body">
+    <div class="vbars" aria-label="Share of global electricity">
+      <div class="vb"><span class="v">1.5%</span><span class="col" style="height:50%"></span><span class="l">2024</span></div>
+      <div class="vb"><span class="v">~3%</span><span class="col g" style="height:100%"></span><span class="l">2030 (projected)</span></div>
+    </div>
+    <p class="axisnote">share of global electricity</p>
+    <ul class="points"><li>Growing 17% in 2025 alone, driven mainly by AI</li></ul>
+    <p class="src">Source: International Energy Agency, “Energy and AI,” 2024–2025</p>
+  </div>
+  <div class="notes">
+    <p>About 1.5% of world electricity consumption in 2024 goes to data centers of all kinds — not just AI, this includes cloud storage, websites, everything — per the International Energy Agency. That share grew 17% in just 2025 alone, and the IEA attributes most of that recent growth specifically to AI workloads. Projected to reach roughly 3% by 2030 — small as a percentage, but the absolute scale, a meaningful fraction of a mid-sized country's total electricity use, and the growth rate are what make it worth tracking.</p>
+  </div>
+</section>
+
+<section class="screen" id="reveal3" data-step="0">
+  <header><span class="kind">Reveal 3</span><h2>General-purpose LLMs are costly</h2></header>
+  <div class="body">
+    <div class="vbars" aria-label="CO2eq per 1,000 inferences, same task">
+      <div class="vb"><span class="v">0.3 g</span><span class="col g" style="height:3%"></span><span class="l">task-specific</span></div>
+      <div class="vb" style="width:4em;justify-content:center"><span class="bignum" style="font-size:1.6em;color:var(--neg)">33×</span></div>
+      <div class="vb"><span class="v">10 g</span><span class="col" style="height:100%"></span><span class="l">general-purpose</span></div>
+    </div>
+    <p class="axisnote">CO₂eq per 1,000 inferences, same task</p>
+    <ul class="points"><li>Same task, 33× apart</li></ul>
+    <p class="src">Source: Luccioni, Jernite &amp; Strubell, FAccT 2024 (arXiv:2311.16863)</p>
+  </div>
+  <div class="notes">
+    <p>Same task — question answering, our own project's task — done two ways: by a model built and tuned specifically for that one task, about 0.3g CO2eq per 1,000 inferences, versus a general-purpose chatbot doing the identical task, about 10g. That's a 33x gap, for output that's often comparable in quality. Nothing about the task changed; only which tool was used to do it. We'll see this same shape of pattern again today, in a different disguise, once we get to machine translation specifically.</p>
+    <p>A Claude Code session, by one ChatGPT estimate, is about 40g — equivalent to driving 40 meters in a car. An AI-powered Google search can be estimated at around 0.03g.</p>
+  </div>
+</section>
+
+<section class="screen" id="deploy" data-step="0">
+  <header><h2>Example: the 33×, at deployment scale</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <ul class="points">
+        <li>A chatbot answering <b>100,000 questions/day</b> with a general-purpose LLM API</li>
+        <li>Anchor: 10 g CO₂eq per 1,000 inferences (Reveal 3)</li>
+        <li>100k/day × 10 g/1,000 ≈ 365 kg/year: about a month of driving a car</li>
+        <li>Swap to task-specific (Reveal 3's 33×) → ≈ 11 kg/year</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="vbars">
+        <div class="vb"><span class="v">365 kg/yr</span><span class="col" style="height:100%"></span><span class="l">general-purpose</span></div>
+        <div class="vb"><span class="v">11 kg/yr</span><span class="col g" style="height:3%"></span><span class="l">task-specific</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Suppose a chatbot is answering 100,000 questions a day using a general-purpose LLM API: that comes out to about 365 kg CO2eq a year — roughly a month's worth of an average car's emissions. Now swap in a task-specific model instead, applying the same 33x improvement from the last screen: the same yearly workload drops to roughly 11 kg. The task didn't change. The tool did.</p>
+  </div>
+</section>
+
+<div class="part" id="part-inference"><h1>Why inference dominates</h1></div>
+
+<section class="screen" id="traininf" data-step="0">
+  <header><h2>Training vs. inference</h2></header>
+  <div class="body">
+    <ul class="points">
+      <li>Train <b>once</b>. Infer <b>millions of times</b>.</li>
+      <li>Cumulative inference cost dominates a model's lifetime footprint</li>
+    </ul>
+    <div class="flow"><div class="box">Train<br>(once)</div><span class="arr">→</span><div class="box">Deployed<br>model</div><span class="arr">⇉</span><div class="box g round">query</div><div class="box g round">query</div><div class="box g round">query</div><div class="box g round">query</div><span class="muted">… many queries</span></div>
+  </div>
+  <div class="notes">
+    <p>To make these points click together: you train a model once, but you run it, perform inference, potentially millions or billions of times over its deployed lifetime. So even though the one-time training cost, 552 tons, sounds dramatic, for a widely-used model the cumulative cost of all those inference calls over months or years usually dwarfs the training cost. Perhaps we should worry more about the technology and practice of inference than about training costs specifically — though training remains relevant if we agree that task-specific models should be prioritized over giant general ones.</p>
+  </div>
+</section>
+
+<section class="screen" id="vocab" data-step="0">
+  <header><h2>Vocabulary for this course</h2></header>
+  <div class="body cols wide-left">
+    <div class="col">
+      <ul class="points">
+        <li><b>FLOPs</b> (floating-point operations): how much computation</li>
+        <li><b>Carbon intensity</b>: CO₂eq per unit of electricity; depends on <i>where</i> and <i>when</i></li>
+        <li><b>PUE</b> (Power Usage Effectiveness): facility power ÷ IT equipment power</li>
+        <li><b>Operational</b> vs. <b>embodied</b> carbon: running it vs. building it</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="box" style="padding:12px 12px 22px;display:grid;gap:12px">
+        <span>Total facility power</span>
+        <div class="box g" style="padding:22px 12px">IT equipment power</div>
+      </div>
+      <p class="axisnote">PUE = facility power ÷ IT equipment power</p>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Just some vocabulary that comes up a lot in green-computation discussions.</p>
+    <p>FLOPs, floating-point operations: the basic unit for counting how much arithmetic a computation requires — how many additions and multiplications of decimal numbers happen. Hardware-independent: a model that needs 10 billion FLOPs to answer one question requires that much arithmetic regardless of what chip runs it. In practice you'll see GFLOPs (billions) or even PFLOPs (10^15), since real workloads are enormous.</p>
+    <p>Carbon intensity: how much CO2-equivalent is emitted per unit of electricity generated. Not a fixed number — depends heavily on where the electricity comes from (coal-heavy grid vs. one dominated by hydro or nuclear), and even when, since the same data center's carbon intensity can shift hour to hour with the momentary energy mix. I mention this because these words get thrown around without much precision, so be careful when you see them — a lot goes unreported.</p>
+    <p>PUE, Power Usage Effectiveness: total facility power divided by IT-equipment power alone. A PUE of 1.5 means for every 1 watt actually doing useful computation, another 0.5 watts goes to overhead — mostly cooling. A PUE of 1.0 would be a theoretically impossible zero-overhead data center; real ones run roughly 1.1–1.6. This matters because a number reported purely in GPU work is hiding this overhead. By the way, water is a very significant cost too, not just electricity — Google estimated a Gemini prompt consumes about 0.26 mL of water, roughly 5 drops. Not nothing, if you think about it.</p>
+    <p>Operational vs. embodied carbon: operational is the emissions from running the hardware, the electricity it draws while computing. Embodied is what already happened before the hardware ever ran anything — mining raw materials, manufacturing the chips, shipping them. A brand-new GPU has a real carbon cost baked in before you've trained a single model on it.</p>
+    <p>These definitions are mainly so you can assess critically what you read about AI's environmental footprint.</p>
+  </div>
+</section>
+
+<div class="part" id="part-case"><h1>Case study: how hard is measurement, really?</h1></div>
+
+<section class="screen" id="fivecars" data-step="0">
+  <header><h2>Case study: a famous number, revisited</h2></header>
+  <div class="body" style="align-items:center">
+    <p style="font-size:2.4em" aria-hidden="true">🚗 🚗 🚗 🚗 🚗</p>
+    <p>“= 5 cars, lifetime emissions”</p>
+    <ul class="points"><li>One 2019 paper, a number repeated everywhere for years, later shown to be about 10× too high</li></ul>
+    <p class="src">Source: Strubell et al., ACL 2019</p>
+  </div>
+  <div class="notes">
+    <p>Speaking of reading critically: this is one of the most widely repeated numbers in the Green AI conversation, and both the number and the reason it was so large seem to be commonly misunderstood.</p>
+    <p>The claim, from Strubell et al., ACL 2019: training a particular large model produced roughly as much lifetime CO2-equivalent as five cars. This was a neural architecture search model. Normally a human designs a neural network's architecture by hand — how many layers, how many attention heads, how wide each layer — then trains that one design. Neural architecture search automates the design step itself: an algorithm generates many candidate architectures, trains each one, evaluates it, and uses that feedback to propose better candidates — potentially thousands of candidates before landing on a winner. So instead of paying the training cost once, you're paying it thousands of times over, just to find a good architecture, before you even do the real, full training run with the winning design.</p>
+    <p>And specifically: the architecture search Strubell et al. were citing, from So, Le &amp; Liang 2019, "The Evolved Transformer," was searching for a better transformer architecture for machine translation.</p>
+    <p>The number itself was later shown to be roughly 10x too high — the original estimate made assumptions about hardware utilization and power draw that didn't hold up under scrutiny.</p>
+    <p>So when you hear "training a transformer emits CO2 like 5 cars during their lifetimes," you're actually talking about half a car — and not just any transformer, but one that helped reduce training costs for future transformers, at least in theory.</p>
+  </div>
+</section>
+
+<section class="screen" id="discuss" data-step="0">
+  <header><span class="kind">Activity</span><h2>Class discussion (10 min)</h2></header>
+  <div class="body">
+    <div class="activity"><h3>Discuss</h3><div>
+      <ul class="points">
+        <li>Why is estimating a carbon footprint from a paper so hard?</li>
+        <li>What would you need to <i>trust</i> a number like this?</li>
+        <li>Catchy comparisons: do they help, or hurt?</li>
+      </ul>
+    </div></div>
+  </div>
+  <div class="notes">
+    <p>Let's discuss a bit: why is it so hard to estimate a carbon footprint from a paper alone; what information would you need before trusting a number like "5 cars"; and do catchy comparisons like this help public understanding or actively mislead it. If a group gets stuck, nudge with: "What wasn't reported in that 2019 paper that you'd want to know?"</p>
+  </div>
+</section>
+
+<section class="screen" id="answers" data-step="0">
+  <header><h2>Discussion: some possible answers</h2></header>
+  <div class="body">
+    <ul class="points">
+      <li><b>Hard because</b>: hardware, PUE, run time, grid are rarely all reported</li>
+      <li><b>To trust it</b>: the full method, ideally reproducible code</li>
+      <li><b>Catchy comparisons</b>: memorable, and risky if the number is wrong</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>Why it's hard to estimate: papers rarely report all of exact hardware — GPU model and generation, since newer chips can be several times more energy-efficient per FLOP than older ones — the facility's PUE, total wall-clock run time including failed or discarded runs (architecture search in particular trains many candidates that get thrown away — do those count?), and the carbon intensity of the specific grid used, at the time it was used. Any one of these missing or approximated can shift the final number by a large factor.</p>
+    <p>What you'd need to actually trust a number: full methodological transparency, ideally reproducible code and logged measurements — exactly what CodeCarbon, the tool we use in the notebook today, is designed to produce, not just a final headline figure. But is that even realistic? Would you want to reproduce that training run yourself?</p>
+    <p>Catchy comparisons: they're memorable and useful for public communication — "5 cars" sticks in a way "552 tons CO2eq" doesn't. But that stickiness is exactly the risk: once a comparison enters common use, it tends to get repeated long after, or even without, the underlying number ever being corrected.</p>
+  </div>
+</section>
+
+<div class="part" id="part-mt"><h1>How does a machine translate?</h1></div>
+
+<section class="screen" id="back" data-step="0">
+  <header><h2>Back to that sentence</h2></header>
+  <div class="body">
+    <p class="sent">Unha <span class="hl">tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”</p>
+    <p class="src center">an aunt's saying, from the novel <i>Speechwriter</i> by Paulo Naseiro</p>
+    <ul class="points">
+      <li>Galician: a <b>low-resource</b> language</li>
+      <li>Does a huge general model actually handle a case like this, or does it rely on what it has plenty of data for: Spanish, Portuguese, English?</li>
+      <li>But… what's a “model”?</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>Here's the sentence again, same highlighting as before. Galician is a low-resource language in NLP terms — relatively little digitized text exists to train models on, compared to a handful of dominant languages. Here's the question we'll try to look at in this module: when a huge general-purpose model advertises "100+ languages," does it actually handle a case like this properly, or does it quietly default to what it has enormous amounts of training data for — Spanish, Portuguese, English? Does bigger and more general genuinely mean better, or just more expensive? But before we can even ask that seriously — what's a "model," actually? Let's define it.</p>
+  </div>
+</section>
+
 <section class="screen" id="roadmap" data-step="0">
   <header><span class="kind">The plan</span><h2>From n-grams to transformers</h2><p class="sub">Each step fixes a problem of the step before.</p></header>
   <div class="body">
     <div class="tablewrap">
-      <table class="road6">
+      <table class="plain" style="width:100%">
         <thead><tr><th>Step</th><th>What it adds</th><th>What is still missing</th></tr></thead>
         <tbody>
-          <tr class="now"><td>1 N-grams</td><td>predict the next word by counting</td><td>aunt and uncle are unrelated words</td></tr>
+          <tr><td>1 N-grams</td><td>predict the next word by counting</td><td>aunt and uncle are unrelated words</td></tr>
           <tr><td>2 Embeddings</td><td>a learned vector per word: similar words get similar vectors</td><td>vectors for words, not for sentences</td></tr>
           <tr><td>3 Encoder–decoder</td><td>read a sentence into one vector, write the translation from it</td><td>one vector for a whole sentence: early words fade</td></tr>
           <tr><td>4 Attention</td><td>the decoder looks back at every source word</td><td>the source is still read one word after another</td></tr>
@@ -193,21 +689,21 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
         </tbody>
       </table>
     </div>
-    <p class="muted">Each step has three parts: a short explanation, an interactive page, and code you run here, in the browser.</p>
+    <p class="muted">Each step has a short explanation, an interactive panel, and often code you run here, in the browser.</p>
   </div>
   <div class="notes">
-    <p>Here is the plan for the technical part of today. We go in six steps. Each step fixes a problem of the step before.</p>
+    <p>Here is the plan for the technical part of today. We go in six steps. Each step fixes a problem of the step before. The bar at the bottom of the screen shows which step we are on.</p>
     <p>Step 1 is n-grams. An n-gram model predicts the next word by counting which words follow which. Its problem: it has no idea that aunt and uncle are similar. They are just two different words.</p>
     <p>Step 2 is embeddings. Each word gets a vector, a list of values, learned from the words around it. Similar words get similar vectors. But these are vectors for single words. They say nothing about a sentence.</p>
     <p>Step 3 is the encoder–decoder model for translation. The encoder reads the whole sentence into one vector. The decoder writes the translation from that vector. Its problem: one vector has to hold the whole sentence, and the early words fade.</p>
     <p>Step 4 is attention. The decoder may look back at every source word, and it decides how much to use each one. But the source sentence is still read one word after another.</p>
     <p>Step 5 is self-attention. Every word looks at every other word of its own sentence, all at the same time.</p>
     <p>Step 6 is the transformer: many blocks of self-attention stacked on top of each other. This is the architecture of today's large language models. Its cost grows with the size of the model and the length of the text. That is where the rest of the course starts.</p>
-    <p>This page is the lesson. Students can open it on their laptops at olzama.github.io/teaching/GreenAI. Each step has a short explanation, then an interactive page, then code that runs in the browser.</p>
   </div>
 </section>
 
-<!-- ================================================================= -->
+<div class="part" id="part-step1"><h1>Step 1 · N-grams</h1></div>
+
 <section class="screen" id="lm" data-step="1">
   <header><span class="kind">Step 1 · N-grams</span><h2>What is a language model?</h2></header>
   <div class="body cols">
@@ -217,22 +713,19 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
         <li>It gives a probability to <em>every</em> word in the vocabulary. The probabilities add up to 1.</li>
         <li>An n-gram model is the simplest kind: it counts word sequences in a corpus, then divides.</li>
       </ul>
+      <div class="fig"><img src="img/jm-ngram.png" alt="Next-word probabilities, from Jurafsky and Martin"><span class="cap">Credit: Jurafsky &amp; Martin, <i>Speech and Language Processing</i></span></div>
     </div>
     <div class="col">
       <p class="label">After “my”: one probability per word</p>
-      <div class="bars" id="lmBars"></div>
+      <div class="bars" data-bars='[["aunt",0.6667],["uncle",0.3333],["my",0],["stayed",0],["spoke",0],["quiet",0],["wisely",0]]'></div>
       <p class="muted" style="font-size:0.9rem">Counted from three sentences, on the next screen. The vocabulary has 7 words.</p>
     </div>
   </div>
   <div class="notes">
-    <p>We start with the statistical era of NLP, and with one idea: the language model.</p>
-    <p>A language model predicts the next word. It does not make one guess. It gives a probability to every word in the vocabulary. The probabilities add up to 1. Most words get a very small probability.</p>
-    <p>The chart shows this for the word “my”. Aunt gets 0.67. Uncle gets 0.33. Every other word gets 0. These numbers come from three sentences. We count them on the next screen.</p>
-    <p>This same task is behind everything from the n-gram models of the 1990s to GPT. An n-gram model is the simplest version. It does not learn anything in the neural sense. It counts how often word sequences occur, and it divides.</p>
+    <p>Let's step back and give some definitions. We said there were various epochs in NLP; we'll skip the symbolic era for now, though it's important — maybe we'll cover it in Session 3 when we talk about retrieval-augmented generation. So we start with the statistical era, directly with "language models." Language models were the step from task-specific to general AI. Formally: a language model assigns a probability to sequences of words, and in practice is almost always used to predict the next word given the words so far — not just a single guess, but a full probability distribution over the entire vocabulary, where every word gets some probability, even if tiny. This is the task underlying everything from the 1990s n-gram counting we're about to do by hand, to GPT-3. N-grams are the simplest possible instance of this idea: instead of anything learned or neural, just count how often word sequences occur in real text, and turn counts into probabilities.</p>
   </div>
 </section>
 
-<!-- ================================================================= -->
 <section class="screen" id="worked" data-step="1">
   <header><span class="kind">Step 1 · N-grams</span><h2>Count, then divide</h2></header>
   <div class="body cols">
@@ -248,19 +741,16 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
         <li>Counting, then dividing: that is the whole model.</li>
         <li>A Galician model has far fewer sentences to count from than a Spanish or English one, so its estimates are noisier.</li>
       </ul>
-      <div class="ask"><b>Question</b><span>Is a bigger n better?</span><button id="nAnswerBtn" style="justify-self:start">Show one answer</button><span id="nAnswer" hidden>More context helps in principle. But a longer word sequence is rarer, so the model has seen fewer of them, and more of its counts are 0.</span></div>
+      <div class="ask"><b>Question</b><span>Is a bigger n better?</span><button data-reveal="nAnswer" style="justify-self:start">Show one answer</button><span id="nAnswer" hidden>More context helps in principle. But a longer word sequence is rarer, so the model has seen fewer of them, and more of its counts are 0.</span></div>
     </div>
   </div>
   <div class="notes">
-    <p>An n-gram is a sequence of n words in a row. A bigram is 2 words. A trigram is 3. This is a bigram model. It predicts the next word from the one word before it.</p>
-    <p>Our corpus has three sentences about an aunt and an uncle. The formula asks: of all the times “my” appeared, how often was the next word “aunt”? “My” appears 3 times. “My aunt” appears 2 times. So the probability of aunt after my is 2 out of 3, about 0.67. “My uncle” appears once, so uncle gets 1 out of 3, about 0.33.</p>
-    <p>Counting, then dividing. That is the whole model. There is no hidden step.</p>
-    <p>Ask the class: is a bigger n better? Let them answer. Then press Show one answer. A longer n gives more context. But the exact longer sequence is rarer in any corpus. So more of the counts are 0. This is called sparsity.</p>
-    <p>Galician has much less text to count from than Spanish or English. So a Galician n-gram model has more zero counts and noisier numbers. Every count in this toy example stands for that bigger problem.</p>
+    <p>An n-gram is just a sequence of n consecutive words — a bigram is 2 words, a trigram is 3, and so on. This is a bigram model: it estimates the probability of the next word using only the one preceding word.</p>
+    <p>Our toy corpus stays with the story's cast of characters. The formula on screen is nothing more than: out of all the times "my" appeared, what fraction of the time was it immediately followed by "aunt"? "My" appears 3 times total; "my aunt" appears 2 of those times, so P(aunt|my) = 2/3 ≈ 0.67. "My uncle" appears once, so P(uncle|my) = 1/3 ≈ 0.33. Counting, then dividing — that really is the entire model, there's no hidden step.</p>
+    <p>Question for you: is it better to use a bigger n? Using a longer n gives the model more context to condition on, but the exact sequence it needs to have seen becomes rarer and rarer in any real corpus — more context helps in principle but makes the sparsity problem worse in practice. And this is the thread we keep pulling: a Galician n-gram model has dramatically fewer real sentences to count from than a Spanish or English one does — every count in this toy example stands in for a much bigger, real problem. Sparse data means noisy, unreliable probability estimates.</p>
   </div>
 </section>
 
-<!-- ================================================================= -->
 <section class="screen fill" id="explore" data-step="1">
   <header><span class="kind">Interactive</span><h2>Count, generate, score</h2></header>
   <div class="body">
@@ -270,7 +760,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <button data-go="score" aria-pressed="false">Score a sentence</button>
       <a class="open" href="../artifacts/ngram.html#count" target="_blank" rel="noopener" style="align-self:center;margin-left:auto">Open the full page</a>
     </div>
-    <iframe class="frame" id="ngFrame" title="N-grams, step by step: count, generate, score" loading="lazy" src="../artifacts/ngram.html?embed=count,gen,score"></iframe>
+    <iframe class="frame" id="ngFrame" title="N-grams, step by step: count, generate, score" data-src="../artifacts/ngram.html?embed=count,gen,score"></iframe>
   </div>
   <div class="notes">
     <p>Count, then divide. Press Replay counting. A window slides over the three sentences and fills the count table, one pair at a time. Click the row for “my”. The page divides: aunt gets 0.67, uncle gets 0.33. These are the numbers from the last screen.</p>
@@ -281,7 +771,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
 </section>
 
-<!-- ================================================================= -->
 <section class="screen" id="tryA" data-step="1">
   <header><span class="kind">Try it · about 15 minutes for the three screens</span><h2>Build the bigram model</h2></header>
   <div class="body">
@@ -293,7 +782,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
         <h3>Exercise 1 · Count bigrams, then divide</h3>
         <p>Complete <code>build_bigram_counts</code> and <code>bigram_prob</code>. <code>counts[w1][w2]</code> is how many times the pair <code>w1 w2</code> occurs. <code>unigram_counts[w1]</code> is how many pairs start with <code>w1</code>. <code>bigram_prob</code> returns P(w2 | w1) = count(w1 w2) / count(w1). The cell should print 0.67 and 0.33.</p>
       </div>
-      <details><summary>Hints</summary><ul>
+      <details class="hint"><summary>Hints</summary><ul>
         <li>The inner loop looks at position <code>i</code> and the word right after it, <code>words[i + 1]</code>.</li>
         <li>The pair count is indexed by the first word, then the second word.</li>
         <li>The probability divides the pair count by the count of the first word.</li></ul></details>
@@ -374,7 +863,7 @@ print(f"P(uncle | my) = {bigram_prob('my', 'uncle', counts, unigram_counts):.3f}
         <h3>Exercise 2 · Change the data, change the model</h3>
         <p>Add at least two sentences to <code>EXTENDED_CORPUS</code> so that, in the new model, P(uncle | my) is <b>larger</b> than P(aunt | my).</p>
       </div>
-      <details><summary>Hints</summary><ul>
+      <details class="hint"><summary>Hints</summary><ul>
         <li>The original corpus has “my aunt” twice and “my uncle” once.</li>
         <li>Each new sentence is a Python string, for example <code>"my uncle spoke kindly"</code>.</li></ul></details>
 <script type="text/plain" class="start">
@@ -408,11 +897,10 @@ print(f"P(uncle | my) = {bigram_prob('my', 'uncle', ext_counts, ext_unigrams):.3
     <p>Now everyone works alone, for about 15 minutes. There are three screens of exercises: this one and the next two.</p>
     <p>The code runs in the browser. Nothing to install. The first Run loads Python and takes a few seconds. If a laptop has trouble, the same exercises are in the Colab notebooks linked at the top.</p>
     <p>How it works: replace every gap, the three underscores, with code. Press Run. The page runs the code and then checks it. A green line means the exercise passed. Hints and the solution are under each exercise. Ask them to try before they open the solution.</p>
-    <p>Exercise 1 rebuilds the model from the slides. It should print 0.67 and 0.33. Exercise 2 changes the corpus, so the numbers change: the data is the model.</p>
+    <p>Exercise 1 rebuilds the model from the worked example. It should print 0.67 and 0.33. Exercise 2 changes the corpus, so the numbers change: the data is the model.</p>
   </div>
 </section>
 
-<!-- ================================================================= -->
 <section class="screen" id="tryGen" data-step="1">
   <header><span class="kind">Try it</span><h2>Generate text with the model</h2></header>
   <div class="body">
@@ -421,7 +909,7 @@ print(f"P(uncle | my) = {bigram_prob('my', 'uncle', ext_counts, ext_unigrams):.3
         <h3>Exercise 3 · Generate text greedily</h3>
         <p>Given a start word, the model repeatedly picks the next word with the highest count. Complete the loop in <code>generate</code>: pick that word, and add it to the sentence.</p>
       </div>
-      <details><summary>Hints</summary><ul>
+      <details class="hint"><summary>Hints</summary><ul>
         <li><code>candidates</code> maps each possible next word to its count, for example <code>{'aunt': 2, 'uncle': 1}</code>.</li>
         <li><code>max(candidates, key=...)</code> returns the key with the largest value of <code>key(word)</code>.</li></ul></details>
 <script type="text/plain" class="start">
@@ -468,7 +956,6 @@ print(generate("my", counts, unigram_counts))
   </div>
 </section>
 
-<!-- ================================================================= -->
 <section class="screen" id="tryB" data-step="1">
   <header><span class="kind">Try it</span><h2>Use the model to fix word order</h2></header>
   <div class="body">
@@ -478,7 +965,7 @@ print(generate("my", counts, unigram_counts))
         <h3>Exercise 4 · Score word orders with a smoothed bigram model</h3>
         <p>Two gaps. In <code>sentence_log_prob</code>, compute the <b>add-one smoothed</b> probability of each pair and add its logarithm to <code>log_prob</code>. In the search loop, keep the best-scoring order seen so far.</p>
       </div>
-      <details><summary>Hints</summary><ul>
+      <details class="hint"><summary>Hints</summary><ul>
         <li>Add-one smoothing adds 1 to every pair count, and adds the vocabulary size to the denominator.</li>
         <li>Logs turn the product of probabilities into a sum: <code>log_prob += math.log(prob)</code>.</li>
         <li>Update the best order only when the new score is higher than <code>best_score</code>.</li></ul></details>
@@ -572,7 +1059,7 @@ print("\nBest order found:", " ".join(best_order))
         <h3>Exercise 5 · Count the orderings</h3>
         <p>Count every ordering of <code>BIGGER_WORDS</code> in the loop, and compute <code>expected</code>, the number of orderings, from a formula. The two numbers must match.</p>
       </div>
-      <details><summary>Hints</summary><ul>
+      <details class="hint"><summary>Hints</summary><ul>
         <li>n different words have n! orderings: n × (n − 1) × … × 1.</li>
         <li><code>math</code> was imported in Exercise 4.</li></ul></details>
 <script type="text/plain" class="start">
@@ -616,7 +1103,6 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   </div>
 </section>
 
-<!-- ================================================================= -->
 <section class="screen fill" id="shakespeare" data-step="1">
   <header><span class="kind">Interactive · if there is time</span><h2>Shakespeare, one word at a time</h2></header>
   <div class="body">
@@ -625,7 +1111,7 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
       <button data-go="game" aria-pressed="false">Shakespeare or n-gram?</button>
       <a class="open" href="../artifacts/ngram.html#shk" target="_blank" rel="noopener" style="align-self:center;margin-left:auto">Open the full page</a>
     </div>
-    <iframe class="frame" title="N-grams, step by step: Shakespeare" loading="lazy" src="../artifacts/ngram.html?embed=shk,game"></iframe>
+    <iframe class="frame" title="N-grams, step by step: Shakespeare" data-src="../artifacts/ngram.html?embed=shk,game"></iframe>
   </div>
   <div class="notes">
     <p>The same counting, on the complete works of Shakespeare: about a million words.</p>
@@ -635,7 +1121,6 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   </div>
 </section>
 
-<!-- ================================================================= -->
 <section class="screen" id="missing" data-step="1">
   <header><span class="kind">Step 1 → Step 2</span><h2>What n-grams cannot see</h2></header>
   <div class="body cols">
@@ -649,33 +1134,1016 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
         <li>What it learns about aunt does not help with uncle.</li>
         <li><b>Step 2, embeddings:</b> give each word a vector, so that words used in similar ways get similar vectors.</li>
       </ul>
-      <p class="muted">Step 2 continues on the slides, from “From counts to vectors” (slide 28).</p>
+      <p class="muted">Next: step 2, embeddings.</p>
     </div>
   </div>
   <div class="notes">
     <p>Here is what step 1 cannot do. In our corpus, aunt and uncle are used in the same way. Both follow “my”. Both are followed by “stayed”.</p>
     <p>The corpus has “aunt spoke”, but never “uncle spoke”. So the model gives “spoke” after uncle a probability of 0. It does not know that aunt and uncle are similar words. For the model, they are just two different rows in a table of counts.</p>
-    <p>Step 2 fixes this. Each word gets a vector, learned from the words around it. Words used in similar ways get similar vectors. Then what the model learns about aunt can help with uncle. We continue on the slides, at slide 28.</p>
+    <p>Step 2 fixes this. Each word gets a vector, learned from the words around it. Words used in similar ways get similar vectors. Then what the model learns about aunt can help with uncle.</p>
+  </div>
+</section>
+
+<div class="part" id="part-step2"><h1>Step 2 · Embeddings</h1></div>
+
+<section class="screen" id="counts2vec" data-step="2">
+  <header><span class="kind">Step 2 · Embeddings</span><h2>From counts to vectors</h2></header>
+  <div class="body">
+    <ul class="points"><li>Count co-occurrences instead of sequences → a vector per word</li></ul>
+    <div class="fig"><img src="img/sparse.png" alt="A co-occurrence table: one row per word, mostly zeros"></div>
+  </div>
+  <div class="notes">
+    <p>A genuinely revolutionary idea was to treat words as vectors. Instead of counting sequences of words, as n-grams do, count co-occurrences: for a given word, how often does each other word in the vocabulary appear nearby it in real text? Do this for every word and you get one long vector per word — its co-occurrence vector — where each position corresponds to one other vocabulary word, and the value is how often they co-occur. Any given word only ever co-occurs with a small fraction of the full vocabulary, so the vast majority of entries in each vector are zero, which is exactly what this table shows: mostly zeros, information concentrated in a few positions. This sparse-vector idea is the direct ancestor of the dense, learned embeddings we get to in a couple of screens.</p>
+  </div>
+</section>
+
+<section class="screen" id="cosine" data-step="2">
+  <header><span class="kind">Step 2 · Embeddings</span><h2>Comparing vectors: cosine similarity</h2></header>
+  <div class="body">
+    <div class="formula">cos(u, v) = <span class="frac"><span>u · v</span><span>‖u‖ ‖v‖</span></span></div>
+    <ul class="points">
+      <li>Toy example: aunt = (4, 2), uncle = (3, 3), car = (1, 4)</li>
+      <li>cos(aunt, uncle) ≈ 0.95 &nbsp;&nbsp; cos(aunt, car) ≈ 0.65</li>
+      <li>Dividing by length makes this about <i>direction</i> alone</li>
+    </ul>
+    <div class="figrow"><img src="img/dot-product.png" alt="The dot product"><img src="img/cosine1.png" alt="Cosine from the dot product"><img src="img/cosine2.png" alt="The angle between two vectors"></div>
+  </div>
+  <div class="notes">
+    <p>Given two word vectors, how do you measure how similar they are? The natural first instinct, the dot product u * v, has a problem: it's inflated simply by how long, how large-valued, the vectors are, which mostly reflects how frequent the words are, not how similar their meaning is. Cosine similarity fixes this by dividing the dot product by the product of the vectors' lengths, which cancels out magnitude and leaves you with a pure measure of direction — do these two vectors point the same way in the space, regardless of how long either one is.</p>
+    <p>The toy numbers stay with our cast of characters: aunt = (4,2), uncle = (3,3), car = (1,4). Cosine of aunt and uncle is about 0.95 — very similar direction, matching our intuition that aunt and uncle are semantically close, both relatives. Cosine of aunt and car is about 0.65, noticeably less similar. This is a two-dimensional toy so the arithmetic fits on a screen; real word vectors have hundreds of dimensions, but the exact same formula, unchanged, is what's used to compare them.</p>
+  </div>
+</section>
+
+<section class="screen fill" id="cosine-i" data-step="2">
+  <header><span class="kind">Interactive</span><h2>Shakespeare, counted by play</h2></header>
+  <div class="body">
+    <div class="tabs"><a class="open" href="../artifacts/ngram.html#td" target="_blank" rel="noopener">Open the full page</a></div>
+    <iframe class="frame" title="Shakespeare, counted by play" data-src="../artifacts/ngram.html?embed=td"></iframe>
+  </div>
+  <div class="notes">
+    <p>The table counts four words, battle, soldier, fool and clown, in four plays.</p>
+    <p>Choose Plays as vectors: each play is a column of counts, so each play is a vector. The plot draws two of the dimensions. Now choose Words as vectors: each row is a vector too.</p>
+    <p>In the similarity table, click a cell. The page shows the cosine arithmetic for that pair. Switch between cosine and dot product: the dot product grows with frequency, the cosine does not.</p>
+    <p>Count it adds a word of your own, counted in the full text of the plays.</p>
+  </div>
+</section>
+
+<section class="screen" id="embeddings" data-step="2">
+  <header><span class="kind">Step 2 · Embeddings</span><h2>From words to vectors: embeddings</h2></header>
+  <div class="body">
+    <div class="col">
+      <ul class="points">
+        <li><b>Learned</b>, <b>dense</b> vectors: every dimension has a value</li>
+        <li>Similar contexts → similar vectors: the same cosine idea, learned this time</li>
+      </ul>
+      <svg class="svgfig" viewBox="0 0 330 90" role="img" aria-label="The same word as a sparse vector, mostly empty, and as a dense vector, every box filled">
+        <text x="0" y="24" font-size="12" class="muted">sparse</text>
+        <g transform="translate(56,8)">
+          <rect x="0" y="0" width="24" height="24" fill="none" stroke="var(--line)"/><rect x="26" y="0" width="24" height="24" fill="none" stroke="var(--line)"/>
+          <rect x="52" y="0" width="24" height="24" fill="var(--blue)" fill-opacity="0.7" stroke="var(--line)"/><text x="64" y="17" font-size="11" text-anchor="middle">3</text>
+          <rect x="78" y="0" width="24" height="24" fill="none" stroke="var(--line)"/><rect x="104" y="0" width="24" height="24" fill="none" stroke="var(--line)"/><rect x="130" y="0" width="24" height="24" fill="none" stroke="var(--line)"/>
+          <rect x="156" y="0" width="24" height="24" fill="var(--blue)" fill-opacity="0.4" stroke="var(--line)"/><text x="168" y="17" font-size="11" text-anchor="middle">1</text>
+          <rect x="182" y="0" width="24" height="24" fill="none" stroke="var(--line)"/><rect x="208" y="0" width="24" height="24" fill="none" stroke="var(--line)"/><rect x="234" y="0" width="24" height="24" fill="none" stroke="var(--line)"/>
+        </g>
+        <text x="0" y="68" font-size="12" class="muted">dense</text>
+        <g transform="translate(56,52)" stroke="var(--line)" fill="var(--green)">
+          <rect x="0" y="0" width="24" height="24" fill-opacity="0.2"/><rect x="26" y="0" width="24" height="24" fill-opacity="0.7"/><rect x="52" y="0" width="24" height="24" fill-opacity="0.4"/><rect x="78" y="0" width="24" height="24" fill-opacity="0.9"/><rect x="104" y="0" width="24" height="24" fill-opacity="0.1"/>
+          <rect x="130" y="0" width="24" height="24" fill-opacity="0.6"/><rect x="156" y="0" width="24" height="24" fill-opacity="0.3"/><rect x="182" y="0" width="24" height="24" fill-opacity="0.8"/><rect x="208" y="0" width="24" height="24" fill-opacity="0.5"/><rect x="234" y="0" width="24" height="24" fill-opacity="0.4"/>
+        </g>
+      </svg>
+      <p class="axisnote">the same word, two representations</p>
+    </div>
+  </div>
+  <div class="fig"><img src="img/embeddings.png" alt="Words as dense vectors" style="width:min(100%, 900px);max-height:none"><span class="cap">Credit: jalammar.github.io/illustrated-transformer</span></div>
+  <div class="notes">
+    <p>Co-occurrence vectors are sparse, and they have as many dimensions as the vocabulary itself — potentially tens of thousands. Embeddings, the next revolutionary idea, are the modern alternative: dense vectors, every dimension has a real, usually non-zero value, with far fewer dimensions, commonly a few hundred. That little diagram up top is the whole contrast in one picture — sparse on top, mostly empty boxes; dense on the bottom, every box filled in with some value. Crucially, embeddings are learned, not counted directly — a model is trained on a task, and the vectors that fall out of that training happen to place words with similar contexts close together, using the exact same cosine-similarity notion of "close" from the previous screen. No individual dimension has an obvious hand-labeled meaning; it's the geometry of the whole space that encodes meaning.</p>
+  </div>
+</section>
+
+<section class="screen" id="sglearn" data-step="2">
+  <header><span class="kind">Step 2 · Embeddings</span><h2>How embeddings are actually learned</h2><p class="sub">Skip-gram (Mikolov et al., 2013): predict the neighbors</p></header>
+  <div class="body cols">
+    <div class="col">
+      <p class="label">A tiny corpus</p>
+      <div class="corpus"><span>cats chase mice</span><span>dogs chase balls</span><span>cats eat fish</span><span>dogs eat meat</span></div>
+      <p class="label">Window = 1</p>
+      <svg class="svgfig" viewBox="0 0 260 80" role="img" aria-label="chase predicts both neighbors, cats and mice" style="max-width:340px">
+        <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="var(--blue)"/></marker></defs>
+        <text x="40" y="66" font-size="15" text-anchor="middle">cats</text>
+        <rect x="98" y="48" width="64" height="26" rx="4" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="130" y="66" font-size="15" text-anchor="middle">chase</text>
+        <text x="220" y="66" font-size="15" text-anchor="middle">mice</text>
+        <path d="M118 46 Q 80 10 46 48" fill="none" stroke="var(--blue)" stroke-width="1.6" marker-end="url(#ah)"/>
+        <path d="M142 46 Q 180 10 214 48" fill="none" stroke="var(--blue)" stroke-width="1.6" marker-end="url(#ah)"/>
+        <text x="130" y="14" font-size="11" text-anchor="middle" fill="var(--blue)" style="fill:var(--blue)">predict both neighbors</text>
+      </svg>
+    </div>
+    <div class="col">
+      <p class="label">16 training pairs: input → word to predict</p>
+      <div class="tablewrap"><table class="plain mono" style="font-size:0.9rem">
+        <tr><td>cats → chase</td><td>cats → eat</td></tr>
+        <tr><td>chase → cats</td><td>eat → cats</td></tr>
+        <tr><td>chase → mice</td><td>eat → fish</td></tr>
+        <tr><td>mice → chase</td><td>fish → eat</td></tr>
+        <tr><td>dogs → chase</td><td>dogs → eat</td></tr>
+        <tr><td>chase → dogs</td><td>eat → dogs</td></tr>
+        <tr><td>chase → balls</td><td>eat → meat</td></tr>
+        <tr><td>balls → chase</td><td>meat → eat</td></tr>
+      </table></div>
+    </div>
+  </div>
+  <ul class="points">
+    <li>The task: given <i>cats</i>, give high probability to <i>chase</i> and <i>eat</i></li>
+    <li>The task never mentions word vectors. The vectors appear because the model needs them to make predictions.</li>
+  </ul>
+  <div class="notes">
+    <p>The previous screen said embeddings are learned. This screen and the next one set up how, with a tiny example. Then we watch it on the skip-gram page.</p>
+    <p>The method is called skip-gram. It was introduced by Mikolov and colleagues in 2013.</p>
+    <p>Skip-gram is trained to do one thing. It is given a word. It must predict which words appear next to that word.</p>
+    <p>On the left is a tiny corpus. A corpus is a collection of text. This one has four sentences: cats chase mice, dogs chase balls, cats eat fish, dogs eat meat.</p>
+    <p>We use a window of size 1. This means each word predicts only the word directly before it and the word directly after it. The picture shows this for the word "chase" in the first sentence. "Chase" must predict "cats" and "mice".</p>
+    <p>We do this for every word in every sentence. The result is the list on the right. There are 16 training pairs. Each pair is an input word and one word the model should predict. For example, the first pair says: given "cats", predict "chase".</p>
+    <p>So the task is: given "cats", give high probability to "chase" and to "eat". Given "dogs", also give high probability to "chase" and to "eat".</p>
+    <p>Notice that the task says nothing about word vectors. Nobody asks the model to find good representations of words. The vectors appear because the model needs some numbers for each word in order to make its predictions. The next screen shows where those numbers live, and what the model multiplies.</p>
+  </div>
+</section>
+
+<section class="screen" id="inside" data-step="2">
+  <header><span class="kind">Step 2 · Embeddings</span><h2>Inside skip-gram: what gets multiplied</h2><p class="sub">Two tables of parameters. Both start random.</p></header>
+  <div class="body cols wide-left">
+    <div class="col">
+      <ul class="points">
+        <li><i>p</i>: the <b>embedding table</b>, one row per word. A <b>one-hot</b> vector (all 0, one 1) times <i>p</i> copies out one row, <i>h</i>:</li>
+      </ul>
+      <div class="eq">
+        <span class="mat" style="--c:4"><span>0</span><span>0</span><span class="hl">1</span><span>0</span></span>
+        <span class="mat" style="--c:2"><span>0.1</span><span>0.9</span><span>0.3</span><span>0.2</span><span class="hl">0.7</span><span class="hl">0.5</span><span>0.4</span><span>0.8</span></span>
+        <span>=</span>
+        <span class="mat" style="--c:2"><span class="hl">0.7</span><span class="hl">0.5</span></span>
+      </div>
+      <ul class="points">
+        <li><i>p′</i>: one column per word. <i>h</i> × <i>p′</i> gives one <b>score</b> per word; <b>softmax</b> turns scores into probabilities that sum to 1</li>
+        <li>Training nudges <i>p</i> and <i>p′</i>: the true neighbor gets more probability</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="fig"><img src="img/skip-gram.png" alt="The skip-gram network"><span class="cap">Illustration: district-data-labs (Medium)</span></div>
+    </div>
+  </div>
+  <div class="notes">
+    <p>This screen shows what the model actually computes. It has two tables of numbers. Both start random. These numbers are its parameters. A parameter is a number that training is allowed to change.</p>
+    <p>The first table is called p. It has one row per word. A row is a vector, a list of values. Each position in the list is a dimension. In our example, every word has two dimensions, so we can draw each word as a point.</p>
+    <p>How does the model read a word? It writes the word as a one-hot vector. That is a vector of zeros with a single 1, at that word's position in the vocabulary. The example on the screen has four words. The 1 is in position 3. Multiply this vector by the table: every row is multiplied by 0, except row 3. So the result is exactly row 3, copied out. We call this row h. It is the word's embedding.</p>
+    <p>The second table is called p′, p prime. It has one column per word. The model multiplies h by every column. Each multiplication is a dot product: multiply matching entries and add them up. This gives one score per word. A function called softmax turns the scores into probabilities. The probabilities are all positive, and they add up to 1. This is the model's guess: how likely each word is as a neighbor.</p>
+    <p>Training compares this guess with the true neighbor. Then it nudges both tables a little, so that the true neighbor gets more probability next time.</p>
+    <p>The picture on the right is the same model with a window of two words on each side. It is a common illustration of skip-gram.</p>
+    <p>Quick note on the sizes here, because the shapes matter as much as the mechanism. Say your vocabulary has V words, so the one-hot input vector is V numbers long, all zeros except one 1. Matrix p has shape V by N, where N is the embedding size, way smaller than V, so maybe V is 10,000 and N is 300. When you multiply that one-hot vector by p, you're doing a 1-by-V times V-by-N multiplication, and the V's cancel out, so what you get back is 1-by-N, that's h. That's really why the one-hot trick works the way it does, matrix multiplication rules just force it: you can only multiply if the inner dimensions match, V and V, and what's left over is the outer dimensions, 1 and N. Then p' has the opposite shape, N by V, so h times p' is 1-by-N times N-by-V, the N's cancel this time, and you're back to 1-by-V, one score per vocabulary word. So the whole thing funnels V dimensions down to N and then back out to V again, and that squeeze through the narrow N-dimensional middle is really the whole reason embeddings end up meaning anything, the network's forced to compress everything useful about a word into just N numbers to still do well at predicting V-many possible neighbors.</p>
+  </div>
+</section>
+
+<section class="screen fill" id="sg-i" data-step="2">
+  <header><span class="kind">Interactive</span><h2>Skip-gram, step by step</h2></header>
+  <div class="body">
+    <div class="tabs"><a class="open" href="../artifacts/skipgram.html" target="_blank" rel="noopener">Open the full page</a></div>
+    <iframe class="frame" title="Skip-gram, step by step" data-src="../artifacts/skipgram.html?embed=train"></iframe>
+  </div>
+  <div class="notes">
+    <p>The top panel shows the multiplication. Press Play the multiplication. Show the steps: the one-hot vector times p gives h. h times p prime gives eight scores. The scores become eight probabilities. Then choose all words at once: now all eight one-hot vectors are multiplied together, and we get a full table of predictions.</p>
+    <p>Now train. In the panel on the right, press Step: next pair. The first pair is cats to chase. The bar chart shows the model's guess for cats. Every word gets about one eighth. Chase gets 0.111, too low. In the plot, the green arrow adds a little of the vector for chase to cats. The red arrow subtracts a little of the average guess. The black arrow, their sum, is the step. Cats moves a little. Press Step a few more times.</p>
+    <p>Then press One pass: all 16 pairs once. Then press Play. Watch the colors. The model never sees them. Cats and dogs end up pointing the same way. So do mice and balls, and fish and meat. Move the slider to 100 passes, then to 3000. Turn on paths: most of the movement happens in the first 20 passes. If there is time, press new random start and play again. The starting points change; the grouping comes back.</p>
+  </div>
+</section>
+
+<section class="screen" id="redrawn" data-step="2">
+  <header><span class="kind">Step 2 · Embeddings</span><h2>The same table, redrawn during training</h2></header>
+  <div class="body">
+    <div class="scatters">
+      <div class="fig"><svg class="scatter" role="img" aria-label="At the start: random points" data-range="-0.5,0.5,-0.5,0.55"
+        data-points='[["cats",-0.41,-0.26,"blue","s"],["dogs",0.30,0.08,"blue","e"],["chase",-0.41,-0.07,"gray","n"],["eat",-0.02,-0.34,"gray","e"],["mice",0.23,-0.39,"orange","e"],["balls",-0.11,0.02,"orange","w"],["fish",-0.07,0.09,"green","n"],["meat",0.24,0.46,"green","e"]]'></svg>
+        <span>start</span><span class="cap">axes: −0.5 to 0.5</span></div>
+      <div class="fig"><svg class="scatter" role="img" aria-label="After 100 passes: colors grouped" data-range="-2,2.5,-2,2.5" data-ray="1.55,0.90"
+        data-points='[["cats",1.02,0.62,"blue","s"],["dogs",1.55,0.90,"blue","n"],["chase",-1.51,0.54,"gray","n"],["eat",-0.50,-1.50,"gray","e"],["mice, balls",2.13,-0.73,"orange","s"],["fish, meat",0.60,2.21,"green","e"]]'></svg>
+        <span>100 passes</span><span class="cap">axes: −2 to 2.5</span></div>
+      <div class="fig"><svg class="scatter" role="img" aria-label="After 3000 passes: groups further apart" data-range="-2,5,-3.5,5.5" data-ray="0.86,0.48"
+        data-points='[["",0.63,0.37,"blue","e"],["cats, dogs",0.86,0.48,"blue","e"],["chase",-1.25,0.47,"gray","n"],["eat",-0.34,-1.29,"gray","w"],["mice, balls",3.91,-3.05,"orange","n"],["fish, meat",-0.25,4.96,"green","e"]]'></svg>
+        <span>3000 passes</span><span class="cap">axes: −2 to 5</span></div>
+    </div>
+    <ul class="points">
+      <li>One pass = all 16 training pairs once</li>
+      <li>Same color → same direction from the origin. Nobody told the model which words belong together.</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>This screen shows the same table at three moments in training. Each plot draws every row of the table as a point, like on the page.</p>
+    <p>One pass means the model has seen all 16 training pairs once.</p>
+    <p>On the left is the start. The points are random, and the colors are mixed together.</p>
+    <p>In the middle is the table after 100 passes. Mice and balls now sit almost on the same spot. So do fish and meat. Cats and dogs sit on the same line from the origin: they point in the same direction, and dogs is a little further out. The dashed line shows that direction. Each color has come together.</p>
+    <p>On the right is the table after 3000 passes. The groups are the same, and they have moved further apart. Cats and dogs still point in the same direction. Notice that the axes change from plot to plot. The numbers grow during training, so each plot is zoomed out more than the one before.</p>
+    <p>Remember that the model never saw the colors. It was never told that cats and dogs are similar. It only tried to predict neighbors. The next screen explains why that was enough.</p>
+  </div>
+</section>
+
+<section class="screen" id="similar" data-step="2">
+  <header><span class="kind">Step 2 · Embeddings</span><h2>Similar company, similar vectors</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <p class="label">The company each word keeps</p>
+      <table class="plain">
+        <tr><td class="c-blue">cats</td><td>chase, eat</td></tr>
+        <tr><td class="c-blue">dogs</td><td>chase, eat</td></tr>
+        <tr><td class="c-orange">mice</td><td>chase</td></tr>
+        <tr><td class="c-orange">balls</td><td>chase</td></tr>
+        <tr><td class="c-green">fish</td><td>eat</td></tr>
+        <tr><td class="c-green">meat</td><td>eat</td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <p class="label">The table after training</p>
+      <table class="plain">
+        <tr><td class="c-blue">cats</td><td class="num">0.63</td><td class="num">0.37</td></tr>
+        <tr><td class="c-blue">dogs</td><td class="num">0.86</td><td class="num">0.48</td></tr>
+        <tr><td class="c-orange">mice</td><td class="num">3.89</td><td class="num">−3.15</td></tr>
+        <tr><td class="c-orange">balls</td><td class="num">3.93</td><td class="num">−2.94</td></tr>
+        <tr><td class="c-green">fish</td><td class="num">−0.34</td><td class="num">5.00</td></tr>
+        <tr><td class="c-green">meat</td><td class="num">−0.16</td><td class="num">4.91</td></tr>
+      </table>
+    </div>
+  </div>
+  <ul class="points">
+    <li>Same neighbors → same nudges, pair after pair → same direction</li>
+    <li>cos(cats, dogs) = 1.00 &nbsp;&nbsp; cos(cats, fish) = 0.44</li>
+    <li>Task solved: P(chase | cats) 0.11 → 0.47, P(eat | cats) 0.12 → 0.52</li>
+  </ul>
+  <p class="quote">“You shall know a word by the company it keeps.” J. R. Firth (1957)</p>
+  <div class="notes">
+    <p>Why did this happen? The left table shows the company each word keeps, meaning the words it has to predict. Cats has to predict chase and eat. Dogs has to predict exactly the same two words.</p>
+    <p>So every time training nudges the cats row to predict chase better, it later nudges the dogs row in the same way, for the same reason. Pair after pair, the two rows receive the same kind of changes. In the end they point in the same direction. The right table shows this. Cats is 0.63 and 0.37. Dogs is 0.86 and 0.48. Both have the second number a little more than half of the first. Dogs is only further from the origin. Mice and balls are almost identical, and so are fish and meat.</p>
+    <p>We can measure this with cosine similarity from a few screens ago. Cosine similarity measures direction and ignores length. Cosine of cats and dogs is 1.00, the maximum. Cosine of cats and fish is 0.44, much lower.</p>
+    <p>The model also got good at its actual task. Before training, the probability of chase given cats was 0.11. After training it is 0.47. The probability of eat given cats went from 0.12 to 0.52. Those two numbers add up to almost 1. The model has learned that cats is always followed by one of these two words, and it splits its bet equally between them.</p>
+    <p>The quote at the bottom is from the linguist J. R. Firth, 1957: "You shall know a word by the company it keeps." This is called the distributional idea: words that appear in similar contexts tend to have similar meanings. Skip-gram turns this idea into a training procedure. If two words keep similar company, the model does better when it gives them similar vectors.</p>
+  </div>
+</section>
+
+<section class="screen fill" id="similar-i" data-step="2">
+  <header><span class="kind">Interactive</span><h2>Which words are similar?</h2></header>
+  <div class="body">
+    <div class="tabs"><a class="open" href="../artifacts/skipgram.html#similar" target="_blank" rel="noopener">Open the full page</a></div>
+    <iframe class="frame" title="Which words are similar?" data-src="../artifacts/skipgram.html?embed=similar"></iframe>
+  </div>
+  <div class="notes">
+    <p>The corpus grows with the same pattern as ours, up to 92 words. Choose 92 words and press Play.</p>
+    <p>There are three columns. Left: one-hot vectors. Every pair of words is at a right angle, so the cosine is 0. One-hot vectors have no similarity at all. Middle: trained vectors with as many dimensions as words. Right: trained vectors with 2 dimensions.</p>
+    <p>Watch the chart of the cosine of cats and dogs. With 2 dimensions it reaches 0.95 at pass 4. With 92 dimensions it takes 352 passes. With few dimensions, words have to share, so similarity appears much sooner.</p>
+  </div>
+</section>
+
+<section class="screen" id="keep" data-step="2">
+  <header><span class="kind">Step 2 · Embeddings</span><h2>What we keep: the embedding table</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <div class="box">task: predict neighboring words</div><div class="center arr">↓</div>
+      <div class="box">the model needs adjustable numbers for each word</div><div class="center arr">↓</div>
+      <div class="box">training adjusts those numbers, pair after pair</div><div class="center arr">↓</div>
+      <div class="box">words with similar neighbors get similar adjustments</div><div class="center arr">↓</div>
+      <div class="box g">a space where similar words are close together</div>
+    </div>
+    <div class="col">
+      <ul class="points">
+        <li>After training, discard the prediction part and <b>keep the table</b>. Its rows are the <b>word embeddings</b>.</li>
+        <li>Embeddings = the parameters the model uses to solve its prediction task</li>
+        <li>Rare word → few pairs → few nudges → poorly placed vector</li>
+        <li>Less Galician text online → weaker embeddings for many Galician words</li>
+      </ul>
+    </div>
+  </div>
+  <div class="notes">
+    <p>The left side summarizes the whole story as a chain of causes. The task is to predict neighboring words. To do that, the model needs adjustable numbers for each word. Training adjusts those numbers, one pair at a time. Words with similar neighbors receive similar adjustments. The result is a space where similar words are close together.</p>
+    <p>When training is finished, we do not need the prediction part anymore. We keep only the table. Each row of the table is the embedding of one word. This is what people mean by word embeddings.</p>
+    <p>You will sometimes hear that embeddings are a byproduct of training. That is roughly right, but it can make them sound accidental. A more precise way to say it: embeddings are learned internal representations. They are exactly the parameters the model uses to solve its prediction task.</p>
+    <p>Now the resource problem from the n-gram screen comes back. A word gets nudged only when it appears in a training pair. A rare word appears in few pairs. So its vector gets few nudges and may stay close to where it started, which was random. There is less Galician text online than Spanish or English text. So many Galician words are rare in the training data, and their embeddings are weaker.</p>
+    <p>Remember the two tables from the page: p, one vector per word as an input, and p′, one vector per word as a predicted neighbor. We keep the first one.</p>
+  </div>
+</section>
+
+<section class="screen" id="act-emb" data-step="2">
+  <header><span class="kind">Activity · about 15–20 minutes, individual</span><h2>Embeddings playground</h2></header>
+  <div class="body">
+    <div class="activity"><h3>Notebook 01c, in Colab (CPU only, no GPU needed)</h3><div>
+      <ul class="points">
+        <li>Part A: real word embeddings, real cosine similarity, a 2-D map of related words</li>
+        <li>Part B: do Galician, Spanish and Portuguese words for “aunt” really look distinct to a multilingual model?</li>
+      </ul>
+      <div class="links">
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01c_embeddings_playground-beginner.ipynb" target="_blank" rel="noopener">Open in Colab: beginner</a>
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01c_embeddings_playground-advanced.ipynb" target="_blank" rel="noopener">Open in Colab: advanced</a>
+      </div>
+    </div></div>
+  </div>
+  <div class="notes">
+    <p>Pause here too, right after skip-gram. Have everyone open 01c_embeddings_playground.ipynb — CPU only, two small downloads (a 66MB GloVe vector file, then a roughly 470MB multilingual sentence encoder). Part A replaces the toy 2-D aunt/uncle/car numbers with real, pretrained 50-dimensional embeddings — same three words, real cosine similarities, a nearest-neighbors query, and a PCA scatter plot of a dozen related words that visibly clusters family terms together and vehicles together, with nobody having hand-labeled either category. Part B is the sharper one: using a small multilingual sentence encoder that explicitly supports Galician, students embed "tía"/"miña"/the full phrase in Galician, Spanish, Portuguese, and English, compute how close Galician sits to each of the other three, then see it two ways — a bar chart of the similarity table, and a PCA scatter of all 12 embeddings together, where the Galician points visibly cluster with Spanish and Portuguese, apart from English. The expected finding — Galician sitting almost as close to Spanish as a word sits to itself — is a measured, hands-on version of the "almost residual" claim we'll cite later. This is meant to land before the machine-translation history screen, so the Galician thread feels demonstrated, not just asserted.</p>
+  </div>
+</section>
+
+<div class="part" id="part-step3"><h1>Step 3 · Encoder–decoder translation</h1></div>
+
+<section class="screen" id="mthistory" data-step="3">
+  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Machine translation: a very short history</h2></header>
+  <div class="body">
+    <div class="flow"><div class="box">Rules<br>1950s</div><span class="arr">→</span><div class="box">Statistics<br>1990s</div><span class="arr">→</span><div class="box">Neural +<br>attention, 2015</div><span class="arr">→</span><div class="box g">LLMs<br>2020s</div></div>
+    <ul class="points">
+      <li>One of AI's oldest goals: first public demo in 1954 (Georgetown–IBM)</li>
+      <li>1966: the ALPAC report cuts U.S. funding for over a decade</li>
+      <li>2006: Google Translate, built on statistical MT</li>
+      <li>Galician is living through this same arc right now</li>
+    </ul>
+    <p class="src">Source: Hutchins, “Machine Translation: A Concise History,” 2007</p>
+  </div>
+  <div class="notes">
+    <p>Just because I like MT so much. MT is one of AI's oldest stated goals — the first public demonstration was in 1954, the Georgetown–IBM experiment, translating a small set of Russian sentences into English (Russia being the enemy back then too, sadly, my own native country), received with enormous, and in hindsight unrealistic, optimism about how soon "solved" translation was. In 1966, the U.S. government's ALPAC report concluded MT wasn't living up to its promises and recommended cutting funding, setting back American MT research roughly a decade. Progress resumed with the rules era — bilingual dictionaries plus hand-written grammatical transformation rules, a linguist encoding "how do you convert this Russian sentence structure into an English one" — then the statistical era starting in the 1990s, learning translation patterns directly from large amounts of already-translated text, no hand-written grammar needed, Google Translate launched on this in 2006, then neural plus attention from 2015, and today's LLM-based translation.</p>
+  </div>
+</section>
+
+<section class="screen" id="encdec" data-step="3">
+  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Neural translation: an encoder and a decoder</h2></header>
+  <div class="body">
+    <ul class="points">
+      <li>Every word is a vector, learned from translated examples, like skip-gram's embeddings</li>
+      <li><b>Encoder</b>: reads the Galician words in order into <b>one vector</b>, the summary</li>
+      <li><b>Decoder</b>: starts from the summary and writes English one word at a time; each word is chosen the way skip-gram chose neighbors</li>
+    </ul>
+    <div class="flow">
+      <div style="display:grid;gap:6px;justify-items:center"><div class="flow"><div class="box">unha</div><span class="arr">→</span><div class="box">tía</div><span class="arr">→</span><div class="box">miña</div></div><span class="label">encoder</span></div>
+      <span class="arr">→</span><div class="box o round">one<br>vector</div><span class="arr">→</span>
+      <div style="display:grid;gap:6px;justify-items:center"><div class="flow"><div class="box g">an</div><span class="arr">→</span><div class="box g">aunt</div><span class="arr">→</span><div class="box g">of</div><span class="arr">→</span><div class="box g">mine</div></div><span class="label">decoder</span></div>
+    </div>
+    <p class="src">Sutskever, Vinyals &amp; Le, NeurIPS 2014 (arXiv:1409.3215)</p>
+  </div>
+  <div class="notes">
+    <p>This is the first neural translation design, from around 2014. It has two parts.</p>
+    <p>First, every word is a vector, like the embeddings from skip-gram. These vectors are learned from examples of translated sentences.</p>
+    <p>The encoder is the part that reads the source sentence. It reads the Galician words in order. It keeps one vector, called the summary, and updates it after every word. At the end, the whole sentence is in that one vector.</p>
+    <p>The decoder is the part that writes the translation. It starts from the summary. It writes the English words one at a time. Each word is chosen the way skip-gram chose neighbors: a score for every English word, then softmax, then the most probable word.</p>
+  </div>
+</section>
+
+<section class="screen fill" id="encdec-i" data-step="3">
+  <header><span class="kind">Interactive</span><h2>Neural translation, step by step</h2></header>
+  <div class="body">
+    <div class="tabs" role="group" aria-label="Go to a section">
+      <button data-go="train" aria-pressed="true">1 Training</button>
+      <button data-go="enc" aria-pressed="false">2 The summary</button>
+      <button data-go="bound" aria-pressed="false">3 The decoder writes</button>
+      <a class="open" href="../artifacts/mt.html#train" target="_blank" rel="noopener">Open the full page</a>
+    </div>
+    <iframe class="frame" title="Neural translation, step by step" data-src="../artifacts/mt.html?embed=train,enc,bound"></iframe>
+  </div>
+  <div class="notes">
+    <p>Section 1 shows where the vectors come from. The table lists 16 short phrases with translations written by people. These are the ground truth: the answers the model is trained to reproduce. Press Play. All vectors start random. Training nudges them, like in skip-gram, so the correct English word gets more probability. Watch the bars of the probability of the correct word go up.</p>
+    <p>Press the tab The summary. This shows the encoder with simple made-up numbers. Choose tía miña and press Next word. Each new word moves the summary halfway toward that word's point. The bar shows how much of each word is left in the summary. Now choose the whole sentence and read it to the end. Almost nothing of tía is left. This is the problem with one vector.</p>
+    <p>Press the tab The decoder writes. This is the trained model at work. Press Next, step by step. First the encoder reads the phrase. Then the decoder writes. At each step, each English word gets a score: the dot product of its vector with the decoder's state. The highest score wins. Then the state is updated with the word just written.</p>
+  </div>
+</section>
+
+<div class="part" id="part-step4"><h1>Step 4 · Attention</h1></div>
+
+<section class="screen" id="born" data-step="4">
+  <header><span class="kind">Step 4 · Attention</span><h2>Attention was born in machine translation</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <ul class="points">
+        <li>The bottleneck: the whole sentence squeezed into <b>one vector</b></li>
+        <li>Bahdanau, Cho &amp; Bengio (2015): the decoder <b>looks back</b> at every source word and chooses new weights for every word it writes: <b>attention</b></li>
+        <li>Invented for translation, years before today's LLMs</li>
+      </ul>
+    </div>
+    <div class="col">
+      <svg class="svgfig" viewBox="0 0 300 150" role="img" aria-label="While writing aunt, most of the attention weight is on tía" style="max-width:420px">
+        <g font-size="14" text-anchor="middle">
+          <rect x="10" y="10" width="70" height="28" rx="4" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="45" y="29">unha</text>
+          <rect x="115" y="10" width="70" height="28" rx="4" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="150" y="29">tía</text>
+          <rect x="220" y="10" width="70" height="28" rx="4" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="255" y="29">miña</text>
+          <line x1="45" y1="38" x2="150" y2="100" stroke="var(--orange)" stroke-width="0.6"/>
+          <line x1="150" y1="38" x2="150" y2="100" stroke="var(--orange)" stroke-width="6"/>
+          <line x1="255" y1="38" x2="150" y2="100" stroke="var(--orange)" stroke-width="1"/>
+          <rect x="90" y="100" width="120" height="28" rx="4" fill="var(--green-soft)" stroke="var(--green)"/><text x="150" y="119">writing: aunt</text>
+          <text x="150" y="146" font-size="11" class="muted">line width = attention weight</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <p class="src">Source: Bahdanau, Cho &amp; Bengio, ICLR 2015 (arXiv:1409.0473)</p>
+  <div class="notes">
+    <p>We just saw the problem. The encoder squeezes the whole sentence into one vector. The longer the sentence, the more of the early words is lost. Translation quality got worse as sentences got longer.</p>
+    <p>Bahdanau, Cho and Bengio fixed this in 2015. The decoder no longer gets only the last summary. It may look back at the encoder's vector for every source word. For every English word it writes, it decides how much to use each source word. These amounts are called attention weights. The picture shows this for the word aunt: most of the weight is on tía. The idea is called attention.</p>
+    <p>Attention was invented for machine translation, years before it became the core of every modern large language model.</p>
+  </div>
+</section>
+
+<section class="screen fill" id="born-i" data-step="4">
+  <header><span class="kind">Interactive</span><h2>One vector, or looking back at every word</h2></header>
+  <div class="body">
+    <div class="tabs"><a class="open" href="../artifacts/attention.html#look" target="_blank" rel="noopener">Open the full page</a></div>
+    <iframe class="frame" title="One vector, or looking back at every word" data-src="../artifacts/attention.html?embed=look"></iframe>
+  </div>
+  <div class="notes">
+    <p>Choose tía miña and press Next English word.</p>
+    <p>The top row shows the decoder without attention: it uses only the last summary, so it uses the words in whatever proportions that summary holds, mostly the last ones. The bottom row shows the decoder with attention: for every English word it chooses new weights.</p>
+    <p>Then choose the whole sentence. Without attention, tía is almost gone. With attention, the decoder can still find it.</p>
+  </div>
+</section>
+
+<section class="screen" id="alignment" data-step="4">
+  <header><span class="kind">Step 4 · Attention</span><h2>The alignment problem in translation</h2></header>
+  <div class="body">
+    <p class="sent small">Unha <span class="hl">tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”.</p>
+    <svg class="svgfig" viewBox="0 0 260 130" role="img" aria-label="tía connects to aunt, miña connects to my: the lines cross" style="max-width:360px">
+      <g font-size="16" text-anchor="middle">
+        <text x="50" y="35">tía</text><text x="50" y="85">miña</text>
+        <text x="210" y="35">my</text><text x="210" y="85">aunt</text>
+        <line x1="72" y1="30" x2="186" y2="80" stroke="var(--blue)" stroke-width="2"/>
+        <line x1="78" y1="80" x2="190" y2="30" stroke="var(--green)" stroke-width="2"/>
+        <text x="50" y="120" font-size="11" class="muted">Galician</text><text x="210" y="120" font-size="11" class="muted">English</text>
+      </g>
+    </svg>
+    <ul class="points">
+      <li>The aunt is introduced as “<i>tía miña</i>”: noun before possessive, the reverse of English</li>
+      <li>Attention learns this reordering automatically, with no separate step</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>Look at just these two words, the sentence's introduction of the aunt character: "tía miña," noun then possessive. English reverses that order: "my aunt," possessive then noun. This kind of word-order mismatch, where the same meaning is expressed with words in a different sequence, is one of the oldest, most fundamental problems in translation — exactly what the old rule-based era needed painstaking, hand-written reordering rules for, language pair by language pair. What we're about to see is that attention learns this kind of reordering completely automatically, directly from translated example sentences, with no separate alignment step and no hand-written rule at all.</p>
+  </div>
+</section>
+
+<section class="screen" id="qkv" data-step="4">
+  <header><span class="kind">Step 4 · Attention</span><h2>Attention scores: how much should I look here?</h2></header>
+  <div class="body">
+    <ul class="points">
+      <li><b>Query</b>: what am I looking for? &nbsp; <b>Key</b>: what do I offer?</li>
+      <li>Score = q · k, then <b>softmax</b>: weights that sum to 1</li>
+      <li><b>Value</b>: the actual content; the output is their weighted average, using those weights</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>This is what you usually see when attention gets explained — attention scores. An analogy that tends to land well: think of this like a search. Query: what you're currently searching for. Key: a short descriptor attached to each candidate item, that your query gets compared against. Value: the actual content of each candidate, which you eventually retrieve. The score is the dot product of the query with each key — literally, how well does this key match what I'm looking for — and then softmax, a function that takes raw scores and converts them into weights that are all positive and sum to exactly 1, like a probability distribution, turns those scores into attention weights. Attention was the next revolutionary idea that really propelled NLP forward, and it's the core of the architectures behind modern LLMs.</p>
+  </div>
+</section>
+
+<section class="screen" id="workedattn" data-step="4">
+  <header><span class="kind">Step 4 · Attention</span><h2>Worked example: aligning “tía miña” → “my aunt”</h2></header>
+  <div class="body">
+    <p class="sent small">Unha <span class="hl">tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”.</p>
+    <div class="big" style="justify-items:center;text-align:center;gap:12px">
+      <span>k<sub>tía</sub> = (1, 0) &nbsp;&nbsp; k<sub>miña</sub> = (0, 1)</span>
+      <span>To write <b>aunt</b>, query q<sub>aunt</sub> = (3, 0): &nbsp; scores 3, 0 &nbsp;⇒&nbsp; softmax 0.95, 0.05</span>
+      <span>To write <b>my</b>, query q<sub>my</sub> = (0, 3): &nbsp; scores 0, 3 &nbsp;⇒&nbsp; softmax 0.05, 0.95</span>
+    </div>
+    <ul class="points"><li>95% of the attention on <i>tía</i> for <i>aunt</i>; 95% on <i>miña</i> for <i>my</i>: a clean word-level correspondence, learned from data</li></ul>
+  </div>
+  <div class="notes">
+    <p>This is the search analogy from the previous screen, done with real, if tiny and two-dimensional, numbers, so the arithmetic is fully transparent. Key vectors: k(tía) = (1,0), k(miña) = (0,1) — deliberately orthogonal, so each key points at a different query direction.</p>
+    <p>To generate "aunt," the model's query could be q(aunt) = (3,0) — the 3 is picked on purpose, it's the solution. Dot product with k(tía): 3. With k(miña): 0. Softmax of (3,0) ≈ (0.95, 0.05) — 95% of the attention weight lands on "tía."</p>
+    <p>To generate "my," the query flips: q(my) = (0,3). Score against "tía": 0. Against "miña": 3. Softmax gives 95% on "miña."</p>
+    <p>So right as the model is about to output "aunt," it's looking almost entirely at "tía"; right as it's about to output "my," it's looking almost entirely at "miña" — a clean, correct word-level correspondence, discovered entirely from data, with the reordering handled automatically just by which word gets attended to at each generation step. Real attention vectors have hundreds of dimensions and are learned from training data, not hand-set like these — but the mechanism, the arithmetic itself, is identical to what's on this screen.</p>
+  </div>
+</section>
+
+<section class="screen fill" id="qk-i" data-step="4">
+  <header><span class="kind">Interactive</span><h2>Queries, keys and weights</h2></header>
+  <div class="body">
+    <div class="tabs"><a class="open" href="../artifacts/attention.html#qk" target="_blank" rel="noopener">Open the full page</a></div>
+    <iframe class="frame" title="Queries, keys and weights" data-src="../artifacts/attention.html?embed=qk"></iframe>
+  </div>
+  <div class="notes">
+    <p>The keys and queries are the ones from the worked example. Press the button aunt (3, 0): 95% of the weight goes to tía. Press my (0, 3): 95% goes to miña.</p>
+    <p>Press aunt, shorter (1, 0): the query points the same way, but it is shorter, so the weights are softer, about 73 and 27%. Press undecided (1.5, 1.5): the weights are 50 and 50.</p>
+    <p>Then drag the orange query yourself. The output is the weighted average of the two values, so it always lies on the line between them.</p>
+  </div>
+</section>
+
+<section class="screen" id="act-attn" data-step="4">
+  <header><span class="kind">Activity · about 15 minutes, individual</span><h2>Attention playground</h2></header>
+  <div class="body">
+    <div class="activity"><h3>Notebook 01d, in Colab (CPU only, no GPU needed)</h3><div>
+      <ul class="points">
+        <li>Part A: rebuild this exact worked example yourself, and check the 95/5 split</li>
+        <li>Part B: pull real attention weights out of a real translation model, on our own sentence, and see how they compare</li>
+      </ul>
+      <div class="links">
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01d_attention_playground-beginner.ipynb" target="_blank" rel="noopener">Open in Colab: beginner</a>
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01d_attention_playground-advanced.ipynb" target="_blank" rel="noopener">Open in Colab: advanced</a>
+      </div>
+    </div></div>
+  </div>
+  <div class="notes">
+    <p>Pause the lecture here and have everyone open 01d_attention_playground.ipynb — pure Python plus a small model download, no GPU needed. Part A: students rebuild the toy query/key/value example from the previous screen by hand, verify it actually reproduces the 0.95/0.05 split. Part B is the payoff: load the real dedicated Galician-English model we'll use again in Notebook 1, run it on our sentence, and pull out its actual cross-attention weights instead of hand-set toy numbers — does a real model, trained on real data, also put most of its weight on "tía" when generating "aunt"? Sometimes yes, sometimes it's messier than the toy example, and that's the point: the toy version is a clean teaching fiction, the real one is what actually happens.</p>
+  </div>
+</section>
+
+<section class="screen" id="gives" data-step="4">
+  <header><span class="kind">Step 4 · Attention</span><h2>What alignment actually gives you</h2></header>
+  <div class="body">
+    <p class="sent small"><span class="hl">Unha tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”.</p>
+    <ul class="points">
+      <li><b>Word for word:</b> “my aunt”: fluent, but it assumes an aunt the reader already knows; <i>unha</i> introduces a new one</li>
+      <li class="frag"><b>What the model writes:</b> “An aunt of mine”: attention keeps all three words: <i>unha</i> → an, <i>tía</i> → aunt, <i>miña</i> → of mine. Logical and faithful</li>
+      <li class="frag"><b>What a translator writes:</b> “I had an aunt who…”: the sentence is rebuilt around introducing her; no word alignment can produce “I had”</li>
+    </ul>
+    <p class="src">Model output: Helsinki-NLP/opus-mt-gl-en, the model from Notebook 1</p>
+  </div>
+  <div class="notes">
+    <p>This screen has three steps. Each click shows one more translation of the same three words.</p>
+    <p>Step one: word for word. "Tía" is aunt, "miña" is my. Put in English order, that gives "my aunt". It is fluent English. But "my aunt" assumes the reader already knows which aunt. In the Galician, the aunt is new: "unha" is the indefinite article, "an aunt".</p>
+    <p>Step two: what the real translation model writes. The model from the notebook, opus-mt for Galician to English, writes "An aunt of mine". Attention keeps all three words: "unha" becomes "an", "tía" becomes "aunt", and "miña" becomes "of mine". This is a good translation. It is logical and faithful, and it introduces a new character, like the Galician does.</p>
+    <p>Step three: what a translator writes. Something like "I had an aunt who...". The sentence is rebuilt around introducing the aunt. This is how English usually brings a new person into a story. No word in the Galician corresponds to "I had". So no word-to-word alignment can produce it. Choosing it needs a view of the whole sentence and of the story.</p>
+  </div>
+</section>
+
+<section class="screen fill" id="real-i" data-step="4">
+  <header><span class="kind">Interactive</span><h2>Where the real model looks</h2></header>
+  <div class="body">
+    <div class="tabs"><a class="open" href="../artifacts/attention.html#real" target="_blank" rel="noopener">Open the full page</a></div>
+    <iframe class="frame" title="Where the real model looks" data-src="../artifacts/attention.html?embed=real"></iframe>
+  </div>
+  <div class="notes">
+    <p>This is the real model, opus-mt, on our sentence. Press Play the translation. Then click the English word aunt.</p>
+    <p>With the average of all heads, about a third of the weight is on tía. Choose layer 6, head 2: 0.99 of the weight is on tía. Choose layer 1: almost none. Different heads look in different places.</p>
+  </div>
+</section>
+
+<section class="screen fill" id="ihad-i" data-step="4">
+  <header><span class="kind">Interactive</span><h2>“I had an aunt who…”</h2></header>
+  <div class="body">
+    <div class="tabs" role="group" aria-label="Go to a section">
+      <button data-go="ihad" aria-pressed="true">4 A model trained on “I had an aunt”</button>
+      <button data-go="real5" aria-pressed="false">5 What the real model prefers</button>
+      <a class="open" href="../artifacts/mt.html#ihad" target="_blank" rel="noopener">Open the full page</a>
+    </div>
+    <iframe class="frame" title="I had an aunt who" data-src="../artifacts/mt.html?embed=ihad,real5"></iframe>
+  </div>
+  <div class="notes">
+    <p>This small model is trained on sentences whose English follows the book counts: “a friend of mine” stays, but for aunts the English says “I had an aunt who”. Play its training, then choose unha tía miña cantaba: the model writes “I had an aunt who sang”. It learns this because its training data does.</p>
+    <p>Press the tab What the real model prefers. This is the real model's probability for each opening. “An aunt of mine” is its favorite by far; “I had an aunt” is tens of thousands of times less likely.</p>
+  </div>
+</section>
+
+<section class="screen fill" id="ofmine" data-step="4">
+  <header><span class="kind">Step 4 · Attention</span><h2>How natural is “an aunt of mine”?</h2></header>
+  <div class="body">
+    <div class="tabs"><span class="muted">For every 100 “my …”, how often do English books write “a … of mine”?</span><a class="open" href="../artifacts/ngram.html#ofmine" target="_blank" rel="noopener">Open the full page</a></div>
+    <iframe class="frame" title="How natural is an aunt of mine?" data-src="../artifacts/ngram.html?embed=ofmine"></iframe>
+  </div>
+  <div class="notes">
+    <p>Here is a question this example raises. "An aunt of mine" is correct English. So why would a translator still prefer "I had an aunt who..."? We can answer it by counting, like on the n-gram page.</p>
+    <p>The chart uses Google Books, English books from 1990 to 2019. For each noun, it compares two phrases. One is "a friend of mine", "an aunt of mine", and so on. The other is "my friend", "my aunt". The bar says how often the first phrase appears for every 100 uses of the second.</p>
+    <p>For "friend", the answer is about 12. Writers say "a friend of mine" about once for every 8 times they say "my friend". For "aunt", it is about 0.4: once in 275. For "brother", it is less than 0.1: once in 1,300.</p>
+    <p>Why? "A friend of mine" picks one friend out of several. Most people have many friends, so this is natural. Close family is different. When you say "my brother", the listener usually assumes there is one specific brother. So "a brother of mine" or "an aunt of mine" sounds marked.</p>
+    <p>This is why "an aunt of mine" is correct but unusual. Galician "unha tía miña" is ordinary. English expresses the same idea differently: "I had an aunt who...". The counts are from books, and our sentence is from a novel, so the comparison fits.</p>
+  </div>
+</section>
+
+<div class="part" id="part-step5"><h1>Step 5 · Self-attention</h1></div>
+
+<section class="screen" id="selfattn" data-step="5">
+  <header><span class="kind">Step 5 · Self-attention</span><h2>Self-attention: aligning a sentence to itself</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <ul class="points">
+        <li>Vaswani et al. (2017): the same mechanism <i>within</i> one sentence: every word attends to every word, itself included, all at once</li>
+        <li>“it” → “the animal”, with no hand-written rule</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="fig"><img src="img/self-attention.png" alt="Self-attention from it to the animal"><span class="cap">Illustration: jalammar.github.io/illustrated-transformer · Source: Vaswani et al., NeurIPS 2017 (arXiv:1706.03762)</span></div>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Everything so far was attention across two languages — the decoder generating English, attending back to the Galician source. Vaswani et al. showed in 2017 that the identical mechanism also works within a single sentence: each word attends to every other word in the same sentence, including itself. The classic illustration is a sentence like "The animal didn't cross the street because it was too tired" — resolving what "it" refers to, the animal and not the street, is exactly a self-attention pattern, no hand-written coreference rule needed, just the same query/key/value arithmetic as before, applied within one sentence instead of across two. The same mechanism is quietly at work inside the English translation of our own story too, wherever a pronoun needs to connect back to the aunt it refers to.</p>
+  </div>
+</section>
+
+<section class="screen" id="multihead" data-step="5">
+  <header><span class="kind">Step 5 · Self-attention</span><h2>Multiple alignments at once: multi-head attention</h2></header>
+  <div class="body">
+    <ul class="points">
+      <li>Several attention patterns in parallel, in different “heads”, combined into one output per word</li>
+      <li>Nobody assigns a head its job: every head starts random, and training shapes it</li>
+    </ul>
+    <div class="flow">
+      <div class="box">input</div><span class="arr">⇉</span>
+      <div style="display:grid;gap:6px"><div class="box g">head 1</div><div class="box g">head 2</div><div class="box g">head 3</div><div class="box g">head 4</div></div>
+      <span class="arr">⇉</span><div class="box">combine</div>
+    </div>
+  </div>
+  <div class="notes">
+    <p>One attention pattern captures one kind of relation between words. Real sentences have several at once: which word goes with which noun, which verb agrees with which subject, what a pronoun refers to. So transformers run several attention computations in parallel. Each one is called a head. Each head has its own queries, keys and values. The outputs of all heads are combined into one vector per word.</p>
+    <p>Who decides what each head does? Nobody. The people who build the model choose how many heads there are. They do not give the heads jobs. Every head starts as random numbers, and training changes all of them at once. Researchers find out afterwards what each head does, by looking.</p>
+    <p>More heads also means more computation for every word. So the number of heads is a cost lever too.</p>
+  </div>
+</section>
+
+<section class="screen fill" id="heads-i" data-step="5">
+  <header><span class="kind">Interactive</span><h2>Self-attention heads</h2></header>
+  <div class="body">
+    <div class="tabs" role="group" aria-label="Go to a section">
+      <button data-go="self" aria-pressed="true">4 The real model's heads</button>
+      <button data-go="who" aria-pressed="false">5 Who decides what a head does?</button>
+      <a class="open" href="../artifacts/attention.html#self" target="_blank" rel="noopener">Open the full page</a>
+    </div>
+    <iframe class="frame" title="Self-attention heads" data-src="../artifacts/attention.html?embed=self,who"></iframe>
+  </div>
+  <div class="notes">
+    <p>This is the encoder of the real model, reading our Galician sentence. Each small square is one head. Choose encoder layer 6 and head 7, then click miña: it looks back at tía, with weight 0.94. This head looks at the previous word. Choose layer 3, head 4: this head looks at the next word.</p>
+    <p>Press the tab Who decides what a head does. A tiny model with 2 layers of 2 heads learns the sentence “The animal didn't cross the street because it was tired”. It has to find what “it” refers to. Choose start A, B or C and press Train. The three runs differ only in their random start. In one run, one head does the job. In another, the job is split between two heads. In the third, no head looks at the nouns.</p>
+  </div>
+</section>
+
+<div class="part" id="part-step6"><h1>Step 6 · Transformers</h1></div>
+
+<section class="screen" id="stack" data-step="6">
+  <header><span class="kind">Step 6 · Transformers</span><h2>Inside a transformer: stacked blocks</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <ul class="points">
+        <li>The same kind of block (attention + feed-forward), repeated many times</li>
+        <li>This picture is the classic translation shape: <b>encoders</b> on the left read the source sentence, <b>decoders</b> on the right write the output</li>
+        <li>GPT-3 and most general-purpose LLMs use only the decoder side: 96 blocks deep, with no separate encoder</li>
+      </ul>
+    </div>
+    <div class="col"><div class="fig"><img src="img/encoder-decoder-stack.png" alt="A stack of encoders feeding a stack of decoders"><span class="cap">Credit: jalammar.github.io/illustrated-transformer</span></div></div>
+  </div>
+  <div class="notes">
+    <p>A transformer isn't one attention computation — it's the same block, multi-head self-attention followed by a small feed-forward network, plus some stabilizing machinery we won't go into, repeated many times in sequence. GPT-3 stacks 96 of these. Think of each block as one editing pass: the representation of each word gets refined a little more, picking up a bit more context and nuance, each time it passes through another block. Every word of our sentence passes through every block in sequence, so block count multiplies directly into total computation per word — so there is a direct cost/quality tradeoff: fewer blocks, less compute, likely somewhat lower quality.</p>
+  </div>
+</section>
+
+<section class="screen" id="block" data-step="6">
+  <header><span class="kind">Step 6 · Transformers</span><h2>Inside one block</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <ul class="points">
+        <li>Two sublayers, always in this order: <b>self-attention</b>, then a <b>feed-forward network</b></li>
+        <li>Self-attention mixes information across positions; the feed-forward layer does not: it runs on each word's vector separately</li>
+        <li>This shape is an <b>encoder</b> block. <b>Decoder</b> blocks add one more piece: <b>cross-attention</b> into the encoder's output</li>
+      </ul>
+    </div>
+    <div class="col"><div class="fig"><img src="img/encoder-block.png" alt="One encoder block: self-attention, then feed-forward"><span class="cap">Credit: jalammar.github.io/illustrated-transformer</span></div></div>
+  </div>
+  <div class="notes">
+    <p>This is what one "Block" from the previous screen actually contains. Two sublayers, always in this order.</p>
+    <p>First, self-attention, the mechanism we talked about: each word's vector gets updated by looking at every other word's vector, weighted by relevance. This is the only place in the whole architecture where information actually moves between positions — worth pausing on that, it's easy to miss.</p>
+    <p>Second, a feed-forward network — really just a small two-layer network, applied identically and independently to every position's vector. No mixing across words here; it's the same small network run once per word, in parallel.</p>
+    <p>Attention decides what to look at; the feed-forward layer is where most of the actual parameters live and most of the per-word computation happens — that's a big part of the answer to "why does model size cost so much". It runs on every position, every block, so its cost multiplies by both sentence length and depth.</p>
+    <p>I'm simplifying on purpose here: the real architecture also has a residual connection and layer normalization around each sublayer, which I'm skipping unless someone asks — but it's worth knowing that's why very deep stacks of these blocks stay trainable at all instead of degrading. Stack N of these, GPT-3 uses 96, and you get the diagram from the previous screen.</p>
+  </div>
+</section>
+
+<section class="screen" id="quadratic" data-step="6">
+  <header><span class="kind">Step 6 · Transformers</span><h2>Why attention cost grows with context length</h2></header>
+  <div class="body">
+    <div class="flow" style="gap:48px;align-items:flex-end">
+      <div class="fig"><div class="squares" data-squares="4" data-color="var(--blue)"></div><span>4 words<br>16 comparisons</span></div>
+      <div class="fig"><div class="squares" data-squares="8" data-color="var(--green)"></div><span>8 words<br>64 comparisons</span></div>
+    </div>
+    <ul class="points">
+      <li>Double the words → four times the comparisons: the growth is quadratic</li>
+      <li>“tía miña” was two words. The full story is thousands.</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>Self-attention, by construction, computes a score between every pair of words in the input — for n words, that's n² comparisons, every word compared against every other, including itself. Double the number of words and you quadruple the comparisons, which the diagram shows concretely: 4 words, 16 comparisons; 8 words, 64. That's quadratic growth, a much steeper curve than the "twice the words, twice the cost" intuition might suggest. "Tía miña" was two words, trivial to attend over. The full Speechwriter story is thousands of words — and this quadratic relationship is exactly why translating, or having a model read, one long document costs disproportionately more than several short ones of the same total length.</p>
+  </div>
+</section>
+
+<section class="screen" id="kv" data-step="6">
+  <header><span class="kind">Step 6 · Transformers</span><h2>Generating text: why inference is sequential</h2></header>
+  <div class="body">
+    <div class="flow" style="gap:24px;align-items:flex-end">
+      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i></div><span>word 1<br>(cache: 1)</span></div>
+      <span class="arr">→</span>
+      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i><i class="kvc" style="background:color-mix(in srgb, var(--blue) 45%, var(--panel))"></i></div><span>word 2<br>(cache: 2)</span></div>
+      <span class="arr">→</span>
+      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i><i class="kvc" style="background:color-mix(in srgb, var(--blue) 45%, var(--panel))"></i><i class="kvc" style="background:var(--blue)"></i></div><span>word 3<br>(cache: 3)</span></div>
+    </div>
+    <ul class="points">
+      <li>One word at a time: the <b>KV cache</b> grows with every word generated</li>
+      <li>Translating the rest of our story this way: the cache keeps growing the whole time</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>Training a transformer can process a whole sentence in parallel, all positions at once. Generating new text can't: the model produces one word, then has to feed that word back in to produce the next one, and so on, inherently one step at a time. To avoid recomputing attention over all previous words from scratch at every step, models cache the keys and values already computed for earlier words — the KV cache — and only compute the new word's contribution fresh each step. But that cache itself keeps growing with every word generated, so later words in a long sequence cost more to produce than earlier ones did. Translating the rest of our story this way means that cache keeps growing for the entire length of the translation — this sequential, ever-growing-cache nature is the concrete mechanical reason generation costs so much more than a single-pass task like classification.</p>
+  </div>
+</section>
+
+<section class="screen" id="size" data-step="6">
+  <header><span class="kind">Step 6 · Transformers</span><h2>Why does model size cost so much?</h2></header>
+  <div class="body cols">
+    <div class="col"><div class="fig"><img src="img/rnn-transformers.png" alt="Recurrent networks compared with transformers"></div></div>
+    <div class="col">
+      <ul class="points">
+        <li>More parameters, more heads, more blocks → more compute per query</li>
+        <li>Longer input → quadratically more attention cost</li>
+        <li><b>Size and context length are levers with a real, computable energy cost</b></li>
+      </ul>
+    </div>
+  </div>
+  <div class="notes">
+    <p>So, regarding model size: more parameters means more attention heads, more stacked blocks — all of it means more computation, more FLOPs, per single query. Separately, longer input text means quadratically more attention computation, and longer generated output means more sequential steps with an ever-growing cache. So, a big model is costly not because it should be trained and stored somewhere; inference is crucial because it is complex and attention is expensive.</p>
+  </div>
+</section>
+
+<div class="part" id="part-backmt"><h1>Back to translation</h1></div>
+
+<section class="screen" id="llmmt" data-step="0">
+  <header><h2>What did LLMs bring to machine translation?</h2></header>
+  <div class="body">
+    <ul class="points">
+      <li>One model, 100+ languages: no separate model per pair</li>
+      <li>Zero-shot, and <b>controllable</b> by instruction</li>
+      <li>But: usually far more expensive per translation than a dedicated MT model</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>The genuine upside: one single model handling 100+ languages, with no need to train and maintain a separate model for every language pair, which the statistical and early neural MT eras required — literally one trained system per pair. It's zero-shot capable, can attempt a pair it wasn't explicitly fine-tuned on, and controllable by instruction: translate this formally, keep the idioms. The catch, directly connecting back to Reveal 3: doing translation this way is usually far more computationally expensive per translation than a dedicated model trained just for that one language pair — the same tradeoff as before, now specifically in translation.</p>
+  </div>
+</section>
+
+<section class="screen" id="galician" data-step="0">
+  <header><h2>How well do LLMs actually serve Galician?</h2></header>
+  <div class="body">
+    <ul class="points">
+      <li>In mainstream LLMs, Galician's presence is “almost residual”: close enough to Spanish and Portuguese that models blur the three together</li>
+      <li>Fix: a <b>smaller</b>, dedicated model (1.3B parameters), trained on real Galician text, that beat the giant general model at producing correct Galician</li>
+      <li>Even bias research mostly skips languages like this: 2 papers out of dozens reviewed</li>
+    </ul>
+    <p class="src">Source: Gamallo et al., “A Galician-Portuguese Generative Model,” EPIA 2024; Proxecto Nós (USC)</p>
+  </div>
+  <div class="notes">
+    <p>The honest follow-up to the question we asked a while back. "100+ languages" sounds comprehensive, but for most mainstream LLMs, Galician's actual share of the training data is, in the words of a paper studying this directly, "almost residual" — a vanishingly small fraction, sitting close enough to Spanish and Portuguese that general models tend to blur the three together rather than reliably producing genuine, correct Galician. The fix researchers found wasn't a bigger general model, it was a much smaller, dedicated one: 1.3 billion parameters, trained specifically on real Galician and Portuguese text — Proxecto Nós at USC is one source of this kind of work. That small, dedicated model beat the giant general-purpose base model specifically at producing correct Galician. Same task-specificity pattern as Reveal 3, except here the general-purpose model doesn't just cost more — it also actually serves this language's speakers worse. One more thing worth mentioning: a recent survey of MT bias research found languages like Galician and Catalan appearing in only 2 papers out of dozens reviewed — even the research dedicated to fairness in MT mostly looks past languages like this one.</p>
+  </div>
+</section>
+
+<section class="screen" id="greenmt" data-step="0">
+  <header><h2>Is there “green MT” research?</h2></header>
+  <div class="body">
+    <p class="bignum center">140× faster &nbsp; 98.7% less energy</p>
+    <p class="center muted">for a small quality trade-off</p>
+    <ul class="points">
+      <li>An MT-specific result: Guta, Petrick &amp; Polák, Findings of EMNLP 2025</li>
+      <li>The 2019 “5 cars” number itself came from a machine-translation architecture search</li>
+      <li>Quantization for MT, specifically: Shterionov &amp; Vanmassenhove, 2022, Session 2's topic</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>Yes, and it's a genuinely active area, not a hypothetical. Guta, Petrick &amp; Polák, "The Green KNIGHT": a practical MT-specific efficiency recipe reaching up to 140x speedup and 98.7% energy savings, for roughly a 10–12% relative quality cost — this course's whole thesis, condensed into one MT-specific number. Remember the "5 cars" case study? That architecture search was, specifically, hunting for a better machine translation model. And Shterionov &amp; Vanmassenhove tested quantization, Session 2's topic, specifically in the context of MT systems. Green AI and MT research aren't two separate things I'm artificially connecting for this course — MT has repeatedly been the actual proving ground where these efficiency techniques were first tried.</p>
+  </div>
+</section>
+
+<section class="screen" id="levers" data-step="0">
+  <header><h2>The levers we'll actually use</h2></header>
+  <div class="body">
+    <div class="icons" style="gap:48px">
+      <div class="fig"><svg class="icon" viewBox="0 0 44 20" aria-hidden="true"><rect x="0" y="4" width="9" height="9" fill="var(--blue)"/><rect x="11" y="4" width="9" height="9" fill="var(--blue-soft)" stroke="var(--blue)"/><rect x="22" y="4" width="9" height="9" fill="var(--blue)"/><rect x="33" y="4" width="9" height="9" fill="var(--blue-soft)" stroke="var(--blue)"/></svg><span><b>Precision</b><br>Session 2</span></div>
+      <div class="fig"><svg class="icon" viewBox="0 0 40 40" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2"/><line x1="24" y1="24" x2="36" y2="36" stroke="var(--blue)" stroke-width="4"/></svg><span><b>Retrieval</b><br>Session 3</span></div>
+      <div class="fig"><svg class="icon" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2"/><circle cx="20" cy="20" r="10" fill="var(--panel)" stroke="var(--blue)" stroke-width="2"/><circle cx="20" cy="20" r="3.5" fill="var(--blue)"/></svg><span><b>Task-specificity</b><br>today, twice over</span></div>
+    </div>
+    <ul class="points"><li>Today, we build the <b>baseline</b> the other two get compared against</li></ul>
+  </div>
+  <div class="notes">
+    <p>Three concrete levers, each demonstrated today or coming up: precision, Session 2, using fewer bits per number in the model's computations; retrieval, Session 3, fetching only relevant information on demand instead of always processing everything; and task-specificity, which we've now seen twice today — once in QA, Reveal 3, and once in machine translation — a model built for one job beats a giant general model at that job, both on cost and often on quality. Today's notebook builds the baseline the other two sessions' techniques get measured against.</p>
+  </div>
+</section>
+
+<div class="part" id="part-turn"><h1>Your turn</h1></div>
+
+<section class="screen" id="nb1" data-step="0">
+  <header><h2>Notebook 1: Baseline measurement</h2></header>
+  <div class="body">
+    <ul class="points">
+      <li>Task: answer questions about a small set of documents (about Green NLP itself)</li>
+      <li>Instrumented with <b>CodeCarbon</b>: energy, CO₂eq, quality, as one row on your leaderboard</li>
+    </ul>
+    <div class="flow"><div class="box">Documents<br>+ question</div><span class="arr">→</span><div class="box">Model</div><span class="arr">→</span><div class="box">Answer</div><span class="arr">→</span><div class="box g">CodeCarbon:<br>energy / CO₂eq</div></div>
+  </div>
+  <div class="notes">
+    <p>Back to the course's own running task: question-answering over a small set of documents about Green NLP itself. Every run is instrumented with CodeCarbon — the same kind of transparent, logged measurement tool we said, back in the discussion activity, you'd need in order to actually trust a carbon number. It reports energy and CO2-equivalent, alongside an answer-quality score, and logs one row to your own leaderboard.csv. That's Part 1.</p>
+  </div>
+</section>
+
+<section class="screen" id="nb1b" data-step="0">
+  <header><h2>Notebook 1, continued: four ways to translate, three ways to grade</h2></header>
+  <div class="body">
+    <ul class="points">
+      <li>Part 2: the same sentence from this morning, through <b>rule-based</b>, <b>statistical</b>, <b>neural</b> and <b>LLM</b> translation: the whole history, hands-on</li>
+      <li>Part 3: <b>BLEU</b>, <b>BERTScore</b> and an <b>LLM-as-judge</b> score the results, and we measure what grading itself costs</li>
+    </ul>
+    <div class="flow"><div class="box">Rule-based</div><span class="arr">→</span><div class="box">Statistical</div><span class="arr">→</span><div class="box">Neural</div><span class="arr">→</span><div class="box g">LLM</div></div>
+  </div>
+  <div class="notes">
+    <p>Part 2 takes today's sentence and translates it four ways, mirroring the exact history arc from earlier: a real rule-based MT system this time, not a classroom toy — Apertium's actively maintained Galician–English pair, called through its public API — which still can't restructure the sentence, something like "A mine aunt..." for the opening, the alignment problem completely unsolved, but now by a real system; a tiny hand-built statistical system that adds a bigram language model, the exact technique from the n-grams screen, to reorder a short fragment's words for fluency; the dedicated neural MT model, Helsinki-NLP/opus-mt-gl-en; and the general-purpose LLM already loaded in Part 1. Worth saying explicitly in class: the fact that even a real, currently-used rule-based engine can't do what the neural and LLM approaches do is a stronger point than the same claim about a toy dictionary would have been.</p>
+    <p>Part 3 then grades the neural and LLM outputs three different ways — BLEU, fast, pure n-gram overlap counting against a reference translation, near-zero cost; BERTScore, a learned neural metric using contextual embeddings, real but modest GPU cost; and an LLM asked to judge the translations itself — and, in keeping with the whole session's theme, we measure what each grading method itself costs, not just what score it reports. BERTScore is standing in for COMET here, by the way — COMET's own pinned dependencies reliably crash on current Colab images, which is itself a small, live example of the same fragility point we've been making all session.</p>
+  </div>
+</section>
+
+<section class="screen" id="act-nb1" data-step="0">
+  <header><span class="kind">Activity · 60–75 min baseline, +40–60 min Parts 2–3, individual</span><h2>Notebook 1</h2></header>
+  <div class="body">
+    <div class="activity"><h3>Notebook 01a, in Colab, with a GPU</h3><div>
+      <ul class="points">
+        <li>In Colab: Runtime → Change runtime type → T4 GPU</li>
+        <li>Part 1 first, then Parts 2–3 if time allows</li>
+        <li>Stretch goal (optional): swap in a bigger model and compare</li>
+      </ul>
+      <div class="links">
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01a_baseline_measurement-beginner.ipynb" target="_blank" rel="noopener">Open in Colab: beginner</a>
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01a_baseline_measurement-advanced.ipynb" target="_blank" rel="noopener">Open in Colab: advanced</a>
+      </div>
+    </div></div>
+  </div>
+  <div class="notes">
+    <p>Open 01_baseline_measurement.ipynb in Google Colab; Runtime, Change runtime type, T4 GPU — needed for the neural models in Parts 1 and 2. Part 1 first, it's the baseline every future session builds on, so it takes priority if time is short. If time allows, continue into Parts 2 and 3. Optional stretch goal: swap in a bigger model for Part 1 and compare, or in Part 2 flip translation direction or try a longer or different text.</p>
+  </div>
+</section>
+
+<section class="screen" id="shareout" data-step="0">
+  <header><h2>Share-out</h2></header>
+  <div class="body">
+    <ul class="points">
+      <li>Part 1: how much energy and CO₂eq did your run measure? Same model, different hardware: did it matter?</li>
+      <li>Parts 2–3: how many orders of magnitude separated your cheapest and priciest approach? Did the three MT metrics even agree?</li>
+      <li>Next time: we quantize this exact model</li>
+    </ul>
+    <p class="center muted">Compare with your neighbor.</p>
+  </div>
+  <div class="notes">
+    <p>Before we wrap up, compare notes with your neighbor. On the QA baseline: what energy and emissions numbers did you get, and how close were they to each other's, given you likely used the same model on similar Colab hardware? What was your accuracy, and if it wasn't 100%, what went wrong in the misses? Did CodeCarbon warn about not recognizing your hardware, and what does that tell you about trusting a single carbon number at face value?</p>
+    <p>On the translation comparison: how many orders of magnitude separated your cheapest and most expensive approach? Neither the real rule-based system nor the toy statistical system could ever produce "I had an aunt who..." — why not, structurally? Apertium is a real, currently maintained system — did that change how seriously you took its limitations, compared to the toy you might have pictured going in? Was the dedicated neural model's translation actually worse than the general-purpose LLM's, or just different? And if you have a moment: paste the Galician sentence into a large commercial model and see whether it gets "an aunt of mine" right where our small local model didn't — what would that tell you about whether this was a limit of the approach or just of this notebook's model size?</p>
+    <p>On evaluation: did BLEU, BERTScore, and the LLM judge actually agree on which translation was better? Next session, we take this exact QA pipeline, load the exact same model quantized to a lower precision, and see what actually changes, for both footprint and accuracy.</p>
+  </div>
+</section>
+
+<section class="screen titlescreen" id="thanks" data-step="0">
+  <div class="cols" style="align-items:center;width:100%">
+    <div class="fig"><img src="img/last-picture.png" alt="" style="max-height:50vh"></div>
+    <div class="col" style="justify-items:center;gap:20px">
+      <h1>Gracias por su atención</h1>
+      <div class="logos"><img src="img/logo-inditexudc.png" alt="Cátedra Inditex–UDC de Algoritmos Verdes"></div>
+      <a href="https://catedrainditexalgoritmosverdes.com/" class="mono">catedrainditexalgoritmosverdes.com</a>
+    </div>
+  </div>
+  <div class="notes">
+    <p>That's Session 1 — from one Galician sentence, through counting, vectors, and attention, to a working, measured baseline you built yourself. Thank you for your attention. See you next time.</p>
+  </div>
+</section>
+
+<div class="part" id="part-backup"><h1>Backup</h1></div>
+
+<section class="screen" id="backup" data-step="0">
+  <header><h2>Backup screens</h2><p class="sub">The same steps as on the skip-gram panels, as static pictures</p></header>
+  <div class="body">
+    <ul class="points">
+      <li>Skip-gram: the table at the start, and one training step</li>
+      <li>A refresher on multiplying matrices</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>These screens are a backup. They show, as static pictures, steps that we normally do on the skip-gram page. Use them if the page does not load.</p>
+  </div>
+</section>
+
+<section class="screen" id="b-params" data-step="0">
+  <header><h2>The model's parameters: a table of numbers</h2><p class="sub">One row per word. It starts random.</p></header>
+  <div class="body cols">
+    <div class="col">
+      <table class="plain">
+        <tr><th>word</th><th>dim 1</th><th>dim 2</th></tr>
+        <tr><td class="c-blue">cats</td><td class="num">−0.41</td><td class="num">−0.26</td></tr>
+        <tr><td class="c-blue">dogs</td><td class="num">0.30</td><td class="num">0.08</td></tr>
+        <tr><td class="c-gray">chase</td><td class="num">−0.41</td><td class="num">−0.07</td></tr>
+        <tr><td class="c-gray">eat</td><td class="num">−0.02</td><td class="num">−0.34</td></tr>
+        <tr><td class="c-orange">mice</td><td class="num">0.23</td><td class="num">−0.39</td></tr>
+        <tr><td class="c-orange">balls</td><td class="num">−0.11</td><td class="num">0.02</td></tr>
+        <tr><td class="c-green">fish</td><td class="num">−0.07</td><td class="num">0.09</td></tr>
+        <tr><td class="c-green">meat</td><td class="num">0.24</td><td class="num">0.46</td></tr>
+      </table>
+      <ul class="points">
+        <li>Two dimensions so we can draw it. word2vec used 300.</li>
+        <li>Color = same neighbors in the corpus. The model never sees the colors.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <svg class="scatter" role="img" aria-label="The starting table drawn as points" data-range="-0.5,0.5,-0.5,0.55" style="max-width:420px"
+        data-points='[["cats",-0.41,-0.26,"blue","s"],["dogs",0.30,0.08,"blue","e"],["chase",-0.41,-0.07,"gray","n"],["eat",-0.02,-0.34,"gray","e"],["mice",0.23,-0.39,"orange","e"],["balls",-0.11,0.02,"orange","w"],["fish",-0.07,0.09,"green","n"],["meat",0.24,0.46,"green","e"]]'></svg>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Here is where the numbers live. The model keeps a table. The table has one row for each word in the vocabulary. The vocabulary is the list of all distinct words. Our vocabulary has eight words.</p>
+    <p>Each row is a vector. A vector is just a list of values. Each position in the list is called a dimension. Here each vector has two dimensions, dimension 1 and dimension 2, so each word gets two values. We use two dimensions only so that we can draw each word as a point on a flat picture. The original word2vec vectors had 300 dimensions.</p>
+    <p>At the start, every number in the table is random. The plot on the right draws each row as a point. The points are scattered with no pattern. At this moment the numbers mean nothing.</p>
+    <p>These numbers are parameters. A parameter is a number that training is allowed to change.</p>
+    <p>The colors are my addition. Words with the same color have the same neighbors in our corpus. Cats and dogs are blue: both are followed by chase and eat. Mice and balls are orange: both come after chase. Fish and meat are green: both come after eat. Chase and eat are gray. The model never sees these colors. Watch where the colors end up after training.</p>
+    <p>These exact numbers come from a small skip-gram model I trained on this corpus. All numbers on the next screens come from the same run.</p>
+  </div>
+</section>
+
+<section class="screen" id="b-step" data-step="0">
+  <header><h2>One training step: cats → chase</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <p class="label">The model's prediction: P( · | cats)</p>
+      <div class="vbars" style="height:13em;gap:4px;font-size:0.85em">
+        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em">.118</span><span class="col" style="height:71%;background:var(--grid)"></span><span class="l">cats</span></div>
+        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em">.110</span><span class="col" style="height:66%;background:var(--grid)"></span><span class="l">dogs</span></div>
+        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em;color:var(--blue)">.111</span><span class="col" style="height:66%"></span><span class="l c-blue">chase</span></div>
+        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em">.122</span><span class="col" style="height:73%;background:var(--grid)"></span><span class="l">eat</span></div>
+        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em">.167</span><span class="col" style="height:100%;background:var(--grid)"></span><span class="l">mice</span></div>
+        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em">.093</span><span class="col" style="height:56%;background:var(--grid)"></span><span class="l">balls</span></div>
+        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em">.135</span><span class="col" style="height:81%;background:var(--grid)"></span><span class="l">fish</span></div>
+        <div class="vb" style="width:auto;flex:1 1 0"><span class="v" style="font-size:0.75em">.144</span><span class="col" style="height:86%;background:var(--grid)"></span><span class="l">meat</span></div>
+      </div>
+      <p class="axisnote c-blue">correct answer, chase: push up</p>
+    </div>
+    <div class="col">
+      <p><b>Training pair:</b> cats → chase</p>
+      <p>Training nudges the parameters so that P(chase | cats) grows.</p>
+      <p>One of the nudged rows is <i>cats</i>:</p>
+      <table class="plain mono"><tr><td>before:</td><td>(−0.414, −0.263)</td></tr><tr><td>after:</td><td>(−0.384, −0.261)</td></tr></table>
+      <p>P(chase | cats): 0.111 → 0.115</p>
+    </div>
+  </div>
+  <ul class="points"><li>Then: cats → eat, dogs → chase, dogs → eat, … all 16 pairs, thousands of times</li></ul>
+  <div class="notes">
+    <p>Now we give the model one training pair: the input is "cats", and the correct answer is "chase".</p>
+    <p>The model takes the current row for "cats" from the table. It uses that row to compute a probability for every word in the vocabulary. The bar chart shows these probabilities. The probabilities add up to 1.</p>
+    <p>The model is untrained, so the probabilities are nearly equal. Each word gets about one eighth, which is 0.125. The correct answer, "chase", gets 0.111. That is too low. The highest bar is "mice", which is wrong.</p>
+    <p>Training now changes the parameters a little bit, in the direction that makes the probability of "chase" higher. The method that computes this direction is called gradient descent. We do not need its details today.</p>
+    <p>One of the things that changes is the row for "cats". Before the step, it was minus 0.414 and minus 0.263. After the step, it is minus 0.384 and minus 0.261. The change is small on purpose. Each step moves the numbers only a little.</p>
+    <p>After this one step, the probability of "chase" given "cats" went from 0.111 to 0.115.</p>
+    <p>Then the model sees the next pair, for example cats to eat, and nudges the "cats" row again. Then dogs to chase, then dogs to eat. It goes through all 16 pairs, many thousands of times.</p>
+  </div>
+</section>
+
+<section class="screen" id="b-matrix" data-step="0">
+  <header><h2>Quick refresher: multiplying matrices</h2></header>
+  <div class="body">
+    <ul class="points">
+      <li>To multiply A (m × n) by B (n × p): the <b>inner</b> dimensions must match; the result is m × p</li>
+      <li>Each entry of the result is a <b>dot product</b>: multiply matching entries, add them up</li>
+    </ul>
+    <div class="eq">
+      <span class="mat" style="--c:3"><span class="hl">1</span><span class="hl">2</span><span class="hl">0</span><span>3</span><span>1</span><span>4</span></span>
+      <span class="mat" style="--c:2"><span class="hl">2</span><span>0</span><span class="hl">1</span><span>3</span><span class="hl">0</span><span>2</span></span>
+      <span>=</span>
+      <span class="mat" style="--c:2"><span class="hl">4</span><span>6</span><span>7</span><span>11</span></span>
+    </div>
+    <p class="axisnote">top-left entry: 1×2 + 2×1 + 0×0 = 4</p>
+    <ul class="points"><li>A vector is a matrix with one row, and a <b>one-hot</b> vector (all zeros but a single 1) does something special:</li></ul>
+    <div class="eq">
+      <span class="mat" style="--c:4"><span>0</span><span>0</span><span class="hl">1</span><span>0</span></span>
+      <span class="mat" style="--c:2"><span>0.1</span><span>0.9</span><span>0.3</span><span>0.2</span><span class="hl">0.7</span><span class="hl">0.5</span><span>0.4</span><span>0.8</span></span>
+      <span>=</span>
+      <span class="mat" style="--c:2"><span class="hl">0.7</span><span class="hl">0.5</span></span>
+    </div>
+    <p class="axisnote">the 1 in position 3 copies out row 3; every other row is multiplied by 0</p>
+  </div>
+  <div class="notes">
+    <p>Let's actually multiply these, since watching the arithmetic happen is worth more than being told the rule. Top-left entry of the result: take row 1 of the first matrix, column 1 of the second, multiply matching entries, and add them up: 1 times 2, plus 2 times 1, plus 0 times 0, that's 4. Do that for every row-column pair and you get the full result. That's genuinely the whole operation, dot products, one per output entry, nothing else going on.</p>
+    <p>Now the special case, because it's exactly what shows up when a network reads a word. A one-hot vector is just a vector with a single 1 and the rest zeros. Multiply it by a matrix the same way, row times column, and every row except the one lined up with that 1 gets multiplied by zero and disappears entirely. What's left is exactly that one row, copied out untouched. That's not some clever trick the network does on purpose, it's just what the arithmetic already does on its own the moment one side is a one-hot vector.</p>
   </div>
 </section>
 
 </main>
 
 <footer>
-  <p>The interactive panels come from the course page <a href="../artifacts/ngram.html">N-grams, step by step</a>. The Python exercises run in the browser with Pyodide; the Colab notebooks hold the same exercises.</p>
+  <p>The interactive panels come from the course pages <a href="../artifacts/ngram.html">N-grams</a>, <a href="../artifacts/skipgram.html">Skip-gram</a>, <a href="../artifacts/mt.html">Neural translation</a> and <a href="../artifacts/attention.html">Attention</a>, step by step. The Python exercises run in the browser with Pyodide; the Colab notebooks hold the same exercises. Figures credited on a screen belong to their authors.</p>
   <p class="label" style="margin-top:6px">References</p>
   <ul>
-    <li>Jurafsky, D., &amp; Martin, J. H. (2026). <i>Speech and Language Processing</i> (3rd ed. draft), Ch. 3, N-gram Language Models. <a href="https://web.stanford.edu/~jurafsky/slp3/">web.stanford.edu/~jurafsky/slp3</a></li>
+    <li>Bahdanau, D., Cho, K., &amp; Bengio, Y. (2015). Neural machine translation by jointly learning to align and translate. ICLR. arXiv:1409.0473</li>
+    <li>Brown, T., et al. (2020). Language models are few-shot learners. NeurIPS.</li>
+    <li>Fortune Business Insights (2025). Natural language processing market size.</li>
+    <li>Gamallo, P., et al. (2024). A Galician-Portuguese generative model. EPIA.</li>
+    <li>Guta, A., Petrick, F., &amp; Polák, P. (2025). The Green KNIGHT. Findings of EMNLP.</li>
+    <li>Hutchins, J. (2007). Machine translation: a concise history.</li>
+    <li>International Energy Agency (2024–2025). Energy and AI.</li>
+    <li>Jurafsky, D., &amp; Martin, J. H. (2026). <i>Speech and Language Processing</i> (3rd ed. draft). <a href="https://web.stanford.edu/~jurafsky/slp3/">web.stanford.edu/~jurafsky/slp3</a></li>
+    <li>Luccioni, A. S., Jernite, Y., &amp; Strubell, E. (2024). Power hungry processing. FAccT. arXiv:2311.16863</li>
+    <li>Mikolov, T., et al. (2013). Efficient estimation of word representations in vector space. arXiv:1301.3781</li>
+    <li>Patterson, D., et al. (2021). Carbon emissions and large neural network training. arXiv:2104.10350</li>
+    <li>Radford, A., et al. (2019). Language models are unsupervised multitask learners.</li>
+    <li>Shterionov, D., &amp; Vanmassenhove, E. (2022). The ecological footprint of neural machine translation systems.</li>
+    <li>Strubell, E., Ganesh, A., &amp; McCallum, A. (2019). Energy and policy considerations for deep learning in NLP. ACL.</li>
+    <li>Sutskever, I., Vinyals, O., &amp; Le, Q. V. (2014). Sequence to sequence learning with neural networks. NeurIPS. arXiv:1409.3215</li>
+    <li>Vaswani, A., et al. (2017). Attention is all you need. NeurIPS. arXiv:1706.03762</li>
+    <li>Alammar, J. The Illustrated Transformer. <a href="https://jalammar.github.io/illustrated-transformer/">jalammar.github.io/illustrated-transformer</a> (figures)</li>
   </ul>
   <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
-  <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
+  <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>, except the figures credited to others.</p>
 </footer>
 
 <div class="pbar" aria-label="Presentation controls">
-  <div class="road" id="pRoad"></div>
+  <span class="where" id="pWhere"></span>
   <span class="count" id="pCount"></span>
-  <button id="pPrev" aria-label="Previous screen">←</button>
-  <button id="pNext" aria-label="Next screen">→</button>
+  <button id="pPrev" aria-label="Previous">←</button>
+  <button id="pNext" aria-label="Next">→</button>
   <button id="pNotes">Notes</button>
   <button id="pExit">Exit</button>
 </div>
@@ -687,6 +2155,7 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   </div>
   <span class="label" id="nKind"></span>
   <h2 id="nTitle"></h2>
+  <span class="fragnote" id="nFrag"></span>
   <div class="ntext" id="nText"></div>
   <div class="next" id="nNextTitle"></div>
 </div>
@@ -701,12 +2170,58 @@ let chan = null;
 try { chan = new BroadcastChannel("greenai-lesson-session1"); } catch (e) {}
 let cur = 0;
 
-/* ---- small figures ---- */
-const VOCAB = [["aunt", 2 / 3], ["uncle", 1 / 3], ["my", 0], ["stayed", 0], ["spoke", 0], ["quiet", 0], ["wisely", 0]];
-$("lmBars").innerHTML = VOCAB.map(([w, p]) =>
-  `<div class="bar${p ? "" : " zero"}"><span class="w">${w}</span><span class="track"><span class="fill" style="display:block;width:${(p * 100).toFixed(1)}%"></span></span><span>${p.toFixed(2)}</span></div>`).join("");
-$("nAnswerBtn").onclick = () => { $("nAnswer").hidden = false; $("nAnswerBtn").hidden = true; };
+/* ---- the part each screen belongs to, contents menu, step strip ---- */
+let part = "";
+document.querySelectorAll("main > .part, main > .screen").forEach(el => {
+  if (el.classList.contains("part")) part = el.querySelector("h1").textContent; else el.dataset.part = part;
+});
+$("tocNav").innerHTML = [...document.querySelectorAll("main > .part")].map(p => `<a href="#${p.id}">${p.querySelector("h1").textContent}</a>`).join("");
+$("tocNav").addEventListener("click", () => $("tocNav").parentElement.open = false);
+$("topRoad").innerHTML = STEPS.map((t, k) => `<span>${k + 1} ${t}</span>`).join("");
+const markRoad = (el, step) => el.querySelectorAll("span").forEach((s, k) => s.classList.toggle("on", k + 1 === step));
+if ("IntersectionObserver" in window) {
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && !presenting()) markRoad($("topRoad"), +e.target.dataset.step || 0); }),
+    { rootMargin: "-20% 0px -70% 0px" });
+  screens.forEach(s => io.observe(s));
+}
 
+/* ---- small figures drawn from data ---- */
+document.querySelectorAll("[data-bars]").forEach(el => {
+  const rows = JSON.parse(el.dataset.bars);
+  el.innerHTML = rows.map(([w, p]) =>
+    `<div class="bar${p ? "" : " zero"}"><span class="w">${w}</span><span class="track"><span class="fill" style="width:${(p * 100).toFixed(1)}%"></span></span><span>${p.toFixed(2)}</span></div>`).join("");
+});
+const COLORS = { blue: "var(--blue)", gray: "var(--muted)", orange: "var(--orange)", green: "var(--green)" };
+document.querySelectorAll("svg.scatter").forEach(svg => {
+  // data-range: xmin,xmax,ymin,ymax; data-points: [label, x, y, color, label position n|s|e|w]
+  const [x0, x1, y0, y1] = svg.dataset.range.split(",").map(Number);
+  const pts = JSON.parse(svg.dataset.points);
+  const W = 240, H = 240, pad = 24;
+  const sx = x => pad + (x - x0) / (x1 - x0) * (W - 2 * pad), sy = y => H - pad - (y - y0) / (y1 - y0) * (H - 2 * pad);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  let s = `<line x1="${sx(x0)}" y1="${sy(0)}" x2="${sx(x1)}" y2="${sy(0)}" stroke="var(--line)"/><line x1="${sx(0)}" y1="${sy(y0)}" x2="${sx(0)}" y2="${sy(y1)}" stroke="var(--line)"/>`;
+  if (svg.dataset.ray) { const [rx, ry] = svg.dataset.ray.split(",").map(Number); s += `<line x1="${sx(0)}" y1="${sy(0)}" x2="${sx(rx)}" y2="${sy(ry)}" stroke="var(--blue)" stroke-dasharray="3 3" opacity="0.6"/>`; }
+  const off = { n: [0, -7, "middle"], s: [0, 14, "middle"], e: [6, 4, "start"], w: [-6, 4, "end"] };
+  for (const [label, x, y, c, pos] of pts) {
+    const [dx, dy, anchor] = off[pos || "e"];
+    s += `<circle cx="${sx(x)}" cy="${sy(y)}" r="3.5" fill="${COLORS[c]}"/>`;
+    if (label) s += `<text x="${sx(x) + dx}" y="${sy(y) + dy}" text-anchor="${anchor}" fill="${COLORS[c]}">${label}</text>`;
+  }
+  svg.innerHTML = s;
+});
+document.querySelectorAll("[data-squares]").forEach(el => {
+  const n = +el.dataset.squares;
+  el.style.gridTemplateColumns = `repeat(${n}, auto)`;
+  el.innerHTML = `<i style="background:${el.dataset.color}"></i>`.repeat(n * n);
+});
+document.querySelectorAll("[data-reveal]").forEach(b => b.onclick = () => { $(b.dataset.reveal).hidden = false; b.hidden = true; });
+
+/* ---- embedded pages load only when their screen comes near (data-src), then stay loaded ---- */
+const loadFrames = el => el && el.querySelectorAll("iframe[data-src]").forEach(f => { if (!f.getAttribute("src")) f.src = f.dataset.src; });
+if ("IntersectionObserver" in window) {
+  const fo = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && !presenting()) loadFrames(e.target); }), { rootMargin: "800px 0px" });
+  screens.forEach(s => { if (s.querySelector("iframe[data-src]")) fo.observe(s); });
+} else screens.forEach(loadFrames);
 /* ---- embedded pages: tabs scroll the frame to a section ---- */
 document.querySelectorAll(".tabs").forEach(tabs => {
   const frame = tabs.parentElement.querySelector("iframe");
@@ -748,7 +2263,7 @@ document.querySelectorAll(".ex").forEach(ex => {
   cell.innerHTML = `<textarea spellcheck="false" aria-label="Code for exercise ${n}"></textarea>
     <div class="cellbar"><button class="primary run">Run</button><button class="reset">Start over</button><span class="status" aria-live="polite"></span></div>
     <pre class="out" aria-label="Output"></pre>
-    <details><summary>Solution to Exercise ${n} (open it after you have tried)</summary><pre class="sol"></pre><button class="use" style="margin-top:8px">Put the solution in the editor</button></details>`;
+    <details class="hint"><summary>Solution to Exercise ${n} (open it after you have tried)</summary><pre class="sol"></pre><button class="use" style="margin-top:8px">Put the solution in the editor</button></details>`;
   ex.append(cell);
   const ta = cell.querySelector("textarea"), out = cell.querySelector(".out"), status = cell.querySelector(".status");
   cell.querySelector(".sol").textContent = solution;
@@ -759,10 +2274,10 @@ document.querySelectorAll(".ex").forEach(ex => {
     if (e.key === "Tab" && !e.shiftKey) { e.preventDefault(); ta.setRangeText("    ", ta.selectionStart, ta.selectionEnd, "end"); }
     if (e.key === "Enter" && (e.shiftKey || e.metaKey || e.ctrlKey)) { e.preventDefault(); run(); }
   });
-  cell.querySelector(".reset").onclick = () => { ta.value = start; fit(); out.textContent = ""; setStatus("", ""); };
-  cell.querySelector(".use").onclick = () => { ta.value = solution; fit(); ta.focus(); };
   const setStatus = (text, cls) => { status.textContent = text; status.className = "status " + cls; };
   const line = (text, cls) => { const s = document.createElement("span"); if (cls) s.className = cls; s.textContent = text + "\n"; out.append(s); };
+  cell.querySelector(".reset").onclick = () => { ta.value = start; fit(); out.textContent = ""; setStatus("", ""); };
+  cell.querySelector(".use").onclick = () => { ta.value = solution; fit(); ta.focus(); };
   async function runOnce() {
     out.textContent = "";
     setStatus(pyPromise ? "Running…" : "Loading Python (once, a few seconds)…", "");
@@ -795,30 +2310,49 @@ document.querySelectorAll(".ex").forEach(ex => {
   cell.querySelector(".run").onclick = run;
 });
 
-/* ---- present mode and notes window ---- */
+/* ---- present mode ---- */
+const presenting = () => document.body.classList.contains("present");
+const frags = i => [...screens[i].querySelectorAll(".frag")];
+const shownFrags = i => frags(i).filter(f => !f.classList.contains("hide")).length;
 const meta = i => {
   const s = screens[i];
-  return { kind: s.querySelector(".kind")?.textContent || "", title: s.querySelector("h2").textContent, notes: s.querySelector(".notes")?.innerHTML || "", step: +s.dataset.step };
+  return { kind: s.querySelector(".kind")?.textContent || s.dataset.part || "", title: s.querySelector("h2, h1")?.textContent || "",
+    notes: s.querySelector(".notes")?.innerHTML || "", step: +s.dataset.step || 0, part: s.dataset.part || "",
+    frags: frags(i).length, shown: shownFrags(i) };
 };
-$("pRoad").innerHTML = STEPS.map((t, k) => `<span>${k + 1} ${t}</span>`).join("");
-function show(i, quiet) {
+function zoomFrames() {
+  // larger text, but keep at least 1000 CSS pixels of width so two-column panels stay side by side
+  const font = parseFloat(getComputedStyle(document.documentElement).fontSize) / 15;
+  document.querySelectorAll("iframe.frame").forEach(f => {
+    const z = presenting() ? Math.max(1, Math.min(1.8, font, f.clientWidth / 1000)) : 1;
+    try { f.contentDocument.documentElement.style.zoom = z === 1 ? "" : z.toFixed(2); } catch (e) {}
+  });
+}
+window.addEventListener("resize", zoomFrames);
+function post() { if (chan) chan.postMessage({ at: cur, shown: shownFrags(cur) }); }
+function show(i, opts = {}) {
   cur = Math.max(0, Math.min(screens.length - 1, i));
   screens.forEach((s, k) => s.classList.toggle("current", k === cur));
+  const fs = frags(cur), n = opts.shown ?? (opts.back ? fs.length : 0);
+  fs.forEach((f, k) => f.classList.toggle("hide", k >= n));
   const m = meta(cur);
-  $("pRoad").querySelectorAll("span").forEach((s, k) => s.classList.toggle("on", k + 1 === m.step));
+  $("pWhere").textContent = m.step ? `Step ${m.step} of 6 · ${STEPS[m.step - 1]}` : m.part;
   $("pCount").textContent = `${cur + 1} / ${screens.length}`;
   screens[cur].scrollTop = 0;
   try { history.replaceState(null, "", "#" + screens[cur].id); } catch (e) {}
-  if (presenting()) zoomFrames();
-  if (chan && !quiet) chan.postMessage({ at: cur });
+  if (presenting()) { loadFrames(screens[cur]); zoomFrames(); }
+  if (!opts.quiet) post();
 }
-const presenting = () => document.body.classList.contains("present");
+function next() {
+  const fs = frags(cur), k = shownFrags(cur);
+  if (k < fs.length) { fs[k].classList.remove("hide"); post(); } else show(cur + 1);
+}
+function prev() { show(cur - 1, { back: true }); }
 function enter() {
   const k = screens.findIndex(s => "#" + s.id === location.hash);
   document.body.classList.add("present");
   document.documentElement.classList.add("present");
   show(k >= 0 ? k : 0);
-  zoomFrames();
   try { document.documentElement.requestFullscreen?.().catch(() => {}); } catch (e) {}
 }
 function exit() {
@@ -831,74 +2365,66 @@ function exit() {
 }
 function openNotes() {
   const w = window.open(location.pathname + "?notes", "lesson-notes", "width=980,height=760");
-  if (!w) alertNotes();
+  if (!w) $("pNotes").textContent = "Allow pop-ups for notes";
 }
-function alertNotes() { $("pNotes").textContent = "Allow pop-ups for notes"; }
 $("presentBtn").onclick = enter;
-$("pPrev").onclick = () => show(cur - 1);
-$("pNext").onclick = () => show(cur + 1);
+$("pPrev").onclick = prev;
+$("pNext").onclick = next;
 $("pNotes").onclick = openNotes;
 $("pExit").onclick = exit;
-document.addEventListener("keydown", e => {
-  if (isNotes || !presenting()) return;
+const keys = e => {
+  if (!presenting()) return;
   if (e.target.closest && e.target.closest("textarea, input, select")) return;
-  if (["ArrowRight", "PageDown"].includes(e.key) || (e.key === " " && !e.target.closest("button, summary"))) { e.preventDefault(); show(cur + 1); }
-  else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); show(cur - 1); }
+  if (["ArrowRight", "PageDown"].includes(e.key) || (e.key === " " && !(e.target.closest && e.target.closest("button, summary, a")))) { e.preventDefault(); next(); }
+  else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); prev(); }
   else if (e.key === "Escape") exit();
   else if (e.key === "n" || e.key === "N") openNotes();
-});
-// present mode zooms the embedded pages to the lesson's text size
-function zoomFrames() {
-  // larger text, but keep at least 1000 CSS pixels of width so the two-column panels stay side by side
-  const font = parseFloat(getComputedStyle(document.documentElement).fontSize) / 15;
-  document.querySelectorAll("iframe.frame").forEach(f => {
-    const z = presenting() ? Math.max(1, Math.min(1.8, font, f.clientWidth / 1000)) : 1;
-    try { f.contentDocument.documentElement.style.zoom = z === 1 ? "" : z.toFixed(2); } catch (e) {}
-  });
-}
-window.addEventListener("resize", zoomFrames);
+};
+if (!isNotes) document.addEventListener("keydown", keys);
 // a click inside an embedded page moves the keyboard focus there: forward the presenter's keys
 document.querySelectorAll("iframe.frame").forEach(f => f.addEventListener("load", () => {
   zoomFrames();
   try {
     f.contentDocument.addEventListener("keydown", e => {
       if (!presenting()) return;
-      if (e.key === "PageDown") { e.preventDefault(); show(cur + 1); }
-      else if (e.key === "PageUp") { e.preventDefault(); show(cur - 1); }
+      if (e.key === "PageDown") { e.preventDefault(); next(); }
+      else if (e.key === "PageUp") { e.preventDefault(); prev(); }
       else if (e.key === "Escape") exit();
     });
   } catch (err) {}
 }));
 if (chan && !isNotes) chan.onmessage = ({ data }) => {
-  if (data.hello) chan.postMessage({ at: cur, presenting: presenting() });
-  if (typeof data.go === "number") { if (!presenting()) enter(); show(data.go); }
+  if (data.hello) post();
+  if (data.cmd) { if (!presenting()) enter(); data.cmd === "next" ? next() : prev(); }
 };
 
+/* ---- speaker-notes window ---- */
 if (isNotes) {
   document.body.classList.add("notesview");
   document.title = "Notes · " + document.title;
   let t0 = Date.now();
-  const render = i => {
+  const render = (i, shown) => {
     cur = i;
     const m = meta(i);
     $("nKind").textContent = m.kind;
     $("nTitle").textContent = m.title;
+    $("nFrag").textContent = m.frags ? `Shown: ${shown} of ${m.frags} parts${shown < m.frags ? " · Next reveals the next part" : ""}` : "";
     $("nText").innerHTML = m.notes;
     $("nCount").textContent = `${i + 1} / ${screens.length}`;
-    $("nNextTitle").textContent = i + 1 < screens.length ? "Next: " + meta(i + 1).title : "Last screen";
+    $("nNextTitle").textContent = i + 1 < screens.length ? "Next screen: " + meta(i + 1).title : "Last screen";
     window.scrollTo(0, 0);
   };
-  render(0);
-  const go = i => { i = Math.max(0, Math.min(screens.length - 1, i)); render(i); chan?.postMessage({ go: i }); };
-  $("nPrev").onclick = () => go(cur - 1);
-  $("nNext").onclick = () => go(cur + 1);
+  render(0, 0);
+  const send = cmd => chan?.postMessage({ cmd });
+  $("nPrev").onclick = () => send("prev");
+  $("nNext").onclick = () => send("next");
   $("nReset").onclick = () => { t0 = Date.now(); };
   document.addEventListener("keydown", e => {
-    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); go(cur + 1); }
-    else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); go(cur - 1); }
+    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); send("next"); }
+    else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); send("prev"); }
   });
   setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $("nClock").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; }, 1000);
-  if (chan) { chan.onmessage = ({ data }) => { if (typeof data.at === "number") render(data.at); }; chan.postMessage({ hello: true }); }
+  if (chan) { chan.onmessage = ({ data }) => { if (typeof data.at === "number") render(data.at, data.shown || 0); }; chan.postMessage({ hello: true }); }
 }
 })();
 </script>

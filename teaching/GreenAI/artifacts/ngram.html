@@ -11,7 +11,7 @@
 // ?embed=count,gen shows only those sections, for use inside a lesson page
 (() => {
   let ids = [];
-  try { ids = (new URLSearchParams(location.search).get("embed") || "").split(",").filter(x => /^[a-z]+$/.test(x)); } catch (e) {}
+  try { ids = (new URLSearchParams(location.search).get("embed") || "").split(",").filter(x => /^[a-z][a-z0-9]*$/.test(x)); } catch (e) {}
   if (!ids.length) return;
   document.documentElement.classList.add("embed");
   const st = document.createElement("style");

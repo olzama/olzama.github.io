@@ -7,6 +7,19 @@
 <body>
 <title>Attention, Step by Step</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<script>
+// ?embed=count,gen shows only those sections, for use inside a lesson page
+(() => {
+  let ids = [];
+  try { ids = (new URLSearchParams(location.search).get("embed") || "").split(",").filter(x => /^[a-z][a-z0-9]*$/.test(x)); } catch (e) {}
+  if (!ids.length) return;
+  document.documentElement.classList.add("embed");
+  const st = document.createElement("style");
+  st.textContent = ".wrap > " + ids.map(i => ":not(#" + i + ")").join("") + " { display: none !important; }"
+    + " html.embed body { padding-block: 8px 16px; } html.embed .wrap { gap: 16px; }";
+  document.head.appendChild(st);
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Questrial&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -167,6 +180,18 @@ table.grid tr.yours th { color: var(--orange); }
 .whogrid .pred .bad { color: var(--neg); }
 .whogrid .sub { grid-column: 1 / -1; font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
 table.jobs td, table.jobs th { text-align: left; font-style: normal; }
+.cmprows { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; align-items: baseline; }
+@media (max-width: 600px) { .cmprows { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+.cmpline { margin: 0; font-size: 1.02rem; }
+.cmpline.src { font-style: italic; }
+.cmpline .bad { color: var(--neg); text-decoration: underline; text-underline-offset: 3px; }
+.cmpline .miss, .note .miss { color: var(--muted); text-decoration: line-through; }
+table.cmpacc th { white-space: nowrap; }
+table.attgrid { border-collapse: separate; border-spacing: 1px; font-family: var(--font-mono); font-size: 0.72rem; }
+table.attgrid td { width: 14px; height: 14px; min-width: 14px; border-radius: 2px; background: var(--grid); }
+table.attgrid tbody th { text-align: right; font-weight: 400; padding-right: 6px; white-space: nowrap; color: var(--fg); }
+table.attgrid thead th { height: 90px; vertical-align: bottom; font-weight: 400; color: var(--muted); font-style: italic; }
+table.attgrid thead th span { display: inline-block; writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; }
 #askbtn { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 10;
   background: var(--blue); border-color: var(--blue); color: var(--panel); border-radius: 999px; padding: 10px 18px; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
 #askpanel { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 11;
@@ -215,12 +240,43 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <div class="heatwrap"><svg id="lookAtt" role="img" aria-label="Encoder chain; the decoder reads every box, weighted"></svg></div>
     <div class="usebar"><span class="label">What the decoder uses for this word</span><div class="mix" id="mixAtt"></div><div class="weights" id="mixAttTxt"></div></div>
     <p class="note" id="lookNote"></p>
-    <p class="note">Weights for <i>tía miña</i> are the hand-set ones from the worked example; for the whole sentence they are the real model's (section 3, averaged over its heads). The English words are that model's translation. The top bar comes from the simplified encoder of the <a href="mt.html">translation page</a>; the bottom bar from the attention weights. Before attention, a long sentence had to fit into the last box alone, and translations of long sentences got much worse.</p>
+    <p class="note">Weights for <i>tía miña</i> are the hand-set ones from the worked example; for the whole sentence they are the real model's (section 4, averaged over its heads). The English words are that model's translation. The top bar comes from the simplified encoder of the <a href="mt.html">translation page</a>; the bottom bar from the attention weights. Before attention, a long sentence had to fit into the last box alone, and translations of long sentences got much worse.</p>
+  </section>
+
+  <section class="panel" id="compare">
+    <h2><span class="n">2</span>Two trained models: without and with attention</h2>
+    <p class="lead">Two small translation models, trained on the same data for the same number of steps, with the same number of parameters. The only difference: <b>without attention</b>, the decoder gets the encoder's last vector, the summary of the whole sentence; <b>with attention</b>, it looks back at every word's vector each time it writes a word. The training data is built from templates around our sentence (other relatives, other verbs, other sayings). Our own sentence was left out, so both models translate it for the first time.</p>
+    <div class="controls">
+      <span class="note">Vector size</span>
+      <div class="seg" role="group" aria-label="Vector size" id="cmpSize"></div>
+      <label class="note" for="cmpEx">Sentence</label>
+      <select id="cmpEx"></select>
+    </div>
+    <div class="cmprows">
+      <p class="label">Galician</p><p class="cmpline src" id="cmpSrc"></p>
+      <p class="label">Correct English</p><p class="cmpline" id="cmpRef"></p>
+      <p class="label">Without attention</p><p class="cmpline" id="cmpOne"></p>
+      <p class="label">With attention</p><p class="cmpline" id="cmpAtt"></p>
+    </div>
+    <p class="note" id="cmpNote"></p>
+    <div class="col">
+      <div class="col">
+        <p class="label">Exactly right, out of 500 sentences neither model saw</p>
+        <div class="heatwrap"><table class="grid cmpacc" id="cmpAcc"></table></div>
+        <p class="note" id="cmpAccNote"></p>
+      </div>
+      <div class="col">
+        <p class="label">Where the model with attention looked</p>
+        <div class="heatwrap"><table class="attgrid" id="cmpGrid"></table></div>
+        <p class="note">One row per English word it wrote, one column per Galician word; darker means more weight. Each column is the encoder's vector after reading that word, so it also carries the words before it. The model without attention has no such grid, because it gets the same one vector for every word.</p>
+      </div>
+    </div>
+    <p class="note">Words in <span style="color:var(--neg)">red</span> are not in the correct translation; <span class="miss">struck-through</span> words are missing. Real sentences hold much more than these templates: with 64 dimensions, one vector holds this toy data perfectly, but real models of 2014 lost details in long sentences (Cho et al. 2014; Bahdanau et al. 2015). Attention solved this without making the vector bigger.</p>
   </section>
 
   <!-- 4 -->
   <section class="panel" id="qk">
-    <h2><span class="n">2</span>Query, key, score, softmax, value</h2>
+    <h2><span class="n">3</span>Query, key, score, softmax, value</h2>
     <p class="lead">Each source word offers a <b>key</b>: what it has. The word being written asks with a <b>query</b>: what it is looking for. The score is the dot product of query and key; softmax turns the scores into weights that sum to 1; the output is the weighted average of the source words' <b>values</b>. Drag the orange query.</p>
     <div class="cols">
       <div class="col">
@@ -251,7 +307,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <!-- 4 -->
   <section class="panel" id="real">
-    <h2><span class="n">3</span>A real model on our sentence</h2>
+    <h2><span class="n">4</span>A real model on our sentence</h2>
     <p class="lead">The same arithmetic inside a trained Galician–English model, Helsinki-NLP/opus-mt-gl-en. Its decoder has 6 layers with 8 attention heads each, and every head looks back at the source in its own way. Click an output word, or play the translation, to see where the model looked. It writes “An aunt of mine”: correct, but rare in English (<a href="mt.html">translation page</a>, sections 3 to 5).</p>
     <div class="controls">
       <button class="primary" id="realPlay">Play the translation</button>
@@ -279,7 +335,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <!-- 4 -->
   <section class="panel" id="self">
-    <h2><span class="n">4</span>Self-attention, and many heads at once</h2>
+    <h2><span class="n">5</span>Self-attention, and many heads at once</h2>
     <p class="lead">The encoder uses the same mechanism inside one sentence: every Galician word attends to every Galician word, itself included. Each head has its own queries and keys, so each head learns its own pattern. The heads' outputs are then combined into one vector per word.</p>
     <div class="controls">
       <label class="note" for="selfLayer">Encoder layer</label>
@@ -301,7 +357,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <!-- 5 -->
   <section class="panel" id="who">
-    <h2><span class="n">5</span>Who decides what a head does?</h2>
+    <h2><span class="n">6</span>Who decides what a head does?</h2>
     <p class="lead">Nobody. The people who build a model choose how many layers and heads it has, how big they are, and what it is trained to predict. They do not assign jobs to heads. Every head starts as random numbers, and training nudges all of them at once in whatever direction lowers the error. A head ends up with a job because, from its own random start, doing that job was the quickest way down. Researchers find the jobs afterwards, by looking, as we do here.</p>
     <p class="lead">Below, a tiny model with 2 layers of 2 heads learns the classic sentence <i>The animal didn't cross the street because it was tired</i>: it has to say what “it” refers to. The adjective decides: <i>tired</i> means the animal, <i>wide</i> means the street. It trains on 96 such sentences. The three runs differ only in their random start.</p>
     <div class="controls">
@@ -334,10 +390,11 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <p id="askhint">Answers use your own Claude account.</p>
   </section>
   <footer>
-    <p>Section 2 uses the hand-set numbers of the worked-example slide and <code>01d_attention_playground.ipynb</code>, Part A. Sections 3 and 4 show real weights from <code>Helsinki-NLP/opus-mt-gl-en</code>, recorded by <code>attention_real.py</code> as in Part B of that notebook: greedy translation, then one teacher-forced pass with the model's own output, so each row is the attention used to write that word. Section 5 is a real training run of a toy model, recorded every 5 steps by <code>attention_it_train.py</code>.</p>
+    <p>Section 2 compares two toy models trained by <code>attention_compare_train.py</code>. Section 3 uses the hand-set numbers of the worked-example slide and <code>01d_attention_playground.ipynb</code>, Part A. Sections 4 and 5 show real weights from <code>Helsinki-NLP/opus-mt-gl-en</code>, recorded by <code>attention_real.py</code> as in Part B of that notebook: greedy translation, then one teacher-forced pass with the model's own output, so each row is the attention used to write that word. Section 6 is a real training run of a toy model, recorded every 5 steps by <code>attention_it_train.py</code>.</p>
     <p class="label" style="margin-top:14px">References</p>
     <ul class="refs">
       <li>Sutskever, I., Vinyals, O., &amp; Le, Q. V. (2014). Sequence to sequence learning with neural networks. <i>Advances in Neural Information Processing Systems 27</i>. <a href="https://arxiv.org/abs/1409.3215">arxiv.org/abs/1409.3215</a></li>
+      <li>Cho, K., van Merriënboer, B., Bahdanau, D., &amp; Bengio, Y. (2014). On the properties of neural machine translation: Encoder–decoder approaches. <i>Proceedings of SSST-8</i>, 103–111. <a href="https://arxiv.org/abs/1409.1259">arxiv.org/abs/1409.1259</a></li>
       <li>Bahdanau, D., Cho, K., &amp; Bengio, Y. (2015). Neural machine translation by jointly learning to align and translate. <i>ICLR 2015</i>. <a href="https://arxiv.org/abs/1409.0473">arxiv.org/abs/1409.0473</a></li>
       <li>Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł., &amp; Polosukhin, I. (2017). Attention is all you need. <i>Advances in Neural Information Processing Systems 30</i>. <a href="https://arxiv.org/abs/1706.03762">arxiv.org/abs/1706.03762</a></li>
       <li>Tiedemann, J., &amp; Thottingal, S. (2020). OPUS-MT: Building open translation services for the World. <i>Proceedings of EAMT 2020</i>, 479–480. Model: <a href="https://huggingface.co/Helsinki-NLP/opus-mt-gl-en">Helsinki-NLP/opus-mt-gl-en</a> (Apache 2.0).</li>
@@ -611,9 +668,9 @@ cur1 = 2; renderLook();
   const lab = v => v === "all" ? "average" : +v + 1;
   return [
     `Section 1 (look back at every word): two diagrams on the same input (${long1 ? "whole sentence, real averaged weights" : "tía miña → my aunt, hand-set weights 0.95/0.05"}). Top, without attention: the encoder is a chain of boxes (one per source word, each a running summary vector); the decoder uses only the last box for every English word. Bottom, with attention: lines from every box, width = weight. English words written so far: ${cur1} of ${lookData().tgt.length}.`,
-    `Section 2 (query, key, score, softmax, value): q = (${q[0]}, ${q[1]}); scores tía ${sc[0].toFixed(2)}, miña ${sc[1].toFixed(2)}; weights tía ${w[0].toFixed(2)}, miña ${w[1].toFixed(2)}.`,
-    `Section 3 (real cross-attention): translation "${D.translation}". Layer ${lab($("realLayer").value)}, head ${lab($("realHead").value)}. Selected output token "${clean(D.tgt[tSel])}" looks at: ${top(D.src, rw)}.`,
-    `Section 4 (encoder self-attention): layer ${sLayer + 1}, head ${sHead + 1}; selected word "${clean(D.src[sSel])}" looks at: ${top(D.src, sw)}.`,
+    `Section 3 (query, key, score, softmax, value): q = (${q[0]}, ${q[1]}); scores tía ${sc[0].toFixed(2)}, miña ${sc[1].toFixed(2)}; weights tía ${w[0].toFixed(2)}, miña ${w[1].toFixed(2)}.`,
+    `Section 4 (real cross-attention): translation "${D.translation}". Layer ${lab($("realLayer").value)}, head ${lab($("realHead").value)}. Selected output token "${clean(D.tgt[tSel])}" looks at: ${top(D.src, rw)}.`,
+    `Section 5 (encoder self-attention): layer ${sLayer + 1}, head ${sHead + 1}; selected word "${clean(D.src[sSel])}" looks at: ${top(D.src, sw)}.`,
   ].join("\n");
 });
 })();
@@ -681,9 +738,97 @@ i = IT.runs[0].snaps.length - 1;
 render();
 (window.__askState ||= []).push(() => {
   const run = IT.runs[r], snap = run.snaps[i];
-  return `Section 5 (who decides what a head does?): start ${NAMES[r]} (seed ${run.seed}), step ${snap.step} of ${IT.steps}, loss ${snap.loss}, ${Math.round(snap.acc * 96)}/96 right. Final head jobs: ` +
+  return `Section 6 (who decides what a head does?): start ${NAMES[r]} (seed ${run.seed}), step ${snap.step} of ${IT.steps}, loss ${snap.loss}, ${Math.round(snap.acc * 96)}/96 right. Final head jobs: ` +
     run.heads.map(h => `layer ${h.layer} head ${h.head}: looks at the animal ${h.animal_when_animal.toFixed(2)} (animal sentences), at the place ${h.place_when_place.toFixed(2)} (place sentences), at the adjective ${h.mass.adjective.toFixed(2)}; ${Math.round(h.acc_without * 96)}/96 right if switched off`).join("; ") +
     `. At this step, for "...because it was tired" the model says ${snap.pred[0]}; for "...wide" it says ${snap.pred[1]}.`;
+});
+})();
+</script>
+
+<script>
+// ---------------------------------------------------------------- section 2: two trained models
+// Data from attention_compare_train.py: one pair of models (without / with attention) per vector size.
+const CMP = /*CMPDATA*/null/*CMPDATA*/;
+(() => {
+const $ = id => document.getElementById(id);
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+let r = 0, e = 0;
+// longest common subsequence: which output words match the correct translation, which correct words are missing
+function diff(out, ref) {
+  const n = out.length, m = ref.length, L = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = out[i] === ref[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const res = []; let i = 0, j = 0;
+  while (i < n || j < m) {
+    if (i < n && j < m && out[i] === ref[j]) { res.push([out[i], "ok"]); i++; j++; }
+    else if (j < m && (i >= n || L[i][j + 1] >= L[i + 1][j])) { res.push([ref[j], "miss"]); j++; }
+    else { res.push([out[i], "bad"]); i++; }
+  }
+  return res;
+}
+const glue = w => /^[,.»]$/.test(w);
+function line(toks) {  // [[word, cls]] → HTML with sentence spacing and a capital first letter
+  let html = "", prev = "";
+  toks.forEach(([w, c], k) => {
+    const shown = k === 0 ? w[0].toUpperCase() + w.slice(1) : w;
+    const sp = k === 0 || glue(w) || prev === "«" ? "" : " ";
+    html += sp + (c ? `<span class="${c}">${esc(shown)}</span>` : esc(shown));
+    prev = w;
+  });
+  return html;
+}
+const plain = ws => line(ws.map(w => [w, ""])).replace(/<[^>]+>/g, "");
+const counts = d => ({ bad: d.filter(x => x[1] === "bad").length, miss: d.filter(x => x[1] === "miss").length });
+function exName(x, k) {
+  return x.course ? (x.kind === "whole sentence" ? "Our sentence" : `Our sentence: ${x.kind} only`) : `Unseen sentence ${k}`;
+}
+function render() {
+  const run = CMP.runs[r], x = run.examples[e];
+  $("cmpSize").querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", i === r));
+  $("cmpSrc").innerHTML = line(x.src.map(w => [w, ""]));
+  $("cmpRef").innerHTML = line(x.ref.map(w => [w, ""]));
+  const d1 = diff(x.one, x.ref), d2 = diff(x.att, x.ref);
+  $("cmpOne").innerHTML = line(d1); $("cmpAtt").innerHTML = line(d2);
+  const c1 = counts(d1), c2 = counts(d2);
+  const say = (name, c) => c.bad + c.miss === 0 ? `${name} is exactly right` :
+    `${name} has ${c.bad} wrong word${c.bad === 1 ? "" : "s"} and ${c.miss} missing`;
+  $("cmpNote").textContent = `With vectors of ${run.dims} dimensions (${run.params.toLocaleString("en-US")} parameters in each model): ${say("the model without attention", c1)}; ${say("the model with attention", c2)}.`;
+  // accuracy table: rows = size × model, columns = kinds
+  let h = `<thead><tr><th></th>${CMP.kinds.map(k => `<th>${k}</th>`).join("")}</tr></thead><tbody>`;
+  CMP.runs.forEach((ru, i) => {
+    [["one", "without"], ["att", "with"]].forEach(([key, lab]) => {
+      h += `<tr class="${i === r ? "yours" : ""}"><th>${ru.dims} dims, ${lab}</th>${ru.acc[key].map(v => `<td>${v}</td>`).join("")}</tr>`;
+    });
+  });
+  $("cmpAcc").innerHTML = h + "</tbody>";
+  $("cmpAccNote").textContent = `Each model was trained on ${CMP.train.toLocaleString("en-US")} items (${CMP.trainSentences.toLocaleString("en-US")} sentences, each also split into its three pieces) for ${CMP.steps.toLocaleString("en-US")} steps. The highlighted rows are the selected vector size.`;
+  // attention grid of the model with attention
+  const W = x.attw, outs = x.att.concat(["‹end›"]);
+  let g = `<thead><tr><th></th>${x.src.map(w => `<th><span>${esc(w)}</span></th>`).join("")}</tr></thead><tbody>`;
+  outs.forEach((w, i) => {
+    if (!W[i]) return;
+    g += `<tr><th>${esc(w)}</th>${W[i].map((v, j) => `<td style="background:rgba(var(--heat),${v.toFixed(3)})" title="${esc(w)} → ${esc(x.src[j])}: ${v.toFixed(2)}"></td>`).join("")}</tr>`;
+  });
+  $("cmpGrid").innerHTML = g + "</tbody>";
+}
+CMP.runs.forEach((ru, i) => {
+  const b = document.createElement("button");
+  b.textContent = `${ru.dims}`; b.setAttribute("aria-pressed", "false");
+  b.addEventListener("click", () => { r = i; render(); });
+  $("cmpSize").appendChild(b);
+});
+$("cmpSize").insertAdjacentHTML("afterend", '<span class="note">dimensions</span>');
+let k = 0;
+CMP.runs[0].examples.forEach((x, i) => {
+  const o = document.createElement("option");
+  o.value = i; o.textContent = exName(x, x.course ? 0 : ++k);
+  $("cmpEx").appendChild(o);
+});
+$("cmpEx").addEventListener("change", () => { e = +$("cmpEx").value; render(); });
+render();
+(window.__askState ||= []).push(() => {
+  const run = CMP.runs[r], x = run.examples[e];
+  return `Section 2 (two trained models): vector size ${run.dims} dimensions (${run.params} parameters per model); sentence "${plain(x.src)}" (${x.course ? "our sentence" : "an unseen template sentence"}, ${x.kind}). Correct: "${plain(x.ref)}". Without attention: "${plain(x.one)}". With attention: "${plain(x.att)}". Exactly right out of ${CMP.test} unseen sentences, by piece (${CMP.kinds.join(", ")}): ` +
+    CMP.runs.map(ru => `${ru.dims} dims without attention ${ru.acc.one.join("/")}, with attention ${ru.acc.att.join("/")}`).join("; ") + ".";
 });
 })();
 </script>
@@ -700,10 +845,11 @@ The page:
 - Running example: the Galician sentence "Unha tía miña, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»" (from the novel Speechwriter by Paulo Naseiro). "tía miña" is noun then possessive; English "my aunt" reverses the order.
 - The page continues a separate translation page (training, the encoder's one summary vector, word-by-word decoding without attention, why "an aunt of mine" is rare in English).
 - Section 1: early neural MT squeezed the whole source sentence into one vector (a bottleneck for long sentences); attention (Bahdanau, Cho & Bengio 2015) lets the decoder look back at every source word at each step. Toy weights: writing "my" puts 0.95 on miña, writing "aunt" puts 0.95 on tía.
-- Section 2: keys k_tía = (1, 0), k_miña = (0, 1); queries q_aunt = (3, 0), q_my = (0, 3), all hand-set as on the course slide. Score = q · k; softmax turns scores into weights that sum to 1 (e^3 / (e^3 + e^0) = 0.95); the output is the weighted average of the value vectors. The two value vectors in the small plot are made up, with dimensions named "family member" and "belongs to me". A shorter query in the same direction gives a less sharp split.
-- Section 3: real cross-attention from the Helsinki-NLP/opus-mt-gl-en model (6 decoder layers × 8 heads) on the full sentence, recorded with one teacher-forced pass over its own greedy translation. Tokens are subword pieces; ‹/s› ends the sentence and often receives "parked" attention. Averaged over all heads, "aunt" looks most at "tía" (0.31); single late-layer heads are much sharper (layer 6 head 2: 0.99), early layers barely align.
-- Section 4: the encoder's self-attention (6 layers × 8 heads), each word attending to every source word. Heads have different habits, e.g. layer 3 head 4 mostly looks at the next word, layer 6 head 7 at the previous word (miña → tía 0.94).
-- Section 5: who decides what a head does. Nobody: designers choose the number of layers and heads, their sizes and the training task; every head starts random and gradient descent changes all of them to lower the loss; jobs emerge and are found afterwards by analysis (Clark et al. 2019; Voita et al. 2019; Michel et al. 2019 found many heads can be removed). A toy model (2 layers × 2 heads, 2-D keys and queries) learns "the animal didn't cross the street because it was tired/wide" (96 sentences; tired, scared, lazy → the animal; wide, busy, wet → the place; example after Uszkoreit 2017). Three runs differ only in the random seed: in start A one head of layer 2 looks at the animal for animal adjectives and at the place for place adjectives (the classic picture); in start B the job is split between two heads; in start C no head looks at either noun much, yet all answers are right, because information can travel through other words in layer 1.`;
+- Section 2: two toy translation models (GRU encoder and decoder) trained on the same data, identical except for attention, with the same number of parameters. Without attention the decoder gets only the encoder's last vector; with attention it takes a weighted average of all the encoder's vectors at every output word (dot-product scores, softmax). Training data: 5,000 template sentences built around the course sentence (other relatives, possessives, verbs, nouns, sayings), each also split into three pieces (noun phrase, noun phrase + relative clause, saying); 8,000 training steps; the course sentence is held out. One pair of models per vector size (8, 16, 64 dimensions). The current state gives the accuracies on 500 unseen sentences. Small vectors lose details without attention (wrong relative, wrong verb, half the saying dropped) while the sentence stays fluent; with 64 dimensions both models are perfect on this toy data, because the templates hold little information. In real 2014 systems, one vector lost details of long sentences (Cho et al. 2014; Bahdanau et al. 2015). The toy data is made up; it is no real corpus.
+- Section 3: keys k_tía = (1, 0), k_miña = (0, 1); queries q_aunt = (3, 0), q_my = (0, 3), all hand-set as on the course slide. Score = q · k; softmax turns scores into weights that sum to 1 (e^3 / (e^3 + e^0) = 0.95); the output is the weighted average of the value vectors. The two value vectors in the small plot are made up, with dimensions named "family member" and "belongs to me". A shorter query in the same direction gives a less sharp split.
+- Section 4: real cross-attention from the Helsinki-NLP/opus-mt-gl-en model (6 decoder layers × 8 heads) on the full sentence, recorded with one teacher-forced pass over its own greedy translation. Tokens are subword pieces; ‹/s› ends the sentence and often receives "parked" attention. Averaged over all heads, "aunt" looks most at "tía" (0.31); single late-layer heads are much sharper (layer 6 head 2: 0.99), early layers barely align.
+- Section 5: the encoder's self-attention (6 layers × 8 heads), each word attending to every source word. Heads have different habits, e.g. layer 3 head 4 mostly looks at the next word, layer 6 head 7 at the previous word (miña → tía 0.94).
+- Section 6: who decides what a head does. Nobody: designers choose the number of layers and heads, their sizes and the training task; every head starts random and gradient descent changes all of them to lower the loss; jobs emerge and are found afterwards by analysis (Clark et al. 2019; Voita et al. 2019; Michel et al. 2019 found many heads can be removed). A toy model (2 layers × 2 heads, 2-D keys and queries) learns "the animal didn't cross the street because it was tired/wide" (96 sentences; tired, scared, lazy → the animal; wide, busy, wet → the place; example after Uszkoreit 2017). Three runs differ only in the random seed: in start A one head of layer 2 looks at the animal for animal adjectives and at the place for place adjectives (the classic picture); in start B the job is split between two heads; in start C no head looks at either noun much, yet all answers are right, because information can travel through other words in layer 1.`;
 (async () => {
   // window.claude exists only inside a Claude viewer; elsewhere the button stays hidden
   const sample = window.claude ? await window.claude.use("sample") : null;

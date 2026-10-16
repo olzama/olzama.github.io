@@ -7,6 +7,19 @@
 <body>
 <title>Skip-gram, Step by Step</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<script>
+// ?embed=count,gen shows only those sections, for use inside a lesson page
+(() => {
+  let ids = [];
+  try { ids = (new URLSearchParams(location.search).get("embed") || "").split(",").filter(x => /^[a-z][a-z0-9]*$/.test(x)); } catch (e) {}
+  if (!ids.length) return;
+  document.documentElement.classList.add("embed");
+  const st = document.createElement("style");
+  st.textContent = ".wrap > " + ids.map(i => ":not(#" + i + ")").join("") + " { display: none !important; }"
+    + " html.embed body { padding-block: 8px 16px; } html.embed .wrap { gap: 16px; }";
+  document.head.appendChild(st);
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Questrial&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -160,7 +173,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <p>The model only ever tries to predict a word's neighbors. Watch the embedding table change while it does: words with the same neighbors end up pointing the same way.</p>
   </header>
 
-  <div class="main">
+  <div class="main" id="train">
     <div class="side">
     <section class="panel">
       <div class="growhead" style="gap:8px 14px"><p class="label" style="margin:0">Inside skip-gram: what gets multiplied</p><span class="chapters" style="margin:0" id="fwmode"><button data-m="one" class="on" style="font-size:0.82rem;padding:4px 10px">one pair</button><button data-m="all" style="font-size:0.82rem;padding:4px 10px">all words at once</button></span><button id="fwplay" style="font-size:0.82rem;padding:4px 10px">Play the multiplication</button></div>
