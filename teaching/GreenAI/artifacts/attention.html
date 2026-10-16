@@ -192,6 +192,16 @@ table.attgrid td { width: 14px; height: 14px; min-width: 14px; border-radius: 2p
 table.attgrid tbody th { text-align: right; font-weight: 400; padding-right: 6px; white-space: nowrap; color: var(--fg); }
 table.attgrid thead th { height: 90px; vertical-align: bottom; font-weight: 400; color: var(--muted); font-style: italic; }
 table.attgrid thead th span { display: inline-block; writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; }
+.writers { display: grid; gap: 12px; }
+.writer { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); min-width: 0; }
+.srcrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.srcrow .chip { cursor: default; transition: background-color .35s ease, color .35s ease; }
+.srcrow .chip.faded { color: var(--muted); }
+.srcrow .arr { color: var(--muted); }
+.sumvec { font-family: var(--font-mono); font-size: 0.82rem; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--orange); color: var(--fg); transition: background-color .2s ease; }
+.sumvec.pulse { background: var(--hi); }
+.cmpline .cur { background: var(--hi); border-radius: 3px; }
+.cmpline .caret { display: inline-block; width: 0.5em; border-bottom: 2px solid var(--orange); margin-left: 3px; }
 #askbtn { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 10;
   background: var(--blue); border-color: var(--blue); color: var(--panel); border-radius: 999px; padding: 10px 18px; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
 #askpanel { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 11;
@@ -253,11 +263,29 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <select id="cmpEx"></select>
     </div>
     <div class="cmprows">
-      <p class="label">Galician</p><p class="cmpline src" id="cmpSrc"></p>
       <p class="label">Correct English</p><p class="cmpline" id="cmpRef"></p>
-      <p class="label">Without attention</p><p class="cmpline" id="cmpOne"></p>
-      <p class="label">With attention</p><p class="cmpline" id="cmpAtt"></p>
     </div>
+    <div class="controls">
+      <button class="primary" id="cmpPlay">Write both translations</button>
+      <button id="cmpBack">Back</button>
+      <button id="cmpNext">Next English word</button>
+      <span class="note" id="cmpStep"></span>
+    </div>
+    <div class="writers">
+      <div class="writer">
+        <p class="label">Without attention: every word is written from one vector</p>
+        <div class="srcrow"><div class="chips" id="cmpSrcOne"></div><span class="arr">→</span><span class="sumvec" id="cmpSum">one vector</span></div>
+        <p class="cmpline" id="cmpOne"></p>
+        <p class="weights" id="cmpWOne"></p>
+      </div>
+      <div class="writer">
+        <p class="label">With attention: each word looks back at the Galician words</p>
+        <div class="srcrow"><div class="chips" id="cmpSrcAtt"></div></div>
+        <p class="cmpline" id="cmpAtt"></p>
+        <p class="weights" id="cmpWAtt"></p>
+      </div>
+    </div>
+    <p class="note">The shading on each Galician word is the weight of the encoder's vector after reading that word. That vector also carries the words before it, so a weight on <i>miña</i> can bring in <i>tía</i> as well.</p>
     <p class="note" id="cmpNote"></p>
     <div class="col">
       <div class="col">
@@ -752,7 +780,7 @@ const CMP = /*CMPDATA*/{"train":20000,"trainSentences":5000,"steps":8000,"seed":
 (() => {
 const $ = id => document.getElementById(id);
 const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-let r = 0, e = 0;
+let r = 0, e = 0, t = 0, timer = null;
 // longest common subsequence: which output words match the correct translation, which correct words are missing
 function diff(out, ref) {
   const n = out.length, m = ref.length, L = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
@@ -784,10 +812,8 @@ function exName(x, k) {
 function render() {
   const run = CMP.runs[r], x = run.examples[e];
   $("cmpSize").querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", i === r));
-  $("cmpSrc").innerHTML = line(x.src.map(w => [w, ""]));
   $("cmpRef").innerHTML = line(x.ref.map(w => [w, ""]));
   const d1 = diff(x.one, x.ref), d2 = diff(x.att, x.ref);
-  $("cmpOne").innerHTML = line(d1); $("cmpAtt").innerHTML = line(d2);
   const c1 = counts(d1), c2 = counts(d2);
   const say = (name, c) => c.bad + c.miss === 0 ? `${name} is exactly right` :
     `${name} has ${c.bad} wrong word${c.bad === 1 ? "" : "s"} and ${c.miss} missing`;
@@ -809,11 +835,56 @@ function render() {
     g += `<tr><th>${esc(w)}</th>${W[i].map((v, j) => `<td style="background:rgba(var(--heat),${v.toFixed(3)})" title="${esc(w)} → ${esc(x.src[j])}: ${v.toFixed(2)}"></td>`).join("")}</tr>`;
   });
   $("cmpGrid").innerHTML = g + "</tbody>";
+  $("cmpSrcOne").innerHTML = x.src.map(w => `<span class="chip src faded">${esc(w)}</span>`).join("");
+  $("cmpSrcAtt").innerHTML = x.src.map(w => `<span class="chip src">${esc(w)}</span>`).join("");
+  drawStep();
 }
+const total = () => { const x = CMP.runs[r].examples[e]; return Math.max(x.one.length, x.att.length); };
+// the output written so far: matched words plain, wrong words red, the newest word highlighted;
+// missing words appear only when the translation is complete
+function partial(out, ref, n, done) {
+  const d = diff(out, ref); let k = 0; const res = [];
+  for (const [w, c] of d) {
+    if (c === "miss") { if (done) res.push([w, "miss"]); continue; }
+    if (k >= n) break;
+    res.push([w, (c === "bad" ? "bad" : "") + (k === n - 1 && !done ? " cur" : "")]); k++;
+  }
+  return res;
+}
+function drawStep() {
+  const x = CMP.runs[r].examples[e], T = total(), done = t >= T;
+  const showLine = (id, out) => {
+    const toks = partial(out, x.ref, Math.min(t, out.length), done);
+    $(id).innerHTML = (toks.length ? line(toks) : "") + (done || t >= out.length ? "" : '<span class="caret"></span>');
+  };
+  showLine("cmpOne", x.one); showLine("cmpAtt", x.att);
+  $("cmpStep").textContent = done ? `${T} of ${T} English words: done` : `${t} of ${T} English words`;
+  // with attention: shade each Galician word by the weight used for the newest English word
+  const i = t - 1, w = i >= 0 && i < x.att.length && !done ? x.attw[i] : null;
+  $("cmpSrcAtt").querySelectorAll(".chip").forEach((c, j) => { c.style.backgroundColor = w ? `rgba(var(--heat),${w[j].toFixed(3)})` : ""; c.style.color = w && w[j] > 0.55 ? "var(--panel)" : ""; });
+  if (w) {
+    const top = w.map((v, j) => [v, x.src[j]]).sort((a, b) => b[0] - a[0]).slice(0, 3);
+    $("cmpWAtt").innerHTML = `Writing “${esc(x.att[i])}”, it looks at ` + top.map(([v, s]) => `<b>${esc(s)}</b> ${v.toFixed(2)}`).join(" · ");
+  } else $("cmpWAtt").textContent = done ? "Play the translation to see where it looks for each word." : "";
+  // without attention: the same vector for every word
+  const s1 = i >= 0 && i < x.one.length && !done;
+  $("cmpSum").classList.toggle("pulse", s1);
+  $("cmpWOne").innerHTML = s1 ? `Writing “${esc(x.one[i])}” from the same one vector as every other word.` : (done ? "The vector is the encoder's state after the last Galician word." : "");
+  $("cmpGrid").querySelectorAll("tbody tr").forEach((tr, k) => { tr.style.outline = !done && k === i ? "2px solid var(--orange)" : ""; });
+}
+function stopPlay() { clearInterval(timer); timer = null; $("cmpPlay").textContent = "Write both translations"; }
+$("cmpPlay").addEventListener("click", () => {
+  if (timer) { stopPlay(); return; }
+  if (t >= total()) t = 0;
+  drawStep(); $("cmpPlay").textContent = "Pause";
+  timer = setInterval(() => { t++; drawStep(); if (t >= total()) stopPlay(); }, 800);
+});
+$("cmpNext").addEventListener("click", () => { stopPlay(); t = t >= total() ? 1 : t + 1; drawStep(); });
+$("cmpBack").addEventListener("click", () => { stopPlay(); t = Math.max(0, Math.min(t, total()) - 1); drawStep(); });
 CMP.runs.forEach((ru, i) => {
   const b = document.createElement("button");
   b.textContent = `${ru.dims}`; b.setAttribute("aria-pressed", "false");
-  b.addEventListener("click", () => { r = i; render(); });
+  b.addEventListener("click", () => { stopPlay(); r = i; t = total(); render(); });
   $("cmpSize").appendChild(b);
 });
 $("cmpSize").insertAdjacentHTML("afterend", '<span class="note">dimensions</span>');
@@ -823,11 +894,11 @@ CMP.runs[0].examples.forEach((x, i) => {
   o.value = i; o.textContent = exName(x, x.course ? 0 : ++k);
   $("cmpEx").appendChild(o);
 });
-$("cmpEx").addEventListener("change", () => { e = +$("cmpEx").value; render(); });
-render();
+$("cmpEx").addEventListener("change", () => { stopPlay(); e = +$("cmpEx").value; t = total(); render(); });
+t = total(); render();
 (window.__askState ||= []).push(() => {
   const run = CMP.runs[r], x = run.examples[e];
-  return `Section 2 (two trained models): vector size ${run.dims} dimensions (${run.params} parameters per model); sentence "${plain(x.src)}" (${x.course ? "our sentence" : "an unseen template sentence"}, ${x.kind}). Correct: "${plain(x.ref)}". Without attention: "${plain(x.one)}". With attention: "${plain(x.att)}". Exactly right out of ${CMP.test} unseen sentences, by piece (${CMP.kinds.join(", ")}): ` +
+  return `Section 2 (two trained models): vector size ${run.dims} dimensions (${run.params} parameters per model); sentence "${plain(x.src)}" (${x.course ? "our sentence" : "an unseen template sentence"}, ${x.kind}). Correct: "${plain(x.ref)}". Animation at English word ${Math.min(t, total())} of ${total()}. Without attention: "${plain(x.one)}". With attention: "${plain(x.att)}". Exactly right out of ${CMP.test} unseen sentences, by piece (${CMP.kinds.join(", ")}): ` +
     CMP.runs.map(ru => `${ru.dims} dims without attention ${ru.acc.one.join("/")}, with attention ${ru.acc.att.join("/")}`).join("; ") + ".";
 });
 })();
