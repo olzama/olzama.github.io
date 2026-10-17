@@ -117,6 +117,26 @@ table.plain tr.now td { background: var(--blue-soft); }
 .costs .box b { font-size: 1.1em; }
 .chain { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; align-items: baseline; font-variant-numeric: tabular-nums; }
 .chain .r { font-family: var(--font-mono); white-space: nowrap; }
+/* step-by-step derivations: a revealed step (.frag data-k=N) shows the parts of the figure marked data-c=N */
+.steps { margin: 0; padding-left: 1.4em; display: grid; gap: 10px; line-height: 1.45; }
+.steps li::marker { color: var(--blue); }
+.steps .m { font-family: var(--font-mono); font-size: 0.92em; }
+.steps .m.b { display: block; margin: 2px 0; }
+.stepfig { width: 100%; max-width: 420px; height: auto; justify-self: center; }
+body.present .stepfig { max-width: min(560px, 40vw); }
+table.sgt td, table.sgt th { padding: 3px 8px; }
+table.sgt th { text-transform: none; letter-spacing: 0; font-size: 0.9em; }
+body.present .stepfig.small { max-width: min(440px, 32vw); }
+table.sgt tr.true td { background: var(--green-soft); }
+table.sgt td.w { font-family: var(--font-body); }
+body.present .stepper:has(.frag.hide[data-k="1"]) [data-c="1"] { visibility: hidden; }
+body.present .stepper:has(.frag.hide[data-k="2"]) [data-c="2"] { visibility: hidden; }
+body.present .stepper:has(.frag.hide[data-k="3"]) [data-c="3"] { visibility: hidden; }
+body.present .stepper:has(.frag.hide[data-k="4"]) [data-c="4"] { visibility: hidden; }
+body.present .stepper:has(.frag.hide[data-k="5"]) [data-c="5"] { visibility: hidden; }
+body.present .stepper:has(.frag.hide[data-k="6"]) [data-c="6"] { visibility: hidden; }
+body.present .stepper:has(.frag.hide[data-k="7"]) [data-c="7"] { visibility: hidden; }
+body.present .stepper:has(.frag.hide[data-k="8"]) [data-c="8"] { visibility: hidden; }
 @media (max-width: 600px) { .chain { grid-template-columns: minmax(0, 1fr); gap: 2px; } .chain .r { white-space: normal; margin-bottom: 6px; } }
 .arr { color: var(--muted); font-size: 1.3em; }
 .vbars { display: flex; align-items: flex-end; justify-content: center; gap: clamp(16px, 4vw, 48px); height: 15em; padding-top: 1.5em; }
@@ -1234,19 +1254,110 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
 </section>
 
 <section class="screen" id="cosine" data-step="2">
-  <header><span class="kind">Step 2 · Embeddings</span><h2>Comparing vectors: cosine similarity</h2></header>
-  <div class="body">
-    <div class="formula">cos(u, v) = <span class="frac"><span>u · v</span><span>‖u‖ ‖v‖</span></span></div>
-    <ul class="points">
-      <li>Toy example: aunt = (4, 2), uncle = (3, 3), car = (1, 4)</li>
-      <li>cos(aunt, uncle) ≈ 0.95 &nbsp;&nbsp; cos(aunt, car) ≈ 0.65</li>
-      <li>Dividing by length makes this about <i>direction</i> alone</li>
-    </ul>
-    <div class="figrow"><img src="img/dot-product.png" alt="The dot product"><img src="img/cosine1.png" alt="Cosine from the dot product"><img src="img/cosine2.png" alt="The angle between two vectors"></div>
+  <header><span class="kind">Step 2 · Embeddings</span><h2>Comparing vectors: cosine similarity, 1</h2><p class="sub">How similar are the directions of two vectors? First, remove the length.</p></header>
+  <div class="body cols stepper">
+    <div class="col">
+      <ol class="steps" start="1">
+        <li class="frag" data-k="1">Two words as vectors: <span class="m">aunt = (4, 2)</span>, <span class="m">uncle = (3, 3)</span>. Words used in similar ways should point in similar directions.</li>
+        <li class="frag" data-k="2"><b>Length</b>, by Pythagoras: <span class="m b">‖aunt‖ = √(4² + 2²) = √20 ≈ 4.47</span><span class="m b">‖uncle‖ = √(3² + 3²) = √18 ≈ 4.24</span>Length is not direction, so we remove it.</li>
+        <li class="frag" data-k="3">Divide each vector by its length: <span class="m">(0.89, 0.45)</span> and <span class="m">(0.71, 0.71)</span>. Both now have length 1: they end on the circle of radius 1.</li>
+      </ol>
+    </div>
+    <div class="col">
+      <svg class="stepfig" viewBox="0 0 360 370" role="img" aria-label="The vectors aunt (4, 2), uncle (3, 3) and car (1, 4), their lengths, the unit circle and the angle between aunt and uncle">
+        <defs><marker id="cah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="context-stroke"/></marker></defs>
+        <g stroke="var(--grid)"><line x1="40" y1="340" x2="350" y2="340"/><line x1="40" y1="340" x2="40" y2="30"/></g>
+        <g font-size="11" fill="var(--muted)" text-anchor="middle"><text x="100" y="356">1</text><text x="160" y="356">2</text><text x="220" y="356">3</text><text x="280" y="356">4</text><text x="30" y="284">1</text><text x="30" y="224">2</text><text x="30" y="164">3</text><text x="30" y="104">4</text></g>
+        <g data-c="1" stroke-width="2.5">
+          <line x1="40" y1="340" x2="280" y2="220" stroke="var(--blue)" marker-end="url(#cah)"/>
+          <line x1="40" y1="340" x2="220" y2="160" stroke="var(--green)" marker-end="url(#cah)"/>
+          <text x="286" y="214" font-size="14" fill="var(--blue)" stroke="none">aunt (4, 2)</text>
+          <text x="196" y="150" font-size="14" fill="var(--green)" stroke="none">uncle (3, 3)</text>
+        </g>
+        <g data-c="2" font-size="12">
+          <path d="M40 340 H280 V220" fill="none" stroke="var(--blue)" stroke-dasharray="4 4"/>
+          <text x="200" y="334" fill="var(--blue)" text-anchor="middle">4</text><text x="288" y="284" fill="var(--blue)">2</text>
+          <text x="252" y="314" fill="var(--blue)" text-anchor="middle">√20 ≈ 4.47</text>
+        </g>
+        <g data-c="3">
+          <path d="M100 340 A60 60 0 0 0 40 280" fill="none" stroke="var(--orange)" stroke-width="1.5"/>
+          <line x1="40" y1="340" x2="93.7" y2="313.2" stroke="var(--orange)" stroke-width="3" marker-end="url(#cah)"/>
+          <line x1="40" y1="340" x2="82.4" y2="297.6" stroke="var(--orange)" stroke-width="3" marker-end="url(#cah)"/>
+          <text x="62" y="268" font-size="11" fill="var(--orange)">radius 1</text>
+        </g>
+        <g data-c="4" style="display:none" fill="none" font-size="13">
+          <path d="M140 340 A100 100 0 0 0 129.4 295.3" stroke="var(--blue)"/><text x="146" y="326" fill="var(--blue)">α</text>
+          <path d="M170 340 A130 130 0 0 0 131.9 248.1" stroke="var(--green)"/><text x="172" y="290" fill="var(--green)">β</text>
+        </g>
+        <g data-c="5" style="display:none" fill="none">
+          <path d="M192 264 A170 170 0 0 0 160.2 219.8" stroke="var(--neg)" stroke-width="2"/><text x="192" y="236" font-size="15" fill="var(--neg)">θ</text>
+        </g>
+        <g data-c="6" style="display:none">
+          <line x1="40" y1="340" x2="100" y2="100" stroke="var(--muted)" stroke-width="2.5" marker-end="url(#cah)"/>
+          <text x="106" y="96" font-size="14" fill="var(--muted)">car (1, 4)</text>
+        </g>
+      </svg>
+    </div>
   </div>
   <div class="notes">
-    <p>Given two word vectors, how do you measure how similar they are? The natural first instinct, the dot product u * v, has a problem: it's inflated simply by how long, how large-valued, the vectors are, which mostly reflects how frequent the words are, not how similar their meaning is. Cosine similarity fixes this by dividing the dot product by the product of the vectors' lengths, which cancels out magnitude and leaves you with a pure measure of direction — do these two vectors point the same way in the space, regardless of how long either one is.</p>
-    <p>The toy numbers stay with our cast of characters: aunt = (4,2), uncle = (3,3), car = (1,4). Cosine of aunt and uncle is about 0.95 — very similar direction, matching our intuition that aunt and uncle are semantically close, both relatives. Cosine of aunt and car is about 0.65, noticeably less similar. This is a two-dimensional toy so the arithmetic fits on a screen; real word vectors have hundreds of dimensions, but the exact same formula, unchanged, is what's used to compare them.</p>
+    <p>We have vectors for words. Now we need a number that says how similar two vectors are. Let's build it step by step. Each press shows the next step.</p>
+    <p>Step 1. Two words, as vectors with two values: aunt is 4, 2, and uncle is 3, 3. We draw each one as an arrow from the origin. Words that are used in similar ways should point in similar directions. So we want to measure how similar the directions are.</p>
+    <p>Step 2. Each arrow has a length. By Pythagoras, the length of aunt is the square root of 4 squared plus 2 squared: the square root of 20, about 4.47. Uncle has length square root of 18, about 4.24. The length can depend on things like how frequent a word is. It is not the direction. So we remove it.</p>
+    <p>Step 3. To remove the length, divide each vector by its own length. Aunt becomes 0.89, 0.45, and uncle becomes 0.71, 0.71. These short arrows point in the same directions as before, but both have length 1. So they end on the circle with radius 1.</p>
+  </div>
+</section>
+
+<section class="screen" id="cosine2" data-step="2">
+  <header><span class="kind">Step 2 · Embeddings</span><h2>Comparing vectors: cosine similarity, 2</h2><p class="sub">Then, measure the angle. This gives the formula.</p></header>
+  <div class="body cols stepper">
+    <div class="col">
+      <ol class="steps" start="4">
+        <li class="frag" data-k="1">A point on that circle, at angle α from the x-axis, is <span class="m">(cos α, sin α)</span>. So the two short vectors are <span class="m">(cos α, sin α)</span> and <span class="m">(cos β, sin β)</span>.</li>
+        <li class="frag" data-k="2">Multiply matching entries and add them up, the <b>dot product</b>. In trigonometry this is the cosine of the angle θ between them: <span class="m b">cos α cos β + sin α sin β = cos(β − α) = cos θ</span><span class="m b">0.89 × 0.71 + 0.45 × 0.71 ≈ 0.95</span></li>
+        <li class="frag" data-k="3">Together, this is the formula: <span class="m b">cos θ = aunt · uncle / (‖aunt‖ ‖uncle‖)</span><span class="m b">= (4×3 + 2×3) / (4.47 × 4.24) ≈ 0.95</span>For <span class="m">car = (1, 4)</span>: <span class="m b">12 / (4.47 × 4.12) ≈ 0.65</span>1 means the same direction, 0 a right angle.</li>
+      </ol>
+    </div>
+    <div class="col">
+      <svg class="stepfig" viewBox="0 0 360 370" role="img" aria-label="The vectors aunt (4, 2), uncle (3, 3) and car (1, 4), their lengths, the unit circle and the angle between aunt and uncle">
+        <defs><marker id="cah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="context-stroke"/></marker></defs>
+        <g stroke="var(--grid)"><line x1="40" y1="340" x2="350" y2="340"/><line x1="40" y1="340" x2="40" y2="30"/></g>
+        <g font-size="11" fill="var(--muted)" text-anchor="middle"><text x="100" y="356">1</text><text x="160" y="356">2</text><text x="220" y="356">3</text><text x="280" y="356">4</text><text x="30" y="284">1</text><text x="30" y="224">2</text><text x="30" y="164">3</text><text x="30" y="104">4</text></g>
+        <g data-x="1" stroke-width="2.5">
+          <line x1="40" y1="340" x2="280" y2="220" stroke="var(--blue)" marker-end="url(#cah2)"/>
+          <line x1="40" y1="340" x2="220" y2="160" stroke="var(--green)" marker-end="url(#cah2)"/>
+          <text x="286" y="214" font-size="14" fill="var(--blue)" stroke="none">aunt (4, 2)</text>
+          <text x="196" y="150" font-size="14" fill="var(--green)" stroke="none">uncle (3, 3)</text>
+        </g>
+        <g data-x="2" font-size="12">
+          <path d="M40 340 H280 V220" fill="none" stroke="var(--blue)" stroke-dasharray="4 4"/>
+          <text x="200" y="334" fill="var(--blue)" text-anchor="middle">4</text><text x="288" y="284" fill="var(--blue)">2</text>
+          <text x="252" y="314" fill="var(--blue)" text-anchor="middle">√20 ≈ 4.47</text>
+        </g>
+        <g data-x="3">
+          <path d="M100 340 A60 60 0 0 0 40 280" fill="none" stroke="var(--orange)" stroke-width="1.5"/>
+          <line x1="40" y1="340" x2="93.7" y2="313.2" stroke="var(--orange)" stroke-width="3" marker-end="url(#cah2)"/>
+          <line x1="40" y1="340" x2="82.4" y2="297.6" stroke="var(--orange)" stroke-width="3" marker-end="url(#cah2)"/>
+          <text x="62" y="268" font-size="11" fill="var(--orange)">radius 1</text>
+        </g>
+        <g data-c="1" fill="none" font-size="13">
+          <path d="M140 340 A100 100 0 0 0 129.4 295.3" stroke="var(--blue)"/><text x="146" y="326" fill="var(--blue)">α</text>
+          <path d="M170 340 A130 130 0 0 0 131.9 248.1" stroke="var(--green)"/><text x="172" y="290" fill="var(--green)">β</text>
+        </g>
+        <g data-c="2" fill="none">
+          <path d="M192 264 A170 170 0 0 0 160.2 219.8" stroke="var(--neg)" stroke-width="2"/><text x="192" y="236" font-size="15" fill="var(--neg)">θ</text>
+        </g>
+        <g data-c="3">
+          <line x1="40" y1="340" x2="100" y2="100" stroke="var(--muted)" stroke-width="2.5" marker-end="url(#cah2)"/>
+          <text x="106" y="96" font-size="14" fill="var(--muted)">car (1, 4)</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <div class="notes">
+    <p>The second half: from the two short arrows to the formula.</p>
+    <p>Step 4. Now a fact from trigonometry. A point on the circle of radius 1, at angle alpha from the x-axis, has coordinates cos alpha, sin alpha. So the short arrow for aunt is cos alpha, sin alpha, and the one for uncle is cos beta, sin beta.</p>
+    <p>Step 5. Multiply the matching entries and add them up. This is called the dot product. We get cos alpha times cos beta, plus sin alpha times sin beta. Trigonometry says this is exactly the cosine of beta minus alpha. And beta minus alpha is the angle between the two arrows, theta. So the dot product of the two short arrows is the cosine of the angle between them. With our numbers: 0.89 times 0.71, plus 0.45 times 0.71, about 0.95.</p>
+    <p>Step 6. Now put it together. We divided each vector by its length, and then took the dot product. That is the same as taking the dot product of the original vectors, and dividing by both lengths. That is the formula for cosine similarity. For aunt and uncle: 4 times 3 plus 2 times 3 is 18, divided by 4.47 times 4.24, about 0.95. For aunt and car, the vector 1, 4: about 0.65. The cosine is 1 when two vectors point the same way, and 0 when they are at a right angle. So aunt is much closer to uncle than to car.</p>
   </div>
 </section>
 
@@ -1343,36 +1454,105 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   </div>
 </section>
 
-<section class="screen" id="inside" data-step="2">
-  <header><span class="kind">Step 2 · Embeddings</span><h2>Inside skip-gram: what gets multiplied</h2><p class="sub">Two tables of parameters. Both start random.</p></header>
-  <div class="body cols wide-left">
+<section class="screen" id="classic" data-step="2">
+  <header><span class="kind">Step 2 · Embeddings</span><h2>Skip-gram: two pictures of the same model</h2></header>
+  <div class="body cols">
     <div class="col">
-      <ul class="points">
-        <li><i>p</i>: the <b>embedding table</b>, one row per word. A <b>one-hot</b> vector (all 0, one 1) times <i>p</i> copies out one row, <i>h</i>:</li>
-      </ul>
-      <div class="eq">
-        <span class="mat" style="--c:4"><span>0</span><span>0</span><span class="hl">1</span><span>0</span></span>
-        <span class="mat" style="--c:2"><span>0.1</span><span>0.9</span><span>0.3</span><span>0.2</span><span class="hl">0.7</span><span class="hl">0.5</span><span>0.4</span><span>0.8</span></span>
-        <span>=</span>
-        <span class="mat" style="--c:2"><span class="hl">0.7</span><span class="hl">0.5</span></span>
+      <p class="label">The classic picture (Mikolov et al., 2013)</p>
+      <div class="fig">
+      <svg class="stepfig small" viewBox="0 0 360 250" role="img" aria-label="Skip-gram: the input word w(t) goes through a projection to four outputs, w(t−2), w(t−1), w(t+1) and w(t+2)">
+        <g font-size="12" text-anchor="middle" fill="currentColor">
+          <text x="45" y="16">INPUT</text><text x="165" y="16">PROJECTION</text><text x="300" y="16">OUTPUT</text>
+          <rect x="15" y="110" width="60" height="34" rx="4" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="45" y="132">w(t)</text>
+          <rect x="135" y="110" width="60" height="34" rx="4" fill="var(--panel)" stroke="var(--fg)"/>
+          <line x1="75" y1="127" x2="131" y2="127" stroke="var(--fg)" marker-end="url(#ah)"/>
+          <g fill="var(--green-soft)" stroke="var(--green)">
+            <rect x="270" y="30" width="60" height="30" rx="4"/><rect x="270" y="80" width="60" height="30" rx="4"/>
+            <rect x="270" y="145" width="60" height="30" rx="4"/><rect x="270" y="195" width="60" height="30" rx="4"/>
+          </g>
+          <text x="300" y="50">w(t−2)</text><text x="300" y="100">w(t−1)</text><text x="300" y="165">w(t+1)</text><text x="300" y="215">w(t+2)</text>
+          <g stroke="var(--fg)" fill="none">
+            <line x1="195" y1="127" x2="266" y2="47" marker-end="url(#ah)"/><line x1="195" y1="127" x2="266" y2="96" marker-end="url(#ah)"/>
+            <line x1="195" y1="127" x2="266" y2="159" marker-end="url(#ah)"/><line x1="195" y1="127" x2="266" y2="208" marker-end="url(#ah)"/>
+          </g>
+        </g>
+        <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--fg)"/></marker></defs>
+      </svg>
+      <span class="cap">Redrawn after Mikolov et al., “Efficient Estimation of Word Representations in Vector Space,” 2013 (arXiv:1301.3781), Figure 1</span>
       </div>
-      <ul class="points">
-        <li><i>p′</i>: one column per word. <i>h</i> × <i>p′</i> gives one <b>score</b> per word; <b>softmax</b> turns scores into probabilities that sum to 1</li>
-        <li>Training nudges <i>p</i> and <i>p′</i>: the true neighbor gets more probability</li>
-      </ul>
     </div>
     <div class="col">
-      <div class="fig"><img src="img/skip-gram.png" alt="The skip-gram network"><span class="cap">Illustration: district-data-labs (Medium)</span></div>
+      <p class="label">The same model, with numbers</p>
+      <div class="fig"><img src="img/skip-gram.png" alt="The skip-gram network with its two tables of numbers"><span class="cap">Illustration: district-data-labs (Medium)</span></div>
+    </div>
+  </div>
+  <ul class="points">
+    <li>Input w(t) = “tape”, as a one-hot vector. Projection = its row of <i>p</i>, called <i>h</i>: the word's embedding.</li>
+    <li>Output = <i>h</i> × <i>p′</i>: one score per word, with the same <i>p′</i> for every position. The picture stops at the scores; <b>softmax</b>, on the next screens, turns them into probabilities.</li>
+  </ul>
+  <div class="notes">
+    <p>Here are two pictures of skip-gram. On the left is the classic picture, from the paper by Mikolov and colleagues, 2013. The input is one word, w of t. It goes through a projection. The output is the words around it: two before, w of t minus 2 and t minus 1, and two after.</p>
+    <p>On the right is the same model with its numbers. The blue column is the input word, “tape”, as a one-hot vector: all zeros, and a 1 at the position of “tape”. The table p is the embedding table. Multiplying the one-hot vector by p picks out one row of p. That row is h, the projection. It is the word's embedding.</p>
+    <p>Then h is multiplied by the second table, p prime. This gives one score for every word in the vocabulary. The four colored outputs are the four positions in the window. In word2vec they all use the same table p prime. So the model makes one prediction, and that prediction is checked against each of the neighbors.</p>
+    <p>Look at the orange output column: 0.4, 0.3, and so on. These are scores. They do not add up to 1, so they are not probabilities yet. The picture leaves out the last step, softmax, which turns scores into probabilities. The next two screens go through all the steps, with our own small example.</p>
+  </div>
+</section>
+
+<section class="screen" id="inside" data-step="2">
+  <header><span class="kind">Step 2 · Embeddings</span><h2>Step by step, 1: from a word to its vector</h2><p class="sub">Our corpus, with the tables at the start of training</p></header>
+  <div class="body cols stepper">
+    <div class="col">
+      <ol class="steps">
+        <li class="frag" data-k="1">The input word is <i>cats</i>. The model writes it as a <b>one-hot</b> vector: one position per vocabulary word, all 0, and a 1 at <i>cats</i>.</li>
+        <li class="frag" data-k="2"><i>p</i> is the <b>embedding table</b>: one row per word, two values each. At the start the values are random.</li>
+        <li class="frag" data-k="3">Multiply: every row of <i>p</i> is multiplied by its 0 or 1, and the rows are added. Only the row of <i>cats</i> is left. So <i>h</i> = <span class="m">(−0.41, −0.26)</span>, the row of <i>cats</i>.</li>
+      </ol>
+    </div>
+    <div class="col">
+      <div class="eq" style="align-items:flex-start">
+        <table class="plain mono sgt" data-c="1"><thead><tr><th></th><th>one-hot</th></tr></thead><tbody><tr><td class="w">cats</td><td class="num">1</td></tr><tr><td class="w">dogs</td><td class="num">0</td></tr><tr><td class="w">chase</td><td class="num">0</td></tr><tr><td class="w">eat</td><td class="num">0</td></tr><tr><td class="w">mice</td><td class="num">0</td></tr><tr><td class="w">balls</td><td class="num">0</td></tr><tr><td class="w">fish</td><td class="num">0</td></tr><tr><td class="w">meat</td><td class="num">0</td></tr></tbody></table>
+        <span data-c="2" style="align-self:center">×</span>
+        <table class="plain mono sgt" data-c="2"><thead><tr><th></th><th colspan="2"><i>p</i></th></tr></thead><tbody><tr class="now"><td class="w">cats</td><td class="num">−0.41</td><td class="num">−0.26</td></tr><tr><td class="w">dogs</td><td class="num">0.30</td><td class="num">0.08</td></tr><tr><td class="w">chase</td><td class="num">−0.41</td><td class="num">−0.07</td></tr><tr><td class="w">eat</td><td class="num">−0.02</td><td class="num">−0.34</td></tr><tr><td class="w">mice</td><td class="num">0.23</td><td class="num">−0.39</td></tr><tr><td class="w">balls</td><td class="num">−0.11</td><td class="num">0.02</td></tr><tr><td class="w">fish</td><td class="num">−0.07</td><td class="num">0.09</td></tr><tr><td class="w">meat</td><td class="num">0.24</td><td class="num">0.46</td></tr></tbody></table>
+        <span data-c="3" style="align-self:center">=</span>
+        <table class="plain mono sgt" data-c="3" style="align-self:center"><thead><tr><th colspan="2"><i>h</i></th></tr></thead><tbody><tr class="now"><td class="num">−0.41</td><td class="num">−0.26</td></tr></tbody></table>
+      </div>
     </div>
   </div>
   <div class="notes">
-    <p>This screen shows what the model actually computes. It has two tables of numbers. Both start random. These numbers are its parameters. A parameter is a number that training is allowed to change.</p>
-    <p>The first table is called p. It has one row per word. A row is a vector, a list of values. Each position in the list is a dimension. In our example, every word has two dimensions, so we can draw each word as a point.</p>
-    <p>How does the model read a word? It writes the word as a one-hot vector. That is a vector of zeros with a single 1, at that word's position in the vocabulary. The example on the screen has four words. The 1 is in position 3. Multiply this vector by the table: every row is multiplied by 0, except row 3. So the result is exactly row 3, copied out. We call this row h. It is the word's embedding.</p>
-    <p>The second table is called p′, p prime. It has one column per word. The model multiplies h by every column. Each multiplication is a dot product: multiply matching entries and add them up. This gives one score per word. A function called softmax turns the scores into probabilities. The probabilities are all positive, and they add up to 1. This is the model's guess: how likely each word is as a neighbor.</p>
-    <p>Training compares this guess with the true neighbor. Then it nudges both tables a little, so that the true neighbor gets more probability next time.</p>
-    <p>The picture on the right is the same model with a window of two words on each side. It is a common illustration of skip-gram.</p>
-    <p>Quick note on the sizes here, because the shapes matter as much as the mechanism. Say your vocabulary has V words, so the one-hot input vector is V numbers long, all zeros except one 1. Matrix p has shape V by N, where N is the embedding size, way smaller than V, so maybe V is 10,000 and N is 300. When you multiply that one-hot vector by p, you're doing a 1-by-V times V-by-N multiplication, and the V's cancel out, so what you get back is 1-by-N, that's h. That's really why the one-hot trick works the way it does, matrix multiplication rules just force it: you can only multiply if the inner dimensions match, V and V, and what's left over is the outer dimensions, 1 and N. Then p' has the opposite shape, N by V, so h times p' is 1-by-N times N-by-V, the N's cancel this time, and you're back to 1-by-V, one score per vocabulary word. So the whole thing funnels V dimensions down to N and then back out to V again, and that squeeze through the narrow N-dimensional middle is really the whole reason embeddings end up meaning anything, the network's forced to compress everything useful about a word into just N numbers to still do well at predicting V-many possible neighbors.</p>
+    <p>Now the same steps with our own small example: the corpus about cats and dogs, and the tables at the very start of training, when they are still random. Each press shows the next step.</p>
+    <p>Step 1. The input word is cats. The model cannot read a word, so it writes it as a one-hot vector. There is one position for every word in the vocabulary, eight here. All of them are 0, except a 1 at the position of cats.</p>
+    <p>Step 2. The table p is the embedding table. It has one row for every word, and each row has two values. At the start, these values are random.</p>
+    <p>Step 3. Now multiply the one-hot vector by the table. Every row of p is multiplied by its own 0 or 1, and then the rows are added up. The rows multiplied by 0 disappear. Only the row of cats is left. So the result, h, is just the row of cats: minus 0.41 and minus 0.26. That is why the rows of p are the embeddings: reading a word means copying out its row.</p>
+  </div>
+</section>
+
+<section class="screen" id="inside2" data-step="2">
+  <header><span class="kind">Step 2 · Embeddings</span><h2>Step by step, 2: from the vector to probabilities</h2><p class="sub">The model's guess for the neighbor of <i>cats</i>, before any training</p></header>
+  <div class="body cols stepper">
+    <div class="col">
+      <ol class="steps">
+        <li class="frag" data-k="1"><i>p′</i> is the second table: one column per word, also random. Here each column is shown as a row.</li>
+        <li class="frag" data-k="2"><b>Score</b>: multiply <i>h</i> by a word's column, entry by entry, and add. For <i>chase</i>: <span class="m">(−0.414)(0.196) + (−0.263)(−0.029) = −0.074</span>. Scores can be negative and do not add up to 1.</li>
+        <li class="frag" data-k="3"><b>Softmax</b>, part 1: take <i>e</i> to the power of each score. Every result is positive, and a higher score still gives a higher number: <span class="m">e<sup>−0.074</sup> = 0.929</span>.</li>
+        <li class="frag" data-k="4"><b>Softmax</b>, part 2: divide each one by their sum, 8.345. Now the values add up to 1: they are probabilities. <span class="m">P(chase | cats) = 0.929 / 8.345 = 0.111</span>.</li>
+        <li class="frag" data-k="5">The true neighbor, <i>chase</i>, gets only 0.111; <i>mice</i> gets the most, 0.167. Training now nudges the row of <i>cats</i> in <i>p</i>, and the columns of <i>p′</i>, so that <i>chase</i> gets more next time.</li>
+      </ol>
+    </div>
+    <div class="col">
+      <div class="tablewrap"><table class="plain mono sgt">
+        <thead><tr><th>word</th><th colspan="2" data-c="1"><i>p′</i></th><th data-c="2">score</th><th data-c="3">e<sup>score</sup></th><th data-c="4">P(word | cats)</th></tr></thead>
+        <tbody><tr><td class="w">cats</td><td class="num" data-c="1">−0.22</td><td class="num" data-c="1">0.39</td><td class="num" data-c="2">−0.014</td><td class="num" data-c="3">0.986</td><td class="num" data-c="4">0.118</td></tr><tr><td class="w">dogs</td><td class="num" data-c="1">0.15</td><td class="num" data-c="1">0.09</td><td class="num" data-c="2">−0.084</td><td class="num" data-c="3">0.919</td><td class="num" data-c="4">0.110</td></tr><tr class="true"><td class="w">chase</td><td class="num" data-c="1">0.20</td><td class="num" data-c="1">−0.03</td><td class="num" data-c="2">−0.074</td><td class="num" data-c="3">0.929</td><td class="num" data-c="4">0.111</td></tr><tr><td class="w">eat</td><td class="num" data-c="1">−0.21</td><td class="num" data-c="1">0.27</td><td class="num" data-c="2">0.014</td><td class="num" data-c="3">1.014</td><td class="num" data-c="4">0.122</td></tr><tr><td class="w">mice</td><td class="num" data-c="1">−0.50</td><td class="num" data-c="1">−0.47</td><td class="num" data-c="2">0.330</td><td class="num" data-c="3">1.391</td><td class="num" data-c="4">0.167</td></tr><tr><td class="w">balls</td><td class="num" data-c="1">0.47</td><td class="num" data-c="1">0.21</td><td class="num" data-c="2">−0.251</td><td class="num" data-c="3">0.778</td><td class="num" data-c="4">0.093</td></tr><tr><td class="w">fish</td><td class="num" data-c="1">−0.20</td><td class="num" data-c="1">−0.13</td><td class="num" data-c="2">0.117</td><td class="num" data-c="3">1.124</td><td class="num" data-c="4">0.135</td></tr><tr><td class="w">meat</td><td class="num" data-c="1">−0.19</td><td class="num" data-c="1">−0.41</td><td class="num" data-c="2">0.185</td><td class="num" data-c="3">1.203</td><td class="num" data-c="4">0.144</td></tr><tr><td class="w muted">sum</td><td></td><td></td><td></td><td class="num" data-c="3">8.345</td><td class="num" data-c="4">1.000</td></tr></tbody>
+      </table></div>
+      <p class="muted" data-c="5" style="font-size:0.9em">Green row: the true neighbor in this training pair, <i>cats → chase</i>.</p>
+    </div>
+  </div>
+  <div class="notes">
+    <p>The second half: from h to a probability for every word.</p>
+    <p>Step 1. The second table, p prime, has one column for every word. It is also random at the start. On the screen each column is shown as a row, so that it fits next to the word.</p>
+    <p>Step 2. The score. For each word, multiply h by that word's column: first value times first value, second times second, and add them up. This is called a dot product. For chase it gives minus 0.074. Every word gets a score like this. Scores can be negative, and they do not add up to 1. So they are not probabilities yet.</p>
+    <p>Step 3. Softmax turns scores into probabilities, in two parts. First, take e to the power of each score. e is a number, about 2.718. The result is always positive, and a higher score still gives a higher number. For chase, e to the minus 0.074 is 0.929.</p>
+    <p>Step 4. Second, divide each of these numbers by their sum. The sum is 8.345. After the division, the eight numbers add up to exactly 1. Now they are probabilities. The probability of chase, given cats, is 0.929 divided by 8.345, which is 0.111. That is the softmax: e to the power, then divide by the sum.</p>
+    <p>Step 5. The training pair says that chase is a true neighbor of cats. But the model gives chase only 0.111, and mice gets the most. So training changes the numbers a little: the row of cats in p, and the columns of p prime, so that chase gets a higher probability next time. The interactive panel on the next screen does exactly this, one pair at a time.</p>
   </div>
 </section>
 
@@ -1931,6 +2111,38 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
 
 
 <div class="part" id="part-turn"><h1>Your turn</h1></div>
+
+<section class="screen" id="qa" data-step="0">
+  <header><h2>The task: answering questions about documents</h2></header>
+  <div class="body">
+    <div class="flow"><div class="box">documents<br>+ question</div><span class="arr">→</span><div class="box">language<br>model</div><span class="arr">→</span><div class="box">answer</div><span class="arr">→</span><div class="box g">right or wrong?</div></div>
+    <div class="cols">
+    <div class="col">
+      <ul class="points">
+        <li><b>Input</b>: a few short documents about green AI, and a question. The model must answer from the documents, in one short sentence.</li>
+        <li><b>Model</b>: Qwen2.5-1.5B-Instruct, a small general-purpose language model</li>
+        <li><b>Score</b>: an answer is right if it contains the reference answer, ignoring capital letters. <b>Accuracy</b> = right answers ÷ all questions.</li>
+        <li>Two runs: with the documents, and without them. What do the documents add to accuracy, and to energy?</li>
+      </ul>
+    </div>
+    <div class="col">
+      <table class="plain">
+        <tr><th>question</th><td>What does the acronym PUE stand for?</td></tr>
+        <tr><th>reference</th><td class="mono">power usage effectiveness</td></tr>
+      </table>
+      <p class="muted">The check is simple and cheap. It also misses right answers that use other words.</p>
+    </div>
+  </div>
+  </div>
+  <div class="notes">
+    <p>Before the notebook, a short look at the task of Part 1: question answering.</p>
+    <p>The model gets a few short documents, about green AI, and a question. It has to answer from the documents, in one short sentence. The model is Qwen 2.5, with 1.5 billion parameters: a small general-purpose language model, small enough for a free Colab GPU.</p>
+    <p>How do we know if an answer is right? Each question has a reference answer. For example: what does the acronym PUE stand for? The reference is “power usage effectiveness”. An answer counts as right if it contains the reference, ignoring capital letters. Accuracy is the number of right answers divided by the number of questions.</p>
+    <p>This check is simple and costs almost nothing. But it is not perfect: a right answer in other words counts as wrong. Keep that in mind when you read your accuracy.</p>
+    <p>You run the questions twice: once with the documents, and once without them. Then you compare. How much do the documents add to accuracy? And how much do they add to the energy, since the model now reads much more text? This question comes back in Session 3, with retrieval.</p>
+  </div>
+</section>
+
 
 
 
