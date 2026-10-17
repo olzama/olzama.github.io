@@ -213,7 +213,20 @@ table.scores th { color: var(--muted); font-size: 0.72rem; letter-spacing: 0.06e
 table.scores td.num { font-family: var(--font-mono); text-align: right; }
 table.scores tr.top td { font-weight: 500; }
 .wbar { display: inline-block; height: 10px; background: rgb(var(--heat)); border-radius: 2px; vertical-align: middle; }
-.steptext { margin: 0; font-size: 0.92rem; max-width: 75ch; min-height: 3em; }
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.legend .lab { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; min-height: 44px; }
+.flow .op { color: var(--muted); font-size: 1.1rem; }
+.flow figure, .dotfig figure { margin: 0; display: grid; gap: 3px; justify-items: start; }
+.flow figcaption, .dotfig figcaption { font-size: 0.75rem; color: var(--muted); }
+.flow .word { font-family: var(--font-mono); font-size: 0.9rem; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); }
+.flow .word.out { border-color: var(--orange); background: var(--hi); }
+.flow .same { font-size: 0.75rem; color: var(--orange); }
+.dotfig { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; align-items: center; }
+.dotfig .k { font-size: 0.8rem; color: var(--muted); text-align: right; }
+.dotfig .sum { grid-column: 2; font-family: var(--font-mono); font-size: 0.85rem; }
+.steptext { margin: 0; font-size: 0.92rem; max-width: 75ch; }
+.steptext:empty { display: none; }
 .cmpline .caret { display: inline-block; width: 0.5em; border-bottom: 2px solid var(--orange); margin-left: 3px; }
 #askbtn { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 10;
   background: var(--blue); border-color: var(--blue); color: var(--panel); border-radius: 999px; padding: 10px 18px; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
@@ -284,27 +297,25 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <button id="cmpNext">Next English word</button>
       <span class="note" id="cmpStep"></span>
     </div>
-    <p class="note">As on the neural translation page, the decoder keeps a <b>state</b>: a vector that starts as the encoder's summary and is updated after every English word it writes, with the word just written. Both models below have one.</p>
-    <p class="note">In the strips, each square is one value of a vector, so the number of squares is the vector size you chose (8, 16 or 64). <span style="color:var(--blue)">Blue</span> is positive, <span style="color:var(--neg)">pink</span> is negative, and a darker square is further from zero (the values lie between −1 and 1). A single square has no meaning of its own: the meaning is in the whole pattern. Where the decoder's state and a Galician word's vector have the same color in the same squares, their products are positive, so the score is high.</p>
+    <div class="legend"><span class="lab">−1</span><span class="strip" id="legendStrip"></span><span class="lab">+1</span><span class="note">one square = one dimension of a vector</span></div>
     <div class="writers">
       <div class="writer">
         <p class="label">Without attention: every word is written from one summary vector</p>
         <div class="srcrow"><div class="chips" id="cmpSrcOne"></div><span class="arr">→</span><span class="sumvec" id="cmpSum">summary vector</span></div>
-        <div class="vecrow"><span class="vname">Summary vector</span><span class="strip" id="vSumOne"></span><span class="vnote">The encoder's state after the last Galician word. It stays the same at every step.</span></div>
-        <div class="vecrow"><span class="vname">Decoder state</span><span class="strip" id="vDecOne"></span><span class="vnote">Starts as the summary vector, then changes after every English word.</span></div>
-        <p class="steptext" id="cmpWOne"></p>
+        <div class="flow" id="flowOne"></div>
         <p class="cmpline" id="cmpOne"></p>
       </div>
       <div class="writer">
         <p class="label">With attention: each word looks back at the Galician words</p>
         <div class="srcrow"><div class="chips" id="cmpSrcAtt"></div></div>
-        <div class="vecrow"><span class="vname">Decoder state</span><span class="strip" id="vDecAtt"></span><span class="vnote">Starts as the summary vector, then changes after every English word. At every step it is compared with the vector of every Galician word.</span></div>
+        <div class="flow" id="flowAtt"></div>
+        <div class="dotfig" id="cmpDot"></div>
         <div class="heatwrap"><table class="scores" id="cmpScores"></table></div>
         <p class="steptext" id="cmpWAtt"></p>
         <p class="cmpline" id="cmpAtt"></p>
       </div>
     </div>
-    <p class="note"><b>Why does it look at <i>tía</i> to write “aunt”?</b> With 16 or 64 dimensions, it puts most of its weight there. Nobody wrote this rule. In training, the model's weights were adjusted, step by step, to make the correct English word more likely. The vector at <i>tía</i> helps to choose “aunt”. So the weights changed until, after writing “an”, the decoder's state became similar to that vector, and their score became the highest. Section 6 shows this kind of training for attention heads.</p>
+    <p class="note"><b>Why <i>tía</i> for “aunt”?</b> Nobody wrote this rule. Training adjusted the weights until, after “an”, the new state matched the vector at <i>tía</i> (with 16 or 64 dimensions). Section 6 shows such training.</p>
     <p class="note">The shading on each Galician word is the weight of the encoder's vector after reading that word. That vector also carries the words before it, so a weight on <i>miña</i> can bring in <i>tía</i> as well.</p>
     <p class="note" id="cmpNote"></p>
     <div class="col">
@@ -873,7 +884,7 @@ function partial(out, ref, n, done) {
 }
 // a vector as a strip of cells: blue for positive values, pink for negative (GRU states lie between -1 and 1)
 function fillStrip(el, v) {
-  const H = CMP.runs[r].dims, wd = Math.max(3, Math.min(16, Math.floor(240 / H)));
+  const H = el.id === "legendStrip" ? v.length : CMP.runs[r].dims, wd = Math.max(3, Math.min(16, Math.floor(240 / H)));
   if (el.children.length !== H) el.innerHTML = Array.from({ length: H }, () => `<i style="width:${wd}px"></i>`).join("");
   [...el.children].forEach((c, k) => {
     const a = v ? Math.min(1, Math.abs(v[k])) : 0;
@@ -894,26 +905,38 @@ function drawStep() {
   const i = t - 1, w = i >= 0 && i < x.att.length && !done ? x.attw[i] : null;
   const prevWord = (out, i) => i === 0 ? "the start signal" : `“${esc(out[i - 1])}”`;
   $("cmpSrcAtt").querySelectorAll(".chip").forEach((c, j) => { c.style.backgroundColor = w ? `rgba(var(--heat),${w[j].toFixed(3)})` : ""; c.style.color = w && w[j] > 0.55 ? "var(--panel)" : ""; });
-  strip("vDecAtt", w ? x.decAtt[i] : null);
+  const word = (w, cls = "") => `<span class="word ${cls}">${esc(w)}</span>`;
+  const fig = (k, cap) => `<figure><span class="strip" data-k="${k}"></span><figcaption>${cap}</figcaption></figure>`;
+  const fill = (el, vecs) => el.querySelectorAll("[data-k]").forEach(n => fillStrip(n, vecs[n.dataset.k]));
+  const op = c => `<span class="op">${c}</span>`;
   if (w) {
-    const sc = x.scores[i], order = w.map((v, j) => j).sort((a, b) => w[b] - w[a]), top = order.slice(0, 3);
+    // the update: previous word + previous state → new state
+    const before = i === 0 ? x.encAtt[x.encAtt.length - 1] : x.decAtt[i - 1];
+    $("flowAtt").innerHTML = word(i === 0 ? "start" : x.att[i - 1]) + op("+") + fig("b", "state") + op("→") + fig("n", "new state") + op("→") + word(x.att[i], "out");
+    fill($("flowAtt"), { b: before, n: x.decAtt[i] });
+    const sc = x.scores[i], order = w.map((v, j) => j).sort((a, b) => w[b] - w[a]), top = order.slice(0, 3), j0 = top[0];
+    // the score of the best match, square by square
+    const st = x.decAtt[i], ev = x.encAtt[j0];
+    $("cmpDot").innerHTML = `<span class="k">new state</span><span class="strip" data-k="s"></span><span class="k">× <i>${esc(x.src[j0])}</i></span><span class="strip" data-k="e"></span><span class="k">=</span><span class="strip" data-k="p"></span><span class="sum">add up all squares: score ${sc[j0].toFixed(1)}</span>`;
+    fill($("cmpDot"), { s: st, e: ev, p: st.map((v, k) => v * ev[k]) });
     const rest = 1 - top.reduce((a, j) => a + w[j], 0);
     $("cmpScores").innerHTML = `<thead><tr><th>Galician word</th><th>its vector</th><th>score</th><th>weight</th></tr></thead><tbody>` +
       top.map((j, k) => `<tr class="${k === 0 ? "top" : ""}"><td><i>${esc(x.src[j])}</i></td><td><span class="strip" data-v="${j}"></span></td><td class="num">${sc[j].toFixed(1)}</td><td><span class="wbar" style="width:${Math.max(2, w[j] * 80).toFixed(0)}px"></span> <span class="mono">${w[j].toFixed(2)}</span></td></tr>`).join("") +
       `<tr><td colspan="4" class="note">The other ${x.src.length - 3} words: weight ${rest.toFixed(2)} together.</td></tr></tbody>`;
     $("cmpScores").querySelectorAll("[data-v]").forEach(el => fillStrip(el, x.encAtt[+el.dataset.v]));
-    const j0 = top[0];
-    $("cmpWAtt").innerHTML = `To write “${esc(x.att[i])}”, the decoder first updates its state with ${prevWord(x.att, i)}. Then it compares its state with the vector of every Galician word: it multiplies the two vectors value by value and adds the products up. This is the <b>score</b>. The vector at <b>${esc(x.src[j0])}</b> matches best (score ${sc[j0].toFixed(1)}), so softmax gives it the most <b>weight</b> (${w[j0].toFixed(2)}).` + (w[j0] < 0.4 ? " The weights are spread out: this small model also relies on its state, which started as the summary vector." : "");
+    $("cmpWAtt").textContent = w[j0] < 0.4 ? "The weights are spread out: this small model also relies on its state." : "";
   } else {
-    $("cmpScores").innerHTML = "";
-    $("cmpWAtt").textContent = done ? "Play the translation, or step through it, to see where the model looks for each word." : "";
+    $("flowAtt").innerHTML = ""; $("cmpDot").innerHTML = ""; $("cmpScores").innerHTML = "";
+    $("cmpWAtt").textContent = done ? "Step through the translation to see where the model looks for each word." : "";
   }
-  // without attention: the decoder's state changes, the summary vector does not
+  // without attention: the state changes, the summary vector does not
   const s1 = i >= 0 && i < x.one.length && !done;
   $("cmpSum").classList.toggle("pulse", s1);
-  strip("vSumOne", x.sumOne);
-  strip("vDecOne", s1 ? x.decOne[i] : null);
-  $("cmpWOne").innerHTML = s1 ? `To write “${esc(x.one[i])}”, the decoder updates its state with ${prevWord(x.one, i)} and the summary vector. Then it chooses the word from its state and the summary vector. The state changes at every step. The summary vector stays the same, so it can never point at a different Galician word.` : (done ? "Play the translation, or step through it, to see the decoder's state change." : "");
+  if (s1) {
+    const before = i === 0 ? x.sumOne : x.decOne[i - 1];
+    $("flowOne").innerHTML = word(i === 0 ? "start" : x.one[i - 1]) + op("+") + fig("b", "state") + op("+") + fig("u", '<span class="same">summary: the same at every step</span>') + op("→") + fig("n", "new state") + op("→") + word(x.one[i], "out");
+    fill($("flowOne"), { b: before, u: x.sumOne, n: x.decOne[i] });
+  } else $("flowOne").innerHTML = done ? '<span class="note">Step through the translation to see the state change.</span>' : "";
   $("cmpGrid").querySelectorAll("tbody tr").forEach((tr, k) => { tr.style.outline = !done && k === i ? "2px solid var(--orange)" : ""; });
 }
 function stopPlay() { clearInterval(timer); timer = null; $("cmpPlay").textContent = "Write both translations"; }
@@ -939,6 +962,7 @@ CMP.runs[0].examples.forEach((x, i) => {
   $("cmpEx").appendChild(o);
 });
 $("cmpEx").addEventListener("change", () => { stopPlay(); e = +$("cmpEx").value; t = total(); render(); });
+fillStrip($("legendStrip"), [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]);
 t = total(); render();
 (window.__askState ||= []).push(() => {
   const run = CMP.runs[r], x = run.examples[e];
