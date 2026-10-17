@@ -255,7 +255,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <section class="panel" id="compare">
     <h2><span class="n">2</span>Two trained models: without and with attention</h2>
-    <p class="lead">Two small translation models, trained on the same data for the same number of steps, with the same number of parameters. The only difference: <b>without attention</b>, the decoder gets the encoder's last vector, the summary of the whole sentence; <b>with attention</b>, it looks back at every word's vector each time it writes a word. The training data is built from templates around our sentence (other relatives, other verbs, other sayings). Our own sentence was left out, so both models translate it for the first time.</p>
+    <p class="lead">Two small translation models, trained on the same data for the same number of steps, with the same number of parameters. The only difference: <b>without attention</b>, the decoder gets the encoder's last vector, the summary of the whole sentence; <b>with attention</b>, it looks back at every word's vector each time it writes a word. The training data is built from templates around our sentence (other relatives, other verbs, other sayings). Both models train on the same 5,000 template sentences. Another 500 are kept apart as a test set, and so is our own sentence: the models never see them in training, so they translate them for the first time. Every word in them appears in training, but in other combinations.</p>
     <div class="controls">
       <span class="note">Vector size</span>
       <div class="seg" role="group" aria-label="Vector size" id="cmpSize"></div>
@@ -289,7 +289,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <p class="note" id="cmpNote"></p>
     <div class="col">
       <div class="col">
-        <p class="label">Exactly right, out of 500 sentences neither model saw</p>
+        <p class="label">Exactly right, out of 500 test sentences (not in the training data)</p>
         <div class="heatwrap"><table class="grid cmpacc" id="cmpAcc"></table></div>
         <p class="note" id="cmpAccNote"></p>
       </div>
@@ -807,7 +807,7 @@ function line(toks) {  // [[word, cls]] → HTML with sentence spacing and a cap
 const plain = ws => line(ws.map(w => [w, ""])).replace(/<[^>]+>/g, "");
 const counts = d => ({ bad: d.filter(x => x[1] === "bad").length, miss: d.filter(x => x[1] === "miss").length });
 function exName(x, k) {
-  return x.course ? (x.kind === "whole sentence" ? "Our sentence" : `Our sentence: ${x.kind} only`) : `Unseen sentence ${k}`;
+  return x.course ? (x.kind === "whole sentence" ? "Our sentence" : `Our sentence: ${x.kind} only`) : `Test sentence ${k}`;
 }
 function render() {
   const run = CMP.runs[r], x = run.examples[e];
@@ -898,7 +898,7 @@ $("cmpEx").addEventListener("change", () => { stopPlay(); e = +$("cmpEx").value;
 t = total(); render();
 (window.__askState ||= []).push(() => {
   const run = CMP.runs[r], x = run.examples[e];
-  return `Section 2 (two trained models): vector size ${run.dims} dimensions (${run.params} parameters per model); sentence "${plain(x.src)}" (${x.course ? "our sentence" : "an unseen template sentence"}, ${x.kind}). Correct: "${plain(x.ref)}". Animation at English word ${Math.min(t, total())} of ${total()}. Without attention: "${plain(x.one)}". With attention: "${plain(x.att)}". Exactly right out of ${CMP.test} unseen sentences, by piece (${CMP.kinds.join(", ")}): ` +
+  return `Section 2 (two trained models): vector size ${run.dims} dimensions (${run.params} parameters per model); sentence "${plain(x.src)}" (${x.course ? "our sentence" : "a test sentence, not in the training data"}, ${x.kind}). Correct: "${plain(x.ref)}". Animation at English word ${Math.min(t, total())} of ${total()}. Without attention: "${plain(x.one)}". With attention: "${plain(x.att)}". Exactly right out of ${CMP.test} unseen sentences, by piece (${CMP.kinds.join(", ")}): ` +
     CMP.runs.map(ru => `${ru.dims} dims without attention ${ru.acc.one.join("/")}, with attention ${ru.acc.att.join("/")}`).join("; ") + ".";
 });
 })();
