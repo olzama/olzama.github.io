@@ -117,6 +117,7 @@ table.plain tr.now td { background: var(--blue-soft); }
 .costs .box b { font-size: 1.1em; }
 .chain { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; align-items: baseline; font-variant-numeric: tabular-nums; }
 .chain .r { font-family: var(--font-mono); white-space: nowrap; }
+@media (max-width: 600px) { .chain { grid-template-columns: minmax(0, 1fr); gap: 2px; } .chain .r { white-space: normal; margin-bottom: 6px; } }
 .arr { color: var(--muted); font-size: 1.3em; }
 .vbars { display: flex; align-items: flex-end; justify-content: center; gap: clamp(16px, 4vw, 48px); height: 15em; padding-top: 1.5em; }
 .vb { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; width: 6.5em; flex: 0 1 auto; min-width: 0; gap: 4px; text-align: center; }
@@ -447,7 +448,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
         <span>GPU energy</span><span class="r">0.07 kWh</span>
         <span>× PUE 1.1</span><span class="r">≈ 0.077 kWh</span>
         <span>× 200 g CO₂eq/kWh</span><span class="r">≈ 15 g CO₂eq</span>
-        <span>GPU energy × WUE 1.15 L/kWh</span><span class="r">≈ 0.08 L of water</span>
+        <span>water: × WUE 1.15 L/kWh</span><span class="r">≈ 0.08 L of water</span>
       </div>
       <p class="muted">Example values. Real ones depend on the data center and the grid.</p>
       <p class="muted">Notebook 1 measures with CodeCarbon: it tracks the power of the processor, GPU and memory while your code runs, and multiplies the energy by your region's carbon intensity.</p>
@@ -458,7 +459,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     <p>First, PUE, power usage effectiveness. A data center uses energy for more than the computers: for cooling, for lighting, for converting power. PUE is the total energy of the data center divided by the energy of the computers. A PUE of 1.0 would mean no overhead at all. With a PUE of 1.1, our 0.07 kilowatt-hours become about 0.077.</p>
     <p>Second, carbon intensity. This says how many grams of CO2-equivalent are emitted to produce one kilowatt-hour of electricity. It depends on where the electricity comes from: coal, gas, wind, sun, nuclear. So it changes from country to country, and also from hour to hour. With an example value of 200 grams per kilowatt-hour, our hour on the GPU emits about 15 grams.</p>
     <p>CO2-equivalent means that other greenhouse gases, like methane, are counted too. Each is converted into the amount of CO2 that would have the same effect on the climate.</p>
-    <p>Third, water. WUE, water usage effectiveness, is the number of liters of water a data center uses for each kilowatt-hour that its computers use. With 1.15 liters per kilowatt-hour, our hour uses about 0.08 liters, a small glass of water.</p>
+    <p>Third, water. WUE, water usage effectiveness, is the number of liters of water a data center uses for each kilowatt-hour that its computers use. WUE is applied to the computers' energy, before PUE. With 1.15 liters per kilowatt-hour, our hour uses about 0.08 liters, a small glass of water.</p>
     <p>All of this is operational carbon: it comes from running the hardware. Embodied carbon comes from building the hardware: making the chips, the servers, the building. It is real, but harder to measure, and most reports leave it out.</p>
     <p>These are example values, to show the steps. In Notebook 1 you will measure with a tool called CodeCarbon. It tracks the power of the processor, the GPU and the memory while your code runs. It adds this up to energy, and it multiplies the energy by the carbon intensity of your region.</p>
   </div>
@@ -541,10 +542,10 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
         <li>Harder to evaluate: a sentence has many good translations</li>
         <li>Our example, Galician to English. Galician is a <b>low-resource</b> language: there is much less text for it than for Spanish or English.</li>
       </ul>
+      <p class="sent small" style="text-align:left">Unha <span class="hl">tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”</p>
+      <p class="src">from the novel <i>Speechwriter</i> by Paulo Naseiro</p>
     </div>
   </div>
-  <p class="sent small">Unha <span class="hl">tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”</p>
-  <p class="src center">from the novel <i>Speechwriter</i> by Paulo Naseiro</p>
   <div class="notes">
     <p>In the hands-on parts we work with two classic NLP tasks.</p>
     <p>The first is question answering. The model gets a small set of documents and a question, and it answers. This task is easy to evaluate: each answer is right or wrong, so the score is simply the share of right answers. That is why it is our main task for measurement, in all three sessions.</p>
