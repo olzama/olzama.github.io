@@ -225,6 +225,13 @@ table.scores tr.top td { font-weight: 500; }
 .dotfig { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; align-items: center; }
 .dotfig .k { font-size: 0.8rem; color: var(--muted); text-align: right; }
 .dotfig .sum { grid-column: 2; font-family: var(--font-mono); font-size: 0.85rem; }
+.board { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 10px; min-width: 0; }
+.board ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-family: "STIX Two Math", "Cambria Math", "Times New Roman", serif; font-size: 1.05rem; min-width: 0; }
+.board li { overflow-wrap: anywhere; }
+.board li .why { font-family: var(--font-body); font-size: 0.8rem; color: var(--muted); margin-left: 12px; }
+.board li.new { animation: chalk .5s ease; }
+@keyframes chalk { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.board b.v { font-weight: 700; }
 .steptext { margin: 0; font-size: 0.92rem; max-width: 75ch; }
 .steptext:empty { display: none; }
 .cmpline .caret { display: inline-block; width: 0.5em; border-bottom: 2px solid var(--orange); margin-left: 3px; }
@@ -310,6 +317,10 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="srcrow"><div class="chips" id="cmpSrcAtt"></div></div>
         <div class="flow" id="flowAtt"></div>
         <div class="dotfig" id="cmpDot"></div>
+        <div class="board" id="cmpBoard" hidden>
+          <ol id="cmpLines"></ol>
+          <div class="controls"><button id="bdNext">Next line</button><button id="bdAll">All lines</button></div>
+        </div>
         <div class="heatwrap"><table class="scores" id="cmpScores"></table></div>
         <p class="steptext" id="cmpWAtt"></p>
         <p class="cmpline" id="cmpAtt"></p>
@@ -893,6 +904,42 @@ function fillStrip(el, v) {
   });
 }
 const strip = (id, v) => fillStrip($(id), v);
+// the score and weight of the best-matching Galician word, derived line by line as on a blackboard
+let bdKey = "", bdN = 1;
+const num = v => (v < 0 ? "−" : "") + Math.abs(v).toFixed(2);
+const par = v => v < 0 ? `(${num(v)})` : num(v);
+const big = v => v >= 100 ? Math.round(v).toLocaleString("en-US") : v.toFixed(1);
+function terms(H, f) {  // all terms for 8 and 16 dimensions; for 64, the first four and the last
+  const ks = H <= 16 ? [...Array(H).keys()] : [0, 1, 2, 3, -1, H - 1];
+  return ks.map(k => k < 0 ? "…" : f(k)).join(" + ");
+}
+function board(x, i, j0) {
+  const h = x.decAtt[i], ev = x.encAtt[j0], H = h.length, sc = x.scores[i], g = esc(x.src[j0]);
+  const prev = i === 0 ? "the start" : `“${esc(x.att[i - 1])}”`;
+  const others = sc.map((v, j) => j).filter(j => j !== j0).sort((a, b) => sc[b] - sc[a]);
+  const ex = sc.map(Math.exp), Z = ex.reduce((a, b) => a + b, 0);
+  const sub = k => `<sub>${k}</sub>`;
+  const L = [
+    `score(${g}) = <b class="v">h</b> · <b class="v">e</b>${sub(g)}<span class="why">h: the decoder's new state after ${prev}; e${sub(g)}: the encoder's vector at ${g}</span>`,
+    `= ${terms(H, k => `h${sub(k + 1)}e${sub(k + 1)}`)}<span class="why">multiply square by square, then add</span>`,
+    `= ${terms(H, k => `${par(h[k])}·${par(ev[k])}`)}`,
+    `= ${terms(H, k => par(h[k] * ev[k]))}`,
+    `= ${sc[j0].toFixed(2)}`,
+    `the same for every Galician word: ${[j0, ...others.slice(0, 3)].map(j => `score(${esc(x.src[j])}) = ${sc[j].toFixed(2)}`).join(", ")}, … <span class="why">${sc.length} scores</span>`,
+    `weight(${g}) = e<sup>score(${g})</sup> / ( e<sup>score(${esc(x.src[0])})</sup> + e<sup>score(${esc(x.src[1])})</sup> + … ) <span class="why">softmax: e<sup>x</sup> makes every score positive; dividing by the sum makes the weights add up to 1</span>`,
+    `= e<sup>${sc[j0].toFixed(2)}</sup> / ( ${[j0, ...others.slice(0, 3)].map(j => `e<sup>${sc[j].toFixed(2)}</sup>`).join(" + ")} + … )`,
+    `= ${big(ex[j0])} / ( ${[j0, ...others.slice(0, 3)].map(j => big(ex[j])).join(" + ")} + … ) = ${big(ex[j0])} / ${big(Z)}`,
+    `= ${(ex[j0] / Z).toFixed(2)}`,
+  ];
+  const key = `${r}/${e}/${i}`;
+  if (key !== bdKey) { bdKey = key; bdN = 1; }
+  bdN = Math.min(bdN, L.length);
+  $("cmpBoard").hidden = false;
+  $("cmpLines").innerHTML = L.slice(0, bdN).map((l, k) => `<li class="${k === bdN - 1 ? "new" : ""}">${l}</li>`).join("");
+  $("bdNext").disabled = bdN >= L.length;
+  $("bdAll").disabled = bdN >= L.length;
+  board.n = L.length;
+}
 function drawStep() {
   const x = CMP.runs[r].examples[e], T = total(), done = t >= T;
   const showLine = (id, out) => {
@@ -917,16 +964,18 @@ function drawStep() {
     const sc = x.scores[i], order = w.map((v, j) => j).sort((a, b) => w[b] - w[a]), top = order.slice(0, 3), j0 = top[0];
     // the score of the best match, square by square
     const st = x.decAtt[i], ev = x.encAtt[j0];
-    $("cmpDot").innerHTML = `<span class="k">new state</span><span class="strip" data-k="s"></span><span class="k">× <i>${esc(x.src[j0])}</i></span><span class="strip" data-k="e"></span><span class="k">=</span><span class="strip" data-k="p"></span><span class="sum">add up all squares: score ${sc[j0].toFixed(1)}</span>`;
+    $("cmpDot").innerHTML = `<span class="k">new state</span><span class="strip" data-k="s"></span><span class="k">× <i>${esc(x.src[j0])}</i></span><span class="strip" data-k="e"></span><span class="k">=</span><span class="strip" data-k="p"></span>`;
     fill($("cmpDot"), { s: st, e: ev, p: st.map((v, k) => v * ev[k]) });
     const rest = 1 - top.reduce((a, j) => a + w[j], 0);
     $("cmpScores").innerHTML = `<thead><tr><th>Galician word</th><th>its vector</th><th>score</th><th>weight</th></tr></thead><tbody>` +
       top.map((j, k) => `<tr class="${k === 0 ? "top" : ""}"><td><i>${esc(x.src[j])}</i></td><td><span class="strip" data-v="${j}"></span></td><td class="num">${sc[j].toFixed(1)}</td><td><span class="wbar" style="width:${Math.max(2, w[j] * 80).toFixed(0)}px"></span> <span class="mono">${w[j].toFixed(2)}</span></td></tr>`).join("") +
       `<tr><td colspan="4" class="note">The other ${x.src.length - 3} words: weight ${rest.toFixed(2)} together.</td></tr></tbody>`;
     $("cmpScores").querySelectorAll("[data-v]").forEach(el => fillStrip(el, x.encAtt[+el.dataset.v]));
+    board(x, i, j0);
     $("cmpWAtt").textContent = w[j0] < 0.4 ? "The weights are spread out: this small model also relies on its state." : "";
   } else {
     $("flowAtt").innerHTML = ""; $("cmpDot").innerHTML = ""; $("cmpScores").innerHTML = "";
+    $("cmpBoard").hidden = true; bdKey = "";
     $("cmpWAtt").textContent = done ? "Step through the translation to see where the model looks for each word." : "";
   }
   // without attention: the state changes, the summary vector does not
@@ -939,6 +988,8 @@ function drawStep() {
   } else $("flowOne").innerHTML = done ? '<span class="note">Step through the translation to see the state change.</span>' : "";
   $("cmpGrid").querySelectorAll("tbody tr").forEach((tr, k) => { tr.style.outline = !done && k === i ? "2px solid var(--orange)" : ""; });
 }
+$("bdNext").addEventListener("click", () => { stopPlay(); bdN++; drawStep(); });
+$("bdAll").addEventListener("click", () => { stopPlay(); bdN = board.n; drawStep(); });
 function stopPlay() { clearInterval(timer); timer = null; $("cmpPlay").textContent = "Write both translations"; }
 $("cmpPlay").addEventListener("click", () => {
   if (timer) { stopPlay(); return; }
