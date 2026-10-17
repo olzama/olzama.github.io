@@ -273,8 +273,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </div>
     <div class="writers">
       <div class="writer">
-        <p class="label">Without attention: every word is written from one vector</p>
-        <div class="srcrow"><div class="chips" id="cmpSrcOne"></div><span class="arr">→</span><span class="sumvec" id="cmpSum">one vector</span></div>
+        <p class="label">Without attention: every word is written from one summary vector</p>
+        <div class="srcrow"><div class="chips" id="cmpSrcOne"></div><span class="arr">→</span><span class="sumvec" id="cmpSum">summary vector</span></div>
         <p class="cmpline" id="cmpOne"></p>
         <p class="weights" id="cmpWOne"></p>
       </div>
@@ -296,7 +296,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <div class="col">
         <p class="label">Where the model with attention looked</p>
         <div class="heatwrap"><table class="attgrid" id="cmpGrid"></table></div>
-        <p class="note">One row per English word it wrote, one column per Galician word; darker means more weight. Each column is the encoder's vector after reading that word, so it also carries the words before it. The model without attention has no such grid, because it gets the same one vector for every word.</p>
+        <p class="note">One row per English word it wrote, one column per Galician word; darker means more weight. Each column is the encoder's vector after reading that word, so it also carries the words before it. The model without attention has no such grid, because it uses the same summary vector for every English word.</p>
       </div>
     </div>
     <p class="note">Words in <span style="color:var(--neg)">red</span> are not in the correct translation; <span class="miss">struck-through</span> words are missing. Real sentences hold much more than these templates: with 64 dimensions, one vector holds this toy data perfectly, but real models of 2014 lost details in long sentences (Cho et al. 2014; Bahdanau et al. 2015). Attention solved this without making the vector bigger.</p>
@@ -869,7 +869,7 @@ function drawStep() {
   // without attention: the same vector for every word
   const s1 = i >= 0 && i < x.one.length && !done;
   $("cmpSum").classList.toggle("pulse", s1);
-  $("cmpWOne").innerHTML = s1 ? `Writing “${esc(x.one[i])}” from the same one vector as every other word.` : (done ? "The vector is the encoder's state after the last Galician word." : "");
+  $("cmpWOne").innerHTML = s1 ? `To write “${esc(x.one[i])}”, the model uses the summary vector. It uses this same vector for every English word.` : (done ? "The summary vector is the encoder's state after the last Galician word." : "");
   $("cmpGrid").querySelectorAll("tbody tr").forEach((tr, k) => { tr.style.outline = !done && k === i ? "2px solid var(--orange)" : ""; });
 }
 function stopPlay() { clearInterval(timer); timer = null; $("cmpPlay").textContent = "Write both translations"; }

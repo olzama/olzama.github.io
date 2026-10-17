@@ -112,6 +112,11 @@ table.plain tr.now td { background: var(--blue-soft); }
 .box.g { border-color: var(--green); background: var(--green-soft); }
 .box.o { border-color: var(--orange); background: var(--orange-soft); }
 .box.round { border-radius: 999px; }
+.costs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13em), 1fr)); gap: 14px; }
+.costs .box { text-align: left; display: grid; gap: 6px; align-content: start; }
+.costs .box b { font-size: 1.1em; }
+.chain { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; align-items: baseline; font-variant-numeric: tabular-nums; }
+.chain .r { font-family: var(--font-mono); white-space: nowrap; }
 .arr { color: var(--muted); font-size: 1.3em; }
 .vbars { display: flex; align-items: flex-end; justify-content: center; gap: clamp(16px, 4vw, 48px); height: 15em; padding-top: 1.5em; }
 .vb { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; width: 6.5em; flex: 0 1 auto; min-width: 0; gap: 4px; text-align: center; }
@@ -277,57 +282,25 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
 </section>
 
-<section class="screen" id="sentence" data-step="0">
-  <header><h2>Let's start with a sentence</h2></header>
-  <div class="body" style="justify-content:center">
-    <p class="sent">Unha <span class="hl">tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”</p>
-    <p class="src center">from <i>Speechwriter</i> by Paulo Naseiro</p>
-  </div>
-  <div class="notes">
-    <p>This is a Galician sentence: "An aunt of mine, who solved everything with sayings and proverbs, used to say something like 'one is a slave to what one says, and master of what one keeps quiet.'" "Tía miña" is highlighted, but it doesn't matter much yet — we'll come back and look at just that noun phrase later. This sentence doesn't have some deep significance; it happened to be the first sentence of the book on my desk. The one thing that does matter about it: it's in Galician, a language AI still doesn't handle perfectly.</p>
-  </div>
-</section>
-
-<div class="part" id="part-intro"><h1>Introduction</h1></div>
-
-<section class="screen" id="overview" data-step="0">
-  <header><h2>Module overview</h2><p class="sub">Three sessions, one running project: the Green NLP Benchmark Lab</p></header>
-  <div class="body">
-    <ul class="points">
-      <li>Session 1: <b>Measure</b> the baseline</li>
-      <li>Session 2: <b>Shrink</b> it: quantization</li>
-      <li>Session 3: <b>Retrieve</b> on demand</li>
-      <li>Same tasks, same measurement, one change per session: quality, energy and carbon in your own leaderboard</li>
-    </ul>
-    <div class="flow"><div class="box">Session 1<br>Measure</div><span class="arr">→</span><div class="box">Session 2<br>Shrink</div><span class="arr">→</span><div class="box g">Session 3<br>Retrieve</div></div>
-    <p class="src">olga.zamaraeva@udc.es · UDC Teams · CITIC, 2nd floor</p>
-  </div>
-  <div class="notes">
-    <p>Three sessions, one running project. Session 1, today: talk about NLP generally, then build a working pipeline and measure its baseline energy/carbon cost — and experiment a bit with machine translation, because it's fun. Session 2: apply quantization — we'll define that properly then, but in short it means storing and computing with the model's numbers using fewer bits of precision — and measure again. Session 3: instead of giving the model everything it might need up front, retrieve only the relevant pieces on demand, and measure again. Same task, same measurement method, three different efficiency techniques, so you can compare them on equal footing.</p>
-    <p>We'll work with machine translation and also with question answering. Partly so we don't get too bored doing just one task, but also because unlike MT, QA can be evaluated more easily: the answer is either right or wrong, so you get a percentage of correct answers and that's your score, accuracy. MT is a lot more complicated to evaluate but also arguably more interesting. Either way, both are classic NLP tasks that now rely on AI, which is costly, and we're going to try to measure how costly. What we change each session is exactly one part of "model" — its size, its precision, how much of the documents it actually sees for the QA task — and re-measure. Every run adds one row to a leaderboard, a CSV file you keep and reuse across all three sessions, so by the end you'll have your own before/after comparison.</p>
-  </div>
-</section>
-
-
 <section class="screen" id="howworks" data-step="0">
   <header><h2>How this session works</h2><p class="sub">One page: explanations, interactive panels, code</p></header>
   <div class="body">
-    <div class="col">
-      <ul class="points">
-        <li>This page is the whole session. Open it on your laptop or phone, now or later:</li>
-      </ul>
-      <p style="font-size:1.4em"><a href="https://olzama.github.io/teaching/GreenAI/lessons/session1.html">olzama.github.io/teaching/GreenAI</a></p>
-      <ul class="points">
-        <li><span class="c-orange">Interactive</span> screens are animations you can step through, change and replay.</li>
-        <li><span class="c-orange">Try it</span> screens have Python that runs in your browser. Nothing to install.</li>
-        <li>The longer notebooks run in Google Colab.</li>
-      </ul>
-    </div>
+    <ul class="points">
+      <li>This page is the whole session. Open it on your laptop or phone, now or later:</li>
+    </ul>
+    <p style="font-size:1.4em"><a href="https://olzama.github.io/teaching/GreenAI/lessons/session1.html">olzama.github.io/teaching/GreenAI</a></p>
+    <ul class="points">
+      <li><span class="c-orange">Interactive</span> screens are animations you can step through, change and replay.</li>
+      <li><span class="c-orange">Try it</span> screens have Python that runs in your browser. Nothing to install.</li>
+      <li>The longer notebooks run in Google Colab.</li>
+    </ul>
+    <p class="src">olga.zamaraeva@udc.es · UDC Teams · CITIC, 2nd floor</p>
   </div>
   <div class="notes">
     <p>A note on how this session works. This year there are no slides. We use one web page for the whole session. You see it on the screen, and you can open the same page on your laptop or phone.</p>
     <p>The address is on the screen: olzama.github.io, teaching, GreenAI. You can follow along during the session and come back to the page later.</p>
     <p>Some screens are explanations, like slides. Some are interactive: animations you can step through, change, and replay, with real numbers. Some are exercises: Python code that runs in your browser. Nothing to install. The longer notebooks run in Google Colab.</p>
+    <p>My contact details are at the bottom of the screen.</p>
   </div>
 </section>
 
@@ -342,7 +315,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
 </section>
 
-<div class="part" id="part-nlp"><h1>What is NLP?</h1></div>
+<div class="part" id="part-nlp"><h1>NLP and what it costs</h1></div>
 
 <section class="screen" id="nlpcl" data-step="0">
   <header><h2>Natural Language Processing &amp; Computational Linguistics</h2></header>
@@ -369,8 +342,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
 </section>
 
-
-
 <section class="screen" id="oneengine" data-step="0">
   <header><h2>One engine now runs many tasks</h2></header>
   <div class="body cols">
@@ -386,210 +357,199 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
   <p class="src">Radford et al., “Language Models are Unsupervised Multitask Learners,” 2019; Brown et al., “Language Models are Few-Shot Learners,” NeurIPS 2020</p>
   <div class="notes">
-    <p>Until recently, "NLP" meant a separate, purpose-built model for each task: one system for translation, a different one for summarization, another for classifying sentiment. What changed is this: a single model, trained on nothing more sophisticated than "predict the next word of text" — the definition of a language model — turned out to be able to do all of these tasks. You just phrase your request differently to the same model, which is what "prompting" means. OpenAI showed this could work in 2019 with GPT-2; the real scale came in 2020 with GPT-3. This is the moment the public conversation stopped distinguishing "NLP" from "AI" — a general-purpose language model looks, from the outside, like general intelligence. Question: how would you define intelligence? Do you think AI is intelligent?</p>
+    <p>Until recently, "NLP" meant a separate, purpose-built model for each task: one system for translation, a different one for summarization, another for classifying sentiment. What changed is this: a single model, trained on nothing more sophisticated than "predict the next word of text" — the definition of a language model — turned out to be able to do all of these tasks. You just phrase your request differently to the same model, which is what "prompting" means. OpenAI showed this could work in 2019 with GPT-2; the real scale came in 2020 with GPT-3. This is the moment the public conversation stopped distinguishing "NLP" from "AI" — a general-purpose language model looks, from the outside, like general intelligence.</p>
   </div>
 </section>
 
-<section class="screen" id="taskcost" data-step="0">
-  <header><h2>NLP tasks: what they actually cost</h2></header>
+<section class="screen" id="costs" data-step="0">
+  <header><h2>Where the costs come from</h2><p class="sub">A language model uses electricity, hardware and water for its whole life</p></header>
   <div class="body">
-    <div class="vbars" aria-label="kWh per 1,000 inferences">
-      <div class="vb"><span class="v">0.002</span><span class="col g" style="height:4%"></span><span class="l">classify</span></div>
-      <div class="vb"><span class="v">0.003</span><span class="col g" style="height:6%"></span><span class="l">QA</span></div>
-      <div class="vb"><span class="v">0.047</span><span class="col" style="height:96%"></span><span class="l">generate</span></div>
-      <div class="vb"><span class="v">0.049</span><span class="col" style="height:100%"></span><span class="l">summarize</span></div>
+    <div class="costs">
+      <div class="box"><b>Training</b><span>Computing the model's parameters from text. Many processors for days or weeks. Paid once per model.</span></div>
+      <div class="box"><b>Inference</b><span>Running the trained model on each request. Small per request, paid every time, for as long as the model is in use.</span></div>
+      <div class="box"><b>Storage</b><span>The model's parameters and the data, kept on disks and in memory, powered all the time.</span></div>
+      <div class="box g"><b>Cooling and water</b><span>Processors turn electricity into heat. Data centers remove it, often by evaporating water.</span></div>
     </div>
-    <p class="axisnote">kWh per 1,000 inferences</p>
-    <ul class="points">
-      <li>Discriminative tasks (classify, answer) are cheap; generative tasks (write, summarize) cost 15–20× more</li>
-    </ul>
-    <p class="src">Source: Luccioni, Jernite &amp; Strubell, FAccT 2024 (arXiv:2311.16863), Table 2</p>
+    <ul class="points"><li>Building the hardware has a cost too, before any of this runs.</li></ul>
   </div>
   <div class="notes">
-    <p>Different tasks cost different amounts. Discriminative tasks — ones where the model picks from a small, fixed set of possible outputs, like classifying or picking a span of text as the answer — are cheap. Generative tasks, where the model produces new text one word at a time, cost 15 to 20 times more. Why the gap? A discriminative task is usually one forward pass through the model — I'm assuming here you've studied neural network architecture a bit, but I'll have a screen on transformer architecture later, which is the basis for modern NLP and really all of modern AI. A generative task requires the model to generate output word by word, feeding each new word back in to generate the next — many forward passes chained together for a single answer. The lesson to carry forward: which task you pick is one of the single biggest levers on cost that exists — arguably bigger than model size alone, and entirely within a system designer's control before any "green AI" technique is even applied.</p>
+    <p>So NLP today means large language models. What does a language model cost? There are four places where the cost comes from.</p>
+    <p>First, training. Training means computing the model's parameters from a large amount of text. For a large model this uses many processors for days or weeks. This cost is paid once for each model.</p>
+    <p>Second, inference. Inference means using the trained model: you send a request, and the model computes an answer. One request costs little. But it is paid for every request, by every user, for as long as the model is in use.</p>
+    <p>Third, storage. The model's parameters and the data have to be kept somewhere: on disks, and in the memory of the machines that run the model. That hardware uses electricity all the time, also when nobody is asking anything.</p>
+    <p>Fourth, cooling and water. Processors turn electricity into heat. A data center has to remove that heat. Many data centers do it by evaporating water. So a data center uses water as well as electricity.</p>
+    <p>And one more: the hardware itself has to be built, and building it also has a cost. We will come back to this when we talk about measurement.</p>
   </div>
 </section>
-
-
-<div class="part" id="part-guess"><h1>Guess the footprint</h1></div>
-
-<section class="screen" id="guess" data-step="0">
-  <header><h2>Before we start: guess the footprint</h2></header>
-  <div class="body">
-    <ol class="points">
-      <li>How many metric tons of CO₂eq did training GPT-3 emit?</li>
-      <li>What share of global electricity do data centers consume today?</li>
-      <li>How many times more carbon does a general-purpose LLM emit per query than a model built just for that task?</li>
-    </ol>
-    <div class="qmarks">
-      <div><span class="q">?</span><span>training<br>emissions</span></div>
-      <div><span class="q">?</span><span>global<br>electricity</span></div>
-      <div><span class="q">?</span><span>task-specific vs.<br>general-purpose</span></div>
-    </div>
-  </div>
-  <div class="notes">
-    <p>Have everyone write down a guess for each of the three questions before revealing anything — the point is that people's intuitions are usually off by an order of magnitude in one direction or another. Question 1: CO2-equivalent to train GPT-3. Question 2: what share of global electricity goes to data centers today. Question 3: for the identical task, how many times more carbon does a general-purpose chatbot emit per query compared to a model built specifically for that one task. Not on the screen, but worth throwing out too: how much does an average daily session with something like Claude Code "emit"?</p>
-  </div>
-</section>
-
-<section class="screen" id="reveal1" data-step="0">
-  <header><span class="kind">Reveal 1</span><h2>Training a large model</h2></header>
-  <div class="body" style="align-items:center">
-    <div class="flow"><span class="bignum">552 t CO₂eq</span><span class="arr">≈</span><span style="font-size:2em" aria-hidden="true">✈ ✈ ✈</span></div>
-    <p>3 × San Francisco ↔ New York round trips</p>
-    <ul class="points"><li>A <i>one-time</i> cost, paid once, by whoever trains the model</li></ul>
-    <p class="src">Source: Patterson et al., “Carbon Emissions and Large Neural Network Training,” 2021 (arXiv:2104.10350)</p>
-  </div>
-  <div class="notes">
-    <p>552 metric tons of CO2-equivalent to train GPT-3 once, per Patterson et al. 2021 — roughly three San Francisco–New York round-trip flights, using standard commercial-aviation emissions factors. The key word is once: this is a one-time cost paid by whoever trains the model, not something repeated every time someone uses it afterward.</p>
-  </div>
-</section>
-
-<section class="screen" id="reveal2" data-step="0">
-  <header><span class="kind">Reveal 2</span><h2>Data centers, globally</h2></header>
-  <div class="body">
-    <div class="vbars" aria-label="Share of global electricity">
-      <div class="vb"><span class="v">1.5%</span><span class="col" style="height:50%"></span><span class="l">2024</span></div>
-      <div class="vb"><span class="v">~3%</span><span class="col g" style="height:100%"></span><span class="l">2030 (projected)</span></div>
-    </div>
-    <p class="axisnote">share of global electricity</p>
-    <ul class="points"><li>Growing 17% in 2025 alone, driven mainly by AI</li></ul>
-    <p class="src">Source: International Energy Agency, “Energy and AI,” 2025, and its 2026 update</p>
-  </div>
-  <div class="notes">
-    <p>About 1.5% of world electricity consumption in 2024 goes to data centers of all kinds — not just AI, this includes cloud storage, websites, everything — per the International Energy Agency. That share grew 17% in just 2025 alone, and the IEA attributes most of that recent growth specifically to AI workloads. Projected to reach roughly 3% by 2030 — small as a percentage, but the absolute scale, a meaningful fraction of a mid-sized country's total electricity use, and the growth rate are what make it worth tracking.</p>
-  </div>
-</section>
-
-<section class="screen" id="reveal3" data-step="0">
-  <header><span class="kind">Reveal 3</span><h2>General-purpose LLMs are costly</h2></header>
-  <div class="body">
-    <div class="vbars" aria-label="CO2eq per 1,000 inferences, same task">
-      <div class="vb"><span class="v">0.3 g</span><span class="col g" style="height:3%"></span><span class="l">task-specific</span></div>
-      <div class="vb" style="width:4em;justify-content:center"><span class="bignum" style="font-size:1.6em;color:var(--neg)">33×</span></div>
-      <div class="vb"><span class="v">10 g</span><span class="col" style="height:100%"></span><span class="l">general-purpose</span></div>
-    </div>
-    <p class="axisnote">CO₂eq per 1,000 inferences, same task</p>
-    <ul class="points"><li>Same task, 33× apart</li></ul>
-    <p class="src">Source: Luccioni, Jernite &amp; Strubell, FAccT 2024 (arXiv:2311.16863)</p>
-  </div>
-  <div class="notes">
-    <p>Same task — question answering, our own project's task — done two ways: by a model built and tuned specifically for that one task, about 0.3g CO2eq per 1,000 inferences, versus a general-purpose chatbot doing the identical task, about 10g. That's a 33x gap, for output that's often comparable in quality. Nothing about the task changed; only which tool was used to do it. We'll see this same shape of pattern again today, in a different disguise, once we get to machine translation specifically.</p>
-  </div>
-</section>
-
-
-<div class="part" id="part-inference"><h1>Why inference dominates</h1></div>
 
 <section class="screen" id="traininf" data-step="0">
-  <header><h2>Training vs. inference</h2></header>
+  <header><h2>Training once, inference every time</h2></header>
   <div class="body">
+    <div class="flow"><div class="box">Train<br>(once)</div><span class="arr">→</span><div class="box">Deployed<br>model</div><span class="arr">⇉</span><div class="box g round">request</div><div class="box g round">request</div><div class="box g round">request</div><div class="box g round">request</div><span class="muted">… millions of requests</span></div>
     <ul class="points">
-      <li>Train <b>once</b>. Infer <b>millions of times</b>.</li>
-      <li>Cumulative inference cost dominates a model's lifetime footprint</li>
+      <li>Over a model's life, the cost of all its requests can add up to more than the cost of training it.</li>
+      <li>Generating text costs more than classifying it: the model runs once for every word it writes.</li>
+      <li>One request runs on more than the processor that computes it: the host machine, idle spare machines, and the data center around them.</li>
     </ul>
-    <div class="flow"><div class="box">Train<br>(once)</div><span class="arr">→</span><div class="box">Deployed<br>model</div><span class="arr">⇉</span><div class="box g round">query</div><div class="box g round">query</div><div class="box g round">query</div><div class="box g round">query</div><span class="muted">… many queries</span></div>
   </div>
   <div class="notes">
-    <p>To make these points click together: you train a model once, but you run it, perform inference, potentially millions or billions of times over its deployed lifetime. So even though the one-time training cost, 552 tons, sounds dramatic, for a widely-used model the cumulative cost of all those inference calls over months or years usually dwarfs the training cost. Perhaps we should worry more about the technology and practice of inference than about training costs specifically — though training remains relevant if we agree that task-specific models should be prioritized over giant general ones.</p>
+    <p>Training is paid once. Inference is paid every time. A popular model may answer millions of requests a day, for months or years. So over the life of a model, the cost of all its requests can add up to more than the cost of training it.</p>
+    <p>The cost of a request depends on the task. If the model only has to pick an answer from a few options, for example to classify a review as positive or negative, it runs once. If it has to write text, it writes one word at a time, and it runs once for every word. So a long answer costs more than a short one.</p>
+    <p>And a request does not only use the processor that computes the answer. It also uses the machine around that processor, spare machines that wait for the next request, and the data center: cooling, power supply, and so on. When we measure, we have to decide which of these we count. The next screens show why that matters.</p>
   </div>
 </section>
 
-<section class="screen" id="vocab" data-step="0">
-  <header><h2>Vocabulary for this course</h2></header>
+<div class="part" id="part-measure"><h1>How do we measure it?</h1></div>
+
+<section class="screen" id="energy" data-step="0">
+  <header><h2>Computation, power and energy</h2><p class="sub">An example: one hour on the GPU you will use in Colab</p></header>
   <div class="body cols wide-left">
     <div class="col">
       <ul class="points">
-        <li><b>FLOPs</b> (floating-point operations): how much computation</li>
-        <li><b>Carbon intensity</b>: CO₂eq per unit of electricity; depends on <i>where</i> and <i>when</i></li>
-        <li><b>PUE</b> (Power Usage Effectiveness): facility power ÷ IT equipment power</li>
-        <li><b>Operational</b> vs. <b>embodied</b> carbon: running it vs. building it</li>
+        <li><b>FLOPs</b> (floating-point operations): how much computation. They count the work, whatever the hardware.</li>
+        <li><b>Power</b>, in watts (W): how fast a device uses electricity, at a given moment.</li>
+        <li><b>Energy</b>, in watt-hours (Wh) or kilowatt-hours (kWh): power × time. This is what you pay for.</li>
       </ul>
     </div>
     <div class="col">
-      <div class="box" style="padding:12px 12px 22px;display:grid;gap:12px">
-        <span>Total facility power</span>
-        <div class="box g" style="padding:22px 12px">IT equipment power</div>
+      <p class="label">An NVIDIA T4 GPU</p>
+      <div class="chain">
+        <span>maximum power</span><span class="r">70 W</span>
+        <span>for one hour</span><span class="r">70 W × 1 h = 70 Wh</span>
+        <span>in kilowatt-hours</span><span class="r">70 Wh = 0.07 kWh</span>
       </div>
-      <p class="axisnote">PUE = facility power ÷ IT equipment power</p>
+      <p class="muted">A real run draws less than the maximum, so 0.07 kWh is an upper bound for the GPU alone.</p>
     </div>
   </div>
   <div class="notes">
-    <p>Just some vocabulary that comes up a lot in green-computation discussions.</p>
-    <p>FLOPs, floating-point operations: the basic unit for counting how much arithmetic a computation requires — how many additions and multiplications of decimal numbers happen. Hardware-independent: a model that needs 10 billion FLOPs to answer one question requires that much arithmetic regardless of what chip runs it. In practice you'll see GFLOPs (billions) or even PFLOPs (10^15), since real workloads are enormous.</p>
-    <p>Carbon intensity: how much CO2-equivalent is emitted per unit of electricity generated. Not a fixed number — depends heavily on where the electricity comes from (coal-heavy grid vs. one dominated by hydro or nuclear), and even when, since the same data center's carbon intensity can shift hour to hour with the momentary energy mix. I mention this because these words get thrown around without much precision, so be careful when you see them — a lot goes unreported.</p>
-    <p>PUE, Power Usage Effectiveness: total facility power divided by IT-equipment power alone. A PUE of 1.5 means for every 1 watt actually doing useful computation, another 0.5 watts goes to overhead — mostly cooling. A PUE of 1.0 would be a theoretically impossible zero-overhead data center; real ones run roughly 1.1–1.6. This matters because a number reported purely in GPU work is hiding this overhead. By the way, water is a very significant cost too, not just electricity — Google estimated a Gemini prompt consumes about 0.26 mL of water, roughly 5 drops. Not nothing, if you think about it.</p>
-    <p>Operational vs. embodied carbon: operational is the emissions from running the hardware, the electricity it draws while computing. Embodied is what already happened before the hardware ever ran anything — mining raw materials, manufacturing the chips, shipping them. A brand-new GPU has a real carbon cost baked in before you've trained a single model on it.</p>
-    <p>These definitions are mainly so you can assess critically what you read about AI's environmental footprint.</p>
+    <p>To compare costs, we need units. Let's go through them with one simple example.</p>
+    <p>First, FLOPs: floating-point operations. One FLOP is one multiplication or one addition of two numbers. FLOPs count how much computation a model does. They do not depend on the hardware. The same model, on the same input, needs the same number of FLOPs on any computer.</p>
+    <p>But FLOPs are not electricity. How much electricity the computation uses depends on the hardware that runs it. For electricity there are two units, and people mix them up.</p>
+    <p>Power is measured in watts. Power says how fast a device uses electricity at a given moment. Energy is power times time. It is measured in watt-hours, or in kilowatt-hours: one kilowatt-hour is a thousand watt-hours. Energy is what appears on an electricity bill.</p>
+    <p>The example on the right is the GPU you will use in Colab today, an NVIDIA T4. Its maximum power is 70 watts. If it runs at maximum power for one hour, it uses 70 watt-hours. That is 0.07 kilowatt-hours. A real run usually draws less than the maximum, so this is an upper bound, and it is only the GPU, not the rest of the machine.</p>
   </div>
 </section>
 
-<div class="part" id="part-case"><h1>Case study: how hard is measurement, really?</h1></div>
-
-<section class="screen" id="fivecars" data-step="0">
-  <header><h2>Case study: a famous number, revisited</h2></header>
-  <div class="body" style="align-items:center">
-    <p style="font-size:2.4em" aria-hidden="true">🚗 🚗 🚗 🚗 🚗</p>
-    <p>“= 5 cars, lifetime emissions”</p>
-    <ul class="points"><li>One 2019 paper, a number repeated everywhere for years, later shown to be about 10× too high</li></ul>
-    <p class="src">Source: Strubell et al., ACL 2019</p>
-  </div>
-  <div class="notes">
-    <p>Speaking of reading critically: this is one of the most widely repeated numbers in the Green AI conversation, and both the number and the reason it was so large seem to be commonly misunderstood.</p>
-    <p>The claim, from Strubell et al., ACL 2019: training a particular large model produced roughly as much lifetime CO2-equivalent as five cars. This was a neural architecture search model. Normally a human designs a neural network's architecture by hand — how many layers, how many attention heads, how wide each layer — then trains that one design. Neural architecture search automates the design step itself: an algorithm generates many candidate architectures, trains each one, evaluates it, and uses that feedback to propose better candidates — potentially thousands of candidates before landing on a winner. So instead of paying the training cost once, you're paying it thousands of times over, just to find a good architecture, before you even do the real, full training run with the winning design.</p>
-    <p>And specifically: the architecture search Strubell et al. were citing, from So, Le &amp; Liang 2019, "The Evolved Transformer," was searching for a better transformer architecture for machine translation.</p>
-    <p>The number itself was later shown to be roughly 10x too high — the original estimate made assumptions about hardware utilization and power draw that didn't hold up under scrutiny.</p>
-    <p>So when you hear "training a transformer emits CO2 like 5 cars during their lifetimes," you're actually talking about half a car — and not just any transformer, but one that helped reduce training costs for future transformers, at least in theory.</p>
-  </div>
-</section>
-
-<section class="screen" id="discuss" data-step="0">
-  <header><span class="kind">Activity</span><h2>Class discussion (10 min)</h2></header>
-  <div class="body">
-    <div class="activity"><h3>Discuss</h3><div>
+<section class="screen" id="carbon" data-step="0">
+  <header><h2>From energy to carbon and water</h2><p class="sub">The same hour on the T4, with example values</p></header>
+  <div class="body cols wide-left">
+    <div class="col">
       <ul class="points">
-        <li>Why is estimating a carbon footprint from a paper so hard?</li>
-        <li>What would you need to <i>trust</i> a number like this?</li>
-        <li>Catchy comparisons: do they help, or hurt?</li>
+        <li><b>PUE</b> (Power Usage Effectiveness): the data center's total energy ÷ the computers' energy. 1.0 would mean no overhead.</li>
+        <li><b>Carbon intensity</b>: grams of CO₂eq per kWh of electricity. It depends on <i>where</i> and <i>when</i>: the grid's mix of coal, gas, wind, sun.</li>
+        <li><b>CO₂eq</b>: all greenhouse gases, converted to the amount of CO₂ with the same effect.</li>
+        <li><b>WUE</b> (Water Usage Effectiveness): liters of water per kWh used by the computers.</li>
+        <li><b>Operational</b> carbon comes from running the hardware; <b>embodied</b> carbon, from building it.</li>
       </ul>
-    </div></div>
+    </div>
+    <div class="col">
+      <div class="chain">
+        <span>GPU energy</span><span class="r">0.07 kWh</span>
+        <span>× PUE 1.1</span><span class="r">≈ 0.077 kWh</span>
+        <span>× 200 g CO₂eq/kWh</span><span class="r">≈ 15 g CO₂eq</span>
+        <span>GPU energy × WUE 1.15 L/kWh</span><span class="r">≈ 0.08 L of water</span>
+      </div>
+      <p class="muted">Example values. Real ones depend on the data center and the grid.</p>
+      <p class="muted">Notebook 1 measures with CodeCarbon: it tracks the power of the processor, GPU and memory while your code runs, and multiplies the energy by your region's carbon intensity.</p>
+    </div>
   </div>
   <div class="notes">
-    <p>Let's discuss a bit: why is it so hard to estimate a carbon footprint from a paper alone; what information would you need before trusting a number like "5 cars"; and do catchy comparisons like this help public understanding or actively mislead it. If a group gets stuck, nudge with: "What wasn't reported in that 2019 paper that you'd want to know?"</p>
+    <p>Energy is not yet carbon. We need a few more steps, and each step has its own unit.</p>
+    <p>First, PUE, power usage effectiveness. A data center uses energy for more than the computers: for cooling, for lighting, for converting power. PUE is the total energy of the data center divided by the energy of the computers. A PUE of 1.0 would mean no overhead at all. With a PUE of 1.1, our 0.07 kilowatt-hours become about 0.077.</p>
+    <p>Second, carbon intensity. This says how many grams of CO2-equivalent are emitted to produce one kilowatt-hour of electricity. It depends on where the electricity comes from: coal, gas, wind, sun, nuclear. So it changes from country to country, and also from hour to hour. With an example value of 200 grams per kilowatt-hour, our hour on the GPU emits about 15 grams.</p>
+    <p>CO2-equivalent means that other greenhouse gases, like methane, are counted too. Each is converted into the amount of CO2 that would have the same effect on the climate.</p>
+    <p>Third, water. WUE, water usage effectiveness, is the number of liters of water a data center uses for each kilowatt-hour that its computers use. With 1.15 liters per kilowatt-hour, our hour uses about 0.08 liters, a small glass of water.</p>
+    <p>All of this is operational carbon: it comes from running the hardware. Embodied carbon comes from building the hardware: making the chips, the servers, the building. It is real, but harder to measure, and most reports leave it out.</p>
+    <p>These are example values, to show the steps. In Notebook 1 you will measure with a tool called CodeCarbon. It tracks the power of the processor, the GPU and the memory while your code runs. It adds this up to energy, and it multiplies the energy by the carbon intensity of your region.</p>
   </div>
 </section>
 
-<section class="screen" id="answers" data-step="0">
-  <header><h2>Discussion: some possible answers</h2></header>
-  <div class="body">
-    <ul class="points">
-      <li><b>Hard because</b>: hardware, PUE, run time, grid are rarely all reported</li>
-      <li><b>To trust it</b>: the full method, ideally reproducible code</li>
-      <li><b>Catchy comparisons</b>: memorable, and risky if the number is wrong</li>
-    </ul>
+<section class="screen" id="prompt" data-step="0">
+  <header><h2>A real measurement: one prompt</h2><p class="sub">The median Gemini text prompt, May 2025, as measured by Google</p></header>
+  <div class="body cols">
+    <div class="col">
+      <table class="plain">
+        <thead><tr><th>What is counted</th><th>Wh</th></tr></thead>
+        <tbody>
+          <tr><td>AI accelerators, while computing</td><td class="num">0.14</td></tr>
+          <tr><td>host processor and memory</td><td class="num">0.06</td></tr>
+          <tr><td>idle machines, kept ready</td><td class="num">0.02</td></tr>
+          <tr><td>data center overhead (PUE 1.09)</td><td class="num">0.02</td></tr>
+          <tr class="now"><td>total</td><td class="num">0.24</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col">
+      <ul class="points">
+        <li>Counting only the accelerators gives a little over half of the total: what you count changes the number.</li>
+        <li>Carbon and water follow from the energy, the grid and the WUE: 0.03 g CO₂eq and 0.26 mL of water.</li>
+        <li>Measured by the company that runs the model, for its own system. Not independently checked.</li>
+      </ul>
+    </div>
   </div>
+  <p class="src">Source: Elsworth et al., “Measuring the environmental impact of delivering AI at Google Scale,” 2025 (arXiv:2508.15734)</p>
   <div class="notes">
-    <p>Why it's hard to estimate: papers rarely report all of exact hardware — GPU model and generation, since newer chips can be several times more energy-efficient per FLOP than older ones — the facility's PUE, total wall-clock run time including failed or discarded runs (architecture search in particular trains many candidates that get thrown away — do those count?), and the carbon intensity of the specific grid used, at the time it was used. Any one of these missing or approximated can shift the final number by a large factor.</p>
-    <p>What you'd need to actually trust a number: full methodological transparency, ideally reproducible code and logged measurements — exactly what CodeCarbon, the tool we use in the notebook today, is designed to produce, not just a final headline figure. But is that even realistic? Would you want to reproduce that training run yourself?</p>
-    <p>Catchy comparisons: they're memorable and useful for public communication — "5 cars" sticks in a way "552 tons CO2eq" doesn't. But that stickiness is exactly the risk: once a comparison enters common use, it tends to get repeated long after, or even without, the underlying number ever being corrected.</p>
+    <p>Here is a real measurement of inference, from a paper published in August 2025 by Google. It measures one text prompt to Gemini, Google's chatbot: the median prompt, in May 2025.</p>
+    <p>The table shows what they counted. The AI accelerators, the chips that compute the answer, use 0.14 watt-hours. The host machine around them, its processor and memory, adds 0.06. Machines that sit idle, ready for the next requests, add 0.02. And the data center overhead adds 0.02 more. Their PUE is 1.09. The total is 0.24 watt-hours.</p>
+    <p>Look at the first row and the last row. If you count only the accelerators, you get a little over half of the total. So two honest measurements of the same prompt can differ by almost a factor of two, just because they count different things. When you read a number like this, always ask what was counted.</p>
+    <p>From the energy, they compute carbon and water, with the steps from the last screen: 0.03 grams of CO2-equivalent, and 0.26 milliliters of water, about five drops.</p>
+    <p>One more thing: this measurement is by the company that runs the model, for its own system. It has not been checked independently. It is still one of the most complete measurements published so far.</p>
   </div>
 </section>
 
-<div class="part" id="part-mt"><h1>How does a machine translate?</h1></div>
+<div class="part" id="part-course"><h1>What this course covers</h1></div>
 
-<section class="screen" id="back" data-step="0">
-  <header><h2>Back to that sentence</h2></header>
+<section class="screen" id="course" data-step="0">
+  <header><h2>The goal: to talk about modern LLMs, and what they cost</h2><p class="sub">Three sessions, one running project: the Green NLP Benchmark Lab</p></header>
   <div class="body">
-    <p class="sent">Unha <span class="hl">tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”</p>
-    <p class="src center">an aunt's saying, from the novel <i>Speechwriter</i> by Paulo Naseiro</p>
     <ul class="points">
-      <li>Galician: a <b>low-resource</b> language</li>
-      <li>Does a huge general model actually handle a case like this, or does it rely on what it has plenty of data for: Spanish, Portuguese, English?</li>
-      <li>But… what's a “model”?</li>
+      <li>To understand large language models, we need to understand language models in general, and how NLP got to them</li>
+    </ul>
+    <div class="flow">
+      <div class="box">Session 1<br><b>Language models</b></div><span class="arr">→</span>
+      <div class="box">Session 2<br><b>Quantized</b> language models</div><span class="arr">→</span>
+      <div class="box g">Session 3<br><b>Retrieval-augmented generation</b></div>
+    </div>
+    <ul class="points">
+      <li>Session 2: the same model, with fewer bits for each of its numbers</li>
+      <li>Session 3: not a kind of model, but a way of using one: give it only the relevant pieces of the documents</li>
+      <li>Every session: the same tasks, measured the same way. One row per run in your own leaderboard.</li>
     </ul>
   </div>
   <div class="notes">
-    <p>Here's the sentence again, same highlighting as before. Galician is a low-resource language in NLP terms — relatively little digitized text exists to train models on, compared to a handful of dominant languages. Here's the question we'll try to look at in this module: when a huge general-purpose model advertises "100+ languages," does it actually handle a case like this properly, or does it quietly default to what it has enormous amounts of training data for — Spanish, Portuguese, English? Does bigger and more general genuinely mean better, or just more expensive? But before we can even ask that seriously — what's a "model," actually? Let's define it.</p>
+    <p>Now, what this course covers. The goal is that you can talk about modern large language models, and about what they cost, with understanding.</p>
+    <p>To understand large language models, we first need to understand language models in general. And for that, it helps to see how NLP got to them. So today we go through a short history of language models, from the simplest one to the transformer.</p>
+    <p>The three sessions follow three ideas. Today, session 1: language models. Session 2: quantized language models. That is the same model, but each of its numbers is stored and computed with fewer bits. Session 3: retrieval-augmented generation. This is not a kind of model. It is a way of using a model: instead of giving the model everything, we first retrieve the relevant pieces of the documents, and give the model only those.</p>
+    <p>In every session we run the same tasks and measure them the same way. Every run adds one row to a leaderboard, a file you keep for all three sessions. By the end, you have your own comparison.</p>
+  </div>
+</section>
+
+<section class="screen" id="tasks" data-step="0">
+  <header><h2>Two tasks: question answering and translation</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <p class="label">Question answering</p>
+      <ul class="points">
+        <li>Answer questions about a small set of documents</li>
+        <li>Easy to evaluate: an answer is right or wrong, so the score is the share of right answers</li>
+        <li>The main task for measurement, in all three sessions</li>
+      </ul>
+    </div>
+    <div class="col">
+      <p class="label">Machine translation</p>
+      <ul class="points">
+        <li>Harder to evaluate: a sentence has many good translations</li>
+        <li>Our example, Galician to English. Galician is a <b>low-resource</b> language: there is much less text for it than for Spanish or English.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="sent small">Unha <span class="hl">tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”</p>
+  <p class="src center">from the novel <i>Speechwriter</i> by Paulo Naseiro</p>
+  <div class="notes">
+    <p>In the hands-on parts we work with two classic NLP tasks.</p>
+    <p>The first is question answering. The model gets a small set of documents and a question, and it answers. This task is easy to evaluate: each answer is right or wrong, so the score is simply the share of right answers. That is why it is our main task for measurement, in all three sessions.</p>
+    <p>The second is machine translation. It is harder to evaluate, because one sentence has many good translations. But it shows very well how language models work. Attention, which we will see today, was invented for translation.</p>
+    <p>Our example is this sentence, from the novel Speechwriter by Paulo Naseiro. It is in Galician. Galician is a low-resource language: there is much less text in Galician than in Spanish or English, and so much less data to learn from. We will come back to the two highlighted words, tía miña, many times today.</p>
   </div>
 </section>
 
@@ -600,19 +560,20 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <table class="plain" style="width:100%">
         <thead><tr><th>Step</th><th>What it adds</th><th>What is still missing</th></tr></thead>
         <tbody>
-          <tr><td>1 N-grams</td><td>predict the next word by counting</td><td>aunt and uncle are unrelated words</td></tr>
-          <tr><td>2 Embeddings</td><td>a learned vector per word: similar words get similar vectors</td><td>vectors for words, not for sentences</td></tr>
-          <tr><td>3 Encoder–decoder</td><td>read a sentence into one vector, write the translation from it</td><td>one vector for a whole sentence: early words fade</td></tr>
-          <tr><td>4 Attention</td><td>the decoder looks back at every source word</td><td>the source is still read one word after another</td></tr>
-          <tr><td>5 Self-attention</td><td>every word looks at every word of its own sentence, all at once</td><td>one round of looking</td></tr>
-          <tr><td>6 Transformers</td><td>many blocks of self-attention, stacked: today's LLMs</td><td>cost grows with size and length</td></tr>
+          <tr><td>1 N-grams <span class="muted">(statistical, 1990s)</span></td><td>predict the next word by counting</td><td>aunt and uncle are unrelated words</td></tr>
+          <tr><td>2 Embeddings <span class="muted">(neural, 2013)</span></td><td>a learned vector per word: similar words get similar vectors</td><td>vectors for words, not for sentences</td></tr>
+          <tr><td>3 Encoder–decoder <span class="muted">(2014)</span></td><td>read a sentence into one vector, write the translation from it</td><td>one vector for a whole sentence: early words fade</td></tr>
+          <tr><td>4 Attention <span class="muted">(2015)</span></td><td>the decoder looks back at every source word</td><td>the source is still read one word after another</td></tr>
+          <tr><td>5 Self-attention <span class="muted">(2017)</span></td><td>every word looks at every word of its own sentence, all at once</td><td>one round of looking</td></tr>
+          <tr><td>6 Transformers <span class="muted">(2017–today)</span></td><td>many blocks of self-attention, stacked: today's LLMs</td><td>cost grows with size and length</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="muted">Each step has a short explanation, an interactive panel, and often code you run here, in the browser.</p>
+    <p class="muted">Before statistics, NLP systems were written by hand, as rules. Each step since has replaced hand-written knowledge with more data and more computation.</p>
   </div>
   <div class="notes">
     <p>Here is the plan for the technical part of today. We go in six steps. Each step fixes a problem of the step before. The bar at the bottom of the screen shows which step we are on.</p>
+    <p>Before these steps, NLP systems were written by hand, as rules. Each step since then has replaced hand-written knowledge with more data and more computation. That is why the history matters for a course about costs.</p>
     <p>Step 1 is n-grams. An n-gram model predicts the next word by counting which words follow which. Its problem: it has no idea that aunt and uncle are similar. They are just two different words.</p>
     <p>Step 2 is embeddings. Each word gets a vector, a list of values, learned from the words around it. Similar words get similar vectors. But these are vectors for single words. They say nothing about a sentence.</p>
     <p>Step 3 is the encoder–decoder model for translation. The encoder reads the whole sentence into one vector. The decoder writes the translation from that vector. Its problem: one vector has to hold the whole sentence, and the early words fade.</p>
@@ -1753,7 +1714,7 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     </ul>
   </div>
   <div class="notes">
-    <p>The genuine upside: one single model handling 100+ languages, with no need to train and maintain a separate model for every language pair, which the statistical and early neural MT eras required — literally one trained system per pair. It's zero-shot capable, can attempt a pair it wasn't explicitly fine-tuned on, and controllable by instruction: translate this formally, keep the idioms. The catch, directly connecting back to Reveal 3: doing translation this way is usually far more computationally expensive per translation than a dedicated model trained just for that one language pair — the same tradeoff as before, now specifically in translation.</p>
+    <p>The genuine upside: one single model handling 100+ languages, with no need to train and maintain a separate model for every language pair, which the statistical and early neural MT eras required — literally one trained system per pair. It's zero-shot capable, can attempt a pair it wasn't explicitly fine-tuned on, and controllable by instruction: translate this formally, keep the idioms.</p>
   </div>
 </section>
 
@@ -1767,40 +1728,11 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <p class="src">Source: Gamallo et al., “A Galician-Portuguese Generative Model,” EPIA 2024; Proxecto Nós (USC)</p>
   </div>
   <div class="notes">
-    <p>The honest follow-up to the question we asked a while back. "100+ languages" sounds comprehensive, but for most mainstream LLMs, Galician's actual share of the training data is, in the words of a paper studying this directly, "almost residual" — a vanishingly small fraction, sitting close enough to Spanish and Portuguese that general models tend to blur the three together rather than reliably producing genuine, correct Galician. The fix researchers found wasn't a bigger general model, it was a much smaller, dedicated one: 1.3 billion parameters, trained specifically on real Galician and Portuguese text — Proxecto Nós at USC is one source of this kind of work. That small, dedicated model beat the giant general-purpose base model specifically at producing correct Galician. Same task-specificity pattern as Reveal 3, except here the general-purpose model doesn't just cost more — it also actually serves this language's speakers worse.</p>
+    <p>"100+ languages" sounds comprehensive, but for most mainstream LLMs, Galician's actual share of the training data is, in the words of a paper studying this directly, "almost residual" — a vanishingly small fraction, sitting close enough to Spanish and Portuguese that general models tend to blur the three together rather than reliably producing genuine, correct Galician. The fix researchers found wasn't a bigger general model, it was a much smaller, dedicated one: 1.3 billion parameters, trained specifically on real Galician and Portuguese text — Proxecto Nós at USC is one source of this kind of work. That small, dedicated model beat the giant general-purpose base model specifically at producing correct Galician.</p>
   </div>
 </section>
 
-<section class="screen" id="greenmt" data-step="0">
-  <header><h2>Is there “green MT” research?</h2></header>
-  <div class="body">
-    <p class="bignum center">140× faster &nbsp; 98.7% less energy</p>
-    <p class="center muted">for a small quality trade-off</p>
-    <ul class="points">
-      <li>An MT-specific efficiency recipe: Guta, Petrick &amp; Polák, Findings of EMNLP 2025</li>
-      <li>The 2019 “5 cars” number itself came from a machine-translation architecture search</li>
-      <li>Quantization for MT, specifically: Shterionov &amp; Vanmassenhove, 2022, Session 2's topic</li>
-    </ul>
-  </div>
-  <div class="notes">
-    <p>Yes, and it's a genuinely active area, not a hypothetical. Guta, Petrick &amp; Polák, "The Green KNIGHT": a practical MT-specific efficiency recipe reaching up to 140x speedup and 98.7% energy savings, for roughly a 10–12% relative quality cost — this course's whole thesis, condensed into one MT-specific number. Remember the "5 cars" case study? That architecture search was, specifically, hunting for a better machine translation model. And Shterionov &amp; Vanmassenhove tested quantization, Session 2's topic, specifically in the context of MT systems. Green AI and MT research aren't two separate things I'm artificially connecting for this course — MT has repeatedly been the actual proving ground where these efficiency techniques were first tried.</p>
-  </div>
-</section>
 
-<section class="screen" id="levers" data-step="0">
-  <header><h2>The levers we'll actually use</h2></header>
-  <div class="body">
-    <div class="icons" style="gap:48px">
-      <div class="fig"><svg class="icon" viewBox="0 0 44 20" aria-hidden="true"><rect x="0" y="4" width="9" height="9" fill="var(--blue)"/><rect x="11" y="4" width="9" height="9" fill="var(--blue-soft)" stroke="var(--blue)"/><rect x="22" y="4" width="9" height="9" fill="var(--blue)"/><rect x="33" y="4" width="9" height="9" fill="var(--blue-soft)" stroke="var(--blue)"/></svg><span><b>Precision</b><br>Session 2</span></div>
-      <div class="fig"><svg class="icon" viewBox="0 0 40 40" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2"/><line x1="24" y1="24" x2="36" y2="36" stroke="var(--blue)" stroke-width="4"/></svg><span><b>Retrieval</b><br>Session 3</span></div>
-      <div class="fig"><svg class="icon" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2"/><circle cx="20" cy="20" r="10" fill="var(--panel)" stroke="var(--blue)" stroke-width="2"/><circle cx="20" cy="20" r="3.5" fill="var(--blue)"/></svg><span><b>Task-specificity</b><br>today, twice over</span></div>
-    </div>
-    <ul class="points"><li>Today, we build the <b>baseline</b> the other two get compared against</li></ul>
-  </div>
-  <div class="notes">
-    <p>Three concrete levers, each demonstrated today or coming up: precision, Session 2, using fewer bits per number in the model's computations; retrieval, Session 3, fetching only relevant information on demand instead of always processing everything; and task-specificity, which we've now seen twice today — once in QA, Reveal 3, and once in machine translation — a model built for one job beats a giant general model at that job, both on cost and often on quality. Today's notebook builds the baseline the other two sessions' techniques get measured against.</p>
-  </div>
-</section>
 
 <div class="part" id="part-turn"><h1>Your turn</h1></div>
 
@@ -1827,10 +1759,11 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     </div></div>
   </div>
   <div class="notes">
-    <p>Back to the course's own running task: question-answering over a small set of documents about Green NLP itself. Every run is instrumented with CodeCarbon — the same kind of transparent, logged measurement tool we said, back in the discussion activity, you'd need in order to actually trust a carbon number. It reports energy and CO2-equivalent, alongside an answer-quality score, and logs one row to your own leaderboard.csv. That's Part 1.</p>
-    <p>Part 2 takes today's sentence and translates it four ways, mirroring the exact history arc from earlier: a real rule-based MT system this time, not a classroom toy — Apertium's actively maintained Galician–English pair, called through its public API — which still can't restructure the sentence, something like "A mine aunt..." for the opening, the alignment problem completely unsolved, but now by a real system; a tiny hand-built statistical system that adds a bigram language model, the exact technique from the n-grams screen, to reorder a short fragment's words for fluency; the dedicated neural MT model, Helsinki-NLP/opus-mt-gl-en; and the general-purpose LLM already loaded in Part 1. Worth saying explicitly in class: the fact that even a real, currently-used rule-based engine can't do what the neural and LLM approaches do is a stronger point than the same claim about a toy dictionary would have been.</p>
-    <p>Part 3 then grades the neural and LLM outputs three different ways — BLEU, fast, pure n-gram overlap counting against a reference translation, near-zero cost; BERTScore, a learned neural metric using contextual embeddings, real but modest GPU cost; and an LLM asked to judge the translations itself — and, in keeping with the whole session's theme, we measure what each grading method itself costs, not just what score it reports. BERTScore is standing in for COMET here, by the way — COMET's own pinned dependencies reliably crash on current Colab images, which is itself a small, live example of the same fragility point we've been making all session.</p>
-    <p>Open 01_baseline_measurement.ipynb in Google Colab; Runtime, Change runtime type, T4 GPU — needed for the neural models in Parts 1 and 2. Part 1 first, it's the baseline every future session builds on, so it takes priority if time is short. If time allows, continue into Parts 2 and 3. Optional stretch goal: swap in a bigger model for Part 1 and compare, or in Part 2 flip translation direction or try a longer or different text.</p>
+    <p>Now it is your turn. Notebook 1 has three parts.</p>
+    <p>Part 1 is the baseline for the whole course. The task is question answering over a small set of documents. Every run is measured with CodeCarbon, the tool from the measurement screens. It reports energy and CO2-equivalent, next to the share of right answers, and it writes one row to your leaderboard file.</p>
+    <p>Part 2 translates our Galician sentence in four ways, in the order of the history we saw. First a rule-based system, Apertium. It is a real system that is still maintained, and it still cannot reorder the words: it writes something like "a mine aunt". Then a small statistical system: it uses a bigram model, like the one from step 1, to reorder the words. Then the dedicated neural model, opus-mt from Helsinki. And last, the general-purpose language model from Part 1.</p>
+    <p>Part 3 grades the translations in three ways. BLEU counts n-grams shared with a reference translation; it costs almost nothing. BERTScore compares the translations with embeddings, so it needs a neural model. And an LLM can act as the judge. We measure what each way of grading costs, not only the score it gives.</p>
+    <p>Open the notebook in Colab. Choose Runtime, Change runtime type, T4 GPU. Do Part 1 first: every later session builds on it. If there is time, continue with Parts 2 and 3. If you finish early, try a bigger model in Part 1 and compare.</p>
   </div>
 </section>
 
@@ -1840,7 +1773,6 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <ul class="points">
       <li>Part 1: how much energy and CO₂eq did your run measure? Same model, different hardware: did it matter?</li>
       <li>Parts 2–3: how many orders of magnitude separated your cheapest and priciest approach? Did the three MT metrics even agree?</li>
-      <li>Next time: we quantize this exact model</li>
     </ul>
     <p class="center muted">Compare with your neighbor.</p>
   </div>
@@ -1848,6 +1780,30 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <p>Before we wrap up, compare notes with your neighbor. On the QA baseline: what energy and emissions numbers did you get, and how close were they to each other's, given you likely used the same model on similar Colab hardware? What was your accuracy, and if it wasn't 100%, what went wrong in the misses? Did CodeCarbon warn about not recognizing your hardware, and what does that tell you about trusting a single carbon number at face value?</p>
     <p>On the translation comparison: how many orders of magnitude separated your cheapest and most expensive approach? Neither the real rule-based system nor the toy statistical system could ever produce "I had an aunt who..." — why not, structurally? Apertium is a real, currently maintained system — did that change how seriously you took its limitations, compared to the toy you might have pictured going in? Was the dedicated neural model's translation actually worse than the general-purpose LLM's, or just different? And if you have a moment: paste the Galician sentence into a large commercial model and see whether it gets "an aunt of mine" right where our small local model didn't — what would that tell you about whether this was a limit of the approach or just of this notebook's model size?</p>
     <p>On evaluation: did BLEU, BERTScore, and the LLM judge actually agree on which translation was better? Next session, we take this exact QA pipeline, load the exact same model quantized to a lower precision, and see what actually changes, for both footprint and accuracy.</p>
+  </div>
+</section>
+
+<div class="part" id="part-next"><h1>What comes next</h1></div>
+
+<section class="screen" id="next" data-step="0">
+  <header><h2>Next sessions: the same tasks, two changes</h2></header>
+  <div class="body">
+    <div class="flow">
+      <div class="box">Today<br><b>Language model</b>: the baseline</div><span class="arr">→</span>
+      <div class="box">Session 2<br><b>Quantized</b> language model</div><span class="arr">→</span>
+      <div class="box g">Session 3<br><b>Retrieval-augmented generation</b></div>
+    </div>
+    <ul class="points">
+      <li>Session 2: the same model, with fewer bits for each number. Less memory, often less energy. Does the quality hold?</li>
+      <li>Session 3: retrieve the relevant pieces of the documents first, and give the model only those. Less text to process for every question.</li>
+      <li>Both are measured against today's baseline, with the same method.</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>To close, what comes next. Today you measured the baseline: a language model, used as it is.</p>
+    <p>In Session 2 we keep the same model and quantize it. Each of its numbers is stored with fewer bits. The model needs less memory, and often less energy. The question is whether the quality of the answers holds.</p>
+    <p>In Session 3 we change how we use the model. Retrieval-augmented generation first finds the pieces of the documents that are relevant to the question, and gives the model only those. Remember from step 6 that attention cost grows with the length of the text. So less text means less computation for every question.</p>
+    <p>Both changes are measured against today's baseline, with the same method, so you can compare them on equal terms.</p>
   </div>
 </section>
 
