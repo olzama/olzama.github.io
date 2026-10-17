@@ -40,6 +40,7 @@
   --hi: #fff3c4;
   --neg: #b0466e;
   --heat: 79, 116, 173;
+  --negheat: 176, 70, 110;
   --font-display: "Questrial", "Century Gothic", "Avenir Next", "Futura", sans-serif;
   --font-body: "Questrial", "Century Gothic", "Avenir Next", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -47,13 +48,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #17191d; --panel: #1f2227; --fg: #e7e9ec; --muted: #9aa0a9; --line: #343840; --grid: #2a2e34;
-    --blue: #86a8dc; --orange: #e8a15e; --green: #7fbf7c; --hi: #4a4122; --neg: #e07fa3; --heat: 134, 168, 220;
+    --blue: #86a8dc; --orange: #e8a15e; --green: #7fbf7c; --hi: #4a4122; --neg: #e07fa3; --heat: 134, 168, 220; --negheat: 224, 127, 163;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #17191d; --panel: #1f2227; --fg: #e7e9ec; --muted: #9aa0a9; --line: #343840; --grid: #2a2e34;
-  --blue: #86a8dc; --orange: #e8a15e; --green: #7fbf7c; --hi: #4a4122; --neg: #e07fa3; --heat: 134, 168, 220;
+  --blue: #86a8dc; --orange: #e8a15e; --green: #7fbf7c; --hi: #4a4122; --neg: #e07fa3; --heat: 134, 168, 220; --negheat: 224, 127, 163;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -201,6 +202,18 @@ table.attgrid thead th span { display: inline-block; writing-mode: vertical-rl; 
 .sumvec { font-family: var(--font-mono); font-size: 0.82rem; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--orange); color: var(--fg); transition: background-color .2s ease; }
 .sumvec.pulse { background: var(--hi); }
 .cmpline .cur { background: var(--hi); border-radius: 3px; }
+.vecrow { display: grid; grid-template-columns: 8.5em minmax(0, 1fr); gap: 4px 10px; align-items: center; }
+.vecrow .vname { font-size: 0.85rem; }
+.vecrow .vnote { grid-column: 2; font-size: 0.82rem; color: var(--muted); }
+.strip { display: flex; gap: 1px; flex-wrap: nowrap; min-width: 0; }
+.strip i { display: block; height: 16px; border-radius: 2px; background: var(--grid); transition: background-color .35s ease; flex: 0 0 auto; }
+table.scores { border-collapse: collapse; font-size: 0.85rem; }
+table.scores td, table.scores th { padding: 3px 8px 3px 0; text-align: left; vertical-align: middle; font-weight: 400; }
+table.scores th { color: var(--muted); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; }
+table.scores td.num { font-family: var(--font-mono); text-align: right; }
+table.scores tr.top td { font-weight: 500; }
+.wbar { display: inline-block; height: 10px; background: rgb(var(--heat)); border-radius: 2px; vertical-align: middle; }
+.steptext { margin: 0; font-size: 0.92rem; max-width: 75ch; min-height: 3em; }
 .cmpline .caret { display: inline-block; width: 0.5em; border-bottom: 2px solid var(--orange); margin-left: 3px; }
 #askbtn { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 10;
   background: var(--blue); border-color: var(--blue); color: var(--panel); border-radius: 999px; padding: 10px 18px; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
@@ -275,16 +288,22 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <div class="writer">
         <p class="label">Without attention: every word is written from one summary vector</p>
         <div class="srcrow"><div class="chips" id="cmpSrcOne"></div><span class="arr">→</span><span class="sumvec" id="cmpSum">summary vector</span></div>
+        <div class="vecrow"><span class="vname">Summary vector</span><span class="strip" id="vSumOne"></span><span class="vnote">The encoder's state after the last Galician word. It stays the same at every step.</span></div>
+        <div class="vecrow"><span class="vname">Decoder memory</span><span class="strip" id="vDecOne"></span><span class="vnote">Starts as the summary vector, then changes after every English word.</span></div>
+        <p class="steptext" id="cmpWOne"></p>
         <p class="cmpline" id="cmpOne"></p>
-        <p class="weights" id="cmpWOne"></p>
       </div>
       <div class="writer">
         <p class="label">With attention: each word looks back at the Galician words</p>
         <div class="srcrow"><div class="chips" id="cmpSrcAtt"></div></div>
+        <div class="vecrow"><span class="vname">Decoder memory</span><span class="strip" id="vDecAtt"></span><span class="vnote">Starts as the summary vector, then changes after every English word. At every step it is compared with the vector of every Galician word.</span></div>
+        <div class="heatwrap"><table class="scores" id="cmpScores"></table></div>
+        <p class="steptext" id="cmpWAtt"></p>
         <p class="cmpline" id="cmpAtt"></p>
-        <p class="weights" id="cmpWAtt"></p>
       </div>
     </div>
+    <p class="note">In the strips, each cell is one value of the vector: <span style="color:var(--blue)">blue</span> is positive, <span style="color:var(--neg)">pink</span> is negative, and a darker cell is further from zero. Where the decoder's memory and a Galician word's vector have the same color in the same cells, the products are positive, so the score is high.</p>
+    <p class="note"><b>Why does it look at <i>tía</i> to write “aunt”?</b> This is clearest with 64 dimensions. Nobody wrote this rule. In training, the model's weights were adjusted, step by step, to make the correct English word more likely. The vector at <i>tía</i> helps to choose “aunt”. So the weights changed until, after writing “an”, the decoder's memory became similar to that vector, and their score became the highest. Section 6 shows this kind of training for attention heads.</p>
     <p class="note">The shading on each Galician word is the weight of the encoder's vector after reading that word. That vector also carries the words before it, so a weight on <i>miña</i> can bring in <i>tía</i> as well.</p>
     <p class="note" id="cmpNote"></p>
     <div class="col">
@@ -851,6 +870,17 @@ function partial(out, ref, n, done) {
   }
   return res;
 }
+// a vector as a strip of cells: blue for positive values, pink for negative (GRU states lie between -1 and 1)
+function fillStrip(el, v) {
+  const H = CMP.runs[r].dims, wd = Math.max(3, Math.min(16, Math.floor(240 / H)));
+  if (el.children.length !== H) el.innerHTML = Array.from({ length: H }, () => `<i style="width:${wd}px"></i>`).join("");
+  [...el.children].forEach((c, k) => {
+    const a = v ? Math.min(1, Math.abs(v[k])) : 0;
+    c.style.backgroundColor = v ? `rgba(var(${v[k] >= 0 ? "--heat" : "--negheat"}),${(0.12 + 0.88 * a).toFixed(2)})` : "";
+    c.title = v ? v[k].toFixed(2) : "";
+  });
+}
+const strip = (id, v) => fillStrip($(id), v);
 function drawStep() {
   const x = CMP.runs[r].examples[e], T = total(), done = t >= T;
   const showLine = (id, out) => {
@@ -861,15 +891,28 @@ function drawStep() {
   $("cmpStep").textContent = done ? `${T} of ${T} English words: done` : `${t} of ${T} English words`;
   // with attention: shade each Galician word by the weight used for the newest English word
   const i = t - 1, w = i >= 0 && i < x.att.length && !done ? x.attw[i] : null;
+  const prevWord = (out, i) => i === 0 ? "the start signal" : `“${esc(out[i - 1])}”`;
   $("cmpSrcAtt").querySelectorAll(".chip").forEach((c, j) => { c.style.backgroundColor = w ? `rgba(var(--heat),${w[j].toFixed(3)})` : ""; c.style.color = w && w[j] > 0.55 ? "var(--panel)" : ""; });
+  strip("vDecAtt", w ? x.decAtt[i] : null);
   if (w) {
-    const top = w.map((v, j) => [v, x.src[j]]).sort((a, b) => b[0] - a[0]).slice(0, 3);
-    $("cmpWAtt").innerHTML = `Writing “${esc(x.att[i])}”, it looks at ` + top.map(([v, s]) => `<b>${esc(s)}</b> ${v.toFixed(2)}`).join(" · ");
-  } else $("cmpWAtt").textContent = done ? "Play the translation to see where it looks for each word." : "";
-  // without attention: the same vector for every word
+    const sc = x.scores[i], order = w.map((v, j) => j).sort((a, b) => w[b] - w[a]), top = order.slice(0, 3);
+    const rest = 1 - top.reduce((a, j) => a + w[j], 0);
+    $("cmpScores").innerHTML = `<thead><tr><th>Galician word</th><th>its vector</th><th>score</th><th>weight</th></tr></thead><tbody>` +
+      top.map((j, k) => `<tr class="${k === 0 ? "top" : ""}"><td><i>${esc(x.src[j])}</i></td><td><span class="strip" data-v="${j}"></span></td><td class="num">${sc[j].toFixed(1)}</td><td><span class="wbar" style="width:${Math.max(2, w[j] * 80).toFixed(0)}px"></span> <span class="mono">${w[j].toFixed(2)}</span></td></tr>`).join("") +
+      `<tr><td colspan="4" class="note">The other ${x.src.length - 3} words: weight ${rest.toFixed(2)} together.</td></tr></tbody>`;
+    $("cmpScores").querySelectorAll("[data-v]").forEach(el => fillStrip(el, x.encAtt[+el.dataset.v]));
+    const j0 = top[0];
+    $("cmpWAtt").innerHTML = `To write “${esc(x.att[i])}”, the decoder first updates its memory with ${prevWord(x.att, i)}. Then it compares its memory with the vector of every Galician word: it multiplies the two vectors value by value and adds the products up. This is the <b>score</b>. The vector at <b>${esc(x.src[j0])}</b> matches best (score ${sc[j0].toFixed(1)}), so softmax gives it the most <b>weight</b> (${w[j0].toFixed(2)}).` + (w[j0] < 0.4 ? " The weights are spread out: this small model also relies on its memory, which started as the summary vector." : "");
+  } else {
+    $("cmpScores").innerHTML = "";
+    $("cmpWAtt").textContent = done ? "Play the translation, or step through it, to see where the model looks for each word." : "";
+  }
+  // without attention: the decoder's memory changes, the summary vector does not
   const s1 = i >= 0 && i < x.one.length && !done;
   $("cmpSum").classList.toggle("pulse", s1);
-  $("cmpWOne").innerHTML = s1 ? `To write “${esc(x.one[i])}”, the model uses the summary vector. It uses this same vector for every English word.` : (done ? "The summary vector is the encoder's state after the last Galician word." : "");
+  strip("vSumOne", x.sumOne);
+  strip("vDecOne", s1 ? x.decOne[i] : null);
+  $("cmpWOne").innerHTML = s1 ? `To write “${esc(x.one[i])}”, the decoder updates its memory with ${prevWord(x.one, i)} and the summary vector. Then it chooses the word from its memory and the summary vector. The memory changes at every step. The summary vector stays the same, so it can never point at a different Galician word.` : (done ? "Play the translation, or step through it, to see the decoder's memory change." : "");
   $("cmpGrid").querySelectorAll("tbody tr").forEach((tr, k) => { tr.style.outline = !done && k === i ? "2px solid var(--orange)" : ""; });
 }
 function stopPlay() { clearInterval(timer); timer = null; $("cmpPlay").textContent = "Write both translations"; }
@@ -898,7 +941,7 @@ $("cmpEx").addEventListener("change", () => { stopPlay(); e = +$("cmpEx").value;
 t = total(); render();
 (window.__askState ||= []).push(() => {
   const run = CMP.runs[r], x = run.examples[e];
-  return `Section 2 (two trained models): vector size ${run.dims} dimensions (${run.params} parameters per model); sentence "${plain(x.src)}" (${x.course ? "our sentence" : "a test sentence, not in the training data"}, ${x.kind}). Correct: "${plain(x.ref)}". Animation at English word ${Math.min(t, total())} of ${total()}. Without attention: "${plain(x.one)}". With attention: "${plain(x.att)}". Exactly right out of ${CMP.test} unseen sentences, by piece (${CMP.kinds.join(", ")}): ` +
+  return `Section 2 (two trained models): vector size ${run.dims} dimensions (${run.params} parameters per model); sentence "${plain(x.src)}" (${x.course ? "our sentence" : "a test sentence, not in the training data"}, ${x.kind}). Correct: "${plain(x.ref)}". Animation at English word ${Math.min(t, total())} of ${total()}. Without attention: "${plain(x.one)}". With attention: "${plain(x.att)}". Exactly right out of ${CMP.test} test sentences (not in training), by piece (${CMP.kinds.join(", ")}): ` +
     CMP.runs.map(ru => `${ru.dims} dims without attention ${ru.acc.one.join("/")}, with attention ${ru.acc.att.join("/")}`).join("; ") + ".";
 });
 })();
@@ -916,7 +959,7 @@ The page:
 - Running example: the Galician sentence "Unha tía miña, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»" (from the novel Speechwriter by Paulo Naseiro). "tía miña" is noun then possessive; English "my aunt" reverses the order.
 - The page continues a separate translation page (training, the encoder's one summary vector, word-by-word decoding without attention, why "an aunt of mine" is rare in English).
 - Section 1: early neural MT squeezed the whole source sentence into one vector (a bottleneck for long sentences); attention (Bahdanau, Cho & Bengio 2015) lets the decoder look back at every source word at each step. Toy weights: writing "my" puts 0.95 on miña, writing "aunt" puts 0.95 on tía.
-- Section 2: two toy translation models (GRU encoder and decoder) trained on the same data, identical except for attention, with the same number of parameters. Without attention the decoder gets only the encoder's last vector; with attention it takes a weighted average of all the encoder's vectors at every output word (dot-product scores, softmax). Training data: 5,000 template sentences built around the course sentence (other relatives, possessives, verbs, nouns, sayings), each also split into three pieces (noun phrase, noun phrase + relative clause, saying); 8,000 training steps; the course sentence is held out. One pair of models per vector size (8, 16, 64 dimensions). The current state gives the accuracies on 500 unseen sentences. Small vectors lose details without attention (wrong relative, wrong verb, half the saying dropped) while the sentence stays fluent; with 64 dimensions both models are perfect on this toy data, because the templates hold little information. In real 2014 systems, one vector lost details of long sentences (Cho et al. 2014; Bahdanau et al. 2015). The toy data is made up; it is no real corpus.
+- Section 2: two toy translation models (GRU encoder and decoder) trained on the same data, identical except for attention, with the same number of parameters. Without attention the decoder gets only the encoder's last vector; with attention it takes a weighted average of all the encoder's vectors at every output word (dot-product scores, softmax). The animation shows, per output word, the decoder's memory (its GRU state, which changes after every word), the fixed summary vector (no attention), and for attention the three Galician positions with the highest scores, their encoder vectors, scores and weights. The score is the dot product of the decoder's memory and an encoder vector; the model learned in training to make the memory similar to the vector that helps predict the next word, e.g. the vector at tía before writing "aunt". Training data: 5,000 template sentences built around the course sentence (other relatives, possessives, verbs, nouns, sayings), each also split into three pieces (noun phrase, noun phrase + relative clause, saying); 8,000 training steps; the course sentence is held out. One pair of models per vector size (8, 16, 64 dimensions). The current state gives the accuracies on 500 test sentences that are not in the training data. Small vectors lose details without attention (wrong relative, wrong verb, half the saying dropped) while the sentence stays fluent; with 64 dimensions both models are perfect on this toy data, because the templates hold little information. In real 2014 systems, one vector lost details of long sentences (Cho et al. 2014; Bahdanau et al. 2015). The toy data is made up; it is no real corpus.
 - Section 3: keys k_tía = (1, 0), k_miña = (0, 1); queries q_aunt = (3, 0), q_my = (0, 3), all hand-set as on the course slide. Score = q · k; softmax turns scores into weights that sum to 1 (e^3 / (e^3 + e^0) = 0.95); the output is the weighted average of the value vectors. The two value vectors in the small plot are made up, with dimensions named "family member" and "belongs to me". A shorter query in the same direction gives a less sharp split.
 - Section 4: real cross-attention from the Helsinki-NLP/opus-mt-gl-en model (6 decoder layers × 8 heads) on the full sentence, recorded with one teacher-forced pass over its own greedy translation. Tokens are subword pieces; ‹/s› ends the sentence and often receives "parked" attention. Averaged over all heads, "aunt" looks most at "tía" (0.31); single late-layer heads are much sharper (layer 6 head 2: 0.99), early layers barely align.
 - Section 5: the encoder's self-attention (6 layers × 8 heads), each word attending to every source word. Heads have different habits, e.g. layer 3 head 4 mostly looks at the next word, layer 6 head 7 at the previous word (miña → tía 0.94).

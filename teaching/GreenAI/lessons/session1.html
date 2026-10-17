@@ -627,7 +627,8 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   <header><span class="kind">Interactive</span><h2>Count, generate, score</h2></header>
   <div class="body">
     <div class="tabs" role="group" aria-label="Go to a section">
-      <button data-go="count" aria-pressed="true">Count, then divide</button>
+      <button data-go="count" aria-pressed="true">Count</button>
+      <button data-go="divide" aria-pressed="false">Divide</button>
       <button data-go="gen" aria-pressed="false">Generate text</button>
       <button data-go="score" aria-pressed="false">Score a sentence</button>
       <a class="open" href="../artifacts/ngram.html#count" target="_blank" rel="noopener" style="align-self:center;margin-left:auto">Open the full page</a>
@@ -647,7 +648,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   <header><span class="kind">Try it · about 15 minutes for the three screens</span><h2>Build the bigram model</h2></header>
   <div class="body">
     <div class="colab"><span>The Python here runs in your browser. The first Run loads Python, which takes a few seconds.</span><span>The same exercises as a notebook: <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01b_ngrams_playground-beginner.ipynb" target="_blank" rel="noopener">beginner</a> · <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01b_ngrams_playground-advanced.ipynb" target="_blank" rel="noopener">advanced</a> (Colab)</span></div>
-    <p style="max-width:80ch">Some lines have gaps marked <code>___</code>. Replace each gap with code, then press Run. The page checks your answer. Hints and solutions are under each exercise. Run the exercises in order: later ones use your earlier code.</p>
+    <p style="max-width:80ch">Some lines have gaps marked <code>___</code>. Replace each gap with code. <b>Run</b> shows what your code prints. <b>Run the tests</b> also checks it: each test checks one thing, including unusual inputs, and says what to fix. Under each exercise you can read the tests, the hints and the solution. Do the exercises in order: later ones use your earlier code.</p>
 
     <div class="ex" data-ex="1">
       <div class="prompt">
@@ -690,11 +691,63 @@ counts, unigram_counts = build_bigram_counts(CORPUS)
 print(f"P(aunt | my)  = {bigram_prob('my', 'aunt', counts, unigram_counts):.3f}")
 print(f"P(uncle | my) = {bigram_prob('my', 'uncle', counts, unigram_counts):.3f}")
 </script>
-<script type="text/plain" class="check">
-assert abs(bigram_prob("my", "aunt", counts, unigram_counts) - 2 / 3) < 1e-9, "P(aunt | my) should be 2/3"
-assert abs(bigram_prob("my", "uncle", counts, unigram_counts) - 1 / 3) < 1e-9, "P(uncle | my) should be 1/3"
-assert counts["stayed"]["quiet"] == 2, "'stayed quiet' occurs twice in the corpus"
-assert unigram_counts["quiet"] == 0, "the last word of a sentence starts no pair, so it gets no count"
+<script type="text/plain" class="tests">
+def test_example():
+    """P(aunt | my) is 2/3 and P(uncle | my) is 1/3"""
+    p_aunt = bigram_prob("my", "aunt", counts, unigram_counts)
+    p_uncle = bigram_prob("my", "uncle", counts, unigram_counts)
+    if p_aunt == 0 and counts["my"]["aunt"] == 2 and unigram_counts["my"] == 3:
+        assert False, "P(aunt | my) is 0 although the counts are right. With // the division rounds down to a whole number: use /"
+    assert abs(p_aunt - 2 / 3) < 1e-9, f"P(aunt | my) is {p_aunt}, expected 2/3 = 0.667. The tests below say which part is off"
+    assert abs(p_uncle - 1 / 3) < 1e-9, f"P(uncle | my) is {p_uncle}, expected 1/3 = 0.333"
+
+
+def test_pair_order():
+    """a pair is counted as (first word, next word), in that order"""
+    assert counts["my"]["my"] == 0, "counts['my']['my'] should be 0: the pair needs the NEXT word, words[i + 1]"
+    assert counts["aunt"]["my"] == 0, "counts['aunt']['my'] should be 0: 'aunt my' never occurs. Are the two words swapped?"
+    assert counts["my"]["aunt"] == 2, f"counts['my']['aunt'] is {counts['my']['aunt']}, expected 2"
+    assert counts["stayed"]["quiet"] == 2, "'stayed quiet' occurs twice in the corpus"
+
+
+def test_unigram_counts():
+    """count(w1) counts the pairs that START with w1"""
+    assert unigram_counts["my"] == 3, f"unigram_counts['my'] is {unigram_counts['my']}, expected 3: 'my' starts three pairs"
+    assert unigram_counts["quiet"] == 0, "unigram_counts['quiet'] should be 0: a sentence's last word starts no pair. Count words[i], not words[i + 1]"
+
+
+def test_probabilities_sum_to_one():
+    """the probabilities of all words that can follow a word add up to 1"""
+    for w1 in ["my", "aunt", "stayed"]:
+        total = sum(bigram_prob(w1, w2, counts, unigram_counts) for w2 in list(counts[w1]))
+        assert abs(total - 1) < 1e-9, f"after '{w1}' the probabilities add up to {total:.3f}, not 1. Check the counts above, and that the pair count is divided by count(w1)"
+
+
+def test_unseen_words():
+    """unseen words get probability 0, without an error"""
+    assert bigram_prob("her", "aunt", counts, unigram_counts) == 0, "a first word never seen should give 0"
+    assert bigram_prob("my", "cat", counts, unigram_counts) == 0, "a pair never seen should give 0"
+
+
+def test_short_corpora():
+    """a one-word sentence has no pairs, and neither has an empty corpus"""
+    c, u = build_bigram_counts(["hello"])
+    assert sum(u.values()) == 0, "a one-word sentence has no pairs"
+    c, u = build_bigram_counts([])
+    assert sum(u.values()) == 0, "an empty corpus has no pairs"
+
+
+def test_repeated_word():
+    """'a a a' has two pairs, both 'a a'"""
+    c, u = build_bigram_counts(["a a a"])
+    assert c["a"]["a"] == 2, f"counts['a']['a'] is {c['a']['a']}, expected 2"
+    assert u["a"] == 2, f"unigram_counts['a'] is {u['a']}, expected 2: the last 'a' starts no pair"
+
+
+def test_capital_letters():
+    """'My' and 'my' are the same word"""
+    c, u = build_bigram_counts(["My Aunt", "my aunt"])
+    assert u["my"] == 2 or c["my"]["aunt"] == 2, "capital letters made a different word: keep sentence.lower()"
 </script>
 <script type="text/plain" class="solution">
 from collections import defaultdict
@@ -748,10 +801,33 @@ ext_counts, ext_unigrams = build_bigram_counts(EXTENDED_CORPUS)
 print(f"P(aunt | my)  = {bigram_prob('my', 'aunt', ext_counts, ext_unigrams):.3f}")
 print(f"P(uncle | my) = {bigram_prob('my', 'uncle', ext_counts, ext_unigrams):.3f}")
 </script>
-<script type="text/plain" class="check">
-assert len(EXTENDED_CORPUS) >= len(CORPUS) + 2, "add at least two sentences"
-assert bigram_prob("my", "uncle", ext_counts, ext_unigrams) > bigram_prob("my", "aunt", ext_counts, ext_unigrams), \
-    "P(uncle | my) should now be larger than P(aunt | my)"
+<script type="text/plain" class="tests">
+def test_two_new_sentences():
+    """at least two new sentences, each a separate string"""
+    new = EXTENDED_CORPUS[len(CORPUS):]
+    assert all(isinstance(s, str) for s in EXTENDED_CORPUS), "every sentence should be a string, in quotes"
+    assert len(new) != 0 or len(CORPUS) == 3, "CORPUS itself was changed. See the last test"
+    assert len(new) != 1, ("found 1 new sentence. A missing comma between two strings joins them into one: "
+                           "\"my uncle\" \"my uncle\" is the single string \"my unclemy uncle\"")
+    assert len(new) >= 2, "add at least two sentences after CORPUS"
+    assert all(len(s.split()) >= 2 for s in new), "each new sentence needs at least two words to make a pair"
+
+
+def test_uncle_wins():
+    """in the new model, P(uncle | my) is larger than P(aunt | my)"""
+    p_uncle = bigram_prob("my", "uncle", ext_counts, ext_unigrams)
+    p_aunt = bigram_prob("my", "aunt", ext_counts, ext_unigrams)
+    assert p_uncle != p_aunt, f"both are {p_uncle:.3f}: a tie. Add one more sentence with 'my uncle'"
+    assert p_uncle > p_aunt, (f"P(uncle | my) = {p_uncle:.3f}, P(aunt | my) = {p_aunt:.3f}. "
+                              "Only the pair 'my uncle' raises it: 'uncle' must come right after 'my'")
+
+
+def test_original_model_unchanged():
+    """the original corpus and model are unchanged, for the next exercises"""
+    assert CORPUS == ["my aunt stayed quiet", "my aunt spoke wisely", "my uncle stayed quiet"], \
+        "CORPUS was changed. Build EXTENDED_CORPUS as a new list with CORPUS + [...], and run Exercise 1 again"
+    assert abs(bigram_prob("my", "aunt", counts, unigram_counts) - 2 / 3) < 1e-9, \
+        "the original model changed. Use new names (ext_counts, ext_unigrams), and run Exercise 1 again"
 </script>
 <script type="text/plain" class="solution">
 EXTENDED_CORPUS = CORPUS + [
@@ -768,7 +844,7 @@ print(f"P(uncle | my) = {bigram_prob('my', 'uncle', ext_counts, ext_unigrams):.3
   <div class="notes">
     <p>Now everyone works alone, for about 15 minutes. There are three screens of exercises: this one and the next two.</p>
     <p>The code runs in the browser. Nothing to install. The first Run loads Python and takes a few seconds. If a laptop has trouble, the same exercises are in the Colab notebooks linked at the top.</p>
-    <p>How it works: replace every gap, the three underscores, with code. Press Run. The page runs the code and then checks it. A green line means the exercise passed. Hints and the solution are under each exercise. Ask them to try before they open the solution.</p>
+    <p>How it works: replace every gap, the three underscores, with code. Run shows what the code prints. Run the tests checks it. Each test checks one thing, also with unusual inputs like an empty corpus, and a failing test says what to fix. The tests, the hints and the solution are under each exercise. Ask them to read a failing test's message before they open the solution.</p>
     <p>Exercise 1 rebuilds the model from the worked example. It should print 0.67 and 0.33. Exercise 2 changes the corpus, so the numbers change: the data is the model.</p>
   </div>
 </section>
@@ -799,9 +875,61 @@ def generate(start_word, counts, unigram_counts, max_words=10):
 
 print(generate("my", counts, unigram_counts))
 </script>
-<script type="text/plain" class="check">
-assert generate("my", counts, unigram_counts) == "my aunt stayed quiet", generate("my", counts, unigram_counts)
-assert generate("her", counts, unigram_counts) == "her", "a word never seen as a first word has no continuation"
+<script type="text/plain" class="tests">
+from collections import defaultdict
+
+
+def _table(pairs):
+    c = defaultdict(lambda: defaultdict(int))
+    u = defaultdict(int)
+    for w1, w2, n in pairs:
+        c[w1][w2] += n
+        u[w1] += n
+    return c, u
+
+
+def test_example():
+    """from 'my', the model writes 'my aunt stayed quiet'"""
+    out = generate("my", counts, unigram_counts)
+    assert out == "my aunt stayed quiet", f"got '{out}'"
+
+
+def test_picks_most_frequent_next_word():
+    """it picks the next word that followed most often, not the first or last in the alphabet"""
+    c, u = _table([("x", "m", 1), ("x", "z", 2), ("x", "a", 3)])
+    out = generate("x", c, u)
+    assert out != "x z", "it picked 'z', the last word in the alphabet. The key should be the count of each candidate"
+    assert out != "x m", "it picked 'm', which followed x only once. The key should be the count of each candidate, candidates[w]"
+    assert out == "x a", f"got '{out}', expected 'x a': a followed x 3 times"
+
+
+def test_uses_the_pair_count():
+    """it uses the count of the pair, not how often the word starts other pairs"""
+    c, u = _table([("x", "b", 2), ("x", "a", 1), ("a", "c", 5)])
+    out = generate("x", c, u)
+    assert out.split()[:2] == ["x", "b"], (f"got '{out}'. 'a' starts many pairs, but after 'x' the word 'b' "
+                                           "is more frequent. Use candidates[w], not unigram_counts[w]")
+
+
+def test_adds_the_new_word():
+    """each step adds the chosen word, and the next step starts from it"""
+    c, u = _table([("p", "q", 1), ("q", "r", 1)])
+    out = generate("p", c, u)
+    assert out == "p q r", f"got '{out}', expected 'p q r'. Append the new word, not the start word"
+
+
+def test_unseen_start_word():
+    """a start word never seen as a first word gives just that word"""
+    out = generate("her", counts, unigram_counts)
+    assert out == "her", f"got '{out}'"
+
+
+def test_stops_after_max_words():
+    """a loop like 'a a a ...' stops after max_words new words"""
+    c, u = _table([("a", "a", 1)])
+    out = generate("a", c, u, max_words=5)
+    assert len(out.split()) == 6, f"got {len(out.split())} words, expected 6: the start word and 5 new ones"
+    assert generate("a", c, u, max_words=0) == "a", "with max_words=0, only the start word"
 </script>
 <script type="text/plain" class="solution">
 def generate(start_word, counts, unigram_counts, max_words=10):
@@ -877,15 +1005,73 @@ for perm in itertools.permutations(words_to_order):
 
 print("\nBest order found:", " ".join(best_order))
 </script>
-<script type="text/plain" class="check">
-_v = vocab_size
-assert abs(sentence_log_prob(["zzz"], fluency_counts, fluency_unigrams, _v) - 2 * math.log(1 / _v)) < 1e-9, \
-    "an unseen word gives two unseen pairs, each with probability 1 / vocab_size"
-assert sentence_log_prob(["my", "aunt"], fluency_counts, fluency_unigrams, _v) > \
-    sentence_log_prob(["aunt", "my"], fluency_counts, fluency_unigrams, _v)
-_best = max(itertools.permutations(words_to_order),
-            key=lambda p: sentence_log_prob(list(p), fluency_counts, fluency_unigrams, _v))
-assert tuple(best_order) == _best, f"best order should be {_best}"
+<script type="text/plain" class="tests">
+import math
+from collections import defaultdict
+
+
+def _table(pairs):
+    c = defaultdict(lambda: defaultdict(int))
+    u = defaultdict(int)
+    for w1, w2, n in pairs:
+        c[w1][w2] += n
+        u[w1] += n
+    return c, u
+
+
+# my aunt: <s> -> my, my -> aunt, aunt -> </s>
+_C, _U = _table([("my", "aunt", 2), ("my", "uncle", 1)])
+_PROBS = [1 / 10, 3 / 13, 1 / 10]
+
+
+def test_smoothed_formula():
+    """each pair gets (count + 1) / (count of the first word + vocabulary size)"""
+    got = sentence_log_prob(["my", "aunt"], _C, _U, 10)
+    right = sum(math.log(p) for p in _PROBS)
+    if abs(got - right) < 1e-9:
+        return
+    assert abs(got - sum(_PROBS)) > 1e-9, "log_prob adds the probabilities. Add their logarithms: math.log(prob)"
+    assert abs(got - sum(math.log10(p) for p in _PROBS)) > 1e-9, "use math.log, the natural logarithm, not math.log10"
+    assert got != 0, "log_prob stays 0. Add each term with +=, starting from 0.0"
+    no_v = math.log(1 / 1) + math.log(3 / 4) + math.log(1 / 1)
+    assert abs(got - no_v) > 1e-9, "the denominator should add vocab_size, not 1"
+    assert False, f"got {got:.4f}, expected {right:.4f}"
+
+
+def test_unseen_words_no_error():
+    """an unseen word gets a small probability, not 0 and not an error"""
+    got = sentence_log_prob(["zzz"], _C, _U, 10)
+    assert abs(got - 2 * math.log(1 / 10)) < 1e-9, \
+        "an unseen word makes two unseen pairs, each with probability 1 / vocab_size"
+
+
+def test_empty_sentence():
+    """an empty sentence is just <s> followed by </s>"""
+    got = sentence_log_prob([], _C, _U, 10)
+    assert abs(got - math.log(1 / 10)) < 1e-9, f"got {got:.4f}, expected log(1/10) = {math.log(1 / 10):.4f}"
+
+
+def test_fluent_order_scores_higher():
+    """'my aunt' scores higher than 'aunt my'"""
+    v = vocab_size
+    assert sentence_log_prob(["my", "aunt"], fluency_counts, fluency_unigrams, v) > \
+        sentence_log_prob(["aunt", "my"], fluency_counts, fluency_unigrams, v), \
+        "'my aunt' should score higher. Fix sentence_log_prob first: see the first test"
+
+
+def test_search_keeps_the_best():
+    """the search keeps the order with the highest score, and its score"""
+    v = vocab_size
+    score = lambda p: sentence_log_prob(list(p), fluency_counts, fluency_unigrams, v)
+    best = max(itertools.permutations(words_to_order), key=score)
+    worst = min(itertools.permutations(words_to_order), key=score)
+    scores = {score(p) for p in itertools.permutations(words_to_order)}
+    assert len(scores) > 1, "every order gets the same score. Fix sentence_log_prob first: see the first test"
+    assert best_order is not None, "best_order is still None: the if never updated it"
+    assert best_score != float("-inf"), "best_score is still -inf: update it together with best_order"
+    assert tuple(best_order) != tuple(worst), "it kept the LOWEST score. Log probabilities: higher is better"
+    assert tuple(best_order) == best, f"best_order is {tuple(best_order)}, expected {best}"
+    assert abs(best_score - score(best)) < 1e-9, "best_score should be updated together with best_order"
 </script>
 <script type="text/plain" class="solution">
 import itertools
@@ -948,8 +1134,27 @@ elapsed = time.time() - start_time
 
 print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed:.2f}s")
 </script>
-<script type="text/plain" class="check">
-assert count == expected == 40320, (count, expected)
+<script type="text/plain" class="tests">
+import math
+
+
+def test_count():
+    """the loop counts every ordering of BIGGER_WORDS once"""
+    n = len(BIGGER_WORDS)
+    assert count != 6, "count is 6: those are the orderings of the three words of Exercise 4. Loop over BIGGER_WORDS"
+    assert count != n * math.factorial(n), "count adds the length of each ordering. Add 1 per ordering"
+    assert count == 40320, f"count is {count}, expected 40,320"
+
+
+def test_formula():
+    """expected comes from the formula n!"""
+    assert expected == math.factorial(len(BIGGER_WORDS)) == 40320, \
+        f"expected is {expected}. n different words have n! orderings: math.factorial(len(BIGGER_WORDS))"
+
+
+def test_match():
+    """the counted and computed numbers match"""
+    assert count == expected, f"count = {count}, expected = {expected}"
 </script>
 <script type="text/plain" class="solution">
 import time
@@ -1983,6 +2188,27 @@ function loadPython() {
   });
   return pyPromise;
 }
+// runs every test_ function of an exercise's tests, in order, with the student's names in scope
+const TEST_RUNNER = `
+def _run_tests(src):
+    import json
+    ns = dict(globals())
+    exec(compile(src, "<tests>", "exec"), ns)
+    tests = sorted((f for k, f in ns.items() if k.startswith("test_") and callable(f)
+                    and getattr(getattr(f, "__code__", None), "co_filename", "") == "<tests>"),
+                   key=lambda f: f.__code__.co_firstlineno)
+    results = []
+    for f in tests:
+        name = (f.__doc__ or f.__name__).strip()
+        try:
+            f()
+            results.append([name, "pass", ""])
+        except AssertionError as e:
+            results.append([name, "fail", str(e)])
+        except Exception as e:
+            results.append([name, "fail", type(e).__name__ + ": " + str(e)])
+    return json.dumps(results)
+`;
 const shortError = msg => {
   const lines = String(msg).trim().split("\n");
   const i = lines.map(l => l.includes('File "<exec>"')).lastIndexOf(true);
@@ -1990,30 +2216,32 @@ const shortError = msg => {
 };
 document.querySelectorAll(".ex").forEach(ex => {
   const start = dedent(ex.querySelector(".start").textContent);
-  const check = dedent(ex.querySelector(".check").textContent);
+  const tests = dedent(ex.querySelector(".tests").textContent);
   const solution = dedent(ex.querySelector(".solution").textContent);
   const n = ex.dataset.ex;
   const cell = document.createElement("div");
   cell.className = "cell";
   cell.innerHTML = `<textarea spellcheck="false" aria-label="Code for exercise ${n}"></textarea>
-    <div class="cellbar"><button class="primary run">Run</button><button class="reset">Start over</button><span class="status" aria-live="polite"></span></div>
+    <div class="cellbar"><button class="primary run">Run</button><button class="primary test">Run the tests</button><button class="reset">Start over</button><span class="status" aria-live="polite"></span></div>
     <pre class="out" aria-label="Output"></pre>
+    <details class="hint"><summary>The tests for Exercise ${n}: what they check</summary><pre class="sol tsrc"></pre></details>
     <details class="hint"><summary>Solution to Exercise ${n} (open it after you have tried)</summary><pre class="sol"></pre><button class="use" style="margin-top:8px">Put the solution in the editor</button></details>`;
   ex.append(cell);
   const ta = cell.querySelector("textarea"), out = cell.querySelector(".out"), status = cell.querySelector(".status");
   cell.querySelector(".sol").textContent = solution;
+  cell.querySelector(".tsrc").textContent = tests;
   const fit = () => { ta.rows = Math.min(30, ta.value.split("\n").length + 1); };
   ta.value = start; fit();
   ta.addEventListener("input", fit);
   ta.addEventListener("keydown", e => {
     if (e.key === "Tab" && !e.shiftKey) { e.preventDefault(); ta.setRangeText("    ", ta.selectionStart, ta.selectionEnd, "end"); }
-    if (e.key === "Enter" && (e.shiftKey || e.metaKey || e.ctrlKey)) { e.preventDefault(); run(); }
+    if (e.key === "Enter" && (e.shiftKey || e.metaKey || e.ctrlKey)) { e.preventDefault(); run(e.metaKey || e.ctrlKey); }
   });
   const setStatus = (text, cls) => { status.textContent = text; status.className = "status " + cls; };
   const line = (text, cls) => { const s = document.createElement("span"); if (cls) s.className = cls; s.textContent = text + "\n"; out.append(s); };
   cell.querySelector(".reset").onclick = () => { ta.value = start; fit(); out.textContent = ""; setStatus("", ""); };
   cell.querySelector(".use").onclick = () => { ta.value = solution; fit(); ta.focus(); };
-  async function runOnce() {
+  async function runOnce(withTests) {
     out.textContent = "";
     setStatus(pyPromise ? "Running…" : "Loading Python (once, a few seconds)…", "");
     let py;
@@ -2031,18 +2259,21 @@ document.querySelectorAll(".ex").forEach(ex => {
       setStatus("Error", "bad");
       return;
     }
+    if (!withTests) { setStatus("Done. Run the tests to check it.", ""); return; }
+    let results;
     try {
-      await py.runPythonAsync(check);
-      line(`✓ Exercise ${n} passed`, "pass");
-      setStatus("Passed", "ok");
-    } catch (e) {
-      const msg = shortError(e.message).split("\n").pop().replace(/^AssertionError:?\s*/, "");
-      line("✗ Not yet" + (msg ? ": " + msg : ""), "err");
-      setStatus("Not yet", "bad");
-    }
+      if (!py.globals.has("_run_tests")) await py.runPythonAsync(TEST_RUNNER);
+      results = JSON.parse(py.globals.get("_run_tests")(tests));
+    } catch (e) { line(shortError(e.message), "err"); setStatus("The tests could not run", "bad"); return; }
+    line("");
+    results.forEach(([name, st, msg]) => line((st === "pass" ? "✓ " : "✗ ") + name + (msg ? "\n    " + msg : ""), st === "pass" ? "pass" : "err"));
+    const ok = results.filter(r => r[1] === "pass").length;
+    if (ok === results.length) { line(`All ${ok} tests pass. Exercise ${n} is done.`, "pass"); setStatus("All tests pass", "ok"); }
+    else setStatus(`${ok} of ${results.length} tests pass`, "bad");
   }
-  const run = () => { queue = queue.then(runOnce, runOnce); };
-  cell.querySelector(".run").onclick = run;
+  const run = (withTests = false) => { const go = () => runOnce(withTests); queue = queue.then(go, go); };
+  cell.querySelector(".run").onclick = () => run(false);
+  cell.querySelector(".test").onclick = () => run(true);
 });
 
 /* ---- present mode ---- */
@@ -2056,11 +2287,24 @@ const meta = i => {
     frags: frags(i).length, shown: shownFrags(i) };
 };
 function zoomFrames() {
-  // larger text, but keep at least 1000 CSS pixels of width so two-column panels stay side by side
+  // in present mode, match the lesson's text size, then zoom out until nothing in the panel overflows sideways
   const font = parseFloat(getComputedStyle(document.documentElement).fontSize) / 15;
   document.querySelectorAll("iframe.frame").forEach(f => {
-    const z = presenting() ? Math.max(1, Math.min(1.8, font, f.clientWidth / 1000)) : 1;
-    try { f.contentDocument.documentElement.style.zoom = z === 1 ? "" : z.toFixed(2); } catch (e) {}
+    try {
+      const d = f.contentDocument, root = d.documentElement;
+      if (!d.getElementById("lessonEmbedStyle")) {
+        const st = d.createElement("style");
+        st.id = "lessonEmbedStyle";
+        st.textContent = "html.embed .wrap > section > h2 { display: none; }";  // the lesson screen and its tabs name the section
+        d.head.append(st);
+      }
+      if (!presenting() || !f.clientWidth) { root.style.zoom = ""; return; }
+      const scrollers = [...d.querySelectorAll("body *")].filter(e => /auto|scroll|hidden/.test(getComputedStyle(e).overflowX));
+      const overflows = () => root.scrollWidth > root.clientWidth + 1 || scrollers.some(e => e.clientWidth > 0 && e.scrollWidth > e.clientWidth + 1);
+      let z = Math.max(1, Math.min(1.8, font));
+      for (; z > 1; z -= 0.05) { root.style.zoom = z.toFixed(2); if (!overflows()) break; }
+      if (z <= 1) root.style.zoom = "";
+    } catch (e) {}
   });
 }
 window.addEventListener("resize", zoomFrames);
