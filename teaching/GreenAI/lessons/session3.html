@@ -542,7 +542,8 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     <iframe class="frame" title="Retrieval, step by step: dense retrieval" data-src="../artifacts/retrieval.html?embed=dense"></iframe>
   </div>
   <div class="notes">
-    <p>On this panel, the five toy documents are arrows. The black arrow is the question. The table ranks the documents by cosine similarity, and the top k are ticked.</p>
+    <p>On this panel, the five toy documents are arrows. The black arrow is the question.</p>
+    <p>Press Play. The retriever scores the documents one at a time: each document's arrow lights up, the orange arc shows its angle with the question, and its cosine appears in the table. When all five are scored, the table sorts itself, the top k are ticked, and the box at the bottom shows the prompt the model will get: the top documents, then the question.</p>
     <p>Click a row of the table: the arithmetic below it changes to that document, and an orange arc shows the angle between the two arrows.</p>
     <p>Now click anywhere on the plane to move the question. Move it up, toward the retrieval document, and watch the ranking change. Then press question A: its only known word is energy, so its vector is the energy document's vector, and the cosine is exactly 1.</p>
     <p>Type a question with none of the six known words. The question gets no vector, and dense retrieval cannot rank anything. A real embedding model knows all words, so this cannot happen there.</p>
@@ -1046,7 +1047,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
     <p>Now the real thing: the 26 documents and 26 questions of today's notebook, with the notebook's own models. Each bar is one document's similarity to the question. The green bar is the document that holds the answer. The dark bars are the top k: the only documents the model will read.</p>
     <p>The panel opens on the question: what does the acronym PUE stand for? With the dense retriever, the right document is ranked 16th. The model will not see it. An acronym is hard for an embedding model: PUE is just three letters to it. Now press sparse, TF-IDF. The word PUE is in one document only, so TF-IDF finds it at once.</p>
     <p>Look at the line above the chart: with k equal to 2, the dense retriever finds the right document for 23 of the 26 questions, and TF-IDF for all 26. On this small, clean collection, counting words works very well.</p>
-    <p>On the right: how many tokens the model reads with all 26 documents, and with the top k. And the number of pairs that attention compares, which grows with the square of the tokens. Change k and watch both.</p>
+    <p>On the right: how many tokens the model reads with all 26 documents, and with the top k. Under it, the pairs that attention compares, drawn as a square whose side is the number of tokens: the gray square is all 26 documents, the blue one the top k. Press Play: k goes from 26 down to 2. The blue side shrinks in step with the tokens, and its area, the pairs, shrinks much faster.</p>
   </div>
 </section>
 
@@ -1101,7 +1102,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
   </div>
   <div class="notes">
     <p>One practical detail matters today. An embedding model can only read a limited number of tokens. Ours, MiniLM, reads at most 128. If a document is longer, the rest is cut off before the embedding is computed. So the embedding represents only the beginning of the document.</p>
-    <p>The chart shows our 26 documents. The blue part of each bar is what MiniLM reads. The hatched red part is never seen. 23 of the 26 documents are longer than 128 tokens. For one of them, the answer to its quiz question is in the hatched part. You will see the retriever miss that question this afternoon.</p>
+    <p>The chart shows our 26 documents. Press Play: MiniLM reads every document from its start, and where the 128-token window ends, the rest turns into hatching. The blue part of each bar is what MiniLM reads. The hatched red part is never seen. 23 of the 26 documents are longer than 128 tokens. For one of them, the answer to its quiz question is in the hatched part. You will see the retriever miss that question this afternoon.</p>
     <p>Real systems solve this with chunking. They split each long document into smaller pieces, called chunks, embed each chunk, and retrieve chunks. Choosing the chunk size is a design decision of its own.</p>
   </div>
 </section>

@@ -156,6 +156,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <button data-q="how much energy does running a model use">question A</button>
       <button data-q="what does it cost in electricity to get an answer">question B, other words</button>
       <input type="text" id="dQ" aria-label="Your question" value="what does it cost in electricity to get an answer">
+      <button class="primary" id="dPlay">▶ Play: score each document, then rank</button>
     </div>
     <div class="cols">
       <div class="col">
@@ -168,6 +169,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
           <span class="note">documents</span></div>
         <div class="tablewrap"><table class="t" id="dTable"></table></div>
         <div class="calc" id="dCalc" aria-live="polite"></div>
+        <p class="label">The prompt the model gets</p>
+        <div class="calc" id="dPrompt"></div>
       </div>
     </div>
   </section>
@@ -206,14 +209,15 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <div class="controls">
       <div class="seg" role="group" aria-label="Retriever" id="qM"><button data-m="dense" aria-pressed="true">dense (MiniLM)</button><button data-m="sparse" aria-pressed="false">sparse (TF-IDF)</button></div>
       <span class="note">Keep the top</span>
-      <div class="seg" role="group" aria-label="k" id="qK"><button data-k="1" aria-pressed="false">1</button><button data-k="2" aria-pressed="true">2</button><button data-k="3" aria-pressed="false">3</button><button data-k="5" aria-pressed="false">5</button></div>
+      <input type="range" id="qK" min="1" max="26" step="1" value="2" aria-label="k, the number of documents kept" style="flex:1 1 160px;min-width:0"><span class="mono" id="qKVal">2</span>
+      <button class="primary" id="qPlay">▶ Play: from all 26 to 2</button>
     </div>
     <p class="verdict" id="qVerdict" aria-live="polite"></p>
     <div class="cols">
       <div class="col"><div class="bars" id="qBars"></div></div>
       <div class="col">
         <div class="stats" id="qStats"></div>
-        <svg class="fig" id="qFig" viewBox="0 0 420 210" role="img" aria-label="Tokens the model reads, and the pairs attention compares"></svg>
+        <svg class="fig" id="qFig" viewBox="0 0 420 330" role="img" aria-label="Tokens the model reads, and the pairs attention compares"></svg>
         <p class="note">Tokens: the question plus the documents, counted with Qwen2.5's tokenizer; the prompt's instructions add a few more. Attention compares every token with every token, so the pairs grow with the square of the tokens.</p>
       </div>
     </div>
@@ -223,6 +227,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="window">
     <h2><span class="n">4</span>The embedding model reads only 128 tokens</h2>
     <p class="lead">The dense retriever's model, MiniLM, reads at most 128 tokens of a text; the rest is cut off before the vector is computed. Each bar is one of the 26 documents. The hatched part is never seen by the retriever.</p>
+    <div class="controls"><button class="primary" id="wPlay">▶ Play: read each document</button><span class="note">MiniLM reads every document from its start; where the window ends, it stops.</span></div>
     <svg class="fig" id="wFig" viewBox="0 0 900 560" role="img" aria-label="Document lengths in tokens, against the 128-token window"></svg>
     <div class="stats" id="wStats"></div>
     <p class="note">Real systems split long documents into chunks shorter than the window, embed each chunk, and retrieve chunks.</p>
@@ -264,6 +269,30 @@ function el(svg, tag, attrs, text) {
   svg.append(e); return e;
 }
 window.__askState = [];
+const REDUCE = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const sleep = ms => new Promise(r => setTimeout(r, REDUCE ? 0 : ms));
+const ease = u => u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2;
+// one animation per section: starting a new one, or touching a control, stops the old one
+const runs = {};
+const stopRun = k => { if (runs[k]) runs[k].stop = true; };
+const newRun = k => { stopRun(k); return (runs[k] = { stop: false }); };
+function tween(ms, f) {  // f(u) for u from 0 to 1, on timers so that it also runs in an embedded panel out of focus
+  return new Promise(res => {
+    if (REDUCE) { f(1); return res(); }
+    const t0 = performance.now();
+    const tick = () => { const u = Math.min(1, (performance.now() - t0) / ms); f(ease(u)); u < 1 ? setTimeout(tick, 16) : res(); };
+    tick();
+  });
+}
+function flip(tbody, render) {  // re-render a table, sliding each row from its old place to its new one
+  const before = {}; tbody?.querySelectorAll("tr[data-k]").forEach(r => before[r.dataset.k] = r.getBoundingClientRect().top);
+  render();
+  if (REDUCE) return;
+  document.querySelectorAll("#dTable tr[data-k]").forEach(r => {
+    const d = before[r.dataset.k] - r.getBoundingClientRect().top;
+    if (d) r.animate([{ transform: `translateY(${d}px)` }, { transform: "none" }], { duration: 700, easing: "ease-in-out" });
+  });
+}
 
 /* ---- the toy collection of Notebook 03b ---- */
 const DOCS = {
@@ -281,7 +310,7 @@ const fn = x => +x.toFixed(2);
 const DVEC = Object.fromEntries(Object.entries(DOCS).map(([k, t]) => [k, textVec(t)]));
 
 /* ================= 1. dense ================= */
-let dq = textVec($("dQ").value), dk = 2, dsel = "doc_energy";
+let dq = textVec($("dQ").value), dk = 2, dsel = "doc_energy", dshow = null;   // dshow: while playing, how many documents are scored
 const COL = { doc_carbon: "var(--muted)", doc_energy: "var(--blue)", doc_water: "var(--green)", doc_retrieval: "var(--neg)", doc_quantize: "var(--orange)" };
 function drawDense() {
   const svg = $("dFig"); svg.innerHTML = "";
@@ -296,10 +325,11 @@ function drawDense() {
     el(svg, "path", { d: `M${x - 10 * Math.cos(ang - 0.4)} ${y - 10 * Math.sin(ang - 0.4)} L${x} ${y} L${x - 10 * Math.cos(ang + 0.4)} ${y - 10 * Math.sin(ang + 0.4)}`, fill: "none", stroke: color, "stroke-width": w, "stroke-linejoin": "round" });
     if (label) el(svg, "text", { x: x + dx, y: y + dy, fill: color }, label);
   };
-  const rank = dq ? Object.keys(DOCS).sort((a, b) => dot(dq, DVEC[b]) / norm(DVEC[b]) - dot(dq, DVEC[a]) / norm(DVEC[a])) : [];
-  const top = new Set(rank.slice(0, dk));
+  const scoring = dshow != null;
+  const rank = !dq ? [] : scoring ? Object.keys(DOCS) : Object.keys(DOCS).sort((a, b) => dot(dq, DVEC[b]) / norm(DVEC[b]) - dot(dq, DVEC[a]) / norm(DVEC[a]));
+  const top = new Set(scoring ? [] : rank.slice(0, dk));
   const off = { doc_carbon: [-34, -10], doc_energy: [6, 14], doc_water: [-78, -6], doc_retrieval: [6, 4], doc_quantize: [6, 12] };
-  for (const [k, v] of Object.entries(DVEC)) arrow(v, COL[k], top.has(k) ? 3 : 1.5, `${k.slice(4)} (${neg(fn(v[0]))}, ${neg(fn(v[1]))})`, ...off[k]);
+  for (const [k, v] of Object.entries(DVEC)) arrow(v, COL[k], top.has(k) || (scoring && k === dsel) ? 3.5 : 1.5, `${k.slice(4)} (${neg(fn(v[0]))}, ${neg(fn(v[1]))})`, ...off[k]);
   if (dq) {
     arrow(dq, "var(--fg)", 2, null);
     el(svg, "text", { x: P(dq)[0] + 8, y: P(dq)[1] - 10, fill: "var(--fg)", "font-weight": 500 }, `question (${neg(fn(dq[0]))}, ${neg(fn(dq[1]))})`);
@@ -312,12 +342,15 @@ function drawDense() {
     const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
     const p = pt.matrixTransform(svg.getScreenCTM().inverse());
     const v = [(p.x - O[0]) / S, (O[1] - p.y) / S];
-    if (Math.hypot(...v) > 0.3) { dq = [Math.round(v[0] * 2) / 2, Math.round(v[1] * 2) / 2]; $("dQ").value = ""; drawDense(); }
+    if (Math.hypot(...v) > 0.3) { stopRun("dense"); dshow = null; dq = [Math.round(v[0] * 2) / 2, Math.round(v[1] * 2) / 2]; $("dQ").value = ""; drawDense(); }
   });
   // table and arithmetic
   if (!dq) { $("dTable").innerHTML = ""; $("dCalc").innerHTML = `<span>None of the question's words has a toy vector, so the question has no vector: dense retrieval cannot rank anything.</span>`; return; }
   $("dTable").innerHTML = `<thead><tr><th class="l">document</th><th>vector</th><th>cosine</th><th>rank</th></tr></thead><tbody>` +
-    rank.map((k, i) => `<tr data-k="${k}" class="${k === dsel ? "sel " : ""}${top.has(k) ? "top" : ""}"><td class="l">${k}</td><td>(${neg(fn(DVEC[k][0]))}, ${neg(fn(DVEC[k][1]))})</td><td>${neg((dot(dq, DVEC[k]) / norm(dq) / norm(DVEC[k])).toFixed(3))}</td><td>${i + 1}${top.has(k) ? " ✓" : ""}</td></tr>`).join("") + "</tbody>";
+    rank.map((k, i) => `<tr data-k="${k}" class="${k === dsel ? "sel " : ""}${top.has(k) ? "top" : ""}"><td class="l">${k}</td><td>(${neg(fn(DVEC[k][0]))}, ${neg(fn(DVEC[k][1]))})</td>` +
+      (scoring && i >= dshow ? `<td>…</td><td></td>` : `<td>${neg((dot(dq, DVEC[k]) / norm(dq) / norm(DVEC[k])).toFixed(3))}</td><td>${scoring ? "" : i + 1}${top.has(k) ? " ✓" : ""}</td>`) + `</tr>`).join("") + "</tbody>";
+  $("dPrompt").innerHTML = scoring ? `<span class="k">… waiting for the ranking</span>` :
+    rank.slice(0, dk).map(k => `<span>[${k}] ${DOCS[k]}</span>`).join("") + `<span class="r">Question: ${$("dQ").value || "(the point you clicked)"}</span>`;
   const d = DVEC[dsel], qd = dot(dq, d), nq = norm(dq), nd = norm(d);
   $("dCalc").innerHTML = `<span class="k">cosine(question, ${dsel})</span>` +
     `<span>= (${neg(fn(dq[0]))}·${neg(fn(d[0]))} + ${neg(fn(dq[1]))}·${neg(fn(d[1]))}) ÷ (|q| × |d|)</span>` +
@@ -325,9 +358,19 @@ function drawDense() {
     `<span>= ${neg(fn(qd))} ÷ ${(nq * nd).toFixed(2)} = <span class="r">${neg((qd / nq / nd).toFixed(3))}</span></span>` +
     `<span class="k">the orange arc is the angle between the two arrows</span>`;
 }
-$("dQ").addEventListener("input", () => { dq = textVec($("dQ").value); drawDense(); });
+$("dQ").addEventListener("input", () => { stopRun("dense"); dshow = null; dq = textVec($("dQ").value); drawDense(); });
+$("dPlay").onclick = async () => {
+  const run = newRun("dense"), names = Object.keys(DOCS);
+  if (!dq) { dq = textVec(($("dQ").value = "what does it cost in electricity to get an answer")); }
+  dshow = 0; dsel = names[0]; drawDense(); await sleep(600);
+  for (let i = 1; i <= names.length; i++) { if (run.stop) return; dshow = i; dsel = names[i - 1]; drawDense(); await sleep(1300); }
+  if (run.stop) return;
+  dshow = null;
+  const best = names.slice().sort((a, b) => dot(dq, DVEC[b]) / norm(DVEC[b]) - dot(dq, DVEC[a]) / norm(DVEC[a]))[0];
+  dsel = best; flip($("dTable").querySelector("tbody"), drawDense);
+};
 document.querySelectorAll("#dense [data-q]").forEach(b => b.onclick = () => { $("dQ").value = b.dataset.q; dq = textVec(b.dataset.q); drawDense(); });
-$("dK").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; dk = +b.dataset.k; press($("dK"), b); drawDense(); });
+$("dK").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; stopRun("dense"); dshow = null; dk = +b.dataset.k; press($("dK"), b); drawDense(); });
 $("dTable").addEventListener("click", e => { const r = e.target.closest("tr[data-k]"); if (r) { dsel = r.dataset.k; drawDense(); } });
 drawDense();
 window.__askState.push(() => `Section 1: question "${$("dQ").value}", vector ${dq ? dq.map(fn).join(", ") : "none"}, top ${dk}; selected ${dsel}`);
@@ -376,6 +419,7 @@ function drawQuiz() {
   const acc = D.questions.filter(x => found(x, qm, qk)).length;
   const all = D.qwen_tokens.reduce((a, b) => a + b, 0) + q.qtokens;
   const sub = [...top].reduce((a, i) => a + D.qwen_tokens[i], 0) + q.qtokens;
+  $("qKVal").textContent = qk;
   $("qStats").innerHTML = `<span>${qm === "dense" ? "dense" : "TF-IDF"}, top ${qk}: right document found for <b>${acc} of 26</b> questions</span>`;
   const svg = $("qFig"); svg.innerHTML = "";
   const W = 220, bar = (y, label, v, vmax, color, txt) => {
@@ -386,38 +430,56 @@ function drawQuiz() {
   el(svg, "text", { x: 0, y: 14, class: "lab" }, "tokens read");
   bar(24, "all 26 documents", all, all, "var(--muted)", all.toLocaleString("en-US"));
   bar(48, `top ${qk}`, sub, all, "var(--blue)", sub.toLocaleString("en-US"));
-  el(svg, "text", { x: 0, y: 108, class: "lab" }, "pairs attention compares (tokens²)");
-  bar(118, "all 26 documents", all * all, all * all, "var(--muted)", (all * all / 1e6).toFixed(1) + " million");
-  bar(142, `top ${qk}`, sub * sub, all * all, "var(--blue)", sub * sub >= 1e6 ? (sub * sub / 1e6).toFixed(2) + " million" : (sub * sub).toLocaleString("en-US"));
-  el(svg, "text", { x: 110, y: 190, fill: "var(--blue)" }, `${(all / sub).toFixed(1)} times fewer tokens, ${(all * all / sub / sub).toFixed(0)} times fewer pairs`);
+  // attention pairs as areas: a square whose side is the number of tokens
+  const side = 200, s2 = side * sub / all, mil = v => v >= 1e6 ? (v / 1e6).toFixed(2) + " million" : v.toLocaleString("en-US");
+  el(svg, "text", { x: 0, y: 96, class: "lab" }, "pairs attention compares: tokens × tokens");
+  el(svg, "rect", { x: 0, y: 106, width: side, height: side, fill: "var(--grid)", stroke: "var(--muted)" });
+  el(svg, "rect", { x: 0, y: 106, width: s2, height: s2, fill: "var(--blue)" });
+  el(svg, "text", { x: side + 12, y: 126, class: "m" }, "gray: all 26 documents");
+  el(svg, "text", { x: side + 12, y: 144 }, mil(all * all));
+  el(svg, "text", { x: side + 12, y: 176, fill: "var(--blue)" }, `blue: top ${qk}`);
+  el(svg, "text", { x: side + 12, y: 194, fill: "var(--blue)" }, mil(sub * sub));
+  el(svg, "text", { x: side + 12, y: 240, fill: "var(--blue)" }, `${(all / sub).toFixed(1)} × fewer tokens`);
+  el(svg, "text", { x: side + 12, y: 258, fill: "var(--blue)" }, `${(all * all / sub / sub).toFixed(0)} × fewer pairs`);
 }
 $("qSel").onchange = () => { qi = +$("qSel").value; drawQuiz(); };
 $("qM").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; qm = b.dataset.m; press($("qM"), b); drawQuiz(); });
-$("qK").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; qk = +b.dataset.k; press($("qK"), b); drawQuiz(); });
+$("qK").addEventListener("input", () => { stopRun("quiz"); qk = +$("qK").value; drawQuiz(); });
+$("qPlay").onclick = async () => {
+  const run = newRun("quiz");
+  qk = 26; $("qK").value = 26; drawQuiz(); await sleep(900);
+  for (let k = 25; k >= 2; k--) { if (run.stop) return; qk = k; $("qK").value = k; drawQuiz(); await sleep(k > 6 ? 220 : 700); }
+};
 drawQuiz();
 window.__askState.push(() => { const q = D.questions[qi]; return `Section 3: question "${q.q}", right document ${D.docs[q.source]}, ${qm}, top ${qk}; top documents ${ranked(q, qm).slice(0, 5).map(([i, s]) => D.docs[i] + " " + s).join(", ")}`; });
 
 /* ================= 4. the window ================= */
-(() => {
-  const svg = $("wFig"), order = D.docs.map((_, i) => i).sort((a, b) => D.minilm_tokens[b] - D.minilm_tokens[a]);
+const WMAX = Math.max(...D.minilm_tokens);
+function drawWindow(pos = WMAX) {   // pos: how far into the documents the reading has got, in tokens
+  const svg = $("wFig"); svg.innerHTML = "";
+  const order = D.docs.map((_, i) => i).sort((a, b) => D.minilm_tokens[b] - D.minilm_tokens[a]);
   const X0 = 250, SC = 2.1, H = 17, G = 21, win = D.window;
   const defs = el(svg, "defs", {});
   const pat = el(defs, "pattern", { id: "hatch", width: 6, height: 6, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
   el(pat, "line", { x1: 0, y1: 0, x2: 0, y2: 6, stroke: "var(--neg)", "stroke-width": 2 });
   order.forEach((i, r) => {
-    const y = 10 + r * G, n = D.minilm_tokens[i], keep = Math.min(n, win);
+    const y = 10 + r * G, n = D.minilm_tokens[i], keep = Math.min(n, win, pos), cut = Math.max(0, Math.min(n, pos) - win);
     el(svg, "text", { x: X0 - 8, y: y + 13, "text-anchor": "end" }, D.docs[i]);
+    el(svg, "rect", { x: X0, y, width: n * SC, height: H, fill: "none", stroke: "var(--line)" });
     el(svg, "rect", { x: X0, y, width: keep * SC, height: H, fill: "var(--blue)", opacity: 0.8 });
-    if (n > win) el(svg, "rect", { x: X0 + win * SC, y, width: (n - win) * SC, height: H, fill: "url(#hatch)", stroke: "var(--neg)", "stroke-width": 0.8 });
-    el(svg, "text", { x: X0 + n * SC + 6, y: y + 13, class: "m" }, String(n));
-    if (D.docs[i] === "training_vs_inference") el(svg, "text", { x: X0 + n * SC + 40, y: y + 13, fill: "var(--neg)" }, "← its quiz answer is in the hatched part");
+    if (cut > 0) el(svg, "rect", { x: X0 + win * SC, y, width: cut * SC, height: H, fill: "url(#hatch)", stroke: "var(--neg)", "stroke-width": 0.8 });
+    if (pos >= n) el(svg, "text", { x: X0 + n * SC + 6, y: y + 13, class: "m" }, String(n));
+    if (pos >= n && D.docs[i] === "training_vs_inference") el(svg, "text", { x: X0 + n * SC + 40, y: y + 13, fill: "var(--neg)" }, "← its quiz answer is in the hatched part");
   });
+  if (pos < WMAX) el(svg, "line", { x1: X0 + pos * SC, x2: X0 + pos * SC, y1: 2, y2: 10 + order.length * G, stroke: pos > win ? "var(--neg)" : "var(--blue)", "stroke-width": 2 });
   const yb = 10 + order.length * G;
   el(svg, "line", { x1: X0 + win * SC, x2: X0 + win * SC, y1: 2, y2: yb + 4, stroke: "var(--orange)", "stroke-width": 2, "stroke-dasharray": "5 4" });
   el(svg, "text", { x: X0 + win * SC, y: yb + 20, "text-anchor": "middle", fill: "var(--orange)" }, `${win} tokens: what MiniLM reads`);
   const over = D.minilm_tokens.filter(n => n > win).length;
   $("wStats").innerHTML = `<span>documents longer than the window: <b>${over} of 26</b></span><span>longest: <b>${Math.max(...D.minilm_tokens)}</b> tokens</span>`;
-})();
+}
+drawWindow();
+$("wPlay").onclick = async () => { const run = newRun("window"); await tween(5000, u => { if (!run.stop) drawWindow(u * WMAX); }); };
 })();
 </script>
 

@@ -514,6 +514,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
   <div class="notes">
     <p>On this panel you can click any bit to flip it, and the page decodes the number again, field by field.</p>
+    <p>First press Play: walk the exponent. The number starts at 1.5 and doubles, one exponent step at a time, then halves. Watch the chart under it: the orange dot is the space to the next number the format can store. It moves with the number, always ten powers of 2 below it. Large numbers are stored coarsely, small numbers finely.</p>
     <p>Start from 1.5. Click the first exponent bit after the zero, so the exponent becomes 1 0 0 0 0. That is 16, minus the bias 15, which is 1. The number doubles: 3.</p>
     <p>Now press the example 0.1. FP16 cannot store 0.1 exactly. The nearest number it can store is 0.0999755859375. Every stored number is rounded to the nearest value the format has. This is already a small rounding error, before any quantization.</p>
     <p>Look at the line under the value: it says what the next number above it is. Nothing in between can be stored. Then switch the format to BF16 and compare.</p>
@@ -823,7 +824,7 @@ for size in [7, 32, 70]:
   <div class="notes">
     <p>Here are the same nine values on a number line. Each value is joined to the code it gets. With 8 bits there are 255 codes, and the lines are almost vertical: every value lands close to a code. Only 3.08 and 3.02 share one. That shared code is orange.</p>
     <p>Click a row of the table to see its arithmetic: the scale, the multiplication, the rounding, the division back, and the error.</p>
-    <p>Now press 4 bits. There are 15 codes left. The lines lean more, and more values share a code. Press 3, then 2. With 2 bits there are only three codes: minus one, zero and one. Most values end up far from where they started. Watch the mean absolute error under the arithmetic grow.</p>
+    <p>Now press Play. The lines move from their 8-bit codes to their 4-bit codes, then 3, then 2. Or press the bit widths one by one. At 4 bits there are 15 codes left. The lines lean more, and more values share a code. Press 3, then 2. With 2 bits there are only three codes: minus one, zero and one. Most values end up far from where they started. Watch the mean absolute error under the arithmetic grow.</p>
     <p>This is why 8 bits is usually mild, while 4 bits and below need more careful methods.</p>
   </div>
 </section>
@@ -1115,7 +1116,7 @@ for bits in [8, 4, 3, 2]:
   </div>
   <div class="notes">
     <p>This panel zooms in on the 24 ordinary values. The orange vertical ticks are the codes. With the outlier and no clipping, only three ticks fall in this window. Each value, the filled dot, is joined to what is stored, the open dot.</p>
-    <p>Move the clipping slider to the left. The ticks move closer together, and the stored values move closer to the originals. Watch two numbers under the picture: the error of the ordinary values goes down, and the error of the outlier goes up.</p>
+    <p>Press Play: shrink the range. The clipping range goes from 256 down to 2.5, and the codes crowd in around the ordinary values. Or move the clipping slider to the left yourself. The ticks move closer together, and the stored values move closer to the originals. Watch two numbers under the picture: the error of the ordinary values goes down, and the error of the outlier goes up.</p>
     <p>Untick the outlier. Without it, absmax alone gives the ordinary values many codes.</p>
     <p>The second tab, Zero point, shows the lopsided values from the previous screen. Symmetric codes in the top row: the negative codes are never used. Asymmetric codes in the bottom row: all of them can be used. Move the slider to shift the values, and watch the zero point change.</p>
   </div>
@@ -1397,6 +1398,22 @@ for clip in [None, 10.0, 5.0, 2.5]:
     <p>Now round each weight on its own. 0.37 becomes 0.25, and 0.52 becomes 0.5. The output is 0.25 times 2 plus 0.5 times 1. That is 0.5 plus 0.5, which is 1.0. The error is 0.26.</p>
     <p>Now the GPTQ way. Round the first weight: 0.37 becomes 0.25. The output loses 0.12 times 2, which is 0.24. Before rounding the second weight, we add that loss to it: 0.52 plus 0.24 is 0.76. Now round it: 0.75. The output is 0.25 times 2 plus 0.75 times 1. That is 0.5 plus 0.75, which is 1.25. The error is only 0.01.</p>
     <p>A real layer has thousands of weights and sees many different inputs. GPTQ computes the corrections from a small set of real inputs, called calibration data, so that the output stays close on average. It does this layer by layer. The result is a model with 4 bits per weight, without any retraining. We will not run the calibration ourselves today. We load a checkpoint that the Qwen team already quantized with GPTQ.</p>
+  </div>
+</section>
+
+<section class="screen fill" id="gptq-i" data-step="5">
+  <header><span class="kind">Interactive</span><h2>Watch GPTQ correct the next weight</h2></header>
+  <div class="body">
+    <div class="tabs" role="group" aria-label="Go to a section">
+      <a class="open" href="../artifacts/quantization.html#gptq" target="_blank" rel="noopener" style="align-self:center;margin-left:auto">Open the full page</a>
+    </div>
+    <iframe class="frame" title="Quantization, step by step: GPTQ" data-src="../artifacts/quantization.html?embed=gptq"></iframe>
+  </div>
+  <div class="notes">
+    <p>The same idea on six weights. Each bar is a weight, the gray outline is its original value, and the gray lines are the steps of 0.25 we can store. On the right is the layer's output: the outline is the original output, 0.79, and the bar is the output now.</p>
+    <p>First choose "round each on its own" and press Play. Each weight jumps to the nearest step, one after another, and the output bar drifts away from the outline. At the end the error is 0.54.</p>
+    <p>Now choose GPTQ and press Play. Each time a weight is rounded, the output changes a little, and that change is moved into the next weight before it is rounded: watch the next blue bar grow or shrink. The output stays on the outline the whole way. Only the last weight has nobody to correct it, so a small error remains, 0.17.</p>
+    <p>The box under the chart writes out each step: the rounding, the change in the output, and the correction.</p>
   </div>
 </section>
 

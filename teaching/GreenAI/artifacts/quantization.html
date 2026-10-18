@@ -149,7 +149,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 <div class="wrap">
   <header>
     <h1>Quantization, Step by Step</h1>
-    <p>A model is billions of numbers. Quantization stores each one with fewer bits. These five stations follow one number into its bits, then a few numbers into integer codes and back, and show what gets lost on the way.</p>
+    <p>A model is billions of numbers. Quantization stores each one with fewer bits. These six stations follow one number into its bits, then a few numbers into integer codes and back, and show what gets lost on the way, and one way to lose less.</p>
   </header>
 
   <!-- 1 -->
@@ -181,6 +181,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </div>
     <div class="bigval" id="bitVal" aria-live="polite"></div>
     <p class="note" id="bitNote"></p>
+    <div class="controls"><button class="primary" id="bitPlay">▶ Play: walk the exponent</button><span class="note">1.5, then × 2 and ÷ 2, one exponent step at a time: watch the space to the next number.</span></div>
+    <svg class="fig" id="bitGap" viewBox="0 0 900 110" role="img" aria-label="The number and the space to the next storable number, on a scale of powers of 2"></svg>
   </section>
 
   <!-- 2 -->
@@ -192,6 +194,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <div class="seg" role="group" aria-label="Bits" id="rBits">
         <button data-b="8" aria-pressed="true">8</button><button data-b="4" aria-pressed="false">4</button><button data-b="3" aria-pressed="false">3</button><button data-b="2" aria-pressed="false">2</button>
       </div>
+      <button class="primary" id="rPlay">▶ Play: 8 → 4 → 3 → 2 bits</button>
     </div>
     <svg class="fig" id="rFig" viewBox="0 0 900 200" role="img" aria-label="Each value on the float line, joined to the integer code it is rounded to"></svg>
     <div class="legendrow">
@@ -226,6 +229,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <input type="range" id="oClip" min="0" max="100" step="1" value="100" aria-label="Clipping range">
       <span class="mono" id="oClipVal"></span>
       <button data-clip="none">no clipping</button><button data-clip="10">10</button><button data-clip="5">5</button><button data-clip="2.5">2.5</button>
+      <button class="primary" id="oPlay">▶ Play: shrink the range</button>
     </div>
     <svg class="fig" id="oFig" viewBox="0 0 900 170" role="img" aria-label="The ordinary values and the codes near them"></svg>
     <div class="stats" id="oStats" aria-live="polite"></div>
@@ -250,8 +254,29 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   </section>
 
   <!-- 5 -->
+  <section class="panel" id="gptq">
+    <h2><span class="n">5</span>GPTQ: round one weight, then correct the next</h2>
+    <p class="lead">A toy layer: six weights, six inputs, one output y = w₁x₁ + … + w₆x₆. The weights can only be stored in steps of 0.25 (the gray lines). Rounding each weight on its own lets the errors add up. GPTQ rounds the weights one at a time, and moves each rounding error into the next weight, before that one is rounded.</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Method" id="gMode"><button data-m="naive" aria-pressed="false">round each on its own</button><button data-m="gptq" aria-pressed="true">GPTQ: correct the next weight</button></div>
+      <button class="primary" id="gPlay">▶ Play</button><button id="gStep">One weight</button><button id="gReset">Start over</button>
+    </div>
+    <svg class="fig" id="gFig" viewBox="0 0 900 300" role="img" aria-label="Six weights, rounded one at a time, and the layer's output"></svg>
+    <div class="legendrow">
+      <span><span class="sw" style="border:2px solid var(--muted)"></span>the original weight</span>
+      <span><span class="sw" style="background:var(--blue)"></span>the weight now, after corrections</span>
+      <span><span class="sw" style="background:var(--orange)"></span>rounded and stored</span>
+    </div>
+    <div class="cols">
+      <div class="calc" id="gCalc" aria-live="polite"></div>
+      <div class="stats" id="gStats"></div>
+    </div>
+    <p class="note">Real GPTQ computes the corrections for all the weights not yet rounded, from a small set of real inputs (calibration data), so that the output stays close on average over those inputs. Here there is one input, and the whole error goes into the next weight.</p>
+  </section>
+
+  <!-- 6 -->
   <section class="panel" id="blocks">
-    <h2><span class="n">5</span>One scale per block</h2>
+    <h2><span class="n">6</span>One scale per block</h2>
     <p class="lead">Sixteen weights of very different sizes, stored with 4 bits. With one scale for all of them, the large weights set the range and the small ones round to 0. Give each block of weights its own scale, and the small ones keep their values. Each scale costs 16 more bits.</p>
     <div class="controls">
       <span class="note">Weights per block:</span>
@@ -303,6 +328,22 @@ const fx = (x, d) => x.toFixed(d).replace("-", "−");
 const rhe = x => { const r = Math.round(x); return Math.abs(x % 1) === 0.5 ? 2 * Math.round(x / 2) : r; };  // ties to even, like NumPy
 const press = (group, btn) => group.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b === btn ? "true" : "false"));
 window.__askState = [];
+const REDUCE = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const sleep = ms => new Promise(r => setTimeout(r, REDUCE ? 0 : ms));
+const ease = u => u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2;
+// one animation per section: starting a new one, or touching a control, stops the old one
+const runs = {};
+const stopRun = k => { if (runs[k]) runs[k].stop = true; };
+const newRun = k => { stopRun(k); return (runs[k] = { stop: false }); };
+function tween(ms, f) {  // calls f(u) for u from 0 to 1; resolves when done
+  return new Promise(res => {
+    if (REDUCE) { f(1); return res(); }
+    // timers, not requestAnimationFrame: these keep running inside an embedded panel that is not in focus
+    const t0 = performance.now();
+    const tick = () => { const u = Math.min(1, (performance.now() - t0) / ms); f(ease(u)); u < 1 ? setTimeout(tick, 16) : res(); };
+    tick();
+  });
+}
 
 /* ================= 1. one number in 16 bits ================= */
 const FMT = { FP16: { E: 5, M: 10, bias: 15 }, BF16: { E: 8, M: 7, bias: 127 } };
@@ -361,15 +402,39 @@ function showBits() {
   $("bitVal").innerHTML = d.kind === "inf" || d.kind === "nan" ? `= <b>${d.kind === "inf" ? (d.s ? "−∞" : "∞") : "NaN"}</b>` :
     `${d.s ? "−" : "+"}${+mv.toPrecision(10)} × 2<sup>${p}</sup> = <b>${+v.toPrecision(12)}</b>`;
   const gap = 2 ** (p - F.M);
+  drawGap(v, gap);
   $("bitNote").textContent = isFinite(v) ? `The next number this format can store above it is ${+(Math.abs(v) + gap).toPrecision(12)}: nothing in between can be stored. ` +
     `Largest ${fmt} number: ${fmt === "FP16" ? "65504" : "about 3.4 × 10³⁸"}.` : "";
+}
+function drawGap(v, gap) {
+  // the number and the space to the next storable number, on a scale of powers of 2
+  const svg = $("bitGap"); svg.innerHTML = "";
+  const F = FMT[fmt], lo = 1 - F.bias - F.M, hi = fmt === "FP16" ? 16 : 40, X = k => 60 + (k - lo) / (hi - lo) * 800;
+  el(svg, "line", { x1: 60, x2: 860, y1: 50, y2: 50, stroke: "var(--muted)" });
+  for (let k = Math.ceil(lo / 4) * 4; k <= hi; k += fmt === "FP16" ? 4 : 8) {
+    el(svg, "line", { x1: X(k), x2: X(k), y1: 45, y2: 55, stroke: "var(--muted)" });
+    el(svg, "text", { x: X(k), y: 72, "text-anchor": "middle", class: "m" }, "2^" + String(k).replace("-", "−"));
+  }
+  if (!isFinite(v) || v === 0) return;
+  const kv = Math.log2(Math.abs(v)), kg = Math.log2(gap);
+  el(svg, "line", { x1: X(kg), x2: X(kv), y1: 30, y2: 30, stroke: "var(--line)", "stroke-width": 6, "stroke-linecap": "round" });
+  el(svg, "circle", { cx: X(kv), cy: 50, r: 7, fill: "var(--blue)" });
+  el(svg, "circle", { cx: X(kg), cy: 50, r: 7, fill: "var(--orange)" });
+  el(svg, "text", { x: X(kv), y: 20, "text-anchor": "middle", fill: "var(--blue)" }, "the number " + +Math.abs(v).toPrecision(6));
+  el(svg, "text", { x: X(kg), y: 100, "text-anchor": "middle", fill: "var(--orange)" }, "space to the next: " + +gap.toPrecision(4));
+  el(svg, "text", { x: 860, y: 100, "text-anchor": "end", class: "lab" }, `always ${F.M} powers of 2 apart: the space grows with the number`);
 }
 function setNum(x) {
   bits = encode(x, FMT[fmt]); showBits();
   const v = decode(bits, FMT[fmt]).value;
   if (isFinite(x) && v !== x) $("bitNote").textContent = `${x} cannot be stored exactly; the nearest ${fmt} number is ${+v.toPrecision(12)}. ` + $("bitNote").textContent;
 }
-$("bitRow").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; bits[+b.dataset.i] ^= 1; showBits(); });
+$("bitRow").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; stopRun("bits"); bits[+b.dataset.i] ^= 1; showBits(); });
+$("bitPlay").onclick = async () => {
+  const run = newRun("bits");
+  const ps = fmt === "FP16" ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, -1, -2, -4, -6, -8, -10, -12, -14, 0] : [0, 4, 8, 16, 24, 32, 40, -4, -8, -16, -24, 0];
+  for (const k of ps) { if (run.stop) return; setNum(1.5 * 2 ** k); $("numIn").value = ""; await sleep(650); }
+};
 document.querySelectorAll("#bits [data-num]").forEach(b => b.onclick = () => { $("numIn").value = b.dataset.num; setNum(+b.dataset.num); });
 $("numIn").addEventListener("change", () => { const x = parseFloat($("numIn").value.replace(",", ".").replace("−", "-")); if (!isNaN(x)) setNum(x); });
 const setFmt = f => { const v = decode(bits, FMT[fmt]).value; fmt = f; press($("fmtFP16").parentElement, $("fmt" + f)); setNum(isNaN(v) ? 1.5 : v); };
@@ -398,8 +463,10 @@ function absmax(xs, b, clip) {
 /* ================= 2. absmax ================= */
 const RV = [5.47, 3.08, -7.59, 0.0, -1.85, -4.57, 10.8, 3.02, -1.92];
 let rb = 8, rsel = 1;
+let rFrom = null, rU = 1;   // while animating: where the lines ended before, and how far along they are
 function drawRound() {
   const { qmax, a, s, q, dq } = absmax(RV, rb);
+  const end = i => rFrom ? rFrom[i] + (dq[i] - rFrom[i]) * rU : dq[i];
   const svg = $("rFig"); svg.innerHTML = "";
   const X = v => 450 + v / a * 400, yF = 40, yC = 150;
   el(svg, "line", { x1: 50, x2: 850, y1: yF, y2: yF, stroke: "var(--fg)" });
@@ -411,18 +478,19 @@ function drawRound() {
   const every = qmax > 20 ? 32 : 1;
   for (let c = -qmax; c <= qmax; c++) {
     const x = X(c / s), lab = c % every === 0 || c === qmax || c === -qmax;
-    el(svg, "line", { x1: x, x2: x, y1: yC - (lab ? 7 : 4), y2: yC + (lab ? 7 : 4), stroke: count[c] > 1 ? "var(--orange)" : "var(--muted)", "stroke-width": count[c] > 1 ? 3 : 1 });
+    el(svg, "line", { x1: x, x2: x, y1: yC - (lab ? 7 : 4), y2: yC + (lab ? 7 : 4), stroke: count[c] > 1 && rU === 1 ? "var(--orange)" : "var(--muted)", "stroke-width": count[c] > 1 && rU === 1 ? 3 : 1, opacity: rFrom ? rU : 1 });
     if (lab && !(qmax > 20 && Math.abs(c) > qmax - 12 && Math.abs(c) !== qmax)) el(svg, "text", { x, y: yC + 22, "text-anchor": "middle", class: "m" }, String(c).replace("-", "−"));
   }
   // value labels: a second row where two labels would overlap
   const row = {}; let lastX = -1e9, lastRow = 0;
   [...RV.keys()].sort((i, j) => RV[i] - RV[j]).forEach(i => { const x = X(RV[i]); lastRow = x - lastX < 34 ? 1 - lastRow : 0; row[i] = lastRow; lastX = x; });
   RV.forEach((v, i) => {
-    const hit = count[q[i]] > 1, sel = i === rsel;
-    el(svg, "line", { x1: X(v), y1: yF, x2: X(dq[i]), y2: yC, stroke: hit ? "var(--orange)" : "var(--blue)", "stroke-width": sel ? 2.5 : 1.2, opacity: sel ? 1 : 0.7 });
+    const hit = count[q[i]] > 1 && rU === 1, sel = i === rsel;
+    el(svg, "line", { x1: X(v), y1: yF, x2: X(end(i)), y2: yC, stroke: hit ? "var(--orange)" : "var(--blue)", "stroke-width": sel ? 2.5 : 1.2, opacity: sel ? 1 : 0.7 });
     el(svg, "circle", { cx: X(v), cy: yF, r: sel ? 6 : 4.5, fill: hit ? "var(--orange)" : "var(--blue)" });
     el(svg, "text", { x: X(v), y: yF - 10 - 15 * row[i], "text-anchor": "middle", fill: sel ? "var(--blue)" : "var(--fg)" }, f2(v));
-    if (sel) el(svg, "text", { x: X(dq[i]), y: yC + 38, "text-anchor": "middle", fill: "var(--orange)" }, "code " + String(q[i]).replace("-", "−"));
+    el(svg, "circle", { cx: X(end(i)), cy: yC, r: 3.5, fill: "none", stroke: hit ? "var(--orange)" : "var(--blue)" });
+    if (sel && rU === 1) el(svg, "text", { x: X(dq[i]), y: yC + 38, "text-anchor": "middle", fill: "var(--orange)" }, "code " + String(q[i]).replace("-", "−"));
   });
   $("rTable").innerHTML = `<thead><tr><th>value x</th><th>x × s</th><th>code</th><th>code ÷ s</th><th>error</th></tr></thead><tbody>` +
     RV.map((v, i) => `<tr data-i="${i}" class="${i === rsel ? "sel" : ""}"><td>${f2(v)}</td><td>${f2(v * s)}</td><td class="${count[q[i]] > 1 ? "hit" : ""}">${q[i]}</td><td>${f2(dq[i])}</td><td>${f2(v - dq[i])}</td></tr>`).join("") + "</tbody>";
@@ -435,7 +503,18 @@ function drawRound() {
   const used = new Set(q).size, mae = RV.reduce((t, x, i) => t + Math.abs(x - dq[i]), 0) / RV.length;
   $("rStats").innerHTML = `<span>codes available: <b>${2 * qmax + 1}</b></span><span>codes used: <b>${used}</b> for 9 values</span><span>mean absolute error: <b>${mae.toFixed(3)}</b></span>`;
 }
-$("rBits").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; rb = +b.dataset.b; press($("rBits"), b); drawRound(); });
+async function toBits(b, run) {
+  // the lines move from the old codes to the new ones
+  rFrom = absmax(RV, rb).dq; rb = b; press($("rBits"), $("rBits").querySelector(`[data-b="${b}"]`));
+  await tween(900, u => { if (!run.stop) { rU = u; drawRound(); } });
+  rFrom = null; rU = 1; drawRound();
+}
+$("rBits").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; toBits(+b.dataset.b, newRun("round")); });
+$("rPlay").onclick = async () => {
+  const run = newRun("round");
+  if (rb !== 8) { await toBits(8, run); await sleep(500); }
+  for (const b of [4, 3, 2]) { if (run.stop) return; await sleep(900); if (run.stop) return; await toBits(b, run); }
+};
 $("rTable").addEventListener("click", e => { const r = e.target.closest("tr[data-i]"); if (r) { rsel = +r.dataset.i; drawRound(); } });
 drawRound();
 window.__askState.push(() => { const { s, q } = absmax(RV, rb); return `Section 2: ${rb} bits, scale ${s.toFixed(3)}, codes ${q.join(", ")} for values ${RV.join(", ")}; selected ${RV[rsel]}`; });
@@ -474,7 +553,14 @@ function drawOut() {
   $("oStats").innerHTML = `<span>range: <b>±${+a.toPrecision(4)}</b></span><span>codes used by the 24 ordinary values: <b>${used}</b></span>` +
     `<span>their mean absolute error: <b>${mae.toFixed(3)}</b></span>` + (withOut ? `<span>outlier error: <b>${(OUT - dq[n]).toFixed(2)}</b></span>` : "");
 }
-$("oClip").addEventListener("input", () => { clip = sliderToClip(+$("oClip").value); drawOut(); });
+$("oClip").addEventListener("input", () => { stopRun("out"); clip = sliderToClip(+$("oClip").value); drawOut(); });
+$("oPlay").onclick = async () => {
+  const run = newRun("out"), from = 100, to = clipToSlider(2.5);
+  if (!$("oOut").checked) $("oOut").checked = true;
+  clip = null; $("oClip").value = 100; drawOut(); await sleep(800);
+  await tween(4500, u => { if (run.stop) return; const t = Math.round(from + (to - from) * u); $("oClip").value = t; clip = t >= 100 ? null : sliderToClip(t); drawOut(); });
+  if (!run.stop) { clip = 2.5; drawOut(); }
+};
 document.querySelectorAll("#outlier [data-clip]").forEach(b => b.onclick = () => { clip = b.dataset.clip === "none" ? null : +b.dataset.clip; $("oClip").value = clipToSlider(clip); drawOut(); });
 $("oOut").onchange = drawOut;
 $("oBits").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; ob = +b.dataset.b; press($("oBits"), b); drawOut(); });
@@ -521,6 +607,64 @@ $("aShift").addEventListener("input", drawAsym);
 drawAsym();
 window.__askState.push(() => `Section 4: values shifted by ${$("aShift").value}; ${$("aStats").textContent}`);
 
+/* ================= 5. GPTQ ================= */
+const GW = [0.37, 0.52, -0.18, 0.66, 0.29, -0.41], GX = [2, 1, 1.5, 0.5, 1, 2], STEP = 0.25;
+const grid = w => Math.round(w / STEP) * STEP;
+const Y0 = GW.reduce((s, w, i) => s + w * GX[i], 0);
+let gmode = "gptq", gcur, gq, gi, glog;
+const gReset = () => { gcur = [...GW]; gq = GW.map(() => null); gi = 0; glog = []; };
+const gOut = (cur = gcur) => cur.reduce((s, w, i) => s + (gq[i] ?? w) * GX[i], 0);
+const n2 = x => (x >= 0 ? "" : "−") + Math.abs(x).toFixed(2), n3 = x => (x >= 0 ? "" : "−") + Math.abs(x).toFixed(3);
+function drawGptq(shown = gcur) {
+  const svg = $("gFig"); svg.innerHTML = "";
+  const y0 = 150, H = 150, X = i => 70 + i * 100, W = 56, Yv = v => y0 - v * H;
+  for (let g = -1; g <= 1.0001; g += STEP) {
+    el(svg, "line", { x1: 40, x2: 640, y1: Yv(g), y2: Yv(g), stroke: g === 0 ? "var(--muted)" : "var(--grid)", "stroke-width": g === 0 ? 1.2 : 1 });
+    el(svg, "text", { x: 34, y: Yv(g) + 4, "text-anchor": "end", class: "m" }, n2(g));
+  }
+  GW.forEach((w, i) => {
+    const v = gq[i] ?? shown[i];
+    el(svg, "rect", { x: X(i), y: Math.min(Yv(v), y0), width: W, height: Math.abs(v) * H, fill: gq[i] != null ? "var(--orange)" : "var(--blue)", opacity: 0.85, rx: 3 });
+    el(svg, "rect", { x: X(i) - 3, y: Math.min(Yv(w), y0), width: W + 6, height: Math.max(1, Math.abs(w) * H), fill: "none", stroke: "var(--muted)", "stroke-width": 2, rx: 3 });
+    el(svg, "text", { x: X(i) + W / 2, y: 282, "text-anchor": "middle", class: "lab" }, `w${i + 1} · x = ${GX[i]}`);
+    el(svg, "text", { x: X(i) + W / 2, y: v >= 0 ? Yv(v) - 6 : Yv(v) + 14, "text-anchor": "middle", fill: gq[i] != null ? "var(--orange)" : "var(--blue)" }, n2(v));
+    if (i === gi && gi < GW.length) el(svg, "path", { d: `M${X(i) + W / 2 - 8} 296 L${X(i) + W / 2} 288 L${X(i) + W / 2 + 8} 296`, fill: "var(--orange)" });
+  });
+  // the output: original against now
+  const yo = gOut(shown), OX = v => 700 + v * 70;
+  el(svg, "text", { x: 680, y: 40, class: "lab" }, "the output y");
+  el(svg, "line", { x1: 690, x2: 890, y1: 120, y2: 120, stroke: "var(--muted)" });
+  [0, 1, 2].forEach(k => el(svg, "text", { x: OX(k), y: 138, "text-anchor": "middle", class: "m" }, String(k)));
+  el(svg, "rect", { x: 700, y: 70, width: Y0 * 70, height: 18, fill: "none", stroke: "var(--muted)", "stroke-width": 2 });
+  el(svg, "rect", { x: 700, y: 92, width: Math.max(0, yo) * 70, height: 18, fill: gq.every(v => v != null) ? "var(--orange)" : "var(--blue)" });
+  el(svg, "text", { x: 700, y: 64, class: "m" }, `original ${n3(Y0)}`);
+  el(svg, "text", { x: 700, y: 160, fill: "var(--blue)" }, `now ${n3(yo)}`);
+  el(svg, "text", { x: 700, y: 180, fill: Math.abs(yo - Y0) > 0.1 ? "var(--neg)" : "var(--green)" }, `error ${n3(yo - Y0)}`);
+  $("gStats").innerHTML = `<span>weights rounded: <b>${gq.filter(v => v != null).length} of 6</b></span><span>output error: <b>${n3(gOut(shown) - Y0)}</b></span>`;
+  $("gCalc").innerHTML = glog.length ? glog.slice(-3).map(s => `<span>${s}</span>`).join("") : `<span class="k">original output</span><span>y = ${GW.map((w, i) => `${n2(w)}·${GX[i]}`).join(" + ").replace(/\+ −/g, "− ")} = ${n3(Y0)}</span>`;
+}
+async function gStep(run) {
+  if (gi >= GW.length) return false;
+  const i = gi, w = gcur[i], r = grid(w), err = (w - r) * GX[i];
+  gq[i] = r;
+  let line = `w${i + 1}: ${n2(w)} → ${n2(r)}; the output changes by (${n2(r)} − ${n2(w)})·${GX[i]} = ${n3(-err)}`;
+  if (gmode === "gptq" && i + 1 < GW.length) {
+    const before = [...gcur], add = err / GX[i + 1];
+    gcur[i + 1] = gcur[i + 1] + add;
+    line += `; move it into w${i + 2}: ${n2(before[i + 1])} + ${n3(err)} ÷ ${GX[i + 1]} = ${n3(gcur[i + 1])}`;
+    glog.push(line); gi++;
+    await tween(700, u => { if (!run.stop) drawGptq(before.map((v, k) => k === i + 1 ? v + add * u : v)); });
+  } else { glog.push(line); gi++; drawGptq(); }
+  if (gi === GW.length) { glog.push(`all rounded: y = ${n3(gOut())}, error ${n3(gOut() - Y0)}`); drawGptq(); }
+  return true;
+}
+$("gStep").onclick = () => gStep(newRun("gptq"));
+$("gReset").onclick = () => { stopRun("gptq"); gReset(); drawGptq(); };
+$("gPlay").onclick = async () => { const run = newRun("gptq"); gReset(); drawGptq(); await sleep(600); while (!run.stop && await gStep(run)) await sleep(900); };
+$("gMode").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; gmode = b.dataset.m; press($("gMode"), b); stopRun("gptq"); gReset(); drawGptq(); });
+gReset(); drawGptq();
+window.__askState.push(() => `Section 5: mode ${gmode}; weights ${GW.join(", ")}, inputs ${GX.join(", ")}; ${gi} rounded; current ${gcur.map(n3).join(", ")}; output ${n3(gOut())} against ${n3(Y0)}`);
+
 /* ================= 5. block scales ================= */
 const BW = [0.1, -0.2, 0.15, 0.05, 2.0, -1.5, 1.8, 0.9, 0.02, -0.04, 0.03, -0.01, 0.6, -0.5, 0.4, 0.7];
 let bk = 16;
@@ -563,7 +707,8 @@ The page:
 - Section 2, absmax: values 5.47, 3.08, −7.59, 0, −1.85, −4.57, 10.8, 3.02, −1.92 (from Grootendorst's visual guide). α = 10.8; scale s = (2^(b−1) − 1) / α, e.g. 127 / 10.8 ≈ 11.76 at 8 bits; code = round(x · s); dequantized = code / s. At 8 bits 3.08 and 3.02 both get code 36.
 - Section 3, outliers: 24 ordinary values in [−2, 2] (Notebook 02b, NumPy seed 7) plus 256. Without clipping at 8 bits, s = 127/256 ≈ 0.50, so the ordinary values use only codes −1, 0, 1. Clipping to [−c, c] first gives them more codes; the outlier is stored as c.
 - Section 4, the zero point: nine values from 0 to 2.8 at 4 bits; symmetric codes −7..7 waste the negative half; asymmetric codes 0..15 with s = (max − min) / 15 and zero point z = round(−min / s). A slider shifts all values.
-- Section 5, block scales: 16 weights of mixed sizes at 4 bits, one absmax scale per block of 16, 8 or 4; each scale costs 16 bits. GGUF type Q4_0 uses blocks of 32: 4.5 bits per weight.`;
+- Section 5, GPTQ: weights 0.37, 0.52, −0.18, 0.66, 0.29, −0.41, inputs 2, 1, 1.5, 0.5, 1, 2, grid of 0.25. Rounding each weight on its own, or GPTQ-style: round weight i, then add its output error (w − rounded)·x_i, divided by x_(i+1), to weight i+1 before rounding it. Real GPTQ spreads the correction over all remaining weights, using calibration inputs.
+- Section 6, block scales: 16 weights of mixed sizes at 4 bits, one absmax scale per block of 16, 8 or 4; each scale costs 16 bits. GGUF type Q4_0 uses blocks of 32: 4.5 bits per weight.`;
 (async () => {
   // window.claude exists only inside a Claude viewer; elsewhere the button stays hidden
   const sample = window.claude ? await window.claude.use("sample") : null;
