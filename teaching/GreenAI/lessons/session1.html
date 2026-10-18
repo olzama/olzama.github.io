@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Questrial&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* The page Session 1 is taught from. Reading mode: the screens stacked as a document.
+/* The page a session is taught from. Reading mode: the screens stacked as a document.
    Present mode: one screen at a time, sized for a projector; speaker notes open in a second window.
    Colors and faces are the deck's, shared with the interactive pages. */
 :root {
@@ -290,7 +290,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 
 <div class="top">
   <div class="title"><b>Green NLP Today</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña</span></div>
-  <div class="road" id="topRoad" aria-label="The six steps"></div>
+  <div class="road" id="topRoad" aria-label="The steps"></div>
   <div class="actions">
     <details class="toc"><summary>Contents</summary><nav id="tocNav"></nav></details>
     <button id="presentBtn" class="primary">Present</button>
@@ -3007,6 +3007,7 @@ document.querySelectorAll(".ex").forEach(ex => {
     py.setStdout({ batched: t => line(t) });
     py.setStderr({ batched: t => line(t, "err") });
     try {
+      await py.loadPackagesFromImports(ta.value + "\n" + (withTests ? tests : ""));  // numpy and the like, once
       await py.runPythonAsync(ta.value);
     } catch (e) {
       const msg = shortError(e.message);
@@ -3072,7 +3073,7 @@ function show(i, opts = {}) {
   const fs = frags(cur), n = opts.shown ?? (opts.back ? fs.length : 0);
   fs.forEach((f, k) => f.classList.toggle("hide", k >= n));
   const m = meta(cur);
-  $("pWhere").textContent = m.step ? `Step ${m.step} of 6 · ${STEPS[m.step - 1]}` : m.part;
+  $("pWhere").textContent = m.step ? `Step ${m.step} of ${STEPS.length} · ${STEPS[m.step - 1]}` : m.part;
   $("pCount").textContent = `${cur + 1} / ${screens.length}`;
   screens[cur].scrollTop = 0;
   try { history.replaceState(null, "", "#" + screens[cur].id); } catch (e) {}

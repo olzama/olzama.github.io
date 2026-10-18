@@ -1,0 +1,1875 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Green NLP: Retrieval</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Questrial&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* The page a session is taught from. Reading mode: the screens stacked as a document.
+   Present mode: one screen at a time, sized for a projector; speaker notes open in a second window.
+   Colors and faces are the deck's, shared with the interactive pages. */
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --fg: #2b2d31; --muted: #6b7079; --line: #dde1e7; --grid: #e9ecf0;
+  --blue: #4f74ad; --orange: #c96f1f; --green: #3f7f3d; --hi: #fff3c4; --neg: #b0466e; --code: #f2f4f7;
+  --blue-soft: #e8eef7; --green-soft: #e6f0e5; --orange-soft: #f8ecdf; --board: #fcfbf6;
+  --font-body: "Questrial", "Century Gothic", "Avenir Next", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17191d; --panel: #1f2227; --fg: #e7e9ec; --muted: #9aa0a9; --line: #343840; --grid: #2a2e34;
+    --blue: #86a8dc; --orange: #e8a15e; --green: #7fbf7c; --hi: #4a4122; --neg: #e07fa3; --code: #262a30;
+    --blue-soft: #263247; --green-soft: #243326; --orange-soft: #3a2c1f; --board: #1c1f1d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17191d; --panel: #1f2227; --fg: #e7e9ec; --muted: #9aa0a9; --line: #343840; --grid: #2a2e34;
+  --blue: #86a8dc; --orange: #e8a15e; --green: #7fbf7c; --hi: #4a4122; --neg: #e07fa3; --code: #262a30;
+  --blue-soft: #263247; --green-soft: #243326; --orange-soft: #3a2c1f; --board: #1c1f1d;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 17px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 40px;
+}
+a { color: var(--blue); overflow-wrap: anywhere; }
+b { font-weight: 400; color: var(--blue); } /* Questrial has one weight */
+h1, h2, h3 { font-weight: 400; margin: 0; text-wrap: balance; }
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.6rem; }
+h3 { font-size: 1.1rem; }
+p { margin: 0; }
+.mono, code { font-family: var(--font-mono); font-size: 0.92em; }
+.muted { color: var(--muted); }
+.label { font-size: 0.74rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); }
+button {
+  font: inherit; font-size: 0.92rem; color: var(--fg); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer;
+}
+button:hover { border-color: var(--blue); }
+button.primary { background: var(--blue); border-color: var(--blue); color: var(--panel); }
+button:focus-visible, textarea:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* top bar */
+.top { position: sticky; top: 0; z-index: 5; background: var(--bg); padding-block: 12px 10px; border-bottom: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; max-width: 1180px; margin: 0 auto; }
+.top .title { display: grid; min-width: 0; }
+.top .title b { color: var(--fg); font-size: 1.15rem; }
+.top .actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.road { display: flex; flex-wrap: wrap; gap: 4px; font-size: 0.8rem; }
+.road span { padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.road span.on { background: var(--blue); border-color: var(--blue); color: var(--panel); }
+.toc { position: relative; }
+.toc > summary { list-style: none; cursor: pointer; border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; font-size: 0.92rem; background: var(--panel); }
+.toc > summary::-webkit-details-marker { display: none; }
+.toc nav { position: absolute; right: 0; top: calc(100% + 6px); background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 8px; display: grid; gap: 2px; width: min(320px, calc(100vw - 32px)); max-height: 70vh; overflow-y: auto; box-shadow: 0 8px 24px rgb(0 0 0 / 0.12); }
+.toc nav a { text-decoration: none; color: var(--fg); padding: 5px 8px; border-radius: 5px; font-size: 0.92rem; }
+.toc nav a:hover { background: var(--blue-soft); }
+
+/* screens, reading mode */
+main { max-width: 1180px; margin: 0 auto; display: grid; gap: 22px; padding-top: 22px; }
+.part { padding-top: 18px; scroll-margin-top: 80px; }
+.part h1 { font-size: 1.5rem; color: var(--muted); }
+.screen { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 22px; display: flex; flex-direction: column; gap: 16px; min-width: 0; scroll-margin-top: 90px; }
+.screen > header { display: grid; gap: 4px; }
+.screen > header .kind { font-size: 0.74rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--orange); }
+.screen > header .sub { color: var(--muted); }
+.body { display: flex; flex-direction: column; gap: 16px; min-width: 0; flex: 1 1 auto; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.cols.wide-left { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+@media (max-width: 860px) { .cols, .cols.wide-left { grid-template-columns: minmax(0, 1fr); } }
+.col { display: grid; gap: 12px; min-width: 0; align-content: start; }
+ul.points { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; max-width: 75ch; }
+ol.points { margin: 0; padding-left: 1.4em; display: grid; gap: 8px; }
+.notes { display: none; }
+.src { font-size: 0.78rem; color: var(--muted); }
+.center { text-align: center; justify-self: center; align-self: center; }
+.tablewrap { overflow-x: auto; }
+table.plain { border-collapse: collapse; font-size: 0.95rem; }
+table.plain th, table.plain td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+table.plain th { color: var(--muted); font-weight: 400; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; }
+table.plain td.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+table.plain tr.now td { background: var(--blue-soft); }
+.c-blue { color: var(--blue); } .c-orange { color: var(--orange); } .c-green { color: var(--green); } .c-gray { color: var(--muted); }
+
+/* the Galician sentence */
+.sent { font-style: italic; text-align: center; max-width: 60ch; justify-self: center; align-self: center; font-size: 1.15em; line-height: 1.6; }
+.sent .hl { color: var(--blue); font-style: italic; }
+.sent.small { font-size: 0.85em; color: var(--muted); }
+
+/* diagrams */
+.flow { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 12px; }
+.box { border: 1px solid var(--blue); background: var(--blue-soft); border-radius: 8px; padding: 10px 16px; text-align: center; line-height: 1.3; }
+.box.g { border-color: var(--green); background: var(--green-soft); }
+.box.o { border-color: var(--orange); background: var(--orange-soft); }
+.box.round { border-radius: 999px; }
+.costs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13em), 1fr)); gap: 14px; }
+.costs .box { text-align: left; display: grid; gap: 6px; align-content: start; }
+.costs .box b { font-size: 1.1em; }
+.chain { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; align-items: baseline; font-variant-numeric: tabular-nums; }
+.chain .r { font-family: var(--font-mono); white-space: nowrap; }
+/* step-by-step derivations: a revealed step (.frag data-k=N) shows the parts of the figure marked data-c=N */
+.steps { margin: 0; padding-left: 1.4em; display: grid; gap: 10px; line-height: 1.45; }
+.steps li::marker { color: var(--blue); }
+.steps .m { font-family: var(--font-mono); font-size: 0.92em; }
+.steps .m.b { display: block; margin: 2px 0; }
+.board { display: grid; gap: 8px; min-width: 0; }
+.board svg { width: 100%; height: auto; background: var(--board); border: 1px solid var(--line); border-radius: 10px; color: var(--fg); }
+.board svg text { font-family: "Caveat", "Segoe Print", "Comic Sans MS", cursive; fill: currentColor; }
+.board svg .gk { font-family: Georgia, "Times New Roman", serif; font-size: 0.85em; }
+.board .bctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.board .bctl .bstep { color: var(--muted); font-size: 0.9rem; }
+.board .frag { display: none; }
+body.present .board svg { max-height: calc(100vh - 255px); }
+body.present .board .bctl { display: none; }
+.stepfig { width: 100%; max-width: 420px; height: auto; justify-self: center; }
+body.present .stepfig { max-width: min(560px, 40vw); }
+table.sgt td, table.sgt th { padding: 3px 8px; }
+table.sgt th { text-transform: none; letter-spacing: 0; font-size: 0.9em; }
+body.present .stepfig.small { max-width: min(440px, 32vw); }
+table.sgt tr.true td { background: var(--green-soft); }
+table.sgt td.w { font-family: var(--font-body); }
+body.present .stepper:has(.frag.hide[data-k="1"]) [data-c="1"] { visibility: hidden; }
+body.present .stepper:has(.frag.hide[data-k="2"]) [data-c="2"] { visibility: hidden; }
+body.present .stepper:has(.frag.hide[data-k="3"]) [data-c="3"] { visibility: hidden; }
+body.present .stepper:has(.frag.hide[data-k="4"]) [data-c="4"] { visibility: hidden; }
+body.present .stepper:has(.frag.hide[data-k="5"]) [data-c="5"] { visibility: hidden; }
+body.present .stepper:has(.frag.hide[data-k="6"]) [data-c="6"] { visibility: hidden; }
+body.present .stepper:has(.frag.hide[data-k="7"]) [data-c="7"] { visibility: hidden; }
+body.present .stepper:has(.frag.hide[data-k="8"]) [data-c="8"] { visibility: hidden; }
+@media (max-width: 600px) { .chain { grid-template-columns: minmax(0, 1fr); gap: 2px; } .chain .r { white-space: normal; margin-bottom: 6px; } }
+.arr { color: var(--muted); font-size: 1.3em; }
+.vbars { display: flex; align-items: flex-end; justify-content: center; gap: clamp(16px, 4vw, 48px); height: 15em; padding-top: 1.5em; }
+.vb { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; width: 6.5em; flex: 0 1 auto; min-width: 0; gap: 4px; text-align: center; }
+.vb .v { font-family: var(--font-mono); }
+.vb .col { width: 70%; background: var(--blue); border-radius: 4px 4px 0 0; min-height: 2px; }
+.vb .col.g { background: var(--green); }
+.vb .col.o { background: var(--orange); }
+.vb .l { font-size: 0.85em; color: var(--muted); min-height: 2.6em; line-height: 1.3; }
+.axisnote { text-align: center; font-size: 0.85em; color: var(--muted); }
+.bars { display: grid; gap: 5px; }
+.bar { display: grid; grid-template-columns: 5.5em minmax(0, 1fr) 3.5em; gap: 10px; align-items: center; font-family: var(--font-mono); font-size: 0.92rem; font-variant-numeric: tabular-nums; }
+.bar .w { text-align: right; }
+.bar .track { height: 16px; background: var(--grid); border-radius: 3px; overflow: hidden; display: block; }
+.bar .fill { height: 100%; background: var(--blue); display: block; }
+.bar.zero { color: var(--muted); }
+.bignum { font-size: 2.4em; color: var(--blue); line-height: 1.1; }
+.fig { display: grid; gap: 6px; justify-items: center; min-width: 0; }
+.fig img { max-width: 100%; max-height: 42vh; width: auto; height: auto; border-radius: 4px; background: #fff; }
+.fig .cap { font-size: 0.78rem; color: var(--muted); text-align: center; }
+.figrow { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
+.figrow img { max-height: 22vh; max-width: 100%; height: auto; }
+.quote { background: var(--green-soft); padding: 10px 16px; border-radius: 6px; text-align: center; justify-self: center; }
+.corpus { font-family: var(--font-mono); display: grid; gap: 4px; font-size: 1.02rem; }
+.corpus mark { background: var(--hi); color: inherit; border-radius: 3px; padding: 0 2px; }
+.formula { font-size: 1.25rem; text-align: center; padding: 6px 0; }
+.frac { display: inline-grid; vertical-align: middle; text-align: center; margin: 0 4px; }
+.frac span:first-child { border-bottom: 1px solid var(--fg); padding: 0 4px; }
+.big { font-family: var(--font-mono); font-size: 1.05rem; display: grid; gap: 4px; }
+.ask { border-left: 3px solid var(--orange); padding: 8px 14px; display: grid; gap: 8px; }
+.ask > b { color: var(--orange); }
+.eq { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; font-family: var(--font-mono); }
+.mat { display: inline-grid; grid-template-columns: repeat(var(--c), auto); gap: 2px 14px; padding: 4px 10px; border-left: 2px solid var(--fg); border-right: 2px solid var(--fg); border-radius: 8px; text-align: right; }
+.mat .hl { color: var(--orange); }
+.svgfig { width: 100%; max-width: 640px; height: auto; justify-self: center; display: block; margin: 0 auto; }
+.svgfig text { fill: var(--fg); font-family: var(--font-body); }
+.svgfig .muted { fill: var(--muted); }
+.scatters { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.scatter { width: 100%; height: auto; display: block; }
+.scatter text { font-family: var(--font-body); font-size: 11px; }
+.kvc { display: block; width: 2.6em; height: 1.8em; border: 1px solid var(--blue); border-radius: 4px; background: var(--blue-soft); }
+.squares { display: grid; gap: 3px; justify-content: center; }
+.squares i { width: 1.1em; height: 1.1em; border-radius: 2px; display: block; }
+.icons { display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap; }
+.icon { width: 3.2em; height: 3.2em; }
+.qmarks { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; }
+.qmarks div { display: grid; justify-items: center; gap: 8px; text-align: center; }
+.qmarks span.q { width: 3.2em; height: 3.2em; border-radius: 50%; border: 1px solid var(--blue); background: var(--blue-soft); display: grid; place-items: center; font-size: 1.6em; color: var(--blue); }
+
+/* activities and links out */
+.activity { border: 1px solid var(--green); border-radius: 10px; overflow: hidden; }
+.activity > h3 { background: var(--green); color: var(--panel); padding: 8px 16px; }
+.activity > div { padding: 14px 16px; background: var(--green-soft); display: grid; gap: 10px; }
+.links { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.links a.btn { text-decoration: none; border: 1px solid var(--green); color: var(--fg); background: var(--panel); border-radius: 6px; padding: 6px 12px; }
+
+/* title and closing screens */
+.titlescreen { align-items: center; text-align: center; justify-content: center; }
+.titlescreen h1 { font-size: 2.2em; }
+.logos { display: flex; flex-wrap: wrap; gap: 18px 30px; justify-content: center; align-items: center; }
+.logos img { height: 3.2em; width: auto; max-width: 100%; object-fit: contain; background: #fff; border-radius: 4px; padding: 4px; }
+
+/* step-by-step reveals: in present mode, Next shows them one at a time */
+body.present .frag.hide { visibility: hidden; }
+
+/* embedded interactive pages */
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.tabs button[aria-pressed=true] { background: var(--blue); border-color: var(--blue); color: var(--panel); }
+.tabs .open { margin-left: auto; font-size: 0.85rem; }
+.frame { width: 100%; height: 78vh; min-height: 420px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); display: block; }
+
+/* exercises */
+.colab { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 0.92rem; padding: 10px 14px; border: 1px dashed var(--line); border-radius: 8px; }
+.ex { display: grid; gap: 10px; border-top: 1px solid var(--line); padding-top: 16px; min-width: 0; }
+.ex .prompt { display: grid; gap: 8px; max-width: 80ch; }
+details.hint { border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; }
+details.hint > summary { cursor: pointer; color: var(--muted); font-size: 0.92rem; }
+details.hint[open] > summary { margin-bottom: 6px; }
+details.hint ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; font-size: 0.95rem; }
+.cell { display: grid; gap: 6px; min-width: 0; }
+.cell textarea {
+  font-family: var(--font-mono); font-size: 0.88rem; line-height: 1.5; color: var(--fg); background: var(--code);
+  border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; width: 100%; resize: vertical; tab-size: 4; white-space: pre; overflow-x: auto;
+}
+.cellbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.cellbar .status { font-size: 0.88rem; color: var(--muted); }
+.cellbar .status.ok { color: var(--green); }
+.cellbar .status.bad { color: var(--neg); }
+pre.out, pre.sol { font-family: var(--font-mono); font-size: 0.86rem; margin: 0; padding: 10px 12px; border-radius: 6px; overflow-x: auto; white-space: pre; }
+pre.out { background: var(--bg); border: 1px solid var(--line); min-height: 2.6em; }
+pre.out .err { color: var(--neg); }
+pre.out .pass { color: var(--green); }
+pre.sol { background: var(--code); }
+.reflect { border-left: 3px solid var(--green); padding: 8px 14px; max-width: 80ch; }
+.reflect > b { color: var(--green); }
+
+footer { max-width: 1180px; margin: 30px auto 0; color: var(--muted); font-size: 0.86rem; display: grid; gap: 8px; }
+footer ul { margin: 0; padding-left: 1.2em; display: grid; gap: 3px; }
+footer .license { padding-top: 10px; border-top: 1px solid var(--line); }
+
+/* present mode: one screen fills the window */
+html.present { font-size: clamp(15px, 1.4vw, 28px); }
+body.present { padding: 0; overflow: hidden; font-size: 1.1rem; }
+body.present .top, body.present footer, body.present .part { display: none; }
+body.present main { max-width: none; padding: 0; display: block; }
+body.present .screen { display: none; border: 0; border-radius: 0; height: 100vh; height: 100dvh; overflow-y: auto;
+  padding: 3.2vh max(4vw, env(safe-area-inset-right, 0px)) 8vh max(4vw, env(safe-area-inset-left, 0px)); }
+body.present .screen.current { display: flex; }
+body.present .screen h2 { font-size: 2em; }
+body.present .titlescreen h1 { font-size: 2.6em; }
+body.present .frame { height: auto; flex: 1 1 auto; min-height: 0; }
+body.present .screen.fill { overflow: hidden; }
+body.present .fig img { max-height: 48vh; }
+body.present .screen:not(.fill):not(.titlescreen) > .body { justify-content: safe center; }
+body.present .flow, body.present .qmarks, body.present .icons { font-size: 1.3em; }
+body.present .vbars { height: 42vh; }
+body.present .svgfig { max-width: min(900px, 62vw) !important; }
+body.present .sent.small { font-size: 1em; }
+body.present .eq { font-size: 1.25em; }
+.pbar { display: none; }
+body.present .pbar { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; gap: 14px; align-items: center;
+  padding: 6px max(4vw, env(safe-area-inset-left, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)); background: var(--bg); border-top: 1px solid var(--line); font-size: 13px; }
+body.present .pbar .where { margin-right: auto; color: var(--muted); }
+body.present .pbar button { font-size: 13px; }
+body.present .pbar .count { font-family: var(--font-mono); color: var(--muted); }
+
+/* speaker-notes window */
+body.notesview { padding: 0; font-size: 22px; }
+body.notesview .top, body.notesview main, body.notesview footer, body.notesview .pbar { display: none !important; }
+#nv { display: none; }
+body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-area-inset-right, 0px)) 40px max(22px, env(safe-area-inset-left, 0px)); max-width: 1000px; margin: 0 auto; }
+#nv .bar1 { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 16px; position: sticky; top: 0; background: var(--bg); padding-block: 8px; }
+#nv .clock { font-family: var(--font-mono); font-size: 20px; margin-left: auto; }
+#nv h2 { font-size: 1.4em; }
+#nv .ntext { display: grid; gap: 0.8em; line-height: 1.5; }
+#nv .next { color: var(--muted); font-size: 16px; border-top: 1px solid var(--line); padding-top: 10px; }
+#nv .fragnote { color: var(--orange); font-size: 16px; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="title"><b>Green NLP: Retrieval</b><span class="muted" style="font-size:0.85rem">Green AI, Session 3 · Universidade da Coruña</span></div>
+  <div class="road" id="topRoad" aria-label="The steps"></div>
+  <div class="actions">
+    <details class="toc"><summary>Contents</summary><nav id="tocNav"></nav></details>
+    <button id="presentBtn" class="primary">Present</button>
+  </div>
+</div>
+
+<main>
+<div class="part" id="part-start"><h1>Start</h1></div>
+
+<section class="screen titlescreen" id="title" data-step="0">
+  <div class="logos"><img src="img/logo-inditexudc.png" alt="Cátedra Inditex–UDC de Algoritmos Verdes"></div>
+  <p class="label">Microcredencial Algoritmos verdes para la IA: diseño e implementación</p>
+  <h1>Green NLP: Retrieval</h1>
+  <p class="muted">Tema: Natural language processing · Sesión 3 · Ponente: Olga Zamaraeva</p>
+  <div class="logos"><img src="img/logo-citicudc.png" alt="CITIC, Universidade da Coruña"><img src="img/logo-financiacion.png" alt="Funding"></div>
+  <div class="notes">
+    <p>This is the third and last session. Today's topic is retrieval.</p>
+    <p>As before, the whole session is on one web page: olzama.github.io, teaching, GreenAI, Session 3.</p>
+  </div>
+</section>
+
+<section class="screen" id="warning" data-step="0">
+  <header><h2>Content warning</h2></header>
+  <div class="body">
+    <ul class="points">
+      <li>The translation part uses sentences from the novel <i>Speechwriter</i></li>
+      <li>Two of them contain strong swearing, as in the original</li>
+      <li>We keep them: translating swearing with the same strength is hard for translation systems</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>One warning before we start. Later today we translate some sentences from the novel Speechwriter. Two of them contain strong swearing. We keep them as they are in the book. Swearing is hard to translate: the translator has to find an expression with the same strength in the other language. So these sentences are a useful test.</p>
+  </div>
+</section>
+
+<section class="screen" id="recap" data-step="0">
+  <header><h2>Where we left off</h2><p class="sub">Two sessions, two changes to the same pipeline</p></header>
+  <div class="body">
+    <div class="flow">
+      <div class="box">Session 1<br><b>baseline-fp16</b><br><span class="muted">reads all documents</span></div><span class="arr">→</span>
+      <div class="box">Session 2<br><b>quantized</b><br><span class="muted">fewer bits per number</span></div><span class="arr">→</span>
+      <div class="box g">Today<br><b>retrieval</b><br><span class="muted">reads only the relevant documents</span></div>
+    </div>
+    <div class="cols">
+      <div class="col">
+        <table class="plain">
+          <thead><tr><th>The model gets</th><th>The task is called</th></tr></thead>
+          <tbody>
+            <tr><td>the question and all the documents, with every answer in them</td><td>reading comprehension</td></tr>
+            <tr><td>the question only</td><td>closed-book question answering</td></tr>
+            <tr><td>the question and the documents a retriever found for it</td><td>open-book question answering</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col">
+        <ul class="points">
+          <li>Closed book, in our Session 1 test run: <b>2 of 8</b> right; with the documents, 8 of 8</li>
+          <li>Its wrong answers sounded just as sure: it called RAG “Retrieval-Augmented Learning”</li>
+          <li>A small model alone is not a reliable source of facts. Documents supply the facts; retrieval chooses which.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Here is where we are. In Session 1, the model answered questions about a few documents. For every question, it read all of them. That is the baseline row in your leaderboard. In Session 2, we kept the documents and made the model's numbers smaller. Today we keep the model as it was in Session 1, and we change what it reads.</p>
+    <p>First, a distinction. When every prompt contains all the documents, and the documents contain every answer, the model does not need to know anything. It only needs to find the answer in the text. That task is called reading comprehension. When the model gets only the question, it must know the answer. That is closed-book question answering. Today we look at the case in between: the model gets the question, plus the documents that a program found for it. That is open-book question answering.</p>
+    <p>In Session 1 you also ran the quiz closed book. In our test run, the model got 2 of 8 right without the documents, and 8 of 8 with them. And the wrong answers sounded just as sure as the right ones. It even called today's technique Retrieval-Augmented Learning. A confident wrong answer like this is called a hallucination.</p>
+    <p>So a small model on its own is not a reliable source of facts. The documents supply the facts. Retrieval is how a system chooses which documents to give the model for each question.</p>
+  </div>
+</section>
+
+<div class="part" id="part-step1"><h1>Step 1 · Retrieve, then read</h1></div>
+
+<section class="screen" id="rag" data-step="1">
+  <header><h2>Retrieval-augmented generation (RAG)</h2></header>
+  <div class="body">
+    <div class="flow">
+      <div class="box">question</div><span class="arr">→</span>
+      <div class="box">retriever<br><span class="muted">searches the documents</span></div><span class="arr">→</span>
+      <div class="box g">prompt:<br>question + top documents</div><span class="arr">→</span>
+      <div class="box">language<br>model</div><span class="arr">→</span>
+      <div class="box">answer</div>
+    </div>
+    <ul class="points">
+      <li>Step 1: find the documents most related to the question. Step 2: put them into the prompt, next to the question.</li>
+      <li>The model answers from the prompt <i>and</i> from what it learned in training</li>
+      <li>The facts only need to be in a document the retriever can find: a small model can answer about facts it never saw in training</li>
+    </ul>
+    <p class="src">Lewis et al., “Retrieval-augmented generation for knowledge-intensive NLP tasks,” NeurIPS 2020</p>
+  </div>
+  <div class="notes">
+    <p>This technique is called RAG. It stands for retrieval-augmented generation. The main paper is by Lewis and colleagues, from 2020.</p>
+    <p>It has two steps. Step one: a program called a retriever searches a collection of documents and finds the ones most related to the question. Step two: the text of those documents is put into the prompt, next to the question. The prompt is the only way to give the model anything. Then the model writes the answer.</p>
+    <p>The model uses the prompt, and it still uses what it learned in training. Retrieval adds facts to the prompt. It does not switch off what the model learned.</p>
+    <p>Why is this useful? The facts do not need to be inside the model. They only need to be in a document that the retriever can find. So a small model can answer questions about facts it never saw in training. The questions for today are how well the retriever finds the right document, and what this saves.</p>
+  </div>
+</section>
+
+<section class="screen" id="phases" data-step="1">
+  <header><h2>Where the documents come from</h2><p class="sub">The system builders choose the collection; the model never sees the search</p></header>
+  <div class="body">
+    <p class="label">1. Once, before any question</p>
+    <div class="flow" style="justify-content:flex-start">
+      <div class="box">collect<br>documents</div><span class="arr">→</span><div class="box">cut into<br>chunks</div><span class="arr">→</span><div class="box">embed<br>each chunk</div><span class="arr">→</span><div class="box g">store in<br>an index</div>
+    </div>
+    <p class="label">2. For every question</p>
+    <div class="flow" style="justify-content:flex-start">
+      <div class="box">embed the<br>question</div><span class="arr">→</span><div class="box g">search<br>the index</div><span class="arr">→</span><div class="box">paste the top chunks<br>into the prompt</div><span class="arr">→</span><div class="box">the model writes<br>the answer</div>
+    </div>
+    <ul class="points">
+      <li>The collection, the <b>knowledge base</b>: help-desk articles, contracts, regulations, …</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>A natural question is: how does the model know where to search? The answer is that the model does not search at all. Retrieval is a separate program that runs before the model. The people who build the system decide which documents it can search.</p>
+    <p>This happens in two phases. Phase one happens once, before any user asks anything. The builders collect the documents. For example, a company's help-desk articles, a law firm's contracts, or a university's regulations. This collection is called the knowledge base. Long documents are cut into smaller pieces, called chunks. Each chunk is turned into an embedding, a vector that represents its meaning. The embeddings are stored in an index, together with the text of each chunk.</p>
+    <p>Phase two happens every time a user asks a question. The question is turned into an embedding too. The index is searched for the chunks whose embeddings are closest to the question's. Those chunks are pasted into the prompt, above the question. Then the model reads the prompt and writes the answer.</p>
+    <p>The model never sees the search. From its side, it just receives a question with some text attached.</p>
+  </div>
+</section>
+
+<section class="screen" id="assistant" data-step="1">
+  <header><h2>The same idea in a chat assistant</h2><p class="sub">The question: “How much energy does one Gemini prompt use?”</p></header>
+  <div class="body cols wide-left">
+    <div class="col">
+      <div class="flow" style="flex-direction:column;align-items:stretch">
+        <div class="box" style="text-align:left">1. The model writes a search request: <span class="mono">search("Gemini prompt energy")</span></div>
+        <div class="box g" style="text-align:left">2. The program around the model runs a web search and copies text from the top pages</div>
+        <div class="box g" style="text-align:left">3. The prompt now holds: the company's instructions + your question + the page text</div>
+        <div class="box" style="text-align:left">4. The model writes the answer, with links to the pages it used</div>
+      </div>
+    </div>
+    <div class="col">
+      <ul class="points">
+        <li>The model only writes text; a search request is text in a special format</li>
+        <li>It was trained on examples where a question about a specific or recent fact is followed by a search request</li>
+        <li>An uploaded file works the same way: cut into chunks, embedded, searched</li>
+        <li>Real systems add: approximate search over millions of chunks, word and embedding search together, a second model that reorders the top results</li>
+      </ul>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Let's see the same idea in a chat assistant you know. Suppose you ask: how much energy does one Gemini prompt use? We saw the answer in Session 1, from Google's own measurement.</p>
+    <p>Step one. The model does not answer yet. It writes a search request, for example: Gemini prompt energy. Step two. The program around the model sends this request to a web search engine, and copies text from the top pages. Step three. That text is added to the prompt. Now the prompt holds the company's instructions, which you do not see, your question, and the text of the pages. Step four. The model reads this prompt and writes the answer, with links to the pages it used.</p>
+    <p>How does the model decide to search? The model can only write text. A search request is also text, in a special format that the program around it recognizes. During training, the model saw many examples where a question about a specific or recent fact was followed by a search request. So for a question like ours, the most likely thing to write first is a search request. For "write me a poem", it is the poem.</p>
+    <p>Uploaded files work the same way. A long contract is cut into chunks, the chunks are embedded, and the chunks closest to your question go into the prompt.</p>
+    <p>Real systems add a few things. With millions of chunks, comparing the question with every chunk is too slow, so the search is approximate: it checks only the most promising chunks, and can occasionally miss the best one. Many systems search by words and by embeddings together, and merge the results. And often a second, more careful model reorders the top twenty to fifty results, and only the best few go into the prompt.</p>
+  </div>
+</section>
+
+<div class="part" id="part-step2"><h1>Step 2 · Dense retrieval</h1></div>
+
+<section class="screen" id="howfind" data-step="2">
+  <header><h2>How a retriever finds documents</h2><p class="sub">The cosine similarity of Session 1, for whole texts</p></header>
+  <div class="body cols">
+    <div class="col">
+      <ol class="points">
+        <li>Turn every document into a vector, an embedding. Once, in advance.</li>
+        <li>Turn the question into a vector, with the same model</li>
+        <li>Compare the question's vector with each document's: <b>cosine similarity</b></li>
+        <li>Keep the <b>k</b> most similar documents. Only those go into the prompt.</li>
+      </ol>
+    </div>
+    <div class="col">
+      <p class="formula">cos(q, d) = <span class="frac"><span>q · d</span><span>|q| × |d|</span></span></p>
+      <ul class="points">
+        <li>q · d: multiply matching values, add them up</li>
+        <li>|q|: the length of the vector, √(sum of squares)</li>
+        <li>1: the same direction; 0: a right angle</li>
+      </ul>
+    </div>
+  </div>
+  <div class="notes">
+    <p>How does the retriever decide which documents are relevant? It uses embeddings, which we saw in Session 1. An embedding is a vector, a list of values, that represents the meaning of a text. Texts with similar meanings get similar vectors.</p>
+    <p>The retriever computes one embedding for each document. This is done once, in advance. For each question, it computes the question's embedding, with the same model. Then it compares the question's vector with each document's vector.</p>
+    <p>The comparison is cosine similarity, the measure we used for aunt, uncle and car in Session 1. Multiply the matching values and add them up: that is the dot product. Then divide by the lengths of the two vectors. A value of 1 means the two vectors point in the same direction. A value of 0 means they are at a right angle: unrelated.</p>
+    <p>The retriever keeps the k documents with the highest values. In today's notebook, k is 2. The next screen works one example out.</p>
+  </div>
+</section>
+
+<section class="screen" id="cosine" data-step="2">
+  <header><h2>Ranking documents by cosine similarity</h2><p class="sub">Notebook 03b's toy vectors; the question “what does it cost in electricity to get an answer”</p></header>
+  <div class="body">
+    <div class="board">
+      <svg viewBox="0 0 1000 520" role="img" aria-label="Question (4, 3). Energy (4, 2): (4·4 + 3·2) ÷ (5 × 4.47) = 22 ÷ 22.35 ≈ 0.98. Carbon (3, 4): 24 ÷ 25 = 0.96. Water (2.5, 3.5): 20.5 ÷ 21.5 ≈ 0.95. With k = 1 the model reads only doc_energy">
+<path d="M70 330 H 340.0" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0" data-t="0.4"/>
+<path d="M70 330 V 70.0" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0" data-t="0.4"/>
+<text x="116.0" y="352.0" font-size="15" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">1</text>
+<text x="52.0" y="285.0" font-size="15" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">1</text>
+<text x="166.0" y="352.0" font-size="15" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">2</text>
+<text x="52.0" y="235.0" font-size="15" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">2</text>
+<text x="216.0" y="352.0" font-size="15" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">3</text>
+<text x="52.0" y="185.0" font-size="15" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">3</text>
+<text x="266.0" y="352.0" font-size="15" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">4</text>
+<text x="52.0" y="135.0" font-size="15" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">4</text>
+<text x="316.0" y="352.0" font-size="15" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">5</text>
+<text x="52.0" y="85.0" font-size="15" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">5</text>
+<line x1="70.0" y1="330.0" x2="270.0" y2="230.0" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" data-s="2" data-d="0.0"/>
+<path d="M261.6 239.9 L270.0 230.0 L257.0 230.8" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.6" data-a="fade" data-t="0.2"/>
+<text x="278.0" y="248.0" font-size="20" style="fill:var(--blue)" data-s="2" data-d="0.5">energy (4, 2)</text>
+<line x1="70.0" y1="330.0" x2="220.0" y2="130.0" stroke="var(--muted)" stroke-width="3" stroke-linecap="round" data-s="2" data-d="0.3"/>
+<path d="M216.9 142.6 L220.0 130.0 L208.8 136.5" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.9" data-a="fade" data-t="0.2"/>
+<text x="200.0" y="116.0" font-size="20" style="fill:var(--muted)" data-s="2" data-d="0.8">carbon (3, 4)</text>
+<line x1="70.0" y1="330.0" x2="195.0" y2="155.0" stroke="var(--green)" stroke-width="3" stroke-linecap="round" data-s="2" data-d="0.6"/>
+<path d="M192.2 167.7 L195.0 155.0 L183.9 161.8" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="1.2" data-a="fade" data-t="0.2"/>
+<text x="35.0" y="165.0" font-size="20" style="fill:var(--green)" data-s="2" data-d="1.1">water (2.5, 3.5)</text>
+<line x1="70.0" y1="330.0" x2="270.0" y2="180.0" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" data-s="3" data-d="0"/>
+<path d="M263.5 191.2 L270.0 180.0 L257.4 183.1" fill="none" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="0.6" data-a="fade" data-t="0.2"/>
+<text x="280.0" y="172.0" font-size="21" style="fill:var(--orange)" data-s="3" data-d="0.6">question (4, 3)</text>
+<text y="40" font-size="24" style="fill:var(--muted)" data-s="4" data-d="0" data-line="H" data-x0="420">cos =</text>
+<g class="bfrac" data-line="H"><text class="num" y="27" font-size="20" style="fill:var(--muted)" data-s="4" data-d="0">q · d</text><line class="bar" y1="34" y2="34" stroke="currentColor" stroke-width="2" data-s="4" data-d="0"/><text class="den" y="54" font-size="20" style="fill:var(--muted)" data-s="4" data-d="0">|q| × |d|</text></g>
+<text y="100" font-size="24" style="fill:var(--blue)" data-s="5" data-d="0" data-line="E1" data-x0="420" id="e0">energy:</text>
+<text y="100" font-size="24" style="fill:currentColor" data-s="5" data-d="0.3" data-line="E1">4·4 + 3·2</text>
+<text y="100" font-size="24" style="fill:currentColor" data-s="6" data-d="0" data-line="E1">= 16 + 6 = 22</text>
+<text y="145" font-size="24" style="fill:currentColor" data-s="7" data-d="0" data-line="E2" data-at="e0">|q| = √(16 + 9) = √25 = 5</text>
+<text y="145" font-size="24" style="fill:currentColor" data-s="8" data-d="0" data-line="E2" data-gap="20">|d| = √(16 + 4) = √20 ≈ 4.47</text>
+<text y="190" font-size="24" style="fill:currentColor" data-s="9" data-d="0" data-line="E3" data-at="e0">22 ÷ (5 × 4.47)</text>
+<text y="190" font-size="24" style="fill:currentColor" data-s="10" data-d="0" data-line="E3">= 22 ÷ 22.35</text>
+<text y="190" font-size="24" style="fill:var(--blue)" data-s="11" data-d="0" data-line="E3">≈ 0.98</text>
+<text y="260" font-size="24" style="fill:var(--muted)" data-s="12" data-d="0" data-line="C1" data-x0="420">carbon:</text>
+<text y="260" font-size="24" style="fill:currentColor" data-s="12" data-d="0.3" data-line="C1">(4·3 + 3·4) ÷ (5 × 5)</text>
+<text y="260" font-size="24" style="fill:currentColor" data-s="13" data-d="0" data-line="C1">= 24 ÷ 25 = 0.96</text>
+<text y="330" font-size="24" style="fill:var(--green)" data-s="14" data-d="0" data-line="W1" data-x0="420">water:</text>
+<text y="330" font-size="24" style="fill:currentColor" data-s="14" data-d="0.3" data-line="W1">(4·2.5 + 3·3.5) ÷ (5 × 4.30)</text>
+<text y="330" font-size="24" style="fill:currentColor" data-s="15" data-d="0" data-line="W1">= 20.5 ÷ 21.5</text>
+<text y="330" font-size="24" style="fill:currentColor" data-s="16" data-d="0" data-line="W1">≈ 0.95</text>
+<text y="410" font-size="22" style="fill:var(--orange)" data-s="17" data-d="0" data-line="R" data-x0="420">ranking: energy 0.98 > carbon 0.96 > water 0.95</text>
+<text y="460" font-size="22" style="fill:var(--orange)" data-s="18" data-d="0" data-line="R2" data-x0="420">k = 1: the model reads only doc_energy</text>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Here is one example, worked out. Real embeddings have hundreds of dimensions. These have two, so we can draw them and do the arithmetic. They are the toy vectors of the Retrieval Playground notebook.</p>
+    <p>Each document's vector is the average of the vectors of the words we know. The question is "what does it cost in electricity to get an answer". The only word with a vector is electricity, so the question's vector is 4, 3.</p>
+    <p>First the energy document, vector 4, 2. The dot product: 4 times 4 plus 3 times 2. That is 16 plus 6, which is 22. The length of the question: the square root of 4 squared plus 3 squared, the square root of 25, which is 5. The length of the document: the square root of 4 squared plus 2 squared, the square root of 20, about 4.47. So the cosine is 22 divided by 5 times 4.47. That is 22 divided by 22.35, about 0.98.</p>
+    <p>The carbon document, vector 3, 4: 4 times 3 plus 3 times 4 is 24. Its length is 5. 24 divided by 25 is 0.96.</p>
+    <p>The water document, vector 2.5, 3.5: 4 times 2.5 plus 3 times 3.5 is 10 plus 10.5, which is 20.5. Its length is about 4.30. 20.5 divided by 21.5 is about 0.95.</p>
+    <p>The energy document is first. With k equal to 1, the model reads only that document. Notice how close the three values are: 0.98, 0.96, 0.95. In two dimensions, many vectors point in similar directions. Real embeddings have hundreds of dimensions, so they can separate topics much better.</p>
+  </div>
+</section>
+
+<section class="screen fill" id="dense-i" data-step="2">
+  <header><span class="kind">Interactive</span><h2>Move the question</h2></header>
+  <div class="body">
+    <div class="tabs" role="group" aria-label="Go to a section">
+      <a class="open" href="../artifacts/retrieval.html#dense" target="_blank" rel="noopener" style="align-self:center;margin-left:auto">Open the full page</a>
+    </div>
+    <iframe class="frame" title="Retrieval, step by step: dense retrieval" data-src="../artifacts/retrieval.html?embed=dense"></iframe>
+  </div>
+  <div class="notes">
+    <p>On this panel, the five toy documents are arrows. The black arrow is the question. The table ranks the documents by cosine similarity, and the top k are ticked.</p>
+    <p>Click a row of the table: the arithmetic below it changes to that document, and an orange arc shows the angle between the two arrows.</p>
+    <p>Now click anywhere on the plane to move the question. Move it up, toward the retrieval document, and watch the ranking change. Then press question A: its only known word is energy, so its vector is the energy document's vector, and the cosine is exactly 1.</p>
+    <p>Type a question with none of the six known words. The question gets no vector, and dense retrieval cannot rank anything. A real embedding model knows all words, so this cannot happen there.</p>
+  </div>
+</section>
+
+<div class="part" id="part-step3"><h1>Step 3 · Sparse retrieval</h1></div>
+
+<section class="screen" id="tfidf" data-step="3">
+  <header><h2>The older method: count shared words, weighted by rarity</h2><p class="sub">TF-IDF; an improved version, BM25, is still used in search engines</p></header>
+  <div class="body cols">
+    <div class="col">
+      <ul class="points">
+        <li>A word in every document does not help to choose one; a word in only one document points straight at it</li>
+        <li><b>tf</b>, term frequency: how many times the word is in <i>this</i> document</li>
+        <li><b>idf</b>, inverse document frequency: how rare the word is in <i>all</i> the documents</li>
+      </ul>
+    </div>
+    <div class="col">
+      <p class="formula">idf(word) = ln <span class="frac"><span>number of documents</span><span>documents that contain the word</span></span></p>
+      <p class="formula">tf-idf(word, doc) = tf(word, doc) × idf(word)</p>
+      <p class="muted">A document's score for a question: the sum of tf-idf over the question's words.</p>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Before embeddings, retrieval worked by counting words. The best-known method is called TF-IDF. It is still widely used, often in an improved version called BM25.</p>
+    <p>The idea: look at which words the question shares with each document. But not every shared word is equally useful. Imagine you must find one person in a room, with one clue. If half the room has brown hair, "brown hair" does not help much. If only one person has a pet parrot, "pet parrot" finds them at once. Words work the same way. The word "the" is in almost every document, so it does not help us choose. A word that is in only one document points straight to it.</p>
+    <p>The score has two parts. TF, term frequency, counts how many times the word appears in one document. IDF, inverse document frequency, measures how rare the word is in the whole collection: the natural logarithm of the number of documents, divided by the number of documents that contain the word.</p>
+    <p>If the word is in every document, the fraction is 1, and the logarithm of 1 is 0. So a word that is everywhere adds nothing. If the word is in only one document, the fraction is large, and the score is high. The two parts are multiplied, so a word scores high only if it is in the document and rare in the collection.</p>
+  </div>
+</section>
+
+<section class="screen" id="idf" data-step="3">
+  <header><h2>TF-IDF, worked out</h2><p class="sub">The five toy documents of Notebook 03b</p></header>
+  <div class="body">
+    <div class="board">
+      <svg viewBox="0 0 1000 560" role="img" aria-label="&#x27;model&#x27; is in 3 of 5 documents: idf = ln(5/3) = ln 1.67 ≈ 0.51. &#x27;energy&#x27; is in 1 of 5: idf = ln 5 ≈ 1.61. In doc_energy, tf = 1 for both: 1 × 0.51 = 0.51 and 1 × 1.61 = 1.61">
+<text y="36" font-size="19" style="fill:var(--muted)" data-s="1" data-d="0.0" data-line="D0" data-x0="20" data-gap="14">doc_carbon</text>
+<text y="36" font-size="19" style="fill:currentColor" data-s="1" data-d="0.0" data-line="D0" id="w0_0" data-gap="8">training</text>
+<text y="36" font-size="19" style="fill:currentColor" data-s="1" data-d="0.0" data-line="D0" id="w0_1" data-gap="8">a</text>
+<text y="36" font-size="19" style="fill:currentColor" data-s="1" data-d="0.0" data-line="D0" id="w0_2" data-gap="8">model</text>
+<text y="36" font-size="19" style="fill:currentColor" data-s="1" data-d="0.0" data-line="D0" id="w0_3" data-gap="8">produces</text>
+<text y="36" font-size="19" style="fill:currentColor" data-s="1" data-d="0.0" data-line="D0" id="w0_4" data-gap="8">carbon</text>
+<text y="36" font-size="19" style="fill:currentColor" data-s="1" data-d="0.0" data-line="D0" id="w0_5" data-gap="8">emissions</text>
+<text y="36" font-size="19" style="fill:currentColor" data-s="1" data-d="0.0" data-line="D0" id="w0_6" data-gap="8">measured</text>
+<text y="36" font-size="19" style="fill:currentColor" data-s="1" data-d="0.0" data-line="D0" id="w0_7" data-gap="8">once</text>
+<text y="74" font-size="19" style="fill:var(--muted)" data-s="1" data-d="0.08" data-line="D1" data-x0="20" data-gap="14">doc_energy</text>
+<text y="74" font-size="19" style="fill:currentColor" data-s="1" data-d="0.08" data-line="D1" id="w1_0" data-gap="8">running</text>
+<text y="74" font-size="19" style="fill:currentColor" data-s="1" data-d="0.08" data-line="D1" id="w1_1" data-gap="8">a</text>
+<text y="74" font-size="19" style="fill:currentColor" data-s="1" data-d="0.08" data-line="D1" id="w1_2" data-gap="8">model</text>
+<text y="74" font-size="19" style="fill:currentColor" data-s="1" data-d="0.08" data-line="D1" id="w1_3" data-gap="8">costs</text>
+<text y="74" font-size="19" style="fill:currentColor" data-s="1" data-d="0.08" data-line="D1" id="w1_4" data-gap="8">energy</text>
+<text y="74" font-size="19" style="fill:currentColor" data-s="1" data-d="0.08" data-line="D1" id="w1_5" data-gap="8">every</text>
+<text y="74" font-size="19" style="fill:currentColor" data-s="1" data-d="0.08" data-line="D1" id="w1_6" data-gap="8">single</text>
+<text y="74" font-size="19" style="fill:currentColor" data-s="1" data-d="0.08" data-line="D1" id="w1_7" data-gap="8">time</text>
+<text y="74" font-size="19" style="fill:currentColor" data-s="1" data-d="0.08" data-line="D1" id="w1_8" data-gap="8">it</text>
+<text y="74" font-size="19" style="fill:currentColor" data-s="1" data-d="0.08" data-line="D1" id="w1_9" data-gap="8">answers</text>
+<text y="74" font-size="19" style="fill:currentColor" data-s="1" data-d="0.08" data-line="D1" id="w1_10" data-gap="8">a</text>
+<text y="74" font-size="19" style="fill:currentColor" data-s="1" data-d="0.08" data-line="D1" id="w1_11" data-gap="8">query</text>
+<text y="112" font-size="19" style="fill:var(--muted)" data-s="1" data-d="0.16" data-line="D2" data-x0="20" data-gap="14">doc_water</text>
+<text y="112" font-size="19" style="fill:currentColor" data-s="1" data-d="0.16" data-line="D2" id="w2_0" data-gap="8">data</text>
+<text y="112" font-size="19" style="fill:currentColor" data-s="1" data-d="0.16" data-line="D2" id="w2_1" data-gap="8">centers</text>
+<text y="112" font-size="19" style="fill:currentColor" data-s="1" data-d="0.16" data-line="D2" id="w2_2" data-gap="8">consume</text>
+<text y="112" font-size="19" style="fill:currentColor" data-s="1" data-d="0.16" data-line="D2" id="w2_3" data-gap="8">water</text>
+<text y="112" font-size="19" style="fill:currentColor" data-s="1" data-d="0.16" data-line="D2" id="w2_4" data-gap="8">for</text>
+<text y="112" font-size="19" style="fill:currentColor" data-s="1" data-d="0.16" data-line="D2" id="w2_5" data-gap="8">cooling</text>
+<text y="112" font-size="19" style="fill:currentColor" data-s="1" data-d="0.16" data-line="D2" id="w2_6" data-gap="8">as</text>
+<text y="112" font-size="19" style="fill:currentColor" data-s="1" data-d="0.16" data-line="D2" id="w2_7" data-gap="8">well</text>
+<text y="112" font-size="19" style="fill:currentColor" data-s="1" data-d="0.16" data-line="D2" id="w2_8" data-gap="8">as</text>
+<text y="112" font-size="19" style="fill:currentColor" data-s="1" data-d="0.16" data-line="D2" id="w2_9" data-gap="8">electricity</text>
+<text y="150" font-size="19" style="fill:var(--muted)" data-s="1" data-d="0.24" data-line="D3" data-x0="20" data-gap="14">doc_retrieval</text>
+<text y="150" font-size="19" style="fill:currentColor" data-s="1" data-d="0.24" data-line="D3" id="w3_0" data-gap="8">a</text>
+<text y="150" font-size="19" style="fill:currentColor" data-s="1" data-d="0.24" data-line="D3" id="w3_1" data-gap="8">retriever</text>
+<text y="150" font-size="19" style="fill:currentColor" data-s="1" data-d="0.24" data-line="D3" id="w3_2" data-gap="8">finds</text>
+<text y="150" font-size="19" style="fill:currentColor" data-s="1" data-d="0.24" data-line="D3" id="w3_3" data-gap="8">relevant</text>
+<text y="150" font-size="19" style="fill:currentColor" data-s="1" data-d="0.24" data-line="D3" id="w3_4" data-gap="8">documents</text>
+<text y="150" font-size="19" style="fill:currentColor" data-s="1" data-d="0.24" data-line="D3" id="w3_5" data-gap="8">before</text>
+<text y="150" font-size="19" style="fill:currentColor" data-s="1" data-d="0.24" data-line="D3" id="w3_6" data-gap="8">the</text>
+<text y="150" font-size="19" style="fill:currentColor" data-s="1" data-d="0.24" data-line="D3" id="w3_7" data-gap="8">model</text>
+<text y="150" font-size="19" style="fill:currentColor" data-s="1" data-d="0.24" data-line="D3" id="w3_8" data-gap="8">reads</text>
+<text y="150" font-size="19" style="fill:currentColor" data-s="1" data-d="0.24" data-line="D3" id="w3_9" data-gap="8">them</text>
+<text y="188" font-size="19" style="fill:var(--muted)" data-s="1" data-d="0.32" data-line="D4" data-x0="20" data-gap="14">doc_quantize</text>
+<text y="188" font-size="19" style="fill:currentColor" data-s="1" data-d="0.32" data-line="D4" id="w4_0" data-gap="8">quantization</text>
+<text y="188" font-size="19" style="fill:currentColor" data-s="1" data-d="0.32" data-line="D4" id="w4_1" data-gap="8">stores</text>
+<text y="188" font-size="19" style="fill:currentColor" data-s="1" data-d="0.32" data-line="D4" id="w4_2" data-gap="8">numbers</text>
+<text y="188" font-size="19" style="fill:currentColor" data-s="1" data-d="0.32" data-line="D4" id="w4_3" data-gap="8">with</text>
+<text y="188" font-size="19" style="fill:currentColor" data-s="1" data-d="0.32" data-line="D4" id="w4_4" data-gap="8">fewer</text>
+<text y="188" font-size="19" style="fill:currentColor" data-s="1" data-d="0.32" data-line="D4" id="w4_5" data-gap="8">bits</text>
+<text y="188" font-size="19" style="fill:currentColor" data-s="1" data-d="0.32" data-line="D4" id="w4_6" data-gap="8">to</text>
+<text y="188" font-size="19" style="fill:currentColor" data-s="1" data-d="0.32" data-line="D4" id="w4_7" data-gap="8">save</text>
+<text y="188" font-size="19" style="fill:currentColor" data-s="1" data-d="0.32" data-line="D4" id="w4_8" data-gap="8">memory</text>
+<rect data-box="#w0_2" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="2" data-d="0.0" data-t="0.4"/>
+<rect data-box="#w1_2" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="2" data-d="0.3" data-t="0.4"/>
+<rect data-box="#w3_7" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="2" data-d="0.6" data-t="0.4"/>
+<text y="260" font-size="24" style="fill:var(--orange)" data-s="2" data-d="0.9" data-line="M" data-x0="20">“model” is in 3 of 5:</text>
+<text y="260" font-size="24" style="fill:currentColor" data-s="3" data-d="0" data-line="M">idf = ln</text>
+<g class="bfrac" data-line="M"><text class="num" y="244" font-size="24" style="fill:currentColor" data-s="3" data-d="0">5</text><line class="bar" y1="253" y2="253" stroke="currentColor" stroke-width="2" data-s="3" data-d="0"/><text class="den" y="277" font-size="24" style="fill:currentColor" data-s="3" data-d="0">3</text></g>
+<text y="260" font-size="24" style="fill:currentColor" data-s="4" data-d="0" data-line="M">= ln 1.67</text>
+<text y="260" font-size="24" style="fill:var(--orange)" data-s="5" data-d="0" data-line="M">≈ 0.51</text>
+<rect data-box="#w1_4" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--blue)" stroke-width="2.5" data-s="6" data-d="0" data-t="0.4"/>
+<text y="380" font-size="24" style="fill:var(--blue)" data-s="6" data-d="0.3" data-line="E" data-x0="20">“energy” is in 1 of 5:</text>
+<text y="380" font-size="24" style="fill:currentColor" data-s="7" data-d="0" data-line="E">idf = ln</text>
+<g class="bfrac" data-line="E"><text class="num" y="364" font-size="24" style="fill:currentColor" data-s="7" data-d="0">5</text><line class="bar" y1="373" y2="373" stroke="currentColor" stroke-width="2" data-s="7" data-d="0"/><text class="den" y="397" font-size="24" style="fill:currentColor" data-s="7" data-d="0">1</text></g>
+<text y="380" font-size="24" style="fill:currentColor" data-s="8" data-d="0" data-line="E">= ln 5</text>
+<text y="380" font-size="24" style="fill:var(--blue)" data-s="9" data-d="0" data-line="E">≈ 1.61</text>
+<text y="500" font-size="24" style="fill:var(--muted)" data-s="10" data-d="0" data-line="T" data-x0="20">in doc_energy, tf = 1 for both:</text>
+<text y="500" font-size="24" style="fill:var(--orange)" data-s="11" data-d="0" data-line="T" data-gap="26">1 × 0.51 = 0.51</text>
+<text y="500" font-size="24" style="fill:var(--blue)" data-s="12" data-d="0" data-line="T">1 × 1.61 = 1.61</text>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Let's compute it on the five toy documents of the Retrieval Playground.</p>
+    <p>The word "model" is in three of the five documents: carbon, energy and retrieval. Its idf is the natural logarithm of 5 divided by 3. 5 divided by 3 is 1.67, and its logarithm is about 0.51.</p>
+    <p>The word "energy" is in only one document. Its idf is the logarithm of 5 divided by 1, the logarithm of 5, about 1.61.</p>
+    <p>Now look inside the energy document. Each of the two words appears there once, so tf is 1 for both. For "model": 1 times 0.51 is 0.51. For "energy": 1 times 1.61 is 1.61.</p>
+    <p>Both words appear once. But "energy" counts about three times more, because it is rare in the collection, and "model" is common.</p>
+  </div>
+</section>
+
+<section class="screen" id="whylog" data-step="3">
+  <header><h2>Why the logarithm?</h2><p class="sub">An imagined news archive with N = 1,000,000 articles</p></header>
+  <div class="body cols">
+    <div class="col">
+      <table class="plain">
+        <thead><tr><th>The word is in</th><th>N ÷ that number</th><th>ln of it</th></tr></thead>
+        <tbody>
+          <tr><td>1 article</td><td class="num">1,000,000</td><td class="num">13.8</td></tr>
+          <tr><td>1,000 articles</td><td class="num">1,000</td><td class="num">6.9</td></tr>
+          <tr><td>every article</td><td class="num">1</td><td class="num">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col">
+      <ul class="points">
+        <li>Without the logarithm, the rarest word counts 1,000 times more than a word in 1,000 articles: one rare word, even a typo, would decide the ranking</li>
+        <li>With it: 13.8 against 6.9, twice as much</li>
+        <li>A word in every article adds 0</li>
+        <li>With 5 documents the ratio is at most 5: the logarithm matters in large collections</li>
+      </ul>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Why is there a logarithm in the formula? To see why, we need a large collection. So imagine one, a news archive with one million articles. These numbers are made up.</p>
+    <p>A word in only one article: the ratio is one million divided by one, a million. A word in a thousand articles: one million divided by a thousand, which is a thousand. A word in every article: the ratio is one.</p>
+    <p>If we used the ratio directly, the rarest word would count a thousand times more than a word in a thousand articles. A single rare word, even a typo, would decide which article comes first. The other words of the question would hardly matter.</p>
+    <p>Now the last column, with the logarithm. The rarest word gets 13.8. The word in a thousand articles gets 6.9. The rare word still counts more, but about twice as much. And a word in every article gets the logarithm of one, which is zero. So words like "the" add nothing.</p>
+    <p>In a small collection the logarithm makes little difference: with five documents, the ratio is never larger than five. It matters in large collections, which is where real search happens.</p>
+  </div>
+</section>
+
+<section class="screen" id="sparsedense" data-step="3">
+  <header><h2>Sparse and dense vectors</h2><p class="sub">The picture of Session 1, now for whole documents</p></header>
+  <div class="body cols">
+    <div class="col">
+      <p class="label">Sparse: one value per word of the vocabulary, mostly 0</p>
+      <div class="squares" style="grid-template-columns:repeat(12, auto)"><i style="background:var(--grid)"></i><i style="background:var(--grid)"></i><i style="background:var(--blue)"></i><i style="background:var(--grid)"></i><i style="background:var(--grid)"></i><i style="background:var(--grid)"></i><i style="background:var(--blue);opacity:0.5"></i><i style="background:var(--grid)"></i><i style="background:var(--grid)"></i><i style="background:var(--grid)"></i><i style="background:var(--grid)"></i><i style="background:var(--grid)"></i></div>
+      <ul class="points"><li>Finds exact word matches only</li><li>Needs only counting</li></ul>
+      <p class="label" style="margin-top:12px">Dense: a few hundred learned values, all filled in</p>
+      <div class="squares" style="grid-template-columns:repeat(12, auto)"><i style="background:var(--green);opacity:0.3"></i><i style="background:var(--green);opacity:0.8"></i><i style="background:var(--green);opacity:0.5"></i><i style="background:var(--green);opacity:1"></i><i style="background:var(--green);opacity:0.2"></i><i style="background:var(--green);opacity:0.7"></i><i style="background:var(--green);opacity:0.4"></i><i style="background:var(--green);opacity:0.9"></i><i style="background:var(--green);opacity:0.6"></i><i style="background:var(--green);opacity:0.5"></i><i style="background:var(--green);opacity:0.3"></i><i style="background:var(--green);opacity:0.8"></i></div>
+      <ul class="points"><li>Matches different words with the same meaning</li><li>Needs an embedding model to run</li></ul>
+    </div>
+    <div class="col">
+      <p class="label">The two questions of the notebook</p>
+      <table class="plain">
+        <thead><tr><th>question</th><th>words shared with doc_energy</th><th>finds doc_energy?</th></tr></thead>
+        <tbody>
+          <tr><td>A: how much energy does running a model use</td><td>energy, running, a, model</td><td>sparse ✓ · dense ✓</td></tr>
+          <tr><td>B: what does it cost in electricity to get an answer</td><td>it</td><td>sparse: a tie with two others · dense ✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Here are the two kinds of document vectors side by side.</p>
+    <p>A sparse vector has one value for every word of the vocabulary. Most values are zero, because a document uses only a few of all possible words. Sparse retrieval can only match words that are exactly the same.</p>
+    <p>A dense vector has a few hundred values, and all of them are filled in. An embedding model learned these values from a large amount of text. Dense retrieval can match a question and a document that use different words for the same idea. The price is that it needs an embedding model to run. Sparse retrieval needs only counting.</p>
+    <p>The table shows the two questions of the notebook. Question A shares four words with the energy document, and both methods find it. Question B asks the same thing in other words. It shares only the word "it" with the energy document. Sparse retrieval ends in a tie between three documents. Dense retrieval still finds it, because electricity is close to energy.</p>
+  </div>
+</section>
+
+<section class="screen fill" id="sparse-i" data-step="3">
+  <header><span class="kind">Interactive</span><h2>Shared words, weighted</h2></header>
+  <div class="body">
+    <div class="tabs" role="group" aria-label="Go to a section">
+      <a class="open" href="../artifacts/retrieval.html#sparse" target="_blank" rel="noopener" style="align-self:center;margin-left:auto">Open the full page</a>
+    </div>
+    <iframe class="frame" title="Retrieval, step by step: sparse retrieval" data-src="../artifacts/retrieval.html?embed=sparse"></iframe>
+  </div>
+  <div class="notes">
+    <p>On this panel, the words the question shares with each document are highlighted. A word in only one document has an orange frame.</p>
+    <p>The table gives two scores: the number of shared words, and TF-IDF. Click a document: the box on the right adds up its TF-IDF, word by word, with tf times the logarithm of 5 over the number of documents.</p>
+    <p>Press question B. The energy document shares only "it". And on five documents, "it" happens to be in only one, so it counts as a rare word: three documents tie. This shows why idf needs a large collection to be reliable.</p>
+  </div>
+</section>
+
+<section class="screen" id="tryRet" data-step="3">
+  <header><span class="kind">Try it · about 20 minutes</span><h2>Build both retrievers</h2></header>
+  <div class="body">
+    <div class="colab"><span>The Python here runs in your browser. The first Run loads Python, which takes a few seconds.</span><span>The same exercises as a notebook: <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session3/beginner/03b_retrieval_playground-beginner.ipynb" target="_blank" rel="noopener">beginner</a> · <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session3/advanced/03b_retrieval_playground-advanced.ipynb" target="_blank" rel="noopener">advanced</a> (Colab)</span></div>
+    <p style="max-width:80ch">Replace each <code>___</code> with code. Do the exercises in order: later ones use your earlier code.</p>
+
+    <div class="ex" data-ex="1">
+      <div class="prompt">
+        <h3>Exercise 1 · Rank by shared words</h3>
+        <p>Complete <code>word_overlap_score</code>: the number of distinct words that the question and the document share, ignoring capital letters. Question A should rank doc_energy first.</p>
+      </div>
+      <details class="hint"><summary>Hints</summary><ul>
+        <li><code>set(text.lower().split())</code> is the set of a text's words.</li>
+        <li><code>a &amp; b</code> is the intersection of two sets; <code>len</code> counts it.</li></ul></details>
+<script type="text/plain" class="start">
+TOY_DOCS = {
+    "doc_carbon": "training a model produces carbon emissions measured once",
+    "doc_energy": "running a model costs energy every single time it answers a query",
+    "doc_water": "data centers consume water for cooling as well as electricity",
+    "doc_retrieval": "a retriever finds relevant documents before the model reads them",
+    "doc_quantize": "quantization stores numbers with fewer bits to save memory",
+}
+
+
+def word_overlap_score(query, doc_text):
+    query_words = set(___.lower().split())
+    doc_words = set(___.lower().split())
+    return len(___ & ___)
+
+
+def rank_by_overlap(query):
+    scores = {name: word_overlap_score(query, text) for name, text in TOY_DOCS.items()}
+    return sorted(scores.items(), key=lambda x: -x[1])
+
+
+QUERY_A = "how much energy does running a model use"
+QUERY_B = "what does it cost in electricity to get an answer"
+for query in [QUERY_A, QUERY_B]:
+    print(query)
+    for name, score in rank_by_overlap(query):
+        print(f"   {name:14s} {score}")
+</script>
+<script type="text/plain" class="tests">
+def test_query_a():
+    """Question A shares 4 words with doc_energy"""
+    assert word_overlap_score(QUERY_A, TOY_DOCS["doc_energy"]) == 4, word_overlap_score(QUERY_A, TOY_DOCS["doc_energy"])
+
+
+def test_first():
+    """Question A ranks doc_energy first"""
+    assert rank_by_overlap(QUERY_A)[0][0] == "doc_energy"
+
+
+def test_distinct():
+    """Each shared word counts once, however often it repeats"""
+    assert word_overlap_score("a a a model", "a model and a model") == 2, "use sets, so 'a' counts once"
+
+
+def test_case():
+    """Capital letters do not matter"""
+    assert word_overlap_score("Energy", "energy costs") == 1, "lower-case both texts"
+
+
+def test_query_b():
+    """Question B shares only 'it' with doc_energy"""
+    assert word_overlap_score(QUERY_B, TOY_DOCS["doc_energy"]) == 1
+</script>
+<script type="text/plain" class="solution">
+TOY_DOCS = {
+    "doc_carbon": "training a model produces carbon emissions measured once",
+    "doc_energy": "running a model costs energy every single time it answers a query",
+    "doc_water": "data centers consume water for cooling as well as electricity",
+    "doc_retrieval": "a retriever finds relevant documents before the model reads them",
+    "doc_quantize": "quantization stores numbers with fewer bits to save memory",
+}
+
+
+def word_overlap_score(query, doc_text):
+    query_words = set(query.lower().split())
+    doc_words = set(doc_text.lower().split())
+    return len(query_words & doc_words)
+
+
+def rank_by_overlap(query):
+    scores = {name: word_overlap_score(query, text) for name, text in TOY_DOCS.items()}
+    return sorted(scores.items(), key=lambda x: -x[1])
+
+
+QUERY_A = "how much energy does running a model use"
+QUERY_B = "what does it cost in electricity to get an answer"
+for query in [QUERY_A, QUERY_B]:
+    print(query)
+    for name, score in rank_by_overlap(query):
+        print(f"   {name:14s} {score}")
+</script>
+    </div>
+
+    <div class="ex" data-ex="2">
+      <div class="prompt">
+        <h3>Exercise 2 · TF-IDF</h3>
+        <p>Complete <code>idf</code> and <code>tf</code>, then <code>tfidf_score</code>: the sum of tf × idf over the distinct words of the question that are in the collection. The cell prints the board's numbers, 0.51 and 1.61, then ranks the documents for both questions.</p>
+      </div>
+      <details class="hint"><summary>Hints</summary><ul>
+        <li><code>math.log</code> is the natural logarithm.</li>
+        <li>idf divides the number of documents by the number that contain the word.</li>
+        <li><code>list.count(word)</code> counts how often the word is in a list.</li>
+        <li>A word in no document would divide by 0: skip it.</li></ul></details>
+<script type="text/plain" class="start">
+import math
+
+
+def idf(word, docs):
+    doc_count = sum(1 for text in docs.values() if word in text.lower().split())
+    return math.log(___ / ___)
+
+
+def tf(word, doc_text):
+    return doc_text.lower().split().___(word)
+
+
+def tfidf_score(query, doc_text, docs):
+    score = 0.0
+    for word in set(query.lower().split()):
+        if any(word in text.lower().split() for text in docs.values()):
+            score += ___ * ___
+    return score
+
+
+print(f"idf('model')  = {idf('model', TOY_DOCS):.2f}")
+print(f"idf('energy') = {idf('energy', TOY_DOCS):.2f}")
+for query in [QUERY_A, QUERY_B]:
+    print(query)
+    ranked = sorted(TOY_DOCS, key=lambda name: -tfidf_score(query, TOY_DOCS[name], TOY_DOCS))
+    for name in ranked:
+        print(f"   {name:14s} {tfidf_score(query, TOY_DOCS[name], TOY_DOCS):.2f}")
+</script>
+<script type="text/plain" class="tests">
+def test_idf_model():
+    """'model' is in 3 of 5 documents: ln(5/3) = 0.51"""
+    assert abs(idf("model", TOY_DOCS) - math.log(5 / 3)) < 1e-9, f"got {idf('model', TOY_DOCS):.4f}"
+
+
+def test_idf_energy():
+    """'energy' is in 1 of 5 documents: ln 5 = 1.61"""
+    assert abs(idf("energy", TOY_DOCS) - math.log(5)) < 1e-9, f"got {idf('energy', TOY_DOCS):.4f}"
+
+
+def test_tf():
+    """tf counts every occurrence"""
+    assert tf("a", TOY_DOCS["doc_energy"]) == 2, "'a' is twice in doc_energy: a model, a query"
+
+
+def test_score_a():
+    """Question A gives doc_energy 1.61 + 1.61 + 2 × 0.51 + 0.51 = 4.75"""
+    s = tfidf_score(QUERY_A, TOY_DOCS["doc_energy"], TOY_DOCS)
+    assert abs(s - 4.751) < 0.01, f"got {s:.3f}; sum tf(word) × idf(word) over the question's words"
+
+
+def test_unknown_word():
+    """A word in no document adds nothing"""
+    assert tfidf_score("zebra", TOY_DOCS["doc_energy"], TOY_DOCS) == 0
+</script>
+<script type="text/plain" class="solution">
+import math
+
+
+def idf(word, docs):
+    doc_count = sum(1 for text in docs.values() if word in text.lower().split())
+    return math.log(len(docs) / doc_count)
+
+
+def tf(word, doc_text):
+    return doc_text.lower().split().count(word)
+
+
+def tfidf_score(query, doc_text, docs):
+    score = 0.0
+    for word in set(query.lower().split()):
+        if any(word in text.lower().split() for text in docs.values()):
+            score += tf(word, doc_text) * idf(word, docs)
+    return score
+
+
+print(f"idf('model')  = {idf('model', TOY_DOCS):.2f}")
+print(f"idf('energy') = {idf('energy', TOY_DOCS):.2f}")
+for query in [QUERY_A, QUERY_B]:
+    print(query)
+    ranked = sorted(TOY_DOCS, key=lambda name: -tfidf_score(query, TOY_DOCS[name], TOY_DOCS))
+    for name in ranked:
+        print(f"   {name:14s} {tfidf_score(query, TOY_DOCS[name], TOY_DOCS):.2f}")
+</script>
+    </div>
+
+    <div class="ex" data-ex="3">
+      <div class="prompt">
+        <h3>Exercise 3 · Dense retrieval with toy vectors</h3>
+        <p>Complete <code>cosine_sim</code> and <code>text_vector</code> (the average of the vectors of the known words), then rank the documents for question B. doc_energy should come first, with 0.984.</p>
+      </div>
+      <details class="hint"><summary>Hints</summary><ul>
+        <li><code>np.dot(a, b)</code> is the dot product; <code>np.linalg.norm(a)</code> the length.</li>
+        <li><code>np.mean(list_of_vectors, axis=0)</code> averages vectors value by value.</li></ul></details>
+<script type="text/plain" class="start">
+import numpy as np
+
+TOY_WORD_VECTORS = {
+    "energy":      np.array([4, 2]),
+    "electricity": np.array([4, 3]),
+    "carbon":      np.array([3, 4]),
+    "water":       np.array([1, 4]),
+    "retriever":   np.array([0, 5]),
+    "memory":      np.array([2, -3]),
+}
+
+
+def cosine_sim(v1, v2):
+    return float(np.dot(___, ___) / (np.linalg.norm(___) * np.linalg.norm(___)))
+
+
+def text_vector(text):
+    words = [w for w in text.lower().split() if w in TOY_WORD_VECTORS]
+    return np.mean([TOY_WORD_VECTORS[w] for w in ___], axis=___)
+
+
+TOY_DOC_VECTORS = {name: text_vector(text) for name, text in TOY_DOCS.items()}
+q = text_vector(QUERY_B)
+print("question B vector:", q)
+for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[1])):
+    print(f"   {name:14s} {str(vec):12s} cosine {cosine_sim(q, vec):.3f}")
+</script>
+<script type="text/plain" class="tests">
+def test_cosine_same():
+    """A vector has cosine 1 with itself"""
+    assert abs(cosine_sim(np.array([4, 3]), np.array([4, 3])) - 1) < 1e-9
+
+
+def test_cosine_right_angle():
+    """Vectors at a right angle have cosine 0"""
+    assert abs(cosine_sim(np.array([1, 0]), np.array([0, 5]))) < 1e-9
+
+
+def test_cosine_length():
+    """The length of a vector does not change the cosine"""
+    assert abs(cosine_sim(np.array([4, 3]), np.array([8, 6])) - 1) < 1e-9, "divide by both lengths"
+
+
+def test_text_vector():
+    """doc_water averages water (1, 4) and electricity (4, 3)"""
+    assert np.allclose(TOY_DOC_VECTORS["doc_water"], [2.5, 3.5]), TOY_DOC_VECTORS["doc_water"]
+
+
+def test_ranking():
+    """Question B ranks doc_energy first, with 0.984"""
+    best = max(TOY_DOC_VECTORS, key=lambda n: cosine_sim(q, TOY_DOC_VECTORS[n]))
+    assert best == "doc_energy", best
+    assert abs(cosine_sim(q, TOY_DOC_VECTORS["doc_energy"]) - 0.984) < 0.001
+</script>
+<script type="text/plain" class="solution">
+import numpy as np
+
+TOY_WORD_VECTORS = {
+    "energy":      np.array([4, 2]),
+    "electricity": np.array([4, 3]),
+    "carbon":      np.array([3, 4]),
+    "water":       np.array([1, 4]),
+    "retriever":   np.array([0, 5]),
+    "memory":      np.array([2, -3]),
+}
+
+
+def cosine_sim(v1, v2):
+    return float(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
+
+
+def text_vector(text):
+    words = [w for w in text.lower().split() if w in TOY_WORD_VECTORS]
+    return np.mean([TOY_WORD_VECTORS[w] for w in words], axis=0)
+
+
+TOY_DOC_VECTORS = {name: text_vector(text) for name, text in TOY_DOCS.items()}
+q = text_vector(QUERY_B)
+print("question B vector:", q)
+for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[1])):
+    print(f"   {name:14s} {str(vec):12s} cosine {cosine_sim(q, vec):.3f}")
+</script>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Now you build both retrievers, on the five toy documents.</p>
+    <p>Exercise 1 is the crudest retriever: count the words the question shares with each document. Question A finds the energy document. Look at what question B finds.</p>
+    <p>Exercise 2 adds TF-IDF. Complete idf and tf, and the score: the sum of tf times idf over the question's words. The cell prints the numbers from the board, 0.51 and 1.61.</p>
+    <p>Exercise 3 is dense retrieval with the toy vectors. Complete the cosine similarity and the text vector, the average of the known words' vectors. Question B now finds the energy document, with 0.984.</p>
+  </div>
+</section>
+
+<section class="screen fill" id="quiz-i" data-step="3">
+  <header><span class="kind">Interactive</span><h2>Both retrievers on the course quiz</h2></header>
+  <div class="body">
+    <div class="tabs" role="group" aria-label="Go to a section">
+      <a class="open" href="../artifacts/retrieval.html#quiz" target="_blank" rel="noopener" style="align-self:center;margin-left:auto">Open the full page</a>
+    </div>
+    <iframe class="frame" title="Retrieval, step by step: the course quiz" data-src="../artifacts/retrieval.html?embed=quiz"></iframe>
+  </div>
+  <div class="notes">
+    <p>Now the real thing: the 26 documents and 26 questions of today's notebook, with the notebook's own models. Each bar is one document's similarity to the question. The green bar is the document that holds the answer. The dark bars are the top k: the only documents the model will read.</p>
+    <p>The panel opens on the question: what does the acronym PUE stand for? With the dense retriever, the right document is ranked 16th. The model will not see it. An acronym is hard for an embedding model: PUE is just three letters to it. Now press sparse, TF-IDF. The word PUE is in one document only, so TF-IDF finds it at once.</p>
+    <p>Look at the line above the chart: with k equal to 2, the dense retriever finds the right document for 23 of the 26 questions, and TF-IDF for all 26. On this small, clean collection, counting words works very well.</p>
+    <p>On the right: how many tokens the model reads with all 26 documents, and with the top k. And the number of pairs that attention compares, which grows with the square of the tokens. Change k and watch both.</p>
+  </div>
+</section>
+
+<div class="part" id="part-step4"><h1>Step 4 · What retrieval saves</h1></div>
+
+<section class="screen" id="payoff" data-step="4">
+  <header><h2>Fewer tokens to read</h2><p class="sub">Today's 26 documents, counted with Qwen2.5's tokenizer; top 2: the average over the 26 questions</p></header>
+  <div class="body cols wide-left">
+    <div class="col">
+      <div class="board">
+      <svg viewBox="0 0 620 400" role="img" aria-label="All 26 documents: 4,031 tokens; top 2 on average 310; 4,031 ÷ 310 ≈ 13 times fewer tokens. Pairs: 4,031² ≈ 16.2 million; 310² = 96,100; 16.2 million ÷ 96,100 ≈ 169 times fewer pairs">
+<text y="50" font-size="25" style="fill:var(--muted)" data-s="1" data-d="0" data-line="A" data-x0="20" id="a0">all 26 documents:</text>
+<text y="50" font-size="25" style="fill:currentColor" data-s="1" data-d="0.3" data-line="A">4,031 tokens</text>
+<text y="100" font-size="25" style="fill:var(--muted)" data-s="2" data-d="0" data-line="B" data-x0="20">top 2, on average:</text>
+<text y="100" font-size="25" style="fill:var(--blue)" data-s="2" data-d="0.3" data-line="B">310 tokens</text>
+<text y="165" font-size="25" style="fill:currentColor" data-s="3" data-d="0" data-line="C" data-x0="20">4,031 ÷ 310</text>
+<text y="165" font-size="25" style="fill:var(--blue)" data-s="4" data-d="0" data-line="C">≈ 13 times fewer tokens</text>
+<text y="245" font-size="25" style="fill:var(--muted)" data-s="5" data-d="0" data-line="P1" data-x0="20">pairs:</text>
+<text y="245" font-size="25" style="fill:currentColor" data-s="5" data-d="0.3" data-line="P1">4,031<tspan dy="-11" font-size="0.68em">2</tspan><tspan dy="11">​</tspan> ≈ 16.2 million</text>
+<text y="295" font-size="25" style="fill:currentColor" data-s="6" data-d="0" data-line="P2" data-x0="95">310<tspan dy="-11" font-size="0.68em">2</tspan><tspan dy="11">​</tspan> = 96,100</text>
+<text y="360" font-size="25" style="fill:currentColor" data-s="7" data-d="0" data-line="P3" data-x0="20">16.2 million ÷ 96,100</text>
+<text y="360" font-size="25" style="fill:var(--orange)" data-s="8" data-d="0" data-line="P3">≈ 169 times fewer pairs</text>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
+    </div>
+    </div>
+    <div class="col">
+      <ul class="points">
+        <li>Attention compares every token with every token: twice the tokens, four times the pairs (Session 1)</li>
+        <li>The rest of the model grows in step with the tokens</li>
+        <li>Writing the answer, one token at a time, costs the same either way</li>
+        <li>So expect an energy saving smaller than the token saving: the notebook measures it</li>
+      </ul>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Why does reading fewer tokens save energy? Recall attention from Session 1. Every token is compared with every other token. Twice the tokens means four times the pairs.</p>
+    <p>The board works it out for today's collection. All 26 documents together are 4,031 tokens. The two documents the retriever picks are, on average over the 26 questions, about 310 tokens. 4,031 divided by 310 is about 13: thirteen times fewer tokens.</p>
+    <p>The pairs: 4,031 squared is about 16.2 million. 310 squared is 96,100. 16.2 million divided by 96,100 is about 169. So attention compares about 169 times fewer pairs.</p>
+    <p>But attention is only part of the work. Other parts of the model do an amount of work that grows in step with the number of tokens, not with the square. And writing the answer, one token at a time, costs the same in both cases. So the energy saving will be smaller than the token saving. You will measure how much smaller this afternoon.</p>
+  </div>
+</section>
+
+<section class="screen" id="chunks" data-step="4">
+  <header><h2>Long documents must be split</h2><p class="sub">The embedding model reads at most 128 tokens</p></header>
+  <div class="body">
+    <iframe class="frame" style="height:58vh" title="Retrieval, step by step: the embedding model's window" data-src="../artifacts/retrieval.html?embed=window"></iframe>
+    <ul class="points">
+      <li>The rest of a document is cut off before its vector is computed: 23 of our 26 documents are longer than 128 tokens</li>
+      <li>Real systems split long documents into <b>chunks</b>, embed each chunk, and retrieve chunks; the chunk size is a design decision</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>One practical detail matters today. An embedding model can only read a limited number of tokens. Ours, MiniLM, reads at most 128. If a document is longer, the rest is cut off before the embedding is computed. So the embedding represents only the beginning of the document.</p>
+    <p>The chart shows our 26 documents. The blue part of each bar is what MiniLM reads. The hatched red part is never seen. 23 of the 26 documents are longer than 128 tokens. For one of them, the answer to its quiz question is in the hatched part. You will see the retriever miss that question this afternoon.</p>
+    <p>Real systems solve this with chunking. They split each long document into smaller pieces, called chunks, embed each chunk, and retrieve chunks. Choosing the chunk size is a design decision of its own.</p>
+  </div>
+</section>
+
+<section class="screen" id="evidence" data-step="4">
+  <header><h2>Reading everything, or retrieving?</h2><p class="sub">Li et al. (2024): GPT-4o, GPT-3.5-Turbo and Gemini-1.5-Pro on long-document question answering</p></header>
+  <div class="body cols">
+    <div class="col">
+      <table class="plain">
+        <thead><tr><th></th><th>long context</th><th>RAG</th></tr></thead>
+        <tbody>
+          <tr><td>the prompt holds</td><td>the whole source text: on average 7,000 words (LongBench) or 100,000 tokens (∞Bench)</td><td>the top 5 chunks of 300 words: 5 × 300 = 1,500 words</td></tr>
+          <tr><td>average quality</td><td>higher, for all three models</td><td>lower</td></tr>
+          <tr><td>the same answer</td><td colspan="2">for 63% of the questions</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col">
+      <p class="label">Self-Route: RAG first; the model says if the chunks are enough; if not, long context</p>
+      <table class="plain">
+        <thead><tr><th>model</th><th>cost compared with long context</th></tr></thead>
+        <tbody>
+          <tr><td>Gemini-1.5-Pro</td><td class="num">−65%</td></tr>
+          <tr><td>GPT-4o</td><td class="num">−39%</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">with quality close to long context</p>
+    </div>
+  </div>
+  <p class="src">Li, Li, Zhang, Mei &amp; Bendersky, “Retrieval augmented generation or long-context LLMs? A comprehensive study and hybrid approach,” EMNLP 2024 Industry Track</p>
+  <div class="notes">
+    <p>Now some published evidence. A 2024 study from Google DeepMind and the University of Michigan compared the two approaches on three strong models: GPT-4o, GPT-3.5-Turbo and Gemini-1.5-Pro. Each question is about one long source text, for example a whole book or a long report.</p>
+    <p>Long context puts the whole source text into the prompt. In their two benchmarks, that is on average 7,000 words in one, and 100,000 tokens in the other. RAG cuts the text into chunks of 300 words and puts only the 5 most relevant chunks into the prompt. 5 times 300 is 1,500 words.</p>
+    <p>For all three models, long context gave better answers on average. So retrieval can lose some quality. But for 63 percent of the questions, the two approaches gave exactly the same answer. For those questions, reading everything bought nothing.</p>
+    <p>The authors used this to build a combined method, called Self-Route. The model first tries RAG, and also says whether the retrieved chunks are enough to answer. If yes, the RAG answer is used. If no, the question goes to long context. With Gemini-1.5-Pro, this cut the cost by 65 percent; with GPT-4o, by 39 percent. In both cases, the quality stayed close to long context.</p>
+    <p>The lesson: use the cheap method when it is enough, and the expensive one only when needed.</p>
+  </div>
+</section>
+
+<div class="part" id="part-step5"><h1>Step 5 · What can go wrong</h1></div>
+
+<section class="screen" id="misses" data-step="5">
+  <header><h2>The retriever can miss</h2><p class="sub">Then the answer is not in the prompt at all</p></header>
+  <div class="body cols">
+    <div class="col">
+      <ul class="points">
+        <li>The baseline read every document: the right one was always in the prompt</li>
+        <li>Now a wrong answer has two possible causes: the retriever, or the model</li>
+        <li><b>Retrieval accuracy</b>: how often the right document is in the top k</li>
+        <li><b>Answer accuracy</b>: how often the final answer is right</li>
+      </ul>
+    </div>
+    <div class="col">
+      <p class="label">Today's quiz, top 2, computed with the notebook's models</p>
+      <table class="plain">
+        <thead><tr><th>retriever</th><th>right document found</th></tr></thead>
+        <tbody>
+          <tr><td>dense (MiniLM)</td><td class="num">23 of 26</td></tr>
+          <tr><td>sparse (TF-IDF)</td><td class="num">26 of 26</td></tr>
+        </tbody>
+      </table>
+      <table class="plain" style="margin-top:10px">
+        <thead><tr><th>dense miss</th><th>why</th></tr></thead>
+        <tbody>
+          <tr><td>What does the acronym PUE stand for?</td><td>an acronym: three letters to the embedding model</td></tr>
+          <tr><td>the training-emissions question</td><td>the answer is past the 128-token window</td></tr>
+          <tr><td>the RAG question</td><td>a second document about RAG ranks higher</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Retrieval adds a new way to fail. The baseline read every document, so the document with the answer was always in the prompt. A retriever can choose the wrong documents. Then the answer is not in the prompt at all. The model may say that the documents do not contain the answer. Or it may answer from a wrong document, and sound sure about it.</p>
+    <p>So when an answer is wrong today, there are two possible causes: the retriever fetched the wrong documents, or the model misread the right ones. The notebook measures the two separately. Retrieval accuracy says how often the right document was in the top k. Answer accuracy says how often the final answer was right.</p>
+    <p>The table shows retrieval accuracy on today's quiz, with k equal to 2. We computed it with the notebook's own models. The dense retriever finds the right document for 23 of the 26 questions. TF-IDF finds it for all 26.</p>
+    <p>The dense retriever misses three. The PUE question: an acronym is hard for an embedding model. The question about training emissions: its answer is past the 128-token window, as we saw. And a question about RAG: there are two documents about RAG, and the other one ranks higher. On a small collection of short, clean documents on clearly different topics, counting words works very well. Real collections are larger and messier.</p>
+  </div>
+</section>
+
+<section class="screen" id="levers" data-step="5">
+  <header><h2>Two levers, measured separately</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <table class="plain">
+        <thead><tr><th></th><th>Session 2: quantization</th><th>Session 3: retrieval</th></tr></thead>
+        <tbody>
+          <tr><td>changes</td><td>bits per number</td><td>tokens to read</td></tr>
+          <tr><td>keeps</td><td>the text</td><td>the precision</td></tr>
+          <tr><td>new risk</td><td>rounding error</td><td>the retriever misses</td></tr>
+        </tbody>
+      </table>
+      <ul class="points"><li>Independent: a system can use both. Notebook 03c combines them.</li></ul>
+    </div>
+    <div class="col">
+      <div class="activity"><h3>Discussion · 10 minutes</h3><div>
+        <ul class="points">
+          <li>When would you give the model everything, on purpose?</li>
+          <li>When would you trust the retriever's top document enough to show the model nothing else?</li>
+          <li>Our 26 documents are short and each is about one topic. What goes wrong first with a large, messy collection?</li>
+        </ul>
+      </div></div>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Keep the two sessions apart. In Session 2 we changed precision: the model read the same text, but its numbers used fewer bits. Today we change how much text the model reads, and the precision stays the same as in the baseline. Each has its own risk: rounding error for quantization, a missed document for retrieval.</p>
+    <p>The two changes are independent. A real system can use a quantized model and retrieval at the same time. Notebook 3c combines them. Today we change only one thing at a time, so that we can measure the effect of each.</p>
+    <p>Now a short discussion, about ten minutes. First: when would you give the model everything, on purpose? Think about the type of task, the budget, and how costly a wrong answer is. Second: when would you trust the retriever's top document enough to show the model nothing else? Third: our documents are short, and each is about one topic. Real collections have duplicates, contradictions and very long documents. What goes wrong first? There is no single right answer. Collect the ideas from the room.</p>
+  </div>
+</section>
+
+<div class="part" id="part-step6"><h1>Step 6 · Retrieval for translation</h1></div>
+
+<section class="screen" id="knnmt" data-step="6">
+  <header><h2>Retrieval works for translation too</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <p class="label">kNN-MT: a lookup at every word</p>
+      <div class="flow" style="justify-content:flex-start"><div class="box">translation<br>model</div><span class="arr">+</span><div class="box g">datastore of earlier<br>translations</div></div>
+      <ul class="points">
+        <li>At each word it writes, it looks up the most similar contexts in the datastore</li>
+        <li>It combines their next word with its own prediction</li>
+      </ul>
+      <p class="src">Khandelwal, Fan, Jurafsky, Zettlemoyer &amp; Lewis, “Nearest neighbor machine translation,” ICLR 2021</p>
+    </div>
+    <div class="col">
+      <p class="label">Ours: a small translation memory, one lookup</p>
+      <table class="plain">
+        <thead><tr><th>Speechwriter sentence in the memory</th><th>cosine</th></tr></thead>
+        <tbody>
+          <tr class="now"><td>O meu curmán Fernando aguantaba o trebón…</td><td class="num">0.40</td></tr>
+          <tr><td>Xuro que fun capaz de ler o pensamento…</td><td class="num">0.33</td></tr>
+          <tr><td>Estou rodeado de merda, carallo! …</td><td class="num">0.32</td></tr>
+          <tr><td>Pero que dúas horas nin que merda! …</td><td class="num">0.29</td></tr>
+          <tr><td>Á noitiña, xa máis calmo, pagou os cubatas.</td><td class="num">0.25</td></tr>
+          <tr><td>Un paso máis atrás, o alcalde suaba puro medo.</td><td class="num">0.18</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">Similarity to our passage, with MiniLM. The top sentence and its English translation go into the prompt as an example.</p>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Retrieval is also used in machine translation. One method is called kNN-MT. kNN means k nearest neighbors. It starts with a translation model that is already trained, and adds a large datastore built from earlier translations. Each time the model writes a word, it searches the datastore for the most similar situations, looks at which word came next in them, and combines that word with its own prediction. It is the same idea as RAG, but it looks things up at every word, not once per question.</p>
+    <p>Real kNN-MT needs millions of entries and a lookup at every word. That is too big for a Colab session. We do a small version of the same idea, called a translation memory. Our memory has six Galician sentences from Speechwriter, each with an English translation.</p>
+    <p>We compute the embedding of our Galician passage, the one with "unha tía miña", and compare it with the six sentences. The table shows the cosine similarities. The most similar is the sentence about the cousin Fernando, with 0.40. That sentence and its translation go into the prompt as an example. Then the model translates our passage.</p>
+    <p>We compare the translations with and without the example, with the four metrics from the earlier sessions: BLEU, BERTScore, Qwen as a judge, and ChatGPT as a judge.</p>
+  </div>
+</section>
+
+<div class="part" id="part-turn"><h1>Your turn</h1></div>
+
+<section class="screen" id="pieces" data-step="0">
+  <header><h2>The same pieces in our notebook</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <table class="plain">
+        <thead><tr><th>In a real system</th><th>In Notebook 3</th></tr></thead>
+        <tbody>
+          <tr><td>knowledge base</td><td><span class="mono">CORPUS</span>: 26 documents, Session 1's eight plus 18 new</td></tr>
+          <tr><td>embedding model</td><td>paraphrase-multilingual-MiniLM-L12-v2</td></tr>
+          <tr><td>index</td><td><span class="mono">doc_embeddings</span>, computed once</td></tr>
+          <tr><td>search</td><td><span class="mono">retrieve()</span>: cosine similarity, keep the top 2</td></tr>
+          <tr><td>augmented prompt</td><td><span class="mono">build_prompt()</span>: the documents above the question</td></tr>
+          <tr><td>language model</td><td>Qwen2.5-1.5B-Instruct, 16 bits, as in Session 1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col">
+      <p class="label">The quiz, three times: 26 questions each</p>
+      <div class="flow" style="justify-content:flex-start">
+        <div class="box">closed book<br><span class="muted">no documents</span></div>
+        <div class="box">full context<br><span class="muted">all 26 documents</span></div>
+        <div class="box g">retrieval<br><span class="muted">the top 2</span></div>
+      </div>
+      <ul class="points">
+        <li>The prompt says: answer only from the documents. An instruction, which the model may or may not follow.</li>
+        <li>Earlier rows had 8 questions, so the notebook compares cost per question</li>
+      </ul>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Before the notebook, here is how its parts match a real system.</p>
+    <p>The knowledge base is the variable CORPUS. It holds 26 documents: the eight from Session 1, plus 18 new ones. The embedding model is MiniLM, the small multilingual model from the Session 1 embeddings notebook. The index is the matrix doc_embeddings, computed once at the start. The search is the function retrieve: it computes the cosine similarity between the question and every document, and keeps the top two. The augmented prompt is built by build_prompt, which pastes the documents above the question. The language model is the same Qwen model as in Session 1, in 16 bits.</p>
+    <p>The same model answers the quiz three times. First closed book, with no documents: what the model knows on its own. Second with all 26 documents: the baseline method, on the bigger collection. Third with the two retrieved documents.</p>
+    <p>One difference from a chat assistant: our prompt tells the model to answer only from the documents. This is an instruction in the prompt. The model may or may not follow it.</p>
+    <p>Your earlier rows had eight questions, and today's have 26. So the notebook compares the cost per question.</p>
+  </div>
+</section>
+
+<section class="screen" id="act-nb3" data-step="0">
+  <header><span class="kind">Activity · 60–75 minutes for Part 1, +50–70 for Parts 2–3, individual</span><h2>Notebook 3: Retrieval measurement</h2></header>
+  <div class="body">
+    <ul class="points">
+      <li>Part 1: the quiz three ways, measured with CodeCarbon; answer accuracy and retrieval accuracy; three rows for your leaderboard</li>
+      <li>Part 2: dense and sparse retrieval on the same quiz, and the questions where they disagree</li>
+      <li>Part 3: our Galician passage translated with and without a retrieved example, graded with four metrics</li>
+    </ul>
+    <div class="activity"><h3>Notebook 03a, in Colab, with a GPU</h3><div>
+      <ul class="points">
+        <li>In Colab: Runtime → Change runtime type → T4 GPU</li>
+        <li>Upload your three CSV files from Sessions 1 and 2 before you start</li>
+        <li>Download them again at the end</li>
+      </ul>
+      <div class="links">
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session3/beginner/03a_retrieval_measurement-beginner.ipynb" target="_blank" rel="noopener">Open in Colab: beginner</a>
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session3/advanced/03a_retrieval_measurement-advanced.ipynb" target="_blank" rel="noopener">Open in Colab: advanced</a>
+      </div>
+    </div></div>
+  </div>
+  <div class="notes">
+    <p>Now the main notebook. Part 1 runs the quiz three ways: closed book, all 26 documents, and the top 2 retrieved documents. CodeCarbon measures each run. You get two accuracies: how often the answer was right, and how often the retriever found the right document. All three runs go into your leaderboard.</p>
+    <p>Part 2 compares the dense retriever with TF-IDF on the same quiz, and prints the questions where they disagree. Look at those carefully: they show where matching words and matching meaning come apart.</p>
+    <p>Part 3 translates our Galician passage with and without the retrieved example from the translation memory, and grades both translations with the four metrics.</p>
+    <p>Choose the T4 GPU. Upload the three CSV files you saved in Sessions 1 and 2, so today's rows are added to them. And download them again at the end.</p>
+  </div>
+</section>
+
+<section class="screen" id="act-nb3c" data-step="0">
+  <header><span class="kind">Activity · 70–90 minutes, if time allows</span><h2>Notebook 3c: three levers, one run</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <table class="plain">
+        <thead><tr><th>configuration</th><th>model</th><th>the model reads</th></tr></thead>
+        <tbody>
+          <tr><td>baseline</td><td>16 bits</td><td>the question only</td></tr>
+          <tr><td>quantized</td><td>GPTQ, 4 bits</td><td>the question only</td></tr>
+          <tr><td>retrieval</td><td>16 bits</td><td>the question + the top 2</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">The same 26 questions, in one Colab session, on one GPU; the translation too.</p>
+    </div>
+    <div class="col">
+      <ul class="points">
+        <li>What does quantization do to what the model <i>knows</i>?</li>
+        <li>What does retrieval add to it, and at what cost?</li>
+      </ul>
+      <div class="links">
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session3/beginner/03c_all_levers_closed_book-beginner.ipynb" target="_blank" rel="noopener">Open in Colab: beginner</a>
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session3/advanced/03c_all_levers_closed_book-advanced.ipynb" target="_blank" rel="noopener">Open in Colab: advanced</a>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Notebook 3c is an extra. It runs all three configurations of the course in one Colab session, on the same GPU, so the numbers are directly comparable.</p>
+    <p>The baseline and the quantized model answer closed book: no documents. So this shows what quantization does to what the model knows by itself. The retrieval run uses the 16-bit model with the two retrieved documents. So this shows what retrieval adds, and at what cost. The translation is run the same three ways.</p>
+  </div>
+</section>
+
+<section class="screen" id="shareout" data-step="0">
+  <header><h2>Share-out</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <p class="label">Questions and answers</p>
+      <ul class="points">
+        <li>Which questions did the model get right closed book, with no documents?</li>
+        <li>Retrieval against all 26 documents: accuracy, energy per question, time</li>
+        <li>When an answer was wrong: was it the retriever or the model?</li>
+      </ul>
+    </div>
+    <div class="col">
+      <p class="label">Translation</p>
+      <ul class="points">
+        <li>Did the retrieved example change the translation? Toward “I had an aunt who…”?</li>
+        <li>Did the four metrics agree?</li>
+      </ul>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Time to compare, with your neighbor and then with the room.</p>
+    <p>Which questions did the model answer correctly closed book? Those are facts it knew from training. Compare retrieval with all 26 documents: accuracy, energy per question, and time. Was the energy saving as large as the token saving? And when an answer was wrong, look at retrieval accuracy: did the retriever miss, or did the model misread the right document?</p>
+    <p>For the translation: did the retrieved example change anything? Did it move toward "I had an aunt who", the translation we discussed in Session 1? And did the four metrics agree on whether it helped?</p>
+  </div>
+</section>
+
+<div class="part" id="part-end"><h1>The course, in one screen</h1></div>
+
+<section class="screen" id="course" data-step="0">
+  <header><h2>Three sessions, one pipeline, one leaderboard</h2></header>
+  <div class="body">
+    <div class="flow">
+      <div class="box">Session 1<br><b>language models</b><br><span class="muted">measure the baseline</span></div><span class="arr">→</span>
+      <div class="box">Session 2<br><b>quantization</b><br><span class="muted">fewer bits per number</span></div><span class="arr">→</span>
+      <div class="box g">Session 3<br><b>retrieval</b><br><span class="muted">fewer tokens to read</span></div>
+    </div>
+    <ul class="points">
+      <li>Measure first: energy, carbon, time and memory, always next to quality</li>
+      <li>Change one thing at a time, on the same task, with the same check</li>
+      <li>Savings and losses depend on the model, the task, the data and the hardware: published numbers are a starting point, your own are the answer</li>
+    </ul>
+  </div>
+  <div class="notes">
+    <p>To close the course, the three sessions in one picture.</p>
+    <p>In Session 1 we saw how language models work, from n-grams to transformers, and we measured a baseline: a small model, a question-answering task, and the energy and carbon of one run. In Session 2 we stored the same model's numbers with fewer bits. In Session 3 we gave the same model fewer tokens to read.</p>
+    <p>The method was the same every time. Measure first, and keep quality next to energy, carbon, time and memory. Change one thing at a time, on the same task, with the same check. And remember that the savings and the losses depend on the model, the task, the data and the hardware. Published numbers are a good starting point. Your own measurements are the answer for your system.</p>
+  </div>
+</section>
+
+<section class="screen titlescreen" id="thanks" data-step="0">
+  <div class="cols" style="align-items:center;width:100%">
+    <div class="fig"><img src="img/last-picture.png" alt="" style="max-height:50vh"></div>
+    <div class="col" style="justify-items:center;gap:20px">
+      <h1>Gracias por su atención</h1>
+      <div class="logos"><img src="img/logo-inditexudc.png" alt="Cátedra Inditex–UDC de Algoritmos Verdes"></div>
+      <a href="https://catedrainditexalgoritmosverdes.com/" class="mono">catedrainditexalgoritmosverdes.com</a>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Thank you for your attention.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>The interactive panels come from the course page <a href="../artifacts/retrieval.html">Retrieval, step by step</a>. The Python exercises run in the browser with Pyodide; the Colab notebooks hold the same exercises.</p>
+  <p class="label" style="margin-top:6px">References</p>
+  <ul>
+    <li>Khandelwal, U., Fan, A., Jurafsky, D., Zettlemoyer, L., &amp; Lewis, M. (2021). Nearest neighbor machine translation. ICLR. arXiv:2010.00710</li>
+    <li>Lewis, P., et al. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. NeurIPS. arXiv:2005.11401</li>
+    <li>Li, Z., Li, C., Zhang, M., Mei, Q., &amp; Bendersky, M. (2024). Retrieval augmented generation or long-context LLMs? A comprehensive study and hybrid approach. EMNLP Industry Track. arXiv:2407.16833</li>
+    <li>Reimers, N., &amp; Gurevych, I. (2019). Sentence-BERT: sentence embeddings using Siamese BERT-networks. EMNLP. arXiv:1908.10084</li>
+    <li>Robertson, S., &amp; Zaragoza, H. (2009). The probabilistic relevance framework: BM25 and beyond. <i>Foundations and Trends in Information Retrieval</i>, 3(4), 333–389.</li>
+    <li>Spärck Jones, K. (1972). A statistical interpretation of term specificity and its application in retrieval. <i>Journal of Documentation</i>, 28(1), 11–21.</li>
+    <li>Naseiro, P. <i>Speechwriter</i> (the translation examples).</li>
+  </ul>
+  <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
+  <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 3. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>, except the quoted sentences of <i>Speechwriter</i>.</p>
+</footer>
+
+<div class="pbar" aria-label="Presentation controls">
+  <span class="where" id="pWhere"></span>
+  <span class="count" id="pCount"></span>
+  <button id="pPrev" aria-label="Previous">←</button>
+  <button id="pNext" aria-label="Next">→</button>
+  <button id="pNotes">Notes</button>
+  <button id="pExit">Exit</button>
+</div>
+
+<div id="nv" aria-live="polite">
+  <div class="bar1">
+    <button id="nPrev">← Previous</button><button id="nNext" class="primary">Next →</button>
+    <span class="muted" id="nCount"></span><span class="clock" id="nClock">0:00</span><button id="nReset">Reset timer</button>
+  </div>
+  <span class="label" id="nKind"></span>
+  <h2 id="nTitle"></h2>
+  <span class="fragnote" id="nFrag"></span>
+  <div class="ntext" id="nText"></div>
+  <div class="next" id="nNextTitle"></div>
+</div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const screens = [...document.querySelectorAll(".screen")];
+const STEPS = ["Retrieve, then read", "Dense retrieval", "Sparse retrieval", "What it saves", "What can go wrong", "Translation"];
+const isNotes = new URLSearchParams(location.search).has("notes");
+let chan = null;
+try { chan = new BroadcastChannel("greenai-lesson-session3"); } catch (e) {}
+let cur = 0;
+
+/* ---- the part each screen belongs to, contents menu, step strip ---- */
+let part = "";
+document.querySelectorAll("main > .part, main > .screen").forEach(el => {
+  if (el.classList.contains("part")) part = el.querySelector("h1").textContent; else el.dataset.part = part;
+});
+$("tocNav").innerHTML = [...document.querySelectorAll("main > .part")].map(p => `<a href="#${p.id}">${p.querySelector("h1").textContent}</a>`).join("");
+$("tocNav").addEventListener("click", () => $("tocNav").parentElement.open = false);
+$("topRoad").innerHTML = STEPS.map((t, k) => `<span>${k + 1} ${t}</span>`).join("");
+const markRoad = (el, step) => el.querySelectorAll("span").forEach((s, k) => s.classList.toggle("on", k + 1 === step));
+if ("IntersectionObserver" in window) {
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && !presenting()) markRoad($("topRoad"), +e.target.dataset.step || 0); }),
+    { rootMargin: "-20% 0px -70% 0px" });
+  screens.forEach(s => io.observe(s));
+}
+
+/* ---- small figures drawn from data ---- */
+document.querySelectorAll("[data-bars]").forEach(el => {
+  const rows = JSON.parse(el.dataset.bars);
+  el.innerHTML = rows.map(([w, p]) =>
+    `<div class="bar${p ? "" : " zero"}"><span class="w">${w}</span><span class="track"><span class="fill" style="width:${(p * 100).toFixed(1)}%"></span></span><span>${p.toFixed(2)}</span></div>`).join("");
+});
+const COLORS = { blue: "var(--blue)", gray: "var(--muted)", orange: "var(--orange)", green: "var(--green)" };
+document.querySelectorAll("svg.scatter").forEach(svg => {
+  // data-range: xmin,xmax,ymin,ymax; data-points: [label, x, y, color, label position n|s|e|w]
+  const [x0, x1, y0, y1] = svg.dataset.range.split(",").map(Number);
+  const pts = JSON.parse(svg.dataset.points);
+  const W = 240, H = 240, pad = 24;
+  const sx = x => pad + (x - x0) / (x1 - x0) * (W - 2 * pad), sy = y => H - pad - (y - y0) / (y1 - y0) * (H - 2 * pad);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  let s = `<line x1="${sx(x0)}" y1="${sy(0)}" x2="${sx(x1)}" y2="${sy(0)}" stroke="var(--line)"/><line x1="${sx(0)}" y1="${sy(y0)}" x2="${sx(0)}" y2="${sy(y1)}" stroke="var(--line)"/>`;
+  if (svg.dataset.ray) { const [rx, ry] = svg.dataset.ray.split(",").map(Number); s += `<line x1="${sx(0)}" y1="${sy(0)}" x2="${sx(rx)}" y2="${sy(ry)}" stroke="var(--blue)" stroke-dasharray="3 3" opacity="0.6"/>`; }
+  const off = { n: [0, -7, "middle"], s: [0, 14, "middle"], e: [6, 4, "start"], w: [-6, 4, "end"] };
+  for (const [label, x, y, c, pos] of pts) {
+    const [dx, dy, anchor] = off[pos || "e"];
+    s += `<circle cx="${sx(x)}" cy="${sy(y)}" r="3.5" fill="${COLORS[c]}"/>`;
+    if (label) s += `<text x="${sx(x) + dx}" y="${sy(y) + dy}" text-anchor="${anchor}" fill="${COLORS[c]}">${label}</text>`;
+  }
+  svg.innerHTML = s;
+});
+document.querySelectorAll("[data-squares]").forEach(el => {
+  const n = +el.dataset.squares;
+  el.style.gridTemplateColumns = `repeat(${n}, auto)`;
+  el.innerHTML = `<i style="background:${el.dataset.color}"></i>`.repeat(n * n);
+});
+document.querySelectorAll("[data-reveal]").forEach(b => b.onclick = () => { $(b.dataset.reveal).hidden = false; b.hidden = true; });
+
+/* ---- embedded pages load only when their screen comes near (data-src), then stay loaded ---- */
+const loadFrames = el => el && el.querySelectorAll("iframe[data-src]").forEach(f => { if (!f.getAttribute("src")) f.src = f.dataset.src; });
+if ("IntersectionObserver" in window) {
+  const fo = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && !presenting()) loadFrames(e.target); }), { rootMargin: "800px 0px" });
+  screens.forEach(s => { if (s.querySelector("iframe[data-src]")) fo.observe(s); });
+} else screens.forEach(loadFrames);
+/* ---- embedded pages: tabs scroll the frame to a section ---- */
+document.querySelectorAll(".tabs").forEach(tabs => {
+  const frame = tabs.parentElement.querySelector("iframe");
+  tabs.querySelectorAll("button[data-go]").forEach(b => b.onclick = () => {
+    tabs.querySelectorAll("button[data-go]").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+    try { const w = frame.contentWindow, el = frame.contentDocument.getElementById(b.dataset.go); w.scrollTo(0, el.getBoundingClientRect().top + w.scrollY); } catch (e) {}
+  });
+});
+
+/* ---- boards: a derivation drawn step by step (elements with data-s=N appear at step N) ---- */
+document.querySelectorAll(".board").forEach(b => {
+  const svg = b.querySelector("svg"), els = [...svg.querySelectorAll("[data-s]")], label = b.querySelector(".bstep");
+  // one hidden mark per step, so the lesson's Next walks through the board in present mode
+  const N = Math.max(...els.map(e => +e.dataset.s));
+  b.querySelectorAll(".frag").forEach(m => m.remove());
+  for (let i = 1; i <= N; i++) { const m = document.createElement("span"); m.className = "frag"; m.dataset.k = i; b.append(m); }
+  const marks = [...b.querySelectorAll(".frag")];
+  let step = 0, laid = false, anims = [], timer = null;
+  function layout() {
+    if (laid || !svg.getBoundingClientRect().width) return;
+    const lines = {};
+    svg.querySelectorAll("[data-line]").forEach(el => (lines[el.dataset.line] ||= []).push(el));
+    for (const arr of Object.values(lines)) {
+      let x = +arr[0].dataset.x0;
+      for (const el of arr) {
+        if (el.dataset.x0) x = +el.dataset.x0;
+        if (el.dataset.at) x = +svg.querySelector("#" + el.dataset.at).getAttribute("x"); // align under another segment
+        let w;
+        if (el.classList.contains("bfrac")) {
+          // numerator and denominator may each have several parts, written one after another
+          const ns = [...el.querySelectorAll(".num")], ds = [...el.querySelectorAll(".den")], bar = el.querySelector(".bar");
+          const width = ps => ps.reduce((s, q) => s + q.getComputedTextLength(), 0) + 7 * (ps.length - 1);
+          const wn = width(ns), wd = width(ds); w = Math.max(wn, wd) + 12;
+          const place = (ps, x1) => ps.forEach(q => { q.setAttribute("x", x1); x1 += q.getComputedTextLength() + 7; });
+          place(ns, x + (w - wn) / 2); place(ds, x + (w - wd) / 2);
+          bar.setAttribute("x1", x); bar.setAttribute("x2", x + w);
+        } else { el.setAttribute("x", x); w = el.getComputedTextLength(); }
+        x += w + (el.dataset.gap ? +el.dataset.gap : 7);
+      }
+    }
+    svg.querySelectorAll("[data-strike]").forEach(p => {  // a unit that cancels: a slash through it
+      const t = svg.querySelector("#" + p.dataset.strike).getBBox();
+      p.setAttribute("d", `M${t.x - 2} ${t.y + t.height * 0.8} L${t.x + t.width + 2} ${t.y + t.height * 0.25}`);
+    });
+    svg.querySelectorAll("[data-ul]").forEach(p => {
+      const t = svg.querySelector("#" + p.dataset.ul).getBBox();
+      p.setAttribute("d", `M${t.x} ${t.y + t.height + 1} q ${t.width / 2} 5 ${t.width} 0`);
+    });
+    // a box around a whole line (data-box="L7") or around some elements (data-box="#a #b")
+    svg.querySelectorAll("[data-box]").forEach(r => {
+      const v = r.dataset.box, px = r.dataset.pad ? +r.dataset.pad : 10, py = r.dataset.pad ? +r.dataset.pad : 8;
+      const bs = [...svg.querySelectorAll(v.startsWith("#") ? v.split(/\s+/).join(",") : `[data-line="${v}"]`)].map(e => e.getBBox());
+      const x0 = Math.min(...bs.map(q => q.x)) - px, y0 = Math.min(...bs.map(q => q.y)) - py;
+      const x1 = Math.max(...bs.map(q => q.x + q.width)) + px, y1 = Math.max(...bs.map(q => q.y + q.height)) + py;
+      r.setAttribute("x", x0); r.setAttribute("y", y0); r.setAttribute("width", x1 - x0); r.setAttribute("height", y1 - y0);
+    });
+    laid = svg.querySelector("[data-line]")?.getComputedTextLength?.() > 0;
+  }
+  function play(el) {
+    const d = (+el.dataset.d || 0) * 1000, kind = el.dataset.a || (el.tagName === "text" || el.tagName === "g" ? "write" : "draw");
+    let a;
+    if (kind === "draw") {
+      const len = el.getTotalLength();
+      a = el.animate([{ strokeDasharray: `${len} ${len}`, strokeDashoffset: len }, { strokeDasharray: `${len} ${len}`, strokeDashoffset: 0 }],
+        { duration: (+el.dataset.t || 0.7) * 1000, delay: d, fill: "backwards", easing: "ease-in-out" });
+    } else if (kind === "write") {
+      const n = (el.textContent || "").length;
+      a = el.animate([{ clipPath: "inset(-40% 100% -40% -2%)" }, { clipPath: "inset(-40% -2% -40% -2%)" }],
+        { duration: (+el.dataset.t || Math.max(0.35, n * 0.045)) * 1000, delay: d, fill: "backwards", easing: "linear" });
+    } else a = el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: (+el.dataset.t || 0.4) * 1000, delay: d, fill: "backwards" });
+    anims.push(a);
+    return d + a.effect.getTiming().duration;
+  }
+  function set(k, animate) {
+    layout();
+    anims.forEach(a => a.cancel()); anims = [];
+    step = Math.max(0, Math.min(N, k));
+    let end = 0;
+    els.forEach(el => {
+      const s = +el.dataset.s, until = el.dataset.until ? +el.dataset.until : Infinity, dim = el.dataset.dim ? +el.dataset.dim : Infinity;
+      const vis = s <= step && step < until;
+      el.style.visibility = vis ? "visible" : "hidden";
+      el.style.opacity = vis && step >= dim ? "0.25" : "";
+      if (animate && vis && s === step) end = Math.max(end, play(el));
+    });
+    if (label) label.textContent = `Step ${step} of ${N}`;
+    return end;
+  }
+  function playAll() {
+    clearTimeout(timer);
+    const go = k => { if (k > N) return; const t = set(k, true); timer = setTimeout(() => go(k + 1), t + 900); };
+    go(1);
+  }
+  b.querySelector(".bnext")?.addEventListener("click", () => { clearTimeout(timer); set(step + 1, true); });
+  b.querySelector(".bprev")?.addEventListener("click", () => { clearTimeout(timer); set(step - 1, false); });
+  b.querySelector(".bplay")?.addEventListener("click", playAll);
+  b.querySelector(".bstart")?.addEventListener("click", () => { clearTimeout(timer); set(0, false); });
+  // in present mode, the lesson's Next reveals one hidden mark per step
+  const sync = () => {
+    const shown = marks.filter(m => !m.classList.contains("hide")).length;
+    if (!document.body.classList.contains("present")) return;
+    clearTimeout(timer);
+    set(shown, shown === step + 1);
+  };
+  new MutationObserver(sync).observe(b, { subtree: true, attributes: true, attributeFilter: ["class"] });
+  // in present mode, shrink the board until its screen no longer scrolls (text above or below it takes space too)
+  const sec = b.closest(".screen");
+  const fit = () => {
+    svg.style.maxHeight = "";
+    if (!document.body.classList.contains("present") || !sec?.classList.contains("current")) return;
+    const over = sec.scrollHeight - sec.clientHeight;
+    if (over > 0) svg.style.maxHeight = Math.max(200, svg.getBoundingClientRect().height - over - 4) + "px";
+  };
+  if (sec) new MutationObserver(() => setTimeout(fit, 50)).observe(sec, { attributes: true, attributeFilter: ["class"] });
+  addEventListener("resize", () => setTimeout(fit, 50));
+  const ready = () => { laid = false; set(document.body.classList.contains("present") ? 0 : N, false); };
+  (document.fonts?.ready || Promise.resolve()).then(ready);
+  new MutationObserver(() => { setTimeout(fit, 50); if (!document.body.classList.contains("present")) { clearTimeout(timer); set(N, false); } })
+    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+});
+
+/* ---- Python exercises ---- */
+const dedent = t => {
+  const lines = t.replace(/^\n+|\s+$/g, "").split("\n");
+  const ind = Math.min(...lines.filter(l => l.trim()).map(l => l.match(/^ */)[0].length));
+  return lines.map(l => l.slice(ind)).join("\n");
+};
+let pyPromise = null, queue = Promise.resolve();
+function loadPython() {
+  if (!pyPromise) pyPromise = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js";
+    s.onload = () => loadPyodide().then(resolve, reject);
+    s.onerror = () => { pyPromise = null; reject(new Error("Python could not be loaded. Check the internet connection, or use the Colab notebook.")); };
+    document.head.append(s);
+  });
+  return pyPromise;
+}
+// runs every test_ function of an exercise's tests, in order, with the student's names in scope
+const TEST_RUNNER = `
+def _run_tests(src):
+    import json
+    ns = dict(globals())
+    exec(compile(src, "<tests>", "exec"), ns)
+    tests = sorted((f for k, f in ns.items() if k.startswith("test_") and callable(f)
+                    and getattr(getattr(f, "__code__", None), "co_filename", "") == "<tests>"),
+                   key=lambda f: f.__code__.co_firstlineno)
+    results = []
+    for f in tests:
+        name = (f.__doc__ or f.__name__).strip()
+        try:
+            f()
+            results.append([name, "pass", ""])
+        except AssertionError as e:
+            results.append([name, "fail", str(e)])
+        except Exception as e:
+            results.append([name, "fail", type(e).__name__ + ": " + str(e)])
+    return json.dumps(results)
+`;
+const shortError = msg => {
+  const lines = String(msg).trim().split("\n");
+  const i = lines.map(l => l.includes('File "<exec>"')).lastIndexOf(true);
+  return (i >= 0 ? lines.slice(i) : lines.slice(-3)).join("\n");
+};
+document.querySelectorAll(".ex").forEach(ex => {
+  const start = dedent(ex.querySelector(".start").textContent);
+  const tests = dedent(ex.querySelector(".tests").textContent);
+  const solution = dedent(ex.querySelector(".solution").textContent);
+  const n = ex.dataset.ex;
+  const cell = document.createElement("div");
+  cell.className = "cell";
+  cell.innerHTML = `<textarea spellcheck="false" aria-label="Code for exercise ${n}"></textarea>
+    <div class="cellbar"><button class="primary run">Run</button><button class="primary test">Run the tests</button><button class="reset">Start over</button><span class="status" aria-live="polite"></span></div>
+    <pre class="out" aria-label="Output"></pre>
+    <details class="hint"><summary>The tests for Exercise ${n}: what they check</summary><pre class="sol tsrc"></pre></details>
+    <details class="hint"><summary>Solution to Exercise ${n} (open it after you have tried)</summary><pre class="sol"></pre><button class="use" style="margin-top:8px">Put the solution in the editor</button></details>`;
+  ex.append(cell);
+  const ta = cell.querySelector("textarea"), out = cell.querySelector(".out"), status = cell.querySelector(".status");
+  cell.querySelector(".sol").textContent = solution;
+  cell.querySelector(".tsrc").textContent = tests;
+  const fit = () => { ta.rows = Math.min(30, ta.value.split("\n").length + 1); };
+  ta.value = start; fit();
+  ta.addEventListener("input", fit);
+  ta.addEventListener("keydown", e => {
+    if (e.key === "Tab" && !e.shiftKey) { e.preventDefault(); ta.setRangeText("    ", ta.selectionStart, ta.selectionEnd, "end"); }
+    if (e.key === "Enter" && (e.shiftKey || e.metaKey || e.ctrlKey)) { e.preventDefault(); run(e.metaKey || e.ctrlKey); }
+  });
+  const setStatus = (text, cls) => { status.textContent = text; status.className = "status " + cls; };
+  const line = (text, cls) => { const s = document.createElement("span"); if (cls) s.className = cls; s.textContent = text + "\n"; out.append(s); };
+  cell.querySelector(".reset").onclick = () => { ta.value = start; fit(); out.textContent = ""; setStatus("", ""); };
+  cell.querySelector(".use").onclick = () => { ta.value = solution; fit(); ta.focus(); };
+  async function runOnce(withTests) {
+    out.textContent = "";
+    setStatus(pyPromise ? "Running…" : "Loading Python (once, a few seconds)…", "");
+    let py;
+    try { py = await loadPython(); } catch (e) { setStatus("", ""); line(e.message, "err"); return; }
+    setStatus("Running…", "");
+    py.setStdout({ batched: t => line(t) });
+    py.setStderr({ batched: t => line(t, "err") });
+    try {
+      await py.loadPackagesFromImports(ta.value + "\n" + (withTests ? tests : ""));  // numpy and the like, once
+      await py.runPythonAsync(ta.value);
+    } catch (e) {
+      const msg = shortError(e.message);
+      line(msg, "err");
+      if (/name '___' is not defined/.test(msg)) line("Replace every ___ with code, then run again.", "err");
+      else if (/NameError/.test(msg)) line("This cell may use code from an earlier exercise. Run that one first.", "err");
+      setStatus("Error", "bad");
+      return;
+    }
+    if (!withTests) { setStatus("Done. Run the tests to check it.", ""); return; }
+    let results;
+    try {
+      if (!py.globals.has("_run_tests")) await py.runPythonAsync(TEST_RUNNER);
+      results = JSON.parse(py.globals.get("_run_tests")(tests));
+    } catch (e) { line(shortError(e.message), "err"); setStatus("The tests could not run", "bad"); return; }
+    line("");
+    results.forEach(([name, st, msg]) => line((st === "pass" ? "✓ " : "✗ ") + name + (msg ? "\n    " + msg : ""), st === "pass" ? "pass" : "err"));
+    const ok = results.filter(r => r[1] === "pass").length;
+    if (ok === results.length) { line(`All ${ok} tests pass. Exercise ${n} is done.`, "pass"); setStatus("All tests pass", "ok"); }
+    else setStatus(`${ok} of ${results.length} tests pass`, "bad");
+  }
+  const run = (withTests = false) => { const go = () => runOnce(withTests); queue = queue.then(go, go); };
+  cell.querySelector(".run").onclick = () => run(false);
+  cell.querySelector(".test").onclick = () => run(true);
+});
+
+/* ---- present mode ---- */
+const presenting = () => document.body.classList.contains("present");
+const frags = i => [...screens[i].querySelectorAll(".frag")];
+const shownFrags = i => frags(i).filter(f => !f.classList.contains("hide")).length;
+const meta = i => {
+  const s = screens[i];
+  return { kind: s.querySelector(".kind")?.textContent || s.dataset.part || "", title: s.querySelector("h2, h1")?.textContent || "",
+    notes: s.querySelector(".notes")?.innerHTML || "", step: +s.dataset.step || 0, part: s.dataset.part || "",
+    frags: frags(i).length, shown: shownFrags(i) };
+};
+function zoomFrames() {
+  // in present mode, match the lesson's text size, then zoom out until nothing in the panel overflows sideways
+  const font = parseFloat(getComputedStyle(document.documentElement).fontSize) / 15;
+  document.querySelectorAll("iframe.frame").forEach(f => {
+    try {
+      const d = f.contentDocument, root = d.documentElement;
+      if (!d.getElementById("lessonEmbedStyle")) {
+        const st = d.createElement("style");
+        st.id = "lessonEmbedStyle";
+        st.textContent = "html.embed .wrap > section > h2 { display: none; }";  // the lesson screen and its tabs name the section
+        d.head.append(st);
+      }
+      if (!presenting() || !f.clientWidth) { root.style.zoom = ""; return; }
+      const scrollers = [...d.querySelectorAll("body *")].filter(e => /auto|scroll|hidden/.test(getComputedStyle(e).overflowX));
+      const overflows = () => root.scrollWidth > root.clientWidth + 1 || scrollers.some(e => e.clientWidth > 0 && e.scrollWidth > e.clientWidth + 1);
+      let z = Math.max(1, Math.min(1.8, font));
+      for (; z > 1; z -= 0.05) { root.style.zoom = z.toFixed(2); if (!overflows()) break; }
+      if (z <= 1) root.style.zoom = "";
+    } catch (e) {}
+  });
+}
+window.addEventListener("resize", zoomFrames);
+function post() { if (chan) chan.postMessage({ at: cur, shown: shownFrags(cur) }); }
+function show(i, opts = {}) {
+  cur = Math.max(0, Math.min(screens.length - 1, i));
+  screens.forEach((s, k) => s.classList.toggle("current", k === cur));
+  const fs = frags(cur), n = opts.shown ?? (opts.back ? fs.length : 0);
+  fs.forEach((f, k) => f.classList.toggle("hide", k >= n));
+  const m = meta(cur);
+  $("pWhere").textContent = m.step ? `Step ${m.step} of ${STEPS.length} · ${STEPS[m.step - 1]}` : m.part;
+  $("pCount").textContent = `${cur + 1} / ${screens.length}`;
+  screens[cur].scrollTop = 0;
+  try { history.replaceState(null, "", "#" + screens[cur].id); } catch (e) {}
+  if (presenting()) { loadFrames(screens[cur]); zoomFrames(); }
+  if (!opts.quiet) post();
+}
+function next() {
+  const fs = frags(cur), k = shownFrags(cur);
+  if (k < fs.length) { fs[k].classList.remove("hide"); post(); } else show(cur + 1);
+}
+function prev() { show(cur - 1, { back: true }); }
+function enter() {
+  const k = screens.findIndex(s => "#" + s.id === location.hash);
+  document.body.classList.add("present");
+  document.documentElement.classList.add("present");
+  show(k >= 0 ? k : 0);
+  try { document.documentElement.requestFullscreen?.().catch(() => {}); } catch (e) {}
+}
+function exit() {
+  document.body.classList.remove("present");
+  document.documentElement.classList.remove("present");
+  screens.forEach(s => s.classList.remove("current"));
+  try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
+  zoomFrames();
+  screens[cur].scrollIntoView({ block: "start" });
+}
+function openNotes() {
+  const w = window.open(location.pathname + "?notes", "lesson-notes", "width=980,height=760");
+  if (!w) $("pNotes").textContent = "Allow pop-ups for notes";
+}
+$("presentBtn").onclick = enter;
+$("pPrev").onclick = prev;
+$("pNext").onclick = next;
+$("pNotes").onclick = openNotes;
+$("pExit").onclick = exit;
+const keys = e => {
+  if (!presenting()) return;
+  if (e.target.closest && e.target.closest("textarea, input, select")) return;
+  if (["ArrowRight", "PageDown"].includes(e.key) || (e.key === " " && !(e.target.closest && e.target.closest("button, summary, a")))) { e.preventDefault(); next(); }
+  else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); prev(); }
+  else if (e.key === "Escape") exit();
+  else if (e.key === "n" || e.key === "N") openNotes();
+};
+if (!isNotes) document.addEventListener("keydown", keys);
+// a click inside an embedded page moves the keyboard focus there: forward the presenter's keys
+document.querySelectorAll("iframe.frame").forEach(f => f.addEventListener("load", () => {
+  zoomFrames();
+  try {
+    f.contentDocument.addEventListener("keydown", e => {
+      if (!presenting()) return;
+      if (e.key === "PageDown") { e.preventDefault(); next(); }
+      else if (e.key === "PageUp") { e.preventDefault(); prev(); }
+      else if (e.key === "Escape") exit();
+    });
+  } catch (err) {}
+}));
+if (chan && !isNotes) chan.onmessage = ({ data }) => {
+  if (data.hello) post();
+  if (data.cmd) { if (!presenting()) enter(); data.cmd === "next" ? next() : prev(); }
+};
+
+/* ---- speaker-notes window ---- */
+if (isNotes) {
+  document.body.classList.add("notesview");
+  document.title = "Notes · " + document.title;
+  let t0 = Date.now();
+  const render = (i, shown) => {
+    cur = i;
+    const m = meta(i);
+    $("nKind").textContent = m.kind;
+    $("nTitle").textContent = m.title;
+    $("nFrag").textContent = m.frags ? `Shown: ${shown} of ${m.frags} parts${shown < m.frags ? " · Next reveals the next part" : ""}` : "";
+    $("nText").innerHTML = m.notes;
+    $("nCount").textContent = `${i + 1} / ${screens.length}`;
+    $("nNextTitle").textContent = i + 1 < screens.length ? "Next screen: " + meta(i + 1).title : "Last screen";
+    window.scrollTo(0, 0);
+  };
+  render(0, 0);
+  const send = cmd => chan?.postMessage({ cmd });
+  $("nPrev").onclick = () => send("prev");
+  $("nNext").onclick = () => send("next");
+  $("nReset").onclick = () => { t0 = Date.now(); };
+  document.addEventListener("keydown", e => {
+    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); send("next"); }
+    else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); send("prev"); }
+  });
+  setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $("nClock").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; }, 1000);
+  if (chan) { chan.onmessage = ({ data }) => { if (typeof data.at === "number") render(data.at, data.shown || 0); }; chan.postMessage({ hello: true }); }
+}
+})();
+</script>
+</body>
+</html>

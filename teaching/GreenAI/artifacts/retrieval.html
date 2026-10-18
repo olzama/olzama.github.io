@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Retrieval, Step by Step</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<script>
+// ?embed=dense,sparse shows only those sections, for use inside a lesson page
+(() => {
+  let ids = [];
+  try { ids = (new URLSearchParams(location.search).get("embed") || "").split(",").filter(x => /^[a-z][a-z0-9]*$/.test(x)); } catch (e) {}
+  if (!ids.length) return;
+  document.documentElement.classList.add("embed");
+  const st = document.createElement("style");
+  st.textContent = ".wrap > " + ids.map(i => ":not(#" + i + ")").join("") + " { display: none !important; }"
+    + " html.embed body { padding-block: 8px 16px; } html.embed .wrap { gap: 16px; }";
+  document.head.appendChild(st);
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Questrial&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Four stations, in the order of the Session 3 lesson: dense retrieval on toy vectors, TF-IDF on
+   toy documents, both retrievers on the course quiz, and the embedding model's window.
+   Colors and faces are the course's, shared with the other pages. */
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --fg: #2b2d31; --muted: #6b7079; --line: #dde1e7; --grid: #e9ecf0;
+  --blue: #4f74ad; --orange: #c96f1f; --green: #3f7f3d; --hi: #fff3c4; --neg: #b0466e;
+  --blue-soft: #e8eef7; --green-soft: #e6f0e5; --orange-soft: #f8ecdf;
+  --font-display: "Questrial", "Century Gothic", "Avenir Next", "Futura", sans-serif;
+  --font-body: "Questrial", "Century Gothic", "Avenir Next", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17191d; --panel: #1f2227; --fg: #e7e9ec; --muted: #9aa0a9; --line: #343840; --grid: #2a2e34;
+    --blue: #86a8dc; --orange: #e8a15e; --green: #7fbf7c; --hi: #4a4122; --neg: #e07fa3;
+    --blue-soft: #263247; --green-soft: #243326; --orange-soft: #3a2c1f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17191d; --panel: #1f2227; --fg: #e7e9ec; --muted: #9aa0a9; --line: #343840; --grid: #2a2e34;
+  --blue: #86a8dc; --orange: #e8a15e; --green: #7fbf7c; --hi: #4a4122; --neg: #e07fa3;
+  --blue-soft: #263247; --green-soft: #243326; --orange-soft: #3a2c1f;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 22px; }
+header h1 { font-family: var(--font-display); font-weight: 400; font-size: 1.9rem; margin: 0; text-wrap: balance; }
+header p { margin: 4px 0 0; color: var(--muted); max-width: 72ch; }
+section.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+h2 { font-family: var(--font-display); font-weight: 400; font-size: 1.35rem; margin: 0; text-wrap: balance; }
+h2 .n { color: var(--muted); font-family: var(--font-mono); font-size: 0.9rem; margin-right: 10px; }
+.lead { margin: 0; max-width: 75ch; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.col { display: grid; gap: 12px; min-width: 0; align-content: start; }
+.label { font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.mono { font-family: var(--font-mono); }
+.note { color: var(--muted); font-size: 0.92rem; margin: 0; max-width: 70ch; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button, input[type=text], select {
+  font: inherit; font-size: 0.92rem; color: var(--fg); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px;
+}
+select { max-width: 100%; min-width: 0; }
+button { cursor: pointer; }
+button:hover { border-color: var(--blue); }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+input[type=text] { font-family: var(--font-mono); flex: 1 1 260px; min-width: 0; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; border-right: 1px solid var(--line); }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed=true] { background: var(--blue); color: var(--panel); }
+.tablewrap { overflow-x: auto; }
+table.t { border-collapse: collapse; font-family: var(--font-mono); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+table.t th, table.t td { padding: 4px 9px; text-align: right; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+table.t th { color: var(--muted); font-weight: 400; font-family: var(--font-body); font-size: 0.8rem; }
+table.t td.l, table.t th.l { text-align: left; }
+table.t tbody tr { cursor: pointer; }
+table.t tr.sel td { background: var(--blue-soft); }
+table.t tr.top td.l { color: var(--green); }
+.stats { display: flex; flex-wrap: wrap; gap: 8px 22px; font-family: var(--font-mono); font-size: 0.9rem; }
+.stats b { font-weight: 500; color: var(--blue); }
+.calc { font-family: var(--font-mono); font-size: 0.92rem; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 4px; overflow-x: auto; }
+.calc .k { color: var(--muted); }
+.calc .r { color: var(--orange); }
+svg.fig { width: 100%; height: auto; display: block; overflow: visible; }
+svg.fig text { font-family: var(--font-mono); font-size: 11px; fill: var(--fg); }
+svg.fig text.m { fill: var(--muted); }
+svg.fig text.lab { font-family: var(--font-body); font-size: 12px; fill: var(--muted); }
+.docs { display: grid; gap: 6px; font-family: var(--font-mono); font-size: 0.88rem; }
+.docs .d { display: grid; grid-template-columns: 8.5em minmax(0, 1fr); gap: 10px; align-items: baseline; }
+.docs .d .n { color: var(--muted); }
+.docs mark { background: var(--hi); color: inherit; border-radius: 3px; padding: 0 2px; }
+.docs mark.rare { outline: 1.5px solid var(--orange); }
+.bars { display: grid; gap: 3px; }
+.bar { display: grid; grid-template-columns: 15em minmax(0, 1fr) 3.5em; gap: 8px; align-items: center; font-family: var(--font-mono); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+.bar .w { text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar .track { height: 12px; background: var(--grid); border-radius: 3px; overflow: hidden; display: block; }
+.bar .fill { height: 100%; background: var(--blue); display: block; opacity: 0.45; }
+.bar.in .fill { opacity: 1; }
+.bar.src .w { color: var(--green); font-weight: 500; }
+.bar.src .fill { background: var(--green); }
+@media (max-width: 600px) { .bar { grid-template-columns: 9em minmax(0, 1fr) 3em; } }
+.legendrow { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.85rem; color: var(--muted); align-items: center; }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
+.verdict { font-size: 1rem; }
+.verdict.ok { color: var(--green); } .verdict.bad { color: var(--neg); }
+
+#askbtn { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 10;
+  background: var(--blue); border-color: var(--blue); color: var(--panel); border-radius: 999px; padding: 10px 18px; box-shadow: 0 4px 14px rgba(0,0,0,0.18); }
+#askpanel { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 11;
+  width: min(440px, calc(100vw - 32px)); height: min(70vh, 620px); display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.22); }
+#askpanel header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+#askpanel header b { font-family: var(--font-display); font-weight: 400; font-size: 1.1rem; }
+#asklog { overflow-y: auto; padding: 12px 14px; display: grid; gap: 10px; align-content: start; font-size: 0.95rem; }
+#asklog .q { justify-self: end; background: var(--hi); border-radius: 10px; padding: 6px 10px; max-width: 85%; white-space: pre-wrap; }
+#asklog .a { white-space: pre-wrap; }
+#asklog .note { color: var(--muted); font-size: 0.85rem; }
+#askform { display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--line); }
+#askform textarea { flex: 1; min-width: 0; resize: none; height: 3.2em; font: inherit; font-size: 0.95rem; padding: 6px 8px; border-radius: 7px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); }
+#askhint { padding: 0 14px 10px; font-size: 0.78rem; color: var(--muted); }
+button.primary { background: var(--blue); border-color: var(--blue); color: var(--panel); }
+footer { color: var(--muted); font-size: 0.82rem; max-width: 90ch; }
+footer p { margin: 0 0 8px; }
+footer a { color: var(--blue); }
+.refs { margin: 0 0 10px; padding-left: 1.1em; display: grid; gap: 4px; }
+footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Retrieval, Step by Step</h1>
+    <p>A retriever picks the documents the model will read. These four stations show how: by comparing vectors, by counting rare shared words, on the course's own 26 documents, and where it goes wrong.</p>
+  </header>
+
+  <!-- 1 -->
+  <section class="panel" id="dense">
+    <h2><span class="n">1</span>Dense retrieval: the angle between vectors</h2>
+    <p class="lead">Each word we know has a 2-D vector; a text's vector is the average of its known words' vectors. The retriever ranks the documents by cosine similarity with the question: 1 means the same direction, 0 a right angle. Pick a question, type your own, or click on the plane.</p>
+    <div class="controls">
+      <button data-q="how much energy does running a model use">question A</button>
+      <button data-q="what does it cost in electricity to get an answer">question B, other words</button>
+      <input type="text" id="dQ" aria-label="Your question" value="what does it cost in electricity to get an answer">
+    </div>
+    <div class="cols">
+      <div class="col">
+        <svg class="fig" id="dFig" viewBox="0 0 420 380" role="img" aria-label="The document vectors and the question vector on a plane"></svg>
+        <p class="note">Known words: energy (4, 2), electricity (4, 3), carbon (3, 4), water (1, 4), retriever (0, 5), memory (2, −3).</p>
+      </div>
+      <div class="col">
+        <div class="controls"><span class="note">Keep the top</span>
+          <div class="seg" role="group" aria-label="k" id="dK"><button data-k="1" aria-pressed="false">1</button><button data-k="2" aria-pressed="true">2</button><button data-k="3" aria-pressed="false">3</button></div>
+          <span class="note">documents</span></div>
+        <div class="tablewrap"><table class="t" id="dTable"></table></div>
+        <div class="calc" id="dCalc" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="panel" id="sparse">
+    <h2><span class="n">2</span>Sparse retrieval: shared words, weighted by rarity</h2>
+    <p class="lead">Word overlap gives one point per shared word. TF-IDF gives each shared word tf × idf: how often it is in the document, times idf = ln(5 ÷ the number of documents that contain it). A word in every document scores 0; a word in one document scores ln 5 ≈ 1.61.</p>
+    <div class="controls">
+      <button data-q="how much energy does running a model use">question A</button>
+      <button data-q="what does it cost in electricity to get an answer">question B, other words</button>
+      <input type="text" id="sQ" aria-label="Your question" value="how much energy does running a model use">
+    </div>
+    <div class="docs" id="sDocs"></div>
+    <div class="legendrow"><span><mark style="background:var(--hi);padding:0 4px">word</mark> shared with the question</span><span><mark style="background:var(--hi);outline:1.5px solid var(--orange);padding:0 4px">word</mark> shared, and in only one document</span></div>
+    <div class="cols">
+      <div class="col">
+        <p class="label">Score of each document</p>
+        <div class="tablewrap"><table class="t" id="sTable"></table></div>
+      </div>
+      <div class="col">
+        <p class="label">Click a document to see its TF-IDF sum</p>
+        <div class="calc" id="sCalc" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="panel" id="quiz">
+    <h2><span class="n">3</span>Both retrievers on the course quiz</h2>
+    <p class="lead">The 26 documents and 26 questions of Notebook 3. The bars are each document's similarity to the question. The green bar is the document that holds the answer; the dark bars are the top k, the only documents the model will read.</p>
+    <div class="controls">
+      <label class="note" for="qSel">Question:</label>
+      <select id="qSel"></select>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Retriever" id="qM"><button data-m="dense" aria-pressed="true">dense (MiniLM)</button><button data-m="sparse" aria-pressed="false">sparse (TF-IDF)</button></div>
+      <span class="note">Keep the top</span>
+      <div class="seg" role="group" aria-label="k" id="qK"><button data-k="1" aria-pressed="false">1</button><button data-k="2" aria-pressed="true">2</button><button data-k="3" aria-pressed="false">3</button><button data-k="5" aria-pressed="false">5</button></div>
+    </div>
+    <p class="verdict" id="qVerdict" aria-live="polite"></p>
+    <div class="cols">
+      <div class="col"><div class="bars" id="qBars"></div></div>
+      <div class="col">
+        <div class="stats" id="qStats"></div>
+        <svg class="fig" id="qFig" viewBox="0 0 420 210" role="img" aria-label="Tokens the model reads, and the pairs attention compares"></svg>
+        <p class="note">Tokens: the question plus the documents, counted with Qwen2.5's tokenizer; the prompt's instructions add a few more. Attention compares every token with every token, so the pairs grow with the square of the tokens.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="panel" id="window">
+    <h2><span class="n">4</span>The embedding model reads only 128 tokens</h2>
+    <p class="lead">The dense retriever's model, MiniLM, reads at most 128 tokens of a text; the rest is cut off before the vector is computed. Each bar is one of the 26 documents. The hatched part is never seen by the retriever.</p>
+    <svg class="fig" id="wFig" viewBox="0 0 900 560" role="img" aria-label="Document lengths in tokens, against the 128-token window"></svg>
+    <div class="stats" id="wStats"></div>
+    <p class="note">Real systems split long documents into chunks shorter than the window, embed each chunk, and retrieve chunks.</p>
+  </section>
+
+  <button id="askbtn" hidden>Ask Claude</button>
+  <section id="askpanel" hidden aria-label="Ask Claude about this page">
+    <header><b>Ask Claude</b><span><button id="askclear" style="font-size:0.8rem;padding:4px 10px">New chat</button> <button id="askclose" style="font-size:0.8rem;padding:4px 10px" aria-label="Close">Close</button></span></header>
+    <div id="asklog" aria-live="polite"><p class="note">Ask about anything on this page: why a document ranks first, what idf does, why the dense retriever misses a question. Claude sees the page's current state.</p></div>
+    <form id="askform"><textarea id="askinput" placeholder="Why does the dense retriever miss the PUE question?" aria-label="Your question"></textarea><button type="submit" class="primary" id="asksend">Ask</button><button type="button" id="askstop" hidden>Stop</button></form>
+    <p id="askhint">Answers use your own Claude account.</p>
+  </section>
+
+  <footer>
+    <p>Sections 1 and 2 use the five toy documents and the toy word vectors of Notebook 03b, computed in your browser. Sections 3 and 4 use the corpus and quiz of Notebook 03a: the similarities were computed once with <code>retrieval_data.py</code>, with the notebook's models and settings (paraphrase-multilingual-MiniLM-L12-v2 with normalized embeddings; scikit-learn's TfidfVectorizer with English stop words).</p>
+    <p class="label" style="margin-top:14px">References</p>
+    <ul class="refs">
+      <li>Lewis, P., et al. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. NeurIPS. arXiv:2005.11401</li>
+      <li>Reimers, N., &amp; Gurevych, I. (2019). Sentence-BERT: sentence embeddings using Siamese BERT-networks. EMNLP. arXiv:1908.10084</li>
+      <li>Salton, G., &amp; Buckley, C. (1988). Term-weighting approaches in automatic text retrieval. <i>Information Processing &amp; Management</i>, 24(5), 513–523.</li>
+      <li>Spärck Jones, K. (1972). A statistical interpretation of term specificity and its application in retrieval. <i>Journal of Documentation</i>, 28(1), 11–21.</li>
+    </ul>
+    <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
+    <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 3. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
+  </footer>
+</div>
+
+<script>
+const RDATA = /*RDATA*/{"docs": ["training_vs_inference", "data_centers", "quantization_basics", "measuring_carbon", "inference_cost_task_type", "rag_concept", "small_models_trend", "transformer_basics", "nas_architecture_search", "nlp_market_size", "mt_history", "attention_origin", "transformer_self_attention", "skipgram_embeddings", "gpt_scaling", "galician_llm_gap", "green_mt_knight", "mt_quantization", "quantization_energy_quality", "quantization_hardware_dependency", "gpu_precision_throughput", "rag_paper", "rag_vs_long_context", "knn_mt", "water_footprint", "image_generation_cost"], "qwen_tokens": [173, 164, 178, 135, 207, 117, 130, 127, 178, 165, 151, 168, 143, 151, 195, 154, 118, 83, 166, 163, 138, 148, 267, 138, 105, 169], "minilm_tokens": [188, 149, 183, 158, 202, 133, 132, 146, 189, 169, 162, 171, 149, 166, 192, 161, 119, 86, 165, 161, 142, 159, 266, 154, 119, 162], "window": 128, "questions": [{"q": "According to Patterson et al. (2021), how many metric tons of CO2-equivalent did training GPT-3 emit?", "source": 0, "dense": [0.22200000286102295, 0.23499999940395355, 0.2150000035762787, 0.42399999499320984, 0.33000001311302185, 0.07999999821186066, 0.2290000021457672, 0.10300000011920929, 0.4880000054836273, 0.12700000405311584, 0.23000000417232513, 0.11400000005960464, 0.03099999949336052, 0.06800000369548798, 0.328000009059906, 0.2160000056028366, 0.28200000524520874, 0.23600000143051147, 0.41200000047683716, 0.2809999883174896, 0.1589999943971634, 0.23499999940395355, 0.19099999964237213, 0.12300000339746475, 0.20600000023841858, 0.2409999966621399], "sparse": [0.358, 0.034, 0.0, 0.024, 0.087, 0.026, 0.0, 0.0, 0.109, 0.0, 0.0, 0.0, 0.028, 0.023, 0.106, 0.04, 0.0, 0.0, 0.039, 0.027, 0.0, 0.053, 0.05, 0.033, 0.0, 0.0], "qtokens": 29}, {"q": "Per the IEA, roughly what percentage of global electricity consumption did data centers represent in 2024?", "source": 1, "dense": [0.15399999916553497, 0.7710000276565552, 0.21899999678134918, 0.4959999918937683, 0.34200000762939453, 0.07999999821186066, 0.31200000643730164, 0.1809999942779541, 0.37700000405311584, 0.46399998664855957, 0.2240000069141388, 0.029999999329447746, 0.0430000014603138, 0.07400000095367432, 0.24500000476837158, 0.14100000262260437, 0.23800000548362732, 0.1899999976158142, 0.35899999737739563, 0.3190000057220459, 0.15000000596046448, 0.21899999678134918, 0.2460000067949295, 0.041999999433755875, 0.5009999871253967, 0.39399999380111694], "sparse": [0.027, 0.426, 0.137, 0.115, 0.046, 0.0, 0.025, 0.013, 0.024, 0.076, 0.012, 0.0, 0.0, 0.0, 0.0, 0.037, 0.014, 0.0, 0.049, 0.013, 0.012, 0.0, 0.024, 0.0, 0.142, 0.058], "qtokens": 23}, {"q": "What does the acronym PUE stand for?", "source": 3, "dense": [0.054999999701976776, -0.08299999684095383, -0.017000000923871994, 0.019999999552965164, -0.03400000184774399, 0.13500000536441803, 0.029999999329447746, 0.12800000607967377, 0.004999999888241291, 0.0010000000474974513, 0.12300000339746475, 0.1080000028014183, 0.14800000190734863, 0.1940000057220459, 0.23399999737739563, 0.07599999755620956, 0.05700000002980232, 0.06499999761581421, -0.019999999552965164, -0.0, -0.035999998450279236, 0.054999999701976776, 0.08299999684095383, 0.08799999952316284, -0.05900000035762787, -0.03799999877810478], "sparse": [0.0, 0.0, 0.0, 0.133, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "qtokens": 9}, {"q": "What does carbon footprint estimation depend on besides hardware power draw and grid carbon intensity?", "source": 3, "dense": [0.19200000166893005, 0.4059999883174896, 0.2709999978542328, 0.8360000252723694, 0.39500001072883606, 0.16300000250339508, 0.2160000056028366, 0.0989999994635582, 0.44200000166893005, 0.2409999966621399, 0.06800000369548798, 0.019999999552965164, 0.009999999776482582, 0.12999999523162842, 0.14499999582767487, 0.11500000208616257, 0.23399999737739563, 0.1889999955892563, 0.35899999737739563, 0.3009999990463257, 0.15199999511241913, 0.16899999976158142, 0.12800000607967377, 0.07999999821186066, 0.3160000145435333, 0.41100001335144043], "sparse": [0.088, 0.0, 0.021, 0.402, 0.023, 0.0, 0.0, 0.0, 0.046, 0.0, 0.0, 0.0, 0.0, 0.039, 0.0, 0.0, 0.0, 0.0, 0.0, 0.067, 0.021, 0.0, 0.0, 0.0, 0.098, 0.029], "qtokens": 16}, {"q": "In the 2024 study on inference costs, about how many grams of CO2-equivalent do the most efficient task-specific models emit per 1,000 extractive question-answering inferences?", "source": 4, "dense": [0.4399999976158142, 0.3100000023841858, 0.3240000009536743, 0.574999988079071, 0.7670000195503235, 0.210999995470047, 0.4480000138282776, 0.37599998712539673, 0.5550000071525574, 0.33399999141693115, 0.296999990940094, 0.28999999165534973, 0.2590000033378601, 0.21400000154972076, 0.33000001311302185, 0.23000000417232513, 0.44999998807907104, 0.42800000309944153, 0.43799999356269836, 0.42800000309944153, 0.17100000381469727, 0.4449999928474426, 0.36899998784065247, 0.36899998784065247, 0.34700000286102295, 0.5460000038146973], "sparse": [0.146, 0.034, 0.014, 0.023, 0.549, 0.0, 0.138, 0.01, 0.045, 0.0, 0.0, 0.009, 0.0, 0.06, 0.036, 0.038, 0.06, 0.086, 0.057, 0.072, 0.0, 0.0, 0.097, 0.059, 0.0, 0.241], "qtokens": 46}, {"q": "What is the name of the technique where a model is given retrieved external text at query time instead of relying only on what it learned during training?", "source": 5, "dense": [0.5199999809265137, 0.1289999932050705, 0.23000000417232513, 0.3019999861717224, 0.41999998688697815, 0.5889999866485596, 0.3659999966621399, 0.49799999594688416, 0.3840000033378601, -0.013000000268220901, 0.38199999928474426, 0.45899999141693115, 0.3709999918937683, 0.4359999895095825, 0.4480000138282776, 0.3779999911785126, 0.40400001406669617, 0.4410000145435333, 0.31200000643730164, 0.296999990940094, 0.06400000303983688, 0.7559999823570251, 0.46000000834465027, 0.6000000238418579, 0.22699999809265137, 0.32199999690055847], "sparse": [0.211, 0.0, 0.013, 0.036, 0.0, 0.473, 0.018, 0.014, 0.075, 0.0, 0.046, 0.0, 0.014, 0.123, 0.03, 0.082, 0.0, 0.095, 0.007, 0.018, 0.0, 0.336, 0.08, 0.033, 0.007, 0.085], "qtokens": 29}, {"q": "What size range (in billions of parameters) do small language models (SLMs) typically fall into?", "source": 6, "dense": [0.515999972820282, 0.2849999964237213, 0.4059999883174896, 0.3409999907016754, 0.4690000116825104, 0.3310000002384186, 0.7670000195503235, 0.5659999847412109, 0.39399999380111694, 0.3050000071525574, 0.4309999942779541, 0.46399998664855957, 0.48899999260902405, 0.492000013589859, 0.47699999809265137, 0.5529999732971191, 0.44600000977516174, 0.3930000066757202, 0.414000004529953, 0.42399999499320984, 0.2630000114440918, 0.39800000190734863, 0.5329999923706055, 0.4690000116825104, 0.289000004529953, 0.2770000100135803], "sparse": [0.011, 0.012, 0.0, 0.0, 0.096, 0.016, 0.333, 0.095, 0.0, 0.032, 0.023, 0.047, 0.037, 0.0, 0.107, 0.067, 0.029, 0.0, 0.04, 0.026, 0.025, 0.069, 0.016, 0.0, 0.026, 0.0], "qtokens": 21}, {"q": "What mechanism inside a transformer layer lets every position gather information from every other position?", "source": 7, "dense": [0.14499999582767487, 0.17100000381469727, 0.2460000067949295, 0.2150000035762787, 0.2460000067949295, 0.1809999942779541, 0.15800000727176666, 0.625, 0.2409999966621399, -0.019999999552965164, 0.19099999964237213, 0.257999986410141, 0.3889999985694885, 0.1860000044107437, 0.27799999713897705, 0.12600000202655792, 0.1979999989271164, 0.2540000081062317, 0.20600000023841858, 0.18000000715255737, 0.21799999475479126, 0.20999999344348907, 0.061000000685453415, 0.26499998569488525, 0.0949999988079071, 0.2590000033378601], "sparse": [0.0, 0.0, 0.0, 0.0, 0.0, 0.099, 0.0, 0.402, 0.026, 0.0, 0.0, 0.024, 0.14, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.084, 0.0, 0.021, 0.0, 0.0], "qtokens": 16}, {"q": "The original '5 cars' carbon estimate for the architecture-search model was later shown to be roughly how many times too high?", "source": 8, "dense": [0.23199999332427979, 0.24799999594688416, 0.32499998807907104, 0.6200000047683716, 0.4269999861717224, 0.12800000607967377, 0.27399998903274536, 0.20800000429153442, 0.6380000114440918, 0.2329999953508377, 0.21699999272823334, 0.1340000033378601, 0.07999999821186066, 0.10599999874830246, 0.15600000321865082, 0.23100000619888306, 0.27000001072883606, 0.22300000488758087, 0.3610000014305115, 0.35199999809265137, 0.24699999392032623, 0.2619999945163727, 0.2540000081062317, 0.14800000190734863, 0.2529999911785126, 0.3370000123977661], "sparse": [0.062, 0.009, 0.012, 0.126, 0.031, 0.041, 0.016, 0.024, 0.467, 0.084, 0.037, 0.0, 0.084, 0.01, 0.012, 0.016, 0.039, 0.01, 0.006, 0.011, 0.01, 0.028, 0.008, 0.013, 0.079, 0.053], "qtokens": 25}, {"q": "Per Fortune Business Insights, roughly what is the projected global NLP market size by 2034?", "source": 9, "dense": [0.14300000667572021, 0.3659999966621399, 0.16500000655651093, 0.26499998569488525, 0.21699999272823334, 0.028999999165534973, 0.3230000138282776, 0.09700000286102295, 0.3400000035762787, 0.7559999823570251, 0.12200000137090683, 0.02500000037252903, 0.02199999988079071, 0.026000000536441803, 0.2329999953508377, 0.026000000536441803, 0.17299999296665192, 0.1420000046491623, 0.17800000309944153, 0.17100000381469727, 0.11100000143051147, 0.07199999690055847, 0.1770000010728836, 0.026000000536441803, 0.17900000512599945, 0.14900000393390656], "sparse": [0.0, 0.101, 0.0, 0.0, 0.01, 0.0, 0.029, 0.035, 0.063, 0.505, 0.011, 0.019, 0.0, 0.0, 0.043, 0.0, 0.037, 0.0, 0.0, 0.011, 0.031, 0.025, 0.0, 0.0, 0.012, 0.013], "qtokens": 22}, {"q": "In what year did the Georgetown-IBM machine translation demonstration take place?", "source": 10, "dense": [0.3240000009536743, 0.1509999930858612, 0.17599999904632568, 0.08699999749660492, 0.2070000022649765, 0.20600000023841858, 0.4090000092983246, 0.3149999976158142, 0.4180000126361847, 0.12399999797344208, 0.7929999828338623, 0.44600000977516174, 0.32600000500679016, 0.2750000059604645, 0.39100000262260437, 0.2639999985694885, 0.5199999809265137, 0.35100001096725464, 0.3089999854564667, 0.3109999895095825, 0.12099999934434891, 0.38499999046325684, 0.23999999463558197, 0.42899999022483826, 0.11800000071525574, 0.07800000160932541], "sparse": [0.0, 0.033, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.038, 0.064, 0.271, 0.122, 0.0, 0.041, 0.018, 0.0, 0.109, 0.062, 0.048, 0.0, 0.0, 0.0, 0.0, 0.159, 0.0, 0.0], "qtokens": 14}, {"q": "In what year did Bahdanau, Cho and Bengio introduce the attention mechanism to fix early neural MT's single-vector bottleneck?", "source": 11, "dense": [0.25099998712539673, 0.14800000190734863, 0.34200000762939453, 0.1720000058412552, 0.35899999737739563, 0.20999999344348907, 0.3580000102519989, 0.3889999985694885, 0.3930000066757202, 0.1340000033378601, 0.40700000524520874, 0.4390000104904175, 0.460999995470047, 0.2980000078678131, 0.30300000309944153, 0.2770000100135803, 0.27000001072883606, 0.3089999854564667, 0.3799999952316284, 0.36399999260902405, 0.3449999988079071, 0.3059999942779541, 0.2669999897480011, 0.1599999964237213, 0.30399999022483826, 0.2409999966621399], "sparse": [0.047, 0.027, 0.05, 0.033, 0.0, 0.0, 0.018, 0.068, 0.021, 0.051, 0.059, 0.419, 0.149, 0.026, 0.013, 0.0, 0.035, 0.0, 0.039, 0.0, 0.0, 0.0, 0.0, 0.0, 0.014, 0.015], "qtokens": 26}, {"q": "What is the name of the architecture introduced by Vaswani et al. in 2017, built entirely around self-attention?", "source": 12, "dense": [0.11599999666213989, 0.12700000405311584, 0.12099999934434891, 0.18799999356269836, 0.20900000631809235, 0.17299999296665192, 0.21799999475479126, 0.33500000834465027, 0.31700000166893005, 0.11900000274181366, 0.31200000643730164, 0.09399999678134918, 0.4740000069141388, 0.1459999978542328, 0.3400000035762787, 0.15199999511241913, 0.1599999964237213, 0.14900000393390656, 0.1289999932050705, 0.17599999904632568, 0.11299999803304672, 0.19599999487400055, 0.12700000405311584, 0.04899999871850014, 0.125, 0.1899999976158142], "sparse": [0.03, 0.0, 0.0, 0.0, 0.023, 0.0, 0.0, 0.091, 0.1, 0.0, 0.0, 0.027, 0.533, 0.065, 0.088, 0.027, 0.0, 0.0, 0.0, 0.031, 0.0, 0.036, 0.019, 0.0, 0.0, 0.0], "qtokens": 29}, {"q": "What is the name of the model introduced by Mikolov et al. that produces word embeddings as a byproduct of predicting nearby words?", "source": 13, "dense": [0.43799999356269836, 0.061000000685453415, 0.25, 0.27900001406669617, 0.2930000126361847, 0.2639999985694885, 0.45399999618530273, 0.5540000200271606, 0.3499999940395355, 0.11299999803304672, 0.5009999871253967, 0.5270000100135803, 0.5120000243186951, 0.7680000066757202, 0.42899999022483826, 0.4350000023841858, 0.4309999942779541, 0.30799999833106995, 0.34299999475479126, 0.35100001096725464, 0.07400000095367432, 0.4339999854564667, 0.32499998807907104, 0.47999998927116394, 0.13300000131130219, 0.19300000369548798], "sparse": [0.084, 0.0, 0.015, 0.009, 0.0, 0.054, 0.021, 0.084, 0.052, 0.0, 0.0, 0.077, 0.148, 0.456, 0.12, 0.054, 0.0, 0.013, 0.008, 0.038, 0.0, 0.081, 0.01, 0.045, 0.009, 0.018], "qtokens": 28}, {"q": "In what year did Brown et al. show GPT-3 could perform many tasks via prompting at large scale?", "source": 14, "dense": [0.24500000476837158, 0.20000000298023224, 0.23199999332427979, 0.2549999952316284, 0.3889999985694885, 0.16599999368190765, 0.3499999940395355, 0.28299999237060547, 0.36399999260902405, 0.10499999672174454, 0.38600000739097595, 0.23999999463558197, 0.23000000417232513, 0.16200000047683716, 0.5490000247955322, 0.25200000405311584, 0.29499998688697815, 0.3100000023841858, 0.421999990940094, 0.31700000166893005, 0.2849999964237213, 0.3019999861717224, 0.32199999690055847, 0.1720000058412552, 0.18700000643730164, 0.3370000123977661], "sparse": [0.108, 0.032, 0.0, 0.0, 0.056, 0.0, 0.021, 0.0, 0.046, 0.062, 0.0, 0.0, 0.051, 0.027, 0.336, 0.042, 0.0, 0.0, 0.063, 0.032, 0.0, 0.073, 0.117, 0.017, 0.0, 0.0], "qtokens": 23}, {"q": "How many billion parameters does the dedicated Galician-Portuguese model described in Gamallo et al. have?", "source": 15, "dense": [0.3610000014305115, 0.164000004529953, 0.17599999904632568, 0.4090000092983246, 0.3959999978542328, 0.09799999743700027, 0.40400001406669617, 0.3330000042915344, 0.36899998784065247, 0.2370000034570694, 0.289000004529953, 0.21299999952316284, 0.27900001406669617, 0.20499999821186066, 0.26600000262260437, 0.6470000147819519, 0.296999990940094, 0.23399999737739563, 0.38999998569488525, 0.2370000034570694, 0.14000000059604645, 0.28299999237060547, 0.29899999499320984, 0.28299999237060547, 0.20999999344348907, 0.3019999861717224], "sparse": [0.07, 0.0, 0.013, 0.007, 0.028, 0.045, 0.052, 0.047, 0.043, 0.087, 0.0, 0.0, 0.048, 0.038, 0.077, 0.517, 0.0, 0.01, 0.033, 0.032, 0.0, 0.103, 0.008, 0.014, 0.007, 0.015], "qtokens": 23}, {"q": "According to the Green KNIGHT study, roughly what percentage energy reduction did their MT-specific recipe achieve?", "source": 16, "dense": [0.12800000607967377, 0.2409999966621399, 0.3310000002384186, 0.42100000381469727, 0.33899998664855957, 0.14900000393390656, 0.20999999344348907, 0.14300000667572021, 0.37599998712539673, 0.10499999672174454, 0.24300000071525574, 0.16300000250339508, 0.0820000022649765, 0.1469999998807907, 0.16699999570846558, 0.20800000429153442, 0.5099999904632568, 0.35499998927116394, 0.5090000033378601, 0.4300000071525574, 0.2460000067949295, 0.27399998903274536, 0.17900000512599945, 0.14100000262260437, 0.32499998807907104, 0.4790000021457672], "sparse": [0.0, 0.086, 0.013, 0.0, 0.077, 0.0, 0.0, 0.027, 0.036, 0.01, 0.081, 0.0, 0.0, 0.0, 0.0, 0.0, 0.409, 0.04, 0.117, 0.062, 0.011, 0.0, 0.028, 0.0, 0.028, 0.125], "qtokens": 20}, {"q": "What NLP task was quantization tested on specifically, per Shterionov and Vanmassenhove (2022)?", "source": 17, "dense": [0.28999999165534973, 0.22499999403953552, 0.37700000405311584, 0.28700000047683716, 0.4659999907016754, 0.20000000298023224, 0.4020000100135803, 0.2750000059604645, 0.4659999907016754, 0.18299999833106995, 0.4519999921321869, 0.32100000977516174, 0.26600000262260437, 0.23199999332427979, 0.421999990940094, 0.25600001215934753, 0.38600000739097595, 0.5759999752044678, 0.5590000152587891, 0.5210000276565552, 0.3319999873638153, 0.3310000002384186, 0.2409999966621399, 0.20100000500679016, 0.2280000001192093, 0.37299999594688416], "sparse": [0.0, 0.0, 0.048, 0.0, 0.079, 0.0, 0.095, 0.0, 0.048, 0.062, 0.0, 0.03, 0.0, 0.056, 0.072, 0.059, 0.074, 0.407, 0.099, 0.115, 0.0, 0.029, 0.0, 0.0, 0.0, 0.1], "qtokens": 28}, {"q": "Per Shi and Ding (2025), up to what percentage drop in code-generation pass rate did aggressive quantization cause for a 13B model?", "source": 18, "dense": [0.39899998903274536, 0.27900001406669617, 0.49300000071525574, 0.3569999933242798, 0.38199999928474426, 0.2160000056028366, 0.45500001311302185, 0.328000009059906, 0.4129999876022339, 0.24300000071525574, 0.3089999854564667, 0.3269999921321869, 0.1589999943971634, 0.28200000524520874, 0.2759999930858612, 0.3529999852180481, 0.3970000147819519, 0.48500001430511475, 0.6449999809265137, 0.578000009059906, 0.3959999978542328, 0.3240000009536743, 0.375, 0.18700000643730164, 0.289000004529953, 0.29899999499320984], "sparse": [0.035, 0.036, 0.051, 0.006, 0.0, 0.062, 0.071, 0.013, 0.012, 0.035, 0.0, 0.015, 0.013, 0.01, 0.012, 0.016, 0.023, 0.042, 0.442, 0.103, 0.0, 0.065, 0.028, 0.03, 0.007, 0.032], "qtokens": 33}, {"q": "Per Husom et al. (2025), which specific model family was tested for quantization energy efficiency on edge hardware?", "source": 19, "dense": [0.20499999821186066, 0.3190000057220459, 0.3840000033378601, 0.49300000071525574, 0.41200000047683716, 0.18700000643730164, 0.4339999854564667, 0.24199999868869781, 0.4909999966621399, 0.10700000077486038, 0.25200000405311584, 0.12700000405311584, 0.14100000262260437, 0.20200000703334808, 0.18299999833106995, 0.1080000028014183, 0.3630000054836273, 0.41100001335144043, 0.5870000123977661, 0.6850000023841858, 0.35100001096725464, 0.25099998712539673, 0.1550000011920929, 0.14100000262260437, 0.27799999713897705, 0.453000009059906], "sparse": [0.067, 0.074, 0.088, 0.03, 0.046, 0.043, 0.075, 0.028, 0.076, 0.037, 0.0, 0.0, 0.046, 0.037, 0.074, 0.043, 0.176, 0.131, 0.164, 0.449, 0.02, 0.065, 0.008, 0.013, 0.022, 0.109], "qtokens": 27}, {"q": "According to the NVIDIA T4 datasheet, what is the GPU's peak INT8 throughput in TOPS?", "source": 20, "dense": [0.12700000405311584, 0.2930000126361847, 0.40400001406669617, 0.21299999952316284, 0.2240000069141388, 0.13199999928474426, 0.2840000092983246, 0.3070000112056732, 0.29899999499320984, 0.09399999678134918, 0.2029999941587448, 0.15800000727176666, 0.12399999797344208, 0.11699999868869781, 0.2199999988079071, 0.125, 0.30000001192092896, 0.32100000977516174, 0.4429999887943268, 0.3569999933242798, 0.6800000071525574, 0.14499999582767487, 0.21899999678134918, 0.08500000089406967, 0.2540000081062317, 0.24400000274181366], "sparse": [0.0, 0.036, 0.04, 0.0, 0.0, 0.0, 0.044, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.413, 0.0, 0.0, 0.0, 0.0, 0.0], "qtokens": 22}, {"q": "In what year did Lewis et al. introduce the original Retrieval-Augmented Generation (RAG) framework?", "source": 21, "dense": [0.1599999964237213, 0.16300000250339508, 0.13500000536441803, 0.20800000429153442, 0.1720000058412552, 0.48100000619888306, 0.2720000147819519, 0.24899999797344208, 0.3700000047683716, 0.11999999731779099, 0.38199999928474426, 0.2199999988079071, 0.18400000035762787, 0.13099999725818634, 0.3199999928474426, 0.17299999296665192, 0.2680000066757202, 0.1940000057220459, 0.27399998903274536, 0.22699999809265137, 0.08699999749660492, 0.5360000133514404, 0.3529999852180481, 0.22100000083446503, 0.09799999743700027, 0.1289999932050705], "sparse": [0.032, 0.033, 0.0, 0.0, 0.0, 0.189, 0.031, 0.0, 0.078, 0.063, 0.0, 0.016, 0.035, 0.028, 0.065, 0.028, 0.0, 0.0, 0.066, 0.033, 0.0, 0.239, 0.117, 0.136, 0.0, 0.021], "qtokens": 22}, {"q": "In the Li et al. (2024) study, for what percentage of queries did RAG and long-context prompting produce identical answers?", "source": 22, "dense": [0.2630000114440918, 0.17299999296665192, 0.24799999594688416, 0.27799999713897705, 0.44699999690055847, 0.3540000021457672, 0.3269999921321869, 0.35199999809265137, 0.35499998927116394, 0.289000004529953, 0.335999995470047, 0.3869999945163727, 0.4000000059604645, 0.33799999952316284, 0.3869999945163727, 0.35199999809265137, 0.3400000035762787, 0.30000001192092896, 0.35100001096725464, 0.35899999737739563, 0.18400000035762787, 0.44699999690055847, 0.5929999947547913, 0.3440000116825104, 0.2160000056028366, 0.3009999990463257], "sparse": [0.026, 0.026, 0.014, 0.0, 0.044, 0.053, 0.02, 0.0, 0.026, 0.0, 0.0, 0.0, 0.028, 0.023, 0.085, 0.036, 0.0, 0.049, 0.077, 0.046, 0.0, 0.031, 0.475, 0.0, 0.034, 0.078], "qtokens": 30}, {"q": "What is the common short name for the retrieval-augmented machine translation method introduced by Khandelwal et al. in 2021?", "source": 23, "dense": [0.26899999380111694, 0.0560000017285347, 0.18000000715255737, 0.125, 0.21799999475479126, 0.4230000078678131, 0.453000009059906, 0.4059999883174896, 0.2980000078678131, 0.08799999952316284, 0.5950000286102295, 0.5669999718666077, 0.4399999976158142, 0.3490000069141388, 0.48899999260902405, 0.296999990940094, 0.6019999980926514, 0.4180000126361847, 0.25200000405311584, 0.30000001192092896, 0.0560000017285347, 0.5789999961853027, 0.46399998664855957, 0.7379999756813049, 0.08699999749660492, 0.10300000011920929], "sparse": [0.067, 0.0, 0.0, 0.0, 0.0, 0.097, 0.03, 0.0, 0.067, 0.026, 0.172, 0.118, 0.034, 0.067, 0.082, 0.028, 0.106, 0.06, 0.0, 0.032, 0.0, 0.15, 0.111, 0.35, 0.0, 0.0], "qtokens": 31}, {"q": "Roughly how many milliliters of water does Google estimate a single Gemini prompt consumes?", "source": 24, "dense": [0.19599999487400055, 0.29100000858306885, 0.30000001192092896, 0.2770000100135803, 0.38100001215934753, 0.13199999928474426, 0.27799999713897705, 0.17299999296665192, 0.3070000112056732, 0.24500000476837158, 0.23199999332427979, 0.19099999964237213, 0.1770000010728836, 0.15000000596046448, 0.16500000655651093, 0.17000000178813934, 0.23800000548362732, 0.1889999955892563, 0.24799999594688416, 0.20100000500679016, 0.24899999797344208, 0.22300000488758087, 0.3490000069141388, 0.16300000250339508, 0.796999990940094, 0.30300000309944153], "sparse": [0.031, 0.01, 0.0, 0.0, 0.011, 0.0, 0.022, 0.03, 0.053, 0.062, 0.048, 0.015, 0.017, 0.0, 0.016, 0.0, 0.014, 0.0, 0.0, 0.012, 0.011, 0.0, 0.048, 0.0, 0.639, 0.032], "qtokens": 19}, {"q": "Per Luccioni et al. (2024), roughly how many kilowatt-hours per 1,000 inferences does image generation average?", "source": 25, "dense": [0.34700000286102295, 0.33000001311302185, 0.3490000069141388, 0.42800000309944153, 0.41100001335144043, 0.20200000703334808, 0.31200000643730164, 0.34700000286102295, 0.41999998688697815, 0.3100000023841858, 0.2590000033378601, 0.24400000274181366, 0.2720000147819519, 0.19699999690055847, 0.27799999713897705, 0.2680000066757202, 0.38499999046325684, 0.3240000009536743, 0.4740000069141388, 0.367000013589859, 0.2590000033378601, 0.34700000286102295, 0.31200000643730164, 0.24500000476837158, 0.2919999957084656, 0.5440000295639038], "sparse": [0.059, 0.092, 0.051, 0.0, 0.194, 0.023, 0.023, 0.012, 0.052, 0.01, 0.011, 0.016, 0.033, 0.026, 0.062, 0.042, 0.013, 0.0, 0.017, 0.043, 0.011, 0.076, 0.112, 0.018, 0.013, 0.318], "qtokens": 34}]}/*RDATA*/;
+(() => {
+const $ = id => document.getElementById(id);
+const NS = "http://www.w3.org/2000/svg";
+const neg = s => String(s).replace(/-/g, "−");
+const press = (group, btn) => group.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b === btn ? "true" : "false"));
+function el(svg, tag, attrs, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) { if (k === "fill" && tag === "text") e.style.fill = v; else e.setAttribute(k, v); }
+  if (text != null) e.textContent = text;
+  svg.append(e); return e;
+}
+window.__askState = [];
+
+/* ---- the toy collection of Notebook 03b ---- */
+const DOCS = {
+  doc_carbon: "training a model produces carbon emissions measured once",
+  doc_energy: "running a model costs energy every single time it answers a query",
+  doc_water: "data centers consume water for cooling as well as electricity",
+  doc_retrieval: "a retriever finds relevant documents before the model reads them",
+  doc_quantize: "quantization stores numbers with fewer bits to save memory",
+};
+const WV = { energy: [4, 2], electricity: [4, 3], carbon: [3, 4], water: [1, 4], retriever: [0, 5], memory: [2, -3] };
+const words = t => t.toLowerCase().split(/\s+/).filter(Boolean);
+const textVec = t => { const ks = words(t).filter(w => WV[w]); if (!ks.length) return null; return [0, 1].map(i => ks.reduce((s, w) => s + WV[w][i], 0) / ks.length); };
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1], norm = a => Math.hypot(a[0], a[1]);
+const fn = x => +x.toFixed(2);
+const DVEC = Object.fromEntries(Object.entries(DOCS).map(([k, t]) => [k, textVec(t)]));
+
+/* ================= 1. dense ================= */
+let dq = textVec($("dQ").value), dk = 2, dsel = "doc_energy";
+const COL = { doc_carbon: "var(--muted)", doc_energy: "var(--blue)", doc_water: "var(--green)", doc_retrieval: "var(--neg)", doc_quantize: "var(--orange)" };
+function drawDense() {
+  const svg = $("dFig"); svg.innerHTML = "";
+  const O = [150, 230], S = 40, P = ([x, y]) => [O[0] + S * x, O[1] - S * y];
+  for (let x = -3; x <= 6; x++) el(svg, "line", { x1: P([x, -4])[0], x2: P([x, -4])[0], y1: P([0, -4])[1], y2: P([0, 5.5])[1], stroke: "var(--grid)" });
+  for (let y = -4; y <= 5; y++) el(svg, "line", { x1: P([-3, y])[0], x2: P([6.3, y])[0], y1: P([0, y])[1], y2: P([0, y])[1], stroke: "var(--grid)" });
+  el(svg, "line", { x1: P([-3, 0])[0], x2: P([6.3, 0])[0], y1: O[1], y2: O[1], stroke: "var(--muted)" });
+  el(svg, "line", { x1: O[0], x2: O[0], y1: P([0, -4])[1], y2: P([0, 5.5])[1], stroke: "var(--muted)" });
+  const arrow = (v, color, w, label, dx = 6, dy = -6) => {
+    const [x, y] = P(v), ang = Math.atan2(y - O[1], x - O[0]);
+    el(svg, "line", { x1: O[0], y1: O[1], x2: x, y2: y, stroke: color, "stroke-width": w, "stroke-linecap": "round" });
+    el(svg, "path", { d: `M${x - 10 * Math.cos(ang - 0.4)} ${y - 10 * Math.sin(ang - 0.4)} L${x} ${y} L${x - 10 * Math.cos(ang + 0.4)} ${y - 10 * Math.sin(ang + 0.4)}`, fill: "none", stroke: color, "stroke-width": w, "stroke-linejoin": "round" });
+    if (label) el(svg, "text", { x: x + dx, y: y + dy, fill: color }, label);
+  };
+  const rank = dq ? Object.keys(DOCS).sort((a, b) => dot(dq, DVEC[b]) / norm(DVEC[b]) - dot(dq, DVEC[a]) / norm(DVEC[a])) : [];
+  const top = new Set(rank.slice(0, dk));
+  const off = { doc_carbon: [-34, -10], doc_energy: [6, 14], doc_water: [-78, -6], doc_retrieval: [6, 4], doc_quantize: [6, 12] };
+  for (const [k, v] of Object.entries(DVEC)) arrow(v, COL[k], top.has(k) ? 3 : 1.5, `${k.slice(4)} (${neg(fn(v[0]))}, ${neg(fn(v[1]))})`, ...off[k]);
+  if (dq) {
+    arrow(dq, "var(--fg)", 2, null);
+    el(svg, "text", { x: P(dq)[0] + 8, y: P(dq)[1] - 10, fill: "var(--fg)", "font-weight": 500 }, `question (${neg(fn(dq[0]))}, ${neg(fn(dq[1]))})`);
+    const d = DVEC[dsel], a0 = Math.atan2(dq[1], dq[0]), a1 = Math.atan2(d[1], d[0]), r = 34;
+    const p0 = [O[0] + r * Math.cos(a0), O[1] - r * Math.sin(a0)], p1 = [O[0] + r * Math.cos(a1), O[1] - r * Math.sin(a1)];
+    el(svg, "path", { d: `M${p0[0]} ${p0[1]} A${r} ${r} 0 0 ${a1 > a0 ? 0 : 1} ${p1[0]} ${p1[1]}`, fill: "none", stroke: "var(--orange)", "stroke-width": 2 });
+  }
+  el(svg, "rect", { x: 0, y: 0, width: 420, height: 380, fill: "transparent", id: "dHit" });
+  $("dHit").addEventListener("click", e => {
+    const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    const v = [(p.x - O[0]) / S, (O[1] - p.y) / S];
+    if (Math.hypot(...v) > 0.3) { dq = [Math.round(v[0] * 2) / 2, Math.round(v[1] * 2) / 2]; $("dQ").value = ""; drawDense(); }
+  });
+  // table and arithmetic
+  if (!dq) { $("dTable").innerHTML = ""; $("dCalc").innerHTML = `<span>None of the question's words has a toy vector, so the question has no vector: dense retrieval cannot rank anything.</span>`; return; }
+  $("dTable").innerHTML = `<thead><tr><th class="l">document</th><th>vector</th><th>cosine</th><th>rank</th></tr></thead><tbody>` +
+    rank.map((k, i) => `<tr data-k="${k}" class="${k === dsel ? "sel " : ""}${top.has(k) ? "top" : ""}"><td class="l">${k}</td><td>(${neg(fn(DVEC[k][0]))}, ${neg(fn(DVEC[k][1]))})</td><td>${neg((dot(dq, DVEC[k]) / norm(dq) / norm(DVEC[k])).toFixed(3))}</td><td>${i + 1}${top.has(k) ? " ✓" : ""}</td></tr>`).join("") + "</tbody>";
+  const d = DVEC[dsel], qd = dot(dq, d), nq = norm(dq), nd = norm(d);
+  $("dCalc").innerHTML = `<span class="k">cosine(question, ${dsel})</span>` +
+    `<span>= (${neg(fn(dq[0]))}·${neg(fn(d[0]))} + ${neg(fn(dq[1]))}·${neg(fn(d[1]))}) ÷ (|q| × |d|)</span>` +
+    `<span>= ${neg(fn(qd))} ÷ (${nq.toFixed(2)} × ${nd.toFixed(2)})</span>` +
+    `<span>= ${neg(fn(qd))} ÷ ${(nq * nd).toFixed(2)} = <span class="r">${neg((qd / nq / nd).toFixed(3))}</span></span>` +
+    `<span class="k">the orange arc is the angle between the two arrows</span>`;
+}
+$("dQ").addEventListener("input", () => { dq = textVec($("dQ").value); drawDense(); });
+document.querySelectorAll("#dense [data-q]").forEach(b => b.onclick = () => { $("dQ").value = b.dataset.q; dq = textVec(b.dataset.q); drawDense(); });
+$("dK").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; dk = +b.dataset.k; press($("dK"), b); drawDense(); });
+$("dTable").addEventListener("click", e => { const r = e.target.closest("tr[data-k]"); if (r) { dsel = r.dataset.k; drawDense(); } });
+drawDense();
+window.__askState.push(() => `Section 1: question "${$("dQ").value}", vector ${dq ? dq.map(fn).join(", ") : "none"}, top ${dk}; selected ${dsel}`);
+
+/* ================= 2. sparse ================= */
+const N = Object.keys(DOCS).length;
+const df = w => Object.values(DOCS).filter(t => words(t).includes(w)).length;
+const idf = w => { const n = df(w); return n ? Math.log(N / n) : 0; };
+let ssel = "doc_energy";
+function drawSparse() {
+  const qw = [...new Set(words($("sQ").value))];
+  $("sDocs").innerHTML = Object.entries(DOCS).map(([k, t]) => `<div class="d"><span class="n">${k}</span><span>` +
+    t.split(" ").map(w => qw.includes(w) ? `<mark class="${df(w) === 1 ? "rare" : ""}">${w}</mark>` : w).join(" ") + "</span></div>").join("");
+  const rows = Object.entries(DOCS).map(([k, t]) => {
+    const ws = words(t), shared = qw.filter(w => ws.includes(w));
+    return { k, overlap: shared.length, tfidf: shared.reduce((s, w) => s + ws.filter(x => x === w).length * idf(w), 0), shared, ws };
+  }).sort((a, b) => b.tfidf - a.tfidf || b.overlap - a.overlap);
+  $("sTable").innerHTML = `<thead><tr><th class="l">document</th><th>shared words</th><th>TF-IDF</th></tr></thead><tbody>` +
+    rows.map((r, i) => `<tr data-k="${r.k}" class="${r.k === ssel ? "sel " : ""}${i === 0 && r.tfidf > 0 ? "top" : ""}"><td class="l">${r.k}</td><td>${r.overlap}</td><td>${r.tfidf.toFixed(2)}</td></tr>`).join("") + "</tbody>";
+  const r = rows.find(x => x.k === ssel);
+  $("sCalc").innerHTML = `<span class="k">TF-IDF(question, ${ssel}) = sum over shared words of tf × idf</span>` +
+    (r.shared.length ? r.shared.map(w => `<span>${w}: tf ${r.ws.filter(x => x === w).length} × ln(5 ÷ ${df(w)}) = ${r.ws.filter(x => x === w).length} × ${idf(w).toFixed(2)} = ${(r.ws.filter(x => x === w).length * idf(w)).toFixed(2)}</span>`).join("") +
+      `<span>sum = <span class="r">${r.tfidf.toFixed(2)}</span></span>` : "<span>no shared words: score 0</span>");
+}
+$("sQ").addEventListener("input", drawSparse);
+document.querySelectorAll("#sparse [data-q]").forEach(b => b.onclick = () => { $("sQ").value = b.dataset.q; drawSparse(); });
+$("sTable").addEventListener("click", e => { const r = e.target.closest("tr[data-k]"); if (r) { ssel = r.dataset.k; drawSparse(); } });
+drawSparse();
+window.__askState.push(() => `Section 2: question "${$("sQ").value}"; scores ${$("sTable").textContent.replace(/\s+/g, " ")}`);
+
+/* ================= 3. the course quiz ================= */
+const D = RDATA;
+let qi = 2, qm = "dense", qk = 2;
+$("qSel").innerHTML = D.questions.map((q, i) => `<option value="${i}">${i + 1}. ${q.q.replace(/</g, "&lt;")}</option>`).join("");
+$("qSel").value = qi;
+const ranked = (q, m) => q[m].map((s, i) => [i, s]).sort((a, b) => b[1] - a[1]);
+const found = (q, m, k) => ranked(q, m).slice(0, k).some(([i]) => i === q.source);
+function drawQuiz() {
+  const q = D.questions[qi], r = ranked(q, qm), top = new Set(r.slice(0, qk).map(x => x[0]));
+  const max = Math.max(...r.map(x => x[1]), 0.01);
+  $("qBars").innerHTML = r.map(([i, s]) => `<div class="bar${top.has(i) ? " in" : ""}${i === q.source ? " src" : ""}"><span class="w" title="${D.docs[i]}">${D.docs[i]}</span><span class="track"><span class="fill" style="width:${Math.max(0, s) / max * 100}%"></span></span><span>${s.toFixed(2)}</span></div>`).join("");
+  const ok = top.has(q.source), pos = r.findIndex(x => x[0] === q.source) + 1;
+  $("qVerdict").className = "verdict " + (ok ? "ok" : "bad");
+  $("qVerdict").textContent = ok ? `Found: the right document, ${D.docs[q.source]}, is in the top ${qk}.` :
+    `Missed: the right document, ${D.docs[q.source]}, is ranked ${pos}. The model will not see it.`;
+  const acc = D.questions.filter(x => found(x, qm, qk)).length;
+  const all = D.qwen_tokens.reduce((a, b) => a + b, 0) + q.qtokens;
+  const sub = [...top].reduce((a, i) => a + D.qwen_tokens[i], 0) + q.qtokens;
+  $("qStats").innerHTML = `<span>${qm === "dense" ? "dense" : "TF-IDF"}, top ${qk}: right document found for <b>${acc} of 26</b> questions</span>`;
+  const svg = $("qFig"); svg.innerHTML = "";
+  const W = 220, bar = (y, label, v, vmax, color, txt) => {
+    el(svg, "text", { x: 0, y: y + 13, class: "lab" }, label);
+    el(svg, "rect", { x: 110, y, width: Math.max(2, v / vmax * W), height: 18, rx: 3, fill: color });
+    el(svg, "text", { x: 116 + Math.max(2, v / vmax * W), y: y + 13 }, txt);
+  };
+  el(svg, "text", { x: 0, y: 14, class: "lab" }, "tokens read");
+  bar(24, "all 26 documents", all, all, "var(--muted)", all.toLocaleString("en-US"));
+  bar(48, `top ${qk}`, sub, all, "var(--blue)", sub.toLocaleString("en-US"));
+  el(svg, "text", { x: 0, y: 108, class: "lab" }, "pairs attention compares (tokens²)");
+  bar(118, "all 26 documents", all * all, all * all, "var(--muted)", (all * all / 1e6).toFixed(1) + " million");
+  bar(142, `top ${qk}`, sub * sub, all * all, "var(--blue)", sub * sub >= 1e6 ? (sub * sub / 1e6).toFixed(2) + " million" : (sub * sub).toLocaleString("en-US"));
+  el(svg, "text", { x: 110, y: 190, fill: "var(--blue)" }, `${(all / sub).toFixed(1)} times fewer tokens, ${(all * all / sub / sub).toFixed(0)} times fewer pairs`);
+}
+$("qSel").onchange = () => { qi = +$("qSel").value; drawQuiz(); };
+$("qM").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; qm = b.dataset.m; press($("qM"), b); drawQuiz(); });
+$("qK").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; qk = +b.dataset.k; press($("qK"), b); drawQuiz(); });
+drawQuiz();
+window.__askState.push(() => { const q = D.questions[qi]; return `Section 3: question "${q.q}", right document ${D.docs[q.source]}, ${qm}, top ${qk}; top documents ${ranked(q, qm).slice(0, 5).map(([i, s]) => D.docs[i] + " " + s).join(", ")}`; });
+
+/* ================= 4. the window ================= */
+(() => {
+  const svg = $("wFig"), order = D.docs.map((_, i) => i).sort((a, b) => D.minilm_tokens[b] - D.minilm_tokens[a]);
+  const X0 = 250, SC = 2.1, H = 17, G = 21, win = D.window;
+  const defs = el(svg, "defs", {});
+  const pat = el(defs, "pattern", { id: "hatch", width: 6, height: 6, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
+  el(pat, "line", { x1: 0, y1: 0, x2: 0, y2: 6, stroke: "var(--neg)", "stroke-width": 2 });
+  order.forEach((i, r) => {
+    const y = 10 + r * G, n = D.minilm_tokens[i], keep = Math.min(n, win);
+    el(svg, "text", { x: X0 - 8, y: y + 13, "text-anchor": "end" }, D.docs[i]);
+    el(svg, "rect", { x: X0, y, width: keep * SC, height: H, fill: "var(--blue)", opacity: 0.8 });
+    if (n > win) el(svg, "rect", { x: X0 + win * SC, y, width: (n - win) * SC, height: H, fill: "url(#hatch)", stroke: "var(--neg)", "stroke-width": 0.8 });
+    el(svg, "text", { x: X0 + n * SC + 6, y: y + 13, class: "m" }, String(n));
+    if (D.docs[i] === "training_vs_inference") el(svg, "text", { x: X0 + n * SC + 40, y: y + 13, fill: "var(--neg)" }, "← its quiz answer is in the hatched part");
+  });
+  const yb = 10 + order.length * G;
+  el(svg, "line", { x1: X0 + win * SC, x2: X0 + win * SC, y1: 2, y2: yb + 4, stroke: "var(--orange)", "stroke-width": 2, "stroke-dasharray": "5 4" });
+  el(svg, "text", { x: X0 + win * SC, y: yb + 20, "text-anchor": "middle", fill: "var(--orange)" }, `${win} tokens: what MiniLM reads`);
+  const over = D.minilm_tokens.filter(n => n > win).length;
+  $("wStats").innerHTML = `<span>documents longer than the window: <b>${over} of 26</b></span><span>longest: <b>${Math.max(...D.minilm_tokens)}</b> tokens</span>`;
+})();
+})();
+</script>
+
+<script>
+const ASK_RULES = `You answer questions from students on an interactive teaching page, "Retrieval, Step by Step", for Session 3 of a course on green NLP (Universidade da Coruña). Answer in plain, short sentences, at the level of a student who knows what an embedding and cosine similarity are. Use the page's own numbers and say which section you mean. If the question is not about this page or retrieval, say so briefly.
+
+The page:
+- Section 1, dense retrieval on toy vectors (Notebook 03b): word vectors energy (4,2), electricity (4,3), carbon (3,4), water (1,4), retriever (0,5), memory (2,−3); a text's vector is the average of its known words' vectors. Five documents: doc_carbon (3,4), doc_energy (4,2), doc_water (2.5,3.5), doc_retrieval (0,5), doc_quantize (2,−3). Ranking by cosine similarity, top k kept. Question B, "what does it cost in electricity to get an answer", has the vector (4,3): cosine 0.984 with doc_energy, 0.96 with doc_carbon, 0.953 with doc_water.
+- Section 2, sparse retrieval on the same five documents: word overlap counts shared words; TF-IDF sums tf × ln(5 / document frequency) over shared words. Question B shares no topic word with doc_energy, only "it", which happens to occur in one document here; doc_water (electricity), doc_energy (it) and doc_quantize (to) tie at 1.61. On five documents, idf is unreliable.
+- Section 3, the 26 documents and 26 questions of Notebook 03a, with similarities precomputed by the notebook's models: dense = paraphrase-multilingual-MiniLM-L12-v2, sparse = TF-IDF with English stop words. With k = 2, dense finds the right document for 23 of 26 questions, TF-IDF for 26. Dense misses: training_vs_inference (its answer is past MiniLM's 128-token window), measuring_carbon for the PUE question (an acronym), rag_concept (rag_paper ranks above it). Tokens are counted with Qwen2.5's tokenizer: all 26 documents are 4,031 tokens.
+- Section 4: MiniLM reads at most 128 tokens; 23 of the 26 documents are longer, and the rest is not embedded. Real systems split documents into chunks.`;
+(async () => {
+  // window.claude exists only inside a Claude viewer; elsewhere the button stays hidden
+  const sample = window.claude ? await window.claude.use("sample") : null;
+  if (!sample) return;
+  const pageState = () => (window.__askState || []).map(f => { try { return f(); } catch (e) { return ""; } }).filter(Boolean).join("\n");
+  const btn = document.getElementById("askbtn"), panel = document.getElementById("askpanel"), log = document.getElementById("asklog");
+  const form = document.getElementById("askform"), input = document.getElementById("askinput"), send = document.getElementById("asksend"), stop = document.getElementById("askstop");
+  let turns = [], ctl = null;
+  btn.hidden = false;
+  btn.onclick = () => { panel.hidden = false; btn.hidden = true; input.focus(); };
+  document.getElementById("askclose").onclick = () => { panel.hidden = true; btn.hidden = false; };
+  document.getElementById("askclear").onclick = () => { ctl?.abort(); turns = []; log.querySelectorAll(".q, .a, .err").forEach(n => n.remove()); };
+  stop.onclick = () => ctl?.abort();
+  input.addEventListener("keydown", e => { e.stopPropagation(); if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
+  const add = (cls, text) => { const el = document.createElement("div"); el.className = cls; el.textContent = text; log.append(el); log.scrollTop = log.scrollHeight; return el; };
+  const copy = { not_granted: "Claude is not allowed on this page for you.", sampling_disabled: "Claude is not available for this account.", rate_limited: "Too many questions for now. Try again in a little while.", session_expired: "Please sign in to Claude again.", refused: "Claude can't answer that. Try asking differently.", empty_completion: "No answer came back. Try asking differently." };
+  form.onsubmit = async e => {
+    e.preventDefault();
+    const q = input.value.trim();
+    if (!q || ctl) return;
+    input.value = ""; add("q", q);
+    const out = add("a note", "Thinking...");
+    turns.push({ role: "user", content: q });
+    const recent = turns.slice(-12);
+    const msgs = [{ role: "user", content: ASK_RULES + "\n\nCurrent state of the page:\n" + pageState() }, ...(recent[0].role === "assistant" ? recent.slice(1) : recent)];
+    ctl = new AbortController(); send.hidden = true; stop.hidden = false;
+    try {
+      const { text, truncated } = await sample(msgs, { cache: false, signal: ctl.signal, onText: ({ text }) => { out.className = "a"; out.textContent = text; log.scrollTop = log.scrollHeight; } });
+      out.className = "a"; out.textContent = text + (truncated ? "\n[cut short]" : "");
+      turns.push({ role: "assistant", content: text });
+    } catch (err) {
+      if (err.code === "cancelled") { out.className = "a"; out.textContent = (err.text || "") + (err.text ? "\n[stopped]" : "[stopped]"); }
+      else {
+        out.className = "a"; out.textContent = err.code === "refused" ? "" : (err.text || "");
+        add("note err", copy[err.code] || "Something went wrong. Try again.");
+        if (err.code === "not_granted" || err.code === "sampling_disabled") { form.hidden = true; }
+      }
+      turns.pop();
+    } finally { ctl = null; send.hidden = false; stop.hidden = true; }
+  };
+})();
+</script>
+
+</body>
+</html>
