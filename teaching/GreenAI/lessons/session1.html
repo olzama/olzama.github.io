@@ -433,11 +433,25 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     </div>
     <div class="col">
       <p class="label">An NVIDIA T4 GPU</p>
-      <div class="chain">
-        <span>maximum power</span><span class="r">70 W</span>
-        <span>for one hour</span><span class="r">70 W × 1 h = 70 Wh</span>
-        <span>in kilowatt-hours</span><span class="r">70 Wh = 0.07 kWh</span>
-      </div>
+      <div class="board">
+      <svg viewBox="0 0 400 245" role="img" aria-label="Energy is power times time: 70 W × 1 h = 70 Wh; 70 Wh × 1 kWh / 1000 Wh = 0.07 kWh, the watt-hours cancel">
+<text y="80" font-size="26" style="fill:var(--blue)" data-s="1" data-d="0" data-line="E1" data-x0="20" id="p" data-gap="80">70 W</text>
+<text y="40" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0" data-a="fade" data-line="E1l" data-at="p">maximum power</text>
+<text y="80" font-size="26" style="fill:currentColor" data-s="2" data-d="0" data-line="E1" id="tx">×</text>
+<text y="80" font-size="26" style="fill:var(--green)" data-s="2" data-d="0.2" data-line="E1" id="t">1 h</text>
+<text y="40" font-size="18" style="fill:var(--muted)" data-s="2" data-d="0" data-a="fade" data-line="E1l" data-at="tx">for one hour</text>
+<text y="80" font-size="26" style="fill:currentColor" data-s="3" data-d="0" data-line="E1">= 70 W·h = 70 Wh</text>
+<text y="212" font-size="26" style="fill:currentColor" data-s="4" data-d="0" data-line="E2" data-x0="20">70</text>
+<text y="212" font-size="26" style="fill:currentColor" data-s="4" data-d="0" data-line="E2" id="wh1" data-gap="12">Wh</text>
+<text y="212" font-size="26" style="fill:currentColor" data-s="5" data-d="0" data-line="E2" id="cx">×</text>
+<g class="bfrac" data-line="E2"><text class="num" y="196" font-size="26" style="fill:currentColor" data-s="5" data-d="0">1</text><text class="num" y="196" font-size="26" style="fill:currentColor" id="kwh" data-s="5" data-d="0">kWh</text><line class="bar" y1="205" y2="205" stroke="currentColor" stroke-width="2" data-s="5" data-d="0"/><text class="den" y="231" font-size="26" style="fill:currentColor" data-s="6" data-d="0">1000</text><text class="den" y="231" font-size="26" style="fill:currentColor" id="wh2" data-s="6" data-d="0">Wh</text></g>
+<text y="150" font-size="18" style="fill:var(--muted)" data-s="5" data-d="0.3" data-a="fade" data-line="E2l" data-at="cx">1 kWh = 1000 Wh</text>
+<path data-strike="wh1" d="M0 0" fill="none" stroke="var(--neg)" stroke-width="2.5" stroke-linecap="round" data-s="7" data-d="0" data-t="0.3"/>
+<path data-strike="wh2" d="M0 0" fill="none" stroke="var(--neg)" stroke-width="2.5" stroke-linecap="round" data-s="7" data-d="0.4" data-t="0.3"/>
+<text y="212" font-size="26" style="fill:var(--blue)" data-s="8" data-d="0" data-line="E2">= 0.07 kWh</text>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
+    </div>
       <p class="muted">A real run draws less than the maximum, so 0.07 kWh is an upper bound for the GPU alone.</p>
     </div>
   </div>
@@ -463,12 +477,35 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       </ul>
     </div>
     <div class="col">
-      <div class="chain">
-        <span>GPU energy</span><span class="r">0.07 kWh</span>
-        <span>× PUE 1.1</span><span class="r">≈ 0.077 kWh</span>
-        <span>× 200 g CO₂eq/kWh</span><span class="r">≈ 15 g CO₂eq</span>
-        <span>water: × WUE 1.15 L/kWh</span><span class="r">≈ 0.08 L of water</span>
-      </div>
+      <div class="board">
+      <svg viewBox="0 0 420 355" role="img" aria-label="0.07 kWh × PUE 1.1 ≈ 0.077 kWh; 0.077 kWh × 200 g CO₂eq / kWh ≈ 15 g CO₂eq; 0.07 kWh × 1.15 L / kWh ≈ 0.08 L of water; the kilowatt-hours cancel">
+<text y="72" font-size="26" style="fill:currentColor" data-s="1" data-d="0" data-line="C1" data-x0="20" id="g">0.07 kWh</text>
+<text y="34" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0" data-a="fade" data-line="C1l" data-at="g">GPU energy</text>
+<text y="72" font-size="26" style="fill:currentColor" data-s="2" data-d="0" data-line="C1" id="px">×</text>
+<text y="72" font-size="26" style="fill:var(--orange)" data-s="2" data-d="0.2" data-line="C1">1.1</text>
+<text y="34" font-size="18" style="fill:var(--muted)" data-s="2" data-d="0" data-a="fade" data-line="C1l" data-at="px">PUE</text>
+<text y="72" font-size="26" style="fill:currentColor" data-s="3" data-d="0" data-line="C1" id="dx">≈</text>
+<text y="72" font-size="26" style="fill:currentColor" data-s="3" data-d="0.2" data-line="C1">0.077 kWh</text>
+<text y="34" font-size="18" style="fill:var(--muted)" data-s="3" data-d="0" data-a="fade" data-line="C1l" data-at="dx">the whole data center</text>
+<text y="198" font-size="26" style="fill:currentColor" data-s="4" data-d="0" data-line="C2" data-x0="20">0.077</text>
+<text y="198" font-size="26" style="fill:currentColor" data-s="4" data-d="0" data-line="C2" id="k1" data-gap="12">kWh</text>
+<text y="198" font-size="26" style="fill:currentColor" data-s="5" data-d="0" data-line="C2" id="ix">×</text>
+<g class="bfrac" data-line="C2"><text class="num" y="182" font-size="26" style="fill:var(--orange)" data-s="5" data-d="0">200 g CO₂eq</text><line class="bar" y1="191" y2="191" stroke="currentColor" stroke-width="2" data-s="5" data-d="0"/><text class="den" y="217" font-size="26" style="fill:var(--orange)" data-s="6" data-d="0">1</text><text class="den" y="217" font-size="26" style="fill:var(--orange)" id="k2" data-s="6" data-d="0">kWh</text></g>
+<text y="128" font-size="18" style="fill:var(--muted)" data-s="5" data-d="0.3" data-a="fade" data-line="C2l" data-at="ix">carbon intensity of the grid</text>
+<path data-strike="k1" d="M0 0" fill="none" stroke="var(--neg)" stroke-width="2.5" stroke-linecap="round" data-s="7" data-d="0" data-t="0.3"/>
+<path data-strike="k2" d="M0 0" fill="none" stroke="var(--neg)" stroke-width="2.5" stroke-linecap="round" data-s="7" data-d="0.4" data-t="0.3"/>
+<text y="198" font-size="26" style="fill:var(--blue)" data-s="8" data-d="0" data-line="C2">≈ 15 g CO₂eq</text>
+<text y="330" font-size="26" style="fill:currentColor" data-s="9" data-d="0" data-line="C3" data-x0="20" id="w0">0.07</text>
+<text y="330" font-size="26" style="fill:currentColor" data-s="9" data-d="0" data-line="C3" id="k3" data-gap="12">kWh</text>
+<text y="262" font-size="18" style="fill:var(--muted)" data-s="9" data-d="0" data-a="fade" data-line="C3l" data-at="w0">water: the GPU energy (before PUE) × WUE</text>
+<text y="330" font-size="26" style="fill:currentColor" data-s="10" data-d="0" data-line="C3" id="wx">×</text>
+<g class="bfrac" data-line="C3"><text class="num" y="314" font-size="26" style="fill:var(--green)" data-s="10" data-d="0">1.15 L</text><line class="bar" y1="323" y2="323" stroke="currentColor" stroke-width="2" data-s="10" data-d="0"/><text class="den" y="349" font-size="26" style="fill:var(--green)" data-s="11" data-d="0">1</text><text class="den" y="349" font-size="26" style="fill:var(--green)" id="k4" data-s="11" data-d="0">kWh</text></g>
+<path data-strike="k3" d="M0 0" fill="none" stroke="var(--neg)" stroke-width="2.5" stroke-linecap="round" data-s="12" data-d="0" data-t="0.3"/>
+<path data-strike="k4" d="M0 0" fill="none" stroke="var(--neg)" stroke-width="2.5" stroke-linecap="round" data-s="12" data-d="0.4" data-t="0.3"/>
+<text y="330" font-size="26" style="fill:var(--blue)" data-s="13" data-d="0" data-line="C3">≈ 0.08 L of water</text>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
+    </div>
       <p class="muted">Example values. Real ones depend on the data center and the grid.</p>
       <p class="muted">Notebook 1 measures with CodeCarbon: it tracks the power of the processor, GPU and memory while your code runs, and multiplies the energy by your region's carbon intensity.</p>
     </div>
@@ -631,10 +668,38 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   <header><span class="kind">Step 1 · N-grams</span><h2>Count, then divide</h2></header>
   <div class="body cols">
     <div class="col">
-      <p class="label">The corpus</p>
-      <div class="corpus"><span><mark>my aunt</mark> stayed quiet</span><span><mark>my aunt</mark> spoke wisely</span><span><mark>my uncle</mark> stayed quiet</span></div>
-      <div class="formula">P(w<sub>i</sub> | w<sub>i−1</sub>) = <span class="frac"><span>Count(w<sub>i−1</sub> w<sub>i</sub>)</span><span>Count(w<sub>i−1</sub>)</span></span></div>
-      <div class="big"><span>P(aunt | my) = 2/3 ≈ 0.67</span><span>P(uncle | my) = 1/3 ≈ 0.33</span></div>
+    <div class="board">
+      <svg viewBox="0 0 620 470" role="img" aria-label="Counting bigrams in the corpus my aunt stayed quiet, my aunt spoke wisely, my uncle stayed quiet: P(w_i | w_i−1) = Count(w_i−1 w_i) / Count(w_i−1); P(aunt | my) = 2/3 ≈ 0.67; P(uncle | my) = 1/3 ≈ 0.33">
+<text x="30.0" y="26.0" font-size="20" style="fill:var(--muted)" data-s="1" data-d="0" data-a="fade">the corpus</text>
+<text y="72" font-size="26" style="fill:currentColor" data-s="1" data-d="0.15" data-line="C1" data-x0="30" id="w10" data-gap="12">my</text>
+<text y="72" font-size="26" style="fill:currentColor" data-s="1" data-d="0.15" data-line="C1" id="w11" data-gap="12">aunt</text>
+<text y="72" font-size="26" style="fill:currentColor" data-s="1" data-d="0.15" data-line="C1" id="w12" data-gap="12">stayed</text>
+<text y="72" font-size="26" style="fill:currentColor" data-s="1" data-d="0.15" data-line="C1" id="w13" data-gap="12">quiet</text>
+<text y="122" font-size="26" style="fill:currentColor" data-s="1" data-d="0.3" data-line="C2" data-x0="30" id="w20" data-gap="12">my</text>
+<text y="122" font-size="26" style="fill:currentColor" data-s="1" data-d="0.3" data-line="C2" id="w21" data-gap="12">aunt</text>
+<text y="122" font-size="26" style="fill:currentColor" data-s="1" data-d="0.3" data-line="C2" id="w22" data-gap="12">spoke</text>
+<text y="122" font-size="26" style="fill:currentColor" data-s="1" data-d="0.3" data-line="C2" id="w23" data-gap="12">wisely</text>
+<text y="172" font-size="26" style="fill:currentColor" data-s="1" data-d="0.45" data-line="C3" data-x0="30" id="w30" data-gap="12">my</text>
+<text y="172" font-size="26" style="fill:currentColor" data-s="1" data-d="0.45" data-line="C3" id="w31" data-gap="12">uncle</text>
+<text y="172" font-size="26" style="fill:currentColor" data-s="1" data-d="0.45" data-line="C3" id="w32" data-gap="12">stayed</text>
+<text y="172" font-size="26" style="fill:currentColor" data-s="1" data-d="0.45" data-line="C3" id="w33" data-gap="12">quiet</text>
+<text y="250" font-size="26" style="fill:currentColor" data-s="2" data-d="0" data-line="F" data-x0="30">P(w<tspan dy="6" font-size="0.68em">i</tspan><tspan dy="-6"> | </tspan>w<tspan dy="6" font-size="0.68em">i−1</tspan><tspan dy="-6">) =</tspan></text>
+<g class="bfrac" data-line="F"><text class="num" y="227" font-size="26" style="fill:var(--orange)" data-s="3" data-d="0">Count(w<tspan dy="6" font-size="0.68em">i−1</tspan><tspan dy="-6"> </tspan>w<tspan dy="6" font-size="0.68em">i</tspan><tspan dy="-6">)</tspan></text><line class="bar" y1="243" y2="243" stroke="currentColor" stroke-width="2" data-s="3" data-d="0"/><text class="den" y="276" font-size="26" style="fill:var(--blue)" data-s="4" data-d="0">Count(w<tspan dy="6" font-size="0.68em">i−1</tspan><tspan dy="-6">)</tspan></text></g>
+<text y="345" font-size="26" style="fill:currentColor" data-s="5" data-d="0" data-line="A" data-x0="30">P(aunt | my) =</text>
+<rect data-box="#w10 #w11" data-pad="8" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="6" data-d="0" data-t="0.5"/>
+<rect data-box="#w20 #w21" data-pad="8" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="6" data-d="0.5" data-t="0.5"/>
+<path data-ul="w10" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="7" data-d="0.0" data-t="0.4"/>
+<path data-ul="w20" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="7" data-d="0.3" data-t="0.4"/>
+<path data-ul="w30" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="7" data-d="0.6" data-t="0.4"/>
+<g class="bfrac" data-line="A"><text class="num" y="329" font-size="26" style="fill:var(--orange)" data-s="6" data-d="0">2</text><line class="bar" y1="338" y2="338" stroke="currentColor" stroke-width="2" data-s="6" data-d="0"/><text class="den" y="364" font-size="26" style="fill:var(--blue)" data-s="7" data-d="0">3</text></g>
+<text y="345" font-size="26" style="fill:currentColor" data-s="8" data-d="0" data-line="A">≈ 0.67</text>
+<text y="435" font-size="26" style="fill:currentColor" data-s="9" data-d="0" data-line="U" data-x0="30">P(uncle | my) =</text>
+<rect data-box="#w30 #w31" data-pad="8" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="10" data-d="0" data-t="0.5"/>
+<g class="bfrac" data-line="U"><text class="num" y="419" font-size="26" style="fill:var(--green)" data-s="10" data-d="0">1</text><line class="bar" y1="428" y2="428" stroke="currentColor" stroke-width="2" data-s="10" data-d="0"/><text class="den" y="454" font-size="26" style="fill:var(--blue)" data-s="11" data-d="0">3</text></g>
+<text y="435" font-size="26" style="fill:currentColor" data-s="12" data-d="0" data-line="U">≈ 0.33</text>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
+    </div>
     </div>
     <div class="col">
       <ul class="points">
@@ -1231,8 +1296,39 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   <header><span class="kind">Step 1 → Step 2</span><h2>What n-grams cannot see</h2></header>
   <div class="body cols">
     <div class="col">
-      <div class="corpus"><span>my <mark>aunt</mark> stayed quiet</span><span>my <mark>aunt</mark> spoke wisely</span><span>my <mark>uncle</mark> stayed quiet</span></div>
-      <div class="big"><span>P(spoke | aunt) = 1/2</span><span>P(spoke | uncle) = 0</span></div>
+    <div class="board">
+      <svg viewBox="0 0 620 380" role="img" aria-label="P(spoke | aunt) = 1/2 = 0.5, but P(spoke | uncle) = 0/1 = 0, because the corpus has no “uncle spoke”, although aunt and uncle have the same neighbors, my before and stayed after">
+<text x="30.0" y="26.0" font-size="20" style="fill:var(--muted)" data-s="1" data-d="0" data-a="fade">the corpus</text>
+<text y="72" font-size="26" style="fill:currentColor" data-s="1" data-d="0.15" data-line="C1" data-x0="30" id="m10" data-gap="12">my</text>
+<text y="72" font-size="26" style="fill:currentColor" data-s="1" data-d="0.15" data-line="C1" id="m11" data-gap="12">aunt</text>
+<text y="72" font-size="26" style="fill:currentColor" data-s="1" data-d="0.15" data-line="C1" id="m12" data-gap="12">stayed</text>
+<text y="72" font-size="26" style="fill:currentColor" data-s="1" data-d="0.15" data-line="C1" id="m13" data-gap="12">quiet</text>
+<text y="122" font-size="26" style="fill:currentColor" data-s="1" data-d="0.3" data-line="C2" data-x0="30" id="m20" data-gap="12">my</text>
+<text y="122" font-size="26" style="fill:currentColor" data-s="1" data-d="0.3" data-line="C2" id="m21" data-gap="12">aunt</text>
+<text y="122" font-size="26" style="fill:currentColor" data-s="1" data-d="0.3" data-line="C2" id="m22" data-gap="12">spoke</text>
+<text y="122" font-size="26" style="fill:currentColor" data-s="1" data-d="0.3" data-line="C2" id="m23" data-gap="12">wisely</text>
+<text y="172" font-size="26" style="fill:currentColor" data-s="1" data-d="0.45" data-line="C3" data-x0="30" id="m30" data-gap="12">my</text>
+<text y="172" font-size="26" style="fill:currentColor" data-s="1" data-d="0.45" data-line="C3" id="m31" data-gap="12">uncle</text>
+<text y="172" font-size="26" style="fill:currentColor" data-s="1" data-d="0.45" data-line="C3" id="m32" data-gap="12">stayed</text>
+<text y="172" font-size="26" style="fill:currentColor" data-s="1" data-d="0.45" data-line="C3" id="m33" data-gap="12">quiet</text>
+<text y="250" font-size="26" style="fill:currentColor" data-s="2" data-d="0" data-line="A" data-x0="30">P(spoke | aunt) =</text>
+<rect data-box="#m21 #m22" data-pad="8" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="3" data-d="0" data-t="0.5"/>
+<path data-ul="m11" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="4" data-d="0" data-t="0.4"/>
+<path data-ul="m21" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="4" data-d="0.3" data-t="0.4"/>
+<g class="bfrac" data-line="A"><text class="num" y="234" font-size="26" style="fill:var(--orange)" data-s="3" data-d="0">1</text><line class="bar" y1="243" y2="243" stroke="currentColor" stroke-width="2" data-s="3" data-d="0"/><text class="den" y="269" font-size="26" style="fill:var(--blue)" data-s="4" data-d="0">2</text></g>
+<text y="250" font-size="26" style="fill:currentColor" data-s="5" data-d="0" data-line="A">= 0.5</text>
+<text y="345" font-size="26" style="fill:currentColor" data-s="6" data-d="0" data-line="U" data-x0="30">P(spoke | uncle) =</text>
+<text x="330.0" y="172.0" font-size="22" style="fill:var(--neg)" data-s="7" data-d="0">no “uncle spoke”</text>
+<path data-ul="m31" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="8" data-d="0" data-t="0.4"/>
+<g class="bfrac" data-line="U"><text class="num" y="329" font-size="26" style="fill:var(--neg)" data-s="7" data-d="0">0</text><line class="bar" y1="338" y2="338" stroke="currentColor" stroke-width="2" data-s="7" data-d="0"/><text class="den" y="364" font-size="26" style="fill:var(--blue)" data-s="8" data-d="0">1</text></g>
+<text y="345" font-size="26" style="fill:var(--neg)" data-s="9" data-d="0" data-line="U">= 0</text>
+<rect data-box="#m10" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="10" data-d="0" data-t="0.4"/>
+<rect data-box="#m12" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="10" data-d="0.3" data-t="0.4"/>
+<rect data-box="#m30" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="10" data-d="0.6" data-t="0.4"/>
+<rect data-box="#m32" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="10" data-d="0.9" data-t="0.4"/>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
+    </div>
     </div>
     <div class="col">
       <ul class="points">
@@ -1267,8 +1363,8 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1000 600" role="img" aria-label="Deriving cosine similarity: the vectors aunt (4, 2) and uncle (3, 3), their lengths, the unit vectors on the circle of radius 1, the angles, the dot product, and the formula cos θ = aunt · uncle / (‖aunt‖ ‖uncle‖) ≈ 0.95">
-<path d="M70 490 H 470" fill="none" stroke="var(--muted)" stroke-width="1.5" data-s="1" data-d="0" data-t="0.5"/>
-<path d="M70 490 V 60" fill="none" stroke="var(--muted)" stroke-width="1.5" data-s="1" data-d="0" data-t="0.5"/>
+<path d="M70 490 H 470" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0" data-t="0.5"/>
+<path d="M70 490 V 60" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0" data-t="0.5"/>
 <text x="156.0" y="514.0" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">1</text>
 <text x="48.0" y="406.0" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">1</text>
 <text x="246.0" y="514.0" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">2</text>
@@ -1277,17 +1373,17 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
 <text x="48.0" y="226.0" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">3</text>
 <text x="426.0" y="514.0" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">4</text>
 <text x="48.0" y="136.0" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">4</text>
-<line x1="70" y1="490" x2="430.0" y2="310.0" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" data-s="2" data-d="0" data-dim="18"/>
+<line x1="70.0" y1="490.0" x2="430.0" y2="310.0" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" data-s="2" data-d="0" data-dim="18"/>
 <path d="M421.6 319.9 L430.0 310.0 L417.0 310.8" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.6" data-dim="18" data-a="fade" data-t="0.2"/>
 <text x="300.0" y="404.0" font-size="24" style="fill:var(--blue)" data-s="2" data-d="0.8" data-dim="18">aunt (4, 2)</text>
-<line x1="70" y1="490" x2="340.0" y2="220.0" stroke="var(--green)" stroke-width="3" stroke-linecap="round" data-s="3" data-d="0" data-dim="18"/>
+<line x1="70.0" y1="490.0" x2="340.0" y2="220.0" stroke="var(--green)" stroke-width="3" stroke-linecap="round" data-s="3" data-d="0" data-dim="18"/>
 <path d="M335.1 232.0 L340.0 220.0 L328.0 224.9" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="0.6" data-dim="18" data-a="fade" data-t="0.2"/>
 <text x="300.0" y="208.0" font-size="24" style="fill:var(--green)" data-s="3" data-d="0.8" data-dim="18">uncle (3, 3)</text>
 <text y="62" font-size="25" style="fill:currentColor" data-s="4" data-d="0" data-line="L1" data-x0="478">‖aunt‖ =</text>
-<path d="M70 490 H 430" fill="none" stroke="var(--blue)" stroke-width="1.5" data-s="5" data-d="0" data-dim="18" stroke-dasharray="5 5" data-a="fade"/>
+<path d="M70 490 H 430" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" data-s="5" data-d="0" data-dim="18" stroke-dasharray="5 5" data-a="fade"/>
 <text x="330.0" y="482.0" font-size="24" style="fill:var(--blue)" data-s="5" data-d="0.2" data-dim="18">4</text>
 <text y="62" font-size="25" style="fill:currentColor" data-s="5" data-d="0.4" data-line="L1">√(4²</text>
-<path d="M430 490 V 310" fill="none" stroke="var(--blue)" stroke-width="1.5" data-s="6" data-d="0" data-dim="18" stroke-dasharray="5 5" data-a="fade"/>
+<path d="M430 490 V 310" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" data-s="6" data-d="0" data-dim="18" stroke-dasharray="5 5" data-a="fade"/>
 <text x="440.0" y="408.0" font-size="24" style="fill:var(--blue)" data-s="6" data-d="0.2" data-dim="18">2</text>
 <text y="62" font-size="25" style="fill:currentColor" data-s="6" data-d="0.4" data-line="L1">+ 2²)</text>
 <text y="62" font-size="25" style="fill:currentColor" data-s="7" data-d="0" data-line="L1">= √(16</text>
@@ -1301,12 +1397,12 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
 <text y="106" font-size="25" style="fill:currentColor" data-s="15" data-d="0" data-line="L2">+ 9)</text>
 <text y="106" font-size="25" style="fill:currentColor" data-s="16" data-d="0" data-line="L2">= √18</text>
 <text y="106" font-size="25" style="fill:currentColor" data-s="17" data-d="0" data-line="L2">≈ 4.24</text>
-<path d="M160.0 490.0 A90 90 0 0 0 70.0 400.0" fill="none" stroke="var(--orange)" stroke-width="1.5" data-s="18" data-d="0"/>
+<path d="M160.0 490.0 A90 90 0 0 0 70.0 400.0" fill="none" stroke="var(--orange)" stroke-width="1.5" stroke-linecap="round" data-s="18" data-d="0"/>
 <text x="100.0" y="386.0" font-size="20" style="fill:var(--orange)" data-s="18" data-d="0.5">1</text>
 <text y="158" font-size="25" style="fill:currentColor" data-s="19" data-d="0" data-line="L3" data-x0="478">â =</text>
 <text y="158" font-size="25" style="fill:currentColor" data-s="20" data-d="0" data-line="L3">aunt</text>
 <text y="158" font-size="25" style="fill:currentColor" data-s="21" data-d="0" data-line="L3">/ ‖aunt‖</text>
-<line x1="70" y1="490" x2="150.5" y2="449.8" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" data-s="21" data-d="0.5"/>
+<line x1="70.0" y1="490.0" x2="150.5" y2="449.8" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" data-s="21" data-d="0.5"/>
 <path d="M142.1 459.6 L150.5 449.8 L137.5 450.6" fill="none" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="21" data-d="1.1" data-a="fade" data-t="0.2"/>
 <text x="158.0" y="452.0" font-size="26" style="fill:var(--orange)" data-s="21" data-d="1.1">â</text>
 <text y="158" font-size="25" style="fill:currentColor" data-s="22" data-d="0" data-line="L3" id="eq-a">= (4 / 4.47,</text>
@@ -1315,21 +1411,21 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
 <text y="246" font-size="25" style="fill:currentColor" data-s="25" data-d="0" data-line="L4" data-x0="478">û =</text>
 <text y="246" font-size="25" style="fill:currentColor" data-s="26" data-d="0" data-line="L4">uncle</text>
 <text y="246" font-size="25" style="fill:currentColor" data-s="27" data-d="0" data-line="L4">/ ‖uncle‖</text>
-<line x1="70" y1="490" x2="133.6" y2="426.4" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" data-s="27" data-d="0.5"/>
+<line x1="70.0" y1="490.0" x2="133.6" y2="426.4" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" data-s="27" data-d="0.5"/>
 <path d="M128.8 438.4 L133.6 426.4 L121.6 431.2" fill="none" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="27" data-d="1.1" data-a="fade" data-t="0.2"/>
 <text x="118.0" y="412.0" font-size="26" style="fill:var(--orange)" data-s="27" data-d="1.1">û</text>
 <text y="246" font-size="25" style="fill:currentColor" data-s="28" data-d="0" data-line="L4" id="eq-u">= (3 / 4.24,</text>
 <text y="246" font-size="25" style="fill:currentColor" data-s="29" data-d="0" data-line="L4">3 / 4.24)</text>
 <text y="286" font-size="25" style="fill:currentColor" data-s="30" data-d="0" data-line="L4b" data-at="eq-u">≈ (0.71, 0.71)</text>
-<path d="M210.0 490.0 A140 140 0 0 0 195.2 427.4" fill="none" stroke="var(--blue)" stroke-width="2" data-s="31" data-d="0"/>
+<path d="M210.0 490.0 A140 140 0 0 0 195.2 427.4" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" data-s="31" data-d="0"/>
 <text x="216.0" y="474.0" font-size="26" style="fill:var(--blue)" data-s="31" data-d="0.6"><tspan class="gk">α</tspan></text>
-<path d="M260.0 490.0 A190 190 0 0 0 204.4 355.6" fill="none" stroke="var(--green)" stroke-width="2" data-s="32" data-d="0"/>
+<path d="M260.0 490.0 A190 190 0 0 0 204.4 355.6" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" data-s="32" data-d="0"/>
 <text x="264.0" y="440.0" font-size="26" style="fill:var(--green)" data-s="32" data-d="0.6"><tspan class="gk">β</tspan></text>
-<path d="M150.5 449.8 V 490" fill="none" stroke="var(--orange)" stroke-width="1.5" data-s="33" data-d="0" stroke-dasharray="4 4" data-a="fade"/>
+<path d="M150.5 449.8 V 490" fill="none" stroke="var(--orange)" stroke-width="1.5" stroke-linecap="round" data-s="33" data-d="0" stroke-dasharray="4 4" data-a="fade"/>
 <text x="128.5" y="536.0" font-size="22" style="fill:var(--orange)" data-s="33" data-d="0.3">cos <tspan class="gk">α</tspan></text>
 <text y="198" font-size="25" style="fill:currentColor" data-s="33" data-d="0.8" data-line="L3b">= (</text>
 <text y="198" font-size="25" style="fill:var(--orange)" data-s="33" data-d="1.0" data-line="L3b" id="cb-ca" data-gap="2">cos <tspan class="gk">α</tspan></text>
-<path d="M150.5 449.8 H 70" fill="none" stroke="var(--orange)" stroke-width="1.5" data-s="34" data-d="0" stroke-dasharray="4 4" data-a="fade"/>
+<path d="M150.5 449.8 H 70" fill="none" stroke="var(--orange)" stroke-width="1.5" stroke-linecap="round" data-s="34" data-d="0" stroke-dasharray="4 4" data-a="fade"/>
 <text x="4.0" y="455.8" font-size="22" style="fill:var(--orange)" data-s="34" data-d="0.3">sin <tspan class="gk">α</tspan></text>
 <text y="198" font-size="25" style="fill:currentColor" data-s="34" data-d="0.8" data-line="L3b" data-gap="5">,</text>
 <text y="198" font-size="25" style="fill:var(--neg)" data-s="34" data-d="0.9" data-line="L3b" id="cb-sa" data-gap="2">sin <tspan class="gk">α</tspan></text>
@@ -1348,18 +1444,18 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
 <text y="338" font-size="25" style="fill:currentColor" data-s="39" data-d="0.8" data-line="L5">+</text>
 <text y="338" font-size="25" style="fill:var(--neg)" data-s="39" data-d="1.0" data-line="L5">sin <tspan class="gk">α</tspan> · sin <tspan class="gk">β</tspan></text>
 <text y="382" font-size="25" style="fill:currentColor" data-s="40" data-d="0" data-line="L6" data-x0="530">= cos(<tspan class="gk">β</tspan> − <tspan class="gk">α</tspan>)</text>
-<path d="M293.6 378.2 A250 250 0 0 0 246.8 313.2" fill="none" stroke="currentColor" stroke-width="2.5" data-s="41" data-d="0"/>
+<path d="M293.6 378.2 A250 250 0 0 0 246.8 313.2" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" data-s="41" data-d="0"/>
 <text x="288.0" y="336.0" font-size="30" style="fill:currentColor" data-s="41" data-d="0.7"><tspan class="gk">θ</tspan></text>
 <text y="382" font-size="25" style="fill:currentColor" data-s="41" data-d="1.0" data-line="L6">= cos <tspan class="gk">θ</tspan></text>
 <text y="462" font-size="25" style="fill:currentColor" data-s="42" data-d="0" data-line="L7" data-x0="478">cos <tspan class="gk">θ</tspan> = â · û =</text>
-<g class="bfrac" data-line="L7"><text class="num" y="446" font-size="25" data-s="43" data-d="0">aunt · uncle</text><line class="bar" y1="455" y2="455" stroke="currentColor" stroke-width="2" data-s="43" data-d="0"/><text class="den" y="480" font-size="25" data-s="44" data-d="0">‖aunt‖</text><text class="den" y="480" font-size="25" data-s="45" data-d="0">‖uncle‖</text></g>
+<g class="bfrac" data-line="L7"><text class="num" y="446" font-size="25" style="fill:currentColor" data-s="43" data-d="0">aunt · uncle</text><line class="bar" y1="455" y2="455" stroke="currentColor" stroke-width="2" data-s="43" data-d="0"/><text class="den" y="480" font-size="25" style="fill:currentColor" data-s="44" data-d="0">‖aunt‖</text><text class="den" y="480" font-size="25" style="fill:currentColor" data-s="45" data-d="0">‖uncle‖</text></g>
 <rect data-box="L7" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--blue)" stroke-width="2.5" data-s="46" data-d="0" data-t="0.9"/>
 <text y="548" font-size="25" style="fill:currentColor" data-s="47" data-d="0" data-line="L8" data-x0="574">=</text>
-<g class="bfrac" data-line="L8"><text class="num" y="532" font-size="25" data-s="47" data-d="0">4·3</text><text class="num" y="532" font-size="25" data-s="48" data-d="0">+ 2·3</text><line class="bar" y1="541" y2="541" stroke="currentColor" stroke-width="2" data-s="47" data-d="0"/><text class="den" y="566" font-size="25" data-s="49" data-d="0">4.47</text><text class="den" y="566" font-size="25" data-s="50" data-d="0">· 4.24</text></g>
+<g class="bfrac" data-line="L8"><text class="num" y="532" font-size="25" style="fill:currentColor" data-s="47" data-d="0">4·3</text><text class="num" y="532" font-size="25" style="fill:currentColor" data-s="48" data-d="0">+ 2·3</text><line class="bar" y1="541" y2="541" stroke="currentColor" stroke-width="2" data-s="47" data-d="0"/><text class="den" y="566" font-size="25" style="fill:currentColor" data-s="49" data-d="0">4.47</text><text class="den" y="566" font-size="25" style="fill:currentColor" data-s="50" data-d="0">· 4.24</text></g>
 <text y="548" font-size="25" style="fill:currentColor" data-s="51" data-d="0" data-line="L8">=</text>
-<g class="bfrac" data-line="L8"><text class="num" y="532" font-size="25" data-s="51" data-d="0">12</text><text class="num" y="532" font-size="25" data-s="52" data-d="0">+ 6</text><line class="bar" y1="541" y2="541" stroke="currentColor" stroke-width="2" data-s="51" data-d="0"/><text class="den" y="566" font-size="25" data-s="53" data-d="0">18.95</text></g>
+<g class="bfrac" data-line="L8"><text class="num" y="532" font-size="25" style="fill:currentColor" data-s="51" data-d="0">12</text><text class="num" y="532" font-size="25" style="fill:currentColor" data-s="52" data-d="0">+ 6</text><line class="bar" y1="541" y2="541" stroke="currentColor" stroke-width="2" data-s="51" data-d="0"/><text class="den" y="566" font-size="25" style="fill:currentColor" data-s="53" data-d="0">18.95</text></g>
 <text y="548" font-size="25" style="fill:currentColor" data-s="54" data-d="0" data-line="L8">=</text>
-<g class="bfrac" data-line="L8"><text class="num" y="532" font-size="25" data-s="54" data-d="0">18</text><line class="bar" y1="541" y2="541" stroke="currentColor" stroke-width="2" data-s="54" data-d="0"/><text class="den" y="566" font-size="25" data-s="54" data-d="0">18.95</text></g>
+<g class="bfrac" data-line="L8"><text class="num" y="532" font-size="25" style="fill:currentColor" data-s="54" data-d="0">18</text><line class="bar" y1="541" y2="541" stroke="currentColor" stroke-width="2" data-s="54" data-d="0"/><text class="den" y="566" font-size="25" style="fill:currentColor" data-s="54" data-d="0">18.95</text></g>
 <text y="548" font-size="25" style="fill:currentColor" data-s="55" data-d="0" data-line="L8">≈ 0.95</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
@@ -1517,59 +1613,167 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
 
 <section class="screen" id="inside" data-step="2">
   <header><span class="kind">Step 2 · Embeddings</span><h2>Step by step, 1: from a word to its vector</h2><p class="sub">Our corpus, with the tables at the start of training</p></header>
-  <div class="body cols stepper">
-    <div class="col">
-      <ol class="steps">
-        <li class="frag" data-k="1">The input word is <i>cats</i>. The model writes it as a <b>one-hot</b> vector: one position per vocabulary word, all 0, and a 1 at <i>cats</i>.</li>
-        <li class="frag" data-k="2"><i>p</i> is the <b>embedding table</b>: one row per word, two values each. At the start the values are random.</li>
-        <li class="frag" data-k="3">Multiply: every row of <i>p</i> is multiplied by its 0 or 1, and the rows are added. Only the row of <i>cats</i> is left. So <i>h</i> = <span class="m">(−0.41, −0.26)</span>, the row of <i>cats</i>.</li>
-      </ol>
-    </div>
-    <div class="col">
-      <div class="eq" style="align-items:flex-start">
-        <table class="plain mono sgt" data-c="1"><thead><tr><th></th><th>one-hot</th></tr></thead><tbody><tr><td class="w">cats</td><td class="num">1</td></tr><tr><td class="w">dogs</td><td class="num">0</td></tr><tr><td class="w">chase</td><td class="num">0</td></tr><tr><td class="w">eat</td><td class="num">0</td></tr><tr><td class="w">mice</td><td class="num">0</td></tr><tr><td class="w">balls</td><td class="num">0</td></tr><tr><td class="w">fish</td><td class="num">0</td></tr><tr><td class="w">meat</td><td class="num">0</td></tr></tbody></table>
-        <span data-c="2" style="align-self:center">×</span>
-        <table class="plain mono sgt" data-c="2"><thead><tr><th></th><th colspan="2"><i>p</i></th></tr></thead><tbody><tr class="now"><td class="w">cats</td><td class="num">−0.41</td><td class="num">−0.26</td></tr><tr><td class="w">dogs</td><td class="num">0.30</td><td class="num">0.08</td></tr><tr><td class="w">chase</td><td class="num">−0.41</td><td class="num">−0.07</td></tr><tr><td class="w">eat</td><td class="num">−0.02</td><td class="num">−0.34</td></tr><tr><td class="w">mice</td><td class="num">0.23</td><td class="num">−0.39</td></tr><tr><td class="w">balls</td><td class="num">−0.11</td><td class="num">0.02</td></tr><tr><td class="w">fish</td><td class="num">−0.07</td><td class="num">0.09</td></tr><tr><td class="w">meat</td><td class="num">0.24</td><td class="num">0.46</td></tr></tbody></table>
-        <span data-c="3" style="align-self:center">=</span>
-        <table class="plain mono sgt" data-c="3" style="align-self:center"><thead><tr><th colspan="2"><i>h</i></th></tr></thead><tbody><tr class="now"><td class="num">−0.41</td><td class="num">−0.26</td></tr></tbody></table>
-      </div>
+  <div class="body">
+    <div class="board">
+      <svg viewBox="0 0 1000 370" role="img" aria-label="The one-hot vector of cats times the embedding table p: the rows multiplied by 0 drop out, and h = (−0.41, −0.26) is the row of cats">
+<text x="120.0" y="30.0" font-size="18" style="fill:var(--muted)" text-anchor="end" data-s="1" data-d="0">word</text>
+<text x="120.0" y="76.0" font-size="24" style="fill:var(--orange)" text-anchor="end" data-s="1" data-d="0.0">cats</text>
+<text x="120.0" y="112.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.05">dogs</text>
+<text x="120.0" y="148.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.1">chase</text>
+<text x="120.0" y="184.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.15">eat</text>
+<text x="120.0" y="220.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.2">mice</text>
+<text x="120.0" y="256.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.25">balls</text>
+<text x="120.0" y="292.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.3">fish</text>
+<text x="120.0" y="328.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.35">meat</text>
+<text x="178.0" y="30.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="2" data-d="0">one-hot</text>
+<path d="M160 50 H152 V340 H160" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="2" data-d="0" data-t="0.4"/>
+<path d="M196 50 H204 V340 H196" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="2" data-d="0" data-t="0.4"/>
+<text x="178.0" y="76.0" font-size="24" style="fill:var(--orange)" text-anchor="middle" data-s="2" data-d="0.4" id="oh0">1</text>
+<text x="178.0" y="112.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.45" data-dim="4" id="oh1">0</text>
+<text x="178.0" y="148.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.5" data-dim="4" id="oh2">0</text>
+<text x="178.0" y="184.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.55" data-dim="4" id="oh3">0</text>
+<text x="178.0" y="220.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.6" data-dim="4" id="oh4">0</text>
+<text x="178.0" y="256.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.65" data-dim="4" id="oh5">0</text>
+<text x="178.0" y="292.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.7" data-dim="4" id="oh6">0</text>
+<text x="178.0" y="328.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.75" data-dim="4" id="oh7">0</text>
+<text x="228.0" y="203.0" font-size="24" style="fill:currentColor" data-s="3" data-d="0">×</text>
+<text x="345.0" y="30.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0">p, random at the start</text>
+<path d="M266 50 H258 V340 H266" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="3" data-d="0" data-t="0.4"/>
+<path d="M424 50 H432 V340 H424" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="3" data-d="0" data-t="0.4"/>
+<text x="305.0" y="76.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.3" id="p00">−0.41</text>
+<text x="385.0" y="76.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.3" id="p01">−0.26</text>
+<text x="305.0" y="112.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.35" data-dim="4" id="p10">0.30</text>
+<text x="385.0" y="112.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.35" data-dim="4" id="p11">0.08</text>
+<text x="305.0" y="148.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.4" data-dim="4" id="p20">−0.41</text>
+<text x="385.0" y="148.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.4" data-dim="4" id="p21">−0.07</text>
+<text x="305.0" y="184.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.45" data-dim="4" id="p30">−0.02</text>
+<text x="385.0" y="184.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.45" data-dim="4" id="p31">−0.34</text>
+<text x="305.0" y="220.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.5" data-dim="4" id="p40">0.23</text>
+<text x="385.0" y="220.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.5" data-dim="4" id="p41">−0.39</text>
+<text x="305.0" y="256.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.55" data-dim="4" id="p50">−0.11</text>
+<text x="385.0" y="256.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.55" data-dim="4" id="p51">0.02</text>
+<text x="305.0" y="292.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.6" data-dim="4" id="p60">−0.07</text>
+<text x="385.0" y="292.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.6" data-dim="4" id="p61">0.09</text>
+<text x="305.0" y="328.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.65" data-dim="4" id="p70">0.24</text>
+<text x="385.0" y="328.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.65" data-dim="4" id="p71">0.46</text>
+<rect data-box="#oh0 #p00 #p01" data-pad="5" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="4" data-d="0" data-t="0.9"/>
+<text y="130" font-size="24" style="fill:currentColor" data-s="5" data-d="0" data-line="H1" data-x0="650" id="h0">h<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6"> =</tspan></text>
+<text y="130" font-size="24" style="fill:var(--orange)" data-s="6" data-d="0" data-line="H1">1 · (−0.41)</text>
+<text y="130" font-size="24" style="fill:var(--muted)" data-s="7" data-d="0" data-line="H1">+ 0 · 0.30 + …</text>
+<text y="172" font-size="24" style="fill:currentColor" data-s="8" data-d="0" data-line="H1b" data-at="h0" id="hb0">= −0.41</text>
+<text y="203.0" font-size="24" style="fill:currentColor" data-s="8" data-d="0" data-line="Hv" data-x0="452">=</text>
+<text y="203.0" font-size="24" style="fill:currentColor" data-s="8" data-d="0.3" data-line="Hv" data-x0="494" id="hv0" data-gap="16">−0.41</text>
+<path d="M484 177.0 H476 V211.0 H484" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="8" data-d="0.2" data-t="0.4"/>
+<path d="M610 177.0 H618 V211.0 H610" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="8" data-d="0.2" data-t="0.4"/>
+<text x="547.0" y="165.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="8" data-d="0.2">h</text>
+<text y="250" font-size="24" style="fill:currentColor" data-s="9" data-d="0" data-line="H2" data-x0="650" id="h1">h<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6"> =</tspan></text>
+<text y="250" font-size="24" style="fill:var(--orange)" data-s="10" data-d="0" data-line="H2">1 · (−0.26)</text>
+<text y="250" font-size="24" style="fill:var(--muted)" data-s="11" data-d="0" data-line="H2">+ 0 · 0.08 + …</text>
+<text y="292" font-size="24" style="fill:currentColor" data-s="12" data-d="0" data-line="H2b" data-at="h1" id="hb1">= −0.26</text>
+<text y="203.0" font-size="24" style="fill:currentColor" data-s="12" data-d="0.3" data-line="Hv">−0.26</text>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
   <div class="notes">
     <p>Now the same steps with our own small example: the corpus about cats and dogs, and the tables at the very start of training, when they are still random. Each press shows the next step.</p>
-    <p>Step 1. The input word is cats. The model cannot read a word, so it writes it as a one-hot vector. There is one position for every word in the vocabulary, eight here. All of them are 0, except a 1 at the position of cats.</p>
-    <p>Step 2. The table p is the embedding table. It has one row for every word, and each row has two values. At the start, these values are random.</p>
-    <p>Step 3. Now multiply the one-hot vector by the table. Every row of p is multiplied by its own 0 or 1, and then the rows are added up. The rows multiplied by 0 disappear. Only the row of cats is left. So the result, h, is just the row of cats: minus 0.41 and minus 0.26. That is why the rows of p are the embeddings: reading a word means copying out its row.</p>
+    <p>The input word is cats. The model cannot read a word, so it writes it as a one-hot vector. There is one position for every word in the vocabulary, eight here. All of them are 0, except a 1 at the position of cats.</p>
+    <p>The table p is the embedding table. It has one row for every word, and each row has two values. At the start, these values are random.</p>
+    <p>Now multiply the one-hot vector by the table. Every row of p is multiplied by its own 0 or 1, and then the rows are added up. The rows multiplied by 0 disappear. Only the row of cats is left. So the result, h, is just the row of cats: minus 0.41 and minus 0.26. That is why the rows of p are the embeddings: reading a word means copying out its row.</p>
   </div>
 </section>
 
 <section class="screen" id="inside2" data-step="2">
   <header><span class="kind">Step 2 · Embeddings</span><h2>Step by step, 2: from the vector to probabilities</h2><p class="sub">The model's guess for the neighbor of <i>cats</i>, before any training</p></header>
-  <div class="body cols stepper">
-    <div class="col">
-      <ol class="steps">
-        <li class="frag" data-k="1"><i>p′</i> is the second table: one column per word, also random. Here each column is shown as a row.</li>
-        <li class="frag" data-k="2"><b>Score</b>: multiply <i>h</i> by a word's column, entry by entry, and add. For <i>chase</i>: <span class="m">(−0.414)(0.196) + (−0.263)(−0.029) = −0.074</span>. Scores can be negative and do not add up to 1.</li>
-        <li class="frag" data-k="3"><b>Softmax</b>, part 1: take <i>e</i> to the power of each score. Every result is positive, and a higher score still gives a higher number: <span class="m">e<sup>−0.074</sup> = 0.929</span>.</li>
-        <li class="frag" data-k="4"><b>Softmax</b>, part 2: divide each one by their sum, 8.345. Now the values add up to 1: they are probabilities. <span class="m">P(chase | cats) = 0.929 / 8.345 = 0.111</span>.</li>
-        <li class="frag" data-k="5">The true neighbor, <i>chase</i>, gets only 0.111; <i>mice</i> gets the most, 0.167. Training now nudges the row of <i>cats</i> in <i>p</i>, and the columns of <i>p′</i>, so that <i>chase</i> gets more next time.</li>
-      </ol>
-    </div>
-    <div class="col">
-      <div class="tablewrap"><table class="plain mono sgt">
-        <thead><tr><th>word</th><th colspan="2" data-c="1"><i>p′</i></th><th data-c="2">score</th><th data-c="3">e<sup>score</sup></th><th data-c="4">P(word | cats)</th></tr></thead>
-        <tbody><tr><td class="w">cats</td><td class="num" data-c="1">−0.22</td><td class="num" data-c="1">0.39</td><td class="num" data-c="2">−0.014</td><td class="num" data-c="3">0.986</td><td class="num" data-c="4">0.118</td></tr><tr><td class="w">dogs</td><td class="num" data-c="1">0.15</td><td class="num" data-c="1">0.09</td><td class="num" data-c="2">−0.084</td><td class="num" data-c="3">0.919</td><td class="num" data-c="4">0.110</td></tr><tr class="true"><td class="w">chase</td><td class="num" data-c="1">0.20</td><td class="num" data-c="1">−0.03</td><td class="num" data-c="2">−0.074</td><td class="num" data-c="3">0.929</td><td class="num" data-c="4">0.111</td></tr><tr><td class="w">eat</td><td class="num" data-c="1">−0.21</td><td class="num" data-c="1">0.27</td><td class="num" data-c="2">0.014</td><td class="num" data-c="3">1.014</td><td class="num" data-c="4">0.122</td></tr><tr><td class="w">mice</td><td class="num" data-c="1">−0.50</td><td class="num" data-c="1">−0.47</td><td class="num" data-c="2">0.330</td><td class="num" data-c="3">1.391</td><td class="num" data-c="4">0.167</td></tr><tr><td class="w">balls</td><td class="num" data-c="1">0.47</td><td class="num" data-c="1">0.21</td><td class="num" data-c="2">−0.251</td><td class="num" data-c="3">0.778</td><td class="num" data-c="4">0.093</td></tr><tr><td class="w">fish</td><td class="num" data-c="1">−0.20</td><td class="num" data-c="1">−0.13</td><td class="num" data-c="2">0.117</td><td class="num" data-c="3">1.124</td><td class="num" data-c="4">0.135</td></tr><tr><td class="w">meat</td><td class="num" data-c="1">−0.19</td><td class="num" data-c="1">−0.41</td><td class="num" data-c="2">0.185</td><td class="num" data-c="3">1.203</td><td class="num" data-c="4">0.144</td></tr><tr><td class="w muted">sum</td><td></td><td></td><td></td><td class="num" data-c="3">8.345</td><td class="num" data-c="4">1.000</td></tr></tbody>
-      </table></div>
-      <p class="muted" data-c="5" style="font-size:0.9em">Green row: the true neighbor in this training pair, <i>cats → chase</i>.</p>
+  <div class="body">
+    <div class="board">
+      <svg viewBox="0 0 1000 470" role="img" aria-label="For each word, score = h · its column of p′; for chase, (−0.41)(0.20) + (−0.26)(−0.03) = −0.074. Softmax: e to the power of each score, divided by their sum 8.346: P(chase | cats) = 0.111; mice gets the most, 0.166">
+<text x="110.0" y="96.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.0" id="w0">cats</text>
+<text x="110.0" y="130.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.05" id="w1">dogs</text>
+<text x="110.0" y="164.0" font-size="24" style="fill:var(--green)" text-anchor="end" data-s="1" data-d="0.1" id="w2">chase</text>
+<text x="110.0" y="198.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.15" id="w3">eat</text>
+<text x="110.0" y="232.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.2" id="w4">mice</text>
+<text x="110.0" y="266.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.25" id="w5">balls</text>
+<text x="110.0" y="300.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.3" id="w6">fish</text>
+<text x="110.0" y="334.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.35" id="w7">meat</text>
+<text y="46" font-size="24" style="fill:var(--orange)" data-s="2" data-d="0" data-line="D1" data-x0="590">h = (−0.41, −0.26)</text>
+<text x="590.0" y="18.0" font-size="16" style="fill:var(--muted)" data-s="2" data-d="0">the vector of cats, from the previous screen</text>
+<text x="205.0" y="50.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0">p′</text>
+<text x="170.0" y="96.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.0" id="c00">−0.22</text>
+<text x="240.0" y="96.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.0" id="c01">0.39</text>
+<text x="170.0" y="130.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.04" id="c10">0.15</text>
+<text x="240.0" y="130.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.04" id="c11">0.09</text>
+<text x="170.0" y="164.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.08" id="c20">0.20</text>
+<text x="240.0" y="164.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.08" id="c21">−0.03</text>
+<text x="170.0" y="198.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.12" id="c30">−0.21</text>
+<text x="240.0" y="198.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.12" id="c31">0.27</text>
+<text x="170.0" y="232.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.16" id="c40">−0.50</text>
+<text x="240.0" y="232.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.16" id="c41">−0.47</text>
+<text x="170.0" y="266.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.2" id="c50">0.47</text>
+<text x="240.0" y="266.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.2" id="c51">0.21</text>
+<text x="170.0" y="300.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.24" id="c60">−0.20</text>
+<text x="240.0" y="300.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.24" id="c61">−0.13</text>
+<text x="170.0" y="334.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.28" id="c70">−0.19</text>
+<text x="240.0" y="334.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.28" id="c71">−0.41</text>
+<text y="126" font-size="24" style="fill:currentColor" data-s="4" data-d="0" data-line="D2" data-x0="590" id="sc">score(chase) =</text>
+<rect data-box="#c20 #c21" data-pad="5" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="4" data-d="0" data-t="0.9"/>
+<text y="126" font-size="24" style="fill:currentColor" data-s="5" data-d="0" data-line="D2">(−0.41) · 0.20</text>
+<text y="126" font-size="24" style="fill:currentColor" data-s="6" data-d="0" data-line="D2">+ (−0.26) · (−0.03)</text>
+<text y="166" font-size="24" style="fill:currentColor" data-s="7" data-d="0" data-line="D2b" data-at="sc">= −0.082 + 0.008</text>
+<text y="166" font-size="24" style="fill:currentColor" data-s="8" data-d="0" data-line="D2b">= −0.074</text>
+<text x="330.0" y="50.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="8" data-d="0">score</text>
+<text x="330.0" y="164.0" font-size="24" style="fill:var(--green)" text-anchor="middle" data-s="8" data-d="0.3">−0.074</text>
+<text x="330.0" y="96.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="9" data-d="0.0">−0.011</text>
+<text x="330.0" y="130.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="9" data-d="0.04">−0.085</text>
+<text x="330.0" y="198.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="9" data-d="0.12">0.016</text>
+<text x="330.0" y="232.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="9" data-d="0.16">0.327</text>
+<text x="330.0" y="266.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="9" data-d="0.2">−0.247</text>
+<text x="330.0" y="300.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="9" data-d="0.24">0.116</text>
+<text x="330.0" y="334.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="9" data-d="0.28">0.184</text>
+<text y="236" font-size="24" style="fill:currentColor" data-s="10" data-d="0" data-line="D3" data-x0="590">e<tspan dy="-11" font-size="0.68em">−0.074</tspan><tspan dy="11">​</tspan></text>
+<text y="236" font-size="24" style="fill:currentColor" data-s="11" data-d="0" data-line="D3">= 0.929</text>
+<text x="420.0" y="50.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="11" data-d="0">e<tspan dy="-11" font-size="0.68em">score</tspan><tspan dy="11">​</tspan></text>
+<text x="420.0" y="164.0" font-size="24" style="fill:var(--green)" text-anchor="middle" data-s="11" data-d="0.3">0.929</text>
+<text x="420.0" y="96.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="12" data-d="0.0">0.989</text>
+<text x="420.0" y="130.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="12" data-d="0.04">0.919</text>
+<text x="420.0" y="198.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="12" data-d="0.12">1.016</text>
+<text x="420.0" y="232.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="12" data-d="0.16">1.387</text>
+<text x="420.0" y="266.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="12" data-d="0.2">0.781</text>
+<text x="420.0" y="300.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="12" data-d="0.24">1.123</text>
+<text x="420.0" y="334.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="12" data-d="0.28">1.202</text>
+<text y="306" font-size="24" style="fill:currentColor" data-s="13" data-d="0" data-line="D4" data-x0="590" id="sum">sum =</text>
+<text y="306" font-size="24" style="fill:currentColor" data-s="14" data-d="0" data-line="D4">0.989 + 0.919 + … + 1.202</text>
+<text y="346" font-size="24" style="fill:currentColor" data-s="15" data-d="0" data-line="D4b" data-at="sum">= 8.346</text>
+<text x="110.0" y="378.0" font-size="24" style="fill:var(--muted)" text-anchor="end" data-s="15" data-d="0">sum</text>
+<text x="420.0" y="378.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="15" data-d="0.3">8.346</text>
+<path d="M380 352 H460" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="15" data-d="0"/>
+<text y="430" font-size="24" style="fill:currentColor" data-s="16" data-d="0" data-line="D5" data-x0="590">P(chase | cats) =</text>
+<g class="bfrac" data-line="D5"><text class="num" y="414" font-size="24" style="fill:currentColor" data-s="16" data-d="0">0.929</text><line class="bar" y1="423" y2="423" stroke="currentColor" stroke-width="2" data-s="16" data-d="0"/><text class="den" y="447" font-size="24" style="fill:currentColor" data-s="17" data-d="0">8.346</text></g>
+<text y="430" font-size="24" style="fill:var(--green)" data-s="18" data-d="0" data-line="D5">= 0.111</text>
+<text x="510.0" y="50.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="18" data-d="0">P(word | cats)</text>
+<text x="510.0" y="164.0" font-size="24" style="fill:var(--green)" text-anchor="middle" data-s="18" data-d="0.3">0.111</text>
+<text x="510.0" y="96.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="19" data-d="0.0" id="P0">0.118</text>
+<text x="510.0" y="130.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="19" data-d="0.04" id="P1">0.110</text>
+<text x="510.0" y="198.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="19" data-d="0.12" id="P3">0.122</text>
+<text x="510.0" y="232.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="19" data-d="0.16" id="P4">0.166</text>
+<text x="510.0" y="266.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="19" data-d="0.2" id="P5">0.094</text>
+<text x="510.0" y="300.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="19" data-d="0.24" id="P6">0.135</text>
+<text x="510.0" y="334.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="19" data-d="0.28" id="P7">0.144</text>
+<text x="510.0" y="378.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="19" data-d="0.4">1.000</text>
+<path d="M470 352 H550" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="19" data-d="0.4"/>
+<rect data-box="#w2" data-pad="5" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="20" data-d="0" data-t="0.9"/>
+<rect data-box="#w4 #P4" data-pad="5" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--neg)" stroke-width="2.5" data-s="20" data-d="0.5" data-t="0.9"/>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
   <div class="notes">
     <p>The second half: from h to a probability for every word.</p>
-    <p>Step 1. The second table, p prime, has one column for every word. It is also random at the start. On the screen each column is shown as a row, so that it fits next to the word.</p>
-    <p>Step 2. The score. For each word, multiply h by that word's column: first value times first value, second times second, and add them up. This is called a dot product. For chase it gives minus 0.074. Every word gets a score like this. Scores can be negative, and they do not add up to 1. So they are not probabilities yet.</p>
-    <p>Step 3. Softmax turns scores into probabilities, in two parts. First, take e to the power of each score. e is a number, about 2.718. The result is always positive, and a higher score still gives a higher number. For chase, e to the minus 0.074 is 0.929.</p>
-    <p>Step 4. Second, divide each of these numbers by their sum. The sum is 8.345. After the division, the eight numbers add up to exactly 1. Now they are probabilities. The probability of chase, given cats, is 0.929 divided by 8.345, which is 0.111. That is the softmax: e to the power, then divide by the sum.</p>
-    <p>Step 5. The training pair says that chase is a true neighbor of cats. But the model gives chase only 0.111, and mice gets the most. So training changes the numbers a little: the row of cats in p, and the columns of p prime, so that chase gets a higher probability next time. The interactive panel on the next screen does exactly this, one pair at a time.</p>
+    <p>The second table, p prime, has one column for every word. It is also random at the start. On the screen each column is shown as a row, so that it fits next to the word.</p>
+    <p>The score. For each word, multiply h by that word's column: first value times first value, second times second, and add them up. This is called a dot product. For chase it gives minus 0.074. Every word gets a score like this. Scores can be negative, and they do not add up to 1. So they are not probabilities yet.</p>
+    <p>Softmax turns scores into probabilities, in two parts. First, take e to the power of each score. e is a number, about 2.718. The result is always positive, and a higher score still gives a higher number. For chase, e to the minus 0.074 is 0.929.</p>
+    <p>Second, divide each of these numbers by their sum. The sum is 8.346. After the division, the eight numbers add up to exactly 1. Now they are probabilities. The probability of chase, given cats, is 0.929 divided by 8.346, which is 0.111. That is the softmax: e to the power, then divide by the sum.</p>
+    <p>The training pair says that chase is a true neighbor of cats. But the model gives chase only 0.111, and mice gets the most. So training changes the numbers a little: the row of cats in p, and the columns of p prime, so that chase gets a higher probability next time. The interactive panel on the next screen does exactly this, one pair at a time.</p>
   </div>
 </section>
 
@@ -1836,10 +2040,54 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   <header><span class="kind">Step 4 · Attention</span><h2>Worked example: aligning “tía miña” → “my aunt”</h2></header>
   <div class="body">
     <p class="sent small">Unha <span class="hl">tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”.</p>
-    <div class="big" style="justify-items:center;text-align:center;gap:12px">
-      <span>k<sub>tía</sub> = (1, 0) &nbsp;&nbsp; k<sub>miña</sub> = (0, 1)</span>
-      <span>To write <b>aunt</b>, query q<sub>aunt</sub> = (3, 0): &nbsp; scores 3, 0 &nbsp;⇒&nbsp; softmax 0.95, 0.05</span>
-      <span>To write <b>my</b>, query q<sub>my</sub> = (0, 3): &nbsp; scores 0, 3 &nbsp;⇒&nbsp; softmax 0.05, 0.95</span>
+    <div class="board">
+      <svg viewBox="0 0 1000 440" role="img" aria-label="Keys k_tía = (1, 0) and k_miña = (0, 1). To write aunt, q_aunt = (3, 0) gives scores 3 and 0; softmax gives e³ / (e³ + e⁰) = 20.09 / 21.09 ≈ 0.95 for tía and ≈ 0.05 for miña. To write my, q_my = (0, 3) gives scores 0 and 3 and weights 0.05 and 0.95">
+<path d="M80 330 H 320" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0" data-t="0.4"/>
+<path d="M80 330 V 90" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0" data-t="0.4"/>
+<text x="146.0" y="354.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">1</text>
+<text x="60.0" y="265.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">1</text>
+<text x="216.0" y="354.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">2</text>
+<text x="60.0" y="195.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">2</text>
+<text x="286.0" y="354.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">3</text>
+<text x="60.0" y="125.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">3</text>
+<line x1="80.0" y1="330.0" x2="150.0" y2="330.0" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" data-s="2" data-d="0"/>
+<path d="M138.0 335.1 L150.0 330.0 L138.0 324.9" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.6" data-a="fade" data-t="0.2"/>
+<text x="120.0" y="382.0" font-size="22" style="fill:var(--blue)" data-s="2" data-d="0.6">k<tspan dy="6" font-size="0.68em">tía</tspan><tspan dy="-6">​</tspan> = (1, 0)</text>
+<line x1="80.0" y1="330.0" x2="80.0" y2="260.0" stroke="var(--green)" stroke-width="3" stroke-linecap="round" data-s="3" data-d="0"/>
+<path d="M85.1 272.0 L80.0 260.0 L74.9 272.0" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="0.6" data-a="fade" data-t="0.2"/>
+<text x="92.0" y="266.0" font-size="22" style="fill:var(--green)" data-s="3" data-d="0.6">k<tspan dy="6" font-size="0.68em">miña</tspan><tspan dy="-6">​</tspan> = (0, 1)</text>
+<text y="40" font-size="24" style="fill:var(--orange)" data-s="4" data-d="0" data-line="A0" data-x0="420">to write “aunt”:</text>
+<text y="40" font-size="24" style="fill:var(--orange)" data-s="4" data-d="0.4" data-line="A0">q<tspan dy="6" font-size="0.68em">aunt</tspan><tspan dy="-6">​</tspan> = (3, 0)</text>
+<line x1="80.0" y1="330.0" x2="290.0" y2="330.0" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" data-s="4" data-d="0.4"/>
+<path d="M278.0 335.1 L290.0 330.0 L278.0 324.9" fill="none" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="4" data-d="1.0" data-a="fade" data-t="0.2"/>
+<text x="250.0" y="316.0" font-size="22" style="fill:var(--orange)" data-s="4" data-d="1.0">q<tspan dy="6" font-size="0.68em">aunt</tspan><tspan dy="-6">​</tspan></text>
+<text y="86" font-size="24" style="fill:currentColor" data-s="5" data-d="0" data-line="A1" data-x0="420" id="a1">q<tspan dy="6" font-size="0.68em">aunt</tspan><tspan dy="-6">​</tspan> · k<tspan dy="6" font-size="0.68em">tía</tspan><tspan dy="-6">​</tspan> =</text>
+<text y="86" font-size="24" style="fill:currentColor" data-s="6" data-d="0" data-line="A1">3 · 1</text>
+<text y="86" font-size="24" style="fill:currentColor" data-s="7" data-d="0" data-line="A1">+ 0 · 0</text>
+<text y="86" font-size="24" style="fill:var(--blue)" data-s="8" data-d="0" data-line="A1">= 3</text>
+<text y="128" font-size="24" style="fill:currentColor" data-s="9" data-d="0" data-line="A2" data-x0="420">q<tspan dy="6" font-size="0.68em">aunt</tspan><tspan dy="-6">​</tspan> · k<tspan dy="6" font-size="0.68em">miña</tspan><tspan dy="-6">​</tspan> =</text>
+<text y="128" font-size="24" style="fill:currentColor" data-s="10" data-d="0" data-line="A2">3 · 0</text>
+<text y="128" font-size="24" style="fill:currentColor" data-s="11" data-d="0" data-line="A2">+ 0 · 1</text>
+<text y="128" font-size="24" style="fill:var(--green)" data-s="12" data-d="0" data-line="A2">= 0</text>
+<text y="214" font-size="24" style="fill:currentColor" data-s="13" data-d="0" data-line="A3" data-x0="420">weight of tía =</text>
+<g class="bfrac" data-line="A3"><text class="num" y="198" font-size="24" style="fill:var(--blue)" data-s="13" data-d="0">e³</text><line class="bar" y1="207" y2="207" stroke="currentColor" stroke-width="2" data-s="13" data-d="0"/><text class="den" y="231" font-size="24" style="fill:var(--blue)" data-s="14" data-d="0">e³</text><text class="den" y="231" font-size="24" style="fill:var(--green)" data-s="15" data-d="0">+ e⁰</text></g>
+<text y="214" font-size="24" style="fill:currentColor" data-s="16" data-d="0" data-line="A3">=</text>
+<g class="bfrac" data-line="A3"><text class="num" y="198" font-size="24" style="fill:currentColor" data-s="16" data-d="0">20.09</text><line class="bar" y1="207" y2="207" stroke="currentColor" stroke-width="2" data-s="16" data-d="0"/><text class="den" y="231" font-size="24" style="fill:currentColor" data-s="16" data-d="0">20.09 + 1</text></g>
+<text y="214" font-size="24" style="fill:var(--blue)" data-s="17" data-d="0" data-line="A3">≈ 0.95</text>
+<text y="300" font-size="24" style="fill:currentColor" data-s="18" data-d="0" data-line="A4" data-x0="420">weight of miña =</text>
+<g class="bfrac" data-line="A4"><text class="num" y="284" font-size="24" style="fill:var(--green)" data-s="18" data-d="0">e⁰</text><line class="bar" y1="293" y2="293" stroke="currentColor" stroke-width="2" data-s="18" data-d="0"/><text class="den" y="317" font-size="24" style="fill:currentColor" data-s="18" data-d="0">e³ + e⁰</text></g>
+<text y="300" font-size="24" style="fill:currentColor" data-s="19" data-d="0" data-line="A4">=</text>
+<g class="bfrac" data-line="A4"><text class="num" y="284" font-size="24" style="fill:currentColor" data-s="19" data-d="0">1</text><line class="bar" y1="293" y2="293" stroke="currentColor" stroke-width="2" data-s="19" data-d="0"/><text class="den" y="317" font-size="24" style="fill:currentColor" data-s="19" data-d="0">21.09</text></g>
+<text y="300" font-size="24" style="fill:var(--green)" data-s="20" data-d="0" data-line="A4">≈ 0.05</text>
+<text y="400" font-size="24" style="fill:var(--neg)" data-s="21" data-d="0" data-line="M1" data-x0="420">to write “my”:</text>
+<text y="400" font-size="24" style="fill:var(--neg)" data-s="21" data-d="0.4" data-line="M1">q<tspan dy="6" font-size="0.68em">my</tspan><tspan dy="-6">​</tspan> = (0, 3)</text>
+<line x1="80.0" y1="330.0" x2="80.0" y2="120.0" stroke="var(--neg)" stroke-width="4" stroke-linecap="round" data-s="21" data-d="0.4"/>
+<path d="M85.1 132.0 L80.0 120.0 L74.9 132.0" fill="none" stroke="var(--neg)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="21" data-d="1.0" data-a="fade" data-t="0.2"/>
+<text x="92.0" y="128.0" font-size="22" style="fill:var(--neg)" data-s="21" data-d="1.0">q<tspan dy="6" font-size="0.68em">my</tspan><tspan dy="-6">​</tspan></text>
+<text y="400" font-size="24" style="fill:currentColor" data-s="22" data-d="0" data-line="M1">→ scores 0, 3</text>
+<text y="400" font-size="24" style="fill:var(--neg)" data-s="23" data-d="0" data-line="M1">→ weights 0.05, 0.95</text>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
     <ul class="points"><li>95% of the attention on <i>tía</i> for <i>aunt</i>; 95% on <i>miña</i> for <i>my</i>: a clean word-level correspondence, learned from data</li></ul>
   </div>
@@ -2044,9 +2292,123 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
 <section class="screen" id="quadratic" data-step="6">
   <header><span class="kind">Step 6 · Transformers</span><h2>Why attention cost grows with context length</h2></header>
   <div class="body">
-    <div class="flow" style="gap:48px;align-items:flex-end">
-      <div class="fig"><div class="squares" data-squares="4" data-color="var(--blue)"></div><span>4 words<br>16 comparisons</span></div>
-      <div class="fig"><div class="squares" data-squares="8" data-color="var(--green)"></div><span>8 words<br>64 comparisons</span></div>
+    <div class="board">
+      <svg viewBox="0 0 760 480" role="img" aria-label="Every word is compared with every word: 4 words give 4 × 4 = 16 comparisons, 8 words give 8 × 8 = 64. n words give n², and 2n words give 4n²">
+<text x="142.0" y="142.0" font-size="17" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.0">Unha</text>
+<text x="142.0" y="176.0" font-size="17" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.08">tía</text>
+<text x="142.0" y="210.0" font-size="17" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.16">miña</text>
+<text x="142.0" y="244.0" font-size="17" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.24">que</text>
+<text x="170.0" y="112.0" font-size="17" style="fill:currentColor" data-s="2" data-d="0.0" transform="rotate(-50 170 112)">Unha</text>
+<text x="204.0" y="112.0" font-size="17" style="fill:currentColor" data-s="2" data-d="0.08" transform="rotate(-50 204 112)">tía</text>
+<text x="238.0" y="112.0" font-size="17" style="fill:currentColor" data-s="2" data-d="0.16" transform="rotate(-50 238 112)">miña</text>
+<text x="272.0" y="112.0" font-size="17" style="fill:currentColor" data-s="2" data-d="0.24" transform="rotate(-50 272 112)">que</text>
+<rect x="152.0" y="122.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.0" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="186.0" y="122.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.02" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="220.0" y="122.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.04" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="254.0" y="122.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.06" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="152.0" y="156.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.06" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="186.0" y="156.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.08" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="220.0" y="156.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.1" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="254.0" y="156.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.12" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="152.0" y="190.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.12" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="186.0" y="190.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.14" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="220.0" y="190.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.16" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="254.0" y="190.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.18" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="152.0" y="224.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.18" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="186.0" y="224.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.2" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="220.0" y="224.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.22" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="254.0" y="224.0" width="30.0" height="30.0" rx="4" fill="var(--blue)" stroke="none" stroke-width="1.5" data-s="3" data-d="0.24" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<text y="310" font-size="24" style="fill:var(--blue)" data-s="4" data-d="0" data-line="G4" data-x0="150">4 × 4</text>
+<text y="310" font-size="24" style="fill:var(--blue)" data-s="5" data-d="0" data-line="G4">= 16</text>
+<text x="452.0" y="142.0" font-size="17" style="fill:currentColor" text-anchor="end" data-s="6" data-d="0.0">Unha</text>
+<text x="452.0" y="176.0" font-size="17" style="fill:currentColor" text-anchor="end" data-s="6" data-d="0.08">tía</text>
+<text x="452.0" y="210.0" font-size="17" style="fill:currentColor" text-anchor="end" data-s="6" data-d="0.16">miña</text>
+<text x="452.0" y="244.0" font-size="17" style="fill:currentColor" text-anchor="end" data-s="6" data-d="0.24">que</text>
+<text x="452.0" y="278.0" font-size="17" style="fill:currentColor" text-anchor="end" data-s="6" data-d="0.32">todo</text>
+<text x="452.0" y="312.0" font-size="17" style="fill:currentColor" text-anchor="end" data-s="6" data-d="0.4">o</text>
+<text x="452.0" y="346.0" font-size="17" style="fill:currentColor" text-anchor="end" data-s="6" data-d="0.48">solucionaba</text>
+<text x="452.0" y="380.0" font-size="17" style="fill:currentColor" text-anchor="end" data-s="6" data-d="0.56">con</text>
+<text x="480.0" y="112.0" font-size="17" style="fill:currentColor" data-s="7" data-d="0.0" transform="rotate(-50 480 112)">Unha</text>
+<text x="514.0" y="112.0" font-size="17" style="fill:currentColor" data-s="7" data-d="0.08" transform="rotate(-50 514 112)">tía</text>
+<text x="548.0" y="112.0" font-size="17" style="fill:currentColor" data-s="7" data-d="0.16" transform="rotate(-50 548 112)">miña</text>
+<text x="582.0" y="112.0" font-size="17" style="fill:currentColor" data-s="7" data-d="0.24" transform="rotate(-50 582 112)">que</text>
+<text x="616.0" y="112.0" font-size="17" style="fill:currentColor" data-s="7" data-d="0.32" transform="rotate(-50 616 112)">todo</text>
+<text x="650.0" y="112.0" font-size="17" style="fill:currentColor" data-s="7" data-d="0.4" transform="rotate(-50 650 112)">o</text>
+<text x="684.0" y="112.0" font-size="17" style="fill:currentColor" data-s="7" data-d="0.48" transform="rotate(-50 684 112)">solucionaba</text>
+<text x="718.0" y="112.0" font-size="17" style="fill:currentColor" data-s="7" data-d="0.56" transform="rotate(-50 718 112)">con</text>
+<rect x="462.0" y="122.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.0" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="496.0" y="122.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.02" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="530.0" y="122.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.04" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="564.0" y="122.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.06" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="598.0" y="122.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.08" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="632.0" y="122.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.1" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="666.0" y="122.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.12" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="700.0" y="122.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.14" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="462.0" y="156.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.06" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="496.0" y="156.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.08" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="530.0" y="156.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.1" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="564.0" y="156.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.12" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="598.0" y="156.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.14" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="632.0" y="156.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.16" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="666.0" y="156.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.18" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="700.0" y="156.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.2" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="462.0" y="190.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.12" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="496.0" y="190.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.14" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="530.0" y="190.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.16" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="564.0" y="190.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.18" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="598.0" y="190.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.2" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="632.0" y="190.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.22" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="666.0" y="190.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.24" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="700.0" y="190.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.26" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="462.0" y="224.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.18" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="496.0" y="224.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.2" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="530.0" y="224.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.22" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="564.0" y="224.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.24" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="598.0" y="224.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.26" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="632.0" y="224.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.28" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="666.0" y="224.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.3" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="700.0" y="224.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.32" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="462.0" y="258.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.24" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="496.0" y="258.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.26" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="530.0" y="258.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.28" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="564.0" y="258.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.3" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="598.0" y="258.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.32" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="632.0" y="258.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.34" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="666.0" y="258.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.36" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="700.0" y="258.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.38" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="462.0" y="292.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.3" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="496.0" y="292.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.32" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="530.0" y="292.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.34" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="564.0" y="292.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.36" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="598.0" y="292.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.38" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="632.0" y="292.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.4" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="666.0" y="292.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.42" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="700.0" y="292.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.44" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="462.0" y="326.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.36" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="496.0" y="326.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.38" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="530.0" y="326.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.4" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="564.0" y="326.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.42" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="598.0" y="326.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.44" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="632.0" y="326.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.46" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="666.0" y="326.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.48" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="700.0" y="326.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.5" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="462.0" y="360.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.42" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="496.0" y="360.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.44" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="530.0" y="360.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.46" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="564.0" y="360.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.48" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="598.0" y="360.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.5" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="632.0" y="360.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.52" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="666.0" y="360.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.54" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<rect x="700.0" y="360.0" width="30.0" height="30.0" rx="4" fill="var(--green)" stroke="none" stroke-width="1.5" data-s="8" data-d="0.56" data-a="fade" fill-opacity="0.35" data-t="0.25"/>
+<text y="455" font-size="24" style="fill:var(--green)" data-s="9" data-d="0" data-line="G8" data-x0="460">8 × 8</text>
+<text y="455" font-size="24" style="fill:var(--green)" data-s="10" data-d="0" data-line="G8">= 64</text>
+<text y="400" font-size="24" style="fill:currentColor" data-s="11" data-d="0" data-line="R1" data-x0="40">n words:</text>
+<text y="400" font-size="24" style="fill:currentColor" data-s="12" data-d="0" data-line="R1">n × n</text>
+<text y="400" font-size="24" style="fill:var(--neg)" data-s="13" data-d="0" data-line="R1">= n²</text>
+<text y="450" font-size="24" style="fill:currentColor" data-s="14" data-d="0" data-line="R2" data-x0="40">2n words:</text>
+<text y="450" font-size="24" style="fill:var(--neg)" data-s="15" data-d="0" data-line="R2">(2n)² = 4n²</text>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
     <ul class="points">
       <li>Double the words → four times the comparisons: the growth is quadratic</li>
@@ -2258,21 +2620,75 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
       <li>To multiply A (m × n) by B (n × p): the <b>inner</b> dimensions must match; the result is m × p</li>
       <li>Each entry of the result is a <b>dot product</b>: multiply matching entries, add them up</li>
     </ul>
-    <div class="eq">
-      <span class="mat" style="--c:3"><span class="hl">1</span><span class="hl">2</span><span class="hl">0</span><span>3</span><span>1</span><span>4</span></span>
-      <span class="mat" style="--c:2"><span class="hl">2</span><span>0</span><span class="hl">1</span><span>3</span><span class="hl">0</span><span>2</span></span>
-      <span>=</span>
-      <span class="mat" style="--c:2"><span class="hl">4</span><span>6</span><span>7</span><span>11</span></span>
+    <div class="board">
+      <svg viewBox="0 0 1000 490" role="img" aria-label="A (2 × 3) times B (3 × 2) is 2 × 2; the top-left entry is row 1 of A times column 1 of B: 1 × 2 + 2 × 1 + 0 × 0 = 4. A one-hot vector (0, 0, 1, 0) times a 4 × 2 matrix copies out row 3, (0.7, 0.5)">
+<path d="M42 46 H34 V134 H42" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0" data-t="0.4"/>
+<path d="M170 46 H178 V134 H170" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0" data-t="0.4"/>
+<text x="62.0" y="79.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.0" id="a00">1</text>
+<text x="106.0" y="79.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.05" id="a01">2</text>
+<text x="150.0" y="79.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.1" id="a02">0</text>
+<text x="62.0" y="119.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.05" id="a10">3</text>
+<text x="106.0" y="119.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.1" id="a11">1</text>
+<text x="150.0" y="119.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.15" id="a12">4</text>
+<text x="97.0" y="170.0" font-size="20" style="fill:var(--muted)" data-s="1" data-d="0.5" id="da">2 × 3</text>
+<path d="M214 26 H206 V154 H214" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="2" data-d="0" data-t="0.4"/>
+<path d="M298 26 H306 V154 H298" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="2" data-d="0" data-t="0.4"/>
+<text x="234.0" y="59.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.0" id="b00">2</text>
+<text x="278.0" y="59.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.05" id="b01">0</text>
+<text x="234.0" y="99.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.05" id="b10">1</text>
+<text x="278.0" y="99.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.1" id="b11">3</text>
+<text x="234.0" y="139.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.1" id="b20">0</text>
+<text x="278.0" y="139.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.15" id="b21">2</text>
+<text x="240.0" y="170.0" font-size="20" style="fill:var(--muted)" data-s="2" data-d="0.5" id="db">3 × 2</text>
+<text x="326.0" y="108.0" font-size="26" style="fill:currentColor" data-s="3" data-d="0">=</text>
+<path d="M372 46 H364 V134 H372" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="3" data-d="0" data-t="0.4"/>
+<path d="M456 46 H464 V134 H456" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="3" data-d="0" data-t="0.4"/>
+<text x="392.0" y="79.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.0" id="c00"></text>
+<text x="436.0" y="79.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.05" id="c01"></text>
+<text x="392.0" y="119.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.05" id="c10"></text>
+<text x="436.0" y="119.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.1" id="c11"></text>
+<text x="398.0" y="170.0" font-size="20" style="fill:var(--muted)" data-s="3" data-d="0.5">2 × 2</text>
+<rect data-box="#a00 #a01 #a02" data-pad="4" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="4" data-d="0" data-t="0.5"/>
+<rect data-box="#b00 #b10 #b20" data-pad="4" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="4" data-d="0.4" data-t="0.5"/>
+<text y="88" font-size="26" style="fill:currentColor" data-s="4" data-d="0.8" data-line="E" data-x0="630" id="ce">c<tspan dy="6" font-size="0.68em">11</tspan><tspan dy="-6"> =</tspan></text>
+<text y="88" font-size="26" style="fill:currentColor" data-s="5" data-d="0" data-line="E">1 × 2</text>
+<text y="88" font-size="26" style="fill:currentColor" data-s="6" data-d="0" data-line="E">+ 2 × 1</text>
+<text y="88" font-size="26" style="fill:currentColor" data-s="7" data-d="0" data-line="E">+ 0 × 0</text>
+<text y="88" font-size="26" style="fill:var(--orange)" data-s="8" data-d="0" data-line="E">= 4</text>
+<text x="392.0" y="79.0" font-size="26" style="fill:var(--orange)" text-anchor="middle" data-s="8" data-d="0.3">4</text>
+<text x="436.0" y="79.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="9" data-d="0.3">6</text>
+<text x="392.0" y="119.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="9" data-d="0.3">7</text>
+<text x="436.0" y="119.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="9" data-d="0.6">11</text>
+<text y="140" font-size="20" style="fill:var(--muted)" data-s="9" data-d="0" data-line="E2" data-x0="630">the same for every row of A and column of B</text>
+<text x="40.0" y="262.0" font-size="20" style="fill:var(--muted)" data-s="10" data-d="0">a one-hot vector</text>
+<path d="M42 332 H34 V380 H42" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="10" data-d="0" data-t="0.4"/>
+<path d="M198 332 H206 V380 H198" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="10" data-d="0" data-t="0.4"/>
+<text x="60.0" y="365.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="10" data-d="0.0" id="o00">0</text>
+<text x="100.0" y="365.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="10" data-d="0.05" id="o01">0</text>
+<text x="140.0" y="365.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="10" data-d="0.1" id="o02">1</text>
+<text x="180.0" y="365.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="10" data-d="0.15" id="o03">0</text>
+<text x="214.0" y="374.0" font-size="26" style="fill:currentColor" data-s="11" data-d="0">×</text>
+<path d="M252 272 H244 V440 H252" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="11" data-d="0" data-t="0.4"/>
+<path d="M360 272 H368 V440 H360" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="11" data-d="0" data-t="0.4"/>
+<text x="278.0" y="305.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="11" data-d="0.0" data-dim="12" id="m00">0.1</text>
+<text x="334.0" y="305.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="11" data-d="0.05" data-dim="12" id="m01">0.9</text>
+<text x="278.0" y="345.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="11" data-d="0.05" data-dim="12" id="m10">0.3</text>
+<text x="334.0" y="345.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="11" data-d="0.1" data-dim="12" id="m11">0.2</text>
+<text x="278.0" y="385.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="11" data-d="0.1" id="m20">0.7</text>
+<text x="334.0" y="385.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="11" data-d="0.15" id="m21">0.5</text>
+<text x="278.0" y="425.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="11" data-d="0.15" data-dim="12" id="m30">0.4</text>
+<text x="334.0" y="425.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="11" data-d="0.2" data-dim="12" id="m31">0.8</text>
+<text x="260.0" y="476.0" font-size="20" style="fill:var(--muted)" data-s="12" data-d="0">every row is multiplied by 0, except row 3</text>
+<rect data-box="#o02" data-pad="4" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--neg)" stroke-width="2.5" data-s="13" data-d="0" data-t="0.5"/>
+<rect data-box="#m20 #m21" data-pad="4" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--neg)" stroke-width="2.5" data-s="13" data-d="0.4" data-t="0.5"/>
+<text x="386.0" y="374.0" font-size="26" style="fill:currentColor" data-s="14" data-d="0">=</text>
+<path d="M428 332 H420 V380 H428" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="14" data-d="0" data-t="0.4"/>
+<path d="M536 332 H544 V380 H536" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="14" data-d="0" data-t="0.4"/>
+<text x="454.0" y="365.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="14" data-d="0.0" id="r00">0.7</text>
+<text x="510.0" y="365.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="14" data-d="0.05" id="r01">0.5</text>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
-    <p class="axisnote">top-left entry: 1×2 + 2×1 + 0×0 = 4</p>
-    <ul class="points"><li>A vector is a matrix with one row, and a <b>one-hot</b> vector (all zeros but a single 1) does something special:</li></ul>
-    <div class="eq">
-      <span class="mat" style="--c:4"><span>0</span><span>0</span><span class="hl">1</span><span>0</span></span>
-      <span class="mat" style="--c:2"><span>0.1</span><span>0.9</span><span>0.3</span><span>0.2</span><span class="hl">0.7</span><span class="hl">0.5</span><span>0.4</span><span>0.8</span></span>
-      <span>=</span>
-      <span class="mat" style="--c:2"><span class="hl">0.7</span><span class="hl">0.5</span></span>
-    </div>
-    <p class="axisnote">the 1 in position 3 copies out row 3; every other row is multiplied by 0</p>
   </div>
   <div class="notes">
     <p>Let's actually multiply these, since watching the arithmetic happen is worth more than being told the rule. Top-left entry of the result: take row 1 of the first matrix, column 1 of the second, multiply matching entries, and add them up: 1 times 2, plus 2 times 1, plus 0 times 0, that's 4. Do that for every row-column pair and you get the full result. That's genuinely the whole operation, dot products, one per output entry, nothing else going on.</p>
@@ -2431,14 +2847,20 @@ document.querySelectorAll(".board").forEach(b => {
         x += w + (el.dataset.gap ? +el.dataset.gap : 7);
       }
     }
+    svg.querySelectorAll("[data-strike]").forEach(p => {  // a unit that cancels: a slash through it
+      const t = svg.querySelector("#" + p.dataset.strike).getBBox();
+      p.setAttribute("d", `M${t.x - 2} ${t.y + t.height * 0.8} L${t.x + t.width + 2} ${t.y + t.height * 0.25}`);
+    });
     svg.querySelectorAll("[data-ul]").forEach(p => {
       const t = svg.querySelector("#" + p.dataset.ul).getBBox();
       p.setAttribute("d", `M${t.x} ${t.y + t.height + 1} q ${t.width / 2} 5 ${t.width} 0`);
     });
+    // a box around a whole line (data-box="L7") or around some elements (data-box="#a #b")
     svg.querySelectorAll("[data-box]").forEach(r => {
-      const bs = [...svg.querySelectorAll(`[data-line="${r.dataset.box}"]`)].map(e => e.getBBox());
-      const x0 = Math.min(...bs.map(q => q.x)) - 10, y0 = Math.min(...bs.map(q => q.y)) - 8;
-      const x1 = Math.max(...bs.map(q => q.x + q.width)) + 10, y1 = Math.max(...bs.map(q => q.y + q.height)) + 8;
+      const v = r.dataset.box, px = r.dataset.pad ? +r.dataset.pad : 10, py = r.dataset.pad ? +r.dataset.pad : 8;
+      const bs = [...svg.querySelectorAll(v.startsWith("#") ? v.split(/\s+/).join(",") : `[data-line="${v}"]`)].map(e => e.getBBox());
+      const x0 = Math.min(...bs.map(q => q.x)) - px, y0 = Math.min(...bs.map(q => q.y)) - py;
+      const x1 = Math.max(...bs.map(q => q.x + q.width)) + px, y1 = Math.max(...bs.map(q => q.y + q.height)) + py;
       r.setAttribute("x", x0); r.setAttribute("y", y0); r.setAttribute("width", x1 - x0); r.setAttribute("height", y1 - y0);
     });
     laid = svg.querySelector("[data-line]")?.getComputedTextLength?.() > 0;
@@ -2490,9 +2912,19 @@ document.querySelectorAll(".board").forEach(b => {
     set(shown, shown === step + 1);
   };
   new MutationObserver(sync).observe(b, { subtree: true, attributes: true, attributeFilter: ["class"] });
+  // in present mode, shrink the board until its screen no longer scrolls (text above or below it takes space too)
+  const sec = b.closest(".screen");
+  const fit = () => {
+    svg.style.maxHeight = "";
+    if (!document.body.classList.contains("present") || !sec?.classList.contains("current")) return;
+    const over = sec.scrollHeight - sec.clientHeight;
+    if (over > 0) svg.style.maxHeight = Math.max(200, svg.getBoundingClientRect().height - over - 4) + "px";
+  };
+  if (sec) new MutationObserver(() => setTimeout(fit, 50)).observe(sec, { attributes: true, attributeFilter: ["class"] });
+  addEventListener("resize", () => setTimeout(fit, 50));
   const ready = () => { laid = false; set(document.body.classList.contains("present") ? 0 : N, false); };
   (document.fonts?.ready || Promise.resolve()).then(ready);
-  new MutationObserver(() => { if (!document.body.classList.contains("present")) { clearTimeout(timer); set(N, false); } })
+  new MutationObserver(() => { setTimeout(fit, 50); if (!document.body.classList.contains("present")) { clearTimeout(timer); set(N, false); } })
     .observe(document.body, { attributes: true, attributeFilter: ["class"] });
 });
 
