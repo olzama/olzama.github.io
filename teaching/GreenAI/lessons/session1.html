@@ -1267,88 +1267,104 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1000 560" role="img" aria-label="Deriving cosine similarity: the vectors aunt (4, 2) and uncle (3, 3), their lengths, the unit vectors on the circle of radius 1, the angles, the dot product, and the formula cos θ = aunt · uncle / (‖aunt‖ ‖uncle‖) ≈ 0.95">
-<path d="M70 490 H 470" stroke="var(--muted)" stroke-width="1.5" fill="none" data-s="1" data-t="0.5"/>
-<path d="M70 490 V 60" stroke="var(--muted)" stroke-width="1.5" fill="none" data-s="1" data-t="0.5"/>
-<text x="156" y="514" font-size="18" fill="var(--muted)" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">1</text>
-<text x="48" y="406" font-size="18" fill="var(--muted)" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">1</text>
-<text x="246" y="514" font-size="18" fill="var(--muted)" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">2</text>
-<text x="48" y="316" font-size="18" fill="var(--muted)" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">2</text>
-<text x="336" y="514" font-size="18" fill="var(--muted)" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">3</text>
-<text x="48" y="226" font-size="18" fill="var(--muted)" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">3</text>
-<text x="426" y="514" font-size="18" fill="var(--muted)" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">4</text>
-<text x="48" y="136" font-size="18" fill="var(--muted)" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">4</text>
-<line x1="70" y1="490" x2="430.0" y2="310.0" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" data-s="1" data-d="0.6" data-dim="3"/>
-<path d="M421.6 319.9 L430.0 310.0 L417.0 310.8" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.2" data-a="fade" data-t="0.2" data-dim="3"/>
-<text x="300" y="404" font-size="24" fill="var(--blue)" style="fill:var(--blue)" data-s="1" data-d="1.4" data-dim="3">aunt (4, 2)</text>
-<line x1="70" y1="490" x2="340.0" y2="220.0" stroke="var(--green)" stroke-width="3" stroke-linecap="round" data-s="1" data-d="2.0" data-dim="3"/>
-<path d="M335.1 232.0 L340.0 220.0 L328.0 224.9" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="2.6" data-a="fade" data-t="0.2" data-dim="3"/>
-<text x="300" y="208" font-size="24" fill="var(--green)" style="fill:var(--green)" data-s="1" data-d="2.8" data-dim="3">uncle (3, 3)</text>
-<path d="M70 490 H 430 V 310" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="5 5" data-s="2" data-a="fade" data-dim="3"/>
-<text x="330" y="482" font-size="24" fill="var(--blue)" style="fill:var(--blue)" data-s="2" data-d="0.3" data-dim="3">4</text>
-<text x="440" y="408" font-size="24" fill="var(--blue)" style="fill:var(--blue)" data-s="2" data-d="0.5" data-dim="3">2</text>
-<text y="62" font-size="25" style="fill:currentColor" data-s="2" data-d="0.9" data-line="L1" data-x0="478">‖aunt‖ = √(4² + 2²) = √20 ≈ 4.47</text>
-<text y="108" font-size="25" style="fill:currentColor" data-s="2" data-d="2.6" data-line="L2" data-x0="478">‖uncle‖ = √(3² + 3²) = √18 ≈ 4.24</text>
-<path d="M160.0 490.0 A90 90 0 0 0 70.0 400.0" fill="none" stroke="var(--orange)" stroke-width="1.5" data-s="3" data-d="0.4"/>
-<text x="100" y="386" font-size="20" fill="var(--orange)" style="fill:var(--orange)" data-s="3" data-d="0.9">1</text>
-<line x1="70" y1="490" x2="150.5" y2="449.8" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" data-s="3" data-d="1.2"/>
-<path d="M142.1 459.6 L150.5 449.8 L137.5 450.6" fill="none" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="1.7999999999999998" data-a="fade" data-t="0.2"/>
-<line x1="70" y1="490" x2="133.6" y2="426.4" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" data-s="3" data-d="1.6"/>
-<path d="M128.8 438.4 L133.6 426.4 L121.6 431.2" fill="none" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="2.2" data-a="fade" data-t="0.2"/>
-<text x="158" y="452" font-size="26" fill="var(--orange)" style="fill:var(--orange)" data-s="3" data-d="2.0">â</text>
-<text x="118" y="412" font-size="26" fill="var(--orange)" style="fill:var(--orange)" data-s="3" data-d="2.1">û</text>
-<text y="168" font-size="25" style="fill:currentColor" data-s="3" data-d="2.4" data-line="L3" data-x0="478">â = aunt / ‖aunt‖ = (0.89, 0.45)</text>
-<text y="214" font-size="25" style="fill:currentColor" data-s="3" data-d="4.0" data-line="L4" data-x0="478">û = uncle / ‖uncle‖ = (0.71, 0.71)</text>
-<path d="M210.0 490.0 A140 140 0 0 0 195.2 427.4" fill="none" stroke="var(--blue)" stroke-width="2" data-s="4" data-d="0"/>
-<text x="216" y="474" font-size="26" fill="var(--blue)" style="fill:var(--blue)" data-s="4" data-d="0.6"><tspan class="gk">α</tspan></text>
-<path d="M260.0 490.0 A190 190 0 0 0 204.4 355.6" fill="none" stroke="var(--green)" stroke-width="2" data-s="4" data-d="0.8"/>
-<text x="264" y="440" font-size="26" fill="var(--green)" style="fill:var(--green)" data-s="4" data-d="1.4"><tspan class="gk">β</tspan></text>
-<path d="M150.5 449.8 V 490 M150.5 449.8 H 70" fill="none" stroke="var(--orange)" stroke-width="1.5" stroke-dasharray="4 4" data-s="4" data-d="1.8" data-a="fade"/>
-<text x="128.49844718999242" y="536" font-size="22" fill="var(--orange)" style="fill:var(--orange)" data-s="4" data-d="2.2">cos <tspan class="gk">α</tspan></text>
-<text x="4" y="455.75077640500376" font-size="22" fill="var(--orange)" style="fill:var(--orange)" data-s="4" data-d="2.6">sin <tspan class="gk">α</tspan></text>
-<text y="168" font-size="25" style="fill:currentColor" data-s="4" data-d="3.1" data-line="L3">= (</text>
-<text y="168" font-size="25" style="fill:var(--orange)" data-s="4" data-d="3.35" data-line="L3" id="cb-ca" data-gap="2">cos <tspan class="gk">α</tspan></text>
-<text y="168" font-size="25" style="fill:currentColor" data-s="4" data-d="3.6500000000000004" data-line="L3" data-gap="5">,</text>
-<text y="168" font-size="25" style="fill:var(--neg)" data-s="4" data-d="3.75" data-line="L3" id="cb-sa" data-gap="2">sin <tspan class="gk">α</tspan></text>
-<text y="168" font-size="25" style="fill:currentColor" data-s="4" data-d="4.05" data-line="L3">)</text>
-<text y="214" font-size="25" style="fill:currentColor" data-s="4" data-d="4.6" data-line="L4">= (</text>
-<text y="214" font-size="25" style="fill:var(--orange)" data-s="4" data-d="4.85" data-line="L4" id="cb-cb" data-gap="2">cos <tspan class="gk">β</tspan></text>
-<text y="214" font-size="25" style="fill:currentColor" data-s="4" data-d="5.1499999999999995" data-line="L4" data-gap="5">,</text>
-<text y="214" font-size="25" style="fill:var(--neg)" data-s="4" data-d="5.25" data-line="L4" id="cb-sb" data-gap="2">sin <tspan class="gk">β</tspan></text>
-<text y="214" font-size="25" style="fill:currentColor" data-s="4" data-d="5.55" data-line="L4">)</text>
-<path data-ul="cb-ca" d="M0 0" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="5" data-d="0.0" data-t="0.4"/>
-<path data-ul="cb-cb" d="M0 0" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="5" data-d="0.3" data-t="0.4"/>
-<path data-ul="cb-sa" d="M0 0" fill="none" stroke="var(--neg)" stroke-width="2.5" stroke-linecap="round" data-s="5" data-d="0.6" data-t="0.4"/>
-<path data-ul="cb-sb" d="M0 0" fill="none" stroke="var(--neg)" stroke-width="2.5" stroke-linecap="round" data-s="5" data-d="0.9" data-t="0.4"/>
-<text y="270" font-size="25" style="fill:currentColor" data-s="5" data-d="1.4" data-line="L5" data-x0="478">â · û =</text>
-<text y="270" font-size="25" style="fill:var(--orange)" data-s="5" data-d="1.9" data-line="L5">cos <tspan class="gk">α</tspan> · cos <tspan class="gk">β</tspan></text>
-<text y="270" font-size="25" style="fill:currentColor" data-s="5" data-d="2.6" data-line="L5">+</text>
-<text y="270" font-size="25" style="fill:var(--neg)" data-s="5" data-d="2.8" data-line="L5">sin <tspan class="gk">α</tspan> · sin <tspan class="gk">β</tspan></text>
-<text y="318" font-size="25" style="fill:currentColor" data-s="6" data-d="0" data-line="L6" data-x0="530">= cos(<tspan class="gk">β</tspan> − <tspan class="gk">α</tspan>) = cos <tspan class="gk">θ</tspan></text>
-<path d="M293.6 378.2 A250 250 0 0 0 246.8 313.2" fill="none" stroke="currentColor" stroke-width="2.5" data-s="6" data-d="1.0"/>
-<text x="288" y="336" font-size="30" fill="currentColor" style="fill:currentColor" data-s="6" data-d="1.7"><tspan class="gk">θ</tspan></text>
-<text y="404" font-size="25" style="fill:currentColor" data-s="7" data-d="0" data-line="L7" data-x0="478">cos <tspan class="gk">θ</tspan> = â · û =</text>
-<g class="bfrac" data-line="L7" data-s="7" data-d="0.8"><text class="num" y="388" font-size="25">aunt · uncle</text><line class="bar" y1="397" y2="397" stroke="currentColor" stroke-width="2"/><text class="den" y="422" font-size="25">‖aunt‖ ‖uncle‖</text></g>
-<rect data-box="L7" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--blue)" stroke-width="2.5" data-s="7" data-d="2.0" data-t="0.9"/>
-<text y="494" font-size="25" style="fill:currentColor" data-s="8" data-d="0" data-line="L8" data-x0="574">=</text>
-<g class="bfrac" data-line="L8" data-s="8" data-d="0.2"><text class="num" y="478" font-size="25">4·3 + 2·3</text><line class="bar" y1="487" y2="487" stroke="currentColor" stroke-width="2"/><text class="den" y="512" font-size="25">4.47 · 4.24</text></g>
-<text y="494" font-size="25" style="fill:currentColor" data-s="8" data-d="1.2" data-line="L8">=</text>
-<g class="bfrac" data-line="L8" data-s="8" data-d="1.4"><text class="num" y="478" font-size="25">18</text><line class="bar" y1="487" y2="487" stroke="currentColor" stroke-width="2"/><text class="den" y="512" font-size="25">18.97</text></g>
-<text y="494" font-size="25" style="fill:currentColor" data-s="8" data-d="2.0" data-line="L8">≈ 0.95</text>
+<path d="M70 490 H 470" fill="none" stroke="var(--muted)" stroke-width="1.5" data-s="1" data-d="0" data-t="0.5"/>
+<path d="M70 490 V 60" fill="none" stroke="var(--muted)" stroke-width="1.5" data-s="1" data-d="0" data-t="0.5"/>
+<text x="156.0" y="514.0" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">1</text>
+<text x="48.0" y="406.0" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">1</text>
+<text x="246.0" y="514.0" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">2</text>
+<text x="48.0" y="316.0" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">2</text>
+<text x="336.0" y="514.0" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">3</text>
+<text x="48.0" y="226.0" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">3</text>
+<text x="426.0" y="514.0" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">4</text>
+<text x="48.0" y="136.0" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">4</text>
+<line x1="70" y1="490" x2="430.0" y2="310.0" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" data-s="2" data-d="0" data-dim="14"/>
+<path d="M421.6 319.9 L430.0 310.0 L417.0 310.8" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.6" data-dim="14" data-a="fade" data-t="0.2"/>
+<text x="300.0" y="404.0" font-size="24" style="fill:var(--blue)" data-s="2" data-d="0.8" data-dim="14">aunt (4, 2)</text>
+<line x1="70" y1="490" x2="340.0" y2="220.0" stroke="var(--green)" stroke-width="3" stroke-linecap="round" data-s="3" data-d="0" data-dim="14"/>
+<path d="M335.1 232.0 L340.0 220.0 L328.0 224.9" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="0.6" data-dim="14" data-a="fade" data-t="0.2"/>
+<text x="300.0" y="208.0" font-size="24" style="fill:var(--green)" data-s="3" data-d="0.8" data-dim="14">uncle (3, 3)</text>
+<text y="62" font-size="25" style="fill:currentColor" data-s="4" data-d="0" data-line="L1" data-x0="478">‖aunt‖ =</text>
+<path d="M70 490 H 430" fill="none" stroke="var(--blue)" stroke-width="1.5" data-s="5" data-d="0" data-dim="14" stroke-dasharray="5 5" data-a="fade"/>
+<text x="330.0" y="482.0" font-size="24" style="fill:var(--blue)" data-s="5" data-d="0.2" data-dim="14">4</text>
+<text y="62" font-size="25" style="fill:currentColor" data-s="5" data-d="0.4" data-line="L1">√(4²</text>
+<path d="M430 490 V 310" fill="none" stroke="var(--blue)" stroke-width="1.5" data-s="6" data-d="0" data-dim="14" stroke-dasharray="5 5" data-a="fade"/>
+<text x="440.0" y="408.0" font-size="24" style="fill:var(--blue)" data-s="6" data-d="0.2" data-dim="14">2</text>
+<text y="62" font-size="25" style="fill:currentColor" data-s="6" data-d="0.4" data-line="L1">+ 2²)</text>
+<text y="62" font-size="25" style="fill:currentColor" data-s="7" data-d="0" data-line="L1">= √20</text>
+<text y="62" font-size="25" style="fill:currentColor" data-s="8" data-d="0" data-line="L1">≈ 4.47</text>
+<text y="108" font-size="25" style="fill:currentColor" data-s="9" data-d="0" data-line="L2" data-x0="478">‖uncle‖ =</text>
+<text y="108" font-size="25" style="fill:currentColor" data-s="10" data-d="0" data-line="L2">√(3²</text>
+<text y="108" font-size="25" style="fill:currentColor" data-s="11" data-d="0" data-line="L2">+ 3²)</text>
+<text y="108" font-size="25" style="fill:currentColor" data-s="12" data-d="0" data-line="L2">= √18</text>
+<text y="108" font-size="25" style="fill:currentColor" data-s="13" data-d="0" data-line="L2">≈ 4.24</text>
+<path d="M160.0 490.0 A90 90 0 0 0 70.0 400.0" fill="none" stroke="var(--orange)" stroke-width="1.5" data-s="14" data-d="0"/>
+<text x="100.0" y="386.0" font-size="20" style="fill:var(--orange)" data-s="14" data-d="0.5">1</text>
+<text y="168" font-size="25" style="fill:currentColor" data-s="15" data-d="0" data-line="L3" data-x0="478">â =</text>
+<text y="168" font-size="25" style="fill:currentColor" data-s="16" data-d="0" data-line="L3">aunt</text>
+<text y="168" font-size="25" style="fill:currentColor" data-s="17" data-d="0" data-line="L3">/ ‖aunt‖</text>
+<line x1="70" y1="490" x2="150.5" y2="449.8" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" data-s="17" data-d="0.5"/>
+<path d="M142.1 459.6 L150.5 449.8 L137.5 450.6" fill="none" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="17" data-d="1.1" data-a="fade" data-t="0.2"/>
+<text x="158.0" y="452.0" font-size="26" style="fill:var(--orange)" data-s="17" data-d="1.1">â</text>
+<text y="168" font-size="25" style="fill:currentColor" data-s="18" data-d="0" data-line="L3">= (0.89, 0.45)</text>
+<text y="214" font-size="25" style="fill:currentColor" data-s="19" data-d="0" data-line="L4" data-x0="478">û =</text>
+<text y="214" font-size="25" style="fill:currentColor" data-s="20" data-d="0" data-line="L4">uncle</text>
+<text y="214" font-size="25" style="fill:currentColor" data-s="21" data-d="0" data-line="L4">/ ‖uncle‖</text>
+<line x1="70" y1="490" x2="133.6" y2="426.4" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" data-s="21" data-d="0.5"/>
+<path d="M128.8 438.4 L133.6 426.4 L121.6 431.2" fill="none" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="21" data-d="1.1" data-a="fade" data-t="0.2"/>
+<text x="118.0" y="412.0" font-size="26" style="fill:var(--orange)" data-s="21" data-d="1.1">û</text>
+<text y="214" font-size="25" style="fill:currentColor" data-s="22" data-d="0" data-line="L4">= (0.71, 0.71)</text>
+<path d="M210.0 490.0 A140 140 0 0 0 195.2 427.4" fill="none" stroke="var(--blue)" stroke-width="2" data-s="23" data-d="0"/>
+<text x="216.0" y="474.0" font-size="26" style="fill:var(--blue)" data-s="23" data-d="0.6"><tspan class="gk">α</tspan></text>
+<path d="M260.0 490.0 A190 190 0 0 0 204.4 355.6" fill="none" stroke="var(--green)" stroke-width="2" data-s="24" data-d="0"/>
+<text x="264.0" y="440.0" font-size="26" style="fill:var(--green)" data-s="24" data-d="0.6"><tspan class="gk">β</tspan></text>
+<path d="M150.5 449.8 V 490" fill="none" stroke="var(--orange)" stroke-width="1.5" data-s="25" data-d="0" stroke-dasharray="4 4" data-a="fade"/>
+<text x="128.5" y="536.0" font-size="22" style="fill:var(--orange)" data-s="25" data-d="0.3">cos <tspan class="gk">α</tspan></text>
+<text y="168" font-size="25" style="fill:currentColor" data-s="25" data-d="0.8" data-line="L3">= (</text>
+<text y="168" font-size="25" style="fill:var(--orange)" data-s="25" data-d="1.0" data-line="L3" id="cb-ca" data-gap="2">cos <tspan class="gk">α</tspan></text>
+<path d="M150.5 449.8 H 70" fill="none" stroke="var(--orange)" stroke-width="1.5" data-s="26" data-d="0" stroke-dasharray="4 4" data-a="fade"/>
+<text x="4.0" y="455.8" font-size="22" style="fill:var(--orange)" data-s="26" data-d="0.3">sin <tspan class="gk">α</tspan></text>
+<text y="168" font-size="25" style="fill:currentColor" data-s="26" data-d="0.8" data-line="L3" data-gap="5">,</text>
+<text y="168" font-size="25" style="fill:var(--neg)" data-s="26" data-d="0.9" data-line="L3" id="cb-sa" data-gap="2">sin <tspan class="gk">α</tspan></text>
+<text y="168" font-size="25" style="fill:currentColor" data-s="26" data-d="1.2" data-line="L3">)</text>
+<text y="214" font-size="25" style="fill:currentColor" data-s="27" data-d="0" data-line="L4">= (</text>
+<text y="214" font-size="25" style="fill:var(--orange)" data-s="27" data-d="0.2" data-line="L4" id="cb-cb" data-gap="2">cos <tspan class="gk">β</tspan></text>
+<text y="214" font-size="25" style="fill:currentColor" data-s="28" data-d="0" data-line="L4" data-gap="5">,</text>
+<text y="214" font-size="25" style="fill:var(--neg)" data-s="28" data-d="0.1" data-line="L4" id="cb-sb" data-gap="2">sin <tspan class="gk">β</tspan></text>
+<text y="214" font-size="25" style="fill:currentColor" data-s="28" data-d="0.4" data-line="L4">)</text>
+<text y="270" font-size="25" style="fill:currentColor" data-s="29" data-d="0" data-line="L5" data-x0="478">â · û =</text>
+<path data-ul="cb-ca" d="M0 0" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="30" data-d="0" data-t="0.4"/>
+<path data-ul="cb-cb" d="M0 0" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="30" data-d="0.3" data-t="0.4"/>
+<text y="270" font-size="25" style="fill:var(--orange)" data-s="30" data-d="0.8" data-line="L5">cos <tspan class="gk">α</tspan> · cos <tspan class="gk">β</tspan></text>
+<path data-ul="cb-sa" d="M0 0" fill="none" stroke="var(--neg)" stroke-width="2.5" stroke-linecap="round" data-s="31" data-d="0" data-t="0.4"/>
+<path data-ul="cb-sb" d="M0 0" fill="none" stroke="var(--neg)" stroke-width="2.5" stroke-linecap="round" data-s="31" data-d="0.3" data-t="0.4"/>
+<text y="270" font-size="25" style="fill:currentColor" data-s="31" data-d="0.8" data-line="L5">+</text>
+<text y="270" font-size="25" style="fill:var(--neg)" data-s="31" data-d="1.0" data-line="L5">sin <tspan class="gk">α</tspan> · sin <tspan class="gk">β</tspan></text>
+<text y="318" font-size="25" style="fill:currentColor" data-s="32" data-d="0" data-line="L6" data-x0="530">= cos(<tspan class="gk">β</tspan> − <tspan class="gk">α</tspan>)</text>
+<path d="M293.6 378.2 A250 250 0 0 0 246.8 313.2" fill="none" stroke="currentColor" stroke-width="2.5" data-s="33" data-d="0"/>
+<text x="288.0" y="336.0" font-size="30" style="fill:currentColor" data-s="33" data-d="0.7"><tspan class="gk">θ</tspan></text>
+<text y="318" font-size="25" style="fill:currentColor" data-s="33" data-d="1.0" data-line="L6">= cos <tspan class="gk">θ</tspan></text>
+<text y="404" font-size="25" style="fill:currentColor" data-s="34" data-d="0" data-line="L7" data-x0="478">cos <tspan class="gk">θ</tspan> = â · û =</text>
+<g class="bfrac" data-line="L7"><text class="num" y="388" font-size="25" data-s="35" data-d="0">aunt · uncle</text><line class="bar" y1="397" y2="397" stroke="currentColor" stroke-width="2" data-s="35" data-d="0"/><text class="den" y="422" font-size="25" data-s="36" data-d="0">‖aunt‖</text><text class="den" y="422" font-size="25" data-s="37" data-d="0">‖uncle‖</text></g>
+<rect data-box="L7" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--blue)" stroke-width="2.5" data-s="38" data-d="0" data-t="0.9"/>
+<text y="494" font-size="25" style="fill:currentColor" data-s="39" data-d="0" data-line="L8" data-x0="574">=</text>
+<g class="bfrac" data-line="L8"><text class="num" y="478" font-size="25" data-s="39" data-d="0">4·3</text><text class="num" y="478" font-size="25" data-s="40" data-d="0">+ 2·3</text><line class="bar" y1="487" y2="487" stroke="currentColor" stroke-width="2" data-s="39" data-d="0"/><text class="den" y="512" font-size="25" data-s="41" data-d="0">4.47</text><text class="den" y="512" font-size="25" data-s="42" data-d="0">· 4.24</text></g>
+<text y="494" font-size="25" style="fill:currentColor" data-s="43" data-d="0" data-line="L8">=</text>
+<g class="bfrac" data-line="L8"><text class="num" y="478" font-size="25" data-s="43" data-d="0">18</text><line class="bar" y1="487" y2="487" stroke="currentColor" stroke-width="2" data-s="43" data-d="0"/><text class="den" y="512" font-size="25" data-s="44" data-d="0">18.97</text></g>
+<text y="494" font-size="25" style="fill:currentColor" data-s="45" data-d="0" data-line="L8">≈ 0.95</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
-      <span class="frag" data-k="1"></span><span class="frag" data-k="2"></span><span class="frag" data-k="3"></span><span class="frag" data-k="4"></span><span class="frag" data-k="5"></span><span class="frag" data-k="6"></span><span class="frag" data-k="7"></span><span class="frag" data-k="8"></span>
     </div>
   </div>
   <div class="notes">
-    <p>We have vectors for words. Now we need a number that says how similar two vectors are. I will derive it on the board, step by step. Each press draws the next step.</p>
-    <p>Step 1. Two words, as vectors with two values: aunt is 4, 2, and uncle is 3, 3. We draw each one as an arrow from the origin. Words used in similar ways should point in similar directions. So we want to measure how similar the directions are.</p>
-    <p>Step 2. Each arrow has a length. By Pythagoras, the length of aunt is the square root of 4 squared plus 2 squared: the square root of 20, about 4.47. Uncle has length square root of 18, about 4.24. Length is not direction, so we remove it.</p>
-    <p>Step 3. To remove the length, divide each vector by its own length. We call the results a-hat and u-hat. They point in the same directions as before, but both have length 1. So they end on the circle of radius 1. Aunt becomes 0.89, 0.45, and uncle becomes 0.71, 0.71.</p>
-    <p>Step 4. A point on the circle of radius 1, at angle alpha from the x-axis, has coordinates cos alpha, sin alpha. You can see it on the drawing: the dashed lines go down to cos alpha and across to sin alpha. So a-hat is cos alpha, sin alpha, and u-hat is cos beta, sin beta.</p>
-    <p>Step 5. Multiply the matching entries and add them up: the first entries, cos alpha times cos beta, plus the second entries, sin alpha times sin beta. This is called the dot product.</p>
-    <p>Step 6. Trigonometry says this sum is exactly the cosine of beta minus alpha. And beta minus alpha is the angle between the two arrows, theta. So the dot product of the two short arrows is the cosine of the angle between them.</p>
-    <p>Step 7. Now put it together. The short arrows were the vectors divided by their lengths. So the cosine of theta is the dot product of the original vectors, divided by both lengths. That is the formula for cosine similarity.</p>
-    <p>Step 8. With our numbers: 4 times 3 plus 2 times 3 is 18. Divided by 4.47 times 4.24, about 18.97. The result is about 0.95, close to 1, the maximum. 1 means the same direction, and 0 a right angle.</p>
+    <p>We have vectors for words. Now we need a number that says how similar two vectors are. I will derive it on the board, step by step. Each press draws the next part of an equation: one term, one factor, or one summand.</p>
+    <p>Two words, as vectors with two values: aunt is 4, 2, and uncle is 3, 3. We draw each one as an arrow from the origin. Words used in similar ways should point in similar directions. So we want to measure how similar the directions are.</p>
+    <p>Each arrow has a length. By Pythagoras, the length of aunt is the square root of 4 squared, the horizontal side, plus 2 squared, the vertical side: the square root of 20, about 4.47. Uncle has length square root of 18, about 4.24. Length is not direction, so we remove it.</p>
+    <p>To remove the length, divide each vector by its own length. We call the results a-hat and u-hat. They point in the same directions as before, but both have length 1. So they end on the circle of radius 1. Aunt becomes 0.89, 0.45, and uncle becomes 0.71, 0.71.</p>
+    <p>A point on the circle of radius 1, at angle alpha from the x-axis, has coordinates cos alpha, sin alpha. You can see it on the drawing: the dashed lines go down to cos alpha and across to sin alpha. So a-hat is cos alpha, sin alpha, and u-hat is cos beta, sin beta.</p>
+    <p>Multiply the matching entries and add them up: the first entries, cos alpha times cos beta, plus the second entries, sin alpha times sin beta. This is called the dot product.</p>
+    <p>Trigonometry says this sum is exactly the cosine of beta minus alpha. And beta minus alpha is the angle between the two arrows, theta. So the dot product of the two short arrows is the cosine of the angle between them.</p>
+    <p>Now put it together. The short arrows were the vectors divided by their lengths. So the cosine of theta is the dot product of the original vectors, divided by both lengths. That is the formula for cosine similarity.</p>
+    <p>With our numbers: 4 times 3 plus 2 times 3 is 18. Divided by 4.47 times 4.24, about 18.97. The result is about 0.95, close to 1, the maximum. 1 means the same direction, and 0 a right angle.</p>
   </div>
 </section>
 
@@ -2376,8 +2392,12 @@ document.querySelectorAll(".tabs").forEach(tabs => {
 
 /* ---- boards: a derivation drawn step by step (elements with data-s=N appear at step N) ---- */
 document.querySelectorAll(".board").forEach(b => {
-  const svg = b.querySelector("svg"), marks = [...b.querySelectorAll(".frag")], N = marks.length;
-  const els = [...svg.querySelectorAll("[data-s]")], label = b.querySelector(".bstep");
+  const svg = b.querySelector("svg"), els = [...svg.querySelectorAll("[data-s]")], label = b.querySelector(".bstep");
+  // one hidden mark per step, so the lesson's Next walks through the board in present mode
+  const N = Math.max(...els.map(e => +e.dataset.s));
+  b.querySelectorAll(".frag").forEach(m => m.remove());
+  for (let i = 1; i <= N; i++) { const m = document.createElement("span"); m.className = "frag"; m.dataset.k = i; b.append(m); }
+  const marks = [...b.querySelectorAll(".frag")];
   let step = 0, laid = false, anims = [], timer = null;
   function layout() {
     if (laid || !svg.getBoundingClientRect().width) return;
@@ -2389,9 +2409,12 @@ document.querySelectorAll(".board").forEach(b => {
         if (el.dataset.x0) x = +el.dataset.x0;
         let w;
         if (el.classList.contains("bfrac")) {
-          const n = el.querySelector(".num"), d = el.querySelector(".den"), bar = el.querySelector(".bar");
-          const wn = n.getComputedTextLength(), wd = d.getComputedTextLength(); w = Math.max(wn, wd) + 12;
-          n.setAttribute("x", x + (w - wn) / 2); d.setAttribute("x", x + (w - wd) / 2);
+          // numerator and denominator may each have several parts, written one after another
+          const ns = [...el.querySelectorAll(".num")], ds = [...el.querySelectorAll(".den")], bar = el.querySelector(".bar");
+          const width = ps => ps.reduce((s, q) => s + q.getComputedTextLength(), 0) + 7 * (ps.length - 1);
+          const wn = width(ns), wd = width(ds); w = Math.max(wn, wd) + 12;
+          const place = (ps, x1) => ps.forEach(q => { q.setAttribute("x", x1); x1 += q.getComputedTextLength() + 7; });
+          place(ns, x + (w - wn) / 2); place(ds, x + (w - wd) / 2);
           bar.setAttribute("x1", x); bar.setAttribute("x2", x + w);
         } else { el.setAttribute("x", x); w = el.getComputedTextLength(); }
         x += w + (el.dataset.gap ? +el.dataset.gap : 7);
