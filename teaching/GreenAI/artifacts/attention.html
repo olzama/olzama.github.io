@@ -297,7 +297,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <p class="lead">A translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. The encoder makes one vector after each Galician word. As on the <a href="mt.html#enc">translation page</a>, each new word takes half of the vector, so each column below holds mostly its own word and less and less of the words before it. The colors only mark which word is which. Each vector itself is a list of numbers, written above its column. Without attention, the decoder gets only the last vector, the <b>summary</b>. With attention, it takes some of every vector, with new weights for every English word.</p>
     <div class="controls">
       <div class="seg" role="group" aria-label="Input">
-        <button id="lShort" aria-pressed="true">tía miña</button>
+        <button id="lShort" aria-pressed="true">unha tía miña</button>
         <button id="lLong" aria-pressed="false">whole sentence</button>
       </div>
       <button class="primary" id="lookPlay">Write the translation</button>
@@ -310,7 +310,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <div class="heatwrap"><svg id="lookAtt" role="img" aria-label="Encoder vectors; the decoder takes from every one, weighted"></svg></div>
     <div class="usebar"><span class="label">How much the decoder takes from each word's vector</span><div class="mix" id="mixAtt"></div><div class="weights" id="mixAttTxt"></div></div>
     <p class="note" id="lookNote"></p>
-    <p class="note">Weights for <i>tía miña</i> are the hand-set ones from the worked example; for the whole sentence they are the real model's (section 4, averaged over its heads). The English words are that model's translation. The columns and the summary use the simplified encoder of the <a href="mt.html#enc">translation page</a> (each word takes half); the bottom bar shows the attention weights. Before attention, a long sentence had to fit into the summary alone, and translations of long sentences got much worse.</p>
+    <p class="note">Weights for <i>unha tía miña</i> are made up for this picture; for the whole sentence they are the real model's (section 4, averaged over its heads). The English words are that model's translation. The columns and the summary use the simplified encoder of the <a href="mt.html#enc">translation page</a> (each word takes half); the bottom bar shows the attention weights. Before attention, a long sentence had to fit into the summary alone, and translations of long sentences got much worse.</p>
   </section>
 
   <section class="panel" id="compare">
@@ -531,13 +531,13 @@ function mixHTML(names, vals, empty) {
 }
 
 // ---------- 3: one vector vs attention ----------
-const SHORT = { src: ["tía", "miña"], tgt: ["my", "aunt"], w: [softmax([0, 3]), softmax([3, 0])] };
+const SHORT = { src: ["unha", "tía", "miña"], tgt: ["an", "aunt", "of", "mine"], w: [softmax([3, 0, 0]), softmax([0, 3, 0]), softmax([0, 1, 3]), softmax([0, 0, 3])] };
 const longData = () => { const R = REAL.sentence; return { src: R.src.map(clean), tgt: R.tgt.map(clean), w: avgOf(R.cross, "all", "all") }; };
 let long1 = false, cur1 = 0, t1 = null;
 const lookData = () => long1 ? longData() : SHORT;
 function lookSvg(id, attention) {
   const d = lookData(), n = d.src.length, m = d.tgt.length;
-  const step = long1 ? 24 : 200, x0 = long1 ? 30 : 140, W = long1 ? x0 + Math.max(n, m) * step + 190 : 760;
+  const step = long1 ? 24 : 150, x0 = long1 ? 30 : 140, W = long1 ? x0 + Math.max(n, m) * step + 190 : 930;
   const sx = k => x0 + k * step, yW = long1 ? 48 : 30, CH = long1 ? 44 : 96, CWd = long1 ? 12 : 30, yB = long1 ? 122 : 124, yT = long1 ? 250 : 290, H = long1 ? 308 : 306;
   const yTop = yB - CH / 2, yBot = yB + CH / 2, wcol = j => `var(${PAL[j % PAL.length]})`;
   // English words: under the source in the short example (so the alignment lines cross), spread evenly in the long one
@@ -585,8 +585,9 @@ function lookSvg(id, attention) {
     d.src.forEach((w, k) => { const e = emb2(w); hv = [0.5 * hv[0] + 0.5 * e[0], 0.5 * hv[1] + 0.5 * e[1]]; g += `<text x="${sx(k)}" y="${yTop - 8}" text-anchor="middle" style="fill:var(--fg)">${f(hv)}</text>`; });
     if (!attention) {
       const x = sx(n - 1) + CWd / 2 + 8, ts = (j, t) => `<tspan style="fill:${wcol(j)}">${t}</tspan>`;
-      g += `<text x="${x}" y="${yTop + 32}">= ${d.src.map((w, j) => `${["", "", "¼", "½"][Math.min(3, j + 4 - n)] || "…"} × ${ts(j, w)}`).reverse().join(" + ")} + ¼ × empty start</text>`;
-      g += `<text x="${x}" y="${yTop + 54}">= ${d.src.map((w, j) => `${["", "", "¼", "½"][Math.min(3, j + 4 - n)]} × ${ts(j, f(emb2(w)))}`).reverse().join(" + ")} + ¼ × (0, 0)</text>`;
+      const fr = v => ({ 0.5: "½", 0.25: "¼", 0.125: "⅛", 0.0625: "1/16" })[v] || v.toFixed(3), fe = fr(Math.pow(0.5, n));
+      g += `<text x="${x}" y="${yTop + 32}">= ${d.src.map((w, j) => `${fr(shareOf(j, n))} × ${ts(j, w)}`).reverse().join(" + ")} + ${fe} × empty start</text>`;
+      g += `<text x="${x}" y="${yTop + 54}">= ${d.src.map((w, j) => `${fr(shareOf(j, n))} × ${ts(j, f(emb2(w)))}`).reverse().join(" + ")}</text>`;
       g += `<text x="${x}" y="${yTop + 76}" style="fill:var(--fg)">= ${f(hv)}</text>`;
     }
   }
@@ -597,7 +598,7 @@ function lookSvg(id, attention) {
     g += long1 ? `<text class="word${k < cur1 ? "" : " dim"}" x="${tx(k)}" y="${yT}" transform="rotate(50 ${tx(k)} ${yT})" style="font-size:13px;${st}">${t}</text>`
                : `<text class="word${k < cur1 ? "" : " dim"}" x="${tx(k)}" y="${yT}" text-anchor="middle" style="${st}">${t}</text>`;
   });
-  const el = $(id); el.setAttribute("viewBox", `0 0 ${W} ${H}`); el.style.minWidth = long1 ? `${Math.round(W * 0.8)}px` : ""; el.style.maxWidth = long1 ? "" : "780px"; el.innerHTML = g;
+  const el = $(id); el.setAttribute("viewBox", `0 0 ${W} ${H}`); el.style.minWidth = long1 ? `${Math.round(W * 0.8)}px` : ""; el.style.maxWidth = long1 ? "" : "940px"; el.innerHTML = g;
 }
 function renderLook() {
   lookSvg("lookOne", false); lookSvg("lookAtt", true);
@@ -612,7 +613,7 @@ function renderLook() {
   $("lookNote").textContent = c < 0 ? "Press “Write the translation”, or go word by word." :
     `Writing “${d.tgt[c]}”. Without attention the decoder gets the summary again, the same as for every other word. With attention it takes ` +
     [...d.w[c].keys()].sort((a, b) => d.w[c][b] - d.w[c][a]).slice(0, 2).map(k => `${d.w[c][k].toFixed(2)} from the vector of “${d.src[k]}”`).join(" and ") +
-    (long1 ? ", and the mix changes with every word it writes." : ". The lines cross: tía miña is noun then possessive, English puts the possessive first.");
+    (long1 ? ", and the mix changes with every word it writes." : c >= 2 ? ". Both “of” and “mine” take most from the vector of “miña”." : ".");
 }
 function stopLook() { clearInterval(t1); t1 = null; }
 function setLong(l) { stopLook(); long1 = l; cur1 = 0; $("lShort").setAttribute("aria-pressed", !l); $("lLong").setAttribute("aria-pressed", l); renderLook(); }
@@ -786,7 +787,7 @@ cur1 = 2; renderLook();
   const top = (toks, ws) => [...ws.keys()].sort((a, b) => ws[b] - ws[a]).slice(0, 4).map(j => `${clean(toks[j])} ${ws[j].toFixed(2)}`).join(", ");
   const lab = v => v === "all" ? "average" : +v + 1;
   return [
-    `Section 1 (look back at every word): two diagrams on the same input (${long1 ? "whole sentence, real averaged weights" : "tía miña → my aunt, hand-set weights 0.95/0.05"}). Top, without attention: the encoder makes one vector per source word, each drawn as a column of colored segments showing how much of each word it holds (simplified encoder: each new word takes half); the decoder gets only the last vector, the summary, for every English word. Bottom, with attention: lines from every vector, width = weight; the bar shows the weights. English words written so far: ${cur1} of ${lookData().tgt.length}.`,
+    `Section 1 (look back at every word): two diagrams on the same input (${long1 ? "whole sentence, real averaged weights" : "unha tía miña → an aunt of mine, made-up weights (each English word takes about 0.9 from one vector: an–unha, aunt–tía, of–miña 0.84, mine–miña)"}). Top, without attention: the encoder makes one vector per source word, each drawn as a column of colored segments showing how much of each word it holds (simplified encoder: each new word takes half); the decoder gets only the last vector, the summary, for every English word. Bottom, with attention: lines from every vector, width = weight; the bar shows the weights. English words written so far: ${cur1} of ${lookData().tgt.length}.`,
     `Section 3 (query, key, score, softmax, value): q = (${q[0]}, ${q[1]}); scores tía ${sc[0].toFixed(2)}, miña ${sc[1].toFixed(2)}; weights tía ${w[0].toFixed(2)}, miña ${w[1].toFixed(2)}.`,
     `Section 4 (real cross-attention): translation "${D.translation}". Layer ${lab($("realLayer").value)}, head ${lab($("realHead").value)}. Selected output token "${clean(D.tgt[tSel])}" looks at: ${top(D.src, rw)}.`,
     `Section 5 (encoder self-attention): layer ${sLayer + 1}, head ${sHead + 1}; selected word "${clean(D.src[sSel])}" looks at: ${top(D.src, sw)}.`,
