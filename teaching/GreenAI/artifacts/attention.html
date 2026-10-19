@@ -310,7 +310,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <h2><span class="n">1</span>Attention: look back at every word</h2>
     <div class="review"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page, sections 2 and 3</a>: a translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. The encoder reads the words in order and makes one vector after each word, from the vector before and the new word. Its last vector is the <b>summary</b>. The decoder keeps its own vector, the <b>decoder state</b>: it starts as the summary and takes in each English word the decoder writes.</p></div>
     <p class="lead">Two small models translate our sentence. We trained them on the same data, and they are identical except for one thing: <b>without attention</b>, the decoder gets the summary for every English word; <b>with attention</b>, it gets a new mix of all the encoder's vectors for every English word. Their vectors have 8 dimensions. Every number below is the models' own. Go step by step.</p>
-    <div class="legend"><span class="lab">−1</span><span class="wkstrip h" id="wkLegend"></span><span class="lab">+1</span><span class="note">one square = one dimension of a vector</span></div>
+    <div class="legend"><span class="lab">−1</span><span class="wkstrip h" id="wkLegend"></span><span class="lab">+1</span><span class="note">one square = one dimension of a vector. Every number is between −1 and +1: each new vector of these models is a mix of the previous vector and a new candidate squashed into that range (by the tanh function), starting from zeros.</span></div>
     <div class="controls"><button id="wkBack">Back</button><button class="primary" id="wkNext">Next step</button><span class="pathstrip" id="wkSteps"></span></div>
     <h3 class="wkh" id="wkTitle"></h3>
     <div class="cmprows" id="wkOut"></div>
@@ -337,7 +337,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <button id="cmpNext">Next English word</button>
       <span class="note" id="cmpStep"></span>
     </div>
-    <div class="legend"><span class="lab">−1</span><span class="strip" id="legendStrip"></span><span class="lab">+1</span><span class="note">one square = one dimension of a vector</span></div>
+    <div class="legend"><span class="lab">−1</span><span class="strip" id="legendStrip"></span><span class="lab">+1</span><span class="note">one square = one dimension of a vector; every number is between −1 and +1 (see section 1)</span></div>
     <div class="writers">
       <div class="writer">
         <p class="label">Without attention</p>
@@ -794,7 +794,12 @@ function diff(out, ref) {
     else if (j < m && (i >= n || L[i][j + 1] >= L[i + 1][j])) { res.push([ref[j], "miss"]); j++; }
     else { res.push([out[i], "bad"]); i++; }
   }
-  return res;
+  // in each run of differences, a wrong word replaces a missing one; only the extra missing words count as missing
+  const kept = []; let run = [];
+  const flush = () => { let skip = run.filter(t => t[1] === "bad").length; run.forEach(t => { if (t[1] === "miss" && skip > 0) { skip--; return; } kept.push(t); }); run = []; };
+  res.forEach(t => { if (t[1] === "ok") { flush(); kept.push(t); } else run.push(t); });
+  flush();
+  return kept;
 }
 const glue = w => /^[,.»]$/.test(w);
 function line(toks) {  // [[word, cls]] → HTML with sentence spacing and a capital first letter
@@ -1059,11 +1064,30 @@ const run = CMP.runs.find(r => r.dims === 8), x = run.examples.find(e => e.cours
 const col = v => `rgba(var(${v >= 0 ? "--heat" : "--negheat"}),${(0.12 + 0.88 * Math.min(1, Math.abs(v))).toFixed(2)})`;
 const strip = (v, cap) => `<figure><span class="wkstrip">${v.map(a => `<i style="background:${col(a)}" title="${a.toFixed(2)}"></i>`).join("")}</span>${cap ? `<figcaption>${cap}</figcaption>` : ""}</figure>`;
 $("wkLegend").innerHTML = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1].map(a => `<i style="background:${col(a)}"></i>`).join("");
-// output lines: wrong words marked, the current word highlighted
-function outLine(out, upto, cur) {
-  return out.slice(0, upto).map((w, k) => {
-    const bad = w !== x.ref[k] && x.one.slice(0, k).every((v, i) => v === x.ref[i]) || (out === x.one && w !== x.ref[k]);
-    const cls = (k === cur ? "cur " : "") + (w !== x.ref[k] ? "bad" : "");
+// align an output with the correct translation (longest common subsequence): wrong words and missing words
+function align(out) {
+  const n = out.length, m = x.ref.length, L = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = out[i] === x.ref[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const res = []; let i = 0, j = 0;
+  while (i < n || j < m) {
+    if (i < n && j < m && out[i] === x.ref[j]) { res.push([out[i], "", i]); i++; j++; }
+    else if (j < m && (i >= n || L[i][j + 1] >= L[i + 1][j])) { res.push([x.ref[j], "miss", -1]); j++; }
+    else { res.push([out[i], "bad", i]); i++; }
+  }
+  // in each run of differences, a wrong word replaces a missing one; only the extra missing words are shown
+  const kept = []; let run = [];
+  const flush = () => { const b = run.filter(t => t[1] === "bad").length; let skip = b; run.forEach(t => { if (t[1] === "miss" && skip > 0) { skip--; return; } kept.push(t); }); run = []; };
+  res.forEach(t => { if (t[1]) run.push(t); else { flush(); kept.push(t); } });
+  flush();
+  return kept;
+}
+const ALIGN = { one: align(x.one), att: align(x.att) };
+const nBad = a => a.filter(t => t[1] === "bad").length, nMiss = a => a.filter(t => t[1] === "miss").length;
+// output lines up to word `upto`: wrong words in red, missing words struck through once the line is complete
+function outLine(key, upto, cur) {
+  const out = x[key], done = upto >= out.length;
+  return ALIGN[key].filter(([, c, i]) => i >= 0 ? i < upto : done).map(([w, c, i], k) => {
+    const cls = (cur >= 0 && i === cur ? "cur " : "") + c;
     return `<span class="${cls}">${esc(k === 0 ? w[0].toUpperCase() + w.slice(1) : w)}</span>`;
   }).join(" ").replace(/ (<span class="[^"]*">[,.»])/g, "$1").replace(/(«<\/span>) /g, "$1");
 }
@@ -1080,7 +1104,7 @@ function srcSvg(mode, w) {
     const cx = x0 + j * CW, used = mode === "one" ? j === n - 1 : mode === "att" ? true : true;
     const op = mode === "one" ? (j === n - 1 ? 1 : 0.25) : mode === "att" ? 0.3 + 0.7 * Math.min(1, w[j] * 3) : 1;
     g += `<text x="${cx + 5}" y="${yW}" transform="rotate(-55 ${cx + 5} ${yW})" style="font-style:italic;fill:var(--fg);font-size:12px">${esc(t)}</text>`;
-    g += `<g opacity="${op.toFixed(2)}">` + x.encAtt[j].map((v, k) => `<rect x="${cx}" y="${yTop + k * ch}" width="12" height="${ch - 1}" rx="1.5" style="fill:${col(v)}"/>`).join("") + "</g>";
+    g += `<g opacity="${op.toFixed(2)}">` + (mode === "one" ? x.encOne : x.encAtt)[j].map((v, k) => `<rect x="${cx}" y="${yTop + k * ch}" width="12" height="${ch - 1}" rx="1.5" style="fill:${col(v)}"/>`).join("") + "</g>";
     if (w) {
       const h = 40 * w[j];
       g += `<rect x="${cx}" y="${yTop + H8 + 6}" width="12" height="${Math.max(0.5, h).toFixed(1)}" style="fill:var(--orange)"/>`;
@@ -1106,10 +1130,10 @@ function panel(model, i) {
     <div class="wkrow">${strip(st, `decoder state (${prev})`)}<span class="op">+</span>${strip(att ? x.ctxAtt[i] : x.sumOne, att ? "the mix" : "the summary")}<span class="op">→</span>${bars(P, x.ref[i] === P[0][0] || out.slice(0, i).every((v, k) => v === x.ref[k]) ? x.ref[i] : null)}</div></div>`;
 }
 const STEPS = [
-  ["Two translations of our sentence", () => ({ out: [1, 1], cur: -1, src: null, panels: "",
-    text: `Both models read our sentence for the first time: it was kept out of their training data. Without attention, the model makes ${x.one.filter((w, k) => w !== x.ref[k]).length} wrong words (in red) and leaves out half of the saying. With attention, the translation is exactly right. The next steps show where the first difference comes from.` })],
+  ["Two translations of our sentence", () => ({ out: [x.one.length, x.att.length], cur: -1, src: null, panels: "",
+    text: `Both models read our sentence for the first time: it was kept out of their training data. Without attention, the model writes ${nBad(ALIGN.one)} wrong words (in red) and leaves out ${nMiss(ALIGN.one)} words of the saying (struck through). With attention, the translation is exactly right. The next steps show where the first difference comes from.` })],
   ["The encoder's vectors", () => ({ out: [0, 0], src: ["enc"], panels: "",
-    text: "The encoder makes one vector per Galician word: 8 numbers, drawn as 8 squares. Each one is computed from the vector before it and the new word, so each also carries something of the words before it. The last one is the summary. Here we show the vectors of the model with attention; the other model has its own." })],
+    text: "The encoder makes one vector per Galician word: 8 numbers, drawn as 8 squares. Each one is computed from the vector before it and the new word, so each also carries something of the words before it. The last one is the summary. Each model has its own encoder; this is the encoder of the model with attention. Step 3 shows the other one." })],
   ["Word 1, without attention", () => ({ out: [1, 1], cur: 0, src: ["one"], panels: panel("one", 0),
     text: "The decoder starts from the summary, the vector after the full stop. The first English word is “a” or “an”, and that depends on the noun: “an aunt”, “a friend”. The noun, tía, is the second of the sentence's 31 pieces; after it, the encoder read 29 more (24 words and 5 punctuation marks) before the summary was made. The model gives “a” 0.77 and writes it: wrong." })],
   ["Word 1, with attention", () => ({ out: [1, 1], cur: 0, src: ["att", x.attw[0]], panels: panel("att", 0),
@@ -1124,7 +1148,7 @@ STEPS.forEach(([t], i) => { const b = document.createElement("button"); b.textCo
 function draw() {
   const [title, f] = STEPS[k], v = f();
   $("wkTitle").textContent = `Step ${k + 1} of ${STEPS.length}: ${title}`;
-  $("wkOut").innerHTML = v.out[0] || v.out[1] ? `<p class="label">Without attention</p><p class="cmpline">${outLine(x.one, v.out[0], v.cur)}</p><p class="label">With attention</p><p class="cmpline">${outLine(x.att, v.out[1], v.cur)}</p>` : "";
+  $("wkOut").innerHTML = v.out[0] || v.out[1] ? `<p class="label">Without attention</p><p class="cmpline">${outLine("one", v.out[0], v.cur)}</p><p class="label">With attention</p><p class="cmpline">${outLine("att", v.out[1], v.cur)}</p>` : "";
   $("wkSrcBox").hidden = !v.src;
   if (v.src) srcSvg(v.src[0], v.src[1]);
   $("wkPanels").innerHTML = v.panels;
