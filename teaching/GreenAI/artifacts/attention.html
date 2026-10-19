@@ -352,7 +352,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="look">
     <h2><span class="n">1</span>Attention, computed by hand</h2>
     <div class="review"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page, sections 2 and 3</a>: a translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. The encoder reads the words in order and makes one vector after each word, from the vector before and the new word. Its last vector is the <b>summary</b>. The decoder keeps its own vector, the <b>decoder state</b>: it starts as the summary and takes in each English word the decoder writes.</p></div>
-    <p class="lead">Section 3 runs two trained translation models on our sentence, with and without attention. Their vectors have 8 numbers each, too many to follow. This section runs the same steps on a model small enough to compute by hand: the phrase <i>unha tía miña</i>, and vectors with three numbers, one per Galician word. Every number is set by hand, so every step can be checked. A vector is drawn twice: as a column of three squares with its numbers (the darker, the larger), and as a point in the picture on the right, with one axis per row.</p>
+    <p class="lead">Section 3 runs two trained translation models on our sentence, with and without attention. Their vectors have 8 numbers each, too many to follow. This section runs the same steps on a model small enough to compute by hand: the phrase <i>unha tía miña</i>, and vectors with three numbers, one per Galician word. We chose every number ourselves, so every step can be checked. A vector is drawn twice: as a column of three squares with its numbers (the darker, the larger), and as a point in the picture on the right, with one axis per row.</p>
     <div class="controls"><button id="tyBack">Back</button><button class="primary" id="tyNext">Next step</button><span class="pathstrip" id="tySteps"></span></div>
     <h3 class="wkh" id="tyTitle"></h3>
     <div class="tycols">
@@ -1220,7 +1220,7 @@ const STEPS = [
         pts: [...wordPts(), ...encPts(ENC.map((e, j) => `${encPlain(j)} ${vecTxt(e)}` + (j === 2 ? "\n= the summary" : "")), "enc", [{ dx: -10, dy: -10, anchor: "end" }, { dx: 4, dy: 26 }, ENC_OFF[2]]).slice(0, i + 1)],
         cap: `${i ? `From the vector ${encPlain(i - 1)}` : "From all zeros, where the axes meet,"} halfway along the dashed line to the word vector of ${DIMS[i]}: ${vecTxt(ENC[i])}.${i === 2 ? " This last vector is the summary." : ""}` } })) }],
   ["How the decoder chooses a word", {
-    text: "“Set by hand” means that we chose every number in this model ourselves; nothing was trained. A trained decoder gives a score to every word it knows, at every position. Its decoder state takes in each word it writes, so it knows what kind of word fits next (section 3, step 5 shows this). This model has no decoder state, so that every number stays checkable. Instead, we list for each of the four English positions the two words that compete: one that needs evidence from the Galician, and a default.",
+    text: "We chose every number in this model ourselves, so that each one can be checked. A real decoder gives a score to every English word it knows and writes the best one. It also keeps track of what it has already written, so it knows which kind of word comes next: after “an”, a noun. This small model leaves that out to keep the numbers few. Instead, at each of the four places in the English phrase, only two words compete: one that needs evidence from the Galician, and a default that wins when there is no such evidence.",
     frames: () => {
       const formula = `<div class="formula">score(word) = word's vector · the vector the decoder gets + word's bias</div>`;
       const intro = work(["The decoder writes one English word at a time. It gives each candidate word a score and writes the one with the highest score. Softmax turns the scores into probabilities, as on the translation page.",
@@ -1238,10 +1238,10 @@ const STEPS = [
         { board: formula + intro + table + rule, scene: { ...SMALL, arrows, pts: [zeros], marks: MARKS.filter(Boolean), cap: "The red marks show how far along each axis the input must reach for the word that needs evidence to win." } }];
     } }],
   ["Without attention: the first English word", {
-    text: `Without attention, the vector the decoder gets is the summary, for every English word. The first English word: “an” or “a” (step 3).`,
+    text: `Without attention, the vector the decoder gets is the summary, for every English word. For the first English word, the two candidates of step 3 compete: “an” and “a”.`,
     frames: () => wordFrames(SUMMARY, "the summary", sumPt(`summary ${vecTxt(SUMMARY)}`), { pts: encPts(null, "enc faint") }) }],
   ["Without attention: the whole phrase", {
-    text: `For every word, the decoder gets the same summary. Each English word needs a different row to pass its mark. The summary passes only the miña mark, so the decoder writes “${DEC.map((d, t) => choose(t, SUMMARY).word).filter(w => w !== "(end)").join(" ")}”: the article and the noun are wrong.`,
+    text: `For every word, the decoder gets the same summary. Each English word needs a different row to pass its red mark from step 3. The summary passes only the miña mark, so the decoder writes “${DEC.map((d, t) => choose(t, SUMMARY).word).filter(w => w !== "(end)").join(" ")}”: the article and the noun are wrong.`,
     frames: () => {
       const res = DEC.map((d, t) => choose(t, SUMMARY));
       return upto(4, n => {
