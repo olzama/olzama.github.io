@@ -302,6 +302,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <button id="lLong" aria-pressed="false">whole sentence</button>
       </div>
     </div>
+    <div id="encDerivBox"><p class="label">How the encoder vectors are computed</p><div class="formula" id="encDeriv"></div></div>
     <p class="label">Without attention: one vector</p>
     <div class="controls"><button class="primary" id="onePlay">Write the translation</button><button id="oneBack">Back</button><button id="oneNext">Next English word</button><button id="oneReset">Start over</button><span class="note" id="oneStep"></span></div>
     <div class="heatwrap"><svg id="lookOne" role="img" aria-label="Encoder vectors; the decoder gets only the last one"></svg></div>
@@ -547,7 +548,19 @@ const lookData = () => long1 ? longData() : SHORT;
 // A column's parts: how much of each word it holds, [0, word 0, word 1, ...] (index 0 unused).
 const KEEP = 0.25, NEW = 0.75;
 const encParts = (k, n) => [0, ...Array.from({ length: n }, (_, j) => j >= k ? 0 : j === 0 ? Math.pow(KEEP, k - 1) : NEW * Math.pow(KEEP, k - 1 - j))];
-function encVec(src, k) { let v = emb2(src[0]); for (let j = 1; j < k; j++) { const e = emb2(src[j]); v = [KEEP * v[0] + NEW * e[0], KEEP * v[1] + NEW * e[1]]; } return v; }
+// each encoder vector is rounded to 2 decimals before the next step, as when computing by hand
+const r2 = x => Math.round(x * 100) / 100;
+function encVec(src, k) { let v = emb2(src[0]); for (let j = 1; j < k; j++) { const e = emb2(src[j]); v = [r2(KEEP * v[0] + NEW * e[0]), r2(KEEP * v[1] + NEW * e[1])]; } return v; }
+// the computation of every encoder vector, one line per Galician word
+function encDerivHTML(src) {
+  const cw = (j, t) => `<span style="color:var(${PAL[j % PAL.length]})">${t}</span>`, f3 = x => x.toFixed(3).replace("-", "−"), fv = v => vecTxt(v).replace(/-/g, "−");
+  return src.map((w, j) => {
+    const v = encVec(src, j + 1);
+    if (j === 0) return `${cw(0, w)}: encoder vector = word vector of ${cw(0, w)} = ${fv(v)}`;
+    const p = encVec(src, j), e = emb2(w), a = [KEEP * p[0], KEEP * p[1]], b = [NEW * e[0], NEW * e[1]];
+    return `${cw(j, w)}: 0.25 × ${fv(p)} + 0.75 × ${cw(j, fv(e))} = (${f3(a[0])} + ${f3(b[0])}, ${f3(a[1])} + ${f3(b[1])}) = (${f3(a[0] + b[0])}, ${f3(a[1] + b[1])}) ≈ <b>${fv(v)}</b>`;
+  }).join("<br>") + `<br><span class="note">The first vector in each line is the encoder vector of the word before; the second is the new word's word vector.</span>`;
+}
 // what the decoder gets for English word c: the summary, or the attention mix of the word vectors
 function decIn(d, c, attention) {
   const n = d.src.length;
@@ -630,6 +643,8 @@ function lookSvg(id, attention) {
 }
 function renderLook() {
   lookSvg("lookOne", false); lookSvg("lookAtt", true);
+  $("encDerivBox").hidden = long1;
+  if (!long1) $("encDeriv").innerHTML = encDerivHTML(lookData().src);
   const d = lookData(), n = d.src.length, m = d.tgt.length;
   const cw = (j, t) => `<span style="color:var(${PAL[j % PAL.length]})">${t}</span>`;
   [["one", "One"], ["att", "Att"]].forEach(([k]) => { $(k + "Step").textContent = `${Math.min(cur[k], m)} of ${m} English words`; $(k + "Back").disabled = cur[k] === 0; $(k + "Next").disabled = cur[k] >= m; });
