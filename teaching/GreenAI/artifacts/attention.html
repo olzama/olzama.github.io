@@ -294,7 +294,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="look">
     <h2><span class="n">1</span>Attention: look back at every word</h2>
-    <p class="lead">A translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. Each box below is the encoder's summary after one more word, as on the <a href="mt.html">translation page</a>. Without attention, the decoder gets only the last box, so it uses the words in the proportions that box happens to hold: mostly the last ones. With attention, it can look back at every box, and it chooses new proportions for every word it writes.</p>
+    <p class="lead">A translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. The encoder makes one vector after each Galician word. As on the <a href="mt.html#enc">translation page</a>, each new word takes half of the vector, so each column below holds mostly its own word and less and less of the words before it. Each word has its own color. Without attention, the decoder gets only the last vector, the <b>summary</b>. With attention, it takes some of every vector, with new weights for every English word.</p>
     <div class="controls">
       <div class="seg" role="group" aria-label="Input">
         <button id="lShort" aria-pressed="true">tía miña</button>
@@ -304,13 +304,13 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <button id="lookStep">Next English word</button>
     </div>
     <p class="label">Without attention: one vector</p>
-    <div class="heatwrap"><svg id="lookOne" role="img" aria-label="Encoder chain; the decoder reads only the last box"></svg></div>
-    <div class="usebar"><span class="label">What the decoder uses for this word</span><div class="mix" id="mixOne"></div><div class="weights" id="mixOneTxt"></div></div>
+    <div class="heatwrap"><svg id="lookOne" role="img" aria-label="Encoder vectors; the decoder gets only the last one"></svg></div>
+    <div class="usebar"><span class="label">What the decoder gets: the summary, and how much of each word it holds</span><div class="mix" id="mixOne"></div><div class="weights" id="mixOneTxt"></div></div>
     <p class="label">With attention</p>
-    <div class="heatwrap"><svg id="lookAtt" role="img" aria-label="Encoder chain; the decoder reads every box, weighted"></svg></div>
-    <div class="usebar"><span class="label">What the decoder uses for this word</span><div class="mix" id="mixAtt"></div><div class="weights" id="mixAttTxt"></div></div>
+    <div class="heatwrap"><svg id="lookAtt" role="img" aria-label="Encoder vectors; the decoder takes from every one, weighted"></svg></div>
+    <div class="usebar"><span class="label">How much the decoder takes from each word's vector</span><div class="mix" id="mixAtt"></div><div class="weights" id="mixAttTxt"></div></div>
     <p class="note" id="lookNote"></p>
-    <p class="note">Weights for <i>tía miña</i> are the hand-set ones from the worked example; for the whole sentence they are the real model's (section 4, averaged over its heads). The English words are that model's translation. The top bar comes from the simplified encoder of the <a href="mt.html">translation page</a>; the bottom bar from the attention weights. Before attention, a long sentence had to fit into the last box alone, and translations of long sentences got much worse.</p>
+    <p class="note">Weights for <i>tía miña</i> are the hand-set ones from the worked example; for the whole sentence they are the real model's (section 4, averaged over its heads). The English words are that model's translation. The columns and the summary use the simplified encoder of the <a href="mt.html#enc">translation page</a> (each word takes half); the bottom bar shows the attention weights. Before attention, a long sentence had to fit into the summary alone, and translations of long sentences got much worse.</p>
   </section>
 
   <section class="panel" id="compare">
@@ -527,7 +527,7 @@ const fmtShare = x => x >= 0.01 ? x.toFixed(2) : x === 0 ? "0" : "≈ 0";
 const PAL = ["--blue", "--green", "--neg", "--orange"];
 function mixHTML(names, vals, empty) {
   const segs = names.map((nm, j) => vals[j] > 0.0005 ? `<span style="width:${(vals[j] * 100).toFixed(2)}%;background:color-mix(in srgb, var(${PAL[j % PAL.length]}) ${40 + Math.round(40 * Math.min(1, vals[j] * 2))}%, transparent)" title="${nm} ${fmtShare(vals[j])}">${vals[j] > 0.07 ? nm : ""}</span>` : "").join("");
-  return segs + (empty > 0.0005 ? `<span class="empty" style="width:${(empty * 100).toFixed(2)}%" title="the empty start">${empty > 0.07 ? "start" : ""}</span>` : "");
+  return segs + (empty > 0.0005 ? `<span class="empty" style="width:${(empty * 100).toFixed(2)}%" title="the empty start">${empty > 0.07 ? "empty start" : ""}</span>` : "");
 }
 
 // ---------- 3: one vector vs attention ----------
@@ -537,41 +537,48 @@ let long1 = false, cur1 = 0, t1 = null;
 const lookData = () => long1 ? longData() : SHORT;
 function lookSvg(id, attention) {
   const d = lookData(), n = d.src.length, m = d.tgt.length;
-  const step = long1 ? 24 : 200, x0 = long1 ? 30 : 110, W = long1 ? x0 + Math.max(n, m) * step + 60 : 600;
-  const sx = k => x0 + k * step, yW = long1 ? 48 : 30, yB = 96, yT = long1 ? 210 : 215, H = long1 ? 268 : 232;
+  const step = long1 ? 24 : 200, x0 = long1 ? 30 : 140, W = long1 ? x0 + Math.max(n, m) * step + 190 : 600;
+  const sx = k => x0 + k * step, yW = long1 ? 48 : 30, CH = long1 ? 44 : 96, CWd = long1 ? 12 : 30, yB = long1 ? 122 : 124, yT = long1 ? 250 : 290, H = long1 ? 308 : 306;
+  const yTop = yB - CH / 2, yBot = yB + CH / 2, wcol = j => `var(${PAL[j % PAL.length]})`;
   // English words: under the source in the short example (so the alignment lines cross), spread evenly in the long one
   const tx = k => long1 ? x0 + k * step * (n - 1) / Math.max(1, m - 1) : sx(k);
   const blue = css("--blue"), orange = css("--orange"), line = css("--line"), muted = css("--muted");
   let g = "";
   // source words and encoder chain
   d.src.forEach((t, k) => {
-    g += long1 ? `<text x="${sx(k)}" y="${yW}" transform="rotate(-50 ${sx(k)} ${yW})" font-style="italic">${t}</text>` : `<text class="word src" x="${sx(k)}" y="${yW}" text-anchor="middle">${t}</text>`;
-    g += `<line x1="${sx(k)}" y1="${yW + 6}" x2="${sx(k)}" y2="${yB - 9}" stroke="${line}"/>`;
-    if (k) g += `<line x1="${sx(k - 1) + 8}" y1="${yB}" x2="${sx(k) - 8}" y2="${yB}" stroke="${muted}" marker-end="url(#ch${id})"/>`;
+    g += long1 ? `<text x="${sx(k)}" y="${yW}" transform="rotate(-50 ${sx(k)} ${yW})" font-style="italic" style="fill:${wcol(k)}">${t}</text>` : `<text class="word src" x="${sx(k)}" y="${yW}" text-anchor="middle" style="fill:${wcol(k)}">${t}</text>`;
+    g += `<line x1="${sx(k)}" y1="${yW + 6}" x2="${sx(k)}" y2="${yTop - 3}" stroke="${line}"/>`;
+    if (k) g += `<line x1="${sx(k - 1) + CWd / 2 + 1}" y1="${yB}" x2="${sx(k) - CWd / 2 - 1}" y2="${yB}" stroke="${muted}" marker-end="url(#ch${id})"/>`;
   });
   g += `<defs><marker id="ch${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${muted}"/></marker></defs>`;
-  // lines from encoder boxes to the current English word
+  // lines from encoder vectors to the current English word
   const c = cur1 - 1;
-  // earlier English words keep a faint line: all from the last box without attention, the weighted fan in the short example
+  // earlier English words keep a faint line: all from the last vector without attention, the weighted fan in the short example
   for (let p = 0; p < c; p++) {
-    if (!attention) g += `<line x1="${sx(n - 1)}" y1="${yB + 9}" x2="${tx(p)}" y2="${yT - 16}" stroke="${orange}" stroke-width="2" stroke-opacity="0.25"/>`;
-    else if (!long1) d.w[p].forEach((wt, k) => { g += `<line x1="${sx(k)}" y1="${yB + 9}" x2="${tx(p)}" y2="${yT - 16}" stroke="${orange}" stroke-width="${(0.5 + 9 * wt).toFixed(1)}" stroke-opacity="${(0.08 + 0.25 * wt).toFixed(2)}" stroke-linecap="round"/>`; });
+    if (!attention) g += `<line x1="${sx(n - 1)}" y1="${yBot + 2}" x2="${tx(p)}" y2="${yT - 16}" stroke="${orange}" stroke-width="2" stroke-opacity="0.25"/>`;
+    else if (!long1) d.w[p].forEach((wt, k) => { g += `<line x1="${sx(k)}" y1="${yBot + 2}" x2="${tx(p)}" y2="${yT - 16}" stroke="${orange}" stroke-width="${(0.5 + 9 * wt).toFixed(1)}" stroke-opacity="${(0.08 + 0.25 * wt).toFixed(2)}" stroke-linecap="round"/>`; });
   }
   if (c >= 0) {
     if (!attention) {
-      g += `<line x1="${sx(n - 1)}" y1="${yB + 9}" x2="${tx(c)}" y2="${yT - 16}" stroke="${orange}" stroke-width="4" stroke-linecap="round"/>`;
+      g += `<line x1="${sx(n - 1)}" y1="${yBot + 2}" x2="${tx(c)}" y2="${yT - 16}" stroke="${orange}" stroke-width="4" stroke-linecap="round"/>`;
     } else {
-      d.w[c].forEach((wt, k) => { g += `<line x1="${sx(k)}" y1="${yB + 9}" x2="${tx(c)}" y2="${yT - 16}" stroke="${orange}" stroke-width="${(0.5 + 9 * wt).toFixed(1)}" stroke-opacity="${(0.12 + 0.88 * Math.min(1, wt * (long1 ? 2.5 : 1))).toFixed(2)}" stroke-linecap="round"/>`; });
+      d.w[c].forEach((wt, k) => { g += `<line x1="${sx(k)}" y1="${yBot + 2}" x2="${tx(c)}" y2="${yT - 16}" stroke="${orange}" stroke-width="${(0.5 + 9 * wt).toFixed(1)}" stroke-opacity="${(0.12 + 0.88 * Math.min(1, wt * (long1 ? 2.5 : 1))).toFixed(2)}" stroke-linecap="round"/>`; });
       if (!long1) d.w[c].forEach((wt, k) => { g += `<text x="${(sx(k) + tx(c)) / 2 + (sx(k) < tx(c) ? -14 : 14)}" y="${(yB + yT) / 2}" text-anchor="${sx(k) < tx(c) ? "end" : "start"}" fill="${orange}">${wt.toFixed(2)}</text>`; });
     }
   }
-  // encoder boxes on top of the lines
+  // encoder vectors on top of the lines: each column shows how much of each word it holds (each new word takes half)
   d.src.forEach((_, k) => {
-    const used = c >= 0 && (attention ? true : k === n - 1);
+    const used = c >= 0 && (attention ? d.w[c][k] > 0.2 : k === n - 1);
     const op = c < 0 ? 1 : attention ? 0.35 + 0.65 * Math.min(1, d.w[c][k] * (long1 ? 3 : 1)) : (k === n - 1 ? 1 : 0.35);
-    g += `<rect x="${sx(k) - 8}" y="${yB - 8}" width="16" height="16" rx="3" fill="${used && (!attention || d.w[c][k] > 0.2) ? orange : blue}" fill-opacity="${op.toFixed(2)}"/>`;
+    // top to bottom in reading order, as in the bar below; the grey rest is the empty start
+    let y = yTop, col = "";
+    for (let j = 0; j <= k; j++) { const hgt = CH * shareOf(j, k + 1); col += `<rect x="${sx(k) - CWd / 2}" y="${y.toFixed(2)}" width="${CWd}" height="${hgt.toFixed(2)}" style="fill:${wcol(j)}"/>`; y += hgt; }
+    col += `<rect x="${sx(k) - CWd / 2}" y="${y.toFixed(2)}" width="${CWd}" height="${(yBot - y).toFixed(2)}" style="fill:var(--grid)"/>`;
+    g += `<g opacity="${op.toFixed(2)}">${col}</g>`;
+    if (used) g += `<rect x="${sx(k) - CWd / 2 - 2.5}" y="${yTop - 2.5}" width="${CWd + 5}" height="${CH + 5}" rx="3" fill="none" stroke="${orange}" stroke-width="2"/>`;
   });
-  if (!attention) g += `<text x="${sx(n - 1) + 14}" y="${yB - 12}" fill="${orange}">${long1 ? "last box" : "last box: the one vector"}</text>`;
+  if (!attention) g += `<text x="${sx(n - 1) + CWd / 2 + 8}" y="${yTop + 10}" fill="${orange}">summary = the last vector</text>`;
+  if (!long1 && !attention) g += `<text x="${sx(0) - CWd / 2 - 8}" y="${yTop + 10}" text-anchor="end">${d.src[0]} ½</text><text x="${sx(0) - CWd / 2 - 8}" y="${yBot - 4}" text-anchor="end">empty start ½</text>`;
   // English words
   d.tgt.forEach((t, k) => {
     const st = k === c ? `fill:${orange}` : "";
@@ -591,8 +598,8 @@ function renderLook() {
   $("mixOneTxt").innerHTML = top(one, 3) + (one[ti] < 0.1 ? ` · <b>tía</b> ${fmtShare(one[ti])}` : "") + " · the same for every English word";
   $("mixAttTxt").innerHTML = c >= 0 ? top(att, 3) + (att[ti] < 0.1 && !top(att, 3).includes(">tía<") ? ` · <b>tía</b> ${fmtShare(att[ti])}` : "") + ` · for “${d.tgt[c]}”` : "";
   $("lookNote").textContent = c < 0 ? "Press “Write the translation”, or go word by word." :
-    `Writing “${d.tgt[c]}”. Without attention the decoder uses the same mix as for every other word: whatever the last box holds. With attention it takes most from ` +
-    [...d.w[c].keys()].sort((a, b) => d.w[c][b] - d.w[c][a]).slice(0, 2).map(k => `“${d.src[k]}” (${d.w[c][k].toFixed(2)})`).join(" and ") +
+    `Writing “${d.tgt[c]}”. Without attention the decoder gets the summary again, the same as for every other word. With attention it takes ` +
+    [...d.w[c].keys()].sort((a, b) => d.w[c][b] - d.w[c][a]).slice(0, 2).map(k => `${d.w[c][k].toFixed(2)} from the vector of “${d.src[k]}”`).join(" and ") +
     (long1 ? ", and the mix changes with every word it writes." : ". The lines cross: tía miña is noun then possessive, English puts the possessive first.");
 }
 function stopLook() { clearInterval(t1); t1 = null; }
@@ -767,7 +774,7 @@ cur1 = 2; renderLook();
   const top = (toks, ws) => [...ws.keys()].sort((a, b) => ws[b] - ws[a]).slice(0, 4).map(j => `${clean(toks[j])} ${ws[j].toFixed(2)}`).join(", ");
   const lab = v => v === "all" ? "average" : +v + 1;
   return [
-    `Section 1 (look back at every word): two diagrams on the same input (${long1 ? "whole sentence, real averaged weights" : "tía miña → my aunt, hand-set weights 0.95/0.05"}). Top, without attention: the encoder is a chain of boxes (one per source word, each a running summary vector); the decoder uses only the last box for every English word. Bottom, with attention: lines from every box, width = weight. English words written so far: ${cur1} of ${lookData().tgt.length}.`,
+    `Section 1 (look back at every word): two diagrams on the same input (${long1 ? "whole sentence, real averaged weights" : "tía miña → my aunt, hand-set weights 0.95/0.05"}). Top, without attention: the encoder makes one vector per source word, each drawn as a column of colored segments showing how much of each word it holds (simplified encoder: each new word takes half); the decoder gets only the last vector, the summary, for every English word. Bottom, with attention: lines from every vector, width = weight; the bar shows the weights. English words written so far: ${cur1} of ${lookData().tgt.length}.`,
     `Section 3 (query, key, score, softmax, value): q = (${q[0]}, ${q[1]}); scores tía ${sc[0].toFixed(2)}, miña ${sc[1].toFixed(2)}; weights tía ${w[0].toFixed(2)}, miña ${w[1].toFixed(2)}.`,
     `Section 4 (real cross-attention): translation "${D.translation}". Layer ${lab($("realLayer").value)}, head ${lab($("realHead").value)}. Selected output token "${clean(D.tgt[tSel])}" looks at: ${top(D.src, rw)}.`,
     `Section 5 (encoder self-attention): layer ${sLayer + 1}, head ${sHead + 1}; selected word "${clean(D.src[sSel])}" looks at: ${top(D.src, sw)}.`,
