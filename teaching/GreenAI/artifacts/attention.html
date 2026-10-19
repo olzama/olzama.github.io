@@ -99,6 +99,9 @@ svg .word.src { font-style: italic; }
 svg .word.dim { fill: var(--line); }
 svg .axis { stroke: var(--line); }
 svg .gridl { stroke: var(--grid); }
+.review { border-left: 3px solid var(--line); padding: 4px 0 4px 12px; max-width: 72ch; color: var(--muted); }
+.review p { margin: 0; display: inline; }
+.rtag { display: inline-block; font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; margin-right: 8px; color: var(--muted); }
 .formula { font-family: var(--font-mono); font-size: 0.9rem; background: var(--bg); border-radius: 6px; padding: 10px 12px; overflow-wrap: anywhere; line-height: 1.7; font-variant-numeric: tabular-nums; }
 .formula .t { color: var(--blue); }
 .formula .m { color: var(--green); }
@@ -294,7 +297,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="look">
     <h2><span class="n">1</span>Attention: look back at every word</h2>
-    <p class="lead">A translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. In the top row of each diagram, every Galician word has its own <b>word vector</b>, written under the word in its color. From these, the encoder computes one <b>encoder vector</b> per word: each column is one encoder vector, with its two numbers written above it. The first encoder vector is the first word's vector; each next one is 0.25 × the previous encoder vector + 0.75 × the new word's vector. So an encoder vector is a mix of the word vectors read so far, and the colored parts of its column show the mix: how much of each word's vector went into it. The colors only mark which word is which. Under each English word is the vector the decoder gets from the encoder for it. The decoder also takes in each English word it has written; the arrows under the English words show this. Without attention, the vector from the encoder is always the last one, the <b>summary</b>. With attention, the decoder mixes all the vectors, with new weights for every English word. These weights are the attention.</p>
+    <div class="review"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page, sections 2 and 3</a>: a translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. Every word has a <b>word vector</b>. The encoder reads the words in order and makes a new vector after each word from the vector before and the new word's vector. Its last vector is the <b>summary</b>. The decoder starts from the summary and takes in each English word it writes.</p></div>
+    <p class="lead">In the top row of each diagram, every Galician word shows its word vector, in its color. Each column is one <b>encoder vector</b>, with its two numbers written above it. Here the first encoder vector is the first word's vector, and each next one is 0.25 × the previous encoder vector + 0.75 × the new word's vector. So an encoder vector is a mix of the word vectors read so far, and the colored parts of its column show the mix: how much of each word's vector went into it. The colors only mark which word is which. Under each English word is the vector the decoder gets from the encoder for it; the arrows under the English words show the written words going back into the decoder. Without attention, the vector from the encoder is always the summary. With attention, the decoder mixes all the encoder vectors, with new weights for every English word. These weights are the attention.</p>
     <div class="controls">
       <span class="note">Galician input</span>
       <div class="seg" role="group" aria-label="Input">
