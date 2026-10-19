@@ -459,6 +459,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         </div>
         <div class="controls">
           <button class="primary" id="genRun">Generate</button>
+          <button id="genBack">Back</button>
           <button id="genStep">Next word</button>
           <button id="genReset">Start over</button>
         </div>
@@ -743,6 +744,13 @@ function renderGen() {
 $("startWord").addEventListener("change", genReset);
 $("genReset").addEventListener("click", genReset);
 $("genStep").addEventListener("click", () => { clearInterval(genTimer); genTimer = null; genStep(); });
+// Back: remove the last word written; the bars show the row that chose the word before it
+$("genBack").addEventListener("click", () => {
+  clearInterval(genTimer); genTimer = null;
+  if (genDone) genDone = false; else if (gen.length > 1) gen.pop();
+  genPick = gen.length > 1 ? { from: known(gen[gen.length - 2]), w: gen[gen.length - 1] } : null;
+  $("genMsg").textContent = ""; renderGen();
+});
 $("genRun").addEventListener("click", () => {
   genReset();
   genTimer = setInterval(() => { if (!genStep()) { clearInterval(genTimer); genTimer = null; } }, reduce ? 200 : 700);

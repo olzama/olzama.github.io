@@ -253,6 +253,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <button id="eLong" aria-pressed="false">whole sentence</button>
       </div>
       <button class="primary" id="encPlay">Read the sentence</button>
+      <button id="encBack">Back</button>
       <button id="encStep">Next word</button>
     </div>
     <div class="cols">
@@ -466,6 +467,7 @@ function setEnc(l) { clearInterval(encT); encLong = l; encK = l ? REAL.sentence.
 $("eShort").addEventListener("click", () => setEnc(false));
 $("eLong").addEventListener("click", () => setEnc(true));
 $("encStep").addEventListener("click", () => { clearInterval(encT); encK = encK >= encSrc().length ? 1 : encK + 1; renderEnc(); });
+$("encBack").addEventListener("click", () => { clearInterval(encT); encK = Math.max(0, encK - 1); renderEnc(); });
 $("encPlay").addEventListener("click", () => { clearInterval(encT); encK = 0; renderEnc(); encT = setInterval(() => { encK++; renderEnc(); if (encK >= encSrc().length) clearInterval(encT); }, reduce ? 150 : encLong ? 350 : 1000); });
 
 const clean = t => t === "</s>" ? "‹/s›" : t.replace(/^▁/, "");

@@ -204,6 +204,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="corpus" id="corpus"></div>
         <div class="pairinfo" id="pairinfo"></div>
         <div class="controls" style="margin-top:12px">
+          <button id="back">Back</button>
           <button id="step" class="primary">Step: next pair</button>
           <button id="pass">One pass (16 pairs)</button>
           <button id="play">Play</button>
@@ -374,7 +375,20 @@ let trail = VOCAB.map(() => []);
 let zoom = 0.7;
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+// Back undoes the last Step or One pass: the state before each is kept here.
+let backStack = [];
+function remember() {
+  backStack.push({ W: cloneW(st.W), C: cloneC(st.C), pass: st.pass, k: st.k, last: st.last, mode: st.mode, trail: trail.map(t => t.length) });
+  if (backStack.length > 500) backStack.shift();
+}
+function goBack() {
+  const h = backStack.pop(); if (!h) return;
+  st.W = h.W; st.C = h.C; st.pass = h.pass; st.k = h.k; st.last = h.last; st.mode = h.mode;
+  trail.forEach((t, i) => { t.length = h.trail[i]; });
+  render();
+}
 function seek(n) {
+  backStack = [];
   st.pass = n; st.k = 0; st.last = null; FW.t0 = null;
   st.W = cloneW(SNAP[n].W); st.C = cloneC(SNAP[n].C);
   // Every pass for the first 200 (where most of the motion is), then every 10th.
@@ -827,6 +841,7 @@ function renderNarr() {
 function render() {
   const done = st.pass >= PASSES;
   ["step", "pass", "play"].forEach(id => { document.getElementById(id).disabled = done; });
+  document.getElementById("back").disabled = !backStack.length;
   renderCorpus(); renderNarr(); drawBars();
   document.getElementById("passnum").textContent = st.pass.toLocaleString();
   document.getElementById("scrub").value = passToSlider(st.pass);
@@ -860,19 +875,21 @@ function frame(t) {
 
 function setPlaying(on) {
   st.playing = on && st.pass < PASSES;
+  if (st.playing) backStack = [];   // playing moves on without recording, so Back starts afresh
   document.getElementById("play").textContent = st.playing ? "Pause" : "Play";
   lastTick = 0;
 }
 
 // ---------------------------------------------------------------- controls
-document.getElementById("step").onclick = () => { setPlaying(false); if (st.pass < PASSES) { st.mode = "slow"; stepOnce(); render(); fwStart(); } };
+document.getElementById("step").onclick = () => { setPlaying(false); if (st.pass < PASSES) { remember(); st.mode = "slow"; stepOnce(); render(); fwStart(); } };
+document.getElementById("back").onclick = () => { setPlaying(false); goBack(); };
 document.getElementById("fwplay").onclick = () => { setPlaying(false); fwStart(); };
 document.querySelectorAll("#fwmode button").forEach(bt => bt.onclick = () => {
   FW.mode = bt.dataset.m;
   document.querySelectorAll("#fwmode button").forEach(x => x.classList.toggle("on", x === bt));
   document.getElementById("fwplay").hidden = FW.mode === "all";
 });
-document.getElementById("pass").onclick = () => { setPlaying(false); if (st.pass < PASSES) { st.mode = "pass"; runPass(); render(); } };
+document.getElementById("pass").onclick = () => { setPlaying(false); if (st.pass < PASSES) { remember(); st.mode = "pass"; runPass(); render(); } };
 document.getElementById("play").onclick = () => setPlaying(!st.playing);
 document.getElementById("reset").onclick = () => { setPlaying(false); st.mode = "slow"; seek(0); };
 document.getElementById("scrub").oninput = e => { setPlaying(false); st.mode = "pass"; seek(sliderToPass(+e.target.value)); };

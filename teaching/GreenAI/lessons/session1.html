@@ -1993,9 +1993,9 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <iframe class="frame" title="One vector, or looking back at every word" data-src="../artifacts/attention.html?embed=look"></iframe>
   </div>
   <div class="notes">
-    <p>Choose unha tía miña and press Next English word.</p>
-    <p>Each column is one vector of the encoder. Each new Galician word takes half of the vector. The colored parts show how much of each word a vector holds.</p>
-    <p>Under each English word is the vector the decoder gets. Without attention, it is always the last vector, the summary. In the summary, tía makes up only a quarter. With attention, the decoder mixes all the vectors. For aunt, tía makes up almost half of the mix.</p>
+    <p>Choose unha tía miña. Each diagram has its own buttons. Press Next English word in the top diagram, then in the bottom one. Start over goes back to the beginning.</p>
+    <p>Each column is one vector of the encoder. The first one is the vector of unha. Each next vector takes 0.75 of the new word and keeps 0.25 of the vector before. The colored parts show how much of each word a vector holds.</p>
+    <p>Under each English word is the vector the decoder gets. Without attention, it is always the last vector, the summary. In the summary, tía makes up only 0.19. With attention, the decoder mixes all the vectors. For aunt, tía makes up 0.69 of the mix.</p>
     <p>Then choose the whole sentence. Without attention, tía is almost gone. With attention, the decoder can still find it.</p>
   </div>
 </section>
