@@ -294,7 +294,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="look">
     <h2><span class="n">1</span>Attention: look back at every word</h2>
-    <p class="lead">A translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. The encoder makes one vector after each Galician word. As on the <a href="mt.html#enc">translation page</a>, each new word takes half of the vector, so each column below holds mostly its own word and less and less of the words before it. The colors in the picture only mark which word is which; the vectors themselves are numbers. Without attention, the decoder gets only the last vector, the <b>summary</b>. With attention, it takes some of every vector, with new weights for every English word.</p>
+    <p class="lead">A translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. The encoder makes one vector after each Galician word. As on the <a href="mt.html#enc">translation page</a>, each new word takes half of the vector, so each column below holds mostly its own word and less and less of the words before it. The colors only mark which word is which. Each vector itself is a list of numbers, written above its column. Without attention, the decoder gets only the last vector, the <b>summary</b>. With attention, it takes some of every vector, with new weights for every English word.</p>
     <div class="controls">
       <div class="seg" role="group" aria-label="Input">
         <button id="lShort" aria-pressed="true">tía miña</button>
@@ -537,7 +537,7 @@ let long1 = false, cur1 = 0, t1 = null;
 const lookData = () => long1 ? longData() : SHORT;
 function lookSvg(id, attention) {
   const d = lookData(), n = d.src.length, m = d.tgt.length;
-  const step = long1 ? 24 : 200, x0 = long1 ? 30 : 140, W = long1 ? x0 + Math.max(n, m) * step + 190 : 600;
+  const step = long1 ? 24 : 200, x0 = long1 ? 30 : 140, W = long1 ? x0 + Math.max(n, m) * step + 190 : 760;
   const sx = k => x0 + k * step, yW = long1 ? 48 : 30, CH = long1 ? 44 : 96, CWd = long1 ? 12 : 30, yB = long1 ? 122 : 124, yT = long1 ? 250 : 290, H = long1 ? 308 : 306;
   const yTop = yB - CH / 2, yBot = yB + CH / 2, wcol = j => `var(${PAL[j % PAL.length]})`;
   // English words: under the source in the short example (so the alignment lines cross), spread evenly in the long one
@@ -547,7 +547,7 @@ function lookSvg(id, attention) {
   // source words and encoder chain
   d.src.forEach((t, k) => {
     g += long1 ? `<text x="${sx(k)}" y="${yW}" transform="rotate(-50 ${sx(k)} ${yW})" font-style="italic" style="fill:${wcol(k)}">${t}</text>` : `<text class="word src" x="${sx(k)}" y="${yW}" text-anchor="middle" style="fill:${wcol(k)}">${t}</text>`;
-    g += `<line x1="${sx(k)}" y1="${yW + 6}" x2="${sx(k)}" y2="${yTop - 3}" stroke="${line}"/>`;
+    g += `<line x1="${sx(k)}" y1="${yW + 6}" x2="${sx(k)}" y2="${long1 ? yTop - 3 : yTop - 24}" stroke="${line}"/>`;
     if (k) g += `<line x1="${sx(k - 1) + CWd / 2 + 1}" y1="${yB}" x2="${sx(k) - CWd / 2 - 1}" y2="${yB}" stroke="${muted}" marker-end="url(#ch${id})"/>`;
   });
   g += `<defs><marker id="ch${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${muted}"/></marker></defs>`;
@@ -578,6 +578,18 @@ function lookSvg(id, attention) {
     if (used) g += `<rect x="${sx(k) - CWd / 2 - 2.5}" y="${yTop - 2.5}" width="${CWd + 5}" height="${CH + 5}" rx="3" fill="none" stroke="${orange}" stroke-width="2"/>`;
   });
   if (!attention) g += `<text x="${sx(n - 1) + CWd / 2 + 8}" y="${yTop + 10}" fill="${orange}">summary = the last vector</text>`;
+  if (!long1) {
+    // the numbers: each vector is ½ × the previous one + ½ × the new word's vector (2 dimensions, as on the translation page)
+    const f = v => `(${v[0].toFixed(2)}, ${v[1].toFixed(2)})`;
+    let hv = [0, 0];
+    d.src.forEach((w, k) => { const e = emb2(w); hv = [0.5 * hv[0] + 0.5 * e[0], 0.5 * hv[1] + 0.5 * e[1]]; g += `<text x="${sx(k)}" y="${yTop - 8}" text-anchor="middle" style="fill:var(--fg)">${f(hv)}</text>`; });
+    if (!attention) {
+      const x = sx(n - 1) + CWd / 2 + 8, ts = (j, t) => `<tspan style="fill:${wcol(j)}">${t}</tspan>`;
+      g += `<text x="${x}" y="${yTop + 32}">= ${d.src.map((w, j) => `${["", "", "¼", "½"][Math.min(3, j + 4 - n)] || "…"} × ${ts(j, w)}`).reverse().join(" + ")} + ¼ × empty start</text>`;
+      g += `<text x="${x}" y="${yTop + 54}">= ${d.src.map((w, j) => `${["", "", "¼", "½"][Math.min(3, j + 4 - n)]} × ${ts(j, f(emb2(w)))}`).reverse().join(" + ")} + ¼ × (0, 0)</text>`;
+      g += `<text x="${x}" y="${yTop + 76}" style="fill:var(--fg)">= ${f(hv)}</text>`;
+    }
+  }
   if (!long1 && !attention) g += `<text x="${sx(0) - CWd / 2 - 8}" y="${yTop + 10}" text-anchor="end">${d.src[0]} ½</text><text x="${sx(0) - CWd / 2 - 8}" y="${yBot - 4}" text-anchor="end">empty start ½</text>`;
   // English words
   d.tgt.forEach((t, k) => {
@@ -585,7 +597,7 @@ function lookSvg(id, attention) {
     g += long1 ? `<text class="word${k < cur1 ? "" : " dim"}" x="${tx(k)}" y="${yT}" transform="rotate(50 ${tx(k)} ${yT})" style="font-size:13px;${st}">${t}</text>`
                : `<text class="word${k < cur1 ? "" : " dim"}" x="${tx(k)}" y="${yT}" text-anchor="middle" style="${st}">${t}</text>`;
   });
-  const el = $(id); el.setAttribute("viewBox", `0 0 ${W} ${H}`); el.style.minWidth = long1 ? `${Math.round(W * 0.8)}px` : ""; el.style.maxWidth = long1 ? "" : "640px"; el.innerHTML = g;
+  const el = $(id); el.setAttribute("viewBox", `0 0 ${W} ${H}`); el.style.minWidth = long1 ? `${Math.round(W * 0.8)}px` : ""; el.style.maxWidth = long1 ? "" : "780px"; el.innerHTML = g;
 }
 function renderLook() {
   lookSvg("lookOne", false); lookSvg("lookAtt", true);
