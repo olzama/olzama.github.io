@@ -294,7 +294,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="look">
     <h2><span class="n">1</span>Attention: look back at every word</h2>
-    <p class="lead">A translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. The encoder makes one vector after each Galician word. As on the <a href="mt.html#enc">translation page</a>, each new word takes half of the vector, so each column below holds mostly its own word and less and less of the words before it. The colors only mark which word is which. Each vector itself is a list of numbers, written above its column. Without attention, the decoder gets only the last vector, the <b>summary</b>. With attention, it takes some of every vector, with new weights for every English word.</p>
+    <p class="lead">A translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. In the top row, the encoder starts from a vector of zeros and makes a new vector after each Galician word: half the previous vector plus half the new word's vector, as on the <a href="mt.html#enc">translation page</a>. The numbers above a column are that vector. The colored parts show how much of each word it holds; the colors only mark which word is which. Under each English word is the vector the decoder gets for it. Without attention, it is always the last vector, the <b>summary</b>. With attention, the decoder mixes all the vectors, with new weights for every English word. These weights are the attention.</p>
     <div class="controls">
       <div class="seg" role="group" aria-label="Input">
         <button id="lShort" aria-pressed="true">unha tía miña</button>
@@ -305,12 +305,12 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </div>
     <p class="label">Without attention: one vector</p>
     <div class="heatwrap"><svg id="lookOne" role="img" aria-label="Encoder vectors; the decoder gets only the last one"></svg></div>
-    <div class="usebar"><span class="label">What the decoder gets: the summary, and how much of each word it holds</span><div class="mix" id="mixOne"></div><div class="weights" id="mixOneTxt"></div></div>
+    <div class="weights" id="mixOneTxt"></div>
     <p class="label">With attention</p>
     <div class="heatwrap"><svg id="lookAtt" role="img" aria-label="Encoder vectors; the decoder takes from every one, weighted"></svg></div>
-    <div class="usebar"><span class="label">How much the decoder takes from each word's vector</span><div class="mix" id="mixAtt"></div><div class="weights" id="mixAttTxt"></div></div>
+    <div class="weights" id="mixAttTxt"></div>
     <p class="note" id="lookNote"></p>
-    <p class="note">Weights for <i>unha tía miña</i> are made up for this picture; for the whole sentence they are the real model's (section 4, averaged over its heads). The English words are that model's translation. The columns and the summary use the simplified encoder of the <a href="mt.html#enc">translation page</a> (each word takes half); the bottom bar shows the attention weights. Before attention, a long sentence had to fit into the summary alone, and translations of long sentences got much worse.</p>
+    <p class="note">Weights for <i>unha tía miña</i> are made up for this picture; for the whole sentence they are the real model's (section 4, averaged over its heads). The English words are that model's translation. The columns use the simplified encoder of the <a href="mt.html#enc">translation page</a>. Before attention, a long sentence had to fit into the summary alone, and translations of long sentences got much worse.</p>
   </section>
 
   <section class="panel" id="compare">
@@ -535,85 +535,99 @@ const SHORT = { src: ["unha", "tía", "miña"], tgt: ["an", "aunt", "of", "mine"
 const longData = () => { const R = REAL.sentence; return { src: R.src.map(clean), tgt: R.tgt.map(clean), w: avgOf(R.cross, "all", "all") }; };
 let long1 = false, cur1 = 0, t1 = null;
 const lookData = () => long1 ? longData() : SHORT;
+// Encoder columns: position 0 is the start (zeros), position k + 1 the vector after Galician word k.
+// A column's parts: [start, word 0, word 1, ...]; each new word takes half, the rest is halved.
+const encParts = (k, n) => [Math.pow(0.5, k), ...Array.from({ length: n }, (_, j) => j < k ? Math.pow(0.5, k - j) : 0)];
+function encVec(src, k) { let v = [0, 0]; for (let j = 0; j < k; j++) { const e = emb2(src[j]); v = [0.5 * v[0] + 0.5 * e[0], 0.5 * v[1] + 0.5 * e[1]]; } return v; }
+// what the decoder gets for English word c: the summary, or the attention mix of the word vectors
+function decIn(d, c, attention) {
+  const n = d.src.length;
+  if (!attention) return { parts: encParts(n, n), vec: encVec(d.src, n) };
+  const w = d.w[c], parts = new Array(n + 1).fill(0), vec = [0, 0];
+  w.forEach((wt, j) => { encParts(j + 1, n).forEach((v, i) => parts[i] += wt * v); const e = encVec(d.src, j + 1); vec[0] += wt * e[0]; vec[1] += wt * e[1]; });
+  return { parts, vec };
+}
+const fracTxt = v => ({ 1: "1", 0.5: "½", 0.25: "¼", 0.125: "⅛", 0.0625: "1/16" })[v] || v.toFixed(2);
+const vecTxt = v => `(${v[0].toFixed(2)}, ${v[1].toFixed(2)})`;
 function lookSvg(id, attention) {
-  const d = lookData(), n = d.src.length, m = d.tgt.length;
-  const step = long1 ? 24 : 150, x0 = long1 ? 30 : 140, W = long1 ? x0 + Math.max(n, m) * step + 190 : 930;
-  const sx = k => x0 + k * step, yW = long1 ? 48 : 30, CH = long1 ? 44 : 96, CWd = long1 ? 12 : 30, yB = long1 ? 122 : 124, yT = long1 ? 250 : 290, H = long1 ? 308 : 306;
-  const yTop = yB - CH / 2, yBot = yB + CH / 2, wcol = j => `var(${PAL[j % PAL.length]})`;
-  // English words: under the source in the short example (so the alignment lines cross), spread evenly in the long one
-  const tx = k => long1 ? x0 + k * step * (n - 1) / Math.max(1, m - 1) : sx(k);
-  const blue = css("--blue"), orange = css("--orange"), line = css("--line"), muted = css("--muted");
-  let g = "";
-  // source words and encoder chain
-  d.src.forEach((t, k) => {
-    g += long1 ? `<text x="${sx(k)}" y="${yW}" transform="rotate(-50 ${sx(k)} ${yW})" font-style="italic" style="fill:${wcol(k)}">${t}</text>` : `<text class="word src" x="${sx(k)}" y="${yW}" text-anchor="middle" style="fill:${wcol(k)}">${t}</text>`;
-    g += `<line x1="${sx(k)}" y1="${yW + 6}" x2="${sx(k)}" y2="${long1 ? yTop - 3 : yTop - 24}" stroke="${line}"/>`;
-    if (k) g += `<line x1="${sx(k - 1) + CWd / 2 + 1}" y1="${yB}" x2="${sx(k) - CWd / 2 - 1}" y2="${yB}" stroke="${muted}" marker-end="url(#ch${id})"/>`;
-  });
-  g += `<defs><marker id="ch${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${muted}"/></marker></defs>`;
-  // lines from encoder vectors to the current English word
-  const c = cur1 - 1;
-  // earlier English words keep a faint line: all from the last vector without attention, the weighted fan in the short example
-  for (let p = 0; p < c; p++) {
-    if (!attention) g += `<line x1="${sx(n - 1)}" y1="${yBot + 2}" x2="${tx(p)}" y2="${yT - 16}" stroke="${orange}" stroke-width="2" stroke-opacity="0.25"/>`;
-    else if (!long1) d.w[p].forEach((wt, k) => { g += `<line x1="${sx(k)}" y1="${yBot + 2}" x2="${tx(p)}" y2="${yT - 16}" stroke="${orange}" stroke-width="${(0.5 + 9 * wt).toFixed(1)}" stroke-opacity="${(0.08 + 0.25 * wt).toFixed(2)}" stroke-linecap="round"/>`; });
+  const d = lookData(), n = d.src.length, m = d.tgt.length, c = cur1 - 1;
+  const step = long1 ? 22 : 130, x0 = long1 ? 40 : 80, CH = long1 ? 44 : 96, CWd = long1 ? 11 : 30;
+  const yW = long1 ? 62 : 40, yTop = long1 ? 74 : 72, yBot = yTop + CH, yD = yBot + (long1 ? 80 : 84), yDB = yD + CH, H = yDB + (long1 ? 70 : 48);
+  const ex = p => x0 + p * step;                                  // encoder columns: 0 = start, k + 1 = after word k
+  const tx = k => long1 ? x0 + step + k * step * (n - 1) / Math.max(1, m - 1) : ex(k + 1);   // decoder columns under the English words
+  const W = long1 ? Math.max(ex(n), tx(m - 1)) + 140 : ex(Math.max(n, m)) + 120;
+  const wcol = j => `var(${PAL[j % PAL.length]})`, partCol = i => i === 0 ? "var(--grid)" : wcol(i - 1);
+  const orange = css("--orange"), line = css("--line"), muted = css("--muted");
+  // a column of parts, top to bottom: the words in reading order, then what is left of the start
+  const column = (x, y, parts, labels, dec) => {
+    let g = "", yy = y;
+    [...parts.keys()].slice(1).concat([0]).forEach(i => {
+      const h = CH * parts[i]; if (h <= 0.01) return;
+      g += `<rect x="${x - CWd / 2}" y="${yy.toFixed(2)}" width="${CWd}" height="${h.toFixed(2)}" style="fill:${partCol(i)}"/>`;
+      if (labels && h >= 13) g += `<text x="${x}" y="${(yy + h / 2 + 4).toFixed(1)}" text-anchor="middle" style="font-size:11px;fill:${i ? "var(--panel)" : "var(--muted)"}">${dec ? parts[i].toFixed(2) : fracTxt(+parts[i].toFixed(4))}</text>`;
+      yy += h;
+    });
+    return g;
+  };
+  let g = `<defs><marker id="ch${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${muted}"/></marker></defs>`;
+  // lines from the encoder to what the decoder gets
+  const link = (x1, x2, wdt, op) => `<line x1="${x1}" y1="${yBot + (long1 ? 3 : 26)}" x2="${x2}" y2="${yD - (long1 ? 4 : 18)}" stroke="${orange}" stroke-width="${wdt}" stroke-opacity="${op}" stroke-linecap="round"/>`;
+  const shown = c < 0 ? 0 : c + 1;
+  for (let k = 0; k < shown; k++) {
+    const now = k === c;
+    if (!attention) g += link(ex(n), tx(k), now ? 4 : 2, now ? 1 : 0.25);
+    else if (now) d.w[k].forEach((wt, j) => { g += link(ex(j + 1), tx(k), (0.5 + 8 * wt).toFixed(1), (0.15 + 0.85 * Math.min(1, wt * (long1 ? 2.5 : 1))).toFixed(2)); });
   }
-  if (c >= 0) {
-    if (!attention) {
-      g += `<line x1="${sx(n - 1)}" y1="${yBot + 2}" x2="${tx(c)}" y2="${yT - 16}" stroke="${orange}" stroke-width="4" stroke-linecap="round"/>`;
-    } else {
-      d.w[c].forEach((wt, k) => { g += `<line x1="${sx(k)}" y1="${yBot + 2}" x2="${tx(c)}" y2="${yT - 16}" stroke="${orange}" stroke-width="${(0.5 + 9 * wt).toFixed(1)}" stroke-opacity="${(0.12 + 0.88 * Math.min(1, wt * (long1 ? 2.5 : 1))).toFixed(2)}" stroke-linecap="round"/>`; });
-      if (!long1) d.w[c].forEach((wt, k) => { g += `<text x="${(sx(k) + tx(c)) / 2 + (sx(k) < tx(c) ? -14 : 14)}" y="${(yB + yT) / 2}" text-anchor="${sx(k) < tx(c) ? "end" : "start"}" fill="${orange}">${wt.toFixed(2)}</text>`; });
+  if (c >= 0 && attention && !long1) d.w[c].forEach((wt, j) => { g += `<text x="${ex(j + 1)}" y="${yBot + 18}" text-anchor="middle" style="fill:${orange}">${wt.toFixed(2)}</text>`; });
+  if (c >= 0 && attention && !long1) g += `<text x="${x0 - CWd / 2}" y="${yBot + 18}" style="fill:${orange}">weights:</text>`;
+  // encoder: the start and one column per Galician word
+  const startLab = long1 ? `<text x="${ex(0)}" y="${yW}" transform="rotate(-50 ${ex(0)} ${yW})">start</text>` : `<text x="${ex(0)}" y="${yW}" text-anchor="middle">start</text>`;
+  g += startLab;
+  for (let p = 0; p <= n; p++) {
+    const x = ex(p);
+    if (p) {
+      const t = d.src[p - 1];
+      g += long1 ? `<text x="${x}" y="${yW}" transform="rotate(-50 ${x} ${yW})" font-style="italic" style="fill:${wcol(p - 1)}">${t}</text>` : `<text class="word src" x="${x}" y="${yW - 12}" text-anchor="middle" style="fill:${wcol(p - 1)}">${t}</text>`;
+      g += `<line x1="${ex(p - 1) + CWd / 2 + 1}" y1="${yTop + CH / 2}" x2="${x - CWd / 2 - 1}" y2="${yTop + CH / 2}" stroke="${muted}" marker-end="url(#ch${id})"/>`;
     }
+    const used = c >= 0 && (attention ? p > 0 && d.w[c][p - 1] > 0.2 : p === n);
+    const op = c < 0 ? 1 : attention ? (p ? 0.5 + 0.5 * Math.min(1, d.w[c][p - 1] * (long1 ? 3 : 1)) : 0.5) : (p === n ? 1 : 0.5);
+    g += `<g opacity="${op.toFixed(2)}">${column(x, yTop, encParts(p, n), !long1)}</g>`;
+    if (!long1) g += `<text x="${x}" y="${yTop - 6}" text-anchor="middle" style="font-size:11px;fill:var(--fg)">${vecTxt(encVec(d.src, p))}</text>`;
+    if (used) g += `<rect x="${x - CWd / 2 - 2.5}" y="${yTop - 2.5}" width="${CWd + 5}" height="${CH + 5}" rx="3" fill="none" stroke="${orange}" stroke-width="2"/>`;
   }
-  // encoder vectors on top of the lines: each column shows how much of each word it holds (each new word takes half)
-  d.src.forEach((_, k) => {
-    const used = c >= 0 && (attention ? d.w[c][k] > 0.2 : k === n - 1);
-    const op = c < 0 ? 1 : attention ? 0.35 + 0.65 * Math.min(1, d.w[c][k] * (long1 ? 3 : 1)) : (k === n - 1 ? 1 : 0.35);
-    // top to bottom in reading order, as in the bar below; the grey rest is the empty start
-    let y = yTop, col = "";
-    for (let j = 0; j <= k; j++) { const hgt = CH * shareOf(j, k + 1); col += `<rect x="${sx(k) - CWd / 2}" y="${y.toFixed(2)}" width="${CWd}" height="${hgt.toFixed(2)}" style="fill:${wcol(j)}"/>`; y += hgt; }
-    col += `<rect x="${sx(k) - CWd / 2}" y="${y.toFixed(2)}" width="${CWd}" height="${(yBot - y).toFixed(2)}" style="fill:var(--grid)"/>`;
-    g += `<g opacity="${op.toFixed(2)}">${col}</g>`;
-    if (used) g += `<rect x="${sx(k) - CWd / 2 - 2.5}" y="${yTop - 2.5}" width="${CWd + 5}" height="${CH + 5}" rx="3" fill="none" stroke="${orange}" stroke-width="2"/>`;
-  });
-  if (!attention) g += `<text x="${sx(n - 1) + CWd / 2 + 8}" y="${yTop + 10}" fill="${orange}">summary = the last vector</text>`;
-  if (!long1) {
-    // the numbers: each vector is ½ × the previous one + ½ × the new word's vector (2 dimensions, as on the translation page)
-    const f = v => `(${v[0].toFixed(2)}, ${v[1].toFixed(2)})`;
-    let hv = [0, 0];
-    d.src.forEach((w, k) => { const e = emb2(w); hv = [0.5 * hv[0] + 0.5 * e[0], 0.5 * hv[1] + 0.5 * e[1]]; g += `<text x="${sx(k)}" y="${yTop - 8}" text-anchor="middle" style="fill:var(--fg)">${f(hv)}</text>`; });
-    if (!attention) {
-      const x = sx(n - 1) + CWd / 2 + 8, ts = (j, t) => `<tspan style="fill:${wcol(j)}">${t}</tspan>`;
-      const fr = v => ({ 0.5: "½", 0.25: "¼", 0.125: "⅛", 0.0625: "1/16" })[v] || v.toFixed(3), fe = fr(Math.pow(0.5, n));
-      g += `<text x="${x}" y="${yTop + 32}">= ${d.src.map((w, j) => `${fr(shareOf(j, n))} × ${ts(j, w)}`).reverse().join(" + ")} + ${fe} × empty start</text>`;
-      g += `<text x="${x}" y="${yTop + 54}">= ${d.src.map((w, j) => `${fr(shareOf(j, n))} × ${ts(j, f(emb2(w)))}`).reverse().join(" + ")}</text>`;
-      g += `<text x="${x}" y="${yTop + 76}" style="fill:var(--fg)">= ${f(hv)}</text>`;
+  if (!attention) g += `<text x="${ex(n) + CWd / 2 + 8}" y="${yTop + 12}" style="fill:${orange}">summary</text>`;
+  else g += `<text x="${ex(n) + CWd / 2 + 8}" y="${yTop + 12}">same as above</text>`;
+  // the decoder: what it gets for every English word written so far, and the word
+  if (!long1) g += `<text x="${tx(0) - CWd / 2 - 10}" y="${yD + CH / 2}" text-anchor="end">the decoder gets</text>`;
+  for (let k = 0; k < m; k++) {
+    const on = k < shown, x = tx(k);
+    if (on) {
+      const di = decIn(d, k, attention);
+      g += column(x, yD, di.parts, !long1, attention);
+      if (!long1) g += `<text x="${x}" y="${yDB + 14}" text-anchor="middle" style="font-size:11px;fill:var(--fg)">${vecTxt(di.vec)}</text>`;
+      if (k === c) g += `<rect x="${x - CWd / 2 - 2.5}" y="${yD - 2.5}" width="${CWd + 5}" height="${CH + 5}" rx="3" fill="none" stroke="${orange}" stroke-width="2"/>`;
     }
+    const st = k === c ? `fill:${orange}` : "", yE = long1 ? yDB + 12 : yDB + 38;
+    g += long1 ? `<text class="word${on ? "" : " dim"}" x="${x}" y="${yE}" transform="rotate(50 ${x} ${yE})" style="font-size:13px;${st}">${d.tgt[k]}</text>`
+               : `<text class="word${on ? "" : " dim"}" x="${x}" y="${yE}" text-anchor="middle" style="${st}">${d.tgt[k]}</text>`;
   }
-  if (!long1 && !attention) g += `<text x="${sx(0) - CWd / 2 - 8}" y="${yTop + 10}" text-anchor="end">${d.src[0]} ½</text><text x="${sx(0) - CWd / 2 - 8}" y="${yBot - 4}" text-anchor="end">empty start ½</text>`;
-  // English words
-  d.tgt.forEach((t, k) => {
-    const st = k === c ? `fill:${orange}` : "";
-    g += long1 ? `<text class="word${k < cur1 ? "" : " dim"}" x="${tx(k)}" y="${yT}" transform="rotate(50 ${tx(k)} ${yT})" style="font-size:13px;${st}">${t}</text>`
-               : `<text class="word${k < cur1 ? "" : " dim"}" x="${tx(k)}" y="${yT}" text-anchor="middle" style="${st}">${t}</text>`;
-  });
-  const el = $(id); el.setAttribute("viewBox", `0 0 ${W} ${H}`); el.style.minWidth = long1 ? `${Math.round(W * 0.8)}px` : ""; el.style.maxWidth = long1 ? "" : "940px"; el.innerHTML = g;
+  const el = $(id); el.setAttribute("viewBox", `0 0 ${W} ${H}`); el.style.minWidth = long1 ? `${Math.round(W * 0.8)}px` : ""; el.style.maxWidth = long1 ? "" : `${W + 20}px`; el.innerHTML = g;
 }
 function renderLook() {
   lookSvg("lookOne", false); lookSvg("lookAtt", true);
   const d = lookData(), c = cur1 - 1, n = d.src.length;
-  const one = d.src.map((_, j) => shareOf(j, n)), att = c >= 0 ? d.w[c] : d.src.map(() => 0);
-  $("mixOne").innerHTML = mixHTML(d.src, one, Math.pow(0.5, n));
-  $("mixAtt").innerHTML = c >= 0 ? mixHTML(d.src, att, 0) : "";
-  const top = (vals, kk) => [...vals.keys()].sort((a, b) => vals[b] - vals[a]).slice(0, kk).map(j => `<b>${d.src[j]}</b> ${fmtShare(vals[j])}`).join(" · ");
-  const ti = d.src.indexOf("tía");
-  $("mixOneTxt").innerHTML = top(one, 3) + (one[ti] < 0.1 ? ` · <b>tía</b> ${fmtShare(one[ti])}` : "") + " · the same for every English word";
-  $("mixAttTxt").innerHTML = c >= 0 ? top(att, 3) + (att[ti] < 0.1 && !top(att, 3).includes(">tía<") ? ` · <b>tía</b> ${fmtShare(att[ti])}` : "") + ` · for “${d.tgt[c]}”` : "";
-  $("lookNote").textContent = c < 0 ? "Press “Write the translation”, or go word by word." :
-    `Writing “${d.tgt[c]}”. Without attention the decoder gets the summary again, the same as for every other word. With attention it takes ` +
-    [...d.w[c].keys()].sort((a, b) => d.w[c][b] - d.w[c][a]).slice(0, 2).map(k => `${d.w[c][k].toFixed(2)} from the vector of “${d.src[k]}”`).join(" and ") +
-    (long1 ? ", and the mix changes with every word it writes." : c >= 2 ? ". Both “of” and “mine” take most from the vector of “miña”." : ".");
+  const cw = (j, t) => `<span style="color:var(${PAL[j % PAL.length]})">${t}</span>`;
+  if (c < 0) { $("mixOneTxt").innerHTML = $("mixAttTxt").innerHTML = ""; $("lookNote").textContent = "Press “Write the translation”, or go word by word."; return; }
+  const sum = decIn(d, c, false), mix = decIn(d, c, true), w = d.w[c];
+  $("mixOneTxt").innerHTML = `for “${d.tgt[c]}”: the summary ${vecTxt(sum.vec)}, the same for every English word`;
+  const order = [...w.keys()].sort((a, b) => w[b] - w[a]), terms = long1 ? order.slice(0, 3) : [...w.keys()];
+  $("mixAttTxt").innerHTML = `for “${d.tgt[c]}”: ` + terms.map(j => `${w[j].toFixed(2)} × the vector of “${cw(j, d.src[j])}”${long1 ? "" : " " + vecTxt(encVec(d.src, j + 1))}`).join(" + ") + (long1 ? " + …" : ` = ${vecTxt(mix.vec)}`);
+  const j0 = order[0], share = (x, j) => x.parts[j + 1];
+  const sj = share(sum, j0), mj = share(mix, j0), wd = cw(j0, d.src[j0]);
+  $("lookNote").innerHTML = `Writing “${d.tgt[c]}”. ` + (mj > sj + 0.05
+    ? `${wd} makes up ${sj < 0.01 ? "almost nothing" : fracTxt(+sj.toFixed(4))} of the summary and ${mj.toFixed(2)} of the attention mix: attention gives it back to the decoder.`
+    : `${wd} already makes up ${fracTxt(+sj.toFixed(4))} of the summary, because it was read last, so here the attention mix is close to the summary.`);
 }
 function stopLook() { clearInterval(t1); t1 = null; }
 function setLong(l) { stopLook(); long1 = l; cur1 = 0; $("lShort").setAttribute("aria-pressed", !l); $("lLong").setAttribute("aria-pressed", l); renderLook(); }
