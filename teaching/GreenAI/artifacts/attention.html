@@ -294,7 +294,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="look">
     <h2><span class="n">1</span>Attention: look back at every word</h2>
-    <p class="lead">A translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. The encoder makes one vector after each Galician word. As on the <a href="mt.html#enc">translation page</a>, each new word takes half of the vector, so each column below holds mostly its own word and less and less of the words before it. Each word has its own color. Without attention, the decoder gets only the last vector, the <b>summary</b>. With attention, it takes some of every vector, with new weights for every English word.</p>
+    <p class="lead">A translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. The encoder makes one vector after each Galician word. As on the <a href="mt.html#enc">translation page</a>, each new word takes half of the vector, so each column below holds mostly its own word and less and less of the words before it. The colors in the picture only mark which word is which; the vectors themselves are numbers. Without attention, the decoder gets only the last vector, the <b>summary</b>. With attention, it takes some of every vector, with new weights for every English word.</p>
     <div class="controls">
       <div class="seg" role="group" aria-label="Input">
         <button id="lShort" aria-pressed="true">tía miña</button>
