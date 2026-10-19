@@ -166,9 +166,9 @@ svg.sb .bg, .sw.bg { fill: rgb(var(--heat)); background: rgb(var(--heat)); } svg
 .chain { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px 6px; }
 .chain .lk { display: grid; justify-items: center; gap: 0; font-size: 0.74rem; color: var(--muted); text-align: center; max-width: 6.5em; padding-bottom: 26px; line-height: 1.2; }
 .chain .lk .ar { font-size: 1.3rem; line-height: 1; } .chain .lk.cur { color: var(--orange); }
-.vc.cur .vh { color: var(--orange); } .vc.cur .sq { box-shadow: 0 0 0 2px var(--orange); }
+.vc.cur .vh { color: var(--orange); } .vc .sq.q { background: var(--bg); border: 1.5px dashed var(--muted); color: var(--muted); } .vc.cur .sq { box-shadow: 0 0 0 2px var(--orange); }
 .eq.tight { flex-wrap: nowrap; gap: 4px; } .eq.tight .vc .sq { width: 36px; font-size: 0.74rem; } .eq.tight .vc .vh { max-width: 5.5em; font-size: 0.72rem; } .eq.tight .gap { width: 14px; flex: none; } .eq.tight .k, .eq.tight .op { white-space: nowrap; }
-.tyboard .eq.tight { overflow-x: auto; }
+.tyboard .eq.tight { overflow-x: auto; } .eq.tight.x8 .vc .sq { width: 32px; font-size: 0.7rem; } .eq.tight.x8 .vc .vh { max-width: 4em; font-size: 0.72rem; } .eq.tight.x8 .gap { width: 8px; }
 svg.sb rect.anim { transform-box: fill-box; transform-origin: left center; animation: grow 0.9s ease-out; } svg.sb rect.anim.neg { transform-origin: right center; }
 .pbar { display: inline-block; height: 10px; border-radius: 2px; background: var(--muted); vertical-align: middle; transform-origin: left center; animation: grow 0.9s ease-out; }
 table.dec tr.win .pbar { background: var(--orange); } table.dec td.pr { white-space: nowrap; font-family: var(--font-mono); font-size: 0.8rem; }
@@ -1378,23 +1378,60 @@ const STEPS = [
             "Nothing has been written yet, so the decoder marks the beginning: it treats ‹start› like a word it has just written and folds it in with the encoder's rule, ½ × 0 + ½ × 1 = 0.5. Real decoders begin with such a start mark too."]),
         scene: decScene(SUMMARY, false, { path: true, cap: "The other eight dimensions do not fit in the picture; the column on the left shows all eleven." }) }] }],
   ["How the decoder scores a word", {
-    text: "The decoder gives each of its eight words a score and writes the word with the highest score. Each English word has its own vector, with the same eleven dimensions as the state. The score begins with the dot product of the word's vector and the state: multiply dimension by dimension, then add up.",
+    text: "The decoder gives each of its eight words a score and writes the word with the highest score. The score comes from the state: each English word has its own vector, with the same eleven dimensions as the state, and the score is the dot product of that vector and the state. What should the vector of a word look like, so that its score is high exactly when the word is right?",
     frames: () => {
-      const st = stateOf(SUMMARY, ST0), sc = scoreAll(SUMMARY, ST0), an = sc.rows[1], a = sc.rows[0];
-      const pt = eqD(...EN.map(w => col([...CAND[w].g, ...CAND[w].e], `“${w}”`)));
-      const prod = w => { const v = [...CAND[w].g, ...CAND[w].e], p = v.map((x, i) => r2(x * st[i])), r = sc.rows.find(q => q.w === w);
-        return eqD(col(v, `vector of “${w}”`), op("×"), col(st, "the decoder state before word 1"), op("="), col(p, "products", "cur")) +
-          work([`dot product of “${w}”: add the products: ${p.filter(x => x).map(f).join(" + ").replace(/\+ −/g, "− ") || "0"} = <b>${f(r2(r.gp + r.ep))}</b>`]); };
-      const sG = decScene(SUMMARY, false, { arrows: true, drops: [TIA], cap: "" });
+      const st = stateOf(SUMMARY, ST0), sc = scoreAll(SUMMARY, ST0);
+      const STL = "the decoder state before word 1 (from step 3)";
+      const vec = w => [...CAND[w].g, ...CAND[w].e];
+      // a vector being filled in: null = not decided yet (shown as ?)
+      const qsq = v => v === null ? `<div class="sq q">?</div>` : sq(v);
+      const qcol = (v, label, cls = "") => `<div class="vc${cls ? " " + cls : ""}"><div class="vh">${label}</div>${v.map(qsq).join("")}</div>`;
+      const part = (w, keep) => vec(w).map((x, i) => keep(DS[i]) ? x : null);
+      const zerosFill = (w, set) => vec(w).map((x, i) => set.includes(DS[i]) ? x : 0);
+      const prodCol = w => col(vec(w).map((x, i) => r2(x * st[i])), "products", "cur");
+      const sumLine = w => { const r = sc.rows.find(q => q.w === w), p = vec(w).map((x, i) => r2(x * st[i]));
+        return `dot product of “${w}”: add the products: ${p.filter(x => x).map(f).join(" + ").replace(/\+ −/g, "− ")} = <b>${f(r2(r.gp + r.ep))}</b>`; };
+      const sG = (cap, extra = {}) => ({ ...decScene(SUMMARY, false, { cap }), ...extra });
+      const anArrow = [{ a: ZERO, b: [0, 0.5, 0], cls: "ca", label: "“an”", dx: 6, dy: 22, anchor: "start" }];
+      const aArrow = [{ a: ZERO, b: [0, -0.5, 0], cls: "ca", label: "“a”", dx: 0, dy: 26, anchor: "start" }];
+      const drop = decScene(SUMMARY, false, { drops: [TIA] });
+      const ANW = { "‹start›": "an article comes first: “an” is right right after the start", "tía": "“an aunt”: “an” is right when the phrase has tía" };
+      const REASONS = [
+        ["aunt", "tía: 8; a, an: 12", "tía means aunt; a noun comes right after an article"],
+        ["friend", "tía: −8; a, an: 12", "the noun when the phrase has no tía; also right after an article"],
+        ["of", "miña: 8; aunt, friend: 12", "miña after a noun becomes “of mine”; “of” comes right after the noun"],
+        ["mine", "miña: 8; of: 12", "miña means mine; it comes right after “of”"],
+        ["yours", "miña: −8; of: 12", "the other possessive: right after “of”, but not when the phrase has miña"],
+        ["‹end›", "aunt, friend, mine, yours: 12", "the phrase can end after the noun or after “mine” / “yours”"]];
+      const reasonTbl = `<div class="heatwrap"><table class="ty"><thead><tr><th>word</th><th>its vector: numbers that are not 0</th><th>why</th></tr></thead><tbody>` +
+        REASONS.map(([w, v, y]) => `<tr><td><b>${w}</b></td><td class="n">${v}</td><td>${y}</td></tr>`).join("") + "</tbody></table></div>";
       return [
-        { board: pt + work(["One column per English word. These numbers were learned from example translations; step 5 shows how. For now, take them as given."]),
-          scene: decScene(SUMMARY, false, { arrows: true, cap: "The first three dimensions of the word vectors, drawn at 1/16 of their length so that they fit, with the decoder state. “an” and “aunt”: 8 in tía. “a” and “friend”: −8 in tía. “of” and “mine”: 8 in miña. “yours” (−8 in miña) is not drawn." }) },
-        { board: prod("an"), scene: { ...sG, cap: `The first three products are the part of the dot product the picture shows: how far the state reaches along tía, ${f(SUMMARY[TIA])}, times 8: ${f(an.gp)}. The ‹start› dimension adds 12 × 0.5 = ${f(an.ep)}.` } },
-        { board: prod("a"), scene: { ...sG, cap: `“a” has −8 in tía, so the state takes ${f(-a.gp)} from it. From ‹start› it gets ${f(a.ep)}, like “an”.` } },
-        { board: dec({ ...SUM_IN, cols: ["g", "e"], parts: ["g", "e"], anim: "e" }), scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], cap: `Every word's dot product, as a bar. Blue: the first three dimensions, the part the picture shows. Green: the eight English dimensions. “an” has ${f(r2(an.gp + an.ep))}, “a” ${f(r2(a.gp + a.ep))}.` }) }];
+        { board: eqD(col(st, STL), op("·"), qcol(DS.map(() => null), "vector of “an”", "cur")) +
+            work(["The state is all the decoder has to go on. To give “an” a high score exactly when “an” is the right first word, its vector needs numbers in the dimensions that tell us “an” is right."]),
+          scene: sG("The state's first three dimensions: the summary. The vector of “an” is not filled in yet.") },
+        { board: eqD(col(st, STL), op("·"), qcol(part("an", d => d === "tía"), "vector of “an”", "cur")) +
+            work([`tía: ${ANW["tía"]}. So the vector of “an” gets a positive number in the tía dimension: the more tía the state holds, the higher the score. We choose 8.`]),
+          scene: sG("The vector of “an” in the first three dimensions: 8 along tía (drawn at 1/16 of its length).", { arrows: anArrow }) },
+        { board: eqD(col(st, STL), op("·"), qcol(part("an", d => d === "tía" || d === "‹start›"), "vector of “an”", "cur")) +
+            work([`‹start›: ${ANW["‹start›"]}. So it gets a positive number in the ‹start› dimension too. We choose 12.`]),
+          scene: sG("‹start› is one of the eight English dimensions, which the picture cannot show.", { arrows: anArrow }) },
+        { board: eqD(col(st, STL), op("·"), col(zerosFill("an", ["tía", "‹start›"]), "vector of “an”", "cur")) +
+            work(["Every other dimension says nothing about “an”: 0."]),
+          scene: sG("The other dimensions are 0, so the vector of “an” lies on the tía axis.", { arrows: anArrow }) },
+        { board: eqD(col(st, STL), op("×"), col(vec("an"), "vector of “an”"), op("="), prodCol("an")) + work([sumLine("an")]),
+          scene: { ...drop, arrows: anArrow, cap: `The dot product, dimension by dimension. The first three products are the part the picture shows: how far the state reaches along tía, ${f(SUMMARY[TIA])}, times 8: ${f(sc.rows[1].gp)}. ‹start> adds 12 × 0.5 = ${f(sc.rows[1].ep)}.`.replace("‹start>", "‹start›") } },
+        { board: work(["“a” is right when the phrase has no tía (“a friend”): the opposite sign, −8 in tía, so tía lowers its score. It is an article too: 12 in ‹start›."]) +
+            `<p class="label">“an”, as before</p>` + eqD(col(st, STL), op("×"), col(vec("an"), "vector of “an”"), op("="), col(vec("an").map((x, i) => r2(x * st[i])), "products")) + work([sumLine("an")]) +
+            `<p class="label">“a”</p>` + eqD(col(st, STL), op("×"), col(vec("a"), "vector of “a”", "cur"), op("="), prodCol("a")) + work([sumLine("a")]),
+          scene: { ...drop, arrows: [...anArrow, ...aArrow], cap: `“a” points the opposite way along tía. tía adds ${f(sc.rows[1].gp)} to “an” and takes ${f(-sc.rows[0].gp)} from “a”.` } },
+        { board: `<p class="label">the state, and the vectors of all eight words</p><div class="eq d11 tight x8">${rowsOf(DS)}${col(st, "state")}<span class="gap"></span>${EN.map(w => col(vec(w), w, ["a", "an"].includes(w) ? "" : "cur")).join("")}</div>` + reasonTbl +
+            work(["Why 8 and 12? For the reasoning, only where the numbers are and their signs matter. We chose the sizes so that the arithmetic comes out round. Step 5 shows that training finds such numbers by itself, from example translations."]),
+          scene: { ...decScene(SUMMARY, false, { arrows: true }), cap: "The other words follow the same reasoning. In the picture: “an”, “aunt” along tía; “a”, “friend” the opposite way; “of”, “mine” along miña. (“yours”, −8 along miña, is not drawn.)" } },
+        { board: eqD(col(st, STL)) + dec({ ...SUM_IN, cols: ["g", "e"], parts: ["g", "e"], anim: "e", noState: true }),
+          scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], cap: `Every word's dot product with the state, as a bar. Blue: the first three dimensions, the part the picture shows. Green: the eight English dimensions. “an” has ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}, “a” ${f(r2(sc.rows[0].gp + sc.rows[0].ep))}.` }) }];
     } }],
   ["Where the numbers in the word vectors come from", {
-    text: "The word vectors are learned from example translations. Training shows the model an example and moves the vector of the right word a little toward the decoder state, so that its dot product grows; the vectors of the wrong words move a little away. Here we train the vectors of “an” and “a” by hand, on two examples.",
+    text: "Step 4 chose the numbers by reasoning about when each word is right. A real model finds them by itself, from example translations. Training shows the model an example and moves the vector of the right word a little toward the decoder state, so that its dot product grows; the vectors of the wrong words move a little away. Here we train the vectors of “an” and “a” by hand, on two examples.",
     frames: () => {
       const S1 = stateOf(SUMMARY, ST0), S2 = stateOf(VEC, ST0), STEP = 16;
       const EX = [["unha tía miña", S1, "an"], ["unha amiga miña", S2, "a"]], seq = [0, 1, 0, 1];
