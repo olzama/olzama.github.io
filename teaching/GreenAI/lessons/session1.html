@@ -1995,9 +1995,9 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   <div class="notes">
     <p>Section 1 is a model small enough to compute by hand. Every number is set by hand. Each vector has three numbers, one for each Galician word: unha, tía, miña. The picture on the right draws each vector as a point, with one axis per word.</p>
     <p>Press Next step. Step 2: the encoder takes half of the previous vector and half of the new word. So the summary holds miña 0.5, tía 0.25, and unha only 0.125. In the picture, the summary lies closest to the miña axis.</p>
-    <p>Step 3: how the decoder chooses a word. Every number in this model is set by hand: we chose it, nothing was trained. A trained decoder scores every word it knows, and its decoder state tells it what kind of word fits next. This model has no decoder state. Instead, it lists two candidate words for each English position. One candidate needs evidence from the Galician: "an" has 8 in the unha row, because unha is an indefinite article. The other is a default: "the" has a vector of zeros, so its score is always its bias, 1.6. So "an" wins only if the vector the decoder gets has more than 1.6 ÷ 8 = 0.2 of unha. The red marks in the picture show these thresholds.</p>
-    <p>Steps 4 and 5: without attention, the decoder gets the summary for every word. The summary has only 0.125 of unha. So the decoder writes "the", and then "friend". The result is "the friend of mine".</p>
-    <p>Steps 6 to 8: with attention, the decoder has a query. For the article, it looks for unha. Each encoder vector is a key. A key's score is the query times the key. Softmax gives the weights: 0.75 on the key after unha. The mix holds 0.43 of unha. That is past the 0.2 mark, so "an" wins.</p>
+    <p>Step 3: how the decoder chooses a word. Every number in this model is set by hand: we chose it, nothing was trained. A trained decoder scores every word it knows, and its decoder state tells it what kind of word fits next. This model has no decoder state. Instead, it lists two candidate words for each English position. One candidate needs evidence from the Galician. English writes "an" because the noun, aunt, starts with a vowel. So "an" has 8 in the tía row. The other candidate is a default: "a" has a vector of zeros, so its score is always its bias, 2.2. So "an" wins only if the vector the decoder gets has more than 2.2 ÷ 8 = 0.275 of tía. The red marks in the picture show these thresholds.</p>
+    <p>Steps 4 and 5: without attention, the decoder gets the summary for every word. The summary has only 0.25 of tía. So the decoder writes "a", and then "friend". The result is "a friend of mine". It is good English, but wrong.</p>
+    <p>Steps 6 to 8: with attention, the decoder has a query. For the article, it looks for tía. Each encoder vector is a key. A key's score is the query times the key. Softmax gives the weights: 0.79 on the key after tía. The mix holds 0.44 of tía. That is past the 0.275 mark, so "an" wins.</p>
     <p>Step 9: each English word has its own query and its own mix. The result is "an aunt of mine".</p>
     <p>Then scroll to section 3. Two trained models translate our whole sentence. Their vectors have 8 numbers, and training chose them. They have a decoder state, so they choose from all English words. They make the same kind of mistakes without attention: the article and the noun. Each step has buttons that jump back to the matching step of section 1.</p>
     <p>Press Next step. Step 1 shows the two translations. Without attention, the model writes "a friend of mine", and many words after that are wrong. With attention, the translation is right.</p>
@@ -2053,7 +2053,7 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   <div class="body">
     <p class="sent small"><span class="hl">Unha tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”.</p>
     <div class="board">
-      <svg viewBox="0 0 1000 540" role="img" aria-label="Keys: the encoder&#x27;s vectors after unha (0.5, 0, 0), after tía (0.25, 0.5, 0), after miña (0.125, 0.25, 0.5). To write aunt, the query (0, 6, 0) gives scores 0, 3 and 1.5; softmax gives e³ / (e⁰ + e³ + e¹·⁵) = 20.09 / 25.57 ≈ 0.79 for the key after tía, 0.04 for the key after unha and 0.18 for the key after miña. To write an, the query (6, 0, 0) gives weights 0.75, 0.17, 0.08; to write mine, the query (0, 0, 6) gives 0.05, 0.05, 0.91">
+      <svg viewBox="0 0 1000 540" role="img" aria-label="Keys: the encoder&#x27;s vectors after unha (0.5, 0, 0), after tía (0.25, 0.5, 0), after miña (0.125, 0.25, 0.5). To write aunt, the query (0, 6, 0) gives scores 0, 3 and 1.5; softmax gives e³ / (e⁰ + e³ + e¹·⁵) = 20.09 / 25.57 ≈ 0.79 for the key after tía, 0.04 for the key after unha and 0.18 for the key after miña. To write an, the decoder uses the same query, because a or an depends on the noun; to write mine, the query (0, 0, 6) gives 0.05, 0.05, 0.91">
 <text x="30.0" y="40.0" font-size="19" style="fill:var(--muted)" data-s="1" data-d="0">keys: the encoder's vectors</text>
 <text x="30.0" y="90.0" font-size="23" style="fill:currentColor" data-s="2" data-d="0">k<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan> = after unha = (0.5, 0, 0)</text>
 <text x="30.0" y="136.0" font-size="23" style="fill:currentColor" data-s="3" data-d="0">k<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan> = after tía = (0.25, 0.5, 0)</text>
@@ -2082,15 +2082,15 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
 <text y="380" font-size="23" style="fill:var(--orange)" data-s="24" data-d="0" data-line="S1">≈ 0.79</text>
 <text y="446" font-size="23" style="fill:currentColor" data-s="25" data-d="0" data-line="S2" data-x0="30">weight of k<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan> = 1 / 25.57 ≈ 0.04;   weight of k<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan> = 4.48 / 25.57 ≈ 0.18</text>
 <text y="496" font-size="23" style="fill:var(--orange)" data-s="26" data-d="0" data-line="M1" data-x0="30">to write “an”:</text>
-<text y="496" font-size="23" style="fill:var(--orange)" data-s="26" data-d="0.4" data-line="M1">q = (6, 0, 0)</text>
-<text y="496" font-size="23" style="fill:currentColor" data-s="27" data-d="0" data-line="M1">→ weights 0.75, 0.17, 0.08</text>
+<text y="496" font-size="23" style="fill:var(--orange)" data-s="26" data-d="0.4" data-line="M1">the same q: a or an depends on the noun</text>
+<text y="496" font-size="23" style="fill:currentColor" data-s="27" data-d="0" data-line="M1">→ weights 0.04, 0.79, 0.18</text>
 <text y="532" font-size="23" style="fill:var(--orange)" data-s="28" data-d="0" data-line="M2" data-x0="30">to write “mine”:</text>
 <text y="532" font-size="23" style="fill:var(--orange)" data-s="28" data-d="0.4" data-line="M2">q = (0, 0, 6)</text>
 <text y="532" font-size="23" style="fill:currentColor" data-s="29" data-d="0" data-line="M2">→ weights 0.05, 0.05, 0.91</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
-    <ul class="points"><li>79% of the attention on the key after <i>tía</i> for <i>aunt</i>, 75% on the key after <i>unha</i> for <i>an</i>, 91% on the key after <i>miña</i> for <i>mine</i>. Here the numbers are set by hand; a trained model learns its own</li></ul>
+    <ul class="points"><li>79% of the attention on the key after <i>tía</i> for <i>aunt</i>, and for <i>an</i> too: “a” or “an” depends on the noun. 91% on the key after <i>miña</i> for <i>mine</i>. Here the numbers are set by hand; a trained model learns its own</li></ul>
   </div>
   <div class="notes">
     <p>This is the search from the previous screen, done with tiny numbers. It is the hand-set model from the attention page, section 1. Every vector has three numbers, one for each Galician word: unha, tía, miña.</p>
@@ -2099,7 +2099,7 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <p>Now the scores. A score is a dot product: multiply the first numbers, then the second numbers, then the third, and add. The query times the key after unha: 0 times 0.5, plus 6 times 0, plus 0 times 0. That is 0. The query times the key after tía: 6 times 0.5. That is 3. The query times the key after miña: 6 times 0.25. That is 1.5. The key after miña also holds some tía, so it gets a score too.</p>
     <p>Now softmax. Take e to the power of each score: e to the 0 is 1, e to the 3 is 20.09, e to the 1.5 is 4.48. Add them up: 25.57. The weight of the key after tía is 20.09 divided by 25.57. That is 0.79. The key after unha gets 0.04. The key after miña gets 0.18.</p>
     <p>So while writing "aunt", 79 percent of the attention is on the key after tía.</p>
-    <p>The other words work the same way. The query for "an" is (6, 0, 0). It looks for unha, and the key after unha gets 0.75. The query for "mine" is (0, 0, 6). It looks for miña, and the key after miña gets 0.91.</p>
+    <p>The other words work the same way. To write "an", the decoder uses the same query as for "aunt". English writes "an" or "a" depending on the noun, so the article also looks at tía. The query for "mine" is (0, 0, 6). It looks for miña, and the key after miña gets 0.91.</p>
     <p>Here the numbers are set by hand. Real models learn their keys and queries from data. They have hundreds of dimensions. But the arithmetic is exactly the one on this screen.</p>
   </div>
 </section>
@@ -2111,9 +2111,9 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <iframe class="frame" title="Query and key: try your own query" data-src="../artifacts/attention.html?embed=qk"></iframe>
   </div>
   <div class="notes">
-    <p>This is the model of the worked example. Press aunt: 0.79 goes to the key after tía. Press an: 0.75 goes to the key after unha. Press of, mine: 0.91 goes to the key after miña.</p>
-    <p>Look at the table at the bottom. With each mix, only some English words come out right. With the query for an, only "an" is right. So the decoder makes a new query for each English word.</p>
-    <p>Press aunt, shorter: the query points the same way, but it is shorter, so the weights are softer: 0.51 on the key after tía. Press all zeros: every weight is the same. Then move the sliders yourself. The mix always lies inside the triangle of the three keys.</p>
+    <p>This is the model of the worked example. Press an, aunt: 0.79 goes to the key after tía. Press of, mine: 0.91 goes to the key after miña. Press unha: 0.75 goes to the key after unha, but no English word here needs unha.</p>
+    <p>Look at the table at the bottom. With each mix, only some English words come out right. With the query for an and aunt, "an aunt" is right, and "of mine" is wrong. So the decoder makes a new query for each English word.</p>
+    <p>Press an, aunt, shorter: the query points the same way, but it is shorter, so the weights are softer: 0.51 on the key after tía. Press all zeros: every weight is the same. Then move the sliders yourself. The mix always lies inside the triangle of the three keys.</p>
   </div>
 </section>
 
