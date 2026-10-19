@@ -105,6 +105,7 @@ svg .gridl { stroke: var(--grid); }
 .parth { margin: 8px 0 0; font-size: 1.1rem; font-weight: 500; border-top: 1px solid var(--line); padding-top: 12px; }
 .tyboard { display: grid; gap: 14px; min-width: 0; align-content: start; }
 .tycols { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.tycols.one { grid-template-columns: minmax(0, 1fr); }
 @media (max-width: 860px) { .tycols { grid-template-columns: minmax(0, 1fr); } }
 .v3fig { margin: 0; display: grid; gap: 6px; min-width: 0; }
 .v3fig figcaption { font-size: 0.86rem; }
@@ -145,6 +146,10 @@ table.ty { border-collapse: collapse; font-size: 0.86rem; }
 table.ty th, table.ty td { padding: 4px 10px 4px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
 table.ty th { font-weight: 400; color: var(--muted); font-size: 0.78rem; }
 table.ty td.n { font-family: var(--font-mono); white-space: nowrap; }
+table.ty tr.win td { background: var(--hi); }
+.work.mono { font-family: var(--font-mono); font-size: 0.85rem; }
+table.ty td.why { color: var(--muted); font-size: 0.8rem; padding-top: 0; white-space: normal; }
+table.ty tr.wrow td { border-bottom: 0; }
 .wkh { margin: 0; font-size: 1.05rem; font-weight: 500; }
 .wkstrip { display: inline-flex; gap: 1px; vertical-align: middle; }
 .wkstrip i { display: block; width: 14px; height: 14px; border-radius: 2px; background: var(--grid); }
@@ -357,18 +362,18 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <h3 class="wkh" id="tyTitle"></h3>
     <div class="tycols">
       <div class="tyboard" id="tyBoard"></div>
-      <figure class="v3fig"><svg class="v3" id="ty3d" viewBox="0 0 470 350" role="img" aria-label="The vectors as points, one axis per Galician word; drag to turn"></svg><figcaption><span id="ty3dCap"></span> <span class="note">Drag to turn the picture; double-click to reset it.</span></figcaption></figure>
+      <figure class="v3fig" id="ty3dFig"><svg class="v3" id="ty3d" viewBox="0 0 470 350" role="img" aria-label="The vectors as points, one axis per Galician word; drag to turn"></svg><figcaption><span id="ty3dCap"></span> <span class="note">Drag to turn the picture; double-click to reset it.</span></figcaption></figure>
     </div>
     <p class="steptext" id="tyText"></p>
   </section>
 
   <section class="panel" id="qk">
     <h2><span class="n">2</span>Query and key: try your own query</h2>
-    <p class="lead">The same model as section 1. In steps 6 and 7, the encoder vectors played two parts: as <b>keys</b>, each was compared with the decoder's <b>query</b>, and the dot product gave its <b>score</b>; softmax turned the scores into <b>weights</b>; as <b>values</b>, the encoder vectors were added up with these weights into the <b>mix</b>. Set the query's three numbers, or pick one below.</p>
+    <p class="lead">The same model as section 1. In steps 7 and 8, the encoder vectors played two parts: as <b>keys</b>, each was compared with the decoder's <b>query</b>, and the dot product gave its <b>score</b>; softmax turned the scores into <b>weights</b>; as <b>values</b>, the encoder vectors were added up with these weights into the <b>mix</b>. Set the query's three numbers, or pick one below.</p>
     <div class="controls qkctl">
-      <label for="qk0"><i>unha</i> row</label><input type="range" id="qk0" min="-6" max="8" step="0.5"><output id="qk0v"></output>
-      <label for="qk1"><i>tía</i> row</label><input type="range" id="qk1" min="-6" max="8" step="0.5"><output id="qk1v"></output>
-      <label for="qk2"><i>miña</i> row</label><input type="range" id="qk2" min="-6" max="8" step="0.5"><output id="qk2v"></output>
+      <label for="qk0"><i>unha</i> row</label><input type="range" id="qk0" min="-6" max="10" step="0.5"><output id="qk0v"></output>
+      <label for="qk1"><i>tía</i> row</label><input type="range" id="qk1" min="-6" max="10" step="0.5"><output id="qk1v"></output>
+      <label for="qk2"><i>miña</i> row</label><input type="range" id="qk2" min="-6" max="10" step="0.5"><output id="qk2v"></output>
     </div>
     <div class="controls"><span class="note">Queries</span><div class="seg" role="group" aria-label="Preset queries" id="qkPre"></div></div>
     <div class="cols">
@@ -381,9 +386,9 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <p class="label">Attention weights</p>
         <div class="bars" id="qkBars"></div>
         <p class="note" id="qkNote"></p>
-        <p class="label">What the decoder would write with this mix</p>
+        <p class="label">What the decoder would write with this mix, at each word of the correct phrase</p>
         <div class="heatwrap"><table class="ty" id="qkWords"></table></div>
-        <p class="note">One query serves only the words that need the same Galician word: the query that finds <i>tía</i> gets “an aunt” right and “of mine” wrong. So the decoder makes a new query for each English word.</p>
+        <p class="note">Each row uses the decoder state the decoder has after writing the correct words before it. One mix serves only some of the words: the mix for the query (0, 6, 0) gets “an” and “aunt” right, but not “of” and “mine”. So the decoder needs a new query for each English word.</p>
       </div>
     </div>
     <p class="note">In this model and in the trained models of sections 3 and 4, the encoder vectors serve as both keys and values. In a transformer (sections 5 to 7), each word's vector is turned into a separate query, key and value by three sets of learned weights; the arithmetic after that is the same.</p>
@@ -1044,7 +1049,7 @@ t = total(); render();
 </script>
 
 <script>
-// ---------------------------------------------------------------- 1 and 2: a hand-set model, every number explicit
+// ---------------------------------------------------------------- 1 and 2: a small model whose numbers are set by hand
 (() => {
 const $ = id => document.getElementById(id);
 const DIMS = ["unha", "tía", "miña"];
@@ -1052,52 +1057,80 @@ const WORD = { unha: [1, 0, 0], "tía": [0, 1, 0], "miña": [0, 0, 1] };
 // encoder: new vector = ½ × previous vector + ½ × word vector, starting from zeros (the translation page's rule)
 const ZERO = [0, 0, 0], ENC = []; { let v = ZERO; for (const w of DIMS) { v = v.map((x, i) => 0.5 * x + 0.5 * WORD[w][i]); ENC.push(v); } }
 const SUMMARY = ENC[2];
-// decoder, set by hand: for each English word, the query (what it looks for) and two candidates,
-// one that needs evidence from the Galician and a default with a fixed score (its bias)
-const DEC = [
-  { q: [0, 6, 0], need: 1, c: [["an", [0, 8, 0], 0], ["a", [0, 0, 0], 2.2]] },
-  { q: [0, 6, 0], need: 1, c: [["aunt", [0, 8, 0], 0], ["friend", [0, 0, 0], 2.2]] },
-  { q: [0, 0, 6], need: 2, c: [["of", [0, 0, 8], 0], ["(end)", [0, 0, 0], 1.6]] },
-  { q: [0, 0, 6], need: 2, c: [["mine", [0, 0, 8], 0], ["yours", [0, 0, 0], 1.6]] },
-];
-const WHY = [["the noun, tía, is “aunt”, which starts with a vowel", "the more common form of the article"], ["tía means aunt", "a common noun in such phrases"],
-  ["miña after the noun: English says “of mine”", "end the phrase here"], ["miña means mine", "the other possessive"]];
-// the evidence word wins when 8 × its row is more than the default's bias: its row must pass bias ÷ 8
-const MARK = DEC.map(d => d.c[1][2] / d.c[0][1][d.need]);
-// every shown number is rounded to 2 decimals, and the next step computes with the rounded number, as by hand
+// the decoder: every English word competes at every position. Its score has three parts:
+// Galician vector · the vector from the encoder, English vector · the decoder state, and its bias.
+const EN = ["a", "an", "aunt", "friend", "of", "mine", "yours", "(end)"];
+const ST = EN.slice(0, 7);                          // rows of the decoder state: the words it can write and take in
+const fol = (...ws) => ST.map(r => ws.includes(r) ? 12 : 0);
+const ART = ST.map(() => -12);
+const CAND = {
+  a:       { g: [0, 0, 0], e: ART, b: 2.2, bt: "2.2" },
+  an:      { g: [0, 8, 0], e: ART, b: 0, bt: "0" },
+  aunt:    { g: [0, 8, 0], e: fol("a", "an"), b: -6, bt: "−6" },
+  friend:  { g: [0, 0, 0], e: fol("a", "an"), b: -3.8, bt: "−6 + 2.2" },
+  of:      { g: [0, 0, 8], e: fol("aunt", "friend"), b: -6, bt: "−6" },
+  mine:    { g: [0, 0, 8], e: fol("of"), b: -6, bt: "−6" },
+  yours:   { g: [0, 0, 0], e: fol("of"), b: -4.4, bt: "−6 + 1.6" },
+  "(end)": { g: [0, 0, 0], e: fol("aunt", "friend", "mine", "yours"), b: -4.4, bt: "−6 + 1.6" },
+};
+const WHY = {
+  a:       ["zeros: the Galician words do not change its score", "−12 in every row: once any word is written, an article no longer fits", "2.2: the more common article, written when nothing points to “an”"],
+  an:      ["8 in the tía row: “an” comes before “aunt”, which starts with a vowel", "−12 in every row: once any word is written, an article no longer fits", "0"],
+  aunt:    ["8 in the tía row: tía means aunt", "12 in the rows a and an: it fits right after an article", "−6: cancelled when an article was written just before (12 × 0.5 = 6)"],
+  friend:  ["zeros: the Galician words do not change its score", "12 in the rows a and an: it fits right after an article", "−6, cancelled as for “aunt”, plus 2.2: the noun written when nothing points to “aunt”"],
+  of:      ["8 in the miña row: after the noun, miña becomes “of mine”", "12 in the rows aunt and friend: it fits right after the noun", "−6: cancelled when the noun was written just before"],
+  mine:    ["8 in the miña row: miña means mine", "12 in the row of: it fits right after “of”", "−6: cancelled when “of” was written just before"],
+  yours:   ["zeros: the Galician words do not change its score", "12 in the row of: it fits right after “of”", "−6, cancelled as for “mine”, plus 1.6: written when nothing points to “mine”"],
+  "(end)": ["zeros: the Galician words do not change its score", "12 in the rows aunt, friend, mine and yours: the phrase can end after the noun or after the possessive", "−6, cancelled as for the others, plus 1.6"],
+};
+// the query: a starting query, shifted by every word written so far (its number in the decoder state × its shift)
+const Q0 = [0, 6, 0];
+const QSHIFT = Object.fromEntries(ST.map(r => [r, ["aunt", "friend", "of", "mine", "yours"].includes(r) ? [0, -12, 12] : [0, 0, 0]]));
+const MARK = 2.2 / 8;                               // "an" beats "a" when 8 × the tía row is more than 2.2
+// every computed number is rounded to 2 decimals, and the next step computes with the rounded number, as by hand
 const r2 = v => Math.round(v * 100) / 100;
-// numbers are shown with up to 3 decimals (0.125 stays exact); computed numbers are already rounded to 2
+// numbers are shown with up to 3 decimals (0.125 stays exact)
 const f = v => { const a = Math.round(Math.abs(v) * 1000) / 1000; return (v < 0 && a ? "−" : "") + String(a); };
 const dot = (a, b) => a.reduce((s, x, i) => s + x * b[i], 0);
-const sq = v => `<div class="sq" style="background:rgba(var(--heat),${(0.08 + 0.85 * Math.min(1, Math.abs(v))).toFixed(2)});color:${Math.abs(v) > 0.6 ? "var(--panel)" : "var(--fg)"}">${f(v)}</div>`;
+const sq = v => `<div class="sq" style="background:rgba(${v < 0 ? "var(--negheat)" : "var(--heat)"},${(0.08 + 0.85 * Math.min(1, Math.abs(v))).toFixed(2)});color:${Math.abs(v) > 0.6 ? "var(--panel)" : "var(--fg)"}">${f(v)}</div>`;
 const col = (v, label) => `<div class="vc"><div class="vh">${label}</div>${v.map(sq).join("")}</div>`;
-const rows = `<div class="vc rl"><div class="vh"></div>${DIMS.map(d => `<div>${d}</div>`).join("")}</div>`;
+const rowsOf = names => `<div class="vc rl"><div class="vh"></div>${names.map(d => `<div>${d}</div>`).join("")}</div>`;
 const op = t => `<div class="op">${t}</div>`, k = t => `<div class="k">${t}</div>`;
-const eq = (...items) => `<div class="eq">${rows}${items.join("")}</div>`;
+const eq = (...items) => `<div class="eq">${rowsOf(DIMS)}${items.join("")}</div>`;
+const eqS = (...items) => `<div class="eq">${rowsOf(ST)}${items.join("")}</div>`;
 const dotTxt = (a, b) => a.map((x, i) => `${f(x)} × ${f(b[i])}`).join(" + ");
 const vecTxt = v => `(${v.map(f).join(", ")})`;
 function softmax(xs) { const e = xs.map(x => r2(Math.exp(x))), Z = r2(e.reduce((s, x) => s + x, 0)); return { e, Z, p: e.map(x => r2(x / Z)) }; }
-// one English word: scores of its two candidates for the vector the decoder gets, then softmax
-function choose(t, x) {
-  const sc = DEC[t].c.map(([, v, b]) => r2(dot(v, x) + b)), sm = softmax(sc), win = sc[0] > sc[1] ? 0 : 1;
-  return { sc, sm, win, word: DEC[t].c[win][0] };
-}
-function chooseWork(t, x, xName) {
-  const ch = choose(t, x), [c0, c1] = DEC[t].c;
-  return eq(col(c0[1], `vector of “${c0[0]}”`), op("·"), col(x, xName), k(`+ bias ${f(c0[2])}`)) +
-    `<p class="work">score(“${c0[0]}”) = ${dotTxt(c0[1], x)} + ${f(c0[2])} = <b>${f(ch.sc[0])}</b><br>
-    score(“${c1[0]}”) = its vector is all zeros, so only its bias counts: <b>${f(ch.sc[1])}</b><br>
-    softmax: e<sup>${f(ch.sc[0])}</sup> = ${f(ch.sm.e[0])}, e<sup>${f(ch.sc[1])}</sup> = ${f(ch.sm.e[1])}, sum = ${f(ch.sm.Z)};
-    P(“${c0[0]}”) = ${f(ch.sm.e[0])} / ${f(ch.sm.Z)} = <b>${f(ch.sm.p[0])}</b>, P(“${c1[0]}”) = <b>${f(ch.sm.p[1])}</b><br>
-    the decoder writes <b>“${ch.word}”</b></p>`;
-}
+const ZST = ST.map(() => 0);
+const update = (st, w) => st.map((v, i) => 0.5 * v + (ST[i] === w ? 0.5 : 0));
+const stTxt = st => st.some(v => v) ? ST.map((r, i) => st[i] ? `${r} ${f(st[i])}` : "").filter(Boolean).join(", ") : "all zeros";
+function queryOf(st) { return [0, 1, 2].map(d => r2(Q0[d] + st.reduce((s, v, i) => s + v * QSHIFT[ST[i]][d], 0))); }
 // attention with query q: scores = q · each encoder vector (the keys), softmax, mix of the encoder vectors (the values)
 function attendQ(q) {
   const sc = ENC.map(e => r2(dot(q, e))), sm = softmax(sc);
   const mix = [0, 1, 2].map(d => r2(sm.p.reduce((s, w, j) => s + w * ENC[j][d], 0)));
   return { q, sc, sm, mix };
 }
-const attend = t => attendQ(DEC[t].q);
+// every English word's score for the vector x from the encoder and the decoder state st
+function scoreAll(x, st) {
+  const rows = EN.map(w => { const c = CAND[w], gp = r2(dot(c.g, x)), ep = r2(dot(c.e, st)); return { w, gp, ep, b: c.b, s: r2(gp + ep + c.b) }; });
+  const sm = softmax(rows.map(r => r.s)); rows.forEach((r, i) => { r.e = sm.e[i]; r.p = sm.p[i]; });
+  const best = rows.reduce((m, r) => r.s > m.s ? r : m, rows[0]);
+  return { rows, Z: sm.Z, best };
+}
+// the decoder writes word after word until it writes (end)
+function runDec(att) {
+  let st = ZST; const out = [];
+  for (let p = 0; p < 6; p++) {
+    const q = att ? queryOf(st) : null, a = att ? attendQ(q) : null, x = att ? a.mix : SUMMARY, sc = scoreAll(x, st);
+    out.push({ st, q, a, x, sc, w: sc.best.w });
+    if (sc.best.w === "(end)") break;
+    st = update(st, sc.best.w);
+  }
+  return out;
+}
+const ONE = runDec(false), ATT = runDec(true);
+const phrase = run => run.map(s => s.w).filter(w => w !== "(end)").join(" ");
 const encName = j => `after <i>${DIMS[j]}</i>`;
 const encPlain = j => `after ${DIMS[j]}`;
 
@@ -1160,9 +1193,6 @@ function guide(p, i) {
   return p[2] ? [{ a: p, b: fl }, { a: fl, b: foot }] : [{ a: p, b: foot }];
 }
 const footLabel = (p, i, cls) => { const foot = [0, 0, 0]; foot[i] = p[i]; return { p: foot, t: f(p[i]), cls, dx: [-6, 6, -10][i], dy: [-9, -9, 4][i], anchor: ["end", "start", "end"][i] }; };
-const markFor = t => ({ axis: DEC[t].need, v: MARK[t] });
-const MARK_OFF = [{}, { dx: -6, dy: 20, anchor: "end" }, { dx: -12, dy: -6, anchor: "end" }];
-const MARKS = [0, 1, 2].map(axis => { const ts = DEC.map((d, t) => t).filter(t => DEC[t].need === axis); return ts.length ? { axis, v: MARK[ts[0]], label: `${ts.map(t => `“${DEC[t].c[0][0]}”`).join(", ")} past ${f(MARK[ts[0]])}`, ...MARK_OFF[axis] } : null; });
 const wordPts = (cls = "word") => DIMS.map((d, i) => ({ p: WORD[d], cls, r: 4 }));
 const encPts = (labels, cls = "enc", offs = ENC_OFF) => ENC.map((e, j) => ({ p: e, cls, label: labels ? labels[j] : "", ...offs[j] }));
 const ENC_OFF = [{ dx: 8, dy: 22 }, { dx: 12, dy: 16 }, { dx: 10, dy: -10 }];
@@ -1178,33 +1208,41 @@ function queryScene(a, labelKeys) {
   return { arrows: [{ a: [0, 0, 0], b: tip, fixed: [12, 340], label: `orange arrow: the query ${vecTxt(a.q)}` }], segs, notes };
 }
 
+
 // ---------- section 1: the steps, each shown one piece at a time ----------
 const v1 = view3d($("ty3d"), $("ty3dCap"));
 const work = ls => ls.length ? `<p class="work">${ls.join("<br>")}</p>` : "";
-// frames that grow: frame i shows pieces 0..i of the board and of the picture
 const upto = (n, fn) => Array.from({ length: n }, (_, i) => fn(i));
-function chooseParts(t, x, xName) {
-  const ch = choose(t, x), [c0, c1] = DEC[t].c;
-  return { ch, eq: eq(col(c0[1], `vector of “${c0[0]}”`), op("·"), col(x, xName), k(`+ bias ${f(c0[2])}`)), lines: [
-    `score(“${c0[0]}”) = ${dotTxt(c0[1], x)} + ${f(c0[2])} = <b>${f(ch.sc[0])}</b>`,
-    `score(“${c1[0]}”) = its vector is all zeros, so only its bias counts: <b>${f(ch.sc[1])}</b>`,
-    `softmax: e<sup>${f(ch.sc[0])}</sup> = ${f(ch.sm.e[0])}, e<sup>${f(ch.sc[1])}</sup> = ${f(ch.sm.e[1])}, sum = ${f(ch.sm.Z)}; P(“${c0[0]}”) = ${f(ch.sm.e[0])} / ${f(ch.sm.Z)} = <b>${f(ch.sm.p[0])}</b>, P(“${c1[0]}”) = <b>${f(ch.sm.p[1])}</b>`,
-    `the decoder writes <b>“${ch.word}”</b>`] };
-}
 const SMALL = { range: 0.5, noTicks: true };
 const sumPt = (label = "summary") => ({ p: SUMMARY, cls: "enc", label, dx: 10, dy: -10 });
-// word 1 scored for vector x (the summary or the mix): four frames, as on a blackboard
-const N0 = DEC[0].need, D0 = DIMS[N0];
-function wordFrames(x, xName, xPt, extra) {
-  const P = chooseParts(0, x, xName), base = { ...SMALL, segs: guide(x, N0), notes: [footLabel(x, N0, xPt.cls === "mix" ? "ql" : "gl3")] };
-  const caps = [
-    `“an” has 8 in the ${D0} row, so its score is 8 × the ${D0} row of ${xName}: 8 × ${f(x[N0])} = ${f(P.ch.sc[0])}.`,
-    `“a” always scores ${f(DEC[0].c[1][2])}. So “an” wins only past ${f(DEC[0].c[1][2])} ÷ 8 = ${f(MARK[0])} on the ${D0} axis: the red mark.`,
-    "Softmax turns the two scores into probabilities.",
-    `${xName[0].toUpperCase() + xName.slice(1)} is ${x[N0] > MARK[0] ? "past" : "short of"} the mark, so the decoder writes “${P.ch.word}”${P.ch.win ? ": wrong" : ": right"}.`];
-  return upto(4, i => ({ board: P.eq + work(P.lines.slice(0, i + 1)),
-    scene: { ...base, marks: i ? [MARKS[N0]] : [], pts: [...(extra?.pts || []), xPt], segs: [...base.segs, ...(i && extra?.segs || [])], notes: [...base.notes, ...(i && extra?.notes || [])], cap: caps[i] } }));
+const TIA = 1, MINA = 2;
+const markAn = { axis: TIA, v: MARK, label: `“an” beats “a” past ${f(MARK)}`, dx: -6, dy: 20, anchor: "end" };
+// the scores of all eight words as a table; cols: which parts are shown so far
+function scoreTable(sc, cols, x, xName) {
+  const head = { g: `Galician part (${xName})`, e: "English part (decoder state)", b: "bias", s: "score" };
+  const best = sc.best.w;
+  return `<div class="heatwrap"><table class="ty"><thead><tr><th>English word</th>${cols.map(c => `<th>${head[c]}</th>`).join("")}</tr></thead><tbody>` +
+    sc.rows.map(r => `<tr${cols.includes("s") && r.w === best ? ' class="win"' : ""}><td><b>${r.w}</b></td>${cols.map(c => `<td class="n">${c === "g" ? (CAND[r.w].g.some(v => v) ? `${dotTxt(CAND[r.w].g, x)} = ${f(r.gp)}` : "0") : f(r[c === "e" ? "ep" : c])}</td>`).join("")}</tr>`).join("") + `</tbody></table></div>`;
 }
+// the first English word, scored for vector x (the summary or the mix): five pieces, as on a blackboard
+function firstWord(x, xName, xPt, extra = {}) {
+  const sc = scoreAll(x, ZST), an = sc.rows.find(r => r.w === "an"), a = sc.rows.find(r => r.w === "a");
+  const inputs = eq(col(x, xName)) + eqS(col(ZST, "decoder state: nothing written yet"));
+  const base = { ...SMALL, segs: guide(x, TIA), notes: [footLabel(x, TIA, xPt.cls === "mix" ? "ql" : "gl3")], pts: [...(extra.pts || []), xPt] };
+  const withMark = { ...base, marks: [markAn], segs: [...base.segs, ...(extra.segs || [])], notes: [...base.notes, ...(extra.notes || [])] };
+  return [
+    { board: inputs, scene: { ...base, cap: `The decoder gets two vectors: ${xName} from the encoder, and its own state, all zeros because nothing is written yet.` } },
+    { board: inputs + scoreTable(sc, ["g"], x, xName),
+      scene: { ...base, cap: `Only “an”, “aunt”, “of” and “mine” have a Galician part: 8 × one row of ${xName}. ${xName[0].toUpperCase() + xName.slice(1)} has ${f(x[TIA])} in the tía row, so “an” gets 8 × ${f(x[TIA])} = ${f(an.gp)}.` } },
+    { board: inputs + scoreTable(sc, ["g", "e"], x, xName),
+      scene: { ...base, cap: "The decoder state is all zeros, so every English part is 0." } },
+    { board: inputs + scoreTable(sc, ["g", "e", "b", "s"], x, xName),
+      scene: { ...withMark, cap: `Add the biases. Only the two articles have high scores: “an” ${f(an.s)}, “a” ${f(a.s)}. “an” beats “a” only when 8 × the tía row is more than 2.2, that is, past 2.2 ÷ 8 = ${f(MARK)} on the tía axis: the red mark.` } },
+    { board: inputs + scoreTable(sc, ["g", "e", "b", "s"], x, xName) + work([`softmax over all eight scores: sum of e<sup>score</sup> = ${f(sc.Z)}; P(“an”) = ${f(an.e)} / ${f(sc.Z)} = <b>${f(an.p)}</b>, P(“a”) = ${f(a.e)} / ${f(sc.Z)} = <b>${f(a.p)}</b>`, `the decoder writes <b>“${sc.best.w}”</b>`]),
+      scene: { ...withMark, cap: `${xName[0].toUpperCase() + xName.slice(1)} is ${x[TIA] > MARK ? "past" : "short of"} the mark, so the decoder writes “${sc.best.w}”${sc.best.w === "an" ? ": right" : ": wrong"}.` } }];
+}
+const pm = v => v < 0 ? `− ${f(-v)}` : `+ ${f(v)}`;
+const top3 = sc => [...sc.rows].sort((p, q) => q.s - p.s).slice(0, 3).map(r => `${r.w}: ${f(r.gp)} ${pm(r.ep)} ${pm(r.b)} = <b>${f(r.s)}</b>`).join("<br>");
 const STEPS = [
   ["The word vectors", {
     text: "Each Galician word has a vector with three numbers, one per Galician word. Each word has a 1 in its own row and 0 in the others. In the picture, each row is one axis, and each word vector is the point at 1 on its own axis.",
@@ -1219,78 +1257,93 @@ const STEPS = [
       scene: { noTicks: true, segs: ENC.slice(0, i + 1).map((e, j) => ({ a: j ? ENC[j - 1] : ZERO, b: WORD[DIMS[j]], cls: "gd" })),
         pts: [...wordPts(), ...encPts(ENC.map((e, j) => `${encPlain(j)} ${vecTxt(e)}` + (j === 2 ? "\n= the summary" : "")), "enc", [{ dx: -10, dy: -10, anchor: "end" }, { dx: 4, dy: 26 }, ENC_OFF[2]]).slice(0, i + 1)],
         cap: `${i ? `From the vector ${encPlain(i - 1)}` : "From all zeros, where the axes meet,"} halfway along the dashed line to the word vector of ${DIMS[i]}: ${vecTxt(ENC[i])}.${i === 2 ? " This last vector is the summary." : ""}` } })) }],
-  ["How the decoder chooses a word", {
-    text: "We set the numbers below by hand, to show how the calculations work in principle: for example, “aunt” gets the vector (0, 8, 0) so that it responds to tía. In a real model, these numbers are learned in training, as in the skip-gram lesson. A real decoder gives a score to every English word it knows and writes the best one. It also keeps track of what it has already written, so it knows which kind of word comes next: after “an”, a noun. This small model leaves that out to keep the numbers few. Instead, at each of the four places in the English phrase, only two words compete: one that needs evidence from the Galician, and a default that wins when there is no such evidence.",
+  ["The decoder state: the English words written so far", {
+    text: "The decoder writes the English phrase one word at a time. It keeps a vector of the words it has written: the decoder state. The decoder state has one row per English word. It starts as all zeros. After each word, it is updated with the same rule as the encoder: half the old state plus half the word's vector, which has 1 in that word's row. So the word written last has 0.5, the word before it 0.25, and so on. Below, the decoder writes “a friend of” as an example.",
     frames: () => {
-      const formula = `<div class="formula">score(word) = word's vector · the vector the decoder gets + word's bias</div>`;
-      const intro = work(["The decoder writes one English word at a time. It gives each candidate word a score and writes the one with the highest score. Softmax turns the scores into probabilities, as on the translation page.",
-        "Each candidate word has a <b>vector</b>, with one number per row, and a <b>bias</b>: a number of its own, added to its score whatever the input."]);
-      const table = `<table class="ty"><thead><tr><th>English word</th><th>candidate</th><th>vector</th><th>bias</th><th>why these numbers</th></tr></thead><tbody>` +
-        DEC.map((d, t) => d.c.map(([w, v, b], i) => `<tr><td>${i ? "" : t + 1}</td><td><b>${w}</b></td><td class="n">${vecTxt(v)}</td><td class="n">${f(b)}</td><td>${WHY[t][i]}${i ? ": the guess when the input gives no evidence" : `: 8 in the ${DIMS[d.need]} row`}</td></tr>`).join("")).join("") + `</tbody></table>`;
-      const rule = work([`A vector of zeros gives 0 whatever the input. So “a” always scores its bias, 2.2: it is the default.`,
-        `“an” has bias 0, so its score comes only from the input: 8 × the input's tía row. It beats “a” only when 8 × the tía row is more than 2.2, that is, when the tía row is above 2.2 ÷ 8 = <b>${f(MARK[0])}</b>.`,
-        `The same holds at every position: “aunt” also needs tía above 2.2 ÷ 8 = <b>${f(MARK[1])}</b>; “of” and “mine” need miña above 1.6 ÷ 8 = <b>${f(MARK[2])}</b>. Nothing here needs unha: unha says that an article comes, but not which one.`,
-        `The four defaults, “a”, “friend”, “(end)” and “yours”, have the same vector: all zeros. So the input never favors one of them over another; only their biases differ. That works here only because each default competes with just one other word. In a real model, every word competes with every other word at each position, so each word has its own vector, learned in training.`]);
-      const arrows = [1, 2].map(i => { const b = [0, 0, 0]; b[i] = 0.5; return { a: [0, 0, 0], b, cls: "ca", label: ["", "“an”, “aunt” (0, 8, 0)", "“of”, “mine” (0, 0, 8)"][i], dx: [0, -6, 8][i], dy: [0, 24, 4][i], anchor: ["", "end", "start"][i] }; });
-      const zeros = { p: [0, 0, 0], cls: "word", r: 4, label: "“a”, “friend”,\n“(end)”, “yours”: (0, 0, 0)", dx: -12, dy: -34, anchor: "end" };
+      const seq = ["a", "friend", "of"], sts = [ZST]; seq.forEach(w => sts.push(update(sts[sts.length - 1], w)));
+      const oneHot = w => ST.map(r => r === w ? 1 : 0);
+      return upto(4, i => ({
+        board: (i ? eqS(k("½ ×"), col(sts[i - 1], i > 1 ? `state after “${seq[i - 2]}”` : "state before writing: all zeros"), op("+"), k("½ ×"), col(oneHot(seq[i - 1]), `vector of “${seq[i - 1]}”: 1 in its own row`), op("="), col(sts[i], `state after “${seq[i - 1]}”`)) + work([`Row by row, for example ${seq[i - 1]}: ½ × ${f(sts[i - 1][ST.indexOf(seq[i - 1])])} + ½ × 1 = ${f(sts[i][ST.indexOf(seq[i - 1])])}${i > 1 ? `; ${seq[i - 2]}: ½ × ${f(sts[i - 1][ST.indexOf(seq[i - 2])])} + ½ × 0 = ${f(sts[i][ST.indexOf(seq[i - 2])])}` : ""}.`]) : eqS(col(ZST, "state before writing: all zeros")))
+          + (i > 1 ? `<p class="label">The state so far</p>` + eqS(...sts.slice(0, i + 1).map((v, j) => col(v, j ? `after “${seq[j - 1]}”` : "start"))) : ""),
+        scene: null,
+        cap: i ? `After “${seq[i - 1]}”: ${stTxt(sts[i])}.` : "" }));
+    } }],
+  ["How the decoder scores an English word", {
+    text: "At every position, every English word gets a score, and the decoder writes the word with the highest score. We set the numbers below by hand, to show how the calculations work in principle. In a real model, these numbers are learned in training, as in the skip-gram lesson.",
+    frames: () => {
+      const formula = `<div class="formula">score = Galician part + English part + bias</div>` + work([
+        "<b>Galician part</b>: the word's Galician vector times the vector from the encoder, row by row, added up. It says how well the Galician phrase supports the word.",
+        "<b>English part</b>: the word's English vector times the decoder state, row by row, added up. It says how well the word fits after the words already written.",
+        "<b>Bias</b>: a number of the word's own, added whatever the input.",
+        "Softmax turns the scores into probabilities, as on the translation page."]);
+      const tbl = n => `<div class="heatwrap"><table class="ty"><thead><tr><th>English word</th><th>Galician vector<br>(unha, tía, miña)</th>${n > 1 ? `<th>English vector<br>(${ST.join(", ")})</th>` : ""}${n > 2 ? "<th>bias</th>" : ""}</tr></thead><tbody>` +
+        EN.map(w => `<tr class="wrow"><td><b>${w}</b></td><td class="n">${vecTxt(CAND[w].g)}</td>${n > 1 ? `<td class="n">${vecTxt(CAND[w].e)}</td>` : ""}${n > 2 ? `<td class="n">${CAND[w].bt}</td>` : ""}</tr><tr><td></td><td class="why" colspan="${n}">${WHY[w].slice(0, n).map((t, i) => `${["Galician", "English", "bias"][i]}: ${t}`).join(". ")}.</td></tr>`).join("") + "</tbody></table></div>";
+      const arrows = [{ a: [0, 0, 0], b: [0, 0.5, 0], cls: "ca", label: "“an”, “aunt”: 8 in the tía row", dx: -6, dy: 24, anchor: "end" }, { a: [0, 0, 0], b: [0, 0, 0.5], cls: "ca", label: "“of”, “mine”: 8 in the miña row", dx: 8, dy: 4 }];
+      const zeros = { p: [0, 0, 0], cls: "word", r: 4, label: "“a”, “friend”, “yours”,\n“(end)”: zeros", dx: -12, dy: -34, anchor: "end" };
+      const gScene = { ...SMALL, arrows, pts: [zeros], cap: "The Galician vectors, drawn shorter. “an” and “aunt” point along tía, “of” and “mine” along miña. The other words have zeros: the Galician phrase does not change their score." };
       return [
-        { board: formula + intro, scene: { ...SMALL, arrows: [{ ...arrows[0], label: "“an” (0, 8, 0)" }], pts: [{ ...zeros, label: "“a”: (0, 0, 0)" }], cap: "The two candidates for the first English word, drawn as vectors: “an” points along tía (drawn shorter); “a” is all zeros, the point where the axes meet." } },
-        { board: formula + intro + table, scene: { ...SMALL, arrows, pts: [zeros], cap: "Each word that needs evidence points along the axis of its Galician word. The four defaults are all zeros." } },
-        { board: formula + intro + table + rule, scene: { ...SMALL, arrows, pts: [zeros], marks: MARKS.filter(Boolean), cap: "The red marks show how far along each axis the input must reach for the word that needs evidence to win." } }];
+        { board: formula, scene: null },
+        { board: formula + tbl(1), scene: gScene },
+        { board: formula + tbl(2) + work(["The English vectors have seven rows, one per row of the decoder state. They decide which kind of word fits next."]), scene: null },
+        { board: formula + tbl(3) + work(["Why 12 and −6? The word written last has 0.5 in the decoder state, and 12 × 0.5 = 6 cancels the bias −6. Words written earlier have 0.25 or less in the state, so they cannot cancel it.",
+          "So after an article, only “aunt” and “friend” get rid of their −6. Between them, the Galician part decides: “aunt” needs 8 × the tía row to beat the 2.2 that “friend” has.",
+          "The biases also decide which word wins when the Galician phrase gives no evidence: “a”, “friend”, “yours”, “(end)”.",
+          "Each word has its own numbers. Two words may share their Galician vector, like “an” and “aunt”; their English vectors differ."]),
+          scene: null }];
     } }],
   ["Without attention: the first English word", {
-    text: `Without attention, the vector the decoder gets is the summary, for every English word. For the first English word, the two candidates of step 3 compete: “an” and “a”.`,
-    frames: () => wordFrames(SUMMARY, "the summary", sumPt(`summary ${vecTxt(SUMMARY)}`), { pts: encPts(null, "enc faint") }) }],
+    text: "Without attention, the vector the decoder gets from the encoder is the summary, for every English word. Here is the first word: every English word gets its score, part by part.",
+    frames: () => firstWord(SUMMARY, "the summary", sumPt(`summary ${vecTxt(SUMMARY)}`), { pts: encPts(null, "enc faint") }) }],
   ["Without attention: the whole phrase", {
-    text: `For every word, the decoder gets the same summary. Each English word needs a different row to pass its red mark from step 3. The summary passes only the miña mark, so the decoder writes “${DEC.map((d, t) => choose(t, SUMMARY).word).filter(w => w !== "(end)").join(" ")}”: the article and the noun are wrong.`,
-    frames: () => {
-      const res = DEC.map((d, t) => choose(t, SUMMARY));
-      return upto(4, n => {
-        const needs = [...new Set(DEC.slice(0, n + 1).map(d => d.need))];
-        return { board: eq(col(SUMMARY, "the summary, for every word")) + `<table class="ty"><thead><tr><th>English word</th><th>needs</th><th>candidates, scores</th><th>probabilities</th><th>writes</th></tr></thead><tbody>` +
-          res.slice(0, n + 1).map((ch, t) => `<tr><td>${t + 1}</td><td><i>${DIMS[DEC[t].need]}</i> above ${f(MARK[t])}</td><td class="n">${DEC[t].c.map(([w], i) => `${w} ${f(ch.sc[i])}`).join(", ")}</td><td class="n">${DEC[t].c.map(([w], i) => `${w} ${f(ch.sm.p[i])}`).join(", ")}</td><td><b>${ch.word}</b></td></tr>`).join("") + `</tbody></table>`,
-          scene: { ...SMALL, segs: needs.flatMap(i => guide(SUMMARY, i)), marks: needs.map(i => MARKS[i]), pts: [sumPt()], notes: needs.map(i => footLabel(SUMMARY, i, "gl3")),
-            cap: `Word ${n + 1}: “${DEC[n].c[0][0]}” needs ${DIMS[DEC[n].need]} above ${f(MARK[n])} (${f(DEC[n].c[1][2])} ÷ 8). The summary has ${f(SUMMARY[DEC[n].need])}, so the decoder writes “${res[n].word}”.` } };
-      });
-    } }],
+    text: `After each word, the decoder state changes, so a different kind of word fits next. The summary stays the same. It has only 0.25 in the tía row, so “aunt” never beats “friend”, and “an” never beats “a”. The decoder writes “${phrase(ONE)}”: good English, but the article and the noun are wrong.`,
+    frames: () => upto(ONE.length, n => {
+      const s = ONE[n];
+      return { board: eq(col(SUMMARY, "the summary, for every word")) + eqS(col(s.st, `decoder state at word ${n + 1}`)) +
+        `<p class="label">Word ${n + 1}: the three best scores (Galician part, English part, bias)</p><p class="work mono">${top3(s.sc)}</p>` +
+        `<div class="heatwrap"><table class="ty"><thead><tr><th>word</th><th>decoder state</th><th>writes</th></tr></thead><tbody>` +
+        ONE.slice(0, n + 1).map((t, i) => `<tr><td>${i + 1}</td><td class="n">${stTxt(t.st)}</td><td><b>${t.w}</b></td></tr>`).join("") + "</tbody></table></div>",
+        scene: { ...SMALL, segs: [...guide(SUMMARY, TIA), ...guide(SUMMARY, MINA)], pts: [sumPt()], notes: [footLabel(SUMMARY, TIA, "gl3"), footLabel(SUMMARY, MINA, "gl3")],
+          cap: `Word ${n + 1}: the decoder state is ${stTxt(s.st)}. The best score is “${s.w}”, so the decoder writes it.` } };
+    }) }],
   ["With attention, word 1: query, keys, scores", {
-    text: "With attention, the decoder also has a query: a vector that says what it looks for. Each encoder vector is compared with the query; in this role it is called a key. A key's score is the query times the key, row by row, added up. Softmax turns the three scores into weights that add up to 1.",
+    text: "With attention, the decoder also makes a query: a vector that says what it looks for in the Galician phrase. Each encoder vector is compared with the query; in this role it is called a key. A key's score is the query times the key, row by row, added up. Softmax turns the three scores into weights that add up to 1.",
     frames: () => {
-      const a = attend(0), qs = queryScene(a), keys = encPts(ENC.map((e, j) => `key ${j + 1}: ${encPlain(j)}`));
+      const a = ATT[0].a, qs = queryScene(a), keys = encPts(ENC.map((e, j) => `key ${j + 1}: ${encPlain(j)}`));
+      const qrule = work([`The query starts as ${vecTxt(Q0)}: before the noun is written, the decoder looks for tía, because the noun decides between “a” and “an”.`,
+        "Every word written from the noun on shifts the query by its number in the decoder state × (0, −12, 12): the decoder stops looking for tía and looks for miña.",
+        `Nothing is written yet, so the query is ${vecTxt(a.q)}.`]);
       const rowsHtml = n => ENC.slice(0, n).map((e, j) => eq(col(a.q, "the query"), op("·"), col(e, `key: encoder vector ${encName(j)}`), op("="), `<div class="res">${dotTxt(a.q, e)} = <b>${f(a.sc[j])}</b></div>`)).join("");
       return [
-        { board: eq(col(a.q, "the query")), scene: { ...SMALL, arrows: qs.arrows, pts: keys, cap: "To write the article, the decoder looks for tía, the noun that decides between “a” and “an”: its query has 6 in the tía row, so it points along the tía axis. The three encoder vectors are the keys." } },
-        ...upto(3, j => ({ board: rowsHtml(j + 1), scene: { ...SMALL, arrows: qs.arrows, segs: qs.segs.slice(0, j + 1), notes: qs.notes.slice(0, j + 1), pts: keys,
-          cap: `Key ${j + 1}: the dashed line drops it onto the query's line, at ${f(ENC[j][N0])} along ${D0}. Its score: 6 × ${f(ENC[j][N0])} = ${f(a.sc[j])}.` } })),
-        { board: rowsHtml(3) + work([`softmax: ${a.sc.map((x, j) => `e<sup>${f(x)}</sup> = ${f(a.sm.e[j])}`).join(", ")}; sum = ${f(a.sm.Z)}`, `weights: ${a.sm.p.map((w, j) => `${f(a.sm.e[j])} / ${f(a.sm.Z)} = <b>${f(w)}</b> (${encName(j)})`).join(", ")}`]),
+        { board: qrule + eq(col(a.q, "the query")), scene: { ...SMALL, arrows: qs.arrows, pts: keys, cap: "The query has 6 in the tía row, so it points along the tía axis. The three encoder vectors are the keys." } },
+        ...upto(3, j => ({ board: qrule + rowsHtml(j + 1), scene: { ...SMALL, arrows: qs.arrows, segs: qs.segs.slice(0, j + 1), notes: qs.notes.slice(0, j + 1), pts: keys,
+          cap: `Key ${j + 1}: the dashed line drops it onto the query's line, at ${f(ENC[j][TIA])} along tía. Its score: 6 × ${f(ENC[j][TIA])} = ${f(a.sc[j])}.` } })),
+        { board: qrule + rowsHtml(3) + work([`softmax: ${a.sc.map((x, j) => `e<sup>${f(x)}</sup> = ${f(a.sm.e[j])}`).join(", ")}; sum = ${f(a.sm.Z)}`, `weights: ${a.sm.p.map((w, j) => `${f(a.sm.e[j])} / ${f(a.sm.Z)} = <b>${f(w)}</b> (${encName(j)})`).join(", ")}`]),
           scene: { ...SMALL, ...qs, pts: encPts(ENC.map((e, j) => `key ${j + 1}: weight ${f(a.sm.p[j])}`)), cap: "Softmax turns the three scores into weights that add up to 1. The key with the largest score gets most of the weight." } }];
     } }],
   ["With attention, word 1: the mix", {
-    text: "The mix is the weighted sum of the encoder vectors, row by row. In this role the encoder vectors are called values.",
+    text: "The mix is the weighted sum of the encoder vectors, row by row. In this role the encoder vectors are called values. The mix takes the place of the summary.",
     frames: () => {
-      const a = attend(0), terms = n => ENC.slice(0, n).flatMap((e, j) => [j ? op("+") : "", k(`${f(a.sm.p[j])} ×`), col(e, `value: encoder vector ${encName(j)}`)]);
+      const a = ATT[0].a, terms = n => ENC.slice(0, n).flatMap((e, j) => [j ? op("+") : "", k(`${f(a.sm.p[j])} ×`), col(e, `value: encoder vector ${encName(j)}`)]);
       const vals = n => encPts(ENC.map((e, j) => j < n ? `weight ${f(a.sm.p[j])}` + (j === 2 ? " (summary)" : "") : ""), "enc").map((p, j) => j < n ? p : { ...p, cls: "enc faint" });
       return [...upto(3, j => ({ board: eq(...terms(j + 1)), scene: { ...SMALL, pts: vals(j + 1), cap: `${f(a.sm.p[j])} × the encoder vector ${encPlain(j)}.` } })),
-        { board: eq(...terms(3), op("="), col(a.mix, "the mix")) + work([`Row by row, for example ${D0}: ${a.sm.p.map((w, j) => `${f(w)} × ${f(ENC[j][N0])}`).join(" + ")} = <b>${f(a.mix[N0])}</b>`]),
-          scene: { ...SMALL, tri: ENC, pts: [...vals(3), { p: a.mix, cls: "mix", label: `mix ${vecTxt(a.mix)}`, dx: -10, dy: -12, anchor: "end" }],
-            cap: `Added up row by row: the mix. It lies inside the triangle of the three encoder vectors, pulled toward the one with the largest weight. It holds ${f(a.mix[N0])} of ${D0}; the summary held ${f(SUMMARY[N0])}.` } }];
+        { board: eq(...terms(3), op("="), col(a.mix, "the mix")) + work([`Row by row, for example tía: ${a.sm.p.map((w, j) => `${f(w)} × ${f(ENC[j][TIA])}`).join(" + ")} = <b>${f(a.mix[TIA])}</b>`]),
+          scene: { ...SMALL, tri: ENC, pts: [...vals(3), { p: a.mix, cls: "mix", label: `mix ${vecTxt(a.mix)}`, dx: 10, dy: 18 }],
+            cap: `Added up row by row: the mix. It lies inside the triangle of the three encoder vectors, pulled toward the one with the largest weight. It holds ${f(a.mix[TIA])} of tía; the summary held ${f(SUMMARY[TIA])}.` } }];
     } }],
   ["With attention, word 1: the word", {
     text: "The same scoring as without attention, with the mix in place of the summary.",
-    frames: () => { const a = attend(0); return wordFrames(a.mix, "the mix", { p: a.mix, cls: "mix", label: "mix", dx: 10, dy: 16 }, { pts: [sumPt()], segs: guide(SUMMARY, 0), notes: [footLabel(SUMMARY, 0, "gl3")] }); } }],
+    frames: () => firstWord(ATT[0].a.mix, "the mix", { p: ATT[0].a.mix, cls: "mix", label: "mix", dx: 10, dy: 16 }, { pts: [sumPt()], segs: guide(SUMMARY, TIA), notes: [footLabel(SUMMARY, TIA, "gl3")] }) }],
   ["With attention: the whole phrase", {
-    text: `Each English word has its own query, so each gets its own weights and its own mix. The phrase comes out as “${DEC.map((d, t) => choose(t, attend(t).mix).word).join(" ")}”: right. Without attention it was “${DEC.map((d, t) => choose(t, SUMMARY).word).filter(w => w !== "(end)").join(" ")}”. Section 3 shows two trained models that make the same kind of mistakes without attention: the article and the noun.`,
-    frames: () => {
-      const res = DEC.map((d, t) => ({ a: attend(t), ch: choose(t, attend(t).mix) }));
-      const names = ["", "mix for “an”, “aunt”", "mix for “of”, “mine”"], off = [{}, { dx: 10, dy: 16 }, { dx: 10, dy: -8 }], first = ax => DEC.findIndex(d => d.need === ax);
-      return upto(4, n => {
-        const shown = [...new Set(DEC.slice(0, n + 1).map(d => d.need))];  // words that look for the same Galician word share one query, so one mix
-        return { board: `<table class="ty"><thead><tr><th>English word</th><th>query</th><th>weights (after unha, tía, miña)</th><th>mix</th><th>candidates, scores</th><th>writes</th></tr></thead><tbody>` +
-          res.slice(0, n + 1).map(({ a, ch }, t) => `<tr><td>${t + 1}</td><td class="n">${vecTxt(a.q)}</td><td class="n">${a.sm.p.map(f).join(", ")}</td><td class="n">${vecTxt(a.mix)}</td><td class="n">${DEC[t].c.map(([w], i) => `${w} ${f(ch.sc[i])}`).join(", ")}</td><td><b>${ch.word}</b></td></tr>`).join("") + `</tbody></table>`,
-          scene: { ...SMALL, tri: ENC, segs: shown.flatMap(ax => guide(res[first(ax)].a.mix, ax)), marks: shown.map(ax => MARKS[ax]), pts: [...encPts(null, "enc faint"), ...shown.map(ax => ({ p: res[first(ax)].a.mix, cls: "mix", label: names[ax], ...off[ax] }))],
-            cap: `Word ${n + 1}: the query ${vecTxt(res[n].a.q)} looks for ${DIMS[DEC[n].need]}. The mix has ${f(res[n].a.mix[DEC[n].need])} of ${DIMS[DEC[n].need]}, past the ${f(MARK[n])} mark, so the decoder writes “${res[n].ch.word}”.` } };
-      });
-    } }],
+    text: `After each word, the decoder state changes. So the query changes, the weights change, and the decoder gets a new mix for every word. The decoder writes “${phrase(ATT)}”: right. Without attention it wrote “${phrase(ONE)}”. Section 3 shows two trained models that make the same kind of mistakes without attention: the article and the noun.`,
+    frames: () => upto(ATT.length, n => {
+      const s = ATT[n], shown = ATT.slice(0, n + 1);
+      return { board: eqS(col(s.st, `decoder state at word ${n + 1}`)) + work([`query = ${vecTxt(Q0)}${s.st.some((v, i) => v && QSHIFT[ST[i]][2]) ? " + " + ST.map((r, i) => s.st[i] && QSHIFT[r][2] ? `${f(s.st[i])} × (0, −12, 12)` : "").filter(Boolean).join(" + ") : ""} = <b>${vecTxt(s.q)}</b>`]) +
+        `<p class="label">Word ${n + 1}: the three best scores (Galician part, English part, bias)</p><p class="work mono">${top3(s.sc)}</p>` +
+        `<div class="heatwrap"><table class="ty"><thead><tr><th>word</th><th>query</th><th>weights (after unha, tía, miña)</th><th>mix</th><th>writes</th></tr></thead><tbody>` +
+        shown.map((t, i) => `<tr><td>${i + 1}</td><td class="n">${vecTxt(t.q)}</td><td class="n">${t.a.sm.p.map(f).join(", ")}</td><td class="n">${vecTxt(t.a.mix)}</td><td><b>${t.w}</b></td></tr>`).join("") + "</tbody></table></div>",
+        scene: { ...SMALL, tri: ENC, pts: [...encPts(null, "enc faint"), ...shown.map((t, i) => ({ p: t.a.mix, cls: i === n ? "mix" : "mix faint", label: i === n ? `mix for word ${n + 1}` : "", dx: 10, dy: 16 }))],
+          cap: `Word ${n + 1}: the query ${vecTxt(s.q)} gives the weights ${s.a.sm.p.map(f).join(", ")} and the mix ${vecTxt(s.a.mix)}. The best score is “${s.w}”.` } };
+    }) }],
 ];
 let k0 = 0, fr = 0, FR = null;
 STEPS.forEach(([t], i) => { const b = document.createElement("button"); b.textContent = i + 1; b.title = t; b.addEventListener("click", () => { go(i, 0); }); $("tySteps").appendChild(b); });
@@ -1299,7 +1352,8 @@ function go(i, j) { k0 = i; FR = frames(i); fr = j < 0 ? FR.length - 1 : j; draw
 function draw() {
   const [title, s] = STEPS[k0], v = FR[fr];
   $("tyTitle").textContent = `Step ${k0 + 1} of ${STEPS.length}: ${title} (${fr + 1} of ${FR.length})`;
-  $("tyBoard").innerHTML = v.board; $("tyText").textContent = s.text; v1.set(v.scene);
+  $("tyBoard").innerHTML = v.board; $("tyText").textContent = s.text;
+  $("ty3dFig").hidden = !v.scene; $("ty3dFig").parentElement.classList.toggle("one", !v.scene); if (v.scene) v1.set(v.scene);
   $("tyBack").disabled = k0 === 0 && fr === 0; $("tyNext").disabled = k0 === STEPS.length - 1 && fr === FR.length - 1;
   [...$("tySteps").children].forEach((b, i) => b.classList.toggle("on", i === k0));
 }
@@ -1311,7 +1365,7 @@ go(0, 0);
 
 // ---------- section 2: your own query ----------
 const v2 = view3d($("qk3d"), null);
-const PRESETS = [["an, aunt", [0, 6, 0]], ["of, mine", [0, 0, 6]], ["unha", [6, 0, 0]], ["an, aunt, shorter", [0, 2, 0]], ["all zeros", [0, 0, 0]], ["between tía and miña", [0, 4, 4]]];
+const PRESETS = [["an, aunt", [0, 6, 0]], ["of", [0, 0, 6]], ["mine", [0, -3, 9]], ["unha", [6, 0, 0]], ["an, aunt, shorter", [0, 2, 0]], ["all zeros", [0, 0, 0]], ["between tía and miña", [0, 4, 4]]];
 let q = [0, 6, 0];
 const sliders = DIMS.map((d, i) => $("qk" + i));
 function drawQ() {
@@ -1323,9 +1377,10 @@ function drawQ() {
     `<br>weights: ${a.sm.p.map((w, j) => `${f(a.sm.e[j])} / ${f(a.sm.Z)} = <b>${f(w)}</b>`).join(", ")}` +
     `<br>mix = ${a.sm.p.map((w, j) => `${f(w)} × ${vecTxt(ENC[j])}`).join(" + ")} = <b>${vecTxt(a.mix)}</b>`;
   $("qkBars").innerHTML = ENC.map((e, j) => `<div class="bar"><span class="w">${encPlain(j)}</span><span class="track"><span class="fill" style="width:${(a.sm.p[j] * 100).toFixed(1)}%;background:rgb(var(--heat))"></span></span><span>${f(a.sm.p[j])}</span></div>`).join("");
-  $("qkWords").innerHTML = `<thead><tr><th>English word</th><th>needs</th><th>the mix has</th><th>candidates, scores</th><th>writes</th></tr></thead><tbody>` + DEC.map((d, t) => {
-    const ch = choose(t, a.mix), ok = ch.win === 0;
-    return `<tr><td>${t + 1}</td><td><i>${DIMS[d.need]}</i> above ${f(MARK[t])}</td><td class="n">${f(a.mix[d.need])}</td><td class="n">${d.c.map(([w], i) => `${w} ${f(ch.sc[i])}`).join(", ")}</td><td><b${ok ? "" : ' class="badw"'}>${ch.word}</b></td></tr>`;
+  // each word of the correct phrase, with the decoder state it has after the correct words before it
+  $("qkWords").innerHTML = `<thead><tr><th>word</th><th>correct word</th><th>three best scores with this mix</th><th>writes</th></tr></thead><tbody>` + ATT.map((t, i) => {
+    const sc = scoreAll(a.mix, t.st), ok = sc.best.w === t.w;
+    return `<tr><td>${i + 1}</td><td>${t.w}</td><td class="n">${top3(sc)}</td><td><b${ok ? "" : ' class="badw"'}>${sc.best.w}</b></td></tr>`;
   }).join("") + "</tbody>";
   const srt = [...a.sc].sort((x, y) => y - x);
   $("qkNote").textContent = !Math.hypot(...q) ? "A query of zeros gives every key the score 0, so every weight is the same, and the mix is the plain average."
@@ -1337,7 +1392,7 @@ PRESETS.forEach(([n, v]) => { const b = document.createElement("button"); b.text
 sliders.forEach((s, i) => s.addEventListener("input", () => { q[i] = +s.value; drawQ(); }));
 drawQ();
 
-(window.__askState ||= []).push(() => `Section 1 (the hand-set model described above): step ${k0 + 1} of ${STEPS.length}, "${STEPS[k0][0]}", piece ${fr + 1} of ${FR.length}; the picture's caption now: "${FR[fr].scene.cap}". Section 2 (your own query, same model): query (${q.map(f).join(", ")}); scores ${attendQ(q).sc.map(f).join(", ")}; weights ${attendQ(q).sm.p.map(f).join(", ")}; mix ${vecTxt(attendQ(q).mix)}; with this mix the decoder would write ${DEC.map((d, t) => choose(t, attendQ(q).mix).word).join(", ")} for words 1 to 4.`);
+(window.__askState ||= []).push(() => `Section 1 (the small model described above): step ${k0 + 1} of ${STEPS.length}, "${STEPS[k0][0]}", piece ${fr + 1} of ${FR.length}${FR[fr].scene ? `; the picture's caption now: "${FR[fr].scene.cap}"` : ""}. Section 2 (your own query, same model): query (${q.map(f).join(", ")}); scores ${attendQ(q).sc.map(f).join(", ")}; weights ${attendQ(q).sm.p.map(f).join(", ")}; mix ${vecTxt(attendQ(q).mix)}; with this mix, at each position of the correct phrase, the decoder would write ${ATT.map(t => scoreAll(attendQ(q).mix, t.st).best.w).join(", ")}.`);
 })();
 </script>
 
@@ -1416,15 +1471,15 @@ function panel(model, i) {
     <div class="wkrow">${strip(st, `decoder state (${prev})`)}<span class="op">+</span>${strip(att ? x.ctxAtt[i] : x.sumOne, att ? "the mix" : "the summary")}<span class="op">→</span>${bars(P, x.ref[i] === P[0][0] || out.slice(0, i).every((v, k) => v === x.ref[k]) ? x.ref[i] : null)}</div></div>`;
 }
 const STEPS = [
-  ["Two translations of our sentence", () => ({ toy: [5, 9], out: [x.one.length, x.att.length], cur: -1, src: null, panels: "",
+  ["Two translations of our sentence", () => ({ toy: [6, 10], out: [x.one.length, x.att.length], cur: -1, src: null, panels: "",
     text: `Both models read our sentence for the first time: it was kept out of their training data. Without attention, the model writes ${nBad(ALIGN.one)} wrong words (in red) and leaves out ${nMiss(ALIGN.one)} words of the saying (struck through). With attention, the translation is exactly right. The next steps show where the first difference comes from.` })],
   ["The encoder's vectors", () => ({ toy: [2], out: [0, 0], src: ["enc"], panels: "",
     text: "The encoder makes one vector per Galician word: 8 numbers, drawn as 8 squares. Each one is computed from the vector before it and the new word, so each also carries something of the words before it. The last one is the summary. Each model has its own encoder; this is the encoder of the model with attention. Step 3 shows the other one. In section 1 each vector had 3 numbers, one per word; here the 8 numbers have no names: training chose them." })],
-  ["Word 1, without attention", () => ({ toy: [4], out: [1, 1], cur: 0, src: ["one"], panels: panel("one", 0),
+  ["Word 1, without attention", () => ({ toy: [5], out: [1, 1], cur: 0, src: ["one"], panels: panel("one", 0),
     text: "The decoder starts from the summary, the vector after the full stop. The first English word is “a” or “an”, and that depends on the noun: “an aunt”, “a friend”. The noun, tía, is the second of the sentence's 31 pieces; after it, the encoder read 29 more (24 words and 5 punctuation marks) before the summary was made. The model gives “a” 0.77 and writes it: wrong." })],
-  ["Word 1, with attention", () => ({ toy: [6, 7, 8], out: [1, 1], cur: 0, src: ["att", x.attw[0]], panels: panel("att", 0),
+  ["Word 1, with attention", () => ({ toy: [7, 8, 9], out: [1, 1], cur: 0, src: ["att", x.attw[0]], panels: panel("att", 0),
     text: "With attention, the decoder gives each Galician vector a weight (orange bars), and the weights add up to 1. The largest, 0.47, is on tía. The mix of the vectors, weighted this way, goes to the decoder instead of the summary, and “an” gets 0.95. The weights are computed as in section 1: the query times each encoder vector, then softmax. Here the query is the decoder state." })],
-  ["Word 2: each model goes on from its own word", () => ({ toy: [9], out: [2, 2], cur: 1, src: ["att", x.attw[1]], panels: panel("one", 1) + panel("att", 1),
+  ["Word 2: each model goes on from its own word", () => ({ toy: [3, 10], out: [2, 2], cur: 1, src: ["att", x.attw[1]], panels: panel("one", 1) + panel("att", 1),
     text: "Each decoder takes in the word it just wrote. After “a”, only relatives that start with a consonant fit: friend, neighbor, cousin. The summary does not say which, so the model spreads its bet and writes “friend”. After “an”, only aunt and uncle fit; with the mix, “aunt” gets 0.96. Here the weights are spread over several words." })],
   ["The rest of the sentence", () => ({ toy: [], out: [x.one.length, x.att.length], cur: -1, src: null, panels: "",
     text: "Without attention, the errors go on: “fixed” for solucionaba, “stories and jokes” for ditos e refráns, “repeat” for dicía, and the middle of the saying is missing. With attention, every word is right. Section 4 lets you step through every word of both models, and other sentences and vector sizes." })],
@@ -1462,8 +1517,8 @@ How to answer: short, plain sentences. Define any technical term the first time 
 The page:
 - Running example: the Galician sentence "Unha tía miña, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»" (from the novel Speechwriter by Paulo Naseiro). "tía miña" is noun then possessive; English "my aunt" reverses the order.
 - The page continues a separate translation page (training, the encoder's one summary vector, word-by-word decoding without attention, why "an aunt of mine" is rare in English).
-- Section 1: a hand-set model (every number chosen by the page's authors; nothing trained), on "unha tía miña". Vectors have 3 dimensions, one per Galician word, drawn as columns of numbered squares and as points in a draggable 3-D picture (one axis per row). Nine steps, each shown piece by piece: word vectors (one-hot); encoder (new = ½ previous + ½ word, from zeros: (0.5,0,0), (0.25,0.5,0), summary (0.125,0.25,0.5)); how the decoder chooses a word (no decoder state, so two candidates per English position: one with vector 8 in the row of its Galician evidence and bias 0, one default with a zero vector and a bias; an (0,8,0) vs a 2.2: English writes "an" because the noun aunt starts with a vowel, so the evidence is tía; aunt (0,8,0) vs friend 2.2; of (0,0,8) vs (end) 1.6; mine (0,0,8) vs yours 1.6; score = vector · input + bias; the evidence word wins when its row passes bias/8: tía 0.275, miña 0.2, red marks on the axes; unha is not needed: it says an article comes, not which); without attention word 1 (summary tía 0.25 → an 2 vs a 2.2 → "a") and whole phrase ("a friend of mine"); with attention: query (0,6,0) for an and for aunt, (0,0,6) for of and mine; keys = encoder vectors; scores 0, 3, 1.5; weights 0.04, 0.79, 0.18; mix (values = encoder vectors) (0.24, 0.44, 0.09), a point inside the triangle of the encoder vectors; "an" 3.52 vs 2.2 → P 0.79; whole phrase → "an aunt of mine". Section 3 links each of its steps back to these.
-- Section 2: the same model with a query the student sets (three sliders; presets an/aunt, of/mine, unha, a shorter an/aunt query, all zeros, between tía and miña). Shows scores (query · each encoder vector), softmax weights, the mix, and what the decoder would write for each of the four English words with that mix. One query serves only the words that need the same Galician word, so the decoder makes a new query per word. In this model and in the trained models of sections 3 and 4, encoder vectors are both keys and values; in transformers, separate learned weights make queries, keys and values.
+- Section 1: a small model whose numbers are set by hand (to show how the calculations work; real models learn them in training, as in the skip-gram lesson), on "unha tía miña" → "an aunt of mine". Galician vectors have 3 rows (unha, tía, miña), drawn as columns of numbered squares and as points in a draggable 3-D picture. Ten steps, each shown piece by piece: 1 word vectors (one-hot); 2 encoder (new = ½ previous + ½ word, from zeros: (0.5,0,0), (0.25,0.5,0), summary (0.125,0.25,0.5)); 3 decoder state: one row per English word (a, an, aunt, friend, of, mine, yours), starts at zeros, updated with the encoder's rule (½ old + ½ the written word's one-hot vector); 4 scoring: every English word (a, an, aunt, friend, of, mine, yours, (end)) competes at every position; score = Galician vector · encoder input + English vector · decoder state + bias. Galician vectors: an, aunt (0,8,0); of, mine (0,0,8); others zeros. English vectors: a, an −12 in every row; aunt, friend 12 in rows a, an; of 12 in aunt, friend; mine, yours 12 in of; (end) 12 in aunt, friend, mine, yours. Biases: a 2.2, an 0, aunt/of/mine −6, friend −6+2.2, yours and (end) −6+1.6. 12 × 0.5 = 6 cancels −6 for the word written last. 5 without attention word 1 (summary tía 0.25: an 2 vs a 2.2 → "a"; an needs tía above 0.275); 6 whole phrase "a friend of mine" then (end); 7 with attention: query = (0,6,0) + for each written word from the noun on, its state number × (0,−12,12); word 1 query (0,6,0), keys = encoder vectors, scores 0, 3, 1.5, weights 0.04, 0.79, 0.18; 8 mix (values) (0.24, 0.44, 0.09); 9 an 3.52 vs a 2.2; 10 whole phrase "an aunt of mine" then (end). Section 3 links each of its steps back to these.
+- Section 2: the same model with a query the student sets (three sliders; presets an/aunt (0,6,0), of (0,0,6), mine (0,−3,9), unha, a shorter an/aunt query, all zeros, between tía and miña). Shows scores (query · each encoder vector), softmax weights, the mix, and, for each word of the correct phrase (with the decoder state after the correct words before it), the three best scores and the word written with this mix. One mix serves only some words, so the decoder needs a new query per word. In this model and in the trained models of sections 3 and 4, encoder vectors are both keys and values; in transformers, separate learned weights make queries, keys and values.
 - Section 3: early neural MT squeezed the whole source sentence into one vector (a bottleneck for long sentences); attention (Bahdanau, Cho & Bengio 2015) lets the decoder look back at every source word at each step. The section is a six-step guided walk through the two trained 8-dimension models of section 4 on our whole sentence, with their real numbers: the translations (without attention: "A friend of mine, who fixed everything with stories and jokes, used to repeat something like «one is a slave to what one keeps quiet»"; with attention: exactly right); the encoder's 31 vectors (8 squares each; the last is the summary); word 1 without attention (decoder state + summary → a 0.77, an 0.21: wrong, the article depends on the noun tía, read 29 pieces (24 words, 5 punctuation marks) before the summary); word 1 with attention (weights tía 0.47, escravo 0.21; the mix → an 0.95); word 2 (each decoder takes in its own last word: after "a" friend 0.39, neighbor 0.31, cousin 0.28; after "an" aunt 0.96, uncle 0.02); the rest (more errors without attention).
 - Section 4: two toy translation models (GRU encoder and decoder) trained on the same data, identical except for attention, with the same number of parameters. Without attention the decoder gets only the encoder's last vector; with attention it takes a weighted average of all the encoder's vectors at every output word (dot-product scores, softmax). The animation draws each model unrolled: a column of squares (one per dimension, blue positive, pink negative) for the encoder's vector at every Galician word, each made from the one before it, the last one being the summary; below, one column pair per English word written so far: the decoder state (GRU hidden state; the first is a copy of the summary, each next one is computed from the previous state and the word just written) and the context (without attention the same summary at every step; with attention the mix, drawn with lines from the Galician vectors whose thickness is the weight). Under each diagram: decoder state + context → the five most probable English words (softmax over the output layer), the chosen one in orange, the correct one ticked. A collapsible part derives the score (dot product of new state and an encoder vector) and the softmax weights line by line with the real numbers. Example at 8 dimensions, our sentence, second word: without attention friend 0.39, neighbor 0.31, cousin 0.28 (the summary has lost which relative); with attention aunt 0.96. The score is the dot product of the decoder's state and an encoder vector; the model learned in training to make the state similar to the vector that helps predict the next word, e.g. the vector at tía before writing "aunt". Training data: 5,000 template sentences built around the course sentence (other relatives, possessives, verbs, nouns, sayings), each also split into three pieces (noun phrase, noun phrase + relative clause, saying); 8,000 training steps; the course sentence is held out. One pair of models per vector size (8, 16, 64 dimensions). The current state gives the accuracies on 500 test sentences that are not in the training data. Small vectors lose details without attention (wrong relative, wrong verb, half the saying dropped) while the sentence stays fluent; with 64 dimensions both models are perfect on this toy data, because the templates hold little information. In real 2014 systems, one vector lost details of long sentences (Cho et al. 2014; Bahdanau et al. 2015). The toy data is made up; it is no real corpus.
 - Section 5: real cross-attention from the Helsinki-NLP/opus-mt-gl-en model (6 decoder layers × 8 heads) on the full sentence, recorded with one teacher-forced pass over its own greedy translation. Tokens are subword pieces; ‹/s› ends the sentence and often receives "parked" attention. Averaged over all heads, "aunt" looks most at "tía" (0.31); single late-layer heads are much sharper (layer 6 head 2: 0.99), early layers barely align.
