@@ -102,6 +102,21 @@ svg .gridl { stroke: var(--grid); }
 .review { border-left: 3px solid var(--line); padding: 4px 0 4px 12px; max-width: 72ch; color: var(--muted); }
 .review p { margin: 0; display: inline; }
 .rtag { display: inline-block; font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; margin-right: 8px; color: var(--muted); }
+.parth { margin: 8px 0 0; font-size: 1.1rem; font-weight: 500; border-top: 1px solid var(--line); padding-top: 12px; }
+.tyboard { display: grid; gap: 14px; }
+.eq { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px 8px; }
+.vc { display: grid; gap: 3px; justify-items: center; }
+.vc .vh { font-size: 0.78rem; color: var(--muted); text-align: center; max-width: 9em; line-height: 1.2; min-height: 1.2em; }
+.vc .sq { width: 46px; height: 28px; border-radius: 4px; display: grid; place-items: center; font-family: var(--font-mono); font-size: 0.8rem; }
+.vc.rl > div:not(.vh) { height: 28px; display: grid; align-items: center; font-size: 0.82rem; font-style: italic; color: var(--fg); }
+.eq .op { font-size: 1.15rem; color: var(--muted); padding-bottom: 32px; }
+.eq .k { font-family: var(--font-mono); font-size: 0.85rem; padding-bottom: 36px; }
+.eq .res { font-family: var(--font-mono); font-size: 0.85rem; padding-bottom: 36px; }
+.work b, .eq b { color: var(--fg); }
+table.ty { border-collapse: collapse; font-size: 0.86rem; }
+table.ty th, table.ty td { padding: 4px 10px 4px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+table.ty th { font-weight: 400; color: var(--muted); font-size: 0.78rem; }
+table.ty td.n { font-family: var(--font-mono); }
 .wkh { margin: 0; font-size: 1.05rem; font-weight: 500; }
 .wkstrip { display: inline-flex; gap: 1px; vertical-align: middle; }
 .wkstrip i { display: block; width: 14px; height: 14px; border-radius: 2px; background: var(--grid); }
@@ -309,6 +324,13 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="look">
     <h2><span class="n">1</span>Attention: look back at every word</h2>
     <div class="review"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page, sections 2 and 3</a>: a translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. The encoder reads the words in order and makes one vector after each word, from the vector before and the new word. Its last vector is the <b>summary</b>. The decoder keeps its own vector, the <b>decoder state</b>: it starts as the summary and takes in each English word the decoder writes.</p></div>
+    <h3 class="parth">A. A model small enough to compute by hand</h3>
+    <p class="lead">In this model, every number is set by hand, so every step can be checked. Each vector has three dimensions, one per Galician word: its numbers say how much of each word it holds. A vector is drawn as a column of three squares, each with its number; the darker the square, the larger the number.</p>
+    <div class="controls"><button id="tyBack">Back</button><button class="primary" id="tyNext">Next step</button><span class="pathstrip" id="tySteps"></span></div>
+    <h4 class="wkh" id="tyTitle"></h4>
+    <div class="tyboard" id="tyBoard"></div>
+    <p class="steptext" id="tyText"></p>
+    <h3 class="parth">B. The real trained models</h3>
     <p class="lead">Two small models translate our sentence. We trained them on the same data, and they are identical except for one thing: <b>without attention</b>, the decoder gets the summary for every English word; <b>with attention</b>, it gets a new mix of all the encoder's vectors for every English word. Their vectors have 8 dimensions. Every number below is the models' own. Go step by step.</p>
     <div class="legend"><span class="lab">−1</span><span class="wkstrip h" id="wkLegend"></span><span class="lab">+1</span><span class="note">one square = one dimension of a vector. Every number is between −1 and +1: each new vector of these models is a mix of the previous vector and a new candidate squashed into that range (by the tanh function), starting from zeros.</span></div>
     <div class="controls"><button id="wkBack">Back</button><button class="primary" id="wkNext">Next step</button><span class="pathstrip" id="wkSteps"></span></div>
@@ -1052,6 +1074,111 @@ t = total(); render();
   return `Section 2 (two trained models): vector size ${run.dims} dimensions (${run.params} parameters per model); sentence "${plain(x.src)}" (${x.course ? "our sentence" : "a test sentence, not in the training data"}, ${x.kind}). Correct: "${plain(x.ref)}". Animation at English word ${Math.min(t, total())} of ${total()}. Without attention: "${plain(x.one)}". With attention: "${plain(x.att)}". Exactly right out of ${CMP.test} test sentences (not in training), by piece (${CMP.kinds.join(", ")}): ` +
     CMP.runs.map(ru => `${ru.dims} dims without attention ${ru.acc.one.join("/")}, with attention ${ru.acc.att.join("/")}`).join("; ") + ".";
 });
+})();
+</script>
+
+<script>
+// ---------------------------------------------------------------- 1A: a hand-set model, every number explicit
+(() => {
+const $ = id => document.getElementById(id);
+const DIMS = ["unha", "tía", "miña"];
+const WORD = { unha: [1, 0, 0], "tía": [0, 1, 0], "miña": [0, 0, 1] };
+// encoder: new vector = ½ × previous vector + ½ × word vector, starting from zeros (the translation page's rule)
+const ZERO = [0, 0, 0], ENC = []; { let v = ZERO; for (const w of DIMS) { v = v.map((x, i) => 0.5 * x + 0.5 * WORD[w][i]); ENC.push(v); } }
+const SUMMARY = ENC[2];
+// decoder, set by hand: for each English word, the query (what it looks for) and two candidates,
+// one that needs evidence from the Galician and a default with a fixed score (its bias)
+const DEC = [
+  { q: [6, 0, 0], need: "unha", c: [["an", [8, 0, 0], 0], ["a", [0, 0, 0], 1.6]] },
+  { q: [0, 6, 0], need: "tía", c: [["aunt", [0, 8, 0], 0], ["friend", [0, 0, 0], 2.2]] },
+  { q: [0, 0, 6], need: "miña", c: [["of", [0, 0, 8], 0], ["(end)", [0, 0, 0], 1.6]] },
+  { q: [0, 0, 6], need: "miña", c: [["mine", [0, 0, 8], 0], ["yours", [0, 0, 0], 1.6]] },
+];
+// every shown number is rounded to 2 decimals, and the next step computes with the rounded number, as by hand
+const r2 = v => Math.round(v * 100) / 100;
+// numbers are shown with up to 3 decimals (0.125 stays exact); computed numbers are already rounded to 2
+const f = v => { const a = Math.round(Math.abs(v) * 1000) / 1000; return (v < 0 && a ? "−" : "") + String(a); };
+const dot = (a, b) => a.reduce((s, x, i) => s + x * b[i], 0);
+const sq = v => `<div class="sq" style="background:rgba(var(--heat),${(0.08 + 0.85 * Math.min(1, Math.abs(v))).toFixed(2)});color:${Math.abs(v) > 0.6 ? "var(--panel)" : "var(--fg)"}">${f(v)}</div>`;
+const col = (v, label) => `<div class="vc"><div class="vh">${label}</div>${v.map(sq).join("")}</div>`;
+const rows = `<div class="vc rl"><div class="vh"></div>${DIMS.map(d => `<div>${d}</div>`).join("")}</div>`;
+const op = t => `<div class="op">${t}</div>`, k = t => `<div class="k">${t}</div>`;
+const eq = (...items) => `<div class="eq">${rows}${items.join("")}</div>`;
+const dotTxt = (a, b) => a.map((x, i) => `${f(x)} × ${f(b[i])}`).join(" + ");
+function softmax(xs) { const e = xs.map(x => r2(Math.exp(x))), Z = r2(e.reduce((s, x) => s + x, 0)); return { e, Z, p: e.map(x => r2(x / Z)) }; }
+// one English word: scores of its two candidates for the vector the decoder gets, then softmax
+function choose(t, x) {
+  const sc = DEC[t].c.map(([, v, b]) => r2(dot(v, x) + b)), sm = softmax(sc), win = sc[0] >= sc[1] ? 0 : 1;
+  return { sc, sm, win, word: DEC[t].c[win][0] };
+}
+function chooseWork(t, x, xName) {
+  const ch = choose(t, x), [c0, c1] = DEC[t].c;
+  return eq(col(c0[1], `vector of “${c0[0]}”`), op("·"), col(x, xName), k(`+ bias ${f(c0[2])}`)) +
+    `<p class="work">score(“${c0[0]}”) = ${dotTxt(c0[1], x)} + ${f(c0[2])} = <b>${f(ch.sc[0])}</b><br>
+    score(“${c1[0]}”) = its vector is all zeros, so only its bias counts: <b>${f(ch.sc[1])}</b><br>
+    softmax: e<sup>${f(ch.sc[0])}</sup> = ${f(ch.sm.e[0])}, e<sup>${f(ch.sc[1])}</sup> = ${f(ch.sm.e[1])}, sum = ${f(ch.sm.Z)};
+    P(“${c0[0]}”) = ${f(ch.sm.e[0])} / ${f(ch.sm.Z)} = <b>${f(ch.sm.p[0])}</b>, P(“${c1[0]}”) = <b>${f(ch.sm.p[1])}</b><br>
+    the decoder writes <b>“${ch.word}”</b></p>`;
+}
+// attention for English word t: scores = query · each encoder vector, softmax, mix
+function attend(t) {
+  const q = DEC[t].q, sc = ENC.map(e => r2(dot(q, e))), sm = softmax(sc);
+  const mix = [0, 1, 2].map(d => r2(sm.p.reduce((s, w, j) => s + w * ENC[j][d], 0)));
+  return { q, sc, sm, mix };
+}
+const encName = j => `after <i>${DIMS[j]}</i>`;
+const STEPS = [
+  ["The word vectors", () => ({
+    board: eq(...DIMS.map(w => col(WORD[w], `<i>${w}</i>`))),
+    text: "Each Galician word has a vector with a 1 in its own dimension." })],
+  ["The encoder reads the sentence", () => ({
+    board: ENC.map((e, j) => eq(k("½ ×"), col(j ? ENC[j - 1] : ZERO, j ? `encoder vector ${encName(j - 1)}` : "before reading: all zeros"), op("+"), k("½ ×"), col(WORD[DIMS[j]], `word vector of <i>${DIMS[j]}</i>`), op("="), col(e, `encoder vector ${encName(j)}`))).join("") +
+      `<p class="work">For example, after <i>tía</i>: ½ × 0.5 + ½ × 0 = 0.25 (unha), ½ × 0 + ½ × 1 = 0.5 (tía), ½ × 0 + ½ × 0 = 0 (miña).</p>`,
+    text: "As on the translation page, each new encoder vector is half the previous one plus half the new word's vector. Before the first word, the vector is all zeros: it holds nothing yet. Each new word halves what was there before, so the last vector, the summary, holds 0.5 of miña, 0.25 of tía and only 0.125 of unha." })],
+  ["Without attention: the first English word", () => ({
+    board: chooseWork(0, SUMMARY, "the summary"),
+    text: "The decoder knows which kind of word comes next; here we set it by hand: an article first. It has two candidates. “an” has a vector that responds to unha; “a” has a fixed score, its bias, so it wins when there is little evidence for unha. A word's score is its vector times the vector the decoder gets, row by row, added up, plus the bias. Without attention, the decoder gets the summary, which holds only 0.125 of unha." })],
+  ["Without attention: the whole phrase", () => {
+    const res = DEC.map((d, t) => choose(t, SUMMARY));
+    return { board: eq(col(SUMMARY, "the summary, for every word")) + `<table class="ty"><thead><tr><th>English word</th><th>candidates, scores</th><th>probabilities</th><th>writes</th></tr></thead><tbody>` +
+      res.map((ch, t) => `<tr><td>${t + 1}</td><td class="n">${DEC[t].c.map(([w], i) => `${w} ${f(ch.sc[i])}`).join(", ")}</td><td class="n">${DEC[t].c.map(([w], i) => `${w} ${f(ch.sm.p[i])}`).join(", ")}</td><td><b>${ch.word}</b></td></tr>`).join("") + `</tbody></table>`,
+      text: `For every word, the decoder gets the same summary. It writes “${res.map(c => c.word).filter(w => w !== "(end)").join(" ")}”. The summary holds miña well (0.5), so “of mine” comes out right; it holds too little of unha and tía, so the article and the noun are wrong.` };
+  }],
+  ["With attention, word 1: the scores", () => {
+    const a = attend(0);
+    return { board: ENC.map((e, j) => eq(col(a.q, "the decoder's query"), op("·"), col(e, `encoder vector ${encName(j)}`), op("="), `<div class="res">${dotTxt(a.q, e)} = <b>${f(a.sc[j])}</b></div>`)).join("") +
+      `<p class="work">softmax: ${a.sc.map((x, j) => `e<sup>${f(x)}</sup> = ${f(a.sm.e[j])}`).join(", ")}; sum = ${f(a.sm.Z)}<br>weights: ${a.sm.p.map((w, j) => `${f(a.sm.e[j])} / ${f(a.sm.Z)} = <b>${f(w)}</b> (${encName(j)})`).join(", ")}</p>`,
+      text: "With attention, the decoder also has a query: a vector that says what it looks for. For the article it looks for unha, so its query is 6 in the unha row. Each encoder vector gets a score: the query times that vector, row by row, added up. Softmax turns the three scores into weights that add up to 1." };
+  }],
+  ["With attention, word 1: the mix", () => {
+    const a = attend(0);
+    return { board: eq(...ENC.flatMap((e, j) => [j ? op("+") : "", k(`${f(a.sm.p[j])} ×`), col(e, `encoder vector ${encName(j)}`)]), op("="), col(a.mix, "the mix")) +
+      `<p class="work">Row by row, for example unha: ${a.sm.p.map((w, j) => `${f(w)} × ${f(ENC[j][0])}`).join(" + ")} = <b>${f(a.mix[0])}</b></p>`,
+      text: "The mix is the weighted sum of the encoder vectors, row by row. The vector after unha has the largest weight, so the mix holds 0.43 of unha, more than three times as much as the summary (0.125)." };
+  }],
+  ["With attention, word 1: the word", () => ({
+    board: chooseWork(0, attend(0).mix, "the mix"),
+    text: "The same scoring as without attention, with the mix in place of the summary." })],
+  ["With attention: the whole phrase", () => {
+    const res = DEC.map((d, t) => ({ a: attend(t), ch: choose(t, attend(t).mix) }));
+    return { board: `<table class="ty"><thead><tr><th>English word</th><th>query looks for</th><th>weights (after unha, tía, miña)</th><th>mix</th><th>candidates, scores</th><th>writes</th></tr></thead><tbody>` +
+      res.map(({ a, ch }, t) => `<tr><td>${t + 1}</td><td><i>${DEC[t].need}</i></td><td class="n">${a.sm.p.map(f).join(", ")}</td><td class="n">(${a.mix.map(f).join(", ")})</td><td class="n">${DEC[t].c.map(([w], i) => `${w} ${f(ch.sc[i])}`).join(", ")}</td><td><b>${ch.word}</b></td></tr>`).join("") + `</tbody></table>`,
+      text: `Each English word has its own query, so each gets its own weights and its own mix. The phrase comes out as “${res.map(r => r.ch.word).join(" ")}”: right. Without attention it was “${DEC.map((d, t) => choose(t, SUMMARY).word).join(" ")}”. The real models in part B make the same two mistakes.` };
+  }],
+];
+let k0 = 0;
+STEPS.forEach(([t], i) => { const b = document.createElement("button"); b.textContent = i + 1; b.title = t; b.addEventListener("click", () => { k0 = i; draw(); }); $("tySteps").appendChild(b); });
+function draw() {
+  const [title, fn] = STEPS[k0], v = fn();
+  $("tyTitle").textContent = `Step ${k0 + 1} of ${STEPS.length}: ${title}`;
+  $("tyBoard").innerHTML = v.board; $("tyText").textContent = v.text;
+  $("tyBack").disabled = k0 === 0; $("tyNext").disabled = k0 === STEPS.length - 1;
+  [...$("tySteps").children].forEach((b, i) => b.classList.toggle("on", i === k0));
+}
+$("tyNext").addEventListener("click", () => { k0 = Math.min(STEPS.length - 1, k0 + 1); draw(); });
+$("tyBack").addEventListener("click", () => { k0 = Math.max(0, k0 - 1); draw(); });
+draw();
+(window.__askState ||= []).push(() => `Section 1, part A (a hand-set model, every number explicit): step ${k0 + 1} of ${STEPS.length}, "${STEPS[k0][0]}". Three dimensions, one per Galician word (unha, tía, miña); word vectors one-hot; encoder: new = ½ previous + ½ word, from zeros: after unha (0.5,0,0), after tía (0.25,0.5,0), after miña = summary (0.125,0.25,0.5). Decoder set by hand: per English word a query and two candidates (one with a vector, one default with a bias): an (8,0,0) vs a bias 1.6; aunt (0,8,0) vs friend bias 2.2; of (0,0,8) vs end bias 1.6; mine (0,0,8) vs yours bias 1.6; score = vector · input + bias, then softmax. Without attention the input is the summary: "a friend of mine". With attention: queries (6,0,0), (0,6,0), (0,0,6), (0,0,6); weights by softmax of query · encoder vectors (word 1: 0.75, 0.17, 0.08), mix = weighted sum (word 1: (0.43, 0.1, 0.04)); "an aunt of mine".`);
 })();
 </script>
 

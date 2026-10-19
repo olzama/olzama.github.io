@@ -1993,7 +1993,12 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <iframe class="frame" title="One vector, or looking back at every word" data-src="../artifacts/attention.html?embed=look"></iframe>
   </div>
   <div class="notes">
-    <p>Two small models translate our sentence. We trained them on the same data. They are identical, except that one has attention. Their vectors have 8 dimensions, and every number on this screen is theirs.</p>
+    <p>Part A is a model small enough to compute by hand. Every number is set by hand. Each vector has three numbers, one for each Galician word: unha, tía, miña.</p>
+    <p>Press Next step. Step 2: the encoder takes half of the previous vector and half of the new word. So the summary holds miña 0.5, tía 0.25, and unha only 0.125.</p>
+    <p>Steps 3 and 4: without attention, the decoder gets the summary for every word. The score of "an" is 8 times 0.125, which is 1. The default "a" has 1.6. So it writes "a", and then "friend". The result is "a friend of mine".</p>
+    <p>Steps 5 to 7: with attention, the decoder has a query. For the article it looks for unha. Each encoder vector gets a score, the query times the vector. Softmax gives the weights: 0.75 on the vector after unha. The mix holds 0.43 of unha. Now "an" scores 3.44, and wins.</p>
+    <p>Step 8: each English word has its own query and its own mix. The result is "an aunt of mine".</p>
+    <p>Part B shows the same thing in two real trained models. Two small models translate our sentence. We trained them on the same data. They are identical, except that one has attention. Their vectors have 8 dimensions, and every number on this screen is theirs.</p>
     <p>Press Next step. Step 1 shows the two translations. Without attention, the model writes "a friend of mine", and many words after that are wrong. With attention, the translation is right.</p>
     <p>Step 2 shows the encoder's vectors, one per Galician word. The last one is the summary.</p>
     <p>Step 3 is the first word without attention. The decoder has only the summary. The article depends on the noun: an aunt, a friend. But tía is the second word of the sentence. After it, the encoder read 24 more words and 5 punctuation marks before it made the summary. The model gives "a" 0.77, and that is wrong.</p>
