@@ -316,7 +316,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <div class="heatwrap"><svg id="lookAtt" role="img" aria-label="Encoder vectors; the decoder takes from every one, weighted"></svg></div>
     <div class="weights" id="mixAttTxt"></div>
     <p class="note" id="lookNote"></p>
-    <p class="note">Weights for <i>unha tía miña</i> come from the keys and queries of section 3; for the whole sentence they are the real model's (section 4, averaged over its heads). The English words are that model's translation. The columns use a simplified encoder. The one on the <a href="mt.html#enc">translation page</a> takes half of each new word; here each new word takes 0.75, so each vector holds mostly its own word. Before attention, a long sentence had to fit into the summary alone, and translations of long sentences got much worse.</p>
+    <p class="note">Weights for <i>unha tía miña</i> come from the keys and queries of section 3; for the whole sentence they are the real model's (section 4, averaged over its heads). The English words are that model's translation. The columns use a simplified encoder with made-up numbers (see under “How the encoder vectors are computed”); the translation and the attention weights for the whole sentence come from the real model Helsinki-NLP/opus-mt-gl-en. Before attention, a long sentence had to fit into the summary alone, and translations of long sentences got much worse.</p>
   </section>
 
   <section class="panel" id="compare">
@@ -563,7 +563,7 @@ function encDerivHTML(src) {
     if (j === 0) return `${cw(0, w)}: encoder vector = word vector of ${cw(0, w)} = ${fv(v)}`;
     const p = encVec(src, j), e = emb2(w), a = [KEEP * p[0], KEEP * p[1]], b = [NEW * e[0], NEW * e[1]];
     return `${cw(j, w)}: 0.25 × ${fv(p)} + 0.75 × ${cw(j, fv(e))} = (${f3(a[0])} + ${f3(b[0])}, ${f3(a[1])} + ${f3(b[1])}) = (${f3(a[0] + b[0])}, ${f3(a[1] + b[1])}) ≈ <b>${fv(v)}</b>`;
-  }).join("<br>") + `<br><span class="note">The first vector in each line is the encoder vector of the word before; the second is the new word's word vector.</span>`;
+  }).join("<br>") + `<br><span class="note">The first vector in each line is the encoder vector of the word before; the second is the new word's word vector. All these numbers are made up for this example: the word vectors of tía and miña are the ones on the translation page, and the one of unha is computed from its letters. The 0.25 and 0.75 are made up too (the translation page uses half and half). A real encoder learns its word vectors, and learns how much of the previous vector to keep. Here each new word gets 0.75, so each vector holds mostly its own word.</span>`;
 }
 // what the decoder gets for English word c: the summary, or the attention mix of the word vectors
 function decIn(d, c, attention) {
