@@ -162,7 +162,11 @@ table.dec small { font-family: var(--font-mono); color: var(--muted); font-size:
 table.dec .lit { font-weight: 600; color: var(--green); }
 svg.sb { width: 190px; max-width: none; display: block; }
 svg.sb .z { stroke: var(--line); stroke-width: 1; } svg.sb .tk { stroke: var(--fg); stroke-width: 2; } svg.sb .rt { fill: var(--fg); font-size: 11px; font-family: var(--font-mono); }
-svg.sb .bg, .sw.bg { fill: rgb(var(--heat)); background: rgb(var(--heat)); } svg.sb .be, .sw.be { fill: var(--green); background: var(--green); } .eq.d11 .vc > :nth-child(5) { margin-top: 10px; }
+svg.sb .bg, .sw.bg { fill: rgb(var(--heat)); background: rgb(var(--heat)); } svg.sb .be, .sw.be { fill: var(--green); background: var(--green); } .eq.d11 .vc > :nth-child(5), .chain.d11 .vc > :nth-child(5) { margin-top: 10px; }
+.chain { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px 6px; }
+.chain .lk { display: grid; justify-items: center; gap: 0; font-size: 0.74rem; color: var(--muted); text-align: center; max-width: 6.5em; padding-bottom: 26px; line-height: 1.2; }
+.chain .lk .ar { font-size: 1.3rem; line-height: 1; } .chain .lk.cur { color: var(--orange); }
+.vc.cur .vh { color: var(--orange); } .vc.cur .sq { box-shadow: 0 0 0 2px var(--orange); }
 .eq.tight { flex-wrap: nowrap; gap: 4px; } .eq.tight .vc .sq { width: 36px; font-size: 0.74rem; } .eq.tight .vc .vh { max-width: 5.5em; font-size: 0.72rem; } .eq.tight .gap { width: 14px; flex: none; } .eq.tight .k, .eq.tight .op { white-space: nowrap; }
 .tyboard .eq.tight { overflow-x: auto; }
 svg.sb rect.anim { transform-box: fill-box; transform-origin: left center; animation: grow 0.9s ease-out; } svg.sb rect.anim.neg { transform-origin: right center; }
@@ -390,8 +394,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="look">
     <h2><span class="n">1</span>Without attention, computed by hand</h2>
-    <div class="review"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page</a>: the <b>encoder</b> reads the Galician words and makes one vector after each word. Its last vector is the <b>summary</b>. The <b>decoder</b> writes the English words one at a time.</p></div>
-    <p class="lead">The steps of the trained models in section 4, on a model small enough to compute by hand: <i>unha tía miña</i>, with three numbers per vector. We set the numbers by hand to show how the calculation works. A real model learns them in training, as in the <a href="skipgram.html">skip-gram lesson</a>.</p>
+    <div class="review"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page</a>: a translation model has two parts. The <b>encoder</b> reads the Galician words and turns them into one vector, the <b>summary</b>. The <b>decoder</b> then writes the English words one at a time. From the <a href="skipgram.html">skip-gram lesson</a>: a <b>vector</b> is a list of numbers, and each position in the list is a <b>dimension</b>; the <b>dot product</b> of two vectors multiplies them dimension by dimension and adds up the results.</p></div>
+    <p class="lead">A translation model small enough to run by hand, on the phrase <i>unha tía miña</i>. Its vectors have three dimensions, one per Galician word, and its decoder knows eight English words. Every number is on the page. Without attention, this model writes “a friend of mine”, and the steps show exactly why. Section 2 adds attention to the same model, and it writes “an aunt of mine”. We set the numbers by hand so that the arithmetic stays simple; a real model learns them from examples, as the skip-gram lesson showed.</p>
     <div class="controls"><button id="tyBack">Back</button><button class="primary" id="tyNext">Next step</button><span class="pathstrip" id="tySteps"></span></div>
     <h3 class="wkh" id="tyTitle"></h3>
     <div class="tycols">
@@ -408,7 +412,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <p class="label">without attention (section 1)</p>
       <div class="flow"><span class="word dimw">after unha</span><span class="word dimw">after tía</span><span class="word">after miña = the summary</span><span class="op">→</span><span class="word out">the state's first three dimensions</span></div>
       <p class="label">with attention (this section)</p>
-      <div class="flow"><span class="word">after unha</span><span class="word">after tía</span><span class="word">after miña</span><span class="op">→</span><span class="word">query · each: weights</span><span class="op">→</span><span class="word">the mix</span><span class="op">→</span><span class="word out">the state's first three dimensions</span></div>
+      <div class="flow"><span class="word">after unha</span><span class="word">after tía</span><span class="word">after miña</span><span class="op">→</span><span class="word">compared with the decoder's question: weights</span><span class="op">→</span><span class="word">the mix</span><span class="op">→</span><span class="word out">the state's first three dimensions</span></div>
     </div>
     <div class="controls"><button id="atBack">Back</button><button class="primary" id="atNext">Next step</button><span class="pathstrip" id="atSteps"></span></div>
     <h3 class="wkh" id="atTitle"></h3>
@@ -1138,7 +1142,7 @@ const r2 = v => Math.round(v * 100) / 100;
 const f = v => { const a = Math.round(Math.abs(v) * 1000) / 1000; return (v < 0 && a ? "−" : "") + String(a); };
 const dot = (a, b) => a.reduce((s, x, i) => s + x * b[i], 0);
 const sq = v => `<div class="sq" style="background:rgba(${v < 0 ? "var(--negheat)" : "var(--heat)"},${(0.08 + 0.85 * Math.min(1, Math.abs(v))).toFixed(2)});color:${Math.abs(v) > 0.6 ? "var(--panel)" : "var(--fg)"}">${f(v)}</div>`;
-const col = (v, label) => `<div class="vc"><div class="vh">${label}</div>${v.map(sq).join("")}</div>`;
+const col = (v, label, cls = "") => `<div class="vc${cls ? " " + cls : ""}"><div class="vh">${label}</div>${v.map(sq).join("")}</div>`;
 const rowsOf = names => `<div class="vc rl"><div class="vh"></div>${names.map(d => `<div>${d}</div>`).join("")}</div>`;
 const op = t => `<div class="op">${t}</div>`, k = t => `<div class="k">${t}</div>`;
 const eq = (...items) => `<div class="eq">${rowsOf(DIMS)}${items.join("")}</div>`;
@@ -1276,7 +1280,7 @@ const ALL = ["g", "e", "b"];
 // cols: table columns shown so far; parts: parts of each bar drawn so far; anim: the part that grows in this frame;
 // rows: words whose bars are drawn; pick: highlight the best word; focus: dim the other words
 const chips = st => ST.map((r, i) => st[i] ? `<span class="chip" style="background:rgba(var(--heat),${(0.08 + 0.8 * st[i]).toFixed(2)})">${r} <small>${f(st[i])}</small></span>` : "").join("");
-function dec({ x, xName, st, cols = [], parts = [], anim = null, rows = EN, pick = false, focus = null, ruler = "", probs = false }) {
+function dec({ x, xName, st, cols = [], parts = [], anim = null, rows = EN, pick = false, focus = null, ruler = "", probs = false, noState = false }) {
   const sc = scoreAll(x, st, parts.includes("b") || !parts.length), best = pick ? sc.best.w : null;
   const slot = `<div class="slot"><p class="label">dimensions unha, tía, miña: from the encoder</p>${eq(col(x, xName))}</div>`;
   const stbox = `<div class="stbox"><p class="label">English dimensions: written so far</p><div class="chips">${chips(st)}</div><p class="note">dimensions that are 0 are not shown</p></div>`;
@@ -1297,7 +1301,7 @@ function dec({ x, xName, st, cols = [], parts = [], anim = null, rows = EN, pick
     const pr = probs ? `<td class="pr"><span class="pbar anim" style="width:${(r.p * 80).toFixed(1)}px"></span> ${f(r.p)}</td>` : "";
     return `<tr class="${w === best ? "win" : ""}${focus && !focus.includes(w) ? " dim" : ""}"><td><b>${w}</b></td>${cols.includes("g") ? `<td class="n">${gcell}</td>` : ""}${cols.includes("e") ? `<td class="n">${ecell}</td>` : ""}${cols.includes("b") ? `<td class="n${anim === "b" ? " flash" : ""}">${f(c.b)}</td>` : ""}<td class="bar">${bar(r)}</td>${pr}</tr>`;
   }).join("");
-  return `<p class="label">the decoder state</p><div class="decin">${slot}${stbox}</div><div class="heatwrap"><table class="ty dec"><thead>${head}</thead><tbody>${body}</tbody></table></div>${ruler}`;
+  return `${noState ? "" : `<p class="label">the decoder state</p><div class="decin">${slot}${stbox}</div>`}<div class="heatwrap"><table class="ty dec"><thead>${head}</thead><tbody>${body}</tbody></table></div>${ruler}`;
 }
 const whyLines = (sc, x, xName) => { const a = sc.rows[0], an = sc.rows[1]; return work([
   `“a”: ${f(a.gp)} + ${f(a.ep)} + bias ${f(a.b)} = <b>${f(a.s)}</b>`,
@@ -1316,7 +1320,7 @@ function ruler(x, att) {
 const CARROWS = [{ a: ZERO, b: [0, 0.5, 0], cls: "ca", label: "“an”, “aunt”", dx: 6, dy: 22, anchor: "start" }, { a: ZERO, b: [0, -0.5, 0], cls: "ca", label: "“a”, “friend”", dx: 0, dy: 26, anchor: "start" }, { a: ZERO, b: [0, 0, 0.5], at: [0, 0, 0.16], cls: "ca", label: "“of”, “mine”", dx: 7, dy: 4, anchor: "start" }];
 const ENC_PATH = ENC.map((e, j) => ({ a: j ? ENC[j - 1] : ZERO, b: e, cls: "gd" }));
 function decScene(x, att, { arrows = false, drops = [], mark = false, path = false, mixes = [], xLabel, cap }) {
-  const xPt = att ? { p: x, cls: "mix", label: xLabel || `the mix ${vecTxt(x)}`, dx: 10, dy: 18 } : { p: x, cls: "enc", label: xLabel || `the summary ${vecTxt(x)}`, dx: -10, dy: 20, anchor: "end" };
+  const xPt = att ? { p: x, cls: "mix", label: xLabel || `the mix ${vecTxt(x)}`, dx: -10, dy: -12, anchor: "end" } : { p: x, cls: "enc", label: xLabel || `the summary ${vecTxt(x)}`, dx: -10, dy: 20, anchor: "end" };
   const s = { ...DEC_VIEW, pts: [xPt], segs: [], notes: [], arrows: arrows ? CARROWS : [], marks: mark ? [markAn] : [], cap };
   if (path) { s.segs.push(...ENC_PATH); s.pts.unshift(...encPts(null, "enc faint").slice(0, 2)); }
   if (att) { s.tri = ENC; s.pts.unshift(...encPts(null, "enc faint"), ...mixes.map(m => ({ p: m, cls: "mix faint" }))); }
@@ -1333,163 +1337,179 @@ const wLine = s => `weights ${s.a.sm.p.map((w, j) => `${f(w)} (${encPlain(j)})`)
 // a phrase whose state holds no tía: unha amiga miña. amiga has no dimension in this model, so reading it only halves the rest.
 const VEC = [0.125, 0, 0.5];
 
+// ----- a chain of vectors, each computed from the one before it. cols: [{v, label}]; links: the label on each arrow;
+// cur: the link being computed in this frame (its result is highlighted; later columns are dimmed)
+function chain(cols, links, cur, rows = DIMS) {
+  return `<div class="chain">${rowsOf(rows)}${cols.map((c, i) => col(c.v, c.label, i === cur + 1 ? "cur" : i > cur + 1 ? "dim" : "") +
+    (i < cols.length - 1 ? `<div class="lk${i === cur ? " cur" : ""}"><span>${links[i]}</span><span class="ar">→</span></div>` : "")).join("")}</div>`;
+}
+const ZS = ST.map(() => 0);
+const ENC_COLS = [{ v: ZERO, label: "before reading: all zeros" }, ...ENC.map((e, j) => ({ v: e, label: `after <i>${DIMS[j]}</i>${j === 2 ? "<br>= the summary" : ""}` }))];
+const ENC_LINKS = DIMS.map(d => `reads <i>${d}</i>`);
+// the same chain for unha amiga miña: amiga has no dimension in this model, so its word vector is all zeros
+const AMI = [[0.5, 0, 0], [0.25, 0, 0], VEC], AMI_W = ["unha", "amiga", "miña"];
+const AMI_COLS = [{ v: ZERO, label: "before reading: all zeros" }, ...AMI.map((e, j) => ({ v: e, label: `after <i>${AMI_W[j]}</i>${j === 2 ? "<br>= the summary" : ""}` }))];
+const encEq = (prev, wv, wname, res) => eq(k("½ ×"), col(prev.v, prev.label), op("+"), k("½ ×"), col(wv, `word vector of <i>${wname}</i>${wv.some(x => x) ? "" : ":<br>all zeros"}`), op("="), col(res.v, res.label, "cur"));
+const wordChips = `<div class="flow">${EN.map(w => `<span class="word">${w}</span>`).join("")}</div><p class="note">‹end› means: the phrase is finished.</p>`;
+
 const STEPS = [
-  ["The word vectors", {
-    text: "One row per Galician word. Each vector is drawn twice: as a column of numbers (darker = larger) and as a point in the picture.",
-    frames: () => upto(3, i => ({ board: eq(...DIMS.slice(0, i + 1).map(w => col(WORD[w], `<i>${w}</i>`))),
+  ["The three Galician words as vectors", {
+    text: "This small model gives each Galician word a vector with three dimensions, one per word of the phrase: 1 in the word's own dimension, 0 in the other two. In the picture, each dimension is one axis, so each word is a point at 1 on its own axis.",
+    frames: () => upto(3, i => ({ board: eq(...DIMS.slice(0, i + 1).map(w => col(WORD[w], `word vector of <i>${w}</i>`))),
       scene: { pts: DIMS.slice(0, i + 1).map((d, j) => ({ p: WORD[d], cls: "word", label: `word vector of ${d}\n(${WORD[d].join(", ")})`, dx: j === 2 ? 10 : 0, dy: j === 2 ? 4 : -30, anchor: j === 2 ? "start" : "middle" })),
-        cap: `The word vector of ${DIMS[i]} has 1 in the ${DIMS[i]} row, so it is the point at 1 on the ${DIMS[i]} axis.` } })) }],
-  ["The encoder reads the sentence", {
-    text: "New vector = ½ previous + ½ new word, starting from zeros. Each new word halves what came before.",
+        cap: `The word vector of ${DIMS[i]}: 1 in the ${DIMS[i]} dimension, so it is the point at 1 on the ${DIMS[i]} axis.` } })) }],
+  ["The encoder reads the phrase", {
+    text: "The encoder reads the words one at a time and keeps one vector, which it updates after each word: the new vector is half the old vector plus half the word's vector. This is one running computation; each result feeds into the next. The vector after the last word is the summary.",
     frames: () => upto(3, i => ({
-      board: ENC.slice(0, i + 1).map((e, j) => eq(k("½ ×"), col(j ? ENC[j - 1] : ZERO, j ? `encoder vector ${encName(j - 1)}` : "before reading: all zeros"), op("+"), k("½ ×"), col(WORD[DIMS[j]], `word vector of <i>${DIMS[j]}</i>`), op("="), col(e, `encoder vector ${encName(j)}`))
-        + (j === 1 ? `<p class="work">Row by row: ½ × 0.5 + ½ × 0 = 0.25 (unha), ½ × 0 + ½ × 1 = 0.5 (tía), ½ × 0 + ½ × 0 = 0 (miña).</p>` : "")).join(""),
+      board: chain(ENC_COLS, ENC_LINKS, i) + `<p class="label">this link, in full</p>` + encEq(ENC_COLS[i], WORD[DIMS[i]], DIMS[i], ENC_COLS[i + 1]) +
+        (i === 1 ? `<p class="work">Dimension by dimension: unha ½ × 0.5 + ½ × 0 = 0.25; tía ½ × 0 + ½ × 1 = 0.5; miña ½ × 0 + ½ × 0 = 0.</p>` : i === 2 ? `<p class="work">Each new word halves what was there before. So the summary holds 0.5 of miña, 0.25 of tía and only 0.125 of unha.</p>` : ""),
       scene: { noTicks: true, segs: ENC.slice(0, i + 1).map((e, j) => ({ a: j ? ENC[j - 1] : ZERO, b: WORD[DIMS[j]], cls: "gd" })),
         pts: [...wordPts(), ...encPts(ENC.map((e, j) => `${encPlain(j)} ${vecTxt(e)}` + (j === 2 ? "\n= the summary" : "")), "enc", [{ dx: -10, dy: -10, anchor: "end" }, { dx: 4, dy: 26 }, ENC_OFF[2]]).slice(0, i + 1)],
         cap: `${i ? `From the vector ${encPlain(i - 1)}` : "From all zeros, where the axes meet,"} halfway along the dashed line to the word vector of ${DIMS[i]}: ${vecTxt(ENC[i])}.${i === 2 ? " This last vector is the summary." : ""}` } })) }],
-  ["The decoder state", {
-    text: "The decoder writes one English word at a time. Before each word it holds a vector, the decoder state: what it knows at that moment. In this model the state has 11 dimensions. The first three, named after the Galician words, hold what the encoder passed on. The other eight, named after English words, record what the decoder has written so far.",
-    frames: () => {
-      const rv = `<div class="review"><span class="rtag">Review</span><p>From the <a href="mt.html#bound">translation page, section 3</a>: the decoder keeps a state, a vector. Before each English word, every English word gets a score from its own vector and the state, and softmax turns the scores into probabilities, as in the <a href="skipgram.html">skip-gram lesson</a>. Then the decoder folds the word it wrote into its state.</p></div>`;
-      return [
-        { board: rv + eqD(col(DS.map(() => 0), "the decoder state: empty")), scene: decScene(SUMMARY, false, { path: true, xLabel: "the summary", cap: "The encoder's three vectors. The decoder has not started yet." }) },
-        { board: rv + eqD(col(stateOf(SUMMARY, ZST), "the decoder state")) + work(["Dimensions unha, tía, miña: without attention, the summary, the encoder's last vector. The decoder gets these three values for every English word it writes."]),
-          scene: decScene(SUMMARY, false, { path: true, xLabel: `the summary ${vecTxt(SUMMARY)}\n= the state's first three dimensions`, cap: "The picture has room for three dimensions only: the state's first three, unha, tía and miña. In them, the state is the summary." }) },
-        { board: rv + eqD(col(stateOf(SUMMARY, ST0), "the decoder state before word 1")) + work(["Dimensions ‹start› to yours: what has been written. Before the first word nothing has been, so the decoder takes in a start token, ‹start›, as real decoders do. It is folded in the way the encoder folds in a word: ½ × the old value + ½ × 1, so ½ × 0 + ½ × 1 = 0.5 in the ‹start› dimension.",
-          "After each English word, the same rule folds that word in: ½ × every old value, + ½ in that word's dimension."]),
-          scene: decScene(SUMMARY, false, { path: true, cap: "The other eight dimensions do not fit in the picture; the column on the left shows all eleven." }) }];
-    } }],
-  ["Where the word vectors come from: training", {
-    text: "Each English word has its own vector, with the same 11 dimensions as the decoder state. Its score will be the dot product of that vector with the state. The vectors are learned in training. This step trains the vectors of “an” and “a” by hand, on two examples, for the choice of the first word.",
-    frames: () => {
-      // training by hand: the decoder state before word 1 of two examples; the right word's vector moves toward it, the wrong word's away
-      const S1 = stateOf(SUMMARY, ST0), S2 = stateOf(VEC, ST0), STEP = 16, mul = v => v.map(x => r2(STEP * x));
-      const EX = [["unha tía miña", S1, "an"], ["unha amiga miña", S2, "a"]];
-      const seq = [0, 1, 0, 1];
-      const vAn = [DS.map(() => 0)], vA = [DS.map(() => 0)];
-      seq.forEach(e => { const [, s, right] = EX[e], sg = right === "an" ? 1 : -1;
-        vAn.push(vAn[vAn.length - 1].map((x, i) => r2(x + sg * STEP * s[i]))); vA.push(vA[vA.length - 1].map((x, i) => r2(x - sg * STEP * s[i]) || 0)); });
-      const rule = `<div class="review"><span class="rtag">Review</span><p>From the <a href="skipgram.html">skip-gram lesson</a>: training shows the model an example and moves the vector of the right word a little toward the vector it is compared with, so their dot product grows. The vectors of wrong words move a little away. The decoder's word vectors are compared with the decoder state, so they move toward or away from the state.</p></div>`;
-      const encAmiga = `<p class="label">the encoder reads <i>unha amiga miña</i>: new encoder vector = ½ × the previous one + ½ × the new word's vector</p>` +
-        eq(k("½ ×"), col(ZERO, "before reading: all zeros"), op("+"), k("½ ×"), col(WORD.unha, "word vector of <i>unha</i>"), op("="), col([0.5, 0, 0], "after unha")) +
-        eq(k("½ ×"), col([0.5, 0, 0], "after unha"), op("+"), k("½ ×"), col([0, 0, 0], "word vector of <i>amiga</i>: all zeros"), op("="), col([0.25, 0, 0], "after amiga")) +
-        eq(k("½ ×"), col([0.25, 0, 0], "after amiga"), op("+"), k("½ ×"), col(WORD["miña"], "word vector of <i>miña</i>"), op("="), col(VEC, "after miña: the summary")) +
-        `<p class="note">This small model has dimensions only for unha, tía and miña, so the word vector of amiga is all zeros: reading it adds nothing and halves the encoder vector. No tía ever enters the summary.</p>`;
-      const states = eqD(col(S1, "decoder state before word 1:<br><i>unha tía miña</i> → an …"), col(S2, "decoder state before word 1:<br><i>unha amiga miña</i> → a …"));
-      const nud = n => { const e = seq[n - 1], [ph, s, right] = EX[e], up = w => w === right;
-        return `<p class="label">example: <i>${ph}</i>; the right first word is “${right}”</p>` +
-          `<div class="eq d11 tight">${rowsOf(DS)}${[col(vAn[n - 1], "“an” before this example"), op(up("an") ? "+" : "−"), k(`${STEP} ×`), col(s, "the decoder state"), op("="), col(vAn[n], "“an” after this example")].join("")}<span class="gap"></span>${[col(vA[n - 1], "“a” before"), op(up("a") ? "+" : "−"), k(`${STEP} ×`), col(s, "the decoder state"), op("="), col(vA[n], "“a” after")].join("")}</div>`; };
-      const stepNote = work([`How far training moves a vector each time is the step size, set by the people who train the model (in the skip-gram lesson, the learning rate). Real training takes many small steps; here we take big ones, ${STEP} × the state, so that two rounds give round numbers.`]);
-      const g3 = v => v.slice(0, 3).map(x => x / STEP);
-      const tScene = (n, cap) => ({ ...DEC_VIEW, cap,
-        pts: [{ p: SUMMARY, cls: "enc", label: "unha tía miña", dx: 10, dy: -10 }, { p: VEC, cls: "enc faint", label: "unha amiga miña", dx: -10, dy: -10, anchor: "end" }],
-        segs: [...vAn.slice(0, n + 1).flatMap((v, i) => i ? [{ a: g3(vAn[i - 1]), b: g3(v), cls: "gd" }] : []), ...vA.slice(0, n + 1).flatMap((v, i) => i ? [{ a: g3(vA[i - 1]), b: g3(v), cls: "gd" }] : [])],
-        arrows: n ? [{ a: ZERO, b: g3(vAn[n]), cls: "ca", label: "“an”", dx: 6, dy: 18 }, { a: ZERO, b: g3(vA[n]), cls: "ca", label: "“a”", dx: 0, dy: 26, anchor: "start" }] : [] });
-      const capN = ["unha tía miña: “an” is right, so its vector moves toward the state; “a” is wrong, so it moves away.",
-        "unha amiga miña: now “a” is right and “an” wrong. The two states have the same values in unha, miña and ‹start›, so those pushes cancel. Only tía is left.",
-        "unha tía miña again: the same push as the first time.",
-        "unha amiga miña again. After two rounds: “an” has 8 in tía, “a” −8, and 0 everywhere else."];
-      return [
-        { board: rule + work(["Two training examples: our phrase, and <i>unha amiga miña</i>, “a friend of mine”. First, the encoder reads the second one:"]) + encAmiga,
-          scene: { ...tScene(0, "The encoder's path for unha amiga miña: it never moves along tía."), segs: [{ a: ZERO, b: [0.5, 0, 0], cls: "gd" }, { a: [0.5, 0, 0], b: [0.25, 0, 0], cls: "gd" }, { a: [0.25, 0, 0], b: VEC, cls: "gd" }] } },
-        { board: states + work(["The decoder state before word 1, for each example: the summary in the first three dimensions, ‹start› 0.5 in the English ones. The first column is the state of step 3."]),
-          scene: tScene(0, "The first three dimensions of the two states: unha tía miña reaches 0.25 along tía, unha amiga miña reaches 0.") },
-        { board: states + work(["Before training, the vectors of “an” and “a” are all zeros: both get the dot product 0 from any state."]), scene: tScene(0, "The vectors of “an” and “a” start at zero, at the corner where the axes meet.") },
-        ...[1, 2, 3, 4].map(n => ({ board: nud(n) + (n === 1 ? stepNote : ""), scene: tScene(n, `${capN[n - 1]} (Vectors drawn at 1/${STEP} of their length; first three dimensions only.)`) })),
-        { board: nud(4) + work(["unha ends at 0: both phrases have it, so it cannot tell “an” from “a”. The noun can.",
-          "‹start› ends at 0 here too. The 12 that “a” and “an” have in ‹start› (next step) is learned at the later words, where an article is wrong.",
-          "“aunt” and “friend” get 8 and −8 along tía the same way, from the same two examples at the second word. “of” and “mine” get 8 along miña from phrases with miña."]),
-          scene: tScene(4, "Where the vectors of “an” and “a” end up: on the tía axis, pointing opposite ways.") }];
-    } }],
-  ["Word 1: the dot products", {
-    text: "Every English word's score starts with the dot product of its vector with the decoder state: multiply dimension by dimension, and add up.",
+  ["From the encoder to the decoder", {
+    text: "The decoder writes the English phrase one word at a time. It knows eight English words. Before each word it holds one vector, its state: everything it has to go on. The state has eleven dimensions: three for what the encoder passed on, eight for what the decoder itself has written so far.",
+    frames: () => [
+      { board: `<p class="label">the eight English words the decoder can write</p>` + wordChips, scene: decScene(SUMMARY, false, { path: true, xLabel: "the summary", cap: "The encoder has read the phrase. Its summary is what the decoder gets." }) },
+      { board: `<p class="label">the summary becomes the first three dimensions of the decoder state</p>` + `<div class="chain">${rowsOf(DIMS)}${col(SUMMARY, "the summary")}<div class="lk cur"><span>copied</span><span class="ar">→</span></div></div>` + eqD(col(stateOf(SUMMARY, ZS), "the decoder state", "cur")) +
+          work(["Without attention, these three dimensions stay the summary for every English word the decoder writes."]),
+        scene: decScene(SUMMARY, false, { path: true, xLabel: `the summary ${vecTxt(SUMMARY)}\n= the state's first three dimensions`, cap: "The picture has room for three dimensions. For the decoder state, they are its first three: unha, tía and miña." }) },
+      { board: eqD(col(stateOf(SUMMARY, ZS), "the decoder state"), op("→"), col(stateOf(SUMMARY, ST0), "the decoder state before word 1", "cur")) +
+          work(["The other eight dimensions record what has been written: one per English word, and one, ‹start›, for the beginning.",
+            "Nothing has been written yet, so the decoder marks the beginning: it treats ‹start› like a word it has just written and folds it in with the encoder's rule, ½ × 0 + ½ × 1 = 0.5. Real decoders begin with such a start mark too."]),
+        scene: decScene(SUMMARY, false, { path: true, cap: "The other eight dimensions do not fit in the picture; the column on the left shows all eleven." }) }] }],
+  ["How the decoder scores a word", {
+    text: "The decoder gives each of its eight words a score and writes the word with the highest score. Each English word has its own vector, with the same eleven dimensions as the state. The score begins with the dot product of the word's vector and the state: multiply dimension by dimension, then add up.",
     frames: () => {
       const st = stateOf(SUMMARY, ST0), sc = scoreAll(SUMMARY, ST0), an = sc.rows[1], a = sc.rows[0];
       const pt = eqD(...EN.map(w => col([...CAND[w].g, ...CAND[w].e], `“${w}”`)));
       const prod = w => { const v = [...CAND[w].g, ...CAND[w].e], p = v.map((x, i) => r2(x * st[i])), r = sc.rows.find(q => q.w === w);
-        return eqD(col(v, `vector of “${w}”`), op("×"), col(st, "the decoder state before word 1"), op("="), col(p, "products")) +
-          work([`dot product of “${w}”: add the products: ${p.filter(x => x).map(f).join(" + ").replace("+ −", "− ") || "0"} = <b>${f(r2(r.gp + r.ep))}</b>`]); };
+        return eqD(col(v, `vector of “${w}”`), op("×"), col(st, "the decoder state before word 1"), op("="), col(p, "products", "cur")) +
+          work([`dot product of “${w}”: add the products: ${p.filter(x => x).map(f).join(" + ").replace(/\+ −/g, "− ") || "0"} = <b>${f(r2(r.gp + r.ep))}</b>`]); };
       const sG = decScene(SUMMARY, false, { arrows: true, drops: [TIA], cap: "" });
       return [
-        { board: pt + work(["All the word vectors, trained as in step 4: one column per English word, like the second table p′ in skip-gram."]),
-          scene: decScene(SUMMARY, false, { arrows: true, cap: "The word vectors in the first three dimensions, drawn at 1/16 of their length, and the decoder state (the summary). “yours” (−8 along miña) is not drawn." }) },
+        { board: pt + work(["One column per English word. These numbers were learned from example translations; step 5 shows how. For now, take them as given."]),
+          scene: decScene(SUMMARY, false, { arrows: true, cap: "The first three dimensions of the word vectors, drawn at 1/16 of their length so that they fit, with the decoder state. “an” and “aunt”: 8 in tía. “a” and “friend”: −8 in tía. “of” and “mine”: 8 in miña. “yours” (−8 in miña) is not drawn." }) },
         { board: prod("an"), scene: { ...sG, cap: `The first three products are the part of the dot product the picture shows: how far the state reaches along tía, ${f(SUMMARY[TIA])}, times 8: ${f(an.gp)}. The ‹start› dimension adds 12 × 0.5 = ${f(an.ep)}.` } },
-        { board: prod("a"), scene: { ...sG, cap: `“a” has −8 in the tía dimension: the state takes ${f(-a.gp)} from it. It gets ${f(a.ep)} from the ‹start› dimension, like “an”.` } },
-        { board: dec({ ...SUM_IN, cols: ["g", "e"], parts: ["g", "e"], anim: "e" }), scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], cap: `Every word's dot product. Blue: the first three dimensions (the picture). Green: the English dimensions. “an” has ${f(r2(an.gp + an.ep))}, “a” ${f(r2(a.gp + a.ep))}.` }) }];
+        { board: prod("a"), scene: { ...sG, cap: `“a” has −8 in tía, so the state takes ${f(-a.gp)} from it. From ‹start› it gets ${f(a.ep)}, like “an”.` } },
+        { board: dec({ ...SUM_IN, cols: ["g", "e"], parts: ["g", "e"], anim: "e" }), scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], cap: `Every word's dot product, as a bar. Blue: the first three dimensions, the part the picture shows. Green: the eight English dimensions. “an” has ${f(r2(an.gp + an.ep))}, “a” ${f(r2(a.gp + a.ep))}.` }) }];
     } }],
-  ["Word 1: the bias, and why “a”", {
-    text: "The dot product is not the whole score. Each word also has a bias: one number of its own, added to its score whatever the state. A neural network's output layer always has one per word.",
+  ["Where the numbers in the word vectors come from", {
+    text: "The word vectors are learned from example translations. Training shows the model an example and moves the vector of the right word a little toward the decoder state, so that its dot product grows; the vectors of the wrong words move a little away. Here we train the vectors of “an” and “a” by hand, on two examples.",
+    frames: () => {
+      const S1 = stateOf(SUMMARY, ST0), S2 = stateOf(VEC, ST0), STEP = 16;
+      const EX = [["unha tía miña", S1, "an"], ["unha amiga miña", S2, "a"]], seq = [0, 1, 0, 1];
+      const vAn = [DS.map(() => 0)], vA = [DS.map(() => 0)];
+      seq.forEach(e => { const [, s, right] = EX[e], sg = right === "an" ? 1 : -1;
+        vAn.push(vAn[vAn.length - 1].map((x, i) => r2(x + sg * STEP * s[i]))); vA.push(vA[vA.length - 1].map((x, i) => r2(x - sg * STEP * s[i]) || 0)); });
+      const rv = `<div class="review"><span class="rtag">Review</span><p>The same rule trained the <a href="skipgram.html">skip-gram</a> vectors and the <a href="mt.html#train">translation page's</a> model: every example nudges the vectors so that the right word's probability goes up.</p></div>`;
+      const encAmi = n => chain(AMI_COLS, AMI_W.map(d => `reads <i>${d}</i>`), n) + `<p class="label">this link, in full</p>` + encEq(AMI_COLS[n], n === 1 ? ZERO : WORD[AMI_W[n]], AMI_W[n], AMI_COLS[n + 1]);
+      const states = eqD(col(S1, "decoder state before word 1:<br><i>unha tía miña</i> → an …"), col(S2, "decoder state before word 1:<br><i>unha amiga miña</i> → a …"));
+      const nud = n => { const e = seq[n - 1], [ph, s, right] = EX[e], up = w => w === right;
+        return `<p class="label">example: <i>${ph}</i>; the right first word is “${right}”</p>` +
+          `<div class="eq d11 tight">${rowsOf(DS)}${[col(vAn[n - 1], "“an” before this example"), op(up("an") ? "+" : "−"), k(`${STEP} ×`), col(s, "the decoder state"), op("="), col(vAn[n], "“an” after this example", "cur")].join("")}<span class="gap"></span>${[col(vA[n - 1], "“a” before"), op(up("a") ? "+" : "−"), k(`${STEP} ×`), col(s, "the decoder state"), op("="), col(vA[n], "“a” after", "cur")].join("")}</div>`; };
+      const stepNote = work([`How far a vector moves each time is the step size (in the skip-gram lesson, the learning rate). Real training takes many small steps; here we take big ones, ${STEP} × the state, so that two rounds give round numbers.`]);
+      const g3 = v => v.slice(0, 3).map(x => x / STEP);
+      const amiSeg = AMI.map((e, j) => ({ a: j ? AMI[j - 1] : ZERO, b: e, cls: "gd" }));
+      const tScene = (n, cap, extra = {}) => ({ ...DEC_VIEW, cap,
+        pts: [{ p: SUMMARY, cls: "enc", label: "unha tía miña", dx: 10, dy: -10 }, { p: VEC, cls: "enc faint", label: "unha amiga miña", dx: -10, dy: -10, anchor: "end" }],
+        segs: [...vAn.slice(0, n + 1).flatMap((v, i) => i ? [{ a: g3(vAn[i - 1]), b: g3(v), cls: "gd" }] : []), ...vA.slice(0, n + 1).flatMap((v, i) => i ? [{ a: g3(vA[i - 1]), b: g3(v), cls: "gd" }] : [])],
+        arrows: n ? [{ a: ZERO, b: g3(vAn[n]), cls: "ca", label: "“an”", dx: 6, dy: 18 }, { a: ZERO, b: g3(vA[n]), cls: "ca", label: "“a”", dx: 0, dy: 26, anchor: "start" }] : [], ...extra });
+      const capN = ["unha tía miña: “an” is right, so its vector moves toward this state; “a” is wrong, so it moves away.",
+        "unha amiga miña: now “a” is right and “an” is wrong. The two states have the same values in unha, miña and ‹start›, so those pushes cancel. Only tía is left.",
+        "unha tía miña again: the same push as the first time.",
+        "unha amiga miña again. After two rounds: “an” has 8 in tía, “a” has −8, and both have 0 everywhere else."];
+      return [
+        { board: rv + work(["Two examples: our phrase, and <i>unha amiga miña</i>, “a friend of mine”. The encoder reads the second one the same way as in step 2:"]) + encAmi(0),
+          scene: tScene(0, "The encoder's path for unha amiga miña. It starts along unha, like our phrase.", { segs: amiSeg.slice(0, 1) }) },
+        { board: rv + encAmi(1), scene: tScene(0, "amiga has no dimension in this small model, so its word vector is all zeros: reading it adds nothing and halves what was there.", { segs: amiSeg.slice(0, 2) }) },
+        { board: rv + encAmi(2), scene: tScene(0, "After miña: the summary of unha amiga miña. It never moved along tía.", { segs: amiSeg }) },
+        { board: states + work(["The decoder state before word 1, for each example: the summary in the first three dimensions, ‹start› 0.5 in the English ones. The first column is the state of step 3."]),
+          scene: tScene(0, "The first three dimensions of the two states: unha tía miña reaches 0.25 along tía, unha amiga miña reaches 0.") },
+        { board: states + work(["Before training, the vectors of “an” and “a” are all zeros: both get the dot product 0 from any state, so the model has no idea which to write."]), scene: tScene(0, "The vectors of “an” and “a” start at zero, at the corner where the axes meet.") },
+        ...[1, 2, 3, 4].map(n => ({ board: nud(n) + (n === 1 ? stepNote : ""), scene: tScene(n, `${capN[n - 1]} (Vectors drawn at 1/${STEP} of their length; first three dimensions only.)`) })),
+        { board: nud(4) + work(["unha ends at 0: both phrases have it, so it cannot tell “an” from “a”. The noun can.",
+          "‹start› ends at 0 here too. The 12 that “a” and “an” have in ‹start› (step 4) is learned at the later words, where an article is wrong.",
+          "“aunt” and “friend” get 8 and −8 in tía the same way, from the same two examples at the second word. “of” and “mine” get 8 in miña from phrases with miña."]),
+          scene: tScene(4, "Where the vectors of “an” and “a” end up: on the tía axis, pointing opposite ways.") }];
+    } }],
+  ["The bias, and why the decoder writes “a”", {
+    text: "The score has one more part. Each word has a bias: one extra number of its own, added to its score whatever the state is. It is learned too. First, why it is needed.",
     frames: () => {
       const vst = { x: VEC, xName: "the summary of unha amiga miña", st: ST0 }, sv = scoreAll(VEC, ST0), sc = scoreAll(SUMMARY, ST0), gap = r2(sc.rows[0].b - sc.rows[1].b);
       const vScene = cap => decScene(VEC, false, { arrows: true, drops: [TIA], xLabel: `unha amiga miña ${vecTxt(VEC)}`, cap });
       return [
-        { board: dec({ ...vst, cols: ["g", "e"], parts: ["g", "e"], focus: ["a", "an"], probs: true }) + work([`Why a bias? Take another phrase: <i>unha amiga miña</i>, “a friend of mine”. amiga has no dimension in this small model, so the state holds nothing of tía: ${vecTxt(VEC)}.`,
-          `Then “a” and “an” get the same dot product, ${f(r2(sv.rows[0].gp + sv.rows[0].ep))}, and the same probability, ${f(sv.rows[0].p)}: a coin toss. Yet in the translation page's training examples, “a” is right 6 times out of 8.`]),
-          scene: vScene("This state reaches 0 along tía: nothing in it speaks for “an”.") },
-        { board: dec({ ...vst, cols: ALL, parts: ALL, anim: "b", focus: ["a", "an"], probs: true }) + work([`The bias gives the decoder a default for when the state says nothing either way. Training raises the bias of words that are often right: “a” gets ${f(CAND.a.b)}. Now P(“a”) = ${f(sv.rows[0].p)}.`,
-          `Biases here: “a” ${f(CAND.a.b)}, “friend” ${f(CAND.friend.b)}, “‹end›” ${f(CAND["‹end›"].b)}, all others 0. Score = dot product + bias.`]),
-          scene: vScene(`The bias does not depend on the state: the gray part is added to the bar of “a” whatever the picture shows.`) },
+        { board: dec({ ...vst, cols: ["g", "e"], parts: ["g", "e"], focus: ["a", "an"], probs: true }) + work([`Take <i>unha amiga miña</i> again. Its state holds nothing of tía, so “a” and “an” get the same dot product, ${f(r2(sv.rows[0].gp + sv.rows[0].ep))}, and the same probability, ${f(sv.rows[0].p)}: a coin toss.`,
+          `Yet in the translation page's example translations, “a” is the right first word 6 times out of 8. The model needs a way to prefer “a” when the state says nothing either way.`]),
+          scene: vScene("This state reaches 0 along tía: nothing in it speaks for “an” or for “a”.") },
+        { board: dec({ ...vst, cols: ALL, parts: ALL, anim: "b", focus: ["a", "an"], probs: true }) + work([`That is the bias. Training raises the bias of a word that is right more often than its dot product says: “a” gets ${f(CAND.a.b)}. Now P(“a”) = ${f(sv.rows[0].p)}.`,
+          `Biases in this model: “a” ${f(CAND.a.b)}, “friend” ${f(CAND.friend.b)}, “‹end›” ${f(CAND["‹end›"].b)}, all others 0. Score = dot product + bias.`]),
+          scene: vScene("The bias does not depend on the state: the gray part is added to the bar of “a” whatever the picture shows.") },
         { board: dec({ ...SUM_IN, cols: ALL, parts: ALL, anim: "b", focus: ["a", "an"] }) + whyLines(sc, SUMMARY, "the summary"),
-          scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA], cap: `Back to unha tía miña. Here the state speaks for “an”: tía adds 8 × ${f(SUMMARY[TIA])} = ${f(sc.rows[1].gp)} to “an” and takes ${f(-sc.rows[0].gp)} from “a”, a gap of ${f(r2(sc.rows[1].gp - sc.rows[0].gp))}. But the bias of “a” is ${f(gap)}, more than that.` }) },
-        { board: dec({ ...SUM_IN, cols: ALL, parts: ALL, focus: ["a", "an"], ruler: ruler(SUMMARY, false) }) + work([`Each unit of tía adds 8 to “an” and takes 8 from “a”. “an” beats the bias of “a” only if 16 × tía > ${f(gap)}: tía > ${f(gap)} ÷ 16 = ${f(MARK)}, the red mark.`]),
+          scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA], cap: `Back to unha tía miña. Here the state does speak for “an”: tía adds 8 × ${f(SUMMARY[TIA])} = ${f(sc.rows[1].gp)} to “an” and takes ${f(-sc.rows[0].gp)} from “a”, a gap of ${f(r2(sc.rows[1].gp - sc.rows[0].gp))}. But the bias of “a” is ${f(gap)}, more than that.` }) },
+        { board: dec({ ...SUM_IN, cols: ALL, parts: ALL, focus: ["a", "an"], ruler: ruler(SUMMARY, false) }) + work([`Each unit of tía in the state adds 8 to “an” and takes 8 from “a”. “an” beats the bias of “a” only if 16 × tía > ${f(gap)}: tía > ${f(gap)} ÷ 16 = ${f(MARK)}, the red mark.`]),
           scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA], mark: true, cap: `The summary reaches ${f(SUMMARY[TIA])} along tía, short of the mark. After reading tía the encoder had ${f(ENC[1][TIA])}; reading miña halved it.` }) },
         { board: dec({ ...SUM_IN, cols: ALL, parts: ALL, pick: true, focus: ["a", "an"], probs: true, ruler: ruler(SUMMARY, false) }) + pickLine(sc),
-          scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA], mark: true, cap: "The decoder writes “a”: the summary holds too little of tía to beat the default." }) }];
+          scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA], mark: true, cap: "The decoder writes “a”: the summary holds too little of tía to beat the bias." }) }];
     } }],
-  ["Without attention: the rest of the phrase", {
-    text: "After each word, that word is folded into the English dimensions of the state. The first three dimensions stay the summary. Section 2 shows what attention changes.",
+  ["The rest of the phrase", {
+    text: "After each word, the decoder folds that word into its state: half the old values, plus half in the dimension of the word just written. The first three dimensions stay the summary. Then every word is scored again.",
     frames: () => {
       const caps = [
-        `“a” is written. “aunt” and “friend” have 12 in the a dimension: both get 6. tía gives “aunt” + ${f(8 * SUMMARY[TIA])} and “friend” − ${f(8 * SUMMARY[TIA])}, but “friend” has a bias of 5.6. The same contest as “a” against “an”: “friend”.`,
-        `“friend” is written. “of” and “‹end›” have 12 in the friend dimension: 6 each. “of” adds 8 × ${f(SUMMARY[MINA])} = ${f(8 * SUMMARY[MINA])} from miña, “‹end›” only its bias, 1.6: “of”.`,
-        `“of” is written. “mine” and “yours” have 12 in the of dimension: 6 each. “mine” adds ${f(8 * SUMMARY[MINA])} from miña: “mine”.`,
-        `“mine” is written. “‹end›” has 12 in the mine dimension (6) and in the friend dimension (12 × 0.125), plus its bias 1.6: 9.1. “mine” still gets 4 from miña + 12 × 0.25 from “of”: 7. “‹end›” wins: the phrase ends. Without attention: “${phrase(ONE)}”. Good English, wrong translation.`];
+        `“a” is written. “aunt” and “friend” have 12 in the a dimension: 6 each. tía gives “aunt” +${f(8 * SUMMARY[TIA])} and “friend” −${f(8 * SUMMARY[TIA])}, but “friend” has a bias of ${f(CAND.friend.b)}. The same contest as “a” against “an”: “friend”.`,
+        `“friend” is written. “of” and “‹end›” have 12 in the friend dimension: 6 each. “of” adds 8 × ${f(SUMMARY[MINA])} = ${f(8 * SUMMARY[MINA])} from miña, “‹end›” only its bias: “of”.`,
+        `“of” is written. “mine” and “yours” have 12 in the of dimension: 6 each. miña gives “mine” +${f(8 * SUMMARY[MINA])} and “yours” −${f(8 * SUMMARY[MINA])}: “mine”.`,
+        `“mine” is written. “‹end›” has 12 in the mine dimension, and the highest score: the phrase is finished. Without attention: “${phrase(ONE)}”. Good English, wrong translation.`];
       return ONE.slice(1).map((s, i) => ({
-        board: work([stLine(ONE[i].w, s.st)]) + dec({ x: SUMMARY, xName: "the summary", st: s.st, cols: ["g", "e", "b"], parts: ALL, pick: true, formula: false }),
+        board: `<p class="label">the decoder state: “${ONE[i].w}” is folded in</p>` + `<div class="chain d11">${rowsOf(DS)}${col(stateOf(SUMMARY, ONE[i].st), `before word ${i + 1}`)}<div class="lk cur"><span>½ × old + ½ in “${ONE[i].w}”</span><span class="ar">→</span></div>${col(stateOf(SUMMARY, s.st), `before word ${i + 2}`, "cur")}</div>` +
+          dec({ x: SUMMARY, xName: "the summary", st: s.st, cols: ["g", "e", "b"], parts: ALL, pick: true, noState: true }),
         scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], mark: true, cap: `Word ${i + 2}. ${caps[i]}` }) }));
     } }],
-  ["With attention, word 1: query, keys, scores", {
-    text: "Query: what the decoder looks for. Keys: the encoder vectors. Score: query · key. Softmax: scores → weights.",
+  ["The decoder asks a question: the query", {
+    text: "With attention, before each English word the decoder looks at all three encoder vectors, not only the last one, and takes a weighted mix of them. To set the weights, it compares each encoder vector with a question of its own, in the form of a vector: the query. In this role, the encoder vectors are called keys.",
     frames: () => {
       const a = ATT[0].a, qs = queryScene(a), keys = encPts(ENC.map((e, j) => `key ${j + 1}: ${encPlain(j)}`));
-      const qrule = work([`query = ${vecTxt(Q0)}: before the noun, look for tía (it decides a / an)`, "each word written from the noun on adds its value in the decoder state × (0, −12, 12): look for miña instead",
-        `nothing written yet → query ${vecTxt(a.q)}`]);
-      const rowsHtml = n => ENC.slice(0, n).map((e, j) => eq(col(a.q, "the query"), op("·"), col(e, `key: encoder vector ${encName(j)}`), op("="), `<div class="res">${dotTxt(a.q, e)} = <b>${f(a.sc[j])}</b></div>`)).join("");
+      const qrule = work([`The query is computed from the decoder state, and its numbers are learned too; we set them by hand. Before the noun is written, the query is ${vecTxt(Q0)}: it asks “how much tía?”, because the noun decides between “a” and “an”.`,
+        "Once a noun is written, the question changes: each written word from the noun on adds its state value × (0, −12, 12), and the query turns toward miña (section 2, step 4).",
+        `Nothing is written yet, so the query is ${vecTxt(a.q)}.`]);
+      const rowsHtml = n => ENC.slice(0, n).map((e, j) => eq(col(a.q, "the query"), op("·"), col(e, `key ${j + 1}: encoder vector ${encName(j)}`), op("="), `<div class="res">${dotTxt(a.q, e)} = <b>${f(a.sc[j])}</b></div>`)).join("");
       return [
-        { board: qrule + eq(col(a.q, "the query")), scene: { ...SMALL, arrows: qs.arrows, pts: keys, cap: "The query has 6 in the tía row, so it points along the tía axis. The three encoder vectors are the keys." } },
-        ...upto(3, j => ({ board: qrule + rowsHtml(j + 1), scene: { ...SMALL, arrows: qs.arrows, segs: qs.segs.slice(0, j + 1), notes: qs.notes.slice(0, j + 1), pts: keys,
+        { board: qrule + eq(col(a.q, "the query")), scene: { ...SMALL, arrows: qs.arrows, pts: keys, cap: "The query has 6 in the tía dimension, so it points along the tía axis. The three encoder vectors are the keys it is compared with." } },
+        ...upto(3, j => ({ board: qrule + `<p class="label">how well each key answers the question: the dot product of query and key</p>` + rowsHtml(j + 1), scene: { ...SMALL, arrows: qs.arrows, segs: qs.segs.slice(0, j + 1), notes: qs.notes.slice(0, j + 1), pts: keys,
           cap: `Key ${j + 1}: the dashed line drops it onto the query's line, at ${f(ENC[j][TIA])} along tía. Its score: 6 × ${f(ENC[j][TIA])} = ${f(a.sc[j])}.` } })),
-        { board: qrule + rowsHtml(3) + work([`softmax: ${a.sc.map((x, j) => `e<sup>${f(x)}</sup> = ${f(a.sm.e[j])}`).join(", ")}; sum = ${f(a.sm.Z)}`, `weights: ${a.sm.p.map((w, j) => `${f(a.sm.e[j])} / ${f(a.sm.Z)} = <b>${f(w)}</b> (${encName(j)})`).join(", ")}`]),
-          scene: { ...SMALL, ...qs, pts: encPts(ENC.map((e, j) => `key ${j + 1}: weight ${f(a.sm.p[j])}`)), cap: "Softmax turns the three scores into weights that add up to 1. The key with the largest score gets most of the weight." } }];
+        { board: qrule + rowsHtml(3) + work([`softmax turns the three scores into weights that add up to 1: ${a.sc.map((x, j) => `e<sup>${f(x)}</sup> = ${f(a.sm.e[j])}`).join(", ")}; sum = ${f(a.sm.Z)}`, `weights: ${a.sm.p.map((w, j) => `${f(a.sm.e[j])} / ${f(a.sm.Z)} = <b>${f(w)}</b> (${encName(j)})`).join(", ")}`]),
+          scene: { ...SMALL, ...qs, pts: encPts(ENC.map((e, j) => `key ${j + 1}: weight ${f(a.sm.p[j])}`)), cap: "The key with the largest score gets most of the weight: the vector after tía, 0.79." } }];
     } }],
-  ["With attention, word 1: the mix", {
-    text: "Mix = each encoder vector (here called a value) × its weight, added up. The mix replaces the summary.",
+  ["The mix", {
+    text: "The mix is the three encoder vectors added up, each multiplied by its weight. In this role the encoder vectors are called values. The mix takes the summary's place in the decoder state.",
     frames: () => {
-      const a = ATT[0].a, terms = n => ENC.slice(0, n).flatMap((e, j) => [j ? op("+") : "", k(`${f(a.sm.p[j])} ×`), col(e, `value: encoder vector ${encName(j)}`)]);
+      const a = ATT[0].a, terms = n => ENC.slice(0, n).flatMap((e, j) => [j ? op("+") : "", k(`${f(a.sm.p[j])} ×`), col(e, `value ${j + 1}: encoder vector ${encName(j)}`)]);
       const vals = n => encPts(ENC.map((e, j) => j < n ? `weight ${f(a.sm.p[j])}` + (j === 2 ? " (summary)" : "") : ""), "enc").map((p, j) => j < n ? p : { ...p, cls: "enc faint" });
       return [...upto(3, j => ({ board: eq(...terms(j + 1)), scene: { ...SMALL, pts: vals(j + 1), cap: `${f(a.sm.p[j])} × the encoder vector ${encPlain(j)}.` } })),
-        { board: eq(...terms(3), op("="), col(a.mix, "the mix")) + work([`Row by row, for example tía: ${a.sm.p.map((w, j) => `${f(w)} × ${f(ENC[j][TIA])}`).join(" + ")} = <b>${f(a.mix[TIA])}</b>`]),
+        { board: eq(...terms(3), op("="), col(a.mix, "the mix", "cur")) + work([`Dimension by dimension, for example tía: ${a.sm.p.map((w, j) => `${f(w)} × ${f(ENC[j][TIA])}`).join(" + ")} = <b>${f(a.mix[TIA])}</b>`]),
           scene: { ...SMALL, tri: ENC, pts: [...vals(3), { p: a.mix, cls: "mix", label: `mix ${vecTxt(a.mix)}`, dx: 10, dy: 18 }],
-            cap: `Added up row by row: the mix. It lies inside the triangle of the three encoder vectors, pulled toward the one with the largest weight. It holds ${f(a.mix[TIA])} of tía; the summary held ${f(SUMMARY[TIA])}.` } }];
+            cap: `Added up: the mix. It lies inside the triangle of the three encoder vectors, pulled toward the one with the largest weight. It holds ${f(a.mix[TIA])} of tía; the summary held ${f(SUMMARY[TIA])}.` } }];
     } }],
-  ["With attention, word 1: the word", {
-    text: "The mix takes the summary's place in the state's first three dimensions. The English dimensions and the biases are as in section 1, step 6.",
+  ["Word 1 with the mix: why “an”", {
+    text: "The mix goes into the first three dimensions of the decoder state, where the summary was. Everything else, the word vectors, the biases and the English dimensions, is exactly as in section 1.",
     frames: () => {
       const s = ATT[0], x = s.a.mix, inp = { x, xName: "the mix", st: ST0 };
       return [
-        { board: dec({ ...inp, cols: ["g", "e", "b"], parts: ["g"] }), scene: decScene(x, true, { arrows: true, drops: [TIA, MINA], cap: `The mix reaches ${f(x[TIA])} along tía: “an” and “aunt” get 8 × ${f(x[TIA])} = ${f(r2(8 * x[TIA]))}. Along miña only ${f(x[MINA])}: “of” and “mine” get ${f(r2(8 * x[MINA]))}.` }) },
-        { board: dec({ ...inp, cols: ["g", "e", "b"], parts: ALL, pick: true, focus: ["a", "an"], ruler: ruler(x, true) }) + whyLines(s.sc, x, "the mix") + pickLine(s.sc), scene: decScene(x, true, { arrows: true, drops: [TIA], mark: true, cap: `Why “an” now: the English dimensions and the biases are as before, but the mix reaches ${f(x[TIA])} along tía, past the ${f(MARK)} mark. tía gives “an” + ${f(s.sc.rows[1].gp)} and “a” − ${f(s.sc.rows[1].gp)}: a gap of ${f(r2(2 * s.sc.rows[1].gp))}, more than the bias of “a”, 5.6. The decoder writes “an”.` }) }];
+        { board: `<div class="chain">${rowsOf(DIMS)}${col(x, "the mix")}<div class="lk cur"><span>copied</span><span class="ar">→</span></div></div>` + eqD(col(stateOf(x, ST0), "the decoder state before word 1", "cur")),
+          scene: decScene(x, true, { arrows: true, cap: "The mix in the picture, with the word vectors of section 1. It reaches 0.44 along tía; the summary reached 0.25." }) },
+        { board: dec({ ...inp, cols: ["g", "e", "b"], parts: ["g"] }), scene: decScene(x, true, { arrows: true, drops: [TIA, MINA], cap: `tía gives “an” and “aunt” 8 × ${f(x[TIA])} = ${f(r2(8 * x[TIA]))}, and takes the same from “a” and “friend”. Along miña the mix reaches only ${f(x[MINA])}: “of” and “mine” get ${f(r2(8 * x[MINA]))}.` }) },
+        { board: dec({ ...inp, cols: ["g", "e", "b"], parts: ALL, pick: true, focus: ["a", "an"], ruler: ruler(x, true) }) + whyLines(s.sc, x, "the mix") + pickLine(s.sc), scene: decScene(x, true, { arrows: true, drops: [TIA], mark: true, cap: `Why “an” now: the gap from tía is ${f(r2(2 * s.sc.rows[1].gp))}, more than the bias of “a”, ${f(CAND.a.b)}. The mix is past the ${f(MARK)} mark. The decoder writes “an”.` }) }];
     } }],
-  ["With attention: the rest of the phrase", {
-    text: "Each word is folded into the English dimensions of the state, so the query, the weights and the mix change too.",
+  ["The rest of the phrase, with attention", {
+    text: "After each word, the state changes as in section 1. Now the query is computed from the state, so the query changes too, and with it the weights and the mix.",
     frames: () => {
       const caps = [
         `After “an”, the noun is still to come, so the query stays ${vecTxt(ATT[1].q)}: the same weights, the same mix. “aunt” ${f(ATT[1].sc.rows[2].s)} beats “friend” ${f(ATT[1].sc.rows[3].s)}: “aunt”.`,
-        `“aunt” is written, at 0.5: the query shifts by 0.5 × (0, −12, 12) to ${vecTxt(ATT[2].q)}. It looks for miña now: weight ${f(ATT[2].a.sm.p[2])} on the key after miña. The mix reaches ${f(ATT[2].a.mix[MINA])} along miña: “of” ${f(ATT[2].sc.rows[4].s)}.`,
+        `“aunt” is written, at 0.5: the query shifts by 0.5 × (0, −12, 12) to ${vecTxt(ATT[2].q)}. It asks “how much miña?” now: weight ${f(ATT[2].a.sm.p[2])} on the key after miña. The mix reaches ${f(ATT[2].a.mix[MINA])} along miña: “of” ${f(ATT[2].sc.rows[4].s)}.`,
         `The query shifts further toward miña. The mix stays near the miña axis: “mine” ${f(ATT[3].sc.rows[5].s)}.`,
-        `“‹end›” has the highest score: the phrase ends. With attention: “${phrase(ATT)}”. Without attention it was “${phrase(ONE)}”.`];
+        `“‹end›” has the highest score: the phrase is finished. With attention: “${phrase(ATT)}”. Without attention it was “${phrase(ONE)}”.`];
       return ATT.slice(1).map((s, i) => ({
-        board: work([stLine(ATT[i].w, s.st), qLine(s), wLine(s)]) + dec({ x: s.a.mix, xName: "the mix", st: s.st, cols: ["g", "e", "b"], parts: ALL, pick: true, formula: false }),
+        board: `<p class="label">the English dimensions of the decoder state: “${ATT[i].w}” is folded in</p>` + `<div class="chain">${rowsOf(ST)}${col(ATT[i].st, `before word ${i + 1}`)}<div class="lk cur"><span>½ × old + ½ in “${ATT[i].w}”</span><span class="ar">→</span></div>${col(s.st, `before word ${i + 2}`, "cur")}</div>` + `<p class="label">the first three dimensions: a new query, new weights, a new mix</p>` +
+          work([qLine(s), wLine(s)]) + dec({ x: s.a.mix, xName: "the mix", st: s.st, cols: ["g", "e", "b"], parts: ALL, pick: true }),
         scene: decScene(s.a.mix, true, { arrows: true, drops: [TIA, MINA], mark: true, mixes: ATT.slice(0, i + 1).map(t => t.a.mix), xLabel: `mix for word ${i + 2}`, cap: `Word ${i + 2}. ${caps[i]}` }) }));
     } }],
 ];
@@ -1627,7 +1647,7 @@ const STEPS = [
     text: `Both models read our sentence for the first time: it was kept out of their training data. Without attention, the model writes ${nBad(ALIGN.one)} wrong words (in red) and leaves out ${nMiss(ALIGN.one)} words of the saying (struck through). With attention, the translation is exactly right. The next steps show where the first difference comes from.` })],
   ["The encoder's vectors", () => ({ toy: [2, 3], out: [0, 0], src: ["enc"], panels: "",
     text: "The encoder makes one vector per Galician word: 8 numbers, drawn as 8 squares. Each one is computed from the vector before it and the new word, so each also carries something of the words before it. The last one is the summary. Each model has its own encoder; this is the encoder of the model with attention. Step 3 shows the other one. In section 1 each vector had 3 numbers, one per word; here the 8 numbers have no names: training chose them." })],
-  ["Word 1, without attention", () => ({ toy: [5, 6], out: [1, 1], cur: 0, src: ["one"], panels: panel("one", 0),
+  ["Word 1, without attention", () => ({ toy: [4, 6], out: [1, 1], cur: 0, src: ["one"], panels: panel("one", 0),
     text: "The decoder starts from the summary, the vector after the full stop. The first English word is “a” or “an”, and that depends on the noun: “an aunt”, “a friend”. The noun, tía, is the second of the sentence's 31 pieces; after it, the encoder read 29 more (24 words and 5 punctuation marks) before the summary was made. The model gives “a” 0.77 and writes it: wrong." })],
   ["Word 1, with attention", () => ({ toy: [8, 9, 10], out: [1, 1], cur: 0, src: ["att", x.attw[0]], panels: panel("att", 0),
     text: "With attention, the decoder gives each Galician vector a weight (orange bars), and the weights add up to 1. The largest, 0.47, is on tía. The mix of the vectors, weighted this way, goes to the decoder instead of the summary, and “an” gets 0.95. The weights are computed as in section 2: the query times each encoder vector, then softmax. Here the query is the decoder state." })],
@@ -1669,7 +1689,7 @@ How to answer: short, plain sentences. Define any technical term the first time 
 The page:
 - Running example: the Galician sentence "Unha tía miña, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»" (from the novel Speechwriter by Paulo Naseiro). "tía miña" is noun then possessive; English "my aunt" reverses the order.
 - The page continues a separate translation page (training, the encoder's one summary vector, word-by-word decoding without attention, why "an aunt of mine" is rare in English).
-- Section 1: a small model whose numbers are set by hand (to show how the calculations work; real models learn them in training, as in the skip-gram lesson), on "unha tía miña" → "an aunt of mine". Vectors have 3 rows (unha, tía, miña), drawn as columns of numbered squares and as points in a draggable 3-D picture. Eleven steps, each shown piece by piece; steps 1–7 are section 1 (“Without attention, computed by hand”; step 4 is a hand-simulated training of the vectors of an and a, step 5 the dot products, step 6 the bias), steps 8–11 are section 2 (“With attention, computed by hand”, numbered 1–4 there, opening with what attention changes: only the state's first three dimensions, a mix of all encoder vectors instead of the summary): 1 word vectors (one-hot); 2 encoder (new = ½ previous + ½ word, from zeros: (0.5,0,0), (0.25,0.5,0), summary (0.125,0.25,0.5)); 3 the decoder state: a vector with 11 dimensions: unha, tía, miña (from the encoder; without attention the summary, the same for every English word) and ‹start›, a, an, aunt, friend, of, mine, yours (what has been written; before the first word the start token ‹start› is folded in with the encoder's rule: 0.5; after each word ½ × every old value + ½ in that word's dimension). Only the first three dimensions fit in the 3-D picture; 4 word 1, the word vectors and the dot products: a hand-simulated training animation explains where the vectors' numbers come from: as in skip-gram, the right word's vector moves toward the decoder state and wrong words' vectors move away. Two examples: unha tía miña (state (0.125, 0.25, 0.5); an, aunt right; a, friend wrong) and unha amiga miña (amiga has no dimension; state (0.125, 0, 0.5); a, friend right). Step size 16 × the state, two rounds: unha and miña cancel (both phrases have them; so unha cannot tell an from a; the noun does); an, aunt end at (0, 8, 0), a, friend at (0, −8, 0). Other vectors: of, mine (0, 0, 8); yours (0, 0, −8); a, an 12 in ‹start›; aunt, friend 12 in a and an; of 12 in aunt and friend; mine, yours 12 in of; ‹end› 12 in aunt, friend, mine, yours. Word 1: an 2 + 6 = 8, a −2 + 6 = 4; 5 the bias: one number per word added whatever the state; why: for unha amiga miña a and an tie (6 each), though "a" is right 6 of 8 times in the translation page's training examples; biases a 5.6, friend 5.6, ‹end› 1.6, others 0. For unha tía miña: a 9.6, an 8; each unit of tía adds 8 to an and takes 8 from a, so an wins only if 16 × tía > 5.6, tía past 0.35 (red mark); the summary is at 0.25 → "a"; 6 the rest without attention: "a friend of mine" then ‹end› (friend 9.6 vs aunt 8); 7 with attention, word 1: query = (0,6,0) + for each written word from the noun on, its state value × (0,−12,12); keys = encoder vectors; scores 0, 3, 1.5; weights 0.04, 0.79, 0.18; 8 mix (values) (0.24, 0.44, 0.09); 9 the mix in the first three dimensions: an 3.52 + 6 = 9.52 beats a −3.52 + 6 + 5.6 = 8.08 → "an"; 10 the rest with attention: aunt 3.52; query (0,0,6) → weights 0.05, 0.05, 0.91, mix (0.15,0.25,0.46), of 3.68; mine 3.84; (end): "an aunt of mine". Section 4 links each of its steps back to these.
+- Sections 1 and 2: a translation model small enough to run by hand, on "unha tía miña" → "an aunt of mine", numbers set by hand (a real model learns them, as in the skip-gram lesson). Galician word vectors: 3 dimensions (unha, tía, miña), one-hot; drawn as columns of numbered squares and as points in a draggable 3-D picture (which can show only three dimensions). Section 1, "Without attention, computed by hand", 7 steps, each revealed piece by piece: 1 the word vectors; 2 the encoder: one running computation, new vector = ½ old + ½ the word's vector, from zeros: (0.5,0,0), (0.25,0.5,0), summary (0.125,0.25,0.5); 3 from the encoder to the decoder: the decoder knows 8 words (a, an, aunt, friend, of, mine, yours, ‹end›); its state has 11 dimensions: unha, tía, miña (the summary, copied; the same for every English word) and ‹start›, a, an, aunt, friend, of, mine, yours (what has been written; before word 1 the start mark ‹start› is folded in with the encoder's rule: 0.5); 4 scoring: each English word has an 11-dimension vector; score begins with the dot product with the state; word vectors: an, aunt 8 in tía; a, friend −8 in tía; of, mine 8 in miña; yours −8 in miña; a, an 12 in ‹start›; aunt, friend 12 in a and an; of 12 in aunt and friend; mine, yours 12 in of; ‹end› 12 in aunt, friend, mine, yours. Word 1: an 8 × 0.25 + 12 × 0.5 = 8, a −2 + 6 = 4; 5 where the numbers come from: hand-simulated training on two examples (unha tía miña, state (0.125,0.25,0.5 | ‹start› 0.5), right word an; unha amiga miña, amiga has no dimension so its summary is (0.125,0,0.5), right word a): the right word's vector moves toward the state, the wrong word's away, step size 16 × the state, two rounds; unha, miña and ‹start› cancel, so an ends at 8 in tía and a at −8; unha cannot tell an from a, the noun can; 6 the bias: one extra number per word, added whatever the state, learned; why: for unha amiga miña a and an tie (6 each, coin toss) though "a" is right 6 of 8 times in the translation page's examples; biases a 5.6, friend 5.6, ‹end› 1.6, others 0; for unha tía miña: a 9.6, an 8; an wins only if 16 × tía > 5.6, tía past 0.35 (red mark); the summary is at 0.25 → "a"; 7 the rest: each written word folded into the state (½ old + ½ in its dimension); "a friend of mine" then ‹end› (friend 9.6 vs aunt 8; of 10; mine 10; ‹end› 9.1). Section 2, "With attention, computed by hand", 4 steps: 1 the query, a question vector computed from the decoder state (set by hand: before the noun (0,6,0), "how much tía?"; each written word from the noun on adds its state value × (0,−12,12)); keys = the encoder vectors; scores = dot products 0, 3, 1.5; softmax weights 0.04, 0.79, 0.18; 2 the mix = weighted sum of the encoder vectors (values): (0.24, 0.44, 0.09), inside their triangle; 3 the mix replaces the summary in the state: an 3.52 + 6 = 9.52 beats a −3.52 + 6 + 5.6 = 8.08 → "an"; 4 the rest: aunt 9.52; query (0,0,6) → weights 0.05, 0.05, 0.91, mix (0.15,0.25,0.46), of 9.68; mine 9.84; ‹end›: "an aunt of mine". Section 4 links each of its steps back to these.
 - Section 3: the same model with a query the student sets (three sliders; presets an/aunt (0,6,0), of (0,0,6), mine (0,−3,9), unha, a shorter an/aunt query, all zeros, between tía and miña). Shows scores (query · each encoder vector), softmax weights, the mix, and, for each word of the correct phrase (with the decoder state after the correct words before it), the three best scores and the word written with this mix. One mix serves only some words, so the decoder needs a new query per word. In this model and in the trained models of sections 4 and 5, encoder vectors are both keys and values; in transformers, separate learned weights make queries, keys and values.
 - Section 4: early neural MT squeezed the whole source sentence into one vector (a bottleneck for long sentences); attention (Bahdanau, Cho & Bengio 2015) lets the decoder look back at every source word at each step. The section is a six-step guided walk through the two trained 8-dimension models of section 5 on our whole sentence, with their real numbers: the translations (without attention: "A friend of mine, who fixed everything with stories and jokes, used to repeat something like «one is a slave to what one keeps quiet»"; with attention: exactly right); the encoder's 31 vectors (8 squares each; the last is the summary); word 1 without attention (decoder state + summary → a 0.77, an 0.21: wrong, the article depends on the noun tía, read 29 pieces (24 words, 5 punctuation marks) before the summary); word 1 with attention (weights tía 0.47, escravo 0.21; the mix → an 0.95); word 2 (each decoder takes in its own last word: after "a" friend 0.39, neighbor 0.31, cousin 0.28; after "an" aunt 0.96, uncle 0.02); the rest (more errors without attention).
 - Section 5: two toy translation models (GRU encoder and decoder) trained on the same data, identical except for attention, with the same number of parameters. Without attention the decoder gets only the encoder's last vector; with attention it takes a weighted average of all the encoder's vectors at every output word (dot-product scores, softmax). The animation draws each model unrolled: a column of squares (one per dimension, blue positive, pink negative) for the encoder's vector at every Galician word, each made from the one before it, the last one being the summary; below, one column pair per English word written so far: the decoder state (GRU hidden state; the first is a copy of the summary, each next one is computed from the previous state and the word just written) and the context (without attention the same summary at every step; with attention the mix, drawn with lines from the Galician vectors whose thickness is the weight). Under each diagram: decoder state + context → the five most probable English words (softmax over the output layer), the chosen one in orange, the correct one ticked. A collapsible part derives the score (dot product of new state and an encoder vector) and the softmax weights line by line with the real numbers. Example at 8 dimensions, our sentence, second word: without attention friend 0.39, neighbor 0.31, cousin 0.28 (the summary has lost which relative); with attention aunt 0.96. The score is the dot product of the decoder's state and an encoder vector; the model learned in training to make the state similar to the vector that helps predict the next word, e.g. the vector at tía before writing "aunt". Training data: 5,000 template sentences built around the course sentence (other relatives, possessives, verbs, nouns, sayings), each also split into three pieces (noun phrase, noun phrase + relative clause, saying); 8,000 training steps; the course sentence is held out. One pair of models per vector size (8, 16, 64 dimensions). The current state gives the accuracies on 500 test sentences that are not in the training data. Small vectors lose details without attention (wrong relative, wrong verb, half the saying dropped) while the sentence stays fluent; with 64 dimensions both models are perfect on this toy data, because the templates hold little information. In real 2014 systems, one vector lost details of long sentences (Cho et al. 2014; Bahdanau et al. 2015). The toy data is made up; it is no real corpus.
