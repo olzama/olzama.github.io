@@ -310,7 +310,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <div class="heatwrap"><svg id="lookAtt" role="img" aria-label="Encoder vectors; the decoder takes from every one, weighted"></svg></div>
     <div class="weights" id="mixAttTxt"></div>
     <p class="note" id="lookNote"></p>
-    <p class="note">Weights for <i>unha tía miña</i> are made up for this picture; for the whole sentence they are the real model's (section 4, averaged over its heads). The English words are that model's translation. The columns use the simplified encoder of the <a href="mt.html#enc">translation page</a>. Before attention, a long sentence had to fit into the summary alone, and translations of long sentences got much worse.</p>
+    <p class="note">Weights for <i>unha tía miña</i> come from the keys and queries of section 3; for the whole sentence they are the real model's (section 4, averaged over its heads). The English words are that model's translation. The columns use the simplified encoder of the <a href="mt.html#enc">translation page</a>. Before attention, a long sentence had to fit into the summary alone, and translations of long sentences got much worse.</p>
   </section>
 
   <section class="panel" id="compare">
@@ -383,10 +383,11 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <svg id="qkSvg" viewBox="0 0 400 400" role="img" aria-label="Keys and a draggable query in two dimensions" style="touch-action:none; max-width:440px"></svg>
         <div class="controls">
           <span class="note">Set the query to</span>
-          <button data-q="3,0">aunt (3, 0)</button>
-          <button data-q="0,3">my (0, 3)</button>
-          <button data-q="1,0">aunt, shorter (1, 0)</button>
-          <button data-q="1.5,1.5">undecided (1.5, 1.5)</button>
+          <button data-q="3,0">an (3, 0)</button>
+          <button data-q="0,3">aunt (0, 3)</button>
+          <button data-q="-2,1">of (−2, 1)</button>
+          <button data-q="-3,0">mine (−3, 0)</button>
+          <button data-q="0,1">aunt, shorter (0, 1)</button>
         </div>
       </div>
       <div class="col">
@@ -399,10 +400,10 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <table class="grid" id="qkGrid"></table>
         <p class="label">Values and the output</p>
         <svg id="vSvg" viewBox="0 0 400 210" role="img" aria-label="Value vectors and their weighted average" style="max-width:380px"></svg>
-        <p class="note">The two values are made up for this example, with dimensions we can name. The output always lies on the line between them, pulled toward the word with the larger weight.</p>
+        <p class="note">The three values are made up for this example, with dimensions we can name. The output always lies inside the triangle they make, pulled toward the word with the largest weight.</p>
       </div>
     </div>
-    <p class="note">Keys and queries as on the worked-example slide: k<sub>tía</sub> = (1, 0), k<sub>miña</sub> = (0, 1), q<sub>aunt</sub> = (3, 0), q<sub>my</sub> = (0, 3). A real model learns them, with hundreds of dimensions.</p>
+    <p class="note">Keys and queries as in the worked example: k<sub>unha</sub> = (1, 0), k<sub>tía</sub> = (0, 1), k<sub>miña</sub> = (−1, 0); q<sub>an</sub> = (3, 0), q<sub>aunt</sub> = (0, 3), q<sub>of</sub> = (−2, 1), q<sub>mine</sub> = (−3, 0). Section 1 uses the weights they give. A real model learns keys and queries, with hundreds of dimensions.</p>
   </section>
 
   <!-- 4 -->
@@ -531,7 +532,8 @@ function mixHTML(names, vals, empty) {
 }
 
 // ---------- 3: one vector vs attention ----------
-const SHORT = { src: ["unha", "tía", "miña"], tgt: ["an", "aunt", "of", "mine"], w: [softmax([3, 0, 0]), softmax([0, 3, 0]), softmax([0, 1, 3]), softmax([0, 0, 3])] };
+// weights from the keys and queries of section 3
+const SHORT = { src: ["unha", "tía", "miña"], tgt: ["an", "aunt", "of", "mine"], w: [[3, 0], [0, 3], [-2, 1], [-3, 0]].map(q => softmax([[1, 0], [0, 1], [-1, 0]].map(k => q[0] * k[0] + q[1] * k[1]))) };
 const longData = () => { const R = REAL.sentence; return { src: R.src.map(clean), tgt: R.tgt.map(clean), w: avgOf(R.cross, "all", "all") }; };
 let long1 = false, cur1 = 0, t1 = null;
 const lookData = () => long1 ? longData() : SHORT;
@@ -551,7 +553,7 @@ const fracTxt = v => ({ 1: "1", 0.5: "½", 0.25: "¼", 0.125: "⅛", 0.0625: "1/
 const vecTxt = v => `(${v[0].toFixed(2)}, ${v[1].toFixed(2)})`;
 function lookSvg(id, attention) {
   const d = lookData(), n = d.src.length, m = d.tgt.length, c = cur1 - 1;
-  const step = long1 ? 22 : 130, x0 = long1 ? 40 : 80, CH = long1 ? 44 : 96, CWd = long1 ? 11 : 30;
+  const step = long1 ? 22 : 130, x0 = long1 ? 40 : 80, CH = long1 ? 44 : 136, CWd = long1 ? 11 : 30;
   const yW = long1 ? 62 : 40, yTop = long1 ? 74 : 72, yBot = yTop + CH, yD = yBot + (long1 ? 80 : 84), yDB = yD + CH, H = yDB + (long1 ? 70 : 48);
   const ex = p => x0 + p * step;                                  // encoder columns: 0 = start, k + 1 = after word k
   const tx = k => long1 ? x0 + step + k * step * (n - 1) / Math.max(1, m - 1) : ex(k + 1);   // decoder columns under the English words
@@ -581,7 +583,7 @@ function lookSvg(id, attention) {
   if (c >= 0 && attention && !long1) d.w[c].forEach((wt, j) => { g += `<text x="${ex(j + 1)}" y="${yBot + 18}" text-anchor="middle" style="fill:${orange}">${wt.toFixed(2)}</text>`; });
   if (c >= 0 && attention && !long1) g += `<text x="${x0 - CWd / 2}" y="${yBot + 18}" style="fill:${orange}">weights:</text>`;
   // encoder: the start and one column per Galician word
-  const startLab = long1 ? `<text x="${ex(0)}" y="${yW}" transform="rotate(-50 ${ex(0)} ${yW})">start</text>` : `<text x="${ex(0)}" y="${yW}" text-anchor="middle">start</text>`;
+  const startLab = long1 ? `<text x="${ex(0)}" y="${yW}" transform="rotate(-50 ${ex(0)} ${yW})">start</text>` : `<text x="${ex(0)}" y="${yW}" text-anchor="middle">start: zeros</text>`;
   g += startLab;
   for (let p = 0; p <= n; p++) {
     const x = ex(p);
@@ -597,6 +599,7 @@ function lookSvg(id, attention) {
     if (used) g += `<rect x="${x - CWd / 2 - 2.5}" y="${yTop - 2.5}" width="${CWd + 5}" height="${CH + 5}" rx="3" fill="none" stroke="${orange}" stroke-width="2"/>`;
   }
   if (!attention) g += `<text x="${ex(n) + CWd / 2 + 8}" y="${yTop + 12}" style="fill:${orange}">summary</text>`;
+  if (!attention && !long1) g += `<text x="${ex(0) - CWd / 2}" y="${yBot + 18}">grey: what is left of the starting zeros; it adds nothing to the numbers</text>`;
   else g += `<text x="${ex(n) + CWd / 2 + 8}" y="${yTop + 12}">same as above</text>`;
   // the decoder: what it gets for every English word written so far, and the word
   if (!long1) g += `<text x="${tx(0) - CWd / 2 - 10}" y="${yD + CH / 2}" text-anchor="end">the decoder gets</text>`;
@@ -640,49 +643,50 @@ $("lookPlay").addEventListener("click", () => {
 });
 
 // ---------- 2: query, key, score, softmax, value ----------
-const K = [[1, 0], [0, 1]], KN = ["tía", "miña"], KC = ["--blue", "--green"];
-const V = [[0.9, 0.2], [0.15, 0.85]]; // made-up values: (family member, belongs to me)
-let q = [3, 0];
-const P = { o: [90, 318], s: 60 }; // plane: 64 px per unit
+const K = [[1, 0], [0, 1], [-1, 0]], KN = ["unha", "tía", "miña"], KC = ["--blue", "--green", "--neg"];
+const V = [[0.1, 0.1], [0.9, 0.2], [0.15, 0.85]]; // made-up values: (family member, belongs to me)
+const QS = [["an", [3, 0]], ["aunt", [0, 3]], ["of", [-2, 1]], ["mine", [-3, 0]]];
+let q = [0, 3];
+const P = { o: [212, 318], s: 43 }; // plane: 43 px per unit
 const X = x => P.o[0] + x * P.s, Y = y => P.o[1] - y * P.s;
 function renderQK() {
   const sc = K.map(k => q[0] * k[0] + q[1] * k[1]), w = softmax(sc), ex = sc.map(Math.exp), sum = ex.reduce((a, b) => a + b, 0);
   let s = "";
-  for (let g = -1; g <= 4; g++) s += `<line class="gridl" x1="${X(g)}" y1="${Y(-1)}" x2="${X(g)}" y2="${Y(4.4)}"/><line class="gridl" x1="${X(-1)}" y1="${Y(g)}" x2="${X(4.4)}" y2="${Y(g)}"/><text x="${X(g)}" y="${Y(-1) + 16}" text-anchor="middle">${g}</text><text x="${X(-1) - 8}" y="${Y(g) + 4}" text-anchor="end">${g}</text>`;
-  s += `<line class="axis" x1="${X(-1)}" y1="${Y(0)}" x2="${X(4.4)}" y2="${Y(0)}"/><line class="axis" x1="${X(0)}" y1="${Y(-1)}" x2="${X(0)}" y2="${Y(4.4)}"/>`;
-  s += `<defs>${["--blue", "--green", "--orange"].map((c, i) => `<marker id="m${i}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${css(c)}"/></marker>`).join("")}</defs>`;
-  // projections of q on each key = the scores (keys have length 1)
-  s += `<line x1="${X(q[0])}" y1="${Y(q[1])}" x2="${X(q[0])}" y2="${Y(0)}" stroke="${css("--blue")}" stroke-dasharray="4 3"/>`;
-  s += `<line x1="${X(q[0])}" y1="${Y(q[1])}" x2="${X(0)}" y2="${Y(q[1])}" stroke="${css("--green")}" stroke-dasharray="4 3"/>`;
-  s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(q[0])}" y2="${Y(0)}" stroke="${css("--blue")}" stroke-width="5" stroke-opacity="0.35"/>`;
-  s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(0)}" y2="${Y(q[1])}" stroke="${css("--green")}" stroke-width="5" stroke-opacity="0.35"/>`;
-  K.forEach((k, i) => { s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(k[0])}" y2="${Y(k[1])}" stroke="${css(KC[i])}" stroke-width="3" marker-end="url(#m${i})"/><text x="${X(k[0]) + (i ? 8 : -4)}" y="${Y(k[1]) + (i ? 4 : 20)}" fill="${css(KC[i])}">k ${KN[i]}</text>`; });
-  s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(q[0])}" y2="${Y(q[1])}" stroke="${css("--orange")}" stroke-width="3" marker-end="url(#m2)"/>`;
+  for (let g = -4; g <= 4; g++) s += `<line class="gridl" x1="${X(g)}" y1="${Y(-1)}" x2="${X(g)}" y2="${Y(4.4)}"/><text x="${X(g)}" y="${Y(-1) + 16}" text-anchor="middle">${g}</text>`;
+  for (let g = -1; g <= 4; g++) s += `<line class="gridl" x1="${X(-4.2)}" y1="${Y(g)}" x2="${X(4.2)}" y2="${Y(g)}"/><text x="${X(-4.2) - 6}" y="${Y(g) + 4}" text-anchor="end">${g}</text>`;
+  s += `<line class="axis" x1="${X(-4.2)}" y1="${Y(0)}" x2="${X(4.2)}" y2="${Y(0)}"/><line class="axis" x1="${X(0)}" y1="${Y(-1)}" x2="${X(0)}" y2="${Y(4.4)}"/>`;
+  s += `<defs>${[...KC, "--orange"].map((c, i) => `<marker id="m${i}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${css(c)}"/></marker>`).join("")}</defs>`;
+  // the query's two coordinates, which the scores are made of
+  s += `<line x1="${X(q[0])}" y1="${Y(q[1])}" x2="${X(q[0])}" y2="${Y(0)}" stroke="${css("--muted")}" stroke-dasharray="4 3"/>`;
+  s += `<line x1="${X(q[0])}" y1="${Y(q[1])}" x2="${X(0)}" y2="${Y(q[1])}" stroke="${css("--muted")}" stroke-dasharray="4 3"/>`;
+  K.forEach((k, i) => { s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(k[0])}" y2="${Y(k[1])}" stroke="${css(KC[i])}" stroke-width="3" marker-end="url(#m${i})"/><text x="${X(k[0]) + (k[0] > 0 ? 4 : k[0] < 0 ? -4 : 8)}" y="${Y(k[1]) + (k[1] ? 4 : 20)}" text-anchor="${k[0] < 0 ? "end" : "start"}" fill="${css(KC[i])}">k ${KN[i]}</text>`; });
+  s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(q[0])}" y2="${Y(q[1])}" stroke="${css("--orange")}" stroke-width="3" marker-end="url(#m3)"/>`;
   s += `<circle id="qHandle" cx="${X(q[0])}" cy="${Y(q[1])}" r="11" fill="${css("--orange")}" fill-opacity="0.25" stroke="${css("--orange")}" stroke-width="2" style="cursor:grab"/>`;
-  s += `<text x="${X(q[0]) + 14}" y="${Y(q[1]) - 10}" fill="${css("--orange")}">q (${f2(q[0])}, ${f2(q[1])})</text>`;
+  s += `<text x="${X(q[0]) + (q[0] > 2 ? -14 : 14)}" y="${Y(q[1]) - 10}" text-anchor="${q[0] > 2 ? "end" : "start"}" fill="${css("--orange")}">q (${f2(q[0])}, ${f2(q[1])})</text>`;
   $("qkSvg").innerHTML = s;
+  const cls = ["u", "t", "m"], sp = (i, t) => `<span style="color:var(${KC[i]})">${t}</span>`;
+  const par = v => v < 0 ? `(${f2(v)})` : f2(v);
   $("qkFormula").innerHTML =
-    `score(<span class="t">tía</span>) = q · k<sub>tía</sub> = ${f2(q[0])}×1 + ${f2(q[1])}×0 = <b>${f2(sc[0])}</b><br>` +
-    `score(<span class="m">miña</span>) = q · k<sub>miña</sub> = ${f2(q[0])}×0 + ${f2(q[1])}×1 = <b>${f2(sc[1])}</b><br>` +
-    `softmax: e<sup>${f2(sc[0])}</sup> = ${ex[0].toFixed(2)}, e<sup>${f2(sc[1])}</sup> = ${ex[1].toFixed(2)}, sum = ${sum.toFixed(2)}<br>` +
-    `weights: <span class="t">${ex[0].toFixed(2)} / ${sum.toFixed(2)} = ${f2(w[0])}</span>, <span class="m">${ex[1].toFixed(2)} / ${sum.toFixed(2)} = ${f2(w[1])}</span><br>` +
-    `output = ${f2(w[0])} × v<sub>tía</sub> + ${f2(w[1])} × v<sub>miña</sub>`;
+    K.map((k, i) => `score(${sp(i, KN[i])}) = q · k<sub>${KN[i]}</sub> = ${f2(q[0])}×${par(k[0])} + ${f2(q[1])}×${par(k[1])} = <b>${f2(sc[i])}</b>`).join("<br>") + "<br>" +
+    `softmax: ${sc.map((v, i) => `e<sup>${f2(v)}</sup> = ${ex[i].toFixed(2)}`).join(", ")}, sum = ${sum.toFixed(2)}<br>` +
+    `weights: ${K.map((_, i) => sp(i, `${ex[i].toFixed(2)} / ${sum.toFixed(2)} = ${f2(w[i])}`)).join(", ")}<br>` +
+    `output = ${K.map((_, i) => `${f2(w[i])} × v<sub>${KN[i]}</sub>`).join(" + ")}`;
   $("qkBars").innerHTML = KN.map((n, i) => `<div class="bar"><span class="w">${n}</span><span class="track"><span class="fill" style="width:${(w[i] * 100).toFixed(1)}%;background:var(${KC[i]})"></span></span><span>${f2(w[i])}</span></div>`).join("");
-  const len = Math.hypot(q[0], q[1]);
-  $("qkNote").textContent = len < 1.6 && Math.abs(sc[0] - sc[1]) > 0.3
-    ? "Same direction as the aunt query, but shorter: the scores are closer together, so softmax splits the attention less sharply."
-    : Math.abs(sc[0] - sc[1]) < 0.3 ? "The query points between the keys: equal scores, equal weights." : "The larger score wins most of the weight. A longer query in the same direction makes the split sharper still.";
-  const rows = [["my", [0, 3]], ["aunt", [3, 0]], ["your query", q]];
+  const srt = [...sc].sort((a, b) => b - a), len = Math.hypot(q[0], q[1]);
+  $("qkNote").textContent = srt[0] - srt[1] < 0.3 ? "The query points between two keys: equal scores, equal weights."
+    : len < 1.6 ? "A short query: the scores are close together, so softmax splits the attention less sharply."
+    : "The largest score wins most of the weight. A longer query in the same direction makes the split sharper still.";
+  const rows = [...QS, ["your query", q]];
   $("qkGrid").innerHTML = `<thead><tr><th></th>${KN.map(n => `<th>${n}</th>`).join("")}</tr></thead><tbody>` + rows.map(([n, qq], r) => {
     const ww = softmax(K.map(k => qq[0] * k[0] + qq[1] * k[1]));
-    return `<tr${r === 2 ? ' class="yours"' : ""}><th>${n}</th>${ww.map(x => `<td style="background:rgba(${css("--heat")},${(x * 0.75).toFixed(2)})">${f2(x)}</td>`).join("")}</tr>`;
+    return `<tr${r === rows.length - 1 ? ' class="yours"' : ""}><th>${n}</th>${ww.map(x => `<td style="background:rgba(${css("--heat")},${(x * 0.75).toFixed(2)})">${f2(x)}</td>`).join("")}</tr>`;
   }).join("") + "</tbody>";
   // values plane
   const vx = x => 60 + x * 300, vy = y => 185 - y * 165;
-  const out = [w[0] * V[0][0] + w[1] * V[1][0], w[0] * V[0][1] + w[1] * V[1][1]];
+  const out = [0, 1].map(d => w.reduce((a, wi, i) => a + wi * V[i][d], 0));
   let v = `<line class="axis" x1="${vx(0)}" y1="${vy(0)}" x2="${vx(1.05)}" y2="${vy(0)}"/><line class="axis" x1="${vx(0)}" y1="${vy(0)}" x2="${vx(0)}" y2="${vy(1.05)}"/>`;
   v += `<text x="${vx(1.05)}" y="${vy(0) + 18}" text-anchor="end">family member</text><text x="${vx(0) - 8}" y="${vy(1.02)}" text-anchor="end" transform="rotate(-90 ${vx(0) - 8} ${vy(1.02)})">belongs to me</text>`;
-  v += `<line x1="${vx(V[0][0])}" y1="${vy(V[0][1])}" x2="${vx(V[1][0])}" y2="${vy(V[1][1])}" stroke="${css("--line")}" stroke-dasharray="4 3"/>`;
+  v += `<polygon points="${V.map(p => `${vx(p[0])},${vy(p[1])}`).join(" ")}" fill="none" stroke="${css("--line")}" stroke-dasharray="4 3"/>`;
   V.forEach((p, i) => { v += `<circle cx="${vx(p[0])}" cy="${vy(p[1])}" r="7" fill="${css(KC[i])}"/><text x="${vx(p[0]) + 12}" y="${vy(p[1]) + 4}" fill="${css(KC[i])}">v ${KN[i]}</text>`; });
   v += `<circle cx="${vx(out[0])}" cy="${vy(out[1])}" r="8" fill="none" stroke="${css("--orange")}" stroke-width="3"/><text x="${vx(out[0]) + 12}" y="${vy(out[1]) - 10}" fill="${css("--orange")}">output</text>`;
   $("vSvg").innerHTML = v;
@@ -690,8 +694,8 @@ function renderQK() {
 function qFromEvent(e) {
   const svg = $("qkSvg"), pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
   const p = pt.matrixTransform(svg.getScreenCTM().inverse());
-  const clamp = x => Math.max(-1, Math.min(4.2, x));
-  return [clamp((p.x - P.o[0]) / P.s), clamp((P.o[1] - p.y) / P.s)].map(x => Math.round(x * 20) / 20);
+  const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
+  return [clamp((p.x - P.o[0]) / P.s, -4.2, 4.2), clamp((P.o[1] - p.y) / P.s, -1, 4.2)].map(x => Math.round(x * 20) / 20);
 }
 let dragging = false;
 $("qkSvg").addEventListener("pointerdown", e => { dragging = true; $("qkSvg").setPointerCapture(e.pointerId); q = qFromEvent(e); renderQK(); });
@@ -801,7 +805,7 @@ cur1 = 2; renderLook();
   const top = (toks, ws) => [...ws.keys()].sort((a, b) => ws[b] - ws[a]).slice(0, 4).map(j => `${clean(toks[j])} ${ws[j].toFixed(2)}`).join(", ");
   const lab = v => v === "all" ? "average" : +v + 1;
   return [
-    `Section 1 (look back at every word): two diagrams on the same input (${long1 ? "whole sentence, real averaged weights" : "unha tía miña → an aunt of mine, made-up weights (each English word takes about 0.9 from one vector: an–unha, aunt–tía, of–miña 0.84, mine–miña)"}). Top, without attention: the encoder makes one vector per source word, each drawn as a column of colored segments showing how much of each word it holds (simplified encoder: each new word takes half); the decoder gets only the last vector, the summary, for every English word. Bottom, with attention: lines from every vector, width = weight; the bar shows the weights. English words written so far: ${cur1} of ${lookData().tgt.length}.`,
+    `Section 1 (look back at every word): two diagrams on the same input (${long1 ? "whole sentence, real averaged weights" : "unha tía miña → an aunt of mine, weights from the keys and queries of section 3 (an: 0.95 unha; aunt: 0.91 tía; of: 0.72 miña, 0.27 tía; mine: 0.95 miña)"}). Top, without attention: the encoder makes one vector per source word, each drawn as a column of colored segments showing how much of each word it holds (simplified encoder: each new word takes half); the decoder gets only the last vector, the summary, for every English word. Bottom, with attention: lines from every vector, width = weight; the bar shows the weights. English words written so far: ${cur1} of ${lookData().tgt.length}.`,
     `Section 3 (query, key, score, softmax, value): q = (${q[0]}, ${q[1]}); scores tía ${sc[0].toFixed(2)}, miña ${sc[1].toFixed(2)}; weights tía ${w[0].toFixed(2)}, miña ${w[1].toFixed(2)}.`,
     `Section 4 (real cross-attention): translation "${D.translation}". Layer ${lab($("realLayer").value)}, head ${lab($("realHead").value)}. Selected output token "${clean(D.tgt[tSel])}" looks at: ${top(D.src, rw)}.`,
     `Section 5 (encoder self-attention): layer ${sLayer + 1}, head ${sHead + 1}; selected word "${clean(D.src[sSel])}" looks at: ${top(D.src, sw)}.`,
@@ -1164,7 +1168,7 @@ The page:
 - The page continues a separate translation page (training, the encoder's one summary vector, word-by-word decoding without attention, why "an aunt of mine" is rare in English).
 - Section 1: early neural MT squeezed the whole source sentence into one vector (a bottleneck for long sentences); attention (Bahdanau, Cho & Bengio 2015) lets the decoder look back at every source word at each step. Toy weights: writing "my" puts 0.95 on miña, writing "aunt" puts 0.95 on tía.
 - Section 2: two toy translation models (GRU encoder and decoder) trained on the same data, identical except for attention, with the same number of parameters. Without attention the decoder gets only the encoder's last vector; with attention it takes a weighted average of all the encoder's vectors at every output word (dot-product scores, softmax). The animation draws each model unrolled: a column of squares (one per dimension, blue positive, pink negative) for the encoder's vector at every Galician word, each made from the one before it, the last one being the summary; below, one column pair per English word written so far: the decoder state (GRU hidden state; the first is a copy of the summary, each next one is computed from the previous state and the word just written) and the context (without attention the same summary at every step; with attention the mix, drawn with lines from the Galician vectors whose thickness is the weight). Under each diagram: decoder state + context → the five most probable English words (softmax over the output layer), the chosen one in orange, the correct one ticked. A collapsible part derives the score (dot product of new state and an encoder vector) and the softmax weights line by line with the real numbers. Example at 8 dimensions, our sentence, second word: without attention friend 0.39, neighbor 0.31, cousin 0.28 (the summary has lost which relative); with attention aunt 0.96. The score is the dot product of the decoder's state and an encoder vector; the model learned in training to make the state similar to the vector that helps predict the next word, e.g. the vector at tía before writing "aunt". Training data: 5,000 template sentences built around the course sentence (other relatives, possessives, verbs, nouns, sayings), each also split into three pieces (noun phrase, noun phrase + relative clause, saying); 8,000 training steps; the course sentence is held out. One pair of models per vector size (8, 16, 64 dimensions). The current state gives the accuracies on 500 test sentences that are not in the training data. Small vectors lose details without attention (wrong relative, wrong verb, half the saying dropped) while the sentence stays fluent; with 64 dimensions both models are perfect on this toy data, because the templates hold little information. In real 2014 systems, one vector lost details of long sentences (Cho et al. 2014; Bahdanau et al. 2015). The toy data is made up; it is no real corpus.
-- Section 3: keys k_tía = (1, 0), k_miña = (0, 1); queries q_aunt = (3, 0), q_my = (0, 3), all hand-set as on the course slide. Score = q · k; softmax turns scores into weights that sum to 1 (e^3 / (e^3 + e^0) = 0.95); the output is the weighted average of the value vectors. The two value vectors in the small plot are made up, with dimensions named "family member" and "belongs to me". A shorter query in the same direction gives a less sharp split.
+- Section 3: keys k_unha = (1, 0), k_tía = (0, 1), k_miña = (−1, 0); queries q_an = (3, 0), q_aunt = (0, 3), q_of = (−2, 1), q_mine = (−3, 0), all hand-set as in the worked example (unha tía miña → an aunt of mine). Score = q · k; softmax turns scores into weights that sum to 1 (for aunt: scores 0, 3, 0; e^3 / (e^0 + e^3 + e^0) = 20.09 / 22.09 = 0.91 for tía, 0.05 each for unha and miña; an: 0.95 on unha; of: 0.72 miña, 0.27 tía; mine: 0.95 on miña). The output is the weighted average of the value vectors. The three value vectors in the small plot are made up, with dimensions named "family member" and "belongs to me". A shorter query in the same direction gives a less sharp split (aunt, shorter (0, 1): 0.21, 0.58, 0.21). Section 1 uses these same weights.
 - Section 4: real cross-attention from the Helsinki-NLP/opus-mt-gl-en model (6 decoder layers × 8 heads) on the full sentence, recorded with one teacher-forced pass over its own greedy translation. Tokens are subword pieces; ‹/s› ends the sentence and often receives "parked" attention. Averaged over all heads, "aunt" looks most at "tía" (0.31); single late-layer heads are much sharper (layer 6 head 2: 0.99), early layers barely align.
 - Section 5: the encoder's self-attention (6 layers × 8 heads), each word attending to every source word. Heads have different habits, e.g. layer 3 head 4 mostly looks at the next word, layer 6 head 7 at the previous word (miña → tía 0.94).
 - Section 6: who decides what a head does. Nobody: designers choose the number of layers and heads, their sizes and the training task; every head starts random and gradient descent changes all of them to lower the loss; jobs emerge and are found afterwards by analysis (Clark et al. 2019; Voita et al. 2019; Michel et al. 2019 found many heads can be removed). A toy model (2 layers × 2 heads, 2-D keys and queries) learns "the animal didn't cross the street because it was tired/wide" (96 sentences; tired, scared, lazy → the animal; wide, busy, wet → the place; example after Uszkoreit 2017). Three runs differ only in the random seed: in start A one head of layer 2 looks at the animal for animal adjectives and at the place for place adjectives (the classic picture); in start B the job is split between two heads; in start C no head looks at either noun much, yet all answers are right, because information can travel through other words in layer 1.`;

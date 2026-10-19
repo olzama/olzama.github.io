@@ -1993,8 +1993,9 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <iframe class="frame" title="One vector, or looking back at every word" data-src="../artifacts/attention.html?embed=look"></iframe>
   </div>
   <div class="notes">
-    <p>Choose tía miña and press Next English word.</p>
-    <p>The top row shows the decoder without attention: it uses only the last summary, so it uses the words in whatever proportions that summary holds, mostly the last ones. The bottom row shows the decoder with attention: for every English word it chooses new weights.</p>
+    <p>Choose unha tía miña and press Next English word.</p>
+    <p>Each column is one vector of the encoder. Each new Galician word takes half of the vector. The colored parts show how much of each word a vector holds.</p>
+    <p>Under each English word is the vector the decoder gets. Without attention, it is always the last vector, the summary. In the summary, tía makes up only a quarter. With attention, the decoder mixes all the vectors. For aunt, tía makes up almost half of the mix.</p>
     <p>Then choose the whole sentence. Without attention, tía is almost gone. With attention, the decoder can still find it.</p>
   </div>
 </section>
@@ -2002,23 +2003,27 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
 <section class="screen" id="alignment" data-step="4">
   <header><span class="kind">Step 4 · Attention</span><h2>The alignment problem in translation</h2></header>
   <div class="body">
-    <p class="sent small">Unha <span class="hl">tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”.</p>
-    <svg class="svgfig" viewBox="0 0 260 130" role="img" aria-label="tía connects to aunt, miña connects to my: the lines cross" style="max-width:360px">
+    <p class="sent small"><span class="hl">Unha tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”.</p>
+    <svg class="svgfig" viewBox="0 0 260 175" role="img" aria-label="unha connects to an, tía to aunt, miña to both of and mine" style="max-width:360px">
       <g font-size="16" text-anchor="middle">
-        <text x="50" y="35">tía</text><text x="50" y="85">miña</text>
-        <text x="210" y="35">my</text><text x="210" y="85">aunt</text>
-        <line x1="72" y1="30" x2="186" y2="80" stroke="var(--blue)" stroke-width="2"/>
-        <line x1="78" y1="80" x2="190" y2="30" stroke="var(--green)" stroke-width="2"/>
-        <text x="50" y="120" font-size="11" class="muted">Galician</text><text x="210" y="120" font-size="11" class="muted">English</text>
+        <text x="50" y="35" font-style="italic">unha</text><text x="50" y="80" font-style="italic">tía</text><text x="50" y="125" font-style="italic">miña</text>
+        <text x="210" y="25">an</text><text x="210" y="60">aunt</text><text x="210" y="95">of</text><text x="210" y="130">mine</text>
+        <line x1="78" y1="30" x2="190" y2="20" stroke="var(--blue)" stroke-width="2"/>
+        <line x1="72" y1="75" x2="184" y2="55" stroke="var(--green)" stroke-width="2"/>
+        <line x1="78" y1="120" x2="194" y2="90" stroke="var(--neg)" stroke-width="2"/>
+        <line x1="78" y1="120" x2="184" y2="125" stroke="var(--neg)" stroke-width="2"/>
+        <text x="50" y="165" font-size="11" class="muted">Galician</text><text x="210" y="165" font-size="11" class="muted">English</text>
       </g>
     </svg>
     <ul class="points">
-      <li>The aunt is introduced as “<i>tía miña</i>”: noun before possessive, the reverse of English</li>
-      <li>Attention learns this reordering automatically, with no separate step</li>
+      <li>The aunt is introduced as “<i>unha tía miña</i>”: three Galician words, four English words</li>
+      <li>One Galician word, <i>miña</i>, becomes two English words: “of mine”</li>
+      <li>Attention learns which Galician word to look at for each English word, with no separate alignment step</li>
     </ul>
   </div>
   <div class="notes">
-    <p>Look at just these two words, the sentence's introduction of the aunt character: "tía miña," noun then possessive. English reverses that order: "my aunt," possessive then noun. This kind of word-order mismatch, where the same meaning is expressed with words in a different sequence, is one of the oldest, most fundamental problems in translation — exactly what the old rule-based era needed painstaking, hand-written reordering rules for, language pair by language pair. What we're about to see is that attention learns this kind of reordering completely automatically, directly from translated example sentences, with no separate alignment step and no hand-written rule at all.</p>
+    <p>Look at the first three words of the sentence: "unha tía miña". This is how the story introduces the aunt. The English translation is "an aunt of mine". Three Galician words become four English words. "Unha" becomes "an". "Tía" becomes "aunt". "Miña" becomes two words, "of mine".</p>
+    <p>So the words do not match one to one. In other sentences, the order changes too. Finding which source word goes with which target word is called alignment. It is one of the oldest problems in translation. Rule-based systems needed hand-written rules for it, for every language pair. Attention learns it from translated example sentences. There is no separate alignment step and no hand-written rule.</p>
   </div>
 </section>
 
@@ -2037,65 +2042,76 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
 </section>
 
 <section class="screen" id="workedattn" data-step="4">
-  <header><span class="kind">Step 4 · Attention</span><h2>Worked example: aligning “tía miña” → “my aunt”</h2></header>
+  <header><span class="kind">Step 4 · Attention</span><h2>Worked example: aligning “unha tía miña” → “an aunt of mine”</h2></header>
   <div class="body">
-    <p class="sent small">Unha <span class="hl">tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”.</p>
+    <p class="sent small"><span class="hl">Unha tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”.</p>
     <div class="board">
-      <svg viewBox="0 0 1000 440" role="img" aria-label="Keys k_tía = (1, 0) and k_miña = (0, 1). To write aunt, q_aunt = (3, 0) gives scores 3 and 0; softmax gives e³ / (e³ + e⁰) = 20.09 / 21.09 ≈ 0.95 for tía and ≈ 0.05 for miña. To write my, q_my = (0, 3) gives scores 0 and 3 and weights 0.05 and 0.95">
-<path d="M80 330 H 320" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0" data-t="0.4"/>
-<path d="M80 330 V 90" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0" data-t="0.4"/>
-<text x="146.0" y="354.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">1</text>
-<text x="60.0" y="265.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">1</text>
-<text x="216.0" y="354.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">2</text>
-<text x="60.0" y="195.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">2</text>
-<text x="286.0" y="354.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">3</text>
-<text x="60.0" y="125.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">3</text>
-<line x1="80.0" y1="330.0" x2="150.0" y2="330.0" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" data-s="2" data-d="0"/>
-<path d="M138.0 335.1 L150.0 330.0 L138.0 324.9" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.6" data-a="fade" data-t="0.2"/>
-<text x="120.0" y="382.0" font-size="22" style="fill:var(--blue)" data-s="2" data-d="0.6">k<tspan dy="6" font-size="0.68em">tía</tspan><tspan dy="-6">​</tspan> = (1, 0)</text>
-<line x1="80.0" y1="330.0" x2="80.0" y2="260.0" stroke="var(--green)" stroke-width="3" stroke-linecap="round" data-s="3" data-d="0"/>
-<path d="M85.1 272.0 L80.0 260.0 L74.9 272.0" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="0.6" data-a="fade" data-t="0.2"/>
-<text x="92.0" y="266.0" font-size="22" style="fill:var(--green)" data-s="3" data-d="0.6">k<tspan dy="6" font-size="0.68em">miña</tspan><tspan dy="-6">​</tspan> = (0, 1)</text>
-<text y="40" font-size="24" style="fill:var(--orange)" data-s="4" data-d="0" data-line="A0" data-x0="420">to write “aunt”:</text>
-<text y="40" font-size="24" style="fill:var(--orange)" data-s="4" data-d="0.4" data-line="A0">q<tspan dy="6" font-size="0.68em">aunt</tspan><tspan dy="-6">​</tspan> = (3, 0)</text>
-<line x1="80.0" y1="330.0" x2="290.0" y2="330.0" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" data-s="4" data-d="0.4"/>
-<path d="M278.0 335.1 L290.0 330.0 L278.0 324.9" fill="none" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="4" data-d="1.0" data-a="fade" data-t="0.2"/>
-<text x="250.0" y="316.0" font-size="22" style="fill:var(--orange)" data-s="4" data-d="1.0">q<tspan dy="6" font-size="0.68em">aunt</tspan><tspan dy="-6">​</tspan></text>
-<text y="86" font-size="24" style="fill:currentColor" data-s="5" data-d="0" data-line="A1" data-x0="420" id="a1">q<tspan dy="6" font-size="0.68em">aunt</tspan><tspan dy="-6">​</tspan> · k<tspan dy="6" font-size="0.68em">tía</tspan><tspan dy="-6">​</tspan> =</text>
-<text y="86" font-size="24" style="fill:currentColor" data-s="6" data-d="0" data-line="A1">3 · 1</text>
-<text y="86" font-size="24" style="fill:currentColor" data-s="7" data-d="0" data-line="A1">+ 0 · 0</text>
-<text y="86" font-size="24" style="fill:var(--blue)" data-s="8" data-d="0" data-line="A1">= 3</text>
-<text y="128" font-size="24" style="fill:currentColor" data-s="9" data-d="0" data-line="A2" data-x0="420">q<tspan dy="6" font-size="0.68em">aunt</tspan><tspan dy="-6">​</tspan> · k<tspan dy="6" font-size="0.68em">miña</tspan><tspan dy="-6">​</tspan> =</text>
-<text y="128" font-size="24" style="fill:currentColor" data-s="10" data-d="0" data-line="A2">3 · 0</text>
-<text y="128" font-size="24" style="fill:currentColor" data-s="11" data-d="0" data-line="A2">+ 0 · 1</text>
-<text y="128" font-size="24" style="fill:var(--green)" data-s="12" data-d="0" data-line="A2">= 0</text>
-<text y="214" font-size="24" style="fill:currentColor" data-s="13" data-d="0" data-line="A3" data-x0="420">weight of tía =</text>
-<g class="bfrac" data-line="A3"><text class="num" y="198" font-size="24" style="fill:var(--blue)" data-s="13" data-d="0">e³</text><line class="bar" y1="207" y2="207" stroke="currentColor" stroke-width="2" data-s="13" data-d="0"/><text class="den" y="231" font-size="24" style="fill:var(--blue)" data-s="14" data-d="0">e³</text><text class="den" y="231" font-size="24" style="fill:var(--green)" data-s="15" data-d="0">+ e⁰</text></g>
-<text y="214" font-size="24" style="fill:currentColor" data-s="16" data-d="0" data-line="A3">=</text>
-<g class="bfrac" data-line="A3"><text class="num" y="198" font-size="24" style="fill:currentColor" data-s="16" data-d="0">20.09</text><line class="bar" y1="207" y2="207" stroke="currentColor" stroke-width="2" data-s="16" data-d="0"/><text class="den" y="231" font-size="24" style="fill:currentColor" data-s="16" data-d="0">20.09 + 1</text></g>
-<text y="214" font-size="24" style="fill:var(--blue)" data-s="17" data-d="0" data-line="A3">≈ 0.95</text>
-<text y="300" font-size="24" style="fill:currentColor" data-s="18" data-d="0" data-line="A4" data-x0="420">weight of miña =</text>
-<g class="bfrac" data-line="A4"><text class="num" y="284" font-size="24" style="fill:var(--green)" data-s="18" data-d="0">e⁰</text><line class="bar" y1="293" y2="293" stroke="currentColor" stroke-width="2" data-s="18" data-d="0"/><text class="den" y="317" font-size="24" style="fill:currentColor" data-s="18" data-d="0">e³ + e⁰</text></g>
-<text y="300" font-size="24" style="fill:currentColor" data-s="19" data-d="0" data-line="A4">=</text>
-<g class="bfrac" data-line="A4"><text class="num" y="284" font-size="24" style="fill:currentColor" data-s="19" data-d="0">1</text><line class="bar" y1="293" y2="293" stroke="currentColor" stroke-width="2" data-s="19" data-d="0"/><text class="den" y="317" font-size="24" style="fill:currentColor" data-s="19" data-d="0">21.09</text></g>
-<text y="300" font-size="24" style="fill:var(--green)" data-s="20" data-d="0" data-line="A4">≈ 0.05</text>
-<text y="400" font-size="24" style="fill:var(--neg)" data-s="21" data-d="0" data-line="M1" data-x0="420">to write “my”:</text>
-<text y="400" font-size="24" style="fill:var(--neg)" data-s="21" data-d="0.4" data-line="M1">q<tspan dy="6" font-size="0.68em">my</tspan><tspan dy="-6">​</tspan> = (0, 3)</text>
-<line x1="80.0" y1="330.0" x2="80.0" y2="120.0" stroke="var(--neg)" stroke-width="4" stroke-linecap="round" data-s="21" data-d="0.4"/>
-<path d="M85.1 132.0 L80.0 120.0 L74.9 132.0" fill="none" stroke="var(--neg)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="21" data-d="1.0" data-a="fade" data-t="0.2"/>
-<text x="92.0" y="128.0" font-size="22" style="fill:var(--neg)" data-s="21" data-d="1.0">q<tspan dy="6" font-size="0.68em">my</tspan><tspan dy="-6">​</tspan></text>
-<text y="400" font-size="24" style="fill:currentColor" data-s="22" data-d="0" data-line="M1">→ scores 0, 3</text>
-<text y="400" font-size="24" style="fill:var(--neg)" data-s="23" data-d="0" data-line="M1">→ weights 0.05, 0.95</text>
+      <svg viewBox="0 0 1000 480" role="img" aria-label="Keys k_unha = (1, 0), k_tía = (0, 1) and k_miña = (−1, 0). To write aunt, q_aunt = (0, 3) gives scores 0, 3 and 0; softmax gives e³ / (e⁰ + e³ + e⁰) = 20.09 / 22.09 ≈ 0.91 for tía and ≈ 0.05 each for unha and miña. To write an, q_an = (3, 0) gives weights 0.95, 0.05, 0.00; to write mine, q_mine = (−3, 0) gives 0.00, 0.05, 0.95">
+<path d="M46.0 330 H 454.0" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0" data-t="0.4"/>
+<path d="M250 330 V 110" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0" data-t="0.4"/>
+<text x="60.0" y="354.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">−3</text>
+<text x="120.0" y="354.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">−2</text>
+<text x="180.0" y="354.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">−1</text>
+<text x="306.0" y="354.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">1</text>
+<text x="366.0" y="354.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">2</text>
+<text x="426.0" y="354.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">3</text>
+<text x="230.0" y="275.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">1</text>
+<text x="230.0" y="215.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">2</text>
+<text x="230.0" y="155.0" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0.3" data-a="fade">3</text>
+<line x1="250.0" y1="330.0" x2="310.0" y2="330.0" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" data-s="2" data-d="0"/>
+<path d="M298.0 335.1 L310.0 330.0 L298.0 324.9" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.6" data-a="fade" data-t="0.2"/>
+<text x="300.0" y="386.0" font-size="22" style="fill:var(--blue)" data-s="2" data-d="0.6">k<tspan dy="6" font-size="0.68em">unha</tspan><tspan dy="-6">​</tspan> = (1, 0)</text>
+<line x1="250.0" y1="330.0" x2="250.0" y2="270.0" stroke="var(--green)" stroke-width="3" stroke-linecap="round" data-s="3" data-d="0"/>
+<path d="M255.1 282.0 L250.0 270.0 L244.9 282.0" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="0.6" data-a="fade" data-t="0.2"/>
+<text x="262.0" y="276.0" font-size="22" style="fill:var(--green)" data-s="3" data-d="0.6">k<tspan dy="6" font-size="0.68em">tía</tspan><tspan dy="-6">​</tspan> = (0, 1)</text>
+<line x1="250.0" y1="330.0" x2="190.0" y2="330.0" stroke="var(--neg)" stroke-width="3" stroke-linecap="round" data-s="4" data-d="0"/>
+<path d="M202.0 324.9 L190.0 330.0 L202.0 335.1" fill="none" stroke="var(--neg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="4" data-d="0.6" data-a="fade" data-t="0.2"/>
+<text x="20.0" y="386.0" font-size="22" style="fill:var(--neg)" data-s="4" data-d="0.6">k<tspan dy="6" font-size="0.68em">miña</tspan><tspan dy="-6">​</tspan> = (−1, 0)</text>
+<text y="40" font-size="24" style="fill:var(--orange)" data-s="5" data-d="0" data-line="A0" data-x0="480">to write “aunt”:</text>
+<text y="40" font-size="24" style="fill:var(--orange)" data-s="5" data-d="0.4" data-line="A0">q<tspan dy="6" font-size="0.68em">aunt</tspan><tspan dy="-6">​</tspan> = (0, 3)</text>
+<line x1="250.0" y1="330.0" x2="250.0" y2="150.0" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" data-s="5" data-d="0.4"/>
+<path d="M255.1 162.0 L250.0 150.0 L244.9 162.0" fill="none" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="5" data-d="1.0" data-a="fade" data-t="0.2"/>
+<text x="262.0" y="158.0" font-size="22" style="fill:var(--orange)" data-s="5" data-d="1.0">q<tspan dy="6" font-size="0.68em">aunt</tspan><tspan dy="-6">​</tspan></text>
+<text y="86" font-size="24" style="fill:currentColor" data-s="6" data-d="0" data-line="A1" data-x0="480">q<tspan dy="6" font-size="0.68em">aunt</tspan><tspan dy="-6">​</tspan> · k<tspan dy="6" font-size="0.68em">unha</tspan><tspan dy="-6">​</tspan> =</text>
+<text y="86" font-size="24" style="fill:currentColor" data-s="7" data-d="0" data-line="A1">0 · 1</text>
+<text y="86" font-size="24" style="fill:currentColor" data-s="8" data-d="0" data-line="A1">+ 3 · 0</text>
+<text y="86" font-size="24" style="fill:var(--blue)" data-s="9" data-d="0" data-line="A1">= 0</text>
+<text y="128" font-size="24" style="fill:currentColor" data-s="10" data-d="0" data-line="A2" data-x0="480">q<tspan dy="6" font-size="0.68em">aunt</tspan><tspan dy="-6">​</tspan> · k<tspan dy="6" font-size="0.68em">tía</tspan><tspan dy="-6">​</tspan> =</text>
+<text y="128" font-size="24" style="fill:currentColor" data-s="11" data-d="0" data-line="A2">0 · 0</text>
+<text y="128" font-size="24" style="fill:currentColor" data-s="12" data-d="0" data-line="A2">+ 3 · 1</text>
+<text y="128" font-size="24" style="fill:var(--green)" data-s="13" data-d="0" data-line="A2">= 3</text>
+<text y="170" font-size="24" style="fill:currentColor" data-s="14" data-d="0" data-line="A3" data-x0="480">q<tspan dy="6" font-size="0.68em">aunt</tspan><tspan dy="-6">​</tspan> · k<tspan dy="6" font-size="0.68em">miña</tspan><tspan dy="-6">​</tspan> =</text>
+<text y="170" font-size="24" style="fill:currentColor" data-s="15" data-d="0" data-line="A3">0 · (−1)</text>
+<text y="170" font-size="24" style="fill:currentColor" data-s="16" data-d="0" data-line="A3">+ 3 · 0</text>
+<text y="170" font-size="24" style="fill:var(--neg)" data-s="17" data-d="0" data-line="A3">= 0</text>
+<text y="250" font-size="24" style="fill:currentColor" data-s="18" data-d="0" data-line="A4" data-x0="480">weight of tía =</text>
+<g class="bfrac" data-line="A4"><text class="num" y="234" font-size="24" style="fill:var(--green)" data-s="18" data-d="0">e³</text><line class="bar" y1="243" y2="243" stroke="currentColor" stroke-width="2" data-s="18" data-d="0"/><text class="den" y="267" font-size="24" style="fill:var(--blue)" data-s="19" data-d="0">e⁰</text><text class="den" y="267" font-size="24" style="fill:var(--green)" data-s="19" data-d="0">+ e³</text><text class="den" y="267" font-size="24" style="fill:var(--neg)" data-s="19" data-d="0">+ e⁰</text></g>
+<text y="250" font-size="24" style="fill:currentColor" data-s="20" data-d="0" data-line="A4">=</text>
+<g class="bfrac" data-line="A4"><text class="num" y="234" font-size="24" style="fill:currentColor" data-s="20" data-d="0">20.09</text><line class="bar" y1="243" y2="243" stroke="currentColor" stroke-width="2" data-s="20" data-d="0"/><text class="den" y="267" font-size="24" style="fill:currentColor" data-s="20" data-d="0">1 + 20.09 + 1</text></g>
+<text y="250" font-size="24" style="fill:var(--green)" data-s="21" data-d="0" data-line="A4">≈ 0.91</text>
+<text y="330" font-size="24" style="fill:currentColor" data-s="22" data-d="0" data-line="A5" data-x0="480">weight of unha = weight of miña =</text>
+<g class="bfrac" data-line="A5"><text class="num" y="314" font-size="24" style="fill:currentColor" data-s="22" data-d="0">1</text><line class="bar" y1="323" y2="323" stroke="currentColor" stroke-width="2" data-s="22" data-d="0"/><text class="den" y="347" font-size="24" style="fill:currentColor" data-s="22" data-d="0">22.09</text></g>
+<text y="330" font-size="24" style="fill:currentColor" data-s="23" data-d="0" data-line="A5">≈ 0.05</text>
+<text y="410" font-size="24" style="fill:var(--orange)" data-s="24" data-d="0" data-line="M1" data-x0="480">to write “an”:</text>
+<text y="410" font-size="24" style="fill:var(--orange)" data-s="24" data-d="0.4" data-line="M1">q<tspan dy="6" font-size="0.68em">an</tspan><tspan dy="-6">​</tspan> = (3, 0)</text>
+<text y="410" font-size="24" style="fill:currentColor" data-s="25" data-d="0" data-line="M1">→ weights 0.95, 0.05, 0.00</text>
+<text y="456" font-size="24" style="fill:var(--orange)" data-s="26" data-d="0" data-line="M2" data-x0="480">to write “mine”:</text>
+<text y="456" font-size="24" style="fill:var(--orange)" data-s="26" data-d="0.4" data-line="M2">q<tspan dy="6" font-size="0.68em">mine</tspan><tspan dy="-6">​</tspan> = (−3, 0)</text>
+<text y="456" font-size="24" style="fill:currentColor" data-s="27" data-d="0" data-line="M2">→ weights 0.00, 0.05, 0.95</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
-    <ul class="points"><li>95% of the attention on <i>tía</i> for <i>aunt</i>; 95% on <i>miña</i> for <i>my</i>: a clean word-level correspondence, learned from data</li></ul>
+    <ul class="points"><li>91% of the attention on <i>tía</i> for <i>aunt</i>, 95% on <i>unha</i> for <i>an</i>, 95% on <i>miña</i> for <i>mine</i>: a clean word-level correspondence, learned from data</li></ul>
   </div>
   <div class="notes">
-    <p>This is the search analogy from the previous screen, done with real, if tiny and two-dimensional, numbers, so the arithmetic is fully transparent. Key vectors: k(tía) = (1,0), k(miña) = (0,1) — deliberately orthogonal, so each key points at a different query direction.</p>
-    <p>To generate "aunt," the model's query could be q(aunt) = (3,0) — the 3 is picked on purpose, it's the solution. Dot product with k(tía): 3. With k(miña): 0. Softmax of (3,0) ≈ (0.95, 0.05) — 95% of the attention weight lands on "tía."</p>
-    <p>To generate "my," the query flips: q(my) = (0,3). Score against "tía": 0. Against "miña": 3. Softmax gives 95% on "miña."</p>
-    <p>So right as the model is about to output "aunt," it's looking almost entirely at "tía"; right as it's about to output "my," it's looking almost entirely at "miña" — a clean, correct word-level correspondence, discovered entirely from data, with the reordering handled automatically just by which word gets attended to at each generation step. Real attention vectors have hundreds of dimensions and are learned from training data, not hand-set like these — but the mechanism, the arithmetic itself, is identical to what's on this screen.</p>
+    <p>This is the search from the previous screen, done with tiny numbers. Every vector has two dimensions, so we can draw it and check every step.</p>
+    <p>Each Galician word has a key. The key of unha is (1, 0). The key of tía is (0, 1). The key of miña is (minus 1, 0). The three keys point in three different directions.</p>
+    <p>To write "aunt", the decoder makes a query. The query for aunt is (0, 3). It points the same way as the key of tía.</p>
+    <p>Now the scores. A score is a dot product: multiply the first numbers, multiply the second numbers, and add. Query times the key of unha: 0 times 1 plus 3 times 0. That is 0. Query times the key of tía: 0 times 0 plus 3 times 1. That is 3. Query times the key of miña: 0 times minus 1 plus 3 times 0. That is 0 again.</p>
+    <p>Now softmax. Take e to the power of each score: e to the 0 is 1, e to the 3 is 20.09, e to the 0 is 1. Add them up: 22.09. The weight of tía is 20.09 divided by 22.09. That is 0.91. Unha and miña get 1 divided by 22.09 each. That is 0.05.</p>
+    <p>So while writing "aunt", 91 percent of the attention is on tía.</p>
+    <p>The other words work the same way. The query for "an" is (3, 0). It points at unha, and unha gets 0.95. The query for "mine" is (minus 3, 0). It points at miña, and miña gets 0.95.</p>
+    <p>Real models learn their keys and queries from data. They have hundreds of dimensions. But the arithmetic is exactly the one on this screen.</p>
   </div>
 </section>
 
@@ -2106,9 +2122,9 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <iframe class="frame" title="Queries, keys and weights" data-src="../artifacts/attention.html?embed=qk"></iframe>
   </div>
   <div class="notes">
-    <p>The keys and queries are the ones from the worked example. Press the button aunt (3, 0): 95% of the weight goes to tía. Press my (0, 3): 95% goes to miña.</p>
-    <p>Press aunt, shorter (1, 0): the query points the same way, but it is shorter, so the weights are softer, about 73 and 27%. Press undecided (1.5, 1.5): the weights are 50 and 50.</p>
-    <p>Then drag the orange query yourself. The output is the weighted average of the two values, so it always lies on the line between them.</p>
+    <p>The keys and queries are the ones from the worked example. Press the button aunt (0, 3): 91% of the weight goes to tía. Press an (3, 0): 95% goes to unha. Press mine (−3, 0): 95% goes to miña.</p>
+    <p>Press of (−2, 1): the query points between miña and tía, so the weight is split, 72% on miña and 27% on tía. Press aunt, shorter (0, 1): the query points the same way as for aunt, but it is shorter, so the weights are softer: 58% on tía.</p>
+    <p>Then drag the orange query yourself. The output is the weighted average of the three values, so it always lies inside the triangle they make.</p>
   </div>
 </section>
 
@@ -2117,7 +2133,7 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   <div class="body">
     <div class="activity"><h3>Notebook 01d, in Colab (CPU only, no GPU needed)</h3><div>
       <ul class="points">
-        <li>Part A: rebuild this exact worked example yourself, and check the 95/5 split</li>
+        <li>Part A: rebuild this exact worked example yourself, and check the 0.91 weight on <i>tía</i></li>
         <li>Part B: pull real attention weights out of a real translation model, on our own sentence, and see how they compare</li>
       </ul>
       <div class="links">
@@ -2127,7 +2143,7 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     </div></div>
   </div>
   <div class="notes">
-    <p>Pause the lecture here and have everyone open 01d_attention_playground.ipynb — pure Python plus a small model download, no GPU needed. Part A: students rebuild the toy query/key/value example from the previous screen by hand, verify it actually reproduces the 0.95/0.05 split. Part B is the payoff: load the real dedicated Galician-English model we'll use again in Notebook 1, run it on our sentence, and pull out its actual cross-attention weights instead of hand-set toy numbers — does a real model, trained on real data, also put most of its weight on "tía" when generating "aunt"? Sometimes yes, sometimes it's messier than the toy example, and that's the point: the toy version is a clean teaching fiction, the real one is what actually happens.</p>
+    <p>Pause the lecture here and have everyone open 01d_attention_playground.ipynb — pure Python plus a small model download, no GPU needed. Part A: students rebuild the toy query/key/value example from the previous screen by hand, verify it actually gives 0.91 on "tía" when writing "aunt". Part B is the payoff: load the real dedicated Galician-English model we'll use again in Notebook 1, run it on our sentence, and pull out its actual cross-attention weights instead of hand-set toy numbers — does a real model, trained on real data, also put most of its weight on "tía" when generating "aunt"? Sometimes yes, sometimes it's messier than the toy example, and that's the point: the toy version is a clean teaching fiction, the real one is what actually happens.</p>
   </div>
 </section>
 
