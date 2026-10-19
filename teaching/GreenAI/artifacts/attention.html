@@ -407,7 +407,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <section class="panel" id="lookatt">
     <h2><span class="n">2</span>With attention, computed by hand</h2>
-    <p class="lead">Section 1 ended with “a friend of mine”. The decoder's first three dimensions held the summary, and the summary held too little of tía. Attention changes those three dimensions, and nothing else. Before each English word, the decoder looks back at all three encoder vectors, not only the last one, and builds a new vector from them: the <b>mix</b>. The word vectors, the biases and the English dimensions stay as in section 1.</p>
+    <p class="lead">Section 1 ended with “a friend of mine”. The first three dimensions of the decoder state held the summary, and the summary held too little of tía. Attention changes the values in those three dimensions, and nothing else. Before each English word, the decoder looks back at all three encoder vectors, not only the last one, and builds a new vector from them: the <b>mix</b>. The word vectors, the biases and the values in the last eight dimensions stay as in section 1.</p>
     <div class="cmpflow">
       <p class="label">without attention (section 1)</p>
       <div class="flow"><span class="word dimw">after unha</span><span class="word dimw">after tía</span><span class="word">after miña = the summary</span><span class="op">→</span><span class="word out">the state's first three dimensions</span></div>
@@ -1120,7 +1120,7 @@ const ST = ["‹start›", ...EN.slice(0, 7)];
 const ST0 = ST.map(r => r === "‹start›" ? 0.5 : 0);   // before the first word: the start mark, taken in by the encoder's rule (½ × 0 + ½ × 1)
 // dir: the Galician row that holds 8; fits: the written rows that hold 12;
 // bias: −6 for every word, plus a bonus for the word chosen when the Galician phrase gives no evidence
-// g: the first three dimensions (unha, tía, miña); fits: the English dimensions that hold 12; b: the bias
+// g: the first three dimensions (unha, tía, miña); fits: the last-eight dimensions that hold 12; b: the bias
 const W = (g, fits, b = 0) => ({ g, fits, e: ST.map(r => fits.includes(r) ? 12 : 0), b });
 const CAND = {
   a:       W([4, -8, 0], ["‹start›"], 5.6),
@@ -1272,7 +1272,7 @@ const DEC_VIEW = { ...SMALL, view: TIA_VIEW, origin: TIA_ORIGIN };
 const markAn = { axis: TIA, v: MARK, label: `“an” beats “a” past ${f(MARK)}`, dx: 0, dy: 44, anchor: "middle" };
 const pm = v => v < 0 ? `− ${f(-v)}` : `+ ${f(v)}`;
 const top3 = sc => [...sc.rows].sort((p, q) => q.s - p.s).slice(0, 3).map(r => `${r.w}: ${f(r.gp)} ${pm(r.ep)} ${pm(r.b)} = <b>${f(r.s)}</b>`).join("<br>");
-const PART = { g: "dimensions unha, tía, miña", e: "English dimensions", b: "bias" };
+const PART = { g: "first three dimensions", e: "last eight dimensions", b: "bias" };
 const ALL = ["g", "e", "b"];
 
 // ----- the decoder panel: the decoder state (its first three dimensions come from the encoder, the other eight record
@@ -1282,8 +1282,8 @@ const ALL = ["g", "e", "b"];
 const chips = st => ST.map((r, i) => st[i] ? `<span class="chip" style="background:rgba(var(--heat),${(0.08 + 0.8 * st[i]).toFixed(2)})">${r} <small>${f(st[i])}</small></span>` : "").join("");
 function dec({ x, xName, st, cols = [], parts = [], anim = null, rows = EN, pick = false, focus = null, ruler = "", probs = false, noState = false }) {
   const sc = scoreAll(x, st, parts.includes("b") || !parts.length), best = pick ? sc.best.w : null;
-  const slot = `<div class="slot"><p class="label">dimensions unha, tía, miña: from the encoder</p>${eq(col(x, xName))}</div>`;
-  const stbox = `<div class="stbox"><p class="label">English dimensions: written so far</p><div class="chips">${chips(st)}</div><p class="note">dimensions that are 0 are not shown</p></div>`;
+  const slot = `<div class="slot"><p class="label">first three dimensions: from the encoder</p>${eq(col(x, xName))}</div>`;
+  const stbox = `<div class="stbox"><p class="label">last eight dimensions (values not 0)</p><div class="chips">${chips(st)}</div></div>`;
   const U = 9, X0 = 6 + 5 * U, H = 20;
   const bar = r => {
     if (!rows.includes(r.w) || !parts.length) return "";
@@ -1292,7 +1292,7 @@ function dec({ x, xName, st, cols = [], parts = [], anim = null, rows = EN, pick
     at = r2(at);
     return `<svg class="sb" viewBox="0 0 190 ${H}" role="img" aria-label="score ${f(at)}">${g}<line x1="${(X0 + at * U).toFixed(1)}" y1="0" x2="${(X0 + at * U).toFixed(1)}" y2="${H}" class="tk"/><text x="${X0 + 11 * U + 6}" y="14" class="rt">${f(at)}</text></svg>`;
   };
-  const head = `<tr><th>English word</th>${cols.includes("g") ? "<th>dot product,<br>dimensions unha, tía, miña</th>" : ""}${cols.includes("e") ? "<th>dot product,<br>English dimensions</th>" : ""}${cols.includes("b") ? "<th>bias</th>" : ""}<th>score${parts.length ? ": " + parts.map(p => `<span class="sw b${p}"></span>${p === "g" ? "unha, tía, miña" : PART[p]}`).join(" + ") : ""}</th>${probs ? "<th>probability</th>" : ""}</tr>`;
+  const head = `<tr><th>English word</th>${cols.includes("g") ? "<th>dot product,<br>first three dimensions</th>" : ""}${cols.includes("e") ? "<th>dot product,<br>last eight dimensions</th>" : ""}${cols.includes("b") ? "<th>bias</th>" : ""}<th>score${parts.length ? ": " + parts.map(p => `<span class="sw b${p}"></span>${PART[p]}`).join(" + ") : ""}</th>${probs ? "<th>probability</th>" : ""}</tr>`;
   const body = EN.map(w => {
     const c = CAND[w], r = sc.rows.find(q => q.w === w);
     const gcell = c.g.some(v => v) ? `${c.g.map((v, i) => v ? `${f(v)} × ${f(x[i])}` : "").filter(Boolean).join(" + ")} = ${f(r.gp)}` : "0";
@@ -1367,16 +1367,16 @@ const STEPS = [
         pts: [...wordPts(), ...encPts(ENC.map((e, j) => `${encPlain(j)} ${vecTxt(e)}` + (j === 2 ? "\n= the summary" : "")), "enc", [{ dx: -10, dy: -10, anchor: "end" }, { dx: 4, dy: 26 }, ENC_OFF[2]]).slice(0, i + 1)],
         cap: `${i ? `From the vector ${encPlain(i - 1)}` : "From all zeros, where the axes meet,"} halfway along the dashed line to the word vector of ${DIMS[i]}: ${vecTxt(ENC[i])}.${i === 2 ? " This last vector is the summary." : ""}` } })) }],
   ["From the encoder to the decoder", {
-    text: "The decoder writes the English phrase one word at a time. It knows eight English words. Before each word it holds one vector, its state: everything it has to go on. The state has eleven dimensions: three for what the encoder passed on, eight for what the decoder itself has written so far.",
+    text: "The decoder writes the English phrase one word at a time, choosing among eight English words. Before each word it holds one vector, the decoder state: everything it has to go on when it chooses. In this model the decoder state has eleven dimensions. The first three dimensions (unha, tía, miña) hold values passed on from the encoder. The last eight dimensions (‹start›, a, an, aunt, friend, of, mine, yours) hold values that record which English words have been written so far.",
     frames: () => [
       { board: `<p class="label">the eight English words the decoder can write</p>` + wordChips, scene: decScene(SUMMARY, false, { path: true, xLabel: "the summary", cap: "The encoder has read the phrase. Its summary is what the decoder gets." }) },
       { board: `<p class="label">the summary becomes the first three dimensions of the decoder state</p>` + `<div class="chain">${rowsOf(DIMS)}${col(SUMMARY, "the summary")}<div class="lk cur"><span>copied</span><span class="ar">→</span></div></div>` + eqD(col(stateOf(SUMMARY, ZS), "the decoder state", "cur")) +
-          work(["Without attention, these three dimensions stay the summary for every English word the decoder writes."]),
+          work(["Without attention, the values in the first three dimensions are the summary, and they stay the same before every English word the decoder writes."]),
         scene: decScene(SUMMARY, false, { path: true, xLabel: `the summary ${vecTxt(SUMMARY)}\n= the state's first three dimensions`, cap: "The picture has room for three dimensions. For the decoder state, they are its first three: unha, tía and miña." }) },
       { board: eqD(col(stateOf(SUMMARY, ZS), "the decoder state"), op("→"), col(stateOf(SUMMARY, ST0), "the decoder state before word 1", "cur")) +
-          work(["The other eight dimensions record what has been written: one per English word, and one, ‹start›, for the beginning.",
-            "Nothing has been written yet, so the decoder marks the beginning: it treats ‹start› like a word it has just written and folds it in with the encoder's rule, ½ × 0 + ½ × 1 = 0.5. Real decoders begin with such a start mark too."]),
-        scene: decScene(SUMMARY, false, { path: true, cap: "The other eight dimensions do not fit in the picture; the column on the left shows all eleven." }) }] }],
+          work(["The last eight dimensions: one for each English word the decoder can write (except ‹end›), and one, ‹start›, for the beginning of the phrase. Their values record what has been written.",
+            "How the values are updated: the same way the encoder updated its vector. When a word is written, every value is halved, and the value in that word's dimension goes up by 0.5 (½ × the old value + ½ × 1).", "Before the first word all eight values are 0. The decoder applies the update once for ‹start›, as if ‹start› had just been written: ½ × 0 + ½ × 1 = 0.5 in the ‹start› dimension. Real decoders also begin with such a start token."]),
+        scene: decScene(SUMMARY, false, { path: true, cap: "The last eight dimensions do not fit in the picture; the column on the left shows all eleven." }) }] }],
   ["How the decoder scores a word", {
     text: "The decoder gives each of its eight words a score and writes the word with the highest score. Each English word has its own vector, with the same eleven dimensions as the state, and its score is the dot product of that vector and the state. In a real model, training sets these vectors from example translations (step 5). Here we set them by hand, to the kind of numbers that training on the translation page's examples would produce, so that the reason for each number is visible.",
     frames: () => {
@@ -1416,16 +1416,17 @@ const STEPS = [
               "So when the state holds tía, “an” should score higher: a positive number in the tía dimension. We choose 8."]),
           scene: sG("The vector of “an” in the first three dimensions: 8 along tía (drawn at 1/16 of its length).", { arrows: anTia }) },
         { board: eqD(col(st, STL), op("·"), qcol(part("an", d => d === "tía" || d === "‹start›"), "vector of “an”", "cur")) +
-            work(["Why the English dimensions are needed: the first three dimensions are the same summary for every English word. If they were all the decoder had, every word would get the same score each time, and the decoder would write the same word over and over. The English dimensions change after each word, so they tell the decoder where in the phrase it is. The ‹start› value is 0.5 before the first word and halves after every word (step 3).",
+            work(["Why the last eight dimensions are needed: without attention, the values in the first three dimensions are the summary before every English word. If the state had only those three dimensions, the decoder would compute the same eight scores before every word, and so write the same word every time.",
+              "The values in the last eight dimensions are different before every word. After a word is written, every value is halved, and the value in that word's own dimension goes up by 0.5 (step 3). The value in the ‹start› dimension is 0.5 before the first word, 0.25 before the second, 0.125 before the third. So a word vector with a large number in the ‹start› dimension has its largest dot product before the first word, and a smaller one before each later word.",
               "In the example translations, “an” only ever appears as the first English word, right after the start. So “an” should score higher when the ‹start› value is high: a positive number in the ‹start› dimension. We choose 12."]),
-          scene: sG("‹start› is one of the eight English dimensions, which the picture cannot show.", { arrows: anTia }) },
+          scene: sG("‹start› is one of the last eight dimensions, which the picture cannot show.", { arrows: anTia }) },
         { board: eqD(col(st, STL), op("·"), qcol(part("an", d => d === "tía" || d === "‹start›" || d === "unha"), "vector of “an”", "cur")) +
             work(["unha: in the example translations, the English phrase starts with “a” or “an” exactly when the Galician phrase has <i>unha</i> or <i>un</i>. The phrases without them (<i>a miña tía</i> → my aunt) start with “my”. So unha speaks for “an”: a positive number in the unha dimension. We choose 4.",
               "But unha speaks just as much for “a” (<i>unha veciña miña</i> → a neighbor of mine). So “a” will get the same 4 in unha. unha says “a or an comes now”, not which one."]),
           scene: sG("With 4 in unha, the vector of “an” leans toward the unha axis.", { arrows: anArrow }) },
         { board: eqD(col(st, STL), op("·"), col(zerosFill("an", ["tía", "‹start›", "unha"]), "vector of “an”", "cur")) +
-            work(["Whether the other dimensions are high or low makes no difference to whether “an” is right: 0."]),
-          scene: sG("The other dimensions are 0, so the vector of “an” lies on the floor, between the unha and tía axes.", { arrows: anArrow }) },
+            work(["In the example translations, the values in the remaining dimensions (miña, and the dimensions of words already written) are no different when “an” is right than when it is wrong. So their numbers are 0."]),
+          scene: sG("The vector of “an” has 0 in miña, so in the picture it lies on the floor, between the unha and tía axes.", { arrows: anArrow }) },
         { board: eqD(col(st, STL), op("×"), col(vec("an"), "vector of “an”"), op("="), prodCol("an")) + work([sumLine("an")]),
           scene: { ...drop2, arrows: anArrow, cap: `The dot product, dimension by dimension. The first three products are the part the picture shows: unha 4 × ${f(SUMMARY[0])} = ${f(4 * SUMMARY[0])}, tía 8 × ${f(SUMMARY[TIA])} = ${f(8 * SUMMARY[TIA])}. ‹start› adds 12 × 0.5 = ${f(sc.rows[1].ep)}.` } },
         { board: work(["In the example translations, “a” is the right first word exactly in the phrases without tía (<i>un amigo meu</i> → a friend of mine, <i>unha veciña miña</i> → a neighbor of mine). So tía should lower its score: −8 in tía. unha speaks for it as much as for “an”: 4 in unha. Like “an”, it only ever appears right after the start: 12 in ‹start›."]) +
@@ -1437,7 +1438,7 @@ const STEPS = [
               "How a real model differs: its dimensions have no names, and each one mixes many such signals; nobody can read off why a number is there. Its state is not updated by our simple ½ + ½ rule but by a learned function. The logic is the same, though: numbers end up wherever they raise the right word's score in the training examples."]),
           scene: { ...decScene(SUMMARY, false, { arrows: true }), cap: "The other words follow the same reasoning. In the picture: “aunt” along tía, “friend” the opposite way; “of”, “mine” along miña. (“yours”, −8 along miña, is not drawn.)" } },
         { board: eqD(col(st, STL)) + dec({ ...SUM_IN, cols: ["g", "e"], parts: ["g", "e"], anim: "e", noState: true }),
-          scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], cap: `Every word's dot product with the state, as a bar. Blue: the first three dimensions, the part the picture shows. Green: the eight English dimensions. “an” has ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}, “a” ${f(r2(sc.rows[0].gp + sc.rows[0].ep))}.` }) }];
+          scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], cap: `Every word's dot product with the state, as a bar. Blue: the first three dimensions, the part the picture shows. Green: the last eight dimensions. “an” has ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}, “a” ${f(r2(sc.rows[0].gp + sc.rows[0].ep))}.` }) }];
     } }],
   ["Where the numbers in the word vectors come from", {
     text: "Step 4 chose the numbers by reasoning about when each word is right. A real model finds them by itself, from example translations. Training shows the model an example and moves the vector of the right word a little toward the decoder state, so that its dot product grows; the vectors of the wrong words move a little away. Here we train the vectors of “an” and “a” by hand, on two examples.",
@@ -1469,7 +1470,7 @@ const STEPS = [
           scene: tScene(0, "The encoder's path for unha amiga miña. It starts along unha, like our phrase.", { segs: amiSeg.slice(0, 1) }) },
         { board: rv + encAmi(1), scene: tScene(0, "amiga has no dimension in this small model, so its word vector is all zeros: reading it adds nothing and halves what was there.", { segs: amiSeg.slice(0, 2) }) },
         { board: rv + encAmi(2), scene: tScene(0, "After miña: the summary of unha amiga miña. It never moved along tía.", { segs: amiSeg }) },
-        { board: states + work(["The decoder state before word 1, for each example: the summary in the first three dimensions, ‹start› 0.5 in the English ones. The first column is the state of step 3."]),
+        { board: states + work(["The decoder state before word 1, for each example: the summary in the first three dimensions; in the last eight, 0.5 in ‹start› and 0 elsewhere. The first column is the state of step 3."]),
           scene: tScene(0, "The first three dimensions of the two states: unha tía miña reaches 0.25 along tía, unha amiga miña reaches 0.") },
         { board: states + work(["Before training, the vectors of “an” and “a” are all zeros: both get the dot product 0 from any state, so the model has no idea which to write."]), scene: tScene(0, "The vectors of “an” and “a” start at zero, at the corner where the axes meet.") },
         ...[1, 2, 3, 4].map(n => ({ board: nud(n) + (n === 1 ? stepNote : ""), scene: tScene(n, `${capN[n - 1]} (Vectors drawn at 1/${STEP} of their length; first three dimensions only.)`) })),
@@ -1498,7 +1499,7 @@ const STEPS = [
           scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA], mark: true, cap: "The decoder writes “a”: the summary holds too little of tía to beat the bias." }) }];
     } }],
   ["The rest of the phrase", {
-    text: "After each word, the decoder folds that word into its state: half the old values, plus half in the dimension of the word just written. The first three dimensions stay the summary. Then every word is scored again.",
+    text: "After each word, the decoder updates the values in the last eight dimensions: every value is halved, and the value in the dimension of the word just written goes up by 0.5. The values in the first three dimensions stay the summary. Then all eight words are scored again.",
     frames: () => {
       const caps = [
         `“a” is written. “aunt” and “friend” have 12 in the a dimension: 6 each. tía gives “aunt” +${f(8 * SUMMARY[TIA])} and “friend” −${f(8 * SUMMARY[TIA])}, but “friend” has a bias of ${f(CAND.friend.b)}. The same contest as “a” against “an”: “friend”.`,
@@ -1506,7 +1507,7 @@ const STEPS = [
         `“of” is written. “mine” and “yours” have 12 in the of dimension: 6 each. miña gives “mine” +${f(8 * SUMMARY[MINA])} and “yours” −${f(8 * SUMMARY[MINA])}: “mine”.`,
         `“mine” is written. “‹end›” has 12 in the mine dimension, and the highest score: the phrase is finished. Without attention: “${phrase(ONE)}”. Good English, wrong translation.`];
       return ONE.slice(1).map((s, i) => ({
-        board: `<p class="label">the decoder state: “${ONE[i].w}” is folded in</p>` + `<div class="chain d11">${rowsOf(DS)}${col(stateOf(SUMMARY, ONE[i].st), `before word ${i + 1}`)}<div class="lk cur"><span>½ × old + ½ in “${ONE[i].w}”</span><span class="ar">→</span></div>${col(stateOf(SUMMARY, s.st), `before word ${i + 2}`, "cur")}</div>` +
+        board: `<p class="label">the decoder state: “${ONE[i].w}” is written</p>` + `<div class="chain d11">${rowsOf(DS)}${col(stateOf(SUMMARY, ONE[i].st), `before word ${i + 1}`)}<div class="lk cur"><span>½ × old + ½ in “${ONE[i].w}”</span><span class="ar">→</span></div>${col(stateOf(SUMMARY, s.st), `before word ${i + 2}`, "cur")}</div>` +
           dec({ x: SUMMARY, xName: "the summary", st: s.st, cols: ["g", "e", "b"], parts: ALL, pick: true, noState: true }),
         scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], mark: true, cap: `Word ${i + 2}. ${caps[i]}` }) }));
     } }],
@@ -1536,7 +1537,7 @@ const STEPS = [
             cap: `Added up: the mix. It lies inside the triangle of the three encoder vectors, pulled toward the one with the largest weight. It holds ${f(a.mix[TIA])} of tía; the summary held ${f(SUMMARY[TIA])}.` } }];
     } }],
   ["Word 1 with the mix: why “an”", {
-    text: "The mix goes into the first three dimensions of the decoder state, where the summary was. Everything else, the word vectors, the biases and the English dimensions, is exactly as in section 1.",
+    text: "The mix goes into the first three dimensions of the decoder state, where the summary was. Everything else, the word vectors, the biases and the values in the last eight dimensions, is exactly as in section 1.",
     frames: () => {
       const s = ATT[0], x = s.a.mix, inp = { x, xName: "the mix", st: ST0 };
       return [
@@ -1554,7 +1555,7 @@ const STEPS = [
         `The query shifts further toward miña. The mix stays near the miña axis: “mine” ${f(ATT[3].sc.rows[5].s)}.`,
         `“‹end›” has the highest score: the phrase is finished. With attention: “${phrase(ATT)}”. Without attention it was “${phrase(ONE)}”.`];
       return ATT.slice(1).map((s, i) => ({
-        board: `<p class="label">the English dimensions of the decoder state: “${ATT[i].w}” is folded in</p>` + `<div class="chain">${rowsOf(ST)}${col(ATT[i].st, `before word ${i + 1}`)}<div class="lk cur"><span>½ × old + ½ in “${ATT[i].w}”</span><span class="ar">→</span></div>${col(s.st, `before word ${i + 2}`, "cur")}</div>` + `<p class="label">the first three dimensions: a new query, new weights, a new mix</p>` +
+        board: `<p class="label">the last eight dimensions of the decoder state: “${ATT[i].w}” is written</p>` + `<div class="chain">${rowsOf(ST)}${col(ATT[i].st, `before word ${i + 1}`)}<div class="lk cur"><span>½ × old + ½ in “${ATT[i].w}”</span><span class="ar">→</span></div>${col(s.st, `before word ${i + 2}`, "cur")}</div>` + `<p class="label">the first three dimensions: their new values come from a new query, new weights, a new mix</p>` +
           work([qLine(s), wLine(s)]) + dec({ x: s.a.mix, xName: "the mix", st: s.st, cols: ["g", "e", "b"], parts: ALL, pick: true }),
         scene: decScene(s.a.mix, true, { arrows: true, drops: [TIA, MINA], mark: true, mixes: ATT.slice(0, i + 1).map(t => t.a.mix), xLabel: `mix for word ${i + 2}`, cap: `Word ${i + 2}. ${caps[i]}` }) }));
     } }],
