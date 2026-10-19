@@ -1370,7 +1370,10 @@ const STEPS = [
       const exs = `<div class="heatwrap"><table class="ty"><thead><tr><th>example</th><th>state, first three dimensions</th><th>right word</th><th>wrong word</th></tr></thead><tbody>` +
         `<tr><td><i>unha tía miña</i> → an aunt …</td><td class="n">${vecTxt(TS)}</td><td>an, aunt</td><td>a, friend</td></tr>` +
         `<tr><td><i>unha amiga miña</i> → a friend …</td><td class="n">${vecTxt(AM)}</td><td>a, friend</td><td>an, aunt</td></tr></tbody></table></div>` +
-        `<p class="note">amiga has no dimension in this small model: reading it only halves what was there.</p>`;
+        `<p class="label">the encoder reads <i>unha amiga miña</i>, with the rule of step 2</p>` +
+        eq(k("½ ×"), col([0.5, 0, 0], "after unha"), op("+"), k("½ ×"), col([0, 0, 0], "word vector of <i>amiga</i>: all zeros"), op("="), col([0.25, 0, 0], "after amiga")) +
+        eq(k("½ ×"), col([0.25, 0, 0], "after amiga"), op("+"), k("½ ×"), col(WORD["miña"], "word vector of <i>miña</i>"), op("="), col(AM, "after miña: the state")) +
+        `<p class="note">This small model has dimensions only for unha, tía and miña, so the word vector of amiga is all zeros. Reading amiga adds nothing and halves the encoder vector. No tía ever enters it.</p>`;
       const nudge = n => { const [sg, s] = seq[n - 1], ex = s === TS ? "unha tía miña" : "unha amiga miña";
         return `<p class="label">example: <i>${ex}</i></p>` +
           eq(col(posAn[n - 1], "“an”, “aunt” before"), op(sg > 0 ? "+" : "−"), col(sc16(s), "16 × the state"), op("="), col(posAn[n], "after")) +
