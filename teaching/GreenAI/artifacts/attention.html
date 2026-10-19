@@ -102,6 +102,17 @@ svg .gridl { stroke: var(--grid); }
 .review { border-left: 3px solid var(--line); padding: 4px 0 4px 12px; max-width: 72ch; color: var(--muted); }
 .review p { margin: 0; display: inline; }
 .rtag { display: inline-block; font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; margin-right: 8px; color: var(--muted); }
+.wkh { margin: 0; font-size: 1.05rem; font-weight: 500; }
+.wkstrip { display: inline-flex; gap: 1px; vertical-align: middle; }
+.wkstrip i { display: block; width: 14px; height: 14px; border-radius: 2px; background: var(--grid); }
+.wkpanels { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
+.wkpanel { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); min-width: 0; }
+.wkrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 0.88rem; }
+.wkrow figure { margin: 0; display: grid; gap: 3px; }
+.wkrow figcaption { font-size: 0.75rem; color: var(--muted); }
+.wkrow .op { color: var(--muted); font-size: 1.1rem; }
+.wkrow .w { font-family: var(--font-mono); font-size: 0.82rem; }
+.wkrow .gw { font-style: italic; }
 .formula { font-family: var(--font-mono); font-size: 0.9rem; background: var(--bg); border-radius: 6px; padding: 10px 12px; overflow-wrap: anywhere; line-height: 1.7; font-variant-numeric: tabular-nums; }
 .formula .t { color: var(--blue); }
 .formula .m { color: var(--green); }
@@ -297,31 +308,20 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="look">
     <h2><span class="n">1</span>Attention: look back at every word</h2>
-    <div class="review"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page, sections 2 and 3</a>: a translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. Every word has a <b>word vector</b>. The encoder reads the words in order and makes a new vector after each word from the vector before and the new word's vector. Its last vector is the <b>summary</b>. The decoder starts from the summary and takes in each English word it writes.</p></div>
-    <p class="lead">In the top row of each diagram, every Galician word shows its word vector, in its color. Each column is one <b>encoder vector</b>, with its two numbers written above it. Here the first encoder vector is the first word's vector, and each next one is 0.25 × the previous encoder vector + 0.75 × the new word's vector. So an encoder vector is a mix of the word vectors read so far, and the colored parts of its column show the mix: how much of each word's vector went into it. The colors only mark which word is which. Under each English word is the vector the decoder gets from the encoder for it; the arrows under the English words show the written words going back into the decoder. Without attention, the vector from the encoder is always the summary. With attention, the decoder mixes all the encoder vectors, with new weights for every English word. These weights are the attention.</p>
-    <div class="controls">
-      <span class="note">Galician input</span>
-      <div class="seg" role="group" aria-label="Input">
-        <button id="lShort" aria-pressed="true">unha tía miña</button>
-        <button id="lLong" aria-pressed="false">whole sentence</button>
-      </div>
-    </div>
-    <div id="encDerivBox"><p class="label">How the encoder vectors are computed</p><div class="formula" id="encDeriv"></div></div>
-    <p class="label">Without attention: one vector</p>
-    <div class="controls"><button class="primary" id="onePlay">Write the translation</button><button id="oneBack">Back</button><button id="oneNext">Next English word</button><button id="oneReset">Start over</button><span class="note" id="oneStep"></span></div>
-    <div class="heatwrap"><svg id="lookOne" role="img" aria-label="Encoder vectors; the decoder gets only the last one"></svg></div>
-    <div class="weights" id="mixOneTxt"></div>
-    <p class="label">With attention</p>
-    <div class="controls"><button class="primary" id="attPlay">Write the translation</button><button id="attBack">Back</button><button id="attNext">Next English word</button><button id="attReset">Start over</button><span class="note" id="attStep"></span></div>
-    <div class="heatwrap"><svg id="lookAtt" role="img" aria-label="Encoder vectors; the decoder takes from every one, weighted"></svg></div>
-    <div class="weights" id="mixAttTxt"></div>
-    <p class="note" id="lookNote"></p>
-    <p class="note">Weights for <i>unha tía miña</i> come from the keys and queries of section 3; for the whole sentence they are the real model's (section 4, averaged over its heads). The English words are that model's translation. The columns use a simplified encoder with made-up numbers (see under “How the encoder vectors are computed”); the translation and the attention weights for the whole sentence come from the real model Helsinki-NLP/opus-mt-gl-en. Before attention, a long sentence had to fit into the summary alone, and translations of long sentences got much worse.</p>
+    <div class="review"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page, sections 2 and 3</a>: a translation model has an <b>encoder</b>, which reads the Galician words, and a <b>decoder</b>, which writes the English words one at a time. The encoder reads the words in order and makes one vector after each word, from the vector before and the new word. Its last vector is the <b>summary</b>. The decoder keeps its own vector, the <b>decoder state</b>: it starts as the summary and takes in each English word the decoder writes.</p></div>
+    <p class="lead">Two small models translate our sentence. We trained them on the same data, and they are identical except for one thing: <b>without attention</b>, the decoder gets the summary for every English word; <b>with attention</b>, it gets a new mix of all the encoder's vectors for every English word. Their vectors have 8 dimensions. Every number below is the models' own. Go step by step.</p>
+    <div class="legend"><span class="lab">−1</span><span class="wkstrip h" id="wkLegend"></span><span class="lab">+1</span><span class="note">one square = one dimension of a vector</span></div>
+    <div class="controls"><button id="wkBack">Back</button><button class="primary" id="wkNext">Next step</button><span class="pathstrip" id="wkSteps"></span></div>
+    <h3 class="wkh" id="wkTitle"></h3>
+    <div class="cmprows" id="wkOut"></div>
+    <div class="heatwrap" id="wkSrcBox"><svg id="wkSrc" role="img" aria-label="The encoder's vectors, one per Galician word"></svg></div>
+    <div class="wkpanels" id="wkPanels"></div>
+    <p class="steptext" id="wkText"></p>
   </section>
 
   <section class="panel" id="compare">
-    <h2><span class="n">2</span>Two trained models: without and with attention</h2>
-    <p class="lead">Two small translation models, trained on the same data for the same number of steps, with the same number of parameters. The only difference: <b>without attention</b>, the decoder gets the encoder's last vector, the summary of the whole sentence; <b>with attention</b>, it looks back at every word's vector each time it writes a word. The training data is built from templates around our sentence (other relatives, other verbs, other sayings). Both models train on the same 5,000 template sentences. Another 500 are kept apart as a test set, and so is our own sentence: the models never see them in training, so they translate them for the first time. Every word in them appears in training, but in other combinations.</p>
+    <h2><span class="n">2</span>The two models, word by word</h2>
+    <p class="lead">The two models of section 1, for every word, every example sentence and three vector sizes. They were trained on the same data for the same number of steps, and have the same number of parameters. The training data is built from templates around our sentence (other relatives, other verbs, other sayings). Both models train on the same 5,000 template sentences. Another 500 are kept apart as a test set, and so is our own sentence: the models never see them in training, so they translate them for the first time. Every word in them appears in training, but in other combinations.</p>
     <div class="controls">
       <span class="note">Vector size</span>
       <div class="seg" role="group" aria-label="Vector size" id="cmpSize"></div>
@@ -537,155 +537,6 @@ function mixHTML(names, vals, empty) {
   return segs + (empty > 0.0005 ? `<span class="empty" style="width:${(empty * 100).toFixed(2)}%" title="the empty start">${empty > 0.07 ? "empty start" : ""}</span>` : "");
 }
 
-// ---------- 3: one vector vs attention ----------
-// weights from the keys and queries of section 3
-const SHORT_K = [[1, 0], [0, 1], [-1, 0]], SHORT_Q = [[3, 0], [0, 3], [-2, 1], [-3, 0]];
-const SHORT = { src: ["unha", "tía", "miña"], tgt: ["an", "aunt", "of", "mine"],
-  sc: SHORT_Q.map(q => SHORT_K.map(k => q[0] * k[0] + q[1] * k[1])) };
-SHORT.w = SHORT.sc.map(softmax);
-const longData = () => { const R = REAL.sentence; return { src: R.src.map(clean), tgt: R.tgt.map(clean), w: avgOf(R.cross, "all", "all") }; };
-let long1 = false;
-const cur = { one: 0, att: 0 }, timer = { one: null, att: null };
-const lookData = () => long1 ? longData() : SHORT;
-// Encoder columns: column k + 1 is the vector after Galician word k. The first is the first word's own
-// vector; each next one is 0.25 × the previous one + 0.75 × the new word's vector.
-// A column's parts: how much of each word it holds, [0, word 0, word 1, ...] (index 0 unused).
-const KEEP = 0.25, NEW = 0.75;
-const encParts = (k, n) => [0, ...Array.from({ length: n }, (_, j) => j >= k ? 0 : j === 0 ? Math.pow(KEEP, k - 1) : NEW * Math.pow(KEEP, k - 1 - j))];
-// each encoder vector is rounded to 2 decimals before the next step, as when computing by hand
-const r2 = x => Math.round(x * 100) / 100;
-function encVec(src, k) { let v = emb2(src[0]); for (let j = 1; j < k; j++) { const e = emb2(src[j]); v = [r2(KEEP * v[0] + NEW * e[0]), r2(KEEP * v[1] + NEW * e[1])]; } return v; }
-// the computation of every encoder vector, one line per Galician word
-function encDerivHTML(src) {
-  const cw = (j, t) => `<span style="color:var(${PAL[j % PAL.length]})">${t}</span>`, f3 = x => x.toFixed(3).replace("-", "−"), fv = v => vecTxt(v).replace(/-/g, "−");
-  return src.map((w, j) => {
-    const v = encVec(src, j + 1);
-    if (j === 0) return `${cw(0, w)}: encoder vector = word vector of ${cw(0, w)} = ${fv(v)}`;
-    const p = encVec(src, j), e = emb2(w), a = [KEEP * p[0], KEEP * p[1]], b = [NEW * e[0], NEW * e[1]];
-    return `${cw(j, w)}: 0.25 × ${fv(p)} + 0.75 × ${cw(j, fv(e))} = (${f3(a[0])} + ${f3(b[0])}, ${f3(a[1])} + ${f3(b[1])}) = (${f3(a[0] + b[0])}, ${f3(a[1] + b[1])}) ≈ <b>${fv(v)}</b>`;
-  }).join("<br>") + `<br><span class="note">The first vector in each line is the encoder vector of the word before; the second is the new word's word vector. All these numbers are made up for this example: the word vectors of tía and miña are the ones on the translation page, and the one of unha is computed from its letters. The 0.25 and 0.75 are made up too (the translation page uses half and half). A real encoder learns its word vectors, and learns how much of the previous vector to keep. Here each new word gets 0.75, so each vector holds mostly its own word.</span>`;
-}
-// what the decoder gets for English word c: the summary, or the attention mix of the word vectors
-function decIn(d, c, attention) {
-  const n = d.src.length;
-  if (!attention) return { parts: encParts(n, n), vec: encVec(d.src, n) };
-  const w = d.w[c], parts = new Array(n + 1).fill(0), vec = [0, 0];
-  w.forEach((wt, j) => { encParts(j + 1, n).forEach((v, i) => parts[i] += wt * v); const e = encVec(d.src, j + 1); vec[0] += wt * e[0]; vec[1] += wt * e[1]; });
-  return { parts, vec };
-}
-const shareTxt = v => v < 0.005 ? "≈ 0" : v.toFixed(2);
-const vecTxt = v => `(${v[0].toFixed(2)}, ${v[1].toFixed(2)})`;
-function lookSvg(id, attention) {
-  const d = lookData(), n = d.src.length, m = d.tgt.length, c = cur[attention ? "att" : "one"] - 1;
-  const step = long1 ? 22 : 130, x0 = long1 ? 40 : 190, CH = long1 ? 44 : 136, CWd = long1 ? 11 : 30;
-  const yW = long1 ? 62 : 44, yTop = long1 ? 74 : 100, yBot = yTop + CH, yD = yBot + (long1 ? 80 : 84), yDB = yD + CH, H = yDB + (long1 ? 70 : 112);
-  const ex = p => x0 + (p - 1) * step;                            // encoder columns: k + 1 = after word k
-  const tx = k => long1 ? x0 + k * step * (n - 1) / Math.max(1, m - 1) : x0 + k * step;   // decoder columns under the English words
-  const W = long1 ? Math.max(ex(n), tx(m - 1)) + 140 : Math.max(ex(n), tx(m - 1)) + 150;
-  const wcol = j => `var(${PAL[j % PAL.length]})`, partCol = i => wcol(i - 1);
-  const orange = css("--orange"), line = css("--line"), muted = css("--muted");
-  // a column of parts, top to bottom: the words in reading order, then what is left of the start
-  const column = (x, y, parts, labels, dec) => {
-    let g = "", yy = y;
-    [...parts.keys()].slice(1).forEach(i => {
-      const h = CH * parts[i]; if (h <= 0.01) return;
-      g += `<rect x="${x - CWd / 2}" y="${yy.toFixed(2)}" width="${CWd}" height="${h.toFixed(2)}" style="fill:${partCol(i)}"/>`;
-      if (labels && parts[i] >= 0.005) g += h >= 13 ? `<text x="${x}" y="${(yy + h / 2 + 4).toFixed(1)}" text-anchor="middle" style="font-size:11px;fill:var(--panel)">${parts[i].toFixed(2)}</text>`
-                               : `<text x="${x + CWd / 2 + 4}" y="${(yy + h / 2 + 4).toFixed(1)}" style="font-size:11px;fill:${partCol(i)}">${shareTxt(parts[i])}</text>`;
-      yy += h;
-    });
-    return g;
-  };
-  let g = `<defs><marker id="ch${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${muted}"/></marker></defs>`;
-  // lines from the encoder to what the decoder gets
-  const link = (x1, x2, wdt, op) => `<line x1="${x1}" y1="${yBot + (long1 ? 3 : 26)}" x2="${x2}" y2="${yD - (long1 ? 4 : 18)}" stroke="${orange}" stroke-width="${wdt}" stroke-opacity="${op}" stroke-linecap="round"/>`;
-  const shown = c < 0 ? 0 : c + 1;
-  for (let k = 0; k < shown; k++) {
-    const now = k === c;
-    if (!attention) g += link(ex(n), tx(k), now ? 4 : 2, now ? 1 : 0.25);
-    else if (now) d.w[k].forEach((wt, j) => { g += link(ex(j + 1), tx(k), (0.5 + 8 * wt).toFixed(1), (0.15 + 0.85 * Math.min(1, wt * (long1 ? 2.5 : 1))).toFixed(2)); });
-  }
-  if (c >= 0 && attention && !long1) d.w[c].forEach((wt, j) => { g += `<text x="${ex(j + 1)}" y="${yBot + 18}" text-anchor="middle" style="fill:${orange}">${shareTxt(wt)}</text>`; });
-  if (c >= 0 && attention && !long1) g += `<text x="${x0 - CWd / 2 - 8}" y="${yBot + 18}" text-anchor="end" style="fill:${orange}">weights:</text>`;
-  // encoder: one column per Galician word
-  for (let p = 1; p <= n; p++) {
-    const x = ex(p);
-    {
-      const t = d.src[p - 1];
-      g += long1 ? `<text x="${x}" y="${yW}" transform="rotate(-50 ${x} ${yW})" font-style="italic" style="fill:${wcol(p - 1)}">${t}</text>` : `<text class="word src" x="${x}" y="${yW - 12}" text-anchor="middle" style="fill:${wcol(p - 1)}">${t}</text><text x="${x}" y="${yW + 14}" text-anchor="middle" style="font-size:11px;fill:${wcol(p - 1)}">${vecTxt(emb2(t))}</text>`;
-      if (p > 1) g += `<line x1="${ex(p - 1) + CWd / 2 + 1}" y1="${yTop + CH / 2}" x2="${x - CWd / 2 - 1}" y2="${yTop + CH / 2}" stroke="${muted}" marker-end="url(#ch${id})"/>`;
-    }
-    const used = c >= 0 && (attention ? d.w[c][p - 1] > 0.2 : p === n);
-    const op = c < 0 ? 1 : attention ? (0.5 + 0.5 * Math.min(1, d.w[c][p - 1] * (long1 ? 3 : 1))) : (p === n ? 1 : 0.5);
-    g += `<g opacity="${op.toFixed(2)}">${column(x, yTop, encParts(p, n), !long1)}</g>`;
-    if (!long1) g += `<text x="${x}" y="${yTop - 6}" text-anchor="middle" style="font-size:11px;fill:var(--fg)">${vecTxt(encVec(d.src, p))}</text>`;
-    if (used) g += `<rect x="${x - CWd / 2 - 2.5}" y="${yTop - 2.5}" width="${CWd + 5}" height="${CH + 5}" rx="3" fill="none" stroke="${orange}" stroke-width="2"/>`;
-  }
-  if (!attention) g += `<text x="${ex(n) + CWd / 2 + 8}" y="${yBot}" style="fill:${orange}">summary</text>`;
-  else g += `<text x="${ex(n) + CWd / 2 + 8}" y="${yBot}">same as above</text>`;
-  // the decoder: what it gets for every English word written so far, and the word
-  if (!long1) g += `<text x="${tx(0) - CWd / 2 - 10}" y="${yD + CH / 2}" text-anchor="end">decoder gets</text><text x="${ex(1) - CWd / 2 - 58}" y="${yW + 14}" text-anchor="end">word vector</text><text x="${ex(1) - CWd / 2 - 58}" y="${yTop - 6}" text-anchor="end">encoder vector</text>`;
-  for (let k = 0; k < m; k++) {
-    const on = k < shown, x = tx(k);
-    if (on) {
-      const di = decIn(d, k, attention);
-      g += column(x, yD, di.parts, !long1, attention);
-      if (!long1) g += `<text x="${x}" y="${yDB + 14}" text-anchor="middle" style="font-size:11px;fill:var(--fg)">${vecTxt(di.vec)}</text>`;
-      if (k === c) g += `<rect x="${x - CWd / 2 - 2.5}" y="${yD - 2.5}" width="${CWd + 5}" height="${CH + 5}" rx="3" fill="none" stroke="${orange}" stroke-width="2"/>`;
-    }
-    const st = k === c ? `fill:${orange}` : "", yE = long1 ? yDB + 12 : yDB + 38;
-    g += long1 ? `<text class="word${on ? "" : " dim"}" x="${x}" y="${yE}" transform="rotate(50 ${x} ${yE})" style="font-size:13px;${st}">${d.tgt[k]}</text>`
-               : `<text class="word${on ? "" : " dim"}" x="${x}" y="${yE}" text-anchor="middle" style="${st}">${d.tgt[k]}</text>`;
-  }
-  // each written English word goes back into the decoder for the next word
-  if (!long1) {
-    const yA = yDB + 50;
-    for (let k = 0; k + 1 < shown; k++) g += `<path d="M${tx(k) + 6} ${yA} Q ${(tx(k) + tx(k + 1)) / 2} ${yA + 22} ${tx(k + 1) - 8} ${yA}" fill="none" stroke="${muted}" marker-end="url(#ch${id})"/>`;
-    if (shown > 1) g += `<text x="${tx(0)}" y="${yA + 34}">each written word goes back into the decoder</text><text x="${tx(0)}" y="${yA + 50}">${attention ? "and shapes the query for the next word (section 3)" : "and changes its state (section 2 draws it)"}</text>`;
-  }
-  const el = $(id); el.setAttribute("viewBox", `0 0 ${W} ${H}`); el.style.minWidth = long1 ? `${Math.round(W * 0.8)}px` : ""; el.style.maxWidth = long1 ? "" : `${W + 20}px`; el.innerHTML = g;
-}
-function renderLook() {
-  lookSvg("lookOne", false); lookSvg("lookAtt", true);
-  $("encDerivBox").hidden = long1;
-  if (!long1) $("encDeriv").innerHTML = encDerivHTML(lookData().src);
-  const d = lookData(), n = d.src.length, m = d.tgt.length;
-  const cw = (j, t) => `<span style="color:var(${PAL[j % PAL.length]})">${t}</span>`;
-  [["one", "One"], ["att", "Att"]].forEach(([k]) => { $(k + "Step").textContent = `${Math.min(cur[k], m)} of ${m} English words`; $(k + "Back").disabled = cur[k] === 0; $(k + "Next").disabled = cur[k] >= m; });
-  const c1 = cur.one - 1, c2 = cur.att - 1;
-  $("mixOneTxt").innerHTML = c1 < 0 ? "" : `for “${d.tgt[c1]}”: the summary ${vecTxt(encVec(d.src, n))}, the same for every English word`;
-  if (c2 < 0) { $("mixAttTxt").innerHTML = ""; $("lookNote").textContent = ""; return; }
-  const sum = decIn(d, c2, false), mix = decIn(d, c2, true), w = d.w[c2];
-  const order = [...w.keys()].sort((a, b) => w[b] - w[a]), terms = long1 ? order.slice(0, 3) : [...w.keys()];
-  $("mixAttTxt").innerHTML = `for “${d.tgt[c2]}”: ` + terms.map(j => `${w[j].toFixed(2)} × the vector of “${cw(j, d.src[j])}”${long1 ? "" : " " + vecTxt(encVec(d.src, j + 1))}`).join(" + ") + (long1 ? " + …" : ` = ${vecTxt(mix.vec)}`);
-  const gain = j => mix.parts[j + 1] - sum.parts[j + 1], jg = [...w.keys()].sort((a, b) => gain(b) - gain(a))[0];
-  const j0 = gain(jg) > 0.05 ? jg : order[0], sj = sum.parts[j0 + 1], mj = mix.parts[j0 + 1], wd = cw(j0, d.src[j0]);
-  let note = `Writing “${d.tgt[c2]}”. ` + (mj > sj + 0.05
-    ? `${wd} makes up ${shareTxt(sj)} of the summary and ${mj.toFixed(2)} of the attention mix: attention gives it back to the decoder.`
-    : `${wd} already makes up ${shareTxt(sj)} of the summary, because it was read last, so here the attention mix is close to the summary.`);
-  if (!long1) {
-    const lo = [...w.keys()].filter(j => w[j] < 0.005);
-    if (lo.length) note += ` ${lo.map(j => cw(j, d.src[j])).join(", ")} gets almost no weight: its key points away from the query for “${d.tgt[c2]}”, so its score is ${String(d.sc[c2][lo[0]]).replace("-", "−")} (section 3).`;
-  }
-  $("lookNote").innerHTML = note;
-}
-function stopLook(k) { (k ? [k] : ["one", "att"]).forEach(x => { clearInterval(timer[x]); timer[x] = null; $(x + "Play").textContent = "Write the translation"; }); }
-function setLong(l) { stopLook(); long1 = l; cur.one = cur.att = 0; $("lShort").setAttribute("aria-pressed", !l); $("lLong").setAttribute("aria-pressed", l); renderLook(); }
-$("lShort").addEventListener("click", () => setLong(false));
-$("lLong").addEventListener("click", () => setLong(true));
-["one", "att"].forEach(k => {
-  const m = () => lookData().tgt.length;
-  $(k + "Next").addEventListener("click", () => { stopLook(k); cur[k] = Math.min(m(), cur[k] + 1); renderLook(); });
-  $(k + "Back").addEventListener("click", () => { stopLook(k); cur[k] = Math.max(0, cur[k] - 1); renderLook(); });
-  $(k + "Reset").addEventListener("click", () => { stopLook(k); cur[k] = 0; renderLook(); });
-  $(k + "Play").addEventListener("click", () => {
-    if (timer[k]) { stopLook(k); return; }
-    if (cur[k] >= m()) cur[k] = 0;
-    $(k + "Play").textContent = "Pause";
-    timer[k] = setInterval(() => { cur[k]++; renderLook(); if (cur[k] >= m()) stopLook(k); }, reduce ? 200 : long1 ? 600 : 1300);
-  });
-});
-
 // ---------- 2: query, key, score, softmax, value ----------
 const K = [[1, 0], [0, 1], [-1, 0]], KN = ["unha", "tía", "miña"], KC = ["--blue", "--green", "--neg"];
 const V = [[0.1, 0.1], [0.9, 0.2], [0.15, 0.85]]; // made-up values: (family member, belongs to me)
@@ -842,14 +693,12 @@ function renderSelf() {
 }
 $("selfLayer").addEventListener("change", () => { sLayer = +$("selfLayer").value; renderSelf(); });
 renderSelf();
-cur.one = cur.att = 2; renderLook();
 (window.__askState ||= []).push(() => {
   const sc = K.map(k => q[0] * k[0] + q[1] * k[1]), w = softmax(sc);
   const M = avgOf(D.cross, $("realLayer").value, $("realHead").value), rw = M[tSel], sw = D.self[sLayer][sHead][sSel];
   const top = (toks, ws) => [...ws.keys()].sort((a, b) => ws[b] - ws[a]).slice(0, 4).map(j => `${clean(toks[j])} ${ws[j].toFixed(2)}`).join(", ");
   const lab = v => v === "all" ? "average" : +v + 1;
   return [
-    `Section 1 (look back at every word): two diagrams on the same input (${long1 ? "whole sentence, real averaged weights" : "unha tía miña → an aunt of mine, weights from the keys and queries of section 3 (an: 0.95 unha; aunt: 0.91 tía; of: 0.72 miña, 0.27 tía; mine: 0.95 miña)"}). Top, without attention: the encoder makes one vector per source word, each drawn as a column of colored segments showing how much of each word it holds (simplified encoder: the first vector is the first word's, each next one is 0.25 × the previous one + 0.75 × the new word; so the summary of unha tía miña holds unha 0.06, tía 0.19, miña 0.75); every panel has its own Write / Back / Next / Start over buttons; the decoder gets only the last vector, the summary, for every English word. Bottom, with attention: lines from every vector, width = weight; the bar shows the weights. English words written so far: without attention ${cur.one}, with attention ${cur.att}, of ${lookData().tgt.length}.`,
     `Section 3 (query, key, score, softmax, value): q = (${q[0]}, ${q[1]}); scores ${KN.map((n, i) => `${n} ${sc[i].toFixed(2)}`).join(", ")}; weights ${KN.map((n, i) => `${n} ${w[i].toFixed(2)}`).join(", ")}.`,
     `Section 4 (real cross-attention): translation "${D.translation}". Layer ${lab($("realLayer").value)}, head ${lab($("realHead").value)}. Selected output token "${clean(D.tgt[tSel])}" looks at: ${top(D.src, rw)}.`,
     `Section 5 (encoder self-attention): layer ${sLayer + 1}, head ${sHead + 1}; selected word "${clean(D.src[sSel])}" looks at: ${top(D.src, sw)}.`,
@@ -1202,6 +1051,95 @@ t = total(); render();
 </script>
 
 <script>
+// ---------------------------------------------------------------- 1: a guided walk through the two trained models
+(() => {
+const $ = id => document.getElementById(id);
+const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+const run = CMP.runs.find(r => r.dims === 8), x = run.examples.find(e => e.course && e.kind === "whole sentence");
+const col = v => `rgba(var(${v >= 0 ? "--heat" : "--negheat"}),${(0.12 + 0.88 * Math.min(1, Math.abs(v))).toFixed(2)})`;
+const strip = (v, cap) => `<figure><span class="wkstrip">${v.map(a => `<i style="background:${col(a)}" title="${a.toFixed(2)}"></i>`).join("")}</span>${cap ? `<figcaption>${cap}</figcaption>` : ""}</figure>`;
+$("wkLegend").innerHTML = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1].map(a => `<i style="background:${col(a)}"></i>`).join("");
+// output lines: wrong words marked, the current word highlighted
+function outLine(out, upto, cur) {
+  return out.slice(0, upto).map((w, k) => {
+    const bad = w !== x.ref[k] && x.one.slice(0, k).every((v, i) => v === x.ref[i]) || (out === x.one && w !== x.ref[k]);
+    const cls = (k === cur ? "cur " : "") + (w !== x.ref[k] ? "bad" : "");
+    return `<span class="${cls}">${esc(k === 0 ? w[0].toUpperCase() + w.slice(1) : w)}</span>`;
+  }).join(" ").replace(/ (<span class="[^"]*">[,.»])/g, "$1").replace(/(«<\/span>) /g, "$1");
+}
+// the five most probable next words as bars; the chosen one in orange
+function bars(P, right) {
+  return `<div class="pbars">${P.map(([w, p], k) => `<span class="bw ${k === 0 ? "win" : ""} ${w === right ? "ok" : k === 0 ? "bad" : ""}">${esc(w)}</span><span class="bt ${k === 0 ? "win" : ""}"><i style="width:${(p * 100).toFixed(1)}%"></i></span><span class="bp">${p.toFixed(2)}</span>`).join("")}</div>`;
+}
+// the encoder's vectors, one column per Galician word; with weights, the attention on each
+function srcSvg(mode, w) {
+  const n = x.src.length, CW = 26, x0 = 20, ch = 9, H8 = 8 * ch, yTop = 70, yW = 60;
+  const W = x0 + n * CW + 130, Hh = yTop + H8 + (w ? 64 : 30);
+  let g = "";
+  x.src.forEach((t, j) => {
+    const cx = x0 + j * CW, used = mode === "one" ? j === n - 1 : mode === "att" ? true : true;
+    const op = mode === "one" ? (j === n - 1 ? 1 : 0.25) : mode === "att" ? 0.3 + 0.7 * Math.min(1, w[j] * 3) : 1;
+    g += `<text x="${cx + 5}" y="${yW}" transform="rotate(-55 ${cx + 5} ${yW})" style="font-style:italic;fill:var(--fg);font-size:12px">${esc(t)}</text>`;
+    g += `<g opacity="${op.toFixed(2)}">` + x.encAtt[j].map((v, k) => `<rect x="${cx}" y="${yTop + k * ch}" width="12" height="${ch - 1}" rx="1.5" style="fill:${col(v)}"/>`).join("") + "</g>";
+    if (w) {
+      const h = 40 * w[j];
+      g += `<rect x="${cx}" y="${yTop + H8 + 6}" width="12" height="${Math.max(0.5, h).toFixed(1)}" style="fill:var(--orange)"/>`;
+    }
+  });
+  if (w) {
+    [...w.keys()].sort((a, b) => w[b] - w[a]).slice(0, 3).forEach(j => { g += `<text x="${x0 + j * CW + 6}" y="${yTop + H8 + 58}" text-anchor="middle" style="fill:var(--orange);font-size:11px">${w[j].toFixed(2)}</text>`; });
+    g += `<text x="${x0 + n * CW + 6}" y="${yTop + H8 + 20}" style="fill:var(--orange);font-size:11px">attention weights</text>`;
+  }
+  if (mode !== "att") g += `<rect x="${x0 + (n - 1) * CW - 3}" y="${yTop - 3}" width="18" height="${H8 + 5}" rx="3" fill="none" stroke="var(--orange)" stroke-width="2"/><text x="${x0 + n * CW + 6}" y="${yTop + 12}" style="fill:var(--orange);font-size:12px">summary</text>`;
+  $("wkSrc").setAttribute("viewBox", `0 0 ${W} ${Hh}`); $("wkSrc").style.minWidth = `${W * 0.85}px`; $("wkSrc").innerHTML = g;
+}
+// one model's step: decoder state + what it gets from the encoder → probabilities
+function panel(model, i) {
+  const att = model === "att", out = att ? x.att : x.one, P = (att ? x.pAtt : x.pOne)[i], st = (att ? x.decAtt : x.decOne)[i];
+  const prev = i === 0 ? "started from the summary; no English word yet" : `has taken in “${out[i - 1]}”`;
+  let mixRow = "";
+  if (att) {
+    const w = x.attw[i], top = [...w.keys()].sort((a, b) => w[b] - w[a]).slice(0, 3), rest = 1 - top.reduce((a, j) => a + w[j], 0);
+    mixRow = `<div class="wkrow">${top.map((j, k) => `${k ? '<span class="op">+</span>' : ""}<span class="w">${w[j].toFixed(2)} ×</span>${strip(x.encAtt[j], `<span class="gw">${esc(x.src[j])}</span>`)}`).join("")}<span class="op">+</span><span class="w">${rest.toFixed(2)} × the other ${x.src.length - 3}</span><span class="op">=</span>${strip(x.ctxAtt[i], "the mix")}</div>`;
+  }
+  return `<div class="wkpanel"><p class="label">${att ? "With attention" : "Without attention"}</p>${mixRow}
+    <div class="wkrow">${strip(st, `decoder state (${prev})`)}<span class="op">+</span>${strip(att ? x.ctxAtt[i] : x.sumOne, att ? "the mix" : "the summary")}<span class="op">→</span>${bars(P, x.ref[i] === P[0][0] || out.slice(0, i).every((v, k) => v === x.ref[k]) ? x.ref[i] : null)}</div></div>`;
+}
+const STEPS = [
+  ["Two translations of our sentence", () => ({ out: [1, 1], cur: -1, src: null, panels: "",
+    text: `Both models read our sentence for the first time: it was kept out of their training data. Without attention, the model makes ${x.one.filter((w, k) => w !== x.ref[k]).length} wrong words (in red) and leaves out half of the saying. With attention, the translation is exactly right. The next steps show where the first difference comes from.` })],
+  ["The encoder's vectors", () => ({ out: [0, 0], src: ["enc"], panels: "",
+    text: "The encoder makes one vector per Galician word: 8 numbers, drawn as 8 squares. Each one is computed from the vector before it and the new word, so each also carries something of the words before it. The last one is the summary. Here we show the vectors of the model with attention; the other model has its own." })],
+  ["Word 1, without attention", () => ({ out: [1, 1], cur: 0, src: ["one"], panels: panel("one", 0),
+    text: "The decoder starts from the summary, the vector after the full stop. The first English word is “a” or “an”, and that depends on the noun: “an aunt”, “a friend”. The noun, tía, was read 30 words before the summary was made. The model gives “a” 0.77 and writes it: wrong." })],
+  ["Word 1, with attention", () => ({ out: [1, 1], cur: 0, src: ["att", x.attw[0]], panels: panel("att", 0),
+    text: "With attention, the decoder gives each Galician vector a weight (orange bars), and the weights add up to 1. The largest, 0.47, is on tía. The mix of the vectors, weighted this way, goes to the decoder instead of the summary, and “an” gets 0.95. Section 3 shows how the weights are computed." })],
+  ["Word 2: each model goes on from its own word", () => ({ out: [2, 2], cur: 1, src: ["att", x.attw[1]], panels: panel("one", 1) + panel("att", 1),
+    text: "Each decoder takes in the word it just wrote. After “a”, only relatives that start with a consonant fit: friend, neighbor, cousin. The summary does not say which, so the model spreads its bet and writes “friend”. After “an”, only aunt and uncle fit; with the mix, “aunt” gets 0.96. Here the weights are spread over several words." })],
+  ["The rest of the sentence", () => ({ out: [x.one.length, x.att.length], cur: -1, src: null, panels: "",
+    text: "Without attention, the errors go on: “fixed” for solucionaba, “stories and jokes” for ditos e refráns, “repeat” for dicía, and the middle of the saying is missing. With attention, every word is right. Section 2 lets you step through every word of both models, and other sentences and vector sizes." })],
+];
+let k = 0;
+STEPS.forEach(([t], i) => { const b = document.createElement("button"); b.textContent = i + 1; b.title = t; b.addEventListener("click", () => { k = i; draw(); }); $("wkSteps").appendChild(b); });
+function draw() {
+  const [title, f] = STEPS[k], v = f();
+  $("wkTitle").textContent = `Step ${k + 1} of ${STEPS.length}: ${title}`;
+  $("wkOut").innerHTML = v.out[0] || v.out[1] ? `<p class="label">Without attention</p><p class="cmpline">${outLine(x.one, v.out[0], v.cur)}</p><p class="label">With attention</p><p class="cmpline">${outLine(x.att, v.out[1], v.cur)}</p>` : "";
+  $("wkSrcBox").hidden = !v.src;
+  if (v.src) srcSvg(v.src[0], v.src[1]);
+  $("wkPanels").innerHTML = v.panels;
+  $("wkText").textContent = v.text;
+  $("wkBack").disabled = k === 0; $("wkNext").disabled = k === STEPS.length - 1;
+  [...$("wkSteps").children].forEach((b, i) => b.classList.toggle("on", i === k));
+}
+$("wkNext").addEventListener("click", () => { k = Math.min(STEPS.length - 1, k + 1); draw(); });
+$("wkBack").addEventListener("click", () => { k = Math.max(0, k - 1); draw(); });
+draw();
+(window.__askState ||= []).push(() => `Section 1 (guided walk through the two trained 8-dimension models on our whole sentence): step ${k + 1} of ${STEPS.length}, "${STEPS[k][0]}". Without attention the model writes "${x.one.join(" ")}"; with attention "${x.att.join(" ")}" (correct). Word 1: without attention a 0.77, an 0.21 (decoder state + summary); with attention weights tía 0.47, escravo 0.21, then mix → an 0.95. Word 2: without attention after "a": friend 0.39, neighbor 0.31, cousin 0.28; with attention after "an": aunt 0.96, uncle 0.02, weights spread (escravo 0.17, un 0.16, tía 0.15).`);
+})();
+</script>
+
+<script>
 // ---------------------------------------------------------------- ask Claude
 // A chat about the page. Each question is sent with a description of the page and a snapshot
 // of its current state (every section registers a function in window.__askState).
@@ -1212,7 +1150,7 @@ How to answer: short, plain sentences. Define any technical term the first time 
 The page:
 - Running example: the Galician sentence "Unha tía miña, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»" (from the novel Speechwriter by Paulo Naseiro). "tía miña" is noun then possessive; English "my aunt" reverses the order.
 - The page continues a separate translation page (training, the encoder's one summary vector, word-by-word decoding without attention, why "an aunt of mine" is rare in English).
-- Section 1: early neural MT squeezed the whole source sentence into one vector (a bottleneck for long sentences); attention (Bahdanau, Cho & Bengio 2015) lets the decoder look back at every source word at each step. Toy weights: writing "my" puts 0.95 on miña, writing "aunt" puts 0.95 on tía.
+- Section 1: early neural MT squeezed the whole source sentence into one vector (a bottleneck for long sentences); attention (Bahdanau, Cho & Bengio 2015) lets the decoder look back at every source word at each step. The section is a six-step guided walk through the two trained 8-dimension models of section 2 on our whole sentence, with their real numbers: the translations (without attention: "A friend of mine, who fixed everything with stories and jokes, used to repeat something like «one is a slave to what one keeps quiet»"; with attention: exactly right); the encoder's 31 vectors (8 squares each; the last is the summary); word 1 without attention (decoder state + summary → a 0.77, an 0.21: wrong, the article depends on the noun read 30 words earlier); word 1 with attention (weights tía 0.47, escravo 0.21; the mix → an 0.95); word 2 (each decoder takes in its own last word: after "a" friend 0.39, neighbor 0.31, cousin 0.28; after "an" aunt 0.96, uncle 0.02); the rest (more errors without attention).
 - Section 2: two toy translation models (GRU encoder and decoder) trained on the same data, identical except for attention, with the same number of parameters. Without attention the decoder gets only the encoder's last vector; with attention it takes a weighted average of all the encoder's vectors at every output word (dot-product scores, softmax). The animation draws each model unrolled: a column of squares (one per dimension, blue positive, pink negative) for the encoder's vector at every Galician word, each made from the one before it, the last one being the summary; below, one column pair per English word written so far: the decoder state (GRU hidden state; the first is a copy of the summary, each next one is computed from the previous state and the word just written) and the context (without attention the same summary at every step; with attention the mix, drawn with lines from the Galician vectors whose thickness is the weight). Under each diagram: decoder state + context → the five most probable English words (softmax over the output layer), the chosen one in orange, the correct one ticked. A collapsible part derives the score (dot product of new state and an encoder vector) and the softmax weights line by line with the real numbers. Example at 8 dimensions, our sentence, second word: without attention friend 0.39, neighbor 0.31, cousin 0.28 (the summary has lost which relative); with attention aunt 0.96. The score is the dot product of the decoder's state and an encoder vector; the model learned in training to make the state similar to the vector that helps predict the next word, e.g. the vector at tía before writing "aunt". Training data: 5,000 template sentences built around the course sentence (other relatives, possessives, verbs, nouns, sayings), each also split into three pieces (noun phrase, noun phrase + relative clause, saying); 8,000 training steps; the course sentence is held out. One pair of models per vector size (8, 16, 64 dimensions). The current state gives the accuracies on 500 test sentences that are not in the training data. Small vectors lose details without attention (wrong relative, wrong verb, half the saying dropped) while the sentence stays fluent; with 64 dimensions both models are perfect on this toy data, because the templates hold little information. In real 2014 systems, one vector lost details of long sentences (Cho et al. 2014; Bahdanau et al. 2015). The toy data is made up; it is no real corpus.
 - Section 3: keys k_unha = (1, 0), k_tía = (0, 1), k_miña = (−1, 0); queries q_an = (3, 0), q_aunt = (0, 3), q_of = (−2, 1), q_mine = (−3, 0), all hand-set as in the worked example (unha tía miña → an aunt of mine). Score = q · k; softmax turns scores into weights that sum to 1 (for aunt: scores 0, 3, 0; e^3 / (e^0 + e^3 + e^0) = 20.09 / 22.09 = 0.91 for tía, 0.05 each for unha and miña; an: 0.95 on unha; of: 0.72 miña, 0.27 tía; mine: 0.95 on miña). The output is the weighted average of the value vectors. The three value vectors in the small plot are made up, with dimensions named "family member" and "belongs to me". A shorter query in the same direction gives a less sharp split (aunt, shorter (0, 1): 0.21, 0.58, 0.21). Section 1 uses these same weights.
 - Section 4: real cross-attention from the Helsinki-NLP/opus-mt-gl-en model (6 decoder layers × 8 heads) on the full sentence, recorded with one teacher-forced pass over its own greedy translation. Tokens are subword pieces; ‹/s› ends the sentence and often receives "parked" attention. Averaged over all heads, "aunt" looks most at "tía" (0.31); single late-layer heads are much sharper (layer 6 head 2: 0.99), early layers barely align.

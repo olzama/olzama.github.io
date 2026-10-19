@@ -1993,10 +1993,13 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <iframe class="frame" title="One vector, or looking back at every word" data-src="../artifacts/attention.html?embed=look"></iframe>
   </div>
   <div class="notes">
-    <p>Choose unha tía miña. Each diagram has its own buttons. Press Next English word in the top diagram, then in the bottom one. Start over goes back to the beginning.</p>
-    <p>Each column is one vector of the encoder. The first one is the vector of unha. Each next vector takes 0.75 of the new word and keeps 0.25 of the vector before. The colored parts show how much of each word a vector holds.</p>
-    <p>Under each English word is the vector the decoder gets. Without attention, it is always the last vector, the summary. In the summary, tía makes up only 0.19. With attention, the decoder mixes all the vectors. For aunt, tía makes up 0.69 of the mix.</p>
-    <p>Then choose the whole sentence. Without attention, tía is almost gone. With attention, the decoder can still find it.</p>
+    <p>Two small models translate our sentence. We trained them on the same data. They are identical, except that one has attention. Their vectors have 8 dimensions, and every number on this screen is theirs.</p>
+    <p>Press Next step. Step 1 shows the two translations. Without attention, the model writes "a friend of mine", and many words after that are wrong. With attention, the translation is right.</p>
+    <p>Step 2 shows the encoder's vectors, one per Galician word. The last one is the summary.</p>
+    <p>Step 3 is the first word without attention. The decoder has only the summary. The article depends on the noun: an aunt, a friend. But tía was read thirty words earlier. The model gives "a" 0.77, and that is wrong.</p>
+    <p>Step 4 is the first word with attention. The biggest weight, 0.47, is on tía. Now "an" gets 0.95.</p>
+    <p>Step 5 is the second word. Each model takes in its own first word. After "a", aunt no longer fits, so the model guesses friend. After "an", aunt gets 0.96.</p>
+    <p>Step 6: the errors without attention go on to the end of the sentence.</p>
   </div>
 </section>
 
