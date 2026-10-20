@@ -455,7 +455,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <p class="label">without attention (section 1)</p>
       <div class="flow"><span class="word dimw">after unha</span><span class="word dimw">after tía</span><span class="word">after miña = the summary</span><span class="op">→</span><span class="word out">the state's first three dimensions</span></div>
       <p class="label">with attention (this section)</p>
-      <div class="flow"><span class="word">after unha</span><span class="word">after tía</span><span class="word">after miña</span><span class="op">→</span><span class="word">compared with the decoder's question: weights</span><span class="op">→</span><span class="word">the mix</span><span class="op">→</span><span class="word out">the state's first three dimensions</span></div>
+      <div class="flow"><span class="word">after unha</span><span class="word">after tía</span><span class="word">after miña</span><span class="op">→</span><span class="word">dot product with the query: three scores</span><span class="op">→</span><span class="word">softmax: three weights</span><span class="op">→</span><span class="word">weighted sum: the mix</span><span class="op">→</span><span class="word out">the state's first three dimensions</span></div>
     </div>
     <div class="controls"><button id="atBack">Back</button><button class="primary" id="atNext">Next step</button><span class="pathstrip" id="atSteps"></span></div>
     <h3 class="wkh" id="atTitle"></h3>
@@ -468,11 +468,11 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <section class="panel" id="qk">
     <h2><span class="n">3</span>Query and key: try your own query</h2>
-    <p class="lead">The same model as sections 1 and 2. In section 2, steps 1 and 2, the encoder vectors played two parts: as <b>keys</b>, each was compared with the decoder's <b>query</b>, and the dot product gave its <b>score</b>; softmax turned the scores into <b>weights</b>; as <b>values</b>, the encoder vectors were added up with these weights into the <b>mix</b>. Set the query's three numbers, or pick one below.</p>
+    <p class="lead">The same model as sections 1 and 2. In section 2, steps 1 and 2, the encoder vectors played two parts: as <b>keys</b>, each was compared with the decoder's <b>query</b>, and the dot product gave its <b>score</b>; softmax turned the scores into <b>weights</b>; as <b>values</b>, the encoder vectors were added up with these weights into the <b>mix</b>. Set the query's three values, or pick one below.</p>
     <div class="controls qkctl">
-      <label for="qk0"><i>unha</i> row</label><input type="range" id="qk0" min="-6" max="10" step="0.5"><output id="qk0v"></output>
-      <label for="qk1"><i>tía</i> row</label><input type="range" id="qk1" min="-6" max="10" step="0.5"><output id="qk1v"></output>
-      <label for="qk2"><i>miña</i> row</label><input type="range" id="qk2" min="-6" max="10" step="0.5"><output id="qk2v"></output>
+      <label for="qk0"><i>unha</i> dimension</label><input type="range" id="qk0" min="-6" max="10" step="0.5"><output id="qk0v"></output>
+      <label for="qk1"><i>tía</i> dimension</label><input type="range" id="qk1" min="-6" max="10" step="0.5"><output id="qk1v"></output>
+      <label for="qk2"><i>miña</i> dimension</label><input type="range" id="qk2" min="-6" max="10" step="0.5"><output id="qk2v"></output>
     </div>
     <div class="controls"><span class="note">Queries</span><div class="seg" role="group" aria-label="Preset queries" id="qkPre"></div></div>
     <div class="cols">
@@ -1627,8 +1627,8 @@ const STEPS = [
           work([stLine(ONE[i].w, s.st), caps[i]]),
         scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], mark: true, cap: `Word ${i + 2}. ${caps[i]}` }) }));
     } }],
-  ["The decoder asks a question: the query", {
-    text: "With attention, before each English word the decoder looks at all three encoder vectors, not only the last one, and takes a weighted mix of them. To set the weights, it compares each encoder vector with a question of its own, in the form of a vector: the query. In this role, the encoder vectors are called keys.",
+  ["The query: one score for each encoder vector", {
+    text: "With attention, before each English word the decoder looks at all three encoder vectors, not only the last one, and takes a weighted mix of them. To set the weights, it computes the dot product of each encoder vector with one more vector, the query. This gives one score per encoder vector, and softmax turns the scores into weights. The query is computed from the decoder state, so it can be different before each English word. In this role, the encoder vectors are called keys.",
     frames: () => {
       const a = ATT[0].a, qs = queryScene(a), keys = encPts(ENC.map((e, j) => `key ${j + 1}: ${encPlain(j)}`));
       const qrule = work([`The query is computed from the decoder state. A real model learns how; we set it by hand, to what helps in the example translations. For the first two English words, the right word depends on whether the phrase has tía (“an aunt” or “a friend”). So the query starts as ${vecTxt(Q0)}: it looks for tía.`,
@@ -1637,7 +1637,7 @@ const STEPS = [
       const rowsHtml = n => ENC.slice(0, n).map((e, j) => eq(col(a.q, "the query"), op("·"), col(e, `key ${j + 1}: encoder vector ${encName(j)}`), op("="), `<div class="res">${dotTxt(a.q, e)} = <b>${f(a.sc[j])}</b></div>`)).join("");
       return [
         { board: qrule + eq(col(a.q, "the query")), scene: { ...SMALL, arrows: qs.arrows, pts: keys, cap: "The query has 6 in the tía dimension, so it points along the tía axis. The three encoder vectors are the keys it is compared with." } },
-        ...upto(3, j => ({ board: qrule + `<p class="label">how well each key answers the question: the dot product of query and key</p>` + rowsHtml(j + 1), scene: { ...SMALL, arrows: qs.arrows, segs: qs.segs.slice(0, j + 1), notes: qs.notes.slice(0, j + 1), pts: keys,
+        ...upto(3, j => ({ board: qrule + `<p class="label">the score of each key: the dot product of the query and the key</p>` + rowsHtml(j + 1), scene: { ...SMALL, arrows: qs.arrows, segs: qs.segs.slice(0, j + 1), notes: qs.notes.slice(0, j + 1), pts: keys,
           cap: `Key ${j + 1}: the dashed line drops it onto the query's line, at ${f(ENC[j][TIA])} along tía. Its score: 6 × ${f(ENC[j][TIA])} = ${f(a.sc[j])}.` } })),
         { board: qrule + rowsHtml(3) + work([`softmax turns the three scores into weights that add up to 1: ${a.sc.map((x, j) => `e<sup>${f(x)}</sup> = ${f(a.sm.e[j])}`).join(", ")}; sum = ${f(a.sm.Z)}`, `weights: ${a.sm.p.map((w, j) => `${f(a.sm.e[j])} / ${f(a.sm.Z)} = <b>${f(w)}</b> (${encName(j)})`).join(", ")}`]),
           scene: { ...SMALL, ...qs, pts: encPts(ENC.map((e, j) => `key ${j + 1}: weight ${f(a.sm.p[j])}`)), cap: "The key with the largest score gets most of the weight: the vector after tía, 0.79." } }];
