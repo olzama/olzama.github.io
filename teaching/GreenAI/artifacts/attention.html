@@ -177,6 +177,10 @@ svg.sb .bg, .sw.bg { fill: rgb(var(--heat)); background: rgb(var(--heat)); } svg
 
 .gcap { margin: 0; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); height: 2.7em; overflow: hidden; line-height: 1.35; }
 .gwrap { overflow-x: auto; }
+svg.smst { width: 600px; max-width: none; height: auto; display: block; }
+svg.smst text { font-size: 13px; fill: var(--fg); } svg.smst .sh { fill: var(--muted); font-size: 12px; } svg.smst .sv, svg.smst .st { font-family: var(--font-mono); }
+svg.smst .st { fill: var(--muted); font-size: 11px; } svg.smst .sw { fill: var(--orange); font-weight: 600; } svg.smst .ax { stroke: var(--muted); }
+svg.smst .k1 { fill: rgba(var(--heat), 0.3); } svg.smst .k2 { fill: rgba(var(--heat), 1); } svg.smst .k3 { fill: rgba(var(--heat), 0.6); } svg.smst .hid { visibility: hidden; }
 .g11 { display: grid; grid-template-columns: 70px repeat(3, 30px) 8px repeat(8, 30px) 36px 36px 34px 104px; column-gap: 1px; row-gap: 2px; align-items: center; width: max-content; }
 .g11 .rl { font-size: 0.8rem; line-height: 1.15; height: 28px; display: flex; align-items: center; overflow: hidden; }
 .g11 .rl.subrow, .g11 .gs, .g11 .subrow { height: 15px; }
@@ -1461,6 +1465,36 @@ function encStage(n) {
     (n === 1 ? "<br>dimension by dimension: unha ½ × 0.5 + ½ × 0 = 0.25; tía ½ × 0 + ½ × 1 = 0.5; miña ½ × 0 + ½ × 0 = 0." : n === 2 ? "<br>Each new word halves what was there before: the summary holds 0.5 of miña, 0.25 of tía and only 0.125 of unha." : "");
   return `<p class="label">the word vectors</p>${top}<p class="label es-lab${n < 0 ? " hid" : ""}">the encoder's vector, updated after each word</p>${bot}<p class="work es-line">${line}</p>`;
 }
+// ----- softmax on one fixed stage: the scores, e to the power of each score (a bar each), the bars end to end
+// (their sum), and each bar's share of the sum (the weights). n = 0…3 reveals one column more each time.
+function smStage(a, n) {
+  const U = 300 / a.sm.Z, X = 265, H = (show, c = "") => `class="${c}${show ? "" : " hid"}"`, sh = j => ["k1", "k2", "k3"][j];
+  let g = `<text x="0" y="16" class="sh">encoder vector</text><text x="170" y="16" text-anchor="end" class="sh">score</text>` +
+    `<text x="250" y="16" text-anchor="end" ${H(n >= 1, "sh")}>e<tspan dy="-5" font-size="0.75em">score</tspan></text>` +
+    `<text x="595" y="16" text-anchor="end" ${H(n >= 3, "sh")}>weight</text>`;
+  ENC.forEach((e, j) => { const y = 48 + 34 * j, w = a.sm.e[j] * U;
+    g += `<text x="0" y="${y}" class="sl">${encPlain(j)}</text><text x="170" y="${y}" text-anchor="end" class="sv">${f(a.sc[j])}</text>` +
+      `<g ${H(n >= 1)}><text x="250" y="${y}" text-anchor="end" class="sv">${f(a.sm.e[j])}</text><rect x="${X}" y="${y - 13}" width="${w.toFixed(1)}" height="16" rx="2" class="${sh(j)}"/></g>` +
+      `<text x="595" y="${y}" text-anchor="end" ${H(n >= 3, "sv sw")}>${f(a.sm.p[j])}</text>`; });
+  let at = X, pcs = "", shares = "";
+  ENC.forEach((e, j) => { const w = a.sm.e[j] * U;
+    pcs += `<rect x="${at.toFixed(1)}" y="152" width="${w.toFixed(1)}" height="20" class="${sh(j)}"/>`;
+    shares += `<text x="${(at + w / 2).toFixed(1)}" y="${j === 0 ? 218 : 204}" text-anchor="middle" class="sv sw">${f(a.sm.p[j])}</text>`; at += w; });
+  g += `<g ${H(n >= 2)}><text x="250" y="167" text-anchor="end" class="sv">sum ${f(a.sm.Z)}</text>${pcs}` +
+    `<line x1="${X}" y1="178" x2="${X + 300}" y2="178" class="ax"/><line x1="${X}" y1="174" x2="${X}" y2="182" class="ax"/><line x1="${X + 300}" y1="174" x2="${X + 300}" y2="182" class="ax"/>` +
+    `<text x="${X}" y="192" text-anchor="middle" class="st">0</text><text x="${X + 300}" y="192" text-anchor="middle" class="st">${n >= 3 ? "1" : f(a.sm.Z)}</text></g>` +
+    `<g ${H(n >= 3)}>${shares}<text x="250" y="204" text-anchor="end" class="st">each piece's share</text></g>`;
+  return `<p class="label">softmax: from the three scores to three weights</p><svg class="smst" viewBox="0 0 600 226" role="img" aria-label="softmax of the scores ${a.sc.map(f).join(", ")}">${g}</svg>`;
+}
+const SMTXT = a => [
+  [`The weights have to be 0 or more and add up to 1, so that the mix is a weighted average of the encoder vectors. The scores ${a.sc.map(f).join(", ")} add up to ${f(r2(a.sc.reduce((x, y) => x + y, 0)))}. Softmax turns scores into weights, in two parts.`,
+    `<span class="review"><span class="rtag">Review</span> The <a href="skipgram.html">skip-gram</a> model used the same softmax to turn its scores into probabilities.</span>`],
+  [`Part 1: e to the power of each score. e is a fixed number, about 2.718. e<sup>0</sup> = 1; e<sup>1.5</sup> = ${f(a.sm.e[2])}; e<sup>3</sup> = 2.718 × 2.718 × 2.718 = ${f(a.sm.e[1])}. The results are always more than 0, and a higher score gives a larger result: each 1 more in the score multiplies it by 2.718.`],
+  [`The three bars end to end: 1 + ${f(a.sm.e[1])} + ${f(a.sm.e[2])} = ${f(a.sm.Z)}.`],
+  [`Part 2: divide each bar by the sum: ${a.sm.p.map((w, j) => `${f(a.sm.e[j])} / ${f(a.sm.Z)} = ${f(w)}`).join(", ")}. The whole bar now has length 1, and each weight is its piece's share. (Rounded to two decimals they add up to ${f(r2(a.sm.p.reduce((x, y) => x + y, 0)))}; exactly, to 1.)`]];
+const SMCAP = ["The three scores, from the dot products above.", "The scores have not changed; only the bars are new.", "The scores have not changed; only the bars are new.",
+  "The key with the largest score gets most of the weight: the vector after tía, 0.79."];
+
 const STEPS = [
   ["The three Galician words as vectors", {
     text: "This small model gives each Galician word a vector with three dimensions, one per word of the phrase: 1 in the word's own dimension, 0 in the other two. In the picture, each dimension is one axis, so each word is a point at 1 on its own axis.",
@@ -1639,8 +1673,9 @@ const STEPS = [
         { board: qrule + eq(col(a.q, "the query")), scene: { ...SMALL, arrows: qs.arrows, pts: keys, cap: "The query has 6 in the tía dimension, so it points along the tía axis. The three encoder vectors are the keys it is compared with." } },
         ...upto(3, j => ({ board: qrule + `<p class="label">the score of each key: the dot product of the query and the key</p>` + rowsHtml(j + 1), scene: { ...SMALL, arrows: qs.arrows, segs: qs.segs.slice(0, j + 1), notes: qs.notes.slice(0, j + 1), pts: keys,
           cap: `Key ${j + 1}: the dashed line drops it onto the query's line, at ${f(ENC[j][TIA])} along tía. Its score: 6 × ${f(ENC[j][TIA])} = ${f(a.sc[j])}.` } })),
-        { board: qrule + rowsHtml(3) + work([`softmax turns the three scores into weights that add up to 1: ${a.sc.map((x, j) => `e<sup>${f(x)}</sup> = ${f(a.sm.e[j])}`).join(", ")}; sum = ${f(a.sm.Z)}`, `weights: ${a.sm.p.map((w, j) => `${f(a.sm.e[j])} / ${f(a.sm.Z)} = <b>${f(w)}</b> (${encName(j)})`).join(", ")}`]),
-          scene: { ...SMALL, ...qs, pts: encPts(ENC.map((e, j) => `key ${j + 1}: weight ${f(a.sm.p[j])}`)), cap: "The key with the largest score gets most of the weight: the vector after tía, 0.79." } }];
+        ...upto(4, n => ({ board: qrule + rowsHtml(3) + smStage(a, n) + work(SMTXT(a)[n]),
+          scene: n < 3 ? { ...SMALL, arrows: qs.arrows, segs: qs.segs, notes: qs.notes, pts: keys, cap: SMCAP[n] }
+            : { ...SMALL, ...qs, pts: encPts(ENC.map((e, j) => `key ${j + 1}: weight ${f(a.sm.p[j])}`)), cap: SMCAP[3] } }))];
     } }],
   ["The mix", {
     text: "The mix is the three encoder vectors added up, each multiplied by its weight. In this role the encoder vectors are called values. The mix takes the summary's place in the decoder state.",
