@@ -197,8 +197,8 @@ svg.sb .bg, .sw.bg { fill: rgb(var(--heat)); background: rgb(var(--heat)); } svg
 .g11 .mixl { color: var(--orange); }
 svg.gbar { width: 104px; height: 26px; display: block; max-width: none; }
 svg.gbar .ax, svg.gbar .tk { stroke: var(--line); } svg.gbar .z { stroke: var(--muted); }
-svg.gbar .sc { fill: var(--muted); } svg.gbar .sc.win { fill: var(--orange); }
-svg.gbar rect.sc.anim { transform-box: fill-box; transform-origin: left center; animation: grow 0.9s ease-out; } svg.gbar rect.sc.anim.neg { transform-origin: right center; }
+svg.gbar .pg { fill: var(--blue); } svg.gbar .pe { fill: var(--green); } svg.gbar .pb { fill: var(--muted); } svg.gbar .tot { stroke: var(--fg); stroke-width: 1.5; } svg.gbar .tot.win { stroke: var(--orange); stroke-width: 2.5; } svg.gbar .rt.win { fill: var(--orange); font-weight: 600; }
+svg.gbar rect.anim { transform-box: fill-box; transform-origin: left center; animation: grow 0.9s ease-out; } svg.gbar rect.anim.neg { transform-origin: right center; }
 .g11 .gsum { font-family: var(--font-mono); font-size: 0.68rem; text-align: center; height: 28px; display: grid; place-items: center; }
 .g11 .gsum.subrow { height: 15px; } .g11 .gsum.g1, .g11 .gh.g1 { color: var(--blue); } .g11 .gsum.g2, .g11 .gh.g2 { color: var(--green); }
 .g11 .gax { align-self: end; } svg.gaxis { width: 104px; height: 52px; display: block; max-width: none; }
@@ -1404,13 +1404,18 @@ const gShade = v => `background:rgba(${v < 0 ? "var(--negheat)" : "var(--heat)"}
 // v: a number; null: not decided yet (?); undefined: invisible
 const gCell = (v, cls = "") => v === undefined ? `<div class="gc hid"></div>` : v === null ? `<div class="gc q ${cls}">?</div>` : `<div class="gc ${cls}" style="${gShade(v)}">${f(v)}</div>`;
 const gSub = (v, cls = "") => `<div class="gs ${cls}">${v === undefined || v === 0 ? "" : f(v)}</div>`;
-// the score of one row: a bar from 0 on this row's own scale (−4 to 12, ticks every 4), the number at the end of the scale
+// the score of one row on this row's own scale (−4 to 12, ticks every 4): one piece per part, each piece starting
+// where the one above it ended (blue: Σ first 3, green: Σ last 8, grey: bias); the mark and the number are the total
 const G_U = 4.2, G_X0 = 4 + 4 * G_U;
-function gScore(v, win, anim) {
-  const x = G_X0 + v * G_U, ticks = [-4, 0, 4, 8, 12].map(t => `<line x1="${G_X0 + t * G_U}" y1="${t ? 17 : 2}" x2="${G_X0 + t * G_U}" y2="23" class="${t ? "tk" : "z"}"/>`).join("");
-  return `<svg class="gbar" viewBox="0 0 104 26" role="img" aria-label="score ${f(v)}"><line x1="${G_X0 - 4 * G_U}" y1="20" x2="${G_X0 + 12 * G_U}" y2="20" class="ax"/>${ticks}` +
-    (v ? `<rect class="sc${win ? " win" : ""}${anim ? " anim" + (v < 0 ? " neg" : "") : ""}" x="${Math.min(x, G_X0).toFixed(1)}" y="5" width="${Math.abs(v * G_U).toFixed(1)}" height="9" rx="1"/>` : "") +
-    `<text x="102" y="14" text-anchor="end" class="rt">${f(v)}</text></svg>`;
+function gScore(v, win, anim, parts = {}) {
+  const ticks = [-4, 0, 4, 8, 12].map(t => `<line x1="${G_X0 + t * G_U}" y1="${t ? 21 : 1}" x2="${G_X0 + t * G_U}" y2="25" class="${t ? "tk" : "z"}"/>`).join("");
+  let at = 0, pcs = "";
+  [["g", "pg"], ["e", "pe"], ["b", "pb"]].forEach(([k, cls], j) => { const d = parts[k]; if (d === undefined) return;
+    if (d) pcs += `<rect class="${cls}${anim === k ? " anim" + (d < 0 ? " neg" : "") : ""}" x="${(G_X0 + Math.min(at, at + d) * G_U).toFixed(1)}" y="${2 + j * 6}" width="${Math.abs(d * G_U).toFixed(1)}" height="5" rx="1"/>`;
+    at = r2(at + d); });
+  const x = (G_X0 + v * G_U).toFixed(1);
+  return `<svg class="gbar" viewBox="0 0 104 26" role="img" aria-label="score ${f(v)}"><line x1="${G_X0 - 4 * G_U}" y1="23" x2="${G_X0 + 12 * G_U}" y2="23" class="ax"/>${ticks}${pcs}` +
+    `<line x1="${x}" y1="0" x2="${x}" y2="20" class="tot${win ? " win" : ""}"/><text x="102" y="14" text-anchor="end" class="rt${win ? " win" : ""}">${f(v)}</text></svg>`;
 }
 // the scale labels above the score column, aligned with the ticks of every row
 const gAxis = title => `<svg class="gaxis" viewBox="0 0 104 52" aria-hidden="true"><text x="${G_X0}" y="22" class="at">${title}</text>` +
@@ -1428,7 +1433,7 @@ function g11(o) {
   const words = EN.map(w => {
     const r = (o.words || {})[w] || {}, dim = (o.dim || []).includes(w) ? " gdim" : "", win = o.win === w ? " win" : "";
     const vec = r.v === undefined ? DS.map(() => undefined) : r.v;
-    const A = line(`<b>${w}</b>`, vec.map((x, i) => gCell(x, r.cur || (r.hi || []).includes(i) ? "cur" : "")), r.g === undefined ? "" : f(r.g), r.e === undefined ? "" : f(r.e), o.bias ? f(CAND[w].b) : "", r.score === undefined ? "" : gScore(r.score, o.win === w, r.anim), dim + win);
+    const A = line(`<b>${w}</b>`, vec.map((x, i) => gCell(x, r.cur || (r.hi || []).includes(i) ? "cur" : "")), r.g === undefined ? "" : f(r.g), r.e === undefined ? "" : f(r.e), o.bias ? f(CAND[w].b) : "", r.score === undefined ? "" : gScore(r.score, o.win === w, r.anim, { g: r.g, e: r.e, b: r.b }), dim + win);
     const B = line(`<span class="gsl">${r.subLabel || ""}</span>`, DS.map((d, i) => gSub(r.sub ? r.sub[i] : undefined)), "", "", "", "", "subrow" + dim);
     return A + B;
   }).join("");
@@ -1439,7 +1444,7 @@ const prodOf = (w, st) => vecOf(w).map((x, i) => r2(x * st[i]));
 const sumTxt = (w, st) => { const p = prodOf(w, st).filter(x => x); return `${p.map(f).join(" + ").replace(/\+ −/g, "− ") || "0"} = ${f(r2(p.reduce((a, b) => a + b, 0)))}`; };
 // all words with their vectors and score bars
 const allBars = (x, st, parts, extra = {}) => { const sc = scoreAll(x, st, parts.includes("b")), W = {};
-  EN.forEach(w => { const r = sc.rows.find(q => q.w === w); W[w] = { v: vecOf(w), g: parts.includes("g") ? r.gp : undefined, e: parts.includes("e") ? r.ep : undefined, score: parts.includes("e") ? r.s : undefined, anim: extra.anim, sub: extra.subs ? prodOf(w, stateOf(x, st)) : undefined, subLabel: extra.subs ? "products" : "" }; }); return W; };
+  EN.forEach(w => { const r = sc.rows.find(q => q.w === w); W[w] = { v: vecOf(w), g: parts.includes("g") ? r.gp : undefined, e: parts.includes("e") ? r.ep : undefined, b: parts.includes("b") ? CAND[w].b : undefined, score: parts.includes("e") ? r.s : undefined, anim: extra.anim, sub: extra.subs ? prodOf(w, stateOf(x, st)) : undefined, subLabel: extra.subs ? "products" : "" }; }); return W; };
 const changed = (a, b) => a.map((v, i) => v !== b[i] ? i : -1).filter(i => i >= 0);
 
 // ----- steps 1 and 2 on one fixed stage: the word vectors on top, each above the arrow where the encoder reads it;
@@ -1539,7 +1544,7 @@ const STEPS = [
               "How a real model differs: its dimensions have no names, and each one mixes many such signals; nobody can read off why a value is there. Its state is not updated by our simple ½ + ½ rule but by a learned function. The logic is the same, though: values end up wherever they raise the right word's score in the training examples."]),
           scene: { ...decScene(SUMMARY, false, { arrows: true }), cap: "The other words follow the same reasoning. In the picture: “aunt” along tía, “friend” the opposite way; “of”, “mine” along miña. (“yours”, −8 along miña, is not drawn.)" } },
         { board: g11({ ...base, cap: "translating <i>unha tía miña</i>, word 1: every word's dot product with the state", resHead: "dot product", words: allBars(SUMMARY, ST0, ["g", "e"], { subs: true, anim: "e" }) }) +
-            work([`For every word: Σ first three (the part of the dot product the picture shows) + Σ last eight = the dot product, drawn as a bar on its row's scale. “an” has ${f(sc.rows[1].gp)} + ${f(sc.rows[1].ep)} = ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}; “a” has ${f(sc.rows[0].gp)} + ${f(sc.rows[0].ep)} = ${f(r2(sc.rows[0].gp + sc.rows[0].ep))}.`]),
+            work([`For every word: Σ first three (the part of the dot product the picture shows) + Σ last eight = the dot product. Each row has its own scale, from −4 to 12. The blue piece is Σ first three, drawn from 0. The green piece is Σ last eight, drawn from where the blue piece ends. The black mark is where the green piece ends: the dot product. “an” has ${f(sc.rows[1].gp)} + ${f(sc.rows[1].ep)} = ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}; “a” has ${f(sc.rows[0].gp)} + ${f(sc.rows[0].ep)} = ${f(r2(sc.rows[0].gp + sc.rows[0].ep))}. Their green pieces are equal; the blue pieces make the difference.`]),
           scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], cap: "Every word's dot product with the state." }) }];
     } }],
   ["Where the values in the word vectors come from", {
