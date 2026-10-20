@@ -177,12 +177,12 @@ svg.sb .bg, .sw.bg { fill: rgb(var(--heat)); background: rgb(var(--heat)); } svg
 
 .gcap { margin: 0; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); height: 2.7em; overflow: hidden; line-height: 1.35; }
 .gwrap { overflow-x: auto; }
-.g11 { display: grid; grid-template-columns: 76px repeat(3, 31px) 8px repeat(8, 31px) 38px 142px; column-gap: 1px; row-gap: 2px; align-items: center; width: max-content; }
+.g11 { display: grid; grid-template-columns: 70px repeat(3, 30px) 8px repeat(8, 30px) 36px 36px 34px 104px; column-gap: 1px; row-gap: 2px; align-items: center; width: max-content; }
 .g11 .rl { font-size: 0.8rem; line-height: 1.15; height: 28px; display: flex; align-items: center; overflow: hidden; }
 .g11 .rl.subrow, .g11 .gs, .g11 .subrow { height: 15px; }
 .g11 .gsl { font-size: 0.64rem; color: var(--muted); white-space: nowrap; }
 .g11 .gh { font-size: 0.66rem; color: var(--muted); white-space: nowrap; writing-mode: vertical-rl; transform: rotate(180deg); height: 52px; justify-self: center; text-align: left; }
-.g11 .gc { height: 28px; border-radius: 4px; display: grid; place-items: center; font-family: var(--font-mono); font-size: 0.66rem; margin: 0 1px; }
+.g11 .gc { height: 28px; border-radius: 4px; display: grid; place-items: center; font-family: var(--font-mono); font-size: 0.62rem; margin: 0 1px; }
 .g11 .gc.q { background: var(--bg); border: 1.5px dashed var(--muted); color: var(--muted); }
 .g11 .gc.cur { box-shadow: 0 0 0 2px var(--orange); }
 .g11 .gs { font-family: var(--font-mono); font-size: 0.64rem; color: var(--orange); text-align: center; line-height: 15px; }
@@ -195,9 +195,13 @@ svg.sb .bg, .sw.bg { fill: rgb(var(--heat)); background: rgb(var(--heat)); } svg
 .g11 .win { background: var(--hi); }
 .g11 .rl.strow, .g11 .rl.sumrow { color: var(--muted); }
 .g11 .mixl { color: var(--orange); }
-svg.gbar { width: 142px; height: 26px; display: block; max-width: none; }
-svg.gbar .tot { fill: var(--orange); }
-.g11 .gax { align-self: end; } svg.gaxis { width: 142px; height: 46px; display: block; max-width: none; }
+svg.gbar { width: 104px; height: 26px; display: block; max-width: none; }
+svg.gbar .ax, svg.gbar .tk { stroke: var(--line); } svg.gbar .z { stroke: var(--muted); }
+svg.gbar .sc { fill: rgb(var(--heat)); } svg.gbar .sc.win { fill: var(--orange); }
+svg.gbar rect.sc.anim { transform-box: fill-box; transform-origin: left center; animation: grow 0.9s ease-out; } svg.gbar rect.sc.anim.neg { transform-origin: right center; }
+.g11 .gsum { font-family: var(--font-mono); font-size: 0.68rem; text-align: center; height: 28px; display: grid; place-items: center; }
+.g11 .gsum.subrow { height: 15px; } .g11 .gsum.g1, .g11 .gh.g1 { color: var(--blue); } .g11 .gsum.g2, .g11 .gh.g2 { color: var(--green); }
+.g11 .gax { align-self: end; } svg.gaxis { width: 104px; height: 52px; display: block; max-width: none; }
 svg.gaxis .at { fill: var(--muted); font-size: 10px; font-family: var(--font-body); } svg.gaxis .av { fill: var(--muted); font-size: 9px; font-family: var(--font-mono); } svg.gaxis .al { stroke: var(--line); }
 svg.gbar .z { stroke: var(--line); } svg.gbar .rt { fill: var(--fg); font-size: 11px; font-family: var(--font-mono); }
 svg.gbar .bg { fill: rgb(var(--heat)); } svg.gbar .be { fill: var(--green); } svg.gbar .bb { fill: var(--muted); }
@@ -1400,33 +1404,32 @@ const gShade = v => `background:rgba(${v < 0 ? "var(--negheat)" : "var(--heat)"}
 // v: a number; null: not decided yet (?); undefined: invisible
 const gCell = (v, cls = "") => v === undefined ? `<div class="gc hid"></div>` : v === null ? `<div class="gc q ${cls}">?</div>` : `<div class="gc ${cls}" style="${gShade(v)}">${f(v)}</div>`;
 const gSub = (v, cls = "") => `<div class="gs ${cls}">${v === undefined || v === 0 ? "" : f(v)}</div>`;
-function gBar(r, parts, anim) {
-  const U = 6, X0 = 6 + 5 * U, H = 26, val = { g: r.gp, e: r.ep, b: r.b }, LANE = 7;
-  let at = 0, g = `<line x1="${X0}" y1="0" x2="${X0}" y2="${H}" class="z"/>`;
-  parts.forEach((p, j) => { const v = val[p]; if (v) g += `<rect class="b${p}${p === anim ? ` anim${v < 0 ? " neg" : ""}` : ""}" x="${(X0 + Math.min(at, at + v) * U).toFixed(1)}" y="${2 + j * LANE}" width="${(Math.abs(v) * U).toFixed(1)}" height="${LANE - 1}" rx="1"/>`; at += v; });
-  at = r2(at);
-  const mx = X0 + at * U, my = 2 + (parts.length - 1) * LANE + (LANE - 1) / 2;
-  return `<svg class="gbar" viewBox="0 0 142 ${H}" role="img" aria-label="score ${f(at)}">${g}<circle cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r="3.5" class="tot"/><text x="${(Math.max(mx, X0) + 7).toFixed(1)}" y="${(my + 4).toFixed(1)}" class="rt">${f(at)}</text></svg>`;
+// the score of one row: a bar from 0 on this row's own scale (−4 to 12, ticks every 4), the number at the end of the scale
+const G_U = 4.2, G_X0 = 4 + 4 * G_U;
+function gScore(v, win, anim) {
+  const x = G_X0 + v * G_U, ticks = [-4, 0, 4, 8, 12].map(t => `<line x1="${G_X0 + t * G_U}" y1="${t ? 17 : 2}" x2="${G_X0 + t * G_U}" y2="23" class="${t ? "tk" : "z"}"/>`).join("");
+  return `<svg class="gbar" viewBox="0 0 104 26" role="img" aria-label="score ${f(v)}"><line x1="${G_X0 - 4 * G_U}" y1="20" x2="${G_X0 + 12 * G_U}" y2="20" class="ax"/>${ticks}` +
+    (v ? `<rect class="sc${win ? " win" : ""}${anim ? " anim" + (v < 0 ? " neg" : "") : ""}" x="${Math.min(x, G_X0).toFixed(1)}" y="5" width="${Math.abs(v * G_U).toFixed(1)}" height="9" rx="1"/>` : "") +
+    `<text x="102" y="14" text-anchor="end" class="rt">${f(v)}</text></svg>`;
 }
-// the scale above the score column
-const gAxis = title => { const U = 6, X0 = 6 + 5 * U;
-  return `<svg class="gaxis" viewBox="0 0 142 46" aria-hidden="true"><text x="${X0}" y="12" class="at">${title}</text><line x1="${X0 - 4 * U}" y1="36" x2="${X0 + 13 * U}" y2="36" class="al"/>` +
-    [-4, 0, 4, 8, 12].map(v => `<line x1="${X0 + v * U}" y1="33" x2="${X0 + v * U}" y2="39" class="al"/><text x="${X0 + v * U}" y="30" text-anchor="middle" class="av">${f(v)}</text>`).join("") + "</svg>"; };
+// the scale labels above the score column, aligned with the ticks of every row
+const gAxis = title => `<svg class="gaxis" viewBox="0 0 104 52" aria-hidden="true"><text x="${G_X0}" y="22" class="at">${title}</text>` +
+  [-4, 0, 4, 8, 12].map(t => `<text x="${G_X0 + t * G_U}" y="48" text-anchor="middle" class="av">${f(t)}</text>`).join("") + "</svg>";
 // o.sum: {label, v, cls, hi: [dims to highlight]}; o.st: {label, v, hi}; o.words: {w: {v, cur, hi, sub, subLabel, res}}
 // o.dim: words drawn faint; o.bias: show the bias column; o.win: the word written
 function g11(o) {
   const sp = `<div></div>`;
-  const line = (label, cells, bias, res, cls = "") => `<div class="rl ${cls}">${label}</div>` + cells.slice(0, 3).join("") + sp + cells.slice(3).join("") + `<div class="gbias ${cls}">${bias ?? ""}</div><div class="res ${cls}">${res ?? ""}</div>`;
-  const head = `<div class="rl"></div>` + DIMS.map(d => `<div class="gh"><i>${d}</i></div>`).join("") + sp + ST.map(d => `<div class="gh">${d}</div>`).join("") + `<div class="gh${o.bias ? "" : " hid"}">bias</div><div class="gax">${o.resHead ? gAxis(o.resHead) : ""}</div>`;
+  const line = (label, cells, s3, s8, bias, res, cls = "") => `<div class="rl ${cls}">${label}</div>` + cells.slice(0, 3).join("") + sp + cells.slice(3).join("") + `<div class="gsum g1 ${cls}">${s3 ?? ""}</div><div class="gsum g2 ${cls}">${s8 ?? ""}</div><div class="gbias ${cls}">${bias ?? ""}</div><div class="res ${cls}">${res ?? ""}</div>`;
+  const head = `<div class="rl"></div>` + DIMS.map(d => `<div class="gh g1"><i>${d}</i></div>`).join("") + sp + ST.map(d => `<div class="gh g2">${d}</div>`).join("") + `<div class="gh g1${o.sums ? "" : " hid"}">Σ first 3</div><div class="gh g2${o.sums ? "" : " hid"}">Σ last 8</div><div class="gh${o.bias ? "" : " hid"}">bias</div><div class="gax">${o.resHead ? gAxis(o.resHead) : ""}</div>`;
   const sum = o.sum || {};
-  const sumRow = line(`<span class="${sum.cls || ""}">${sum.label || "summary"}</span>`, [...[0, 1, 2].map(i => gCell(sum.v ? sum.v[i] : undefined, (sum.hi || []).includes(i) ? "cur" : "")), ...ST.map(() => gCell(undefined))], "", "", "sumrow");
+  const sumRow = line(`<span class="${sum.cls || ""}">${sum.label || "summary"}</span>`, [...[0, 1, 2].map(i => gCell(sum.v ? sum.v[i] : undefined, (sum.hi || []).includes(i) ? "cur" : "")), ...ST.map(() => gCell(undefined))], "", "", "", "", "sumrow");
   const st = o.st || {};
-  const stRow = line(st.label || "decoder state", DS.map((d, i) => gCell(st.v ? st.v[i] : undefined, (st.hi || []).includes(i) ? "cur" : "")), "", st.res || "", "strow");
+  const stRow = line(st.label || "decoder state", DS.map((d, i) => gCell(st.v ? st.v[i] : undefined, (st.hi || []).includes(i) ? "cur" : "")), "", "", "", "", "strow");
   const words = EN.map(w => {
     const r = (o.words || {})[w] || {}, dim = (o.dim || []).includes(w) ? " gdim" : "", win = o.win === w ? " win" : "";
     const vec = r.v === undefined ? DS.map(() => undefined) : r.v;
-    const A = line(`<b>${w}</b>`, vec.map((x, i) => gCell(x, r.cur || (r.hi || []).includes(i) ? "cur" : "")), o.bias ? f(CAND[w].b) : "", r.res, dim + win);
-    const B = line(`<span class="gsl">${r.subLabel || ""}</span>`, DS.map((d, i) => gSub(r.sub ? r.sub[i] : undefined)), "", "", "subrow" + dim);
+    const A = line(`<b>${w}</b>`, vec.map((x, i) => gCell(x, r.cur || (r.hi || []).includes(i) ? "cur" : "")), r.g === undefined ? "" : f(r.g), r.e === undefined ? "" : f(r.e), o.bias ? f(CAND[w].b) : "", r.score === undefined ? "" : gScore(r.score, o.win === w, r.anim), dim + win);
+    const B = line(`<span class="gsl">${r.subLabel || ""}</span>`, DS.map((d, i) => gSub(r.sub ? r.sub[i] : undefined)), "", "", "", "", "subrow" + dim);
     return A + B;
   }).join("");
   return `<p class="gcap">${o.cap || "&nbsp;"}</p><div class="gwrap"><div class="g11">${head}${sumRow}${stRow}<div class="gsep"></div>${words}</div></div>`;
@@ -1436,7 +1439,7 @@ const prodOf = (w, st) => vecOf(w).map((x, i) => r2(x * st[i]));
 const sumTxt = (w, st) => { const p = prodOf(w, st).filter(x => x); return `${p.map(f).join(" + ").replace(/\+ −/g, "− ") || "0"} = ${f(r2(p.reduce((a, b) => a + b, 0)))}`; };
 // all words with their vectors and score bars
 const allBars = (x, st, parts, extra = {}) => { const sc = scoreAll(x, st, parts.includes("b")), W = {};
-  EN.forEach(w => { W[w] = { v: vecOf(w), res: gBar(sc.rows.find(q => q.w === w), parts, extra.anim), sub: extra.subs ? prodOf(w, stateOf(x, st)) : undefined, subLabel: extra.subs ? "products" : "" }; }); return W; };
+  EN.forEach(w => { const r = sc.rows.find(q => q.w === w); W[w] = { v: vecOf(w), g: parts.includes("g") ? r.gp : undefined, e: parts.includes("e") ? r.ep : undefined, score: parts.includes("e") ? r.s : undefined, anim: extra.anim, sub: extra.subs ? prodOf(w, stateOf(x, st)) : undefined, subLabel: extra.subs ? "products" : "" }; }); return W; };
 const changed = (a, b) => a.map((v, i) => v !== b[i] ? i : -1).filter(i => i >= 0);
 
 // ----- steps 1 and 2 on one fixed stage: the word vectors on top, each above the arrow where the encoder reads it;
@@ -1482,14 +1485,14 @@ const STEPS = [
   ["How the decoder scores a word", {
     text: "The decoder gives each of its eight words a score and writes the word with the highest score. Each English word has its own vector, with the same eleven dimensions as the state, and its score is the dot product of that vector and the state. In a real model, training sets these vectors from example translations (step 5). Here we set them by hand, to the kind of numbers that training on the translation page's examples would produce, so that the reason for each number is visible.",
     frames: () => {
-      const st = stateOf(SUMMARY, ST0), base = { sum: { v: SUMMARY }, st: { v: st } }, sc = scoreAll(SUMMARY, ST0);
+      const st = stateOf(SUMMARY, ST0), base = { sum: { v: SUMMARY }, st: { v: st }, sums: true, resHead: "dot product" }, sc = scoreAll(SUMMARY, ST0);
       const part = keep => vecOf("an").map((x, i) => keep.includes(DS[i]) ? x : null);
       const anArrow = [{ a: ZERO, b: [0.25, 0.5, 0], cls: "ca", label: "“an”", dx: 6, dy: 18, anchor: "start" }], anTia = [{ a: ZERO, b: [0, 0.5, 0], cls: "ca", label: "“an”", dx: 6, dy: 22, anchor: "start" }];
       const aArrow = [{ a: ZERO, b: [0.25, -0.5, 0], cls: "ca", label: "“a”", dx: 0, dy: 20, anchor: "start" }];
       const sG = (cap, arrows) => ({ ...decScene(SUMMARY, false, { cap }), arrows });
       const drop2 = decScene(SUMMARY, false, { drops: [0, TIA] });
-      const anDone = { v: vecOf("an"), sub: prodOf("an", st), subLabel: "products", res: `= ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}` };
-      const aDone = { v: vecOf("a"), sub: prodOf("a", st), subLabel: "products", res: `= ${f(r2(sc.rows[0].gp + sc.rows[0].ep))}` };
+      const anDone = { v: vecOf("an"), sub: prodOf("an", st), subLabel: "products", g: sc.rows[1].gp, e: sc.rows[1].ep, score: r2(sc.rows[1].gp + sc.rows[1].ep) };
+      const aDone = { v: vecOf("a"), sub: prodOf("a", st), subLabel: "products", g: sc.rows[0].gp, e: sc.rows[0].ep, score: r2(sc.rows[0].gp + sc.rows[0].ep) };
       const REASONS = [
         ["aunt", "tía: 8; a, an: 12", "right in the phrases with tía, never in the others; always the second word, right after “a” or “an”"],
         ["friend", "tía: −8; a, an: 12", "right in phrases without tía; always the second word"],
@@ -1521,7 +1524,7 @@ const STEPS = [
             work(["In the example translations, the values in the remaining dimensions (miña, and the dimensions of words already written) are no different when “an” is right than when it is wrong. So their numbers are 0."]),
           scene: sG("The vector of “an” has 0 in miña, so in the picture it lies on the floor, between the unha and tía axes.", anArrow) },
         { board: g11({ ...base, cap: "the dot product of the state and the vector of “an”", words: { an: { ...anDone, cur: false } } }) +
-            work([`Each product sits under its own column: the value of the state times the number of “an” in that dimension. Added up: ${sumTxt("an", st)}.`]),
+            work([`Each product sits under its own column: the value of the state times the number of “an” in that dimension. The dot product adds all eleven products. Σ first three adds the products in unha, tía and miña: ${f(sc.rows[1].gp)}. Σ last eight adds the products in ‹start› to yours: ${f(sc.rows[1].ep)}. Together: ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}, the bar on the right.`]),
           scene: { ...drop2, arrows: anArrow, cap: `The first three products are the part the picture shows: unha 4 × ${f(SUMMARY[0])} = ${f(4 * SUMMARY[0])}, tía 8 × ${f(SUMMARY[TIA])} = ${f(8 * SUMMARY[TIA])}. ‹start› adds 12 × 0.5 = ${f(sc.rows[1].ep)}.` } },
         { board: g11({ ...base, cap: "the vector of “a”, and its dot product", words: { an: anDone, a: { ...aDone, hi: [0, 1, 3] } } }) +
             work(["In the example translations, “a” is the right first word exactly in the phrases without tía (<i>un amigo meu</i> → a friend of mine, <i>unha veciña miña</i> → a neighbor of mine). So tía should lower its score: −8 in tía. unha speaks for it as much as for “an”: 4. Like “an”, it only ever appears right after the start: 12 in ‹start›.",
@@ -1532,7 +1535,7 @@ const STEPS = [
               "How a real model differs: its dimensions have no names, and each one mixes many such signals; nobody can read off why a number is there. Its state is not updated by our simple ½ + ½ rule but by a learned function. The logic is the same, though: numbers end up wherever they raise the right word's score in the training examples."]),
           scene: { ...decScene(SUMMARY, false, { arrows: true }), cap: "The other words follow the same reasoning. In the picture: “aunt” along tía, “friend” the opposite way; “of”, “mine” along miña. (“yours”, −8 along miña, is not drawn.)" } },
         { board: g11({ ...base, cap: "every word's dot product with the state", resHead: "dot product", words: allBars(SUMMARY, ST0, ["g", "e"], { subs: true, anim: "e" }) }) +
-            work([`Each bar: blue, the products in the first three dimensions (the part the picture shows); green, the products in the last eight. “an” has ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}, “a” ${f(r2(sc.rows[0].gp + sc.rows[0].ep))}.`]),
+            work([`For every word: Σ first three (the part of the dot product the picture shows) + Σ last eight = the dot product, drawn as a bar on its row's scale. “an” has ${f(sc.rows[1].gp)} + ${f(sc.rows[1].ep)} = ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}; “a” has ${f(sc.rows[0].gp)} + ${f(sc.rows[0].ep)} = ${f(r2(sc.rows[0].gp + sc.rows[0].ep))}.`]),
           scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], cap: "Every word's dot product with the state." }) }];
     } }],
   ["Where the numbers in the word vectors come from", {
@@ -1582,7 +1585,7 @@ const STEPS = [
     frames: () => {
       const sv0 = scoreAll(VEC, ST0, false), sv = scoreAll(VEC, ST0), sc = scoreAll(SUMMARY, ST0), gap = r2(sc.rows[0].b - sc.rows[1].b);
       const others = EN.filter(w => !["a", "an"].includes(w));
-      const am = { sum: { v: VEC }, st: { v: stateOf(VEC, ST0) }, dim: others, resHead: "score" }, ti = { sum: { v: SUMMARY }, st: { v: stateOf(SUMMARY, ST0) }, dim: others, resHead: "score" };
+      const am = { sum: { v: VEC }, st: { v: stateOf(VEC, ST0) }, dim: others, resHead: "score", sums: true }, ti = { sum: { v: SUMMARY }, st: { v: stateOf(SUMMARY, ST0) }, dim: others, resHead: "score", sums: true };
       const P = s => `P(“a”) = <b>${f(s.rows[0].p)}</b>, P(“an”) = <b>${f(s.rows[1].p)}</b>`;
       const vScene = cap => decScene(VEC, false, { arrows: true, drops: [TIA], xLabel: `unha amiga miña ${vecTxt(VEC)}`, cap });
       return [
@@ -1611,7 +1614,7 @@ const STEPS = [
         `“mine” and “yours” have 12 in the of dimension: 6 each. miña gives “mine” +${f(8 * SUMMARY[MINA])} and “yours” −${f(8 * SUMMARY[MINA])}: “mine”.`,
         `“‹end›” has 12 in the mine dimension, and the highest score: the phrase is finished. Without attention: “${phrase(ONE)}”. Good English, wrong translation.`];
       return ONE.slice(1).map((s, i) => ({
-        board: g11({ cap: `“${ONE[i].w}” has been written: the decoder state before word ${i + 2}`, sum: { v: SUMMARY }, st: { v: stateOf(SUMMARY, s.st), hi: changed(ONE[i].st, s.st).map(j => j + 3) }, bias: true, resHead: "score", win: s.w, words: allBars(SUMMARY, s.st, ALL) }) +
+        board: g11({ cap: `“${ONE[i].w}” has been written: the decoder state before word ${i + 2}`, sum: { v: SUMMARY }, st: { v: stateOf(SUMMARY, s.st), hi: changed(ONE[i].st, s.st).map(j => j + 3) }, bias: true, sums: true, resHead: "score", win: s.w, words: allBars(SUMMARY, s.st, ALL) }) +
           work([stLine(ONE[i].w, s.st), caps[i]]),
         scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], mark: true, cap: `Word ${i + 2}. ${caps[i]}` }) }));
     } }],
@@ -1643,7 +1646,7 @@ const STEPS = [
   ["Word 1 with the mix: why “an”", {
     text: "The mix is copied into the first three dimensions of the decoder state, where the summary was. Everything else, the word vectors, the biases and the values in the last eight dimensions, is exactly as in section 1.",
     frames: () => {
-      const s = ATT[0], x = s.a.mix, base = { sum: { label: "the mix", v: x, cls: "mixl" }, bias: true, resHead: "score" };
+      const s = ATT[0], x = s.a.mix, base = { sum: { label: "the mix", v: x, cls: "mixl" }, bias: true, sums: true, resHead: "score" };
       const W0 = {}; EN.forEach(w => { W0[w] = { v: vecOf(w) }; });
       return [
         { board: g11({ ...base, cap: "the mix is copied into the first three dimensions of the decoder state", st: { v: stateOf(x, ST0), hi: [0, 1, 2] }, words: W0 }),
@@ -1663,7 +1666,7 @@ const STEPS = [
         `“‹end›” has the highest score: the phrase is finished. With attention: “${phrase(ATT)}”. Without attention it was “${phrase(ONE)}”.`];
       return ATT.slice(1).map((s, i) => {
         const prev = stateOf(ATT[i].a.mix, ATT[i].st), now = stateOf(s.a.mix, s.st);
-        return { board: g11({ cap: `“${ATT[i].w}” has been written: a new query, new weights, a new mix`, sum: { label: "the mix", v: s.a.mix, cls: "mixl", hi: changed(ATT[i].a.mix, s.a.mix) }, st: { v: now, hi: changed(prev, now) }, bias: true, resHead: "score", win: s.w, words: allBars(s.a.mix, s.st, ALL) }) +
+        return { board: g11({ cap: `“${ATT[i].w}” has been written: a new query, new weights, a new mix`, sum: { label: "the mix", v: s.a.mix, cls: "mixl", hi: changed(ATT[i].a.mix, s.a.mix) }, st: { v: now, hi: changed(prev, now) }, bias: true, sums: true, resHead: "score", win: s.w, words: allBars(s.a.mix, s.st, ALL) }) +
             work([stLine(ATT[i].w, s.st), qLine(s), wLine(s)]),
           scene: decScene(s.a.mix, true, { arrows: true, drops: [TIA, MINA], mark: true, mixes: ATT.slice(0, i + 1).map(t => t.a.mix), xLabel: `mix for word ${i + 2}`, cap: `Word ${i + 2}. ${caps[i]}` }) };
       });
