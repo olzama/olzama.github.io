@@ -128,6 +128,7 @@ svg.v3 .gl3 { fill: var(--fg); font-size: 12px; font-family: var(--font-mono); }
 svg.v3 .pt.word { fill: var(--muted); } svg.v3 .pt.enc { fill: rgb(var(--heat)); } svg.v3 .pt.mix { fill: var(--orange); }
 svg.v3 .pt.faint { opacity: 0.3; }
 svg.v3 .pl { font-size: 12px; fill: var(--fg); } svg.v3 .pl.mix { fill: var(--orange); } svg.v3 .pl.enc { fill: rgb(var(--heat)); }
+.controls.stick { position: sticky; top: 0; z-index: 3; background: inherit; padding-block: 6px; }
 .tries { max-width: 72ch; margin: 0 0 10px; padding-left: 1.2em; } .tries li { margin: 2px 0; }
 .qkctl { display: grid; grid-template-columns: max-content minmax(0, 260px) 3em; justify-content: start; gap: 6px 10px; align-items: center; }
 #qkPre { flex-wrap: wrap; }
@@ -444,7 +445,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <h2><span class="n">1</span>Without attention, computed by hand</h2>
     <div class="review"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page</a>: a translation model has two parts. The <b>encoder</b> reads the Galician words and turns them into one vector, the <b>summary</b>. The <b>decoder</b> then writes the English words one at a time. From the <a href="skipgram.html">skip-gram lesson</a>: a <b>vector</b> is a list of values, and each position in the list is a <b>dimension</b>; the <b>dot product</b> of two vectors multiplies them dimension by dimension and adds up the results.</p></div>
     <p class="lead">A translation model small enough to run by hand, on the phrase <i>unha tía miña</i>. Its vectors have three dimensions, one per Galician word, and its decoder knows eight English words. Every value is on the page. Without attention, this model writes “a friend of mine”, and the steps show exactly why. Section 2 adds attention to the same model, and it writes “an aunt of mine”. We set the values by hand so that the arithmetic stays simple; a real model learns them from examples, as the skip-gram lesson showed.</p>
-    <div class="controls"><button id="tyBack">Back</button><button class="primary" id="tyNext">Next step</button><span class="pathstrip" id="tySteps"></span></div>
+    <div class="controls stick"><button id="tyBack">Back</button><button class="primary" id="tyNext">Next step</button><span class="pathstrip" id="tySteps"></span></div>
     <h3 class="wkh" id="tyTitle"></h3>
     <div class="tycols">
       <div class="tyboard" id="tyBoard"></div>
@@ -462,7 +463,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <p class="label">with attention (this section)</p>
       <div class="flow"><span class="word">after unha</span><span class="word">after tía</span><span class="word">after miña</span><span class="op">→</span><span class="word">dot product with the query: three scores</span><span class="op">→</span><span class="word">softmax: three weights</span><span class="op">→</span><span class="word">weighted sum: the mix</span><span class="op">→</span><span class="word out">the state's first three dimensions</span></div>
     </div>
-    <div class="controls"><button id="atBack">Back</button><button class="primary" id="atNext">Next step</button><span class="pathstrip" id="atSteps"></span></div>
+    <div class="controls stick"><button id="atBack">Back</button><button class="primary" id="atNext">Next step</button><span class="pathstrip" id="atSteps"></span></div>
     <h3 class="wkh" id="atTitle"></h3>
     <div class="tycols">
       <div class="tyboard" id="atBoard"></div>
@@ -508,7 +509,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <h2><span class="n">4</span>The same steps in two trained models</h2>
     <p class="lead">Two small models translate our whole sentence. We trained them on the same data, and they are identical except for one thing: <b>without attention</b>, the decoder gets the summary for every English word; <b>with attention</b>, it gets a new mix of all the encoder's vectors for every English word, as in section 2. Their vectors have 8 dimensions, and their values were learned in training: every number below is the models' own. Each step links to the step of section 1 or 2 that does the same thing by hand. One difference: here the query is the decoder state itself.</p>
     <div class="legend"><span class="lab">−1</span><span class="wkstrip h" id="wkLegend"></span><span class="lab">+1</span><span class="note">one square = one dimension of a vector. Every number is between −1 and +1: each new vector of these models is a mix of the previous vector and a new candidate squashed into that range (by the tanh function), starting from zeros.</span></div>
-    <div class="controls"><button id="wkBack">Back</button><button class="primary" id="wkNext">Next step</button><span class="pathstrip" id="wkSteps"></span></div>
+    <div class="controls stick"><button id="wkBack">Back</button><button class="primary" id="wkNext">Next step</button><span class="pathstrip" id="wkSteps"></span></div>
     <h3 class="wkh" id="wkTitle"></h3>
     <div class="cmprows" id="wkOut"></div>
     <div class="heatwrap" id="wkSrcBox"><svg id="wkSrc" role="img" aria-label="The encoder's vectors, one per Galician word"></svg></div>
@@ -531,20 +532,20 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </div>
     <div class="controls">
       <button class="primary" id="cmpPlay">Write both translations</button>
-      <button id="cmpBack">Back</button>
-      <button id="cmpNext">Next English word</button>
-      <span class="note" id="cmpStep"></span>
+      <span class="note">or step through each model with its own buttons below</span>
     </div>
     <div class="legend"><span class="lab">−1</span><span class="strip" id="legendStrip"></span><span class="lab">+1</span><span class="note">one square = one dimension of a vector; every number is between −1 and +1 (see section 4)</span></div>
     <div class="writers">
       <div class="writer">
         <p class="label">Without attention</p>
+        <div class="controls wctl stick"><button data-play="One">Play</button><button data-back="One">Back</button><button data-next="One">Next English word</button><span class="note" id="stepOne"></span></div>
         <div class="unroll"><svg class="ulab" id="labOne"></svg><div class="uscroll" id="scrOne"><svg class="dg" id="dgOne"></svg></div></div>
         <div class="choose"><div class="flow" id="inOne"></div><span class="op">→</span><div class="pbars" id="barsOne"></div></div>
         <p class="cmpline" id="cmpOne"></p>
       </div>
       <div class="writer">
         <p class="label">With attention</p>
+        <div class="controls wctl stick"><button data-play="Att">Play</button><button data-back="Att">Back</button><button data-next="Att">Next English word</button><span class="note" id="stepAtt"></span></div>
         <div class="unroll"><svg class="ulab" id="labAtt"></svg><div class="uscroll" id="scrAtt"><svg class="dg" id="dgAtt"></svg></div></div>
         <div class="choose"><div class="flow" id="inAtt"></div><span class="op">→</span><div class="pbars" id="barsAtt"></div></div>
         <p class="steptext" id="cmpWAtt"></p>
@@ -885,7 +886,8 @@ const CMP = /*CMPDATA*/{"train":20000,"trainSentences":5000,"steps":8000,"seed":
 (() => {
 const $ = id => document.getElementById(id);
 const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-let r = 0, e = 0, t = 0, timer = null;
+let r = 0, e = 0;
+const T_ = { One: 0, Att: 0 }, TM = { One: null, Att: null };  // each model: English words written so far, its play timer
 // longest common subsequence: which output words match the correct translation, which correct words are missing
 function diff(out, ref) {
   const n = out.length, m = ref.length, L = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
@@ -947,7 +949,8 @@ function render() {
   $("cmpGrid").innerHTML = g + "</tbody>";
   drawStep();
 }
-const total = () => { const x = CMP.runs[r].examples[e]; return Math.max(x.one.length, x.att.length); };
+const len = m => CMP.runs[r].examples[e][m === "One" ? "one" : "att"].length;
+const resetT = () => { T_.One = len("One"); T_.Att = len("Att"); };
 // the output written so far: matched words plain, wrong words red, the newest word highlighted;
 // missing words appear only when the translation is complete
 function partial(out, ref, n, done) {
@@ -1067,22 +1070,23 @@ function unroll(m, x, i, done) {
   if (cur >= 0) { const sc = $("scr" + m); sc.scrollLeft = Math.max(0, ex(cur) - sc.clientWidth / 2); }
 }
 function drawStep() {
-  const x = CMP.runs[r].examples[e], T = total(), done = t >= T;
-  const showLine = (id, out) => {
-    const toks = partial(out, x.ref, Math.min(t, out.length), done);
-    $(id).innerHTML = (toks.length ? line(toks) : "") + (done || t >= out.length ? "" : '<span class="caret"></span>');
+  const x = CMP.runs[r].examples[e];
+  const showLine = (m, out) => {
+    const t = T_[m], T = out.length, done = t >= T, toks = partial(out, x.ref, Math.min(t, T), done);
+    $("cmp" + m).innerHTML = (toks.length ? line(toks) : "") + (done ? "" : '<span class="caret"></span>');
+    $("step" + m).textContent = done ? `${T} of ${T} English words: done` : `${t} of ${T} English words`;
   };
-  showLine("cmpOne", x.one); showLine("cmpAtt", x.att);
-  $("cmpStep").textContent = done ? `${T} of ${T} English words: done` : `${t} of ${T} English words`;
+  showLine("One", x.one); showLine("Att", x.att);
+  const doneA = T_.Att >= x.att.length, doneO = T_.One >= x.one.length;
   // with attention: shade each Galician word by the weight used for the newest English word
-  const i = t - 1, w = i >= 0 && i < x.att.length && !done ? x.attw[i] : null;
+  const i = T_.Att - 1, w = i >= 0 && i < x.att.length && !doneA ? x.attw[i] : null;
   const prevWord = (out, i) => i === 0 ? "the start signal" : `“${esc(out[i - 1])}”`;
   const word = (w, cls = "") => `<span class="word ${cls}">${esc(w)}</span>`;
   const fig = (k, cap) => `<figure><span class="strip" data-k="${k}"></span><figcaption>${cap}</figcaption></figure>`;
   const fill = (el, vecs) => el.querySelectorAll("[data-k]").forEach(n => fillStrip(n, vecs[n.dataset.k]));
   const op = c => `<span class="op">${c}</span>`;
   // the five most probable English words; the chosen one in orange, the correct one ticked
-  const bars = (id, P, out) => {
+  const bars = (id, P, out, i) => {
     const right = out.slice(0, i).every((v, k) => v === x.ref[k]) ? x.ref[i] : null;
     let h = P.map(([wd, pr], k) => {
       const cls = (k === 0 ? "win " : "") + (right && wd === right ? "ok" : k === 0 && right ? "bad" : "");
@@ -1096,7 +1100,7 @@ function drawStep() {
     $("inAtt").innerHTML = fig("s", "decoder state") + op("+") + fig("c", "mix");
     fill($("inAtt"), { s: x.decAtt[i], c: x.ctxAtt[i] });
     const sc = x.scores[i], order = w.map((v, j) => j).sort((a, b) => w[b] - w[a]), top = order.slice(0, 3), j0 = top[0];
-    bars("barsAtt", x.pAtt[i], x.att);
+    bars("barsAtt", x.pAtt[i], x.att, i);
     // details: how the weights come from the scores
     const st = x.decAtt[i], ev = x.encAtt[j0];
     $("cmpDot").innerHTML = `<span class="k">new state</span><span class="strip" data-k="s"></span><span class="k">× <i>${esc(x.src[j0])}</i></span><span class="strip" data-k="e"></span><span class="k">=</span><span class="strip" data-k="p"></span>`;
@@ -1109,34 +1113,44 @@ function drawStep() {
   } else {
     clear(["inAtt", "barsAtt", "cmpDot", "cmpScores"]);
     $("cmpBoard").hidden = true; bdKey = "";
-    $("cmpWAtt").textContent = done ? "Step through the translation to see why each word comes out." : "";
+    $("cmpWAtt").textContent = doneA ? "Step through the translation to see why each word comes out." : "";
   }
   // without attention: the state changes, the summary vector does not
-  const s1 = i >= 0 && i < x.one.length && !done;
+  const i1 = T_.One - 1, s1 = i1 >= 0 && i1 < x.one.length && !doneO;
   if (s1) {
     $("inOne").innerHTML = fig("s", "decoder state") + op("+") + fig("c", "summary");
-    fill($("inOne"), { s: x.decOne[i], c: x.sumOne });
-    bars("barsOne", x.pOne[i], x.one);
+    fill($("inOne"), { s: x.decOne[i1], c: x.sumOne });
+    bars("barsOne", x.pOne[i1], x.one, i1);
   } else clear(["inOne", "barsOne"]);
-  unroll("One", x, i, done); unroll("Att", x, i, done);
-  $("cmpGrid").querySelectorAll("tbody tr").forEach((tr, k) => { tr.style.outline = !done && k === i ? "2px solid var(--orange)" : ""; });
+  unroll("One", x, i1, doneO); unroll("Att", x, i, doneA);
+  $("cmpGrid").querySelectorAll("tbody tr").forEach((tr, k) => { tr.style.outline = !doneA && k === i ? "2px solid var(--orange)" : ""; });
 }
 $("bdNext").addEventListener("click", () => { stopPlay(); bdN++; drawStep(); });
 $("bdBack").addEventListener("click", () => { stopPlay(); bdN = Math.max(1, bdN - 1); drawStep(); });
 $("bdAll").addEventListener("click", () => { stopPlay(); bdN = board.n; drawStep(); });
-function stopPlay() { clearInterval(timer); timer = null; $("cmpPlay").textContent = "Write both translations"; }
+function stopPlay(m) {
+  (m ? [m] : ["One", "Att"]).forEach(k => { clearInterval(TM[k]); TM[k] = null; $("compare").querySelector(`[data-play="${k}"]`).textContent = "Play"; });
+  if (!TM.One && !TM.Att) $("cmpPlay").textContent = "Write both translations";
+}
+function play(m) {
+  if (T_[m] >= len(m)) T_[m] = 0;
+  $("compare").querySelector(`[data-play="${m}"]`).textContent = "Pause";
+  TM[m] = setInterval(() => { T_[m]++; drawStep(); if (T_[m] >= len(m)) stopPlay(m); }, 800);
+}
 $("cmpPlay").addEventListener("click", () => {
-  if (timer) { stopPlay(); return; }
-  if (t >= total()) t = 0;
-  drawStep(); $("cmpPlay").textContent = "Pause";
-  timer = setInterval(() => { t++; drawStep(); if (t >= total()) stopPlay(); }, 800);
+  if (TM.One || TM.Att) { stopPlay(); return; }
+  T_.One = T_.Att = 0; drawStep(); play("One"); play("Att"); $("cmpPlay").textContent = "Pause";
 });
-$("cmpNext").addEventListener("click", () => { stopPlay(); t = t >= total() ? 1 : t + 1; drawStep(); });
-$("cmpBack").addEventListener("click", () => { stopPlay(); t = Math.max(0, Math.min(t, total()) - 1); drawStep(); });
+["One", "Att"].forEach(m => {
+  const q = a => $("compare").querySelector(`[data-${a}="${m}"]`);
+  q("play").addEventListener("click", () => { if (TM[m]) { stopPlay(m); return; } play(m); drawStep(); });
+  q("next").addEventListener("click", () => { stopPlay(m); T_[m] = T_[m] >= len(m) ? 1 : T_[m] + 1; drawStep(); });
+  q("back").addEventListener("click", () => { stopPlay(m); T_[m] = Math.max(0, Math.min(T_[m], len(m)) - 1); drawStep(); });
+});
 CMP.runs.forEach((ru, i) => {
   const b = document.createElement("button");
   b.textContent = `${ru.dims}`; b.setAttribute("aria-pressed", "false");
-  b.addEventListener("click", () => { stopPlay(); r = i; t = total(); render(); });
+  b.addEventListener("click", () => { stopPlay(); r = i; resetT(); render(); });
   $("cmpSize").appendChild(b);
 });
 $("cmpSize").insertAdjacentHTML("afterend", '<span class="note">dimensions</span>');
@@ -1146,12 +1160,12 @@ CMP.runs[0].examples.forEach((x, i) => {
   o.value = i; o.textContent = exName(x, x.course ? 0 : ++k);
   $("cmpEx").appendChild(o);
 });
-$("cmpEx").addEventListener("change", () => { stopPlay(); e = +$("cmpEx").value; t = total(); render(); });
+$("cmpEx").addEventListener("change", () => { stopPlay(); e = +$("cmpEx").value; resetT(); render(); });
 fillStrip($("legendStrip"), [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]);
-t = total(); render();
+resetT(); render();
 (window.__askState ||= []).push(() => {
   const run = CMP.runs[r], x = run.examples[e];
-  return `Section 5 (two trained models): vector size ${run.dims} dimensions (${run.params} parameters per model); sentence "${plain(x.src)}" (${x.course ? "our sentence" : "a test sentence, not in the training data"}, ${x.kind}). Correct: "${plain(x.ref)}". Animation at English word ${Math.min(t, total())} of ${total()}. Without attention: "${plain(x.one)}". With attention: "${plain(x.att)}". Exactly right out of ${CMP.test} test sentences (not in training), by piece (${CMP.kinds.join(", ")}): ` +
+  return `Section 5 (two trained models): vector size ${run.dims} dimensions (${run.params} parameters per model); sentence "${plain(x.src)}" (${x.course ? "our sentence" : "a test sentence, not in the training data"}, ${x.kind}). Correct: "${plain(x.ref)}". Animation: without attention at English word ${Math.min(T_.One, len("One"))} of ${len("One")}, with attention at ${Math.min(T_.Att, len("Att"))} of ${len("Att")}. Without attention: "${plain(x.one)}". With attention: "${plain(x.att)}". Exactly right out of ${CMP.test} test sentences (not in training), by piece (${CMP.kinds.join(", ")}): ` +
     CMP.runs.map(ru => `${ru.dims} dims without attention ${ru.acc.one.join("/")}, with attention ${ru.acc.att.join("/")}`).join("; ") + ".";
 });
 })();
