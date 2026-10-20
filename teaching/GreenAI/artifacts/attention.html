@@ -167,6 +167,10 @@ svg.sb .bg, .sw.bg { fill: rgb(var(--heat)); background: rgb(var(--heat)); } svg
 .chain .lk { display: grid; justify-items: center; gap: 0; font-size: 0.74rem; color: var(--muted); text-align: center; max-width: 6.5em; padding-bottom: 26px; line-height: 1.2; }
 .chain .lk .ar { font-size: 1.3rem; line-height: 1; } .chain .lk.cur { color: var(--orange); }
 .vc.cur .vh { color: var(--orange); } .vc .sq.q { background: var(--bg); border: 1.5px dashed var(--muted); color: var(--muted); } .vc.cur .sq { box-shadow: 0 0 0 2px var(--orange); }
+.hid { visibility: hidden; }
+.stage3 .vc .sq { width: 36px; font-size: 0.74rem; } .stage11 .vc .sq { width: 31px; font-size: 0.68rem; } .stage11 { gap: 3px; } .stage11 .op { padding-bottom: 26px; }
+.stage3 .vc .vh, .stage11 .vc .vh { height: 3.8em; max-width: 5.6em; font-size: 0.72rem; display: flex; align-items: flex-end; justify-content: center; }
+.stage3 { flex-wrap: nowrap; } .work.encl { min-height: 3em; margin: 0; } .label.exl { min-height: 1.5em; }
 .eq.tight { flex-wrap: nowrap; gap: 4px; } .eq.tight .vc .sq { width: 36px; font-size: 0.74rem; } .eq.tight .vc .vh { max-width: 5.5em; font-size: 0.72rem; } .eq.tight .gap { width: 14px; flex: none; } .eq.tight .k, .eq.tight .op { white-space: nowrap; }
 .tyboard .eq.tight { overflow-x: auto; } .eq.tight.x8 .vc .sq { width: 32px; font-size: 0.7rem; } .eq.tight.x8 .vc .vh { max-width: 4em; font-size: 0.72rem; } .eq.tight.x8 .gap { width: 8px; }
 svg.sb rect.anim { transform-box: fill-box; transform-origin: left center; animation: grow 0.9s ease-out; } svg.sb rect.anim.neg { transform-origin: right center; }
@@ -1449,12 +1453,23 @@ const STEPS = [
       seq.forEach(e => { const [, s, right] = EX[e], sg = right === "an" ? 1 : -1;
         vAn.push(vAn[vAn.length - 1].map((x, i) => r2(x + sg * STEP * s[i]))); vA.push(vA[vA.length - 1].map((x, i) => r2(x - sg * STEP * s[i]) || 0)); });
       const rv = `<div class="review"><span class="rtag">Review</span><p>The same rule trained the <a href="skipgram.html">skip-gram</a> vectors and the <a href="mt.html#train">translation page's</a> model: every example nudges the vectors so that the right word's probability goes up.</p></div>`;
-      const encAmi = n => chain(AMI_COLS, AMI_W.map(d => `reads <i>${d}</i>`), n) + `<p class="label">this link, in full</p>` + encEq(AMI_COLS[n], n === 1 ? ZERO : WORD[AMI_W[n]], AMI_W[n], AMI_COLS[n + 1]);
-      const states = eqD(col(S1, "decoder state before word 1:<br><i>unha tía miña</i> → an …"), col(S2, "decoder state before word 1:<br><i>unha amiga miña</i> → a …"));
-      const nud = n => { const e = seq[n - 1], [ph, s, right] = EX[e], up = w => w === right;
-        return `<p class="label">example: <i>${ph}</i>; the right first word is “${right}”</p>` +
-          `<div class="eq d11 tight">${rowsOf(DS)}${[col(vAn[n - 1], "“an” before this example"), op(up("an") ? "+" : "−"), k(`${STEP} ×`), col(s, "the decoder state"), op("="), col(vAn[n], "“an” after this example", "cur")].join("")}<span class="gap"></span>${[col(vA[n - 1], "“a” before"), op(up("a") ? "+" : "−"), k(`${STEP} ×`), col(s, "the decoder state"), op("="), col(vA[n], "“a” after", "cur")].join("")}</div>`; };
-      const stepNote = work([`How far a vector moves each time is the step size (in the skip-gram lesson, the learning rate). Real training takes many small steps; here we take big ones, ${STEP} × the state, so that two rounds give round numbers.`]);
+      // one stage for the whole step: every column has its final place and size from the first frame;
+      // what is not reached yet is invisible (hid), what is being computed is highlighted (cur)
+      const H = (show, cls = "") => [cls, show ? "" : "hid"].filter(Boolean).join(" ");
+      const ENCL = ["½ × (0, 0, 0) + ½ × (1, 0, 0) = (0.5, 0, 0)", "½ × (0.5, 0, 0) + ½ × (0, 0, 0) = (0.25, 0, 0). amiga has no dimension here: its word vector is all zeros", "½ × (0.25, 0, 0) + ½ × (0, 0, 1) = (0.125, 0, 0.5)"];
+      const stage = n => {
+        const encDone = n >= 3, k8 = Math.max(0, Math.min(4, n - 4)), ex = k8 ? EX[seq[k8 - 1]] : null;
+        const enc = `<p class="label">the encoder reads <i>unha amiga miña</i>: new vector = ½ × old vector + ½ × the word's vector</p>` +
+          `<div class="chain stage3">${rowsOf(DIMS)}${AMI_COLS.map((c, i) => col(c.v, i ? `after <i>${AMI_W[i - 1]}</i>` : "start: zeros", H(encDone || i <= n + 1, !encDone && i === n + 1 ? "cur" : "")) +
+            (i < 3 ? `<div class="lk ${H(encDone || i <= n, !encDone && i === n ? "cur" : "")}"><span>reads <i>${AMI_W[i]}</i></span><span class="ar">→</span></div>` : "")).join("")}</div>` +
+          `<p class="work encl">${n <= 2 ? `reads <i>${AMI_W[n]}</i>: ${ENCL[n]}` : "&nbsp;"}</p>`;
+        const sg = w => ex && ex[2] === w ? "+" : "−";
+        const grp = (w, v) => [col(v[Math.max(0, k8 - 1)], `“${w}” before`, H(n >= 4)), `<div class="op ${H(n >= 5)}">${sg(w)}</div>`, 
+          col((ex ? ex[1] : S1).map(x => r2(STEP * x)), `${STEP} × the state`, H(n >= 5)), `<div class="op ${H(n >= 5)}">=</div>`, col(v[k8], `“${w}” after`, H(n >= 5, n >= 5 && n <= 8 ? "cur" : ""))].join("");
+        const grid = `<div class="eq d11 tight stage11">${rowsOf(DS)}${col(S1, "state, <i>unha tía miña</i>", H(n >= 3, ex && ex[1] === S1 && n <= 8 ? "cur" : ""))}${col(S2, "state, <i>unha amiga miña</i>", H(n >= 3, ex && ex[1] === S2 && n <= 8 ? "cur" : ""))}<span class="gap"></span>${grp("an", vAn)}<span class="gap"></span>${grp("a", vA)}</div>`;
+        const exl = `<p class="label exl">${ex && n <= 8 ? `example: <i>${ex[0]}</i>; the right first word is “${ex[2]}”` : "&nbsp;"}</p>`;
+        return rv + enc + exl + grid;
+      };
       const g3 = v => v.slice(0, 3).map(x => x / STEP);
       const amiSeg = AMI.map((e, j) => ({ a: j ? AMI[j - 1] : ZERO, b: e, cls: "gd" }));
       const tScene = (n, cap, extra = {}) => ({ ...DEC_VIEW, cap,
@@ -1466,16 +1481,18 @@ const STEPS = [
         "unha tía miña again: the same push as the first time.",
         "unha amiga miña again. After two rounds: “an” has 8 in tía, “a” has −8, and both have 0 everywhere else."];
       return [
-        { board: rv + work(["Two examples: our phrase, and <i>unha amiga miña</i>, “a friend of mine”. The encoder reads the second one the same way as in step 2:"]) + encAmi(0),
+        { board: stage(0) + work(["Two examples: our phrase, and <i>unha amiga miña</i>, “a friend of mine”. First the encoder reads the second one, with the same rule as in step 2."]),
           scene: tScene(0, "The encoder's path for unha amiga miña. It starts along unha, like our phrase.", { segs: amiSeg.slice(0, 1) }) },
-        { board: rv + encAmi(1), scene: tScene(0, "amiga has no dimension in this small model, so its word vector is all zeros: reading it adds nothing and halves what was there.", { segs: amiSeg.slice(0, 2) }) },
-        { board: rv + encAmi(2), scene: tScene(0, "After miña: the summary of unha amiga miña. It never moved along tía.", { segs: amiSeg }) },
-        { board: states + work(["The decoder state before word 1, for each example: the summary in the first three dimensions; in the last eight, 0.5 in ‹start› and 0 elsewhere. The first column is the state of step 3."]),
+        { board: stage(1), scene: tScene(0, "Reading amiga adds nothing and halves what was there.", { segs: amiSeg.slice(0, 2) }) },
+        { board: stage(2), scene: tScene(0, "After miña: the summary of unha amiga miña. It never moved along tía.", { segs: amiSeg }) },
+        { board: stage(3) + work(["The decoder state before word 1, for each example: the summary in the first three dimensions; in the last eight, 0.5 in ‹start› and 0 elsewhere. The first column is the state of step 3."]),
           scene: tScene(0, "The first three dimensions of the two states: unha tía miña reaches 0.25 along tía, unha amiga miña reaches 0.") },
-        { board: states + work(["Before training, the vectors of “an” and “a” are all zeros: both get the dot product 0 from any state, so the model has no idea which to write."]), scene: tScene(0, "The vectors of “an” and “a” start at zero, at the corner where the axes meet.") },
-        ...[1, 2, 3, 4].map(n => ({ board: nud(n) + (n === 1 ? stepNote : ""), scene: tScene(n, `${capN[n - 1]} (Vectors drawn at 1/${STEP} of their length; first three dimensions only.)`) })),
-        { board: nud(4) + work(["unha ends at 0 here: both phrases have it, so it cannot tell “an” from “a”. tía can: only the phrase where “an” is right has it. The 4 that “a” and “an” have in unha (step 4) comes from other examples: phrases without unha (<i>a miña tía</i> → my aunt), where neither is right.",
-          "‹start› ends at 0 here too. The 12 that “a” and “an” have in ‹start› (step 4) comes from the later words of the examples: there “a” and “an” are wrong and the ‹start› value is smaller, so training pushes them away from those states.",
+        { board: stage(4) + work(["Before training, the vectors of “an” and “a” are all zeros: both get the dot product 0 from any state, so the model has no reason to prefer either."]),
+          scene: tScene(0, "The vectors of “an” and “a” start at zero, at the corner where the axes meet.") },
+        ...[1, 2, 3, 4].map(n => ({ board: stage(4 + n) + (n === 1 ? work([`How far a vector moves each time is the step size (in the skip-gram lesson, the learning rate). Real training takes many small steps; here we take big ones, ${STEP} × the state, so that two rounds give round numbers.`]) : ""),
+          scene: tScene(n, `${capN[n - 1]} (Vectors drawn at 1/${STEP} of their length; first three dimensions only.)`) })),
+        { board: stage(9) + work(["unha ends at 0 here: both phrases have it, so it cannot tell “an” from “a”. tía can: only the phrase where “an” is right has it. The 4 that “a” and “an” have in unha (step 4) comes from other examples: phrases without unha (<i>a miña tía</i> → my aunt), where neither is right.",
+          "‹start› ends at 0 here too. The 12 that “a” and “an” have in ‹start› (step 4) comes from the later words of the examples: there “a” and “an” are wrong and the value in ‹start› is smaller, so training pushes them away from those states.",
           "“aunt” and “friend” get 8 and −8 in tía the same way, from the same two examples at the second word. “of” and “mine” get 8 in miña from phrases with miña."]),
           scene: tScene(4, "Where the vectors of “an” and “a” end up: on the tía axis, pointing opposite ways.") }];
     } }],
