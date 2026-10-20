@@ -1307,7 +1307,7 @@ function queryScene(a, labelKeys) {
   const n = Math.hypot(...a.q); if (!n) return { arrows: [], segs: [], notes: [] };
   const u = a.q.map(x => x / n), tip = u.map(x => x * 0.42), segs = [], notes = [];
   // the query's line, drawn through every point where a key lands on it (also past the arrow's tip and behind 0)
-  const ss = ENC.map(e => dot(u, e)), lo = Math.min(0, ...ss) - 0.03, hi = Math.max(0.42, ...ss) + 0.03;
+  const ss = ENC.map(e => dot(u, e)), lo = Math.min(0, ...ss), hi = Math.max(0, ...ss);
   segs.push({ a: u.map(x => x * lo), b: u.map(x => x * hi), cls: "qline" });
   ENC.forEach((e, j) => {
     const s = dot(u, e), foot = u.map(x => x * s);
