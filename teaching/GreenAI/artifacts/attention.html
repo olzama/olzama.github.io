@@ -168,6 +168,13 @@ svg.sb .bg, .sw.bg { fill: rgb(var(--heat)); background: rgb(var(--heat)); } svg
 .chain .lk .ar { font-size: 1.3rem; line-height: 1; } .chain .lk.cur { color: var(--orange); }
 .vc.cur .vh { color: var(--orange); } .vc .sq.q { background: var(--bg); border: 1.5px dashed var(--muted); color: var(--muted); } .vc.cur .sq { box-shadow: 0 0 0 2px var(--orange); }
 .hid { visibility: hidden; }
+.es-row { display: flex; align-items: flex-end; }
+.es-row .es-c { width: 54px; display: flex; justify-content: center; flex: none; }
+.es-row .es-l { width: 92px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: none; font-size: 0.74rem; color: var(--muted); text-align: center; padding-bottom: 26px; }
+.es-row .es-l .vc { margin-bottom: -26px; }
+.es-row .es-l.lk .ar { font-size: 1.1rem; } .es-row .es-l.lk.cur { color: var(--orange); }
+.work.es-line { min-height: 4.5em; }
+
 .gcap { margin: 0; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); height: 2.7em; overflow: hidden; line-height: 1.35; }
 .gwrap { overflow-x: auto; }
 .g11 { display: grid; grid-template-columns: 76px repeat(3, 31px) 8px repeat(8, 31px) 38px 142px; column-gap: 1px; row-gap: 2px; align-items: center; width: max-content; }
@@ -1424,17 +1431,29 @@ const allBars = (x, st, parts, extra = {}) => { const sc = scoreAll(x, st, parts
   EN.forEach(w => { W[w] = { v: vecOf(w), res: gBar(sc.rows.find(q => q.w === w), parts, extra.anim), sub: extra.subs ? prodOf(w, stateOf(x, st)) : undefined, subLabel: extra.subs ? "products" : "" }; }); return W; };
 const changed = (a, b) => a.map((v, i) => v !== b[i] ? i : -1).filter(i => i >= 0);
 
+// ----- steps 1 and 2 on one fixed stage: the word vectors on top, each above the arrow where the encoder reads it;
+// the encoder's running vector below. n = -1: the word vectors only; n = 0, 1, 2: the encoder has read word n.
+function encStage(n) {
+  const sp = `<div class="es-c"></div>`, cv = (v, label, cls) => `<div class="es-c">${col(v, label, cls)}</div>`;
+  const top = `<div class="es-row">${rowsOf(DIMS)}${sp}${DIMS.map((d, j) => `<div class="es-l">${col(WORD[d], `word vector of <i>${d}</i>`, n === j ? "cur" : "")}</div>${sp}`).join("")}</div>`;
+  const cols = [{ v: ZERO, label: "before reading: all zeros" }, ...ENC.map((e, j) => ({ v: e, label: `after <i>${DIMS[j]}</i>${j === 2 ? " = the summary" : ""}` }))];
+  const bot = `<div class="es-row">${rowsOf(DIMS)}${cols.map((c, i) => cv(c.v, c.label, i > n + 1 ? "hid" : i === n + 1 && n >= 0 ? "cur" : "") +
+    (i < 3 ? `<div class="es-l lk${i === n ? " cur" : ""}${i > n ? " hid" : ""}"><span>reads <i>${DIMS[i]}</i></span><span class="ar">↓ →</span></div>` : "")).join("")}</div>`;
+  const prev = n > 0 ? ENC[n - 1] : ZERO;
+  const line = n < 0 ? "Next: the encoder reads these three vectors, one at a time." :
+    `new vector = ½ × old vector + ½ × word vector of <i>${DIMS[n]}</i>: ½ × ${vecTxt(prev)} + ½ × ${vecTxt(WORD[DIMS[n]])} = <b>${vecTxt(ENC[n])}</b>` +
+    (n === 1 ? "<br>dimension by dimension: unha ½ × 0.5 + ½ × 0 = 0.25; tía ½ × 0 + ½ × 1 = 0.5; miña ½ × 0 + ½ × 0 = 0." : n === 2 ? "<br>Each new word halves what was there before: the summary holds 0.5 of miña, 0.25 of tía and only 0.125 of unha." : "");
+  return `<p class="label">the word vectors</p>${top}<p class="label es-lab${n < 0 ? " hid" : ""}">the encoder's vector, updated after each word</p>${bot}<p class="work es-line">${line}</p>`;
+}
 const STEPS = [
   ["The three Galician words as vectors", {
     text: "This small model gives each Galician word a vector with three dimensions, one per word of the phrase: 1 in the word's own dimension, 0 in the other two. In the picture, each dimension is one axis, so each word is a point at 1 on its own axis.",
-    frames: () => upto(3, i => ({ board: eq(...DIMS.slice(0, i + 1).map(w => col(WORD[w], `word vector of <i>${w}</i>`))),
-      scene: { pts: DIMS.slice(0, i + 1).map((d, j) => ({ p: WORD[d], cls: "word", label: `word vector of ${d}\n(${WORD[d].join(", ")})`, dx: j === 2 ? 10 : 0, dy: j === 2 ? 4 : -30, anchor: j === 2 ? "start" : "middle" })),
-        cap: `The word vector of ${DIMS[i]}: 1 in the ${DIMS[i]} dimension, so it is the point at 1 on the ${DIMS[i]} axis.` } })) }],
+    frames: () => [{ board: encStage(-1), scene: { pts: DIMS.map((d, j) => ({ p: WORD[d], cls: "word", label: `word vector of ${d}\n(${WORD[d].join(", ")})`, dx: j === 2 ? 10 : 0, dy: j === 2 ? 4 : -30, anchor: j === 2 ? "start" : "middle" })),
+      cap: "Each word vector has 1 in its own dimension, so it is the point at 1 on its own axis." } }] }],
   ["The encoder reads the phrase", {
     text: "The encoder reads the words one at a time and keeps one vector, which it updates after each word: the new vector is half the old vector plus half the word's vector. This is one running computation; each result feeds into the next. The vector after the last word is the summary.",
     frames: () => upto(3, i => ({
-      board: chain(ENC_COLS, ENC_LINKS, i) + `<p class="label">this link, in full</p>` + encEq(ENC_COLS[i], WORD[DIMS[i]], DIMS[i], ENC_COLS[i + 1]) +
-        (i === 1 ? `<p class="work">Dimension by dimension: unha ½ × 0.5 + ½ × 0 = 0.25; tía ½ × 0 + ½ × 1 = 0.5; miña ½ × 0 + ½ × 0 = 0.</p>` : i === 2 ? `<p class="work">Each new word halves what was there before. So the summary holds 0.5 of miña, 0.25 of tía and only 0.125 of unha.</p>` : ""),
+      board: encStage(i),
       scene: { noTicks: true, segs: ENC.slice(0, i + 1).map((e, j) => ({ a: j ? ENC[j - 1] : ZERO, b: WORD[DIMS[j]], cls: "gd" })),
         pts: [...wordPts(), ...encPts(ENC.map((e, j) => `${encPlain(j)} ${vecTxt(e)}` + (j === 2 ? "\n= the summary" : "")), "enc", [{ dx: -10, dy: -10, anchor: "end" }, { dx: 4, dy: 26 }, ENC_OFF[2]]).slice(0, i + 1)],
         cap: `${i ? `From the vector ${encPlain(i - 1)}` : "From all zeros, where the axes meet,"} halfway along the dashed line to the word vector of ${DIMS[i]}: ${vecTxt(ENC[i])}.${i === 2 ? " This last vector is the summary." : ""}` } })) }],
