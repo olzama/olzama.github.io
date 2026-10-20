@@ -118,7 +118,7 @@ svg.v3 .axl { fill: var(--fg); font-style: italic; font-size: 15px; font-family:
 svg.v3 .tk { fill: var(--muted); } svg.v3 .tkl { fill: var(--muted); font-size: 11px; }
 svg.v3 .tri { fill: rgba(var(--heat), 0.08); stroke: rgb(var(--heat)); stroke-dasharray: 4 3; }
 svg.v3 .gd { stroke: var(--muted); stroke-dasharray: 4 3; }
-svg.v3 .qd { stroke: var(--orange); stroke-dasharray: 3 3; }
+svg.v3 .qd { stroke: var(--orange); stroke-dasharray: 3 3; } svg.v3 .qline { stroke: var(--orange); stroke-width: 1; opacity: 0.6; }
 svg.v3 .qa { stroke: var(--orange); stroke-width: 3; }
 svg.v3 .ca { stroke: var(--fg); stroke-width: 2.5; } svg.v3 .ahc { fill: var(--fg); } svg.v3 .cl { fill: var(--fg); font-size: 12px; font-family: var(--font-mono); }
 svg.v3 .mk { stroke: var(--neg); stroke-width: 3; }
@@ -128,10 +128,11 @@ svg.v3 .gl3 { fill: var(--fg); font-size: 12px; font-family: var(--font-mono); }
 svg.v3 .pt.word { fill: var(--muted); } svg.v3 .pt.enc { fill: rgb(var(--heat)); } svg.v3 .pt.mix { fill: var(--orange); }
 svg.v3 .pt.faint { opacity: 0.3; }
 svg.v3 .pl { font-size: 12px; fill: var(--fg); } svg.v3 .pl.mix { fill: var(--orange); } svg.v3 .pl.enc { fill: rgb(var(--heat)); }
-.qkctl { display: grid; grid-template-columns: 5.5em minmax(0, 260px) 3em; justify-content: start; gap: 6px 10px; align-items: center; }
+.tries { max-width: 72ch; margin: 0 0 10px; padding-left: 1.2em; } .tries li { margin: 2px 0; }
+.qkctl { display: grid; grid-template-columns: max-content minmax(0, 260px) 3em; justify-content: start; gap: 6px 10px; align-items: center; }
 #qkPre { flex-wrap: wrap; }
 #qkBars .bar { grid-template-columns: 7.5em minmax(0, 1fr) 3.5em; }
-.qkctl output { font-family: var(--font-mono); }
+.qkctl output { font-family: var(--font-mono); } .qkctl label { white-space: nowrap; }
 .badw { color: var(--neg); }
 .eq { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px 8px; }
 .vc { display: grid; gap: 3px; justify-items: center; }
@@ -472,7 +473,13 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <section class="panel" id="qk">
     <h2><span class="n">3</span>Query and key: try your own query</h2>
-    <p class="lead">The same model as sections 1 and 2. In section 2, steps 1 and 2, the encoder vectors played two parts: as <b>keys</b>, each was compared with the decoder's <b>query</b>, and the dot product gave its <b>score</b>; softmax turned the scores into <b>weights</b>; as <b>values</b>, the encoder vectors were added up with these weights into the <b>mix</b>. Set the query's three values, or pick one below.</p>
+    <p class="lead">The same model as sections 1 and 2. In section 2, the query was set by hand, one query per English word, and we saw its result for each word. Here you set the query yourself and see what it changes: the scores of the three encoder vectors, their weights, where the mix lands, and, in the table on the right, which word the decoder would write at each position with that mix. This shows two things: what the query's direction does and what its length does, and why one query cannot serve the whole phrase.</p>
+    <ul class="tries">
+      <li><b>an, aunt</b>, <b>of</b>, <b>mine</b>: the queries the decoder used in section 2. Compare which words in the table come out right with each.</li>
+      <li><b>an, aunt, shorter</b>: the same direction at a third of the length. The weights spread more evenly.</li>
+      <li><b>all zeros</b>: every score is 0, so every weight is 1/3, and the mix is the plain average of the three encoder vectors.</li>
+      <li><b>unha</b>, <b>between tía and miña</b>: other directions. Or set the three values with the sliders.</li>
+    </ul>
     <div class="controls qkctl">
       <label for="qk0"><i>unha</i> dimension</label><input type="range" id="qk0" min="-6" max="10" step="0.5"><output id="qk0v"></output>
       <label for="qk1"><i>tía</i> dimension</label><input type="range" id="qk1" min="-6" max="10" step="0.5"><output id="qk1v"></output>
@@ -499,7 +506,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <section class="panel" id="walk">
     <h2><span class="n">4</span>The same steps in two trained models</h2>
-    <p class="lead">Two small models translate our whole sentence. We trained them on the same data, and they are identical except for one thing: <b>without attention</b>, the decoder gets the summary for every English word; <b>with attention</b>, it gets a new mix of all the encoder's vectors for every English word, as in section 2. Their vectors have 8 dimensions, and their numbers were learned in training: every number below is the models' own. Each step links to the step of section 1 or 2 that does the same thing by hand. One difference: here the query is the decoder state itself.</p>
+    <p class="lead">Two small models translate our whole sentence. We trained them on the same data, and they are identical except for one thing: <b>without attention</b>, the decoder gets the summary for every English word; <b>with attention</b>, it gets a new mix of all the encoder's vectors for every English word, as in section 2. Their vectors have 8 dimensions, and their values were learned in training: every number below is the models' own. Each step links to the step of section 1 or 2 that does the same thing by hand. One difference: here the query is the decoder state itself.</p>
     <div class="legend"><span class="lab">−1</span><span class="wkstrip h" id="wkLegend"></span><span class="lab">+1</span><span class="note">one square = one dimension of a vector. Every number is between −1 and +1: each new vector of these models is a mix of the previous vector and a new candidate squashed into that range (by the tanh function), starting from zeros.</span></div>
     <div class="controls"><button id="wkBack">Back</button><button class="primary" id="wkNext">Next step</button><span class="pathstrip" id="wkSteps"></span></div>
     <h3 class="wkh" id="wkTitle"></h3>
@@ -1299,6 +1306,9 @@ const ENC_OFF = [{ dx: 8, dy: 22 }, { dx: 12, dy: 16 }, { dx: 10, dy: -10 }];
 function queryScene(a, labelKeys) {
   const n = Math.hypot(...a.q); if (!n) return { arrows: [], segs: [], notes: [] };
   const u = a.q.map(x => x / n), tip = u.map(x => x * 0.42), segs = [], notes = [];
+  // the query's line, drawn through every point where a key lands on it (also past the arrow's tip and behind 0)
+  const ss = ENC.map(e => dot(u, e)), lo = Math.min(0, ...ss) - 0.03, hi = Math.max(0.42, ...ss) + 0.03;
+  segs.push({ a: u.map(x => x * lo), b: u.map(x => x * hi), cls: "qline" });
   ENC.forEach((e, j) => {
     const s = dot(u, e), foot = u.map(x => x * s);
     segs.push({ a: e, b: foot, cls: "qd" });
@@ -1671,7 +1681,7 @@ const STEPS = [
       const rowsHtml = n => ENC.slice(0, n).map((e, j) => eq(col(a.q, "the query"), op("·"), col(e, `key ${j + 1}: encoder vector ${encName(j)}`), op("="), `<div class="res">${dotTxt(a.q, e)} = <b>${f(a.sc[j])}</b></div>`)).join("");
       return [
         { board: qrule + eq(col(a.q, "the query")), scene: { ...SMALL, arrows: qs.arrows, pts: keys, cap: "The query has 6 in the tía dimension, so it points along the tía axis. The three encoder vectors are the keys it is compared with." } },
-        ...upto(3, j => ({ board: qrule + `<p class="label">the score of each key: the dot product of the query and the key</p>` + rowsHtml(j + 1), scene: { ...SMALL, arrows: qs.arrows, segs: qs.segs.slice(0, j + 1), notes: qs.notes.slice(0, j + 1), pts: keys,
+        ...upto(3, j => ({ board: qrule + `<p class="label">the score of each key: the dot product of the query and the key</p>` + rowsHtml(j + 1), scene: { ...SMALL, arrows: qs.arrows, segs: qs.segs.slice(0, j + 2), notes: qs.notes.slice(0, j + 1), pts: keys,
           cap: `Key ${j + 1}: the dashed line drops it onto the query's line, at ${f(ENC[j][TIA])} along tía. Its score: 6 × ${f(ENC[j][TIA])} = ${f(a.sc[j])}.` } })),
         ...upto(4, n => ({ board: qrule + rowsHtml(3) + smStage(a, n) + work(SMTXT(a)[n]),
           scene: n < 3 ? { ...SMALL, arrows: qs.arrows, segs: qs.segs, notes: qs.notes, pts: keys, cap: SMCAP[n] }
