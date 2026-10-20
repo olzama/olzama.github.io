@@ -582,7 +582,20 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="real">
     <h2><span class="n">6</span>A real model on our sentence</h2>
-    <p class="lead">The same arithmetic inside a trained Galician–English model, Helsinki-NLP/opus-mt-gl-en. Its decoder has 6 layers with 8 attention heads each, and every head looks back at the source in its own way. Click an output word, or play the translation, to see where the model looked. It writes “An aunt of mine”: correct, but rare in English (<a href="mt.html">translation page</a>, sections 3 to 5).</p>
+    <p class="lead">Sections 4 and 5 used two small models that we trained ourselves. This section looks inside a real translation model, trained by others on a large amount of real Galician–English text: Helsinki-NLP/opus-mt-gl-en. We let it translate our whole sentence and recorded every attention weight it used for every English word it wrote. Training set all the values in the model; nothing was set by hand. The attention weights come out of its computation, as in section 2.</p>
+    <p class="label">The same as the grid at the end of section 5</p>
+    <ul class="tries">
+      <li>The picture: one row per English piece the model wrote, one column per Galician piece; darker means more weight. The weights in each row add up to 1.</li>
+      <li>The arithmetic, for each English piece: a dot product of a query with each key gives the scores, softmax turns them into weights, and a weighted sum gives the mix.</li>
+    </ul>
+    <p class="label">New in this model</p>
+    <ul class="tries">
+      <li><b>Pieces of words.</b> The model reads and writes pieces from a fixed list it knows: a common word is one piece, a rarer word is split, as in <span class="mono">solucion·aba</span>. ‹/s› is the end marker, added after the last Galician piece.</li>
+      <li><b>Layers.</b> The decoder repeats its computation 6 times, one on top of the other. Each repetition is a layer: it takes the vectors from the layer below and has its own attention, so its own grid.</li>
+      <li><b>Heads.</b> Inside each layer, 8 attentions run side by side, called heads. 6 layers × 8 heads = 48 grids. The two menus choose one, or average them.</li>
+      <li><b>Queries and keys.</b> In our small models the encoder's vectors were the keys themselves. Here each head first multiplies the vectors by three tables of its own learned values: one gives its queries, one its keys, and one the vectors it mixes. It also divides each score by 8, the square root of the 64 dimensions of its queries, before softmax.</li>
+    </ul>
+    <p class="note" id="realTr"></p>
     <div class="controls">
       <button class="primary" id="realPlay">Play the translation</button>
       <label class="note" for="realLayer">Layer</label>
@@ -592,19 +605,22 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </div>
     <div class="cols">
       <div class="col">
-        <p class="label">Source (Galician), shaded by attention weight</p>
+        <p class="label">Galician pieces, shaded by their weight for the English piece chosen below</p>
         <div class="chips" id="realSrc"></div>
-        <p class="label">Output (English), as the model wrote it</p>
+        <p class="label">English pieces, as the model wrote them: click one</p>
         <div class="chips" id="realTgt"></div>
         <div class="weights" id="realWeights"></div>
         <p class="note" id="realNote"></p>
       </div>
       <div class="col">
-        <p class="label">The whole grid: one row per output word, one column per source word</p>
+        <p class="label">The whole grid: one row per English piece, one column per Galician piece</p>
         <div class="heatwrap"><canvas id="realHeat" aria-label="Cross-attention weights"></canvas></div>
       </div>
     </div>
-    <p class="note">Words are split into pieces the model knows, such as <span class="mono">solucion·aba</span>. ‹/s› marks the end of the sentence; models often park attention there when nothing in the source is needed.</p>
+    <p class="label">What the layers do: the weight on the right Galician word, averaged over the 8 heads of each layer</p>
+    <div class="heatwrap"><table class="grid" id="realLayers"></table></div>
+    <p class="note" id="realLayersNote"></p>
+    <p class="note" id="realEnd"></p>
   </section>
 
   <!-- 4 -->
@@ -744,9 +760,9 @@ function renderReal() {
   $("realTgt").querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => { clearInterval(realTimer); realUpto = undefined; tSel = +b.dataset.i; renderReal(); }));
   $("realWeights").innerHTML = `Writing “${clean(D.tgt[tSel])}”: ` + topList(D.src, w, 3);
   const lay = $("realLayer").value, hd = $("realHead").value;
-  $("realNote").textContent = lay === "all" && hd === "all"
-    ? `Averaged over all 48 heads the picture is blurry, but “aunt” still looks most at “tía” and “mine” at “miña”. Try layer 1 against layer 6: early layers barely align, late ones do (layer 6, head 2 puts ${f2(D.cross[5][1][D.tgt.indexOf("▁aunt")][D.src.indexOf("▁tía")])} on “tía” for “aunt”).`
-    : `One ${hd === "all" ? "layer, averaged over its heads" : "head"}. Different layers and heads look in different places; this is why the averaged view is only a summary.`;
+  $("realNote").textContent = lay === "all" && hd === "all" ? "The average of all 48 grids (6 layers × 8 heads)."
+    : lay === "all" ? `Head ${+hd + 1} of every layer, averaged. Heads with the same number in different layers are unrelated, so this average says little.`
+    : hd === "all" ? `Layer ${+lay + 1}: the average of its 8 heads.` : `Layer ${+lay + 1}, head ${+hd + 1}: one of the 48 grids. Other heads of the same layer look elsewhere.`;
   drawHeat(M);
 }
 function drawHeat(M) {
@@ -770,6 +786,16 @@ $("realPlay").addEventListener("click", () => {
   realTimer = setInterval(() => { if (tSel >= D.tgt.length - 1) { clearInterval(realTimer); realUpto = undefined; renderReal(); return; } tSel++; realUpto = tSel + 1; renderReal(); }, reduce ? 250 : 650);
 });
 renderReal();
+{
+  const iof = (arr, t) => arr.indexOf(t), pairs = [["▁aunt", "▁tía"], ["▁mine", "▁miña"]].map(([e, g]) => [iof(D.tgt, e), iof(D.src, g)]);
+  const lay = (l, [r, c]) => D.cross[l].reduce((x, H) => x + H[r][c], 0) / D.cross[l].length;
+  $("realLayers").innerHTML = `<thead><tr><th>layer</th>${D.cross.map((_, l) => `<th>${l + 1}</th>`).join("")}</tr></thead><tbody>` +
+    pairs.map(([r, c]) => `<tr><th>“${clean(D.tgt[r])}” → <i>${clean(D.src[c])}</i></th>${D.cross.map((_, l) => `<td>${f2(lay(l, [r, c]))}</td>`).join("")}</tr>`).join("") + "</tbody>";
+  $("realLayersNote").textContent = "In the first layers, the weights for an English piece do not follow the Galician word it translates; in the last layers they do. Choose layer 1 and then layer 6 in the menu to see the whole grid change.";
+  const end = D.src.length - 1, endL = D.cross.map(L => { let x = 0, k = 0; for (const H of L) for (const row of H) { x += row[end]; k++; } return x / k; });
+  $("realEnd").textContent = `Why so much weight on ‹/s›: the weights in each row add up to 1, so a head that needs nothing from the Galician sentence for a word still has to put its weight somewhere. Many heads put it on ‹/s›: ${f2(endL[0])} of all weight in layer 1, ${f2(endL[endL.length - 1])} in layer 6.`;
+  $("realTr").innerHTML = `Its whole translation: “${D.translation.replace(/&/g, "&amp;").replace(/</g, "&lt;")}” It starts with “An aunt of mine”: correct, but rare in English (<a href="mt.html">translation page</a>, sections 3 to 5). Later it goes wrong. Press Play the translation to see where it looked for each piece.`;
+}
 
 // ---------- 4: self-attention heads ----------
 $("selfLayer").innerHTML = Array.from({ length: D.self.length }, (_, i) => `<option value="${i}">${i + 1}</option>`).join("");
