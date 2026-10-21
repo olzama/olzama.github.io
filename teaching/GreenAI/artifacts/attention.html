@@ -452,7 +452,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <div class="review"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page</a>: a translation model has two parts. The <b>encoder</b> reads the Galician words and turns them into one vector, the <b>summary</b>. The <b>decoder</b> then writes the English words one at a time. From the <a href="skipgram.html">skip-gram lesson</a>: a <b>vector</b> is a list of values, and each position in the list is a <b>dimension</b>; the <b>dot product</b> of two vectors multiplies them dimension by dimension and adds up the results.</p></div>
     <div class="review"><span class="rtag">Review</span><p>The example translations: the 16 phrases, translated by people, that the model on the <a href="mt.html#train">translation page</a> was trained on. Every “in the example translations” below refers to this table.</p>
       <div class="heatwrap"><table class="ty corpus"><tbody><tr><td><i>a miña tía</i></td><td>my aunt</td><td class="cpm"><i>unha tía miña</i></td><td class="cpm">an aunt of mine <span class="cpt">our phrase</span></td></tr><tr><td><i>a túa tía</i></td><td>your aunt</td><td><i>unha tía túa</i></td><td>an aunt of yours</td></tr><tr><td><i>o meu amigo</i></td><td>my friend</td><td><i>un amigo meu</i></td><td>a friend of mine</td></tr><tr><td><i>o teu amigo</i></td><td>your friend</td><td><i>un amigo teu</i></td><td>a friend of yours</td></tr><tr><td><i>o meu irmán</i></td><td>my brother</td><td><i>un irmán meu</i></td><td>a brother of mine</td></tr><tr><td><i>o teu irmán</i></td><td>your brother</td><td><i>un irmán teu</i></td><td>a brother of yours</td></tr><tr><td><i>a miña veciña</i></td><td>my neighbor</td><td class="cpm"><i>unha veciña miña</i></td><td class="cpm">a neighbor of mine <span class="cpt">2nd phrase (steps 5–6)</span></td></tr><tr><td><i>a túa veciña</i></td><td>your neighbor</td><td><i>unha veciña túa</i></td><td>a neighbor of yours</td></tr></tbody></table></div>
-      <p>The model on this page is smaller: it has a dimension for only three Galician words (unha, tía, miña) and knows only eight English words (a, an, aunt, friend, of, mine, yours, and ‹end›), enough for our phrase and the one it writes without attention. We set its values by hand so that its scores agree with these translations, as training would.</p></div>
+      <p>The model on this page is smaller: it has a dimension for only three Galician words (unha, tía, miña) and knows only eight English words (a, an, aunt, friend, of, mine, yours, and ‹end›), enough for our phrase and the one it writes without attention. Its values are made up: we chose them because we know which translations we want it to produce. Step 5 shows, on a made-up training run, how training on these example translations would produce such values.</p></div>
     <p class="lead">A translation model small enough to run by hand, on the phrase <i>unha tía miña</i>. Its vectors have three dimensions, one per Galician word, and its decoder knows eight English words. Every value is on the page. Without attention, this model writes “a friend of mine”, and the steps show exactly why. Section 2 adds attention to the same model, and it writes “an aunt of mine”. We set the values by hand so that the arithmetic stays simple; a real model learns them from examples, as the skip-gram lesson showed.</p>
     <div class="planes" id="tyPlanes"></div>
   </section>
@@ -1537,22 +1537,12 @@ function smCore(o, n) {
 }
 // section 2, steps 1 and 2 share one board: the query rule, the query · key rows, the softmax board, then the mix
 function qkParts(a) {
-  const qrule = work([`The query is computed from the decoder state. A real model learns how; we set it by hand, to what helps in the example translations. For the first two English words, the right word depends on whether the phrase has tía (“an aunt” or “a friend”). So the query starts as ${vecTxt(Q0)}: it looks for tía.`,
-        "From the third word on, the right word depends on miña (“of mine” or “of yours”). So each word written from the second word on shifts the query by its state value × (0, −12, 12): away from tía, toward miña (section 2, step 4).",
+  const qrule = work([`The query is computed from the decoder state. A real model learns how, in training. Here the query is made up, like the word vectors: we chose it because we know the result we want, “an aunt of mine”.`,
+        `Before the first two English words, the query is ${vecTxt(Q0)}: it points along tía. After that, each word written shifts it by its value in the state × (0, −12, 12), away from tía and toward miña (step 4).`,
         `Nothing is written yet, so the query is ${vecTxt(a.q)}.`]);
   const rowsHtml = n => ENC.slice(0, n).map((e, j) => eq(col(a.q, "the query"), op("·"), col(e, `key ${j + 1}: encoder vector ${encName(j)}`), op("="), `<div class="res">${dotTxt(a.q, e)} = <b>${f(a.sc[j])}</b></div>`)).join("");
   return { qrule, rowsHtml, LBL: `<p class="label">the score of each key: the dot product of the query and the key</p>` };
 }
-// the values that are not 0 in each word vector, and why (section 1, step 4)
-const REASONS = [
-  ["aunt", "tía: 8; a, an: 12", "right exactly in the phrases with tía; always the second English word, and of this model's eight words only “a” and “an” come right before it"],
-  ["friend", "tía: −8; a, an: 12", "right in the phrases with amigo; this model has no dimension for amigo, so its only clue is tía: −8 in tía, lower when tía is there; always the second English word"],
-  ["of", "miña: 8; aunt, friend: 12", "right in the phrases with miña (… of mine); always right after “aunt” or “friend”"],
-  ["mine", "miña: 8; of: 12", "right in the phrases with miña; always right after “of”"],
-  ["yours", "miña: −8; of: 12", "right in the phrases with túa (no dimension in this small model), never with miña; always right after “of”"],
-  ["‹end›", "aunt, friend, mine, yours: 12", "of this model's eight words, these are the ones a translation ends right after"]];
-const reasonRows = ws => `<div class="heatwrap"><table class="ty"><thead><tr><th>word</th><th>its vector: values that are not 0</th><th>why: what the example translations show</th></tr></thead><tbody>` +
-  REASONS.filter(r => ws.includes(r[0])).map(([w, v, y]) => `<tr><td><b>${w}</b></td><td class="n">${v}</td><td>${y}</td></tr>`).join("") + "</tbody></table></div>";
 // softmax over the three encoder vectors (attention weights)
 const smStage = (a, n, from) => smCore({ labels: ENC.map((e, j) => encPlain(j)), sc: a.sc, e: a.sm.e, Z: a.sm.Z, p: a.sm.p, head: "encoder vector", outHead: "weight",
   title: `${from ? `${from}: ` : ""}scores (query · each encoder vector) → softmax → weights` }, n);
@@ -1601,60 +1591,34 @@ const STEPS = [
             "Before the first word all eight values are 0. The decoder applies the update once for ‹start›, as if ‹start› had just been written: ½ × 0 + ½ × 1 = 0.5 in the ‹start› dimension. Real decoders also begin with such a start token."]),
         scene: decScene(SUMMARY, false, { path: true, cap: "The last eight dimensions do not fit in the picture; the grid on the left shows all eleven." }) }] }],
   ["How the decoder scores a word", {
-    text: "When the decoder translates, it gives each of its eight words a score and writes the word with the highest score. Each English word has its own vector, with the same eleven dimensions as the state, and its score is the dot product of that vector and the state. The state changes while the decoder translates; the word vectors do not. They are set before any translating starts: in a real model by training on example translations (step 5), here by hand, to the kind of values training would produce. This step first sets the vector of “an” (before translating), then computes the dot products the decoder computes while translating our phrase.",
+    text: "When the decoder translates, it gives each of its eight words a score and writes the word with the highest score. Each English word has its own vector, with the same eleven dimensions as the state, and its score is the dot product of that vector and the state. While the decoder translates, only the state changes; the word vectors stay as they are.",
     frames: () => {
       const st = stateOf(SUMMARY, ST0), base = { sum: { v: SUMMARY }, st: { v: st }, sums: true, resHead: "dot product" }, sc = scoreAll(SUMMARY, ST0);
-      const part = keep => vecOf("an").map((x, i) => keep.includes(DS[i]) ? x : null);
-      const anArrow = [{ a: ZERO, b: [0.25, 0.5, 0], cls: "ca", label: "“an”", dx: 6, dy: 18, anchor: "start" }], anTia = [{ a: ZERO, b: [0, 0.5, 0], cls: "ca", label: "“an”", dx: 6, dy: 22, anchor: "start" }];
+      const anArrow = [{ a: ZERO, b: [0.25, 0.5, 0], cls: "ca", label: "“an”", dx: 6, dy: 18, anchor: "start" }];
       const aArrow = [{ a: ZERO, b: [0.25, -0.5, 0], cls: "ca", label: "“a”", dx: 0, dy: 20, anchor: "start" }];
-      const sG = (cap, arrows) => ({ ...decScene(SUMMARY, false, { cap }), arrows });
       const drop2 = decScene(SUMMARY, false, { drops: [0, TIA] });
       const anDone = { v: vecOf("an"), sub: prodOf("an", st), subLabel: "products", g: sc.rows[1].gp, e: sc.rows[1].ep, score: r2(sc.rows[1].gp + sc.rows[1].ep) };
       const aDone = { v: vecOf("a"), sub: prodOf("a", st), subLabel: "products", g: sc.rows[0].gp, e: sc.rows[0].ep, score: r2(sc.rows[0].gp + sc.rows[0].ep) };
-      const reasonTbl = `<div class="heatwrap"><table class="ty"><thead><tr><th>word</th><th>its vector: values that are not 0</th><th>why: what the example translations show</th></tr></thead><tbody>` +
-        REASONS.map(([w, v, y]) => `<tr><td><b>${w}</b></td><td class="n">${v}</td><td>${y}</td></tr>`).join("") + "</tbody></table></div>";
-      const all = {}; EN.forEach(w => { all[w] = { v: vecOf(w), cur: !["a", "an"].includes(w) }; }); Object.assign(all, { an: anDone, a: aDone });
+      const W = (extra = {}, cur = false) => { const o = {}; EN.forEach(w => { o[w] = { v: vecOf(w), cur }; }); return Object.assign(o, extra); };
       return [
-        { board: g11({ ...base, cap: "before translating: setting the vector of “an”", words: { an: { v: part([]), cur: true } } }) +
-            work(["This happens before the decoder translates anything. While translating, the decoder will see only the state, and it knows nothing about English grammar: it will compute the dot product of each word vector with the state, and nothing else.",
-              "So the vector of “an” has to be set now so that its dot product comes out high whenever “an” is the right next word. To set it, we look at the example translations and at the states the decoder has there: in which dimensions are the state's values different when “an” is the right next word than when it is not? Those dimensions get values other than 0. The row above shows one such state, the state before word 1 of our phrase."]),
-          scene: sG("The state's first three dimensions: the summary. The vector of “an” is not filled in yet.", []) },
-        { board: g11({ ...base, cap: "before translating: the vector of “an”, tía dimension", words: { an: { v: part(["tía"]), hi: [1] } } }) +
-            work(["In the example translations, “an” is the right first word in exactly two phrases: <i>unha tía miña</i> → an aunt of mine and <i>unha tía túa</i> → an aunt of yours. Both have tía. The other phrases with tía start with “my” or “your”, and the phrases with the other nouns and un or unha start with “a”.",
-              "So when the state holds tía, “an” should score higher: a positive value in the tía dimension. We choose 8."]),
-          scene: sG("The vector of “an” in the first three dimensions: 8 along tía (drawn at 1/16 of its length).", anTia) },
-        { board: g11({ ...base, cap: "before translating: the vector of “an”, ‹start› dimension", words: { an: { v: part(["tía", "‹start›"]), hi: [3] } } }) +
-            work(["Why the last eight dimensions are needed: while translating without attention, the values in the first three dimensions are the summary before every English word. If the state had only those three dimensions, the decoder would compute the same eight scores before every word, and so write the same word every time.",
-              "The values in the last eight dimensions are different before every word. After a word is written, every value is halved, and the value in that word's own dimension goes up by 0.5 (step 3). The value in the ‹start› dimension is 0.5 before the first word, 0.25 before the second, 0.125 before the third. So a word vector with a large value in the ‹start› dimension has its largest dot product before the first word, and a smaller one before each later word.",
-              "In the example translations, “an” only ever appears as the first English word, right after the start. So “an” should score higher when the value in ‹start› is high: a positive value in the ‹start› dimension. We choose 12."]),
-          scene: sG("‹start› is one of the last eight dimensions, which the picture cannot show.", anTia) },
-        { board: g11({ ...base, cap: "before translating: the vector of “an”, unha dimension", words: { an: { v: part(["tía", "‹start›", "unha"]), hi: [0] } } }) +
-            work(["unha: in the example translations, the English phrase starts with “a” or “an” exactly when the Galician phrase has <i>unha</i> or <i>un</i>. The phrases without them (<i>a miña tía</i> → my aunt, <i>o teu amigo</i> → your friend) start with “my” or “your”. So unha speaks for “an”: a positive value in the unha dimension. We choose 4.",
-              "But unha speaks just as much for “a” (<i>unha veciña miña</i> → a neighbor of mine). So “a” will get the same 4 in unha. unha says “a or an comes now”, not which one."]),
-          scene: sG("With 4 in unha, the vector of “an” leans toward the unha axis.", anArrow) },
-        { board: g11({ ...base, cap: "before translating: the vector of “an”, the other dimensions", words: { an: { v: vecOf("an"), hi: [2, 4, 5, 6, 7, 8, 9, 10] } } }) +
-            work(["What a value in the vector of “an” does: in the dot product it is multiplied by the state's value in the same dimension, and the result is added to the score of “an”. So a value other than 0 helps only in a dimension where the state's value is different when “an” is the right next word than when it is not. That is the test each dimension of the vector has to pass.",
-              "miña: every example phrase ends in miña or túa, so the state's value in miña is 0.5 before the first word whether the right word is “an” or “a”. It cannot tell them apart.",
-              "a, an, aunt, friend, of, mine, yours: these dimensions record English words the decoder has already written. When “an” is right, it is the first word, so nothing has been written yet and all these values are 0. Any value here would be multiplied by 0 and add nothing at the moment “an” is right.",
-              "None of these dimensions passes the test, so the vector of “an” gets 0 in all of them. (At later words, “an” is always wrong; a trained model might give these dimensions negative values to push it further down. The ‹start› value of “an” already does that, because the value in ‹start› shrinks after every word.)"]),
-          scene: sG("The vector of “an” has 0 in miña, so in the picture it lies on the floor, between the unha and tía axes.", anArrow) },
-        { board: g11({ ...base, cap: "translating <i>unha tía miña</i>, word 1: the dot product of the state and the vector of “an”", words: { an: { ...anDone, cur: false } } }) +
+        { board: g11({ ...base, cap: "the eight word vectors: values made up for this example", words: W({}, true) }) +
+            work(["The values in these vectors are made up. We chose them because we know what we want the model to do: translate our phrase as “a friend of mine” without attention (this section) and as “an aunt of mine” with attention (section 2). A real model gets its values from training on example translations. Step 5 plays through a made-up training run to show how training moves a vector.",
+              "What a value does: in the dot product it is multiplied by the state's value in the same dimension. A positive value raises the word's score when the state has a value there; a negative value lowers it. For example, “an” has 8 in tía and “a” has −8: the more tía the state holds, the more “an” gains and the more “a” loses.",
+              "The last eight dimensions of the state record which English words have been written (step 3), so they differ before every word. A word vector with a large value in ‹start›, like “a” and “an”, scores highest before the first word."]),
+          scene: { ...decScene(SUMMARY, false, { arrows: true }), cap: "The word vectors in the first three dimensions, drawn at 1/16 of their length: “an” and “aunt” toward tía, “a” and “friend” away from it, “of” and “mine” along miña. (“yours”, −8 along miña, is not drawn.)" } },
+        { board: g11({ ...base, cap: "translating <i>unha tía miña</i>, word 1: the dot product of the state and the vector of “an”", words: W({ an: anDone }) }) +
             work([`Each product sits under its own column: the value of the state times the value of “an” in that dimension. The dot product adds all eleven products. Σ first three adds the products in unha, tía and miña: ${f(sc.rows[1].gp)}. Σ last eight adds the products in ‹start› to yours: ${f(sc.rows[1].ep)}. Together: ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}, the bar on the right.`]),
           scene: { ...drop2, arrows: anArrow, cap: `The first three products are the part the picture shows: unha 4 × ${f(SUMMARY[0])} = ${f(4 * SUMMARY[0])}, tía 8 × ${f(SUMMARY[TIA])} = ${f(8 * SUMMARY[TIA])}. ‹start› adds 12 × 0.5 = ${f(sc.rows[1].ep)}.` } },
-        { board: g11({ ...base, cap: "before translating: the vector of “a”; then, translating word 1, its dot product", words: { an: anDone, a: { ...aDone, hi: [0, 1, 3] } } }) +
-            work(["In the example translations, “a” is the right first word in the six phrases that have un or unha but no tía (<i>un amigo meu</i> → a friend of mine, <i>unha veciña miña</i> → a neighbor of mine, …). So tía should lower its score: −8 in tía. unha speaks for it as much as for “an”: 4. Like “an”, it only ever appears right after the start: 12 in ‹start›.",
-              `Dot product of “a”: ${sumTxt("a", st)}. unha and ‹start› add the same to both; tía makes all the difference.`]),
+        { board: g11({ ...base, cap: "translating <i>unha tía miña</i>, word 1: the dot product of the state and the vector of “a”", words: W({ an: anDone, a: aDone }) }) +
+            work([`Dot product of “a”: ${sumTxt("a", st)}. unha and ‹start› add the same to “a” and “an”; tía makes all the difference.`]),
           scene: { ...drop2, arrows: [...anArrow, ...aArrow], cap: `“a” and “an” lean the same way along unha and opposite ways along tía. unha adds ${f(4 * SUMMARY[0])} to both. tía adds ${f(8 * SUMMARY[TIA])} to “an” and takes ${f(8 * SUMMARY[TIA])} from “a”.` } },
-        { board: g11({ ...base, cap: "before translating: the vectors of the other six words", words: all }) + reasonTbl +
-            work(["Why 8 and 12? Only where the values other than 0 are, and their signs, carry the reasoning. We chose the sizes so that the arithmetic comes out round. Step 5 shows how training finds such values by itself.",
-              "How a real model differs: its dimensions have no names, and each one mixes many such signals; nobody can read off why a value is there. Its state is not updated by our simple ½ + ½ rule but by a learned function. The logic is the same, though: values end up wherever they raise the right word's score in the training examples."]),
-          scene: { ...decScene(SUMMARY, false, { arrows: true }), cap: "The other words follow the same reasoning. In the picture: “aunt” along tía, “friend” the opposite way; “of”, “mine” along miña. (“yours”, −8 along miña, is not drawn.)" } },
         { board: g11({ ...base, cap: "translating <i>unha tía miña</i>, word 1: every word's dot product with the state", resHead: "dot product", words: allBars(SUMMARY, ST0, ["g", "e"], { subs: true, anim: "e" }) }) +
-            work([`For every word: Σ first three (the part of the dot product the picture shows) + Σ last eight = the dot product. Each row has its own scale, from −4 to 12. The blue piece is Σ first three, drawn from 0. The green piece is Σ last eight, drawn from where the blue piece ends. The black mark is where the green piece ends: the dot product. “an” has ${f(sc.rows[1].gp)} + ${f(sc.rows[1].ep)} = ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}; “a” has ${f(sc.rows[0].gp)} + ${f(sc.rows[0].ep)} = ${f(r2(sc.rows[0].gp + sc.rows[0].ep))}. Their green pieces are equal; the blue pieces make the difference.`]),
+            work([`For every word: Σ first three (the part of the dot product the picture shows) + Σ last eight = the dot product. Each row has its own scale, from −4 to 12. The blue piece is Σ first three, drawn from 0. The green piece is Σ last eight, drawn from where the blue piece ends. The black mark is where the green piece ends: the dot product. “an” has ${f(sc.rows[1].gp)} + ${f(sc.rows[1].ep)} = ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}; “a” has ${f(sc.rows[0].gp)} + ${f(sc.rows[0].ep)} = ${f(r2(sc.rows[0].gp + sc.rows[0].ep))}. Their green pieces are equal; the blue pieces make the difference.`,
+              "How a real model differs: its dimensions have no names, and each mixes many signals, so nobody can read off why a value is there. Its state is not updated by our simple ½ + ½ rule but by a learned function."]),
           scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], cap: "Every word's dot product with the state." }) }];
     } }],
   ["Where the values in the word vectors come from", {
-    text: "Step 4 chose the values by reasoning about when each word is right. A real model finds them by itself, from example translations. Training shows the model an example and moves the vector of the right word a little toward the decoder state, so that its dot product grows; the vectors of the wrong words move a little away. Here we train the vectors of “an” and “a” by hand, on two examples, starting from zeros.",
+    text: "Step 4 gave the word vectors made-up values. A real model finds its values by training on example translations. Training shows the model an example and moves the vector of the right word a little toward the decoder state, so that its dot product grows; the vectors of the wrong words move a little away. Below is a made-up training run for “an” and “a” on two of the example translations, with the step size chosen so that the run lands on the values of step 4. Here we train the vectors of “an” and “a” by hand, on two examples, starting from zeros.",
     frames: () => {
       const S1 = stateOf(SUMMARY, ST0), S2 = stateOf(VEC, ST0), STEP = 16;
       const EX = [["unha tía miña", S1, "an", SUMMARY], ["unha veciña miña", S2, "a", VEC]], seq = [0, 1, 0, 1];
@@ -1691,9 +1655,7 @@ const STEPS = [
           scene: tScene(0, "The vectors of “an” and “a” start at zero, at the corner where the axes meet.") },
         nudge(1), nudge(2), nudge(3), nudge(4),
         { board: g11({ cap: "after training on the two examples", sum: { label: L2("summary", AMIP), v: VEC }, st: { label: L2("state", AMIP), v: S2 }, dim: others, words: { an: { v: vAn[4] }, a: { v: vA[4] } } }) +
-            work(["unha ends at 0 here: both phrases have it, so it cannot tell “an” from “a”. tía can: only the phrase where “an” is right has it. The 4 that “a” and “an” have in unha (step 4) comes from other examples: phrases without unha (<i>a miña tía</i> → my aunt), where neither is right.",
-              "‹start› ends at 0 here too. The 12 that “a” and “an” have in ‹start› (step 4) comes from the later words of the examples: there “a” and “an” are wrong and the value in ‹start› is smaller, so training pushes them away from those states.",
-              "“aunt” and “friend” get 8 and −8 in tía the same way, from the same two examples at the second word. “of” and “mine” get 8 in miña from phrases with miña."]),
+            work(["This made-up run gives “an” 8 and “a” −8 in tía, the values of step 4. unha and ‹start› end at 0 here, because both phrases have the same values there, so their pushes cancel. The 4 in unha and the 12 in ‹start› of step 4 would come from more examples: the other example translations, and the later words of each phrase. We did not run those; we set those values, and the vectors of the other six words, directly."]),
           scene: tScene(4, "Where the vectors of “an” and “a” end up: on the tía axis, pointing opposite ways.") }];
     } }],
   ["The bias, and why the decoder writes “a”", {
@@ -1765,19 +1727,14 @@ const STEPS = [
     frames: () => {
       const s = ATT[0], x = s.a.mix, base = { sum: { label: "the mix", v: x, cls: "mixl" }, bias: true, sums: true, resHead: "score" };
       const AA = ["a", "an"], W = ws => Object.fromEntries(ws.map(w => [w, { v: vecOf(w), cur: true }]));
-      const vRow = (w, why) => [w, vecOf(w).map((v, i) => v ? `${DS[i]}: ${f(v)}` : "").filter(Boolean).join("; "), why];
-      const aaTbl = `<div class="heatwrap"><table class="ty"><thead><tr><th>word</th><th>its vector: values that are not 0</th><th>why: what the example translations show</th></tr></thead><tbody>` +
-        [vRow("a", "of the phrases with un or unha, right exactly in those without tía; always the first word"), vRow("an", "of the phrases with un or unha, right exactly in those with tía; always the first word")]
-          .map(([w, v, y]) => `<tr><td><b>${w}</b></td><td class="n">${v}</td><td>${y}</td></tr>`).join("") + "</tbody></table></div>";
       return [
         { board: g11({ ...base, cap: "the mix is copied into the first three dimensions of the decoder state", st: { v: stateOf(x, ST0), hi: [0, 1, 2] } }) +
             work([`The first three dimensions of the decoder state now hold the mix, ${vecTxt(x)}, where section 1 had the summary, ${vecTxt(SUMMARY)}. The last eight are as in section 1: nothing is written yet, so ‹start› is 0.5 and the rest 0.`]),
           scene: decScene(x, true, { cap: `The mix in the picture. It reaches ${f(x[TIA])} along tía; the summary reached ${f(SUMMARY[TIA])}.` }) },
-        { board: g11({ ...base, cap: "the vectors of “a” and “an”: the same as in section 1", st: { v: stateOf(x, ST0) }, words: W(AA) }) + aaTbl +
+        { board: g11({ ...base, cap: "the vectors of “a” and “an”: the same as in section 1", st: { v: stateOf(x, ST0) }, words: W(AA) }) +
             work(["The word vectors were set before translating (section 1, step 4) and do not change. Attention changes only the state."]),
           scene: decScene(x, true, { arrows: true, cap: "The vectors of “a” and “an” lean the same way along unha and opposite ways along tía." }) },
-        { board: g11({ ...base, cap: "the vectors of the other six words: the same as in section 1", st: { v: stateOf(x, ST0) }, words: { ...Object.fromEntries(AA.map(w => [w, { v: vecOf(w) }])), ...W(EN.filter(w => !AA.includes(w))) } }) +
-            reasonRows(EN.filter(w => !AA.includes(w))),
+        { board: g11({ ...base, cap: "the vectors of the other six words: the same as in section 1", st: { v: stateOf(x, ST0) }, words: { ...Object.fromEntries(AA.map(w => [w, { v: vecOf(w) }])), ...W(EN.filter(w => !AA.includes(w))) } }) + work(["The same vectors as in section 1, with the same made-up values."]),
           scene: decScene(x, true, { arrows: true, cap: "“aunt” along tía, “friend” the opposite way; “of” and “mine” along miña." }) },
         { board: g11({ ...base, cap: "the first three dimensions of each dot product", st: { v: stateOf(x, ST0) }, words: allBars(x, ST0, ["g"]) }),
           scene: decScene(x, true, { arrows: true, drops: [TIA, MINA], cap: `tía gives “an” and “aunt” 8 × ${f(x[TIA])} = ${f(r2(8 * x[TIA]))}, and takes the same from “a” and “friend”. Along miña the mix reaches only ${f(x[MINA])}: “of” and “mine” get ${f(r2(8 * x[MINA]))}.` }) },
