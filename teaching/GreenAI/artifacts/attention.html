@@ -1778,16 +1778,16 @@ const STEPS = [
           scene: decScene(x, true, { arrows: true, drops: [TIA], mark: true, cap: `Why “an” now: the gap from tía is ${f(r2(2 * 8 * x[TIA]))}, more than the bias of “a”, ${f(CAND.a.b)}. The mix is past the ${f(MARK)} mark. The decoder writes “an”.` }) }];
     } }],
   ["The rest of the phrase, with attention", {
-    text: "After each word, the decoder state changes as in section 1. Now the query is computed from the state, so the query changes too, and with it the weights and the mix.",
+    text: "After each word, the decoder state changes as in section 1. Now the query is computed from the state. Some written words change the query (“aunt”, “friend”, “of”, “mine”, “yours”), and with it the weights and the mix; the others, such as “an”, leave it as it was.",
     frames: () => {
       const caps = [
-        `After “an”, the query stays ${vecTxt(ATT[1].q)}: the same weights, the same mix. “aunt” ${f(ATT[1].sc.rows[2].s)} beats “friend” ${f(ATT[1].sc.rows[3].s)}: “aunt”.`,
+        `“an” does not change the query: it stays ${vecTxt(ATT[1].q)}, so the weights and the mix are the ones from step 3. “aunt” ${f(ATT[1].sc.rows[2].s)} beats “friend” ${f(ATT[1].sc.rows[3].s)}: “aunt”.`,
         `“aunt” is written, at 0.5: the query shifts by 0.5 × (0, −12, 12) to ${vecTxt(ATT[2].q)}. It looks for miña now: weight ${f(ATT[2].a.sm.p[2])} on the key after miña. The mix reaches ${f(ATT[2].a.mix[MINA])} along miña: “of” ${f(ATT[2].sc.rows[4].s)}.`,
         `The query shifts further toward miña. The mix stays near the miña axis: “mine” ${f(ATT[3].sc.rows[5].s)}.`,
         `“‹end›” has the highest score: the phrase is finished. With attention: “${phrase(ATT)}”. Without attention it was “${phrase(ONE)}”.`];
       return ATT.slice(1).map((s, i) => {
         const prev = stateOf(ATT[i].a.mix, ATT[i].st), now = stateOf(s.a.mix, s.st);
-        return { board: g11({ cap: `“${ATT[i].w}” has been written: a new query, new weights, a new mix`, sum: { label: "the mix", v: s.a.mix, cls: "mixl", hi: changed(ATT[i].a.mix, s.a.mix) }, st: { v: now, hi: changed(prev, now) }, bias: true, sums: true, resHead: "score", win: s.w, words: allBars(s.a.mix, s.st, ALL) }) +
+        return { board: g11({ cap: vecTxt(ATT[i].q) === vecTxt(s.q) ? `“${ATT[i].w}” has been written: a new state; the query, the weights and the mix stay as in step 3` : `“${ATT[i].w}” has been written: a new query, new weights, a new mix`, sum: { label: "the mix", v: s.a.mix, cls: "mixl", hi: changed(ATT[i].a.mix, s.a.mix) }, st: { v: now, hi: changed(prev, now) }, bias: true, sums: true, resHead: "score", win: s.w, words: allBars(s.a.mix, s.st, ALL) }) +
             `<div class="fixh">${work([stLine(ATT[i].w, s.st), qLine(s)])}</div>` + smStage(s.a, 3, "the new query") + work([wLine(s)]),
           scene: decScene(s.a.mix, true, { arrows: true, drops: [TIA, MINA], mark: true, mixes: ATT.slice(0, i + 1).map(t => t.a.mix), xLabel: `mix for word ${i + 2}`, cap: `Word ${i + 2}. ${caps[i]}` }) };
       });
