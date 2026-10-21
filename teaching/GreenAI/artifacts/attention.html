@@ -1531,6 +1531,14 @@ function smCore(o, n) {
     `<g ${H(n >= 3)}>${shares}<text x="250" y="${yB + 52}" text-anchor="end" class="st">each piece's share</text></g>`;
   return `<p class="label">${o.title}</p><svg class="smst" viewBox="0 0 600 ${H2}" role="img" aria-label="softmax of the scores ${o.sc.map(f).join(", ")}">${g}</svg>`;
 }
+// section 2, steps 1 and 2 share one board: the query rule, the query · key rows, the softmax board, then the mix
+function qkParts(a) {
+  const qrule = work([`The query is computed from the decoder state. A real model learns how; we set it by hand, to what helps in the example translations. For the first two English words, the right word depends on whether the phrase has tía (“an aunt” or “a friend”). So the query starts as ${vecTxt(Q0)}: it looks for tía.`,
+        "From the third word on, the right word depends on miña (“of mine” or “of yours”). So each word written from the second word on shifts the query by its state value × (0, −12, 12): away from tía, toward miña (section 2, step 4).",
+        `Nothing is written yet, so the query is ${vecTxt(a.q)}.`]);
+  const rowsHtml = n => ENC.slice(0, n).map((e, j) => eq(col(a.q, "the query"), op("·"), col(e, `key ${j + 1}: encoder vector ${encName(j)}`), op("="), `<div class="res">${dotTxt(a.q, e)} = <b>${f(a.sc[j])}</b></div>`)).join("");
+  return { qrule, rowsHtml, LBL: `<p class="label">the score of each key: the dot product of the query and the key</p>` };
+}
 // softmax over the three encoder vectors (attention weights)
 const smStage = (a, n, from) => smCore({ labels: ENC.map((e, j) => encPlain(j)), sc: a.sc, e: a.sm.e, Z: a.sm.Z, p: a.sm.p, head: "encoder vector", outHead: "weight",
   title: `${from ? `${from}: ` : ""}scores (query · each encoder vector) → softmax → weights` }, n);
@@ -1723,25 +1731,23 @@ const STEPS = [
     text: "With attention, before each English word the decoder looks at all three encoder vectors, not only the last one, and takes a weighted mix of them. To set the weights, it computes the dot product of each encoder vector with one more vector, the query. This gives one score per encoder vector, and softmax turns the scores into weights. The query is computed from the decoder state, so it can be different before each English word. In this role, the encoder vectors are called keys.",
     frames: () => {
       const a = ATT[0].a, qs = queryScene(a), keys = encPts(ENC.map((e, j) => `key ${j + 1}: ${encPlain(j)}`));
-      const qrule = work([`The query is computed from the decoder state. A real model learns how; we set it by hand, to what helps in the example translations. For the first two English words, the right word depends on whether the phrase has tía (“an aunt” or “a friend”). So the query starts as ${vecTxt(Q0)}: it looks for tía.`,
-        "From the third word on, the right word depends on miña (“of mine” or “of yours”). So each word written from the second word on shifts the query by its state value × (0, −12, 12): away from tía, toward miña (section 2, step 4).",
-        `Nothing is written yet, so the query is ${vecTxt(a.q)}.`]);
-      const rowsHtml = n => ENC.slice(0, n).map((e, j) => eq(col(a.q, "the query"), op("·"), col(e, `key ${j + 1}: encoder vector ${encName(j)}`), op("="), `<div class="res">${dotTxt(a.q, e)} = <b>${f(a.sc[j])}</b></div>`)).join("");
+      const { qrule, rowsHtml, LBL } = qkParts(a);
       return [
-        { board: qrule + eq(col(a.q, "the query")), scene: { ...SMALL, arrows: qs.arrows, pts: keys, cap: "The query has 6 in the tía dimension, so it points along the tía axis. The three encoder vectors are the keys it is compared with." } },
-        ...upto(3, j => ({ board: qrule + `<p class="label">the score of each key: the dot product of the query and the key</p>` + rowsHtml(j + 1), scene: { ...SMALL, arrows: qs.arrows, segs: qs.segs.slice(0, j + 2), notes: qs.notes.slice(0, j + 1), pts: keys,
+        { board: qrule + LBL + eq(col(a.q, "the query")), scene: { ...SMALL, arrows: qs.arrows, pts: keys, cap: "The query has 6 in the tía dimension, so it points along the tía axis. The three encoder vectors are the keys it is compared with." } },
+        ...upto(3, j => ({ board: qrule + LBL + rowsHtml(j + 1), scene: { ...SMALL, arrows: qs.arrows, segs: qs.segs.slice(0, j + 2), notes: qs.notes.slice(0, j + 1), pts: keys,
           cap: `Key ${j + 1}: the dashed line drops it onto the query's line, at ${f(ENC[j][TIA])} along tía. Its score: 6 × ${f(ENC[j][TIA])} = ${f(a.sc[j])}.` } })),
-        ...upto(4, n => ({ board: qrule + rowsHtml(3) + smStage(a, n) + work(SMTXT(a)[n]),
+        ...upto(4, n => ({ board: qrule + LBL + rowsHtml(3) + smStage(a, n) + work(SMTXT(a)[n]),
           scene: n < 3 ? { ...SMALL, arrows: qs.arrows, segs: qs.segs, notes: qs.notes, pts: keys, cap: SMCAP[n] }
             : { ...SMALL, ...qs, pts: encPts(ENC.map((e, j) => `key ${j + 1}: weight ${f(a.sm.p[j])}`)), cap: SMCAP[3] } }))];
     } }],
   ["The mix", {
     text: "The mix is the three encoder vectors added up, each multiplied by its weight. In this role the encoder vectors are called values. The mix takes the summary's place in the decoder state.",
     frames: () => {
-      const a = ATT[0].a, terms = n => ENC.slice(0, n).flatMap((e, j) => [j ? op("+") : "", k(`${f(a.sm.p[j])} ×`), col(e, `value ${j + 1}: encoder vector ${encName(j)}`)]);
+      const a = ATT[0].a, terms = n => ENC.slice(0, n).flatMap((e, j) => [j ? op("+") : "", k(`${f(a.sm.p[j])} ×`), col(e, encName(j))]);
       const vals = n => encPts(ENC.map((e, j) => j < n ? `weight ${f(a.sm.p[j])}` + (j === 2 ? " (summary)" : "") : ""), "enc").map((p, j) => j < n ? p : { ...p, cls: "enc faint" });
-      return [...upto(3, j => ({ board: smStage(a, 3, "from step 1") + eq(...terms(j + 1)), scene: { ...SMALL, pts: vals(j + 1), cap: `${f(a.sm.p[j])} × the encoder vector ${encPlain(j)}.` } })),
-        { board: smStage(a, 3, "from step 1") + eq(...terms(3), op("="), col(a.mix, "the mix", "cur")) + work([`Dimension by dimension, for example tía: ${a.sm.p.map((w, j) => `${f(w)} × ${f(ENC[j][TIA])}`).join(" + ")} = <b>${f(a.mix[TIA])}</b>`]),
+      const { qrule, rowsHtml, LBL } = qkParts(a), top = qrule + LBL + rowsHtml(3) + smStage(a, 3);
+      return [...upto(3, j => ({ board: top + `<p class="label">the mix: each encoder vector (here called a value) times its weight, added up</p>` + eq(...terms(j + 1)), scene: { ...SMALL, pts: vals(j + 1), cap: `${f(a.sm.p[j])} × the encoder vector ${encPlain(j)}.` } })),
+        { board: top + `<p class="label">the mix: each encoder vector (here called a value) times its weight, added up</p>` + eq(...terms(3), op("="), col(a.mix, "the mix", "cur")) + work([`Dimension by dimension, for example tía: ${a.sm.p.map((w, j) => `${f(w)} × ${f(ENC[j][TIA])}`).join(" + ")} = <b>${f(a.mix[TIA])}</b>`]),
           scene: { ...SMALL, tri: ENC, pts: [...vals(3), { p: a.mix, cls: "mix", label: `mix ${vecTxt(a.mix)}`, dx: 10, dy: 18 }],
             cap: `Added up: the mix. It lies inside the triangle of the three encoder vectors, pulled toward the one with the largest weight. It holds ${f(a.mix[TIA])} of tía; the summary held ${f(SUMMARY[TIA])}.` } }];
     } }],
@@ -1775,51 +1781,64 @@ const STEPS = [
     } }],
 ];
 // sections 1 and 2: one stepper each (section 2 starts at step 7 of STEPS)
-// each step is its own plane: a title, what the step does, its own controls, the board and the 3-D picture.
-// A plane appears below the previous one, which stays as it ended.
-function planes(px, steps) {
+// one plane per layout: consecutive steps whose shapes stay in place share a plane, and the plane's pieces run
+// through all of them. A new layout starts a new plane below; the planes above stay as they ended.
+function planes(px, steps, groups) {
   const host = $(px + "Planes"), P = [], st = { k: 0, steps };
-  Object.defineProperties(st, { fr: { get: () => P[st.k].fr }, FR: { get: () => P[st.k].FR } });
-  steps.forEach(([title, s], i) => {
-    const el = document.createElement("div"); el.className = "plane"; el.hidden = i > 0;
-    el.innerHTML = `<h3 class="wkh">Step ${i + 1} of ${steps.length}: ${title}</h3><p class="steptext">${s.text}</p>` +
+  const FRS = steps.map(() => null), frames = si => FRS[si] || (FRS[si] = steps[si][1].frames());
+  let cur = { p: 0, i: 0 };
+  Object.defineProperties(st, { fr: { get: () => P[cur.p].items[P[cur.p].i][1] }, FR: { get: () => frames(st.k) } });
+  groups.forEach((g, pi) => {
+    const el = document.createElement("div"); el.className = "plane"; el.hidden = pi > 0;
+    const nextG = groups[pi + 1];
+    el.innerHTML = `<div class="plhead"><h3 class="wkh"></h3><p class="steptext"></p></div>` +
       `<div class="controls stick"><button class="pb">Back</button><button class="primary pn">Next</button><span class="note pc"></span></div>` +
       `<div class="tycols"><div class="tyboard"></div><figure class="v3fig"><svg class="v3" viewBox="0 0 470 350" role="img" aria-label="The vectors as points, one axis per Galician word; drag to turn"></svg>` +
       `<figcaption><span class="cap"></span> <span class="note">Drag to turn the picture; double-click to reset it.</span></figcaption></figure></div>` +
-      (i < steps.length - 1 ? `<div class="controls plgo" hidden><button class="primary">Go on to step ${i + 2}: ${steps[i + 1][0]} ↓</button></div>` : "");
+      (nextG ? `<div class="controls plgo" hidden><button class="primary">Go on to step ${nextG[0] + 1}: ${steps[nextG[0]][0]} ↓</button></div>` : "");
     host.appendChild(el);
-    const p = { el, fr: 0, FR: null, view: view3d(el.querySelector("svg.v3"), el.querySelector(".cap")) };
+    const p = { el, g, items: null, i: 0, view: view3d(el.querySelector("svg.v3"), el.querySelector(".cap")) };
     P.push(p);
-    el.querySelector(".pb").addEventListener("click", () => { if (p.fr > 0) { p.fr--; draw(i); } });
-    el.querySelector(".pn").addEventListener("click", () => { if (p.fr < p.FR.length - 1) { p.fr++; draw(i); } else open(i + 1); });
-    const go = el.querySelector(".plgo button"); if (go) go.addEventListener("click", () => open(i + 1));
+    el.querySelector(".pb").addEventListener("click", () => { if (p.i > 0) { p.i--; draw(pi); } });
+    el.querySelector(".pn").addEventListener("click", () => { if (p.i < p.items.length - 1) { p.i++; draw(pi); } else open(pi + 1); });
+    const go = el.querySelector(".plgo button"); if (go) go.addEventListener("click", () => open(pi + 1));
   });
-  function draw(i) {
-    const p = P[i], el = p.el; if (!p.FR) p.FR = steps[i][1].frames();
-    const v = p.FR[p.fr], last = p.fr === p.FR.length - 1;
+  const itemsOf = p => p.items || (p.items = p.g.flatMap(si => frames(si).map((_, fi) => [si, fi])));
+  // the heading block keeps the height of its tallest step text, so nothing below it moves when the step changes
+  function fitHead(p) {
+    const h = p.el.querySelector(".plhead"); if (p.el.hidden || p.g.length < 2) return; h.style.minHeight = "";
+    let m = 0; p.g.forEach(si => { setHead(p, si); m = Math.max(m, h.offsetHeight); }); h.style.minHeight = m + "px";
+  }
+  const setHead = (p, si) => { p.el.querySelector(".wkh").textContent = `Step ${si + 1} of ${steps.length}: ${steps[si][0]}`; p.el.querySelector(".steptext").textContent = steps[si][1].text; };
+  function draw(pi) {
+    const p = P[pi], el = p.el, it = itemsOf(p), [si, fi] = it[p.i], v = frames(si)[fi], last = p.i === it.length - 1;
+    setHead(p, si);
     el.querySelector(".tyboard").innerHTML = v.board;
     el.querySelector(".v3fig").hidden = !v.scene; el.querySelector(".tycols").classList.toggle("one", !v.scene); if (v.scene) p.view.set(v.scene);
-    el.querySelector(".pb").disabled = p.fr === 0;
-    const nx = el.querySelector(".pn"); nx.textContent = last ? (i < steps.length - 1 ? `Next: step ${i + 2} ↓` : "Next") : "Next"; nx.disabled = last && i === steps.length - 1;
-    el.querySelector(".pc").textContent = `${p.fr + 1} of ${p.FR.length}`;
-    const g = el.querySelector(".plgo"); if (g) g.hidden = !(last && P[i + 1].el.hidden);
-    st.k = i;
+    el.querySelector(".pb").disabled = p.i === 0;
+    const nx = el.querySelector(".pn"), nextG = groups[pi + 1];
+    nx.textContent = last && nextG ? `Next: step ${nextG[0] + 1} ↓` : "Next"; nx.disabled = last && !nextG;
+    el.querySelector(".pc").textContent = `step ${si + 1}, piece ${fi + 1} of ${frames(si).length}`;
+    const g = el.querySelector(".plgo"); if (g) g.hidden = !(last && P[pi + 1].el.hidden);
+    st.k = si; cur = { p: pi, i: p.i };
   }
-  // show planes up to j: earlier hidden ones at their last piece, plane j at its first
-  function open(j, scroll = true) {
-    if (j >= steps.length) return;
-    for (let k = 0; k < j; k++) if (P[k].el.hidden || !P[k].FR) { P[k].el.hidden = false; if (!P[k].FR) P[k].FR = steps[k][1].frames(); P[k].fr = P[k].FR.length - 1; draw(k); }
-    const fresh = P[j].el.hidden; P[j].el.hidden = false; if (fresh || !P[j].FR) { P[j].fr = 0; draw(j); }
-    for (let k = 0; k < j; k++) draw(k);
-    draw(j);
-    if (scroll) P[j].el.scrollIntoView({ block: "start" });
+  // show planes up to pj: earlier hidden ones at their last piece
+  function open(pj, scroll = true) {
+    if (pj >= P.length) return;
+    for (let k = 0; k <= pj; k++) if (P[k].el.hidden) { P[k].el.hidden = false; P[k].i = k < pj ? itemsOf(P[k]).length - 1 : 0; fitHead(P[k]); }
+    for (let k = 0; k < pj; k++) draw(k);
+    draw(pj);
+    if (scroll) P[pj].el.scrollIntoView({ block: "start" });
   }
-  draw(0);
-  st.go = (i, j) => { open(i, false); if (!P[i].FR) P[i].FR = steps[i][1].frames(); P[i].fr = j < 0 ? P[i].FR.length - 1 : j; draw(i); };
-  st.plane = i => P[i].el;
+  fitHead(P[0]); draw(0);
+  window.addEventListener("resize", () => P.forEach((p, pi) => { if (!p.el.hidden) { fitHead(p); draw(pi); } }));
+  const planeOf = si => groups.findIndex(g => g.includes(si));
+  st.go = (si, j) => { const pi = planeOf(si); open(pi, false); const it = itemsOf(P[pi]); const ofs = it.findIndex(([a]) => a === si);
+    P[pi].i = j < 0 ? ofs + frames(si).length - 1 : ofs + j; draw(pi); };
+  st.plane = si => P[planeOf(si)].el;
   return st;
 }
-const S1 = planes("ty", STEPS.slice(0, 7)), S2 = planes("at", STEPS.slice(7));
+const S1 = planes("ty", STEPS.slice(0, 7), [[0, 1], [2, 3, 4, 5, 6]]), S2 = planes("at", STEPS.slice(7), [[0, 1], [2, 3]]);
 // section 4 links its steps back here: steps 1-7 are section 1, steps 8-11 section 2
 window.__toyGo = i => { if (i < 7) { S1.go(i, 0); S1.plane(i).scrollIntoView(); } else { S2.go(i - 7, 0); S2.plane(i - 7).scrollIntoView(); } };
 
