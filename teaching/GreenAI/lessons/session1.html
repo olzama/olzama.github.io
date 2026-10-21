@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Green NLP Today</title>
+<title>Fundamentals of NLP</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Questrial&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -289,7 +289,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <body>
 
 <div class="top">
-  <div class="title"><b>Green NLP Today</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña</span></div>
+  <div class="title"><b>Fundamentals of NLP</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña</span></div>
   <div class="road" id="topRoad" aria-label="The steps"></div>
   <div class="actions">
     <details class="toc"><summary>Contents</summary><nav id="tocNav"></nav></details>
@@ -303,11 +303,11 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <section class="screen titlescreen" id="title" data-step="0">
   <div class="logos"><img src="img/logo-inditexudc.png" alt="Cátedra Inditex–UDC de Algoritmos Verdes"></div>
   <p class="label">Microcredencial Algoritmos verdes para la IA: diseño e implementación</p>
-  <h1>Green NLP Today</h1>
+  <h1>Fundamentals of NLP</h1>
   <p class="muted">Tema: Natural language processing · Sesión 1 · Ponente: Olga Zamaraeva</p>
   <div class="logos"><img src="img/logo-citicudc.png" alt="CITIC, Universidade da Coruña"><img src="img/logo-financiacion.png" alt="Funding"></div>
   <div class="notes">
-    <p>Welcome, everyone. This is Session 1 of the microcredential on green algorithms for AI — "Green NLP Today." I'm Olga Zamaraeva; I'll teach this session and the next two.</p>
+    <p>Welcome, everyone. This is Session 1 of the microcredential on green algorithms for AI: "Fundamentals of NLP." I'm Olga Zamaraeva; I'll teach this session and the next two.</p>
     <p>First, a disclaimer: I taught this module last year too, and it did not go well, in my opinion — it was super technical and boring for everyone. It's important to study model architectures and the underlying math, what makes one architecture more computationally and environmentally expensive than another, but I don't think that's the best focus for this course. So this year I changed everything, which means I'm doing this material for the first time today, which can be a little embarrassing. I'll even use a prompter on my iPad to help me explain things properly and not forget something important. Just a disclaimer.</p>
   </div>
 </section>
@@ -2560,7 +2560,7 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   <div class="notes">
     <p>Now it is your turn. Notebook 1 has three parts.</p>
     <p>Part 1 is the baseline for the whole course. The task is question answering over a small set of documents. Every run is measured with CodeCarbon, the tool from the measurement screens. It reports energy and CO2-equivalent, next to the share of right answers, and it writes one row to your leaderboard file.</p>
-    <p>Part 2 translates our Galician sentence in four ways, in the order of the history we saw. First a rule-based system, Apertium. It is a real system that is still maintained, and it still cannot reorder the words: it writes something like "a mine aunt". Then a small statistical system: it uses a bigram model, like the one from step 1, to reorder the words. Then the dedicated neural model, opus-mt from Helsinki. And last, the general-purpose language model from Part 1.</p>
+    <p>Part 2 translates our Galician sentence in four ways, in the order of the history we saw. First a rule-based system, Apertium. It is a real system that is still maintained, and it still cannot reorder the words: it writes something like "a mine aunt". Then a small statistical system, IBM Model 1. It learns word translations from 24 short phrase pairs, then translates word by word, with no reordering. Then the dedicated neural model, opus-mt from Helsinki. And last, the general-purpose language model from Part 1.</p>
     <p>Part 3 grades the translations in three ways. BLEU counts n-grams shared with a reference translation; it costs almost nothing. BERTScore compares the translations with embeddings, so it needs a neural model. And an LLM can act as the judge. We measure what each way of grading costs, not only the score it gives.</p>
     <p>Open the notebook in Colab. Choose Runtime, Change runtime type, T4 GPU. Do Part 1 first: every later session builds on it. If there is time, continue with Parts 2 and 3. If you finish early, try a bigger model in Part 1 and compare.</p>
   </div>
