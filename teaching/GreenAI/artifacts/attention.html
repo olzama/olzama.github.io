@@ -489,13 +489,26 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <section class="panel" id="qk">
     <h2><span class="n">3</span>Query and key: try your own query</h2>
-    <p class="lead">The same model as sections 1 and 2, with the same three encoder vectors, word vectors and biases. In section 2 the query came from a made-up rule: one query before “an” and “aunt”, another before “of”, another before “mine”. Here you set the query yourself. The page then does what section 2 did, in the same order: the query's dot product with each key, softmax, the mix. Last, it puts the mix into the decoder state and lets the decoder score its eight words, at each of the five words of “an aunt of mine ‹end›”.</p>
+    <p class="lead">In section 2 the queries were handed to us by a made-up rule: one query before “an” and “aunt”, another before “of”, another before “mine”, and the decoder wrote the right phrase. Here you set the query yourself, to see what each part of it does. Three questions:</p>
+    <ol class="tries">
+      <li><b>Direction: which key does a query pick?</b> The query has three numbers, one per Galician word. Raise the number for tía, and the encoder vector with the most tía in it gets the largest score, so the largest weight.</li>
+      <li><b>Length: how sharply does it pick?</b> The same direction, but longer, pushes the scores further apart, and softmax puts more of the weight on one key. Shorter brings the scores together, and the weight spreads.</li>
+      <li><b>Does the decoder need a new query for each word?</b> Here one query serves all five words of “an aunt of mine ‹end›”. Count how many of them come out right.</li>
+    </ol>
+    <p class="lead">Everything else is as in sections 1 and 2: the three encoder vectors, the word vectors and the biases. The page does what section 2 did, in the same order: the query's dot product with each key, softmax, the mix. Last, it puts the mix into the decoder state and lets the decoder score its eight words, at each of the five words.</p>
     <div class="cmpflow">
       <p class="label">section 2: a new query before each English word</p>
       <div class="flow"><span class="word">the state</span><span class="op">→</span><span class="word">the query</span><span class="op">→</span><span class="word">three scores</span><span class="op">→</span><span class="word">three weights</span><span class="op">→</span><span class="word">the mix</span><span class="op">→</span><span class="word out">the next word</span></div>
       <p class="label">this section: your query, the same before every word</p>
       <div class="flow"><span class="word out">your query</span><span class="op">→</span><span class="word">three scores</span><span class="op">→</span><span class="word">three weights</span><span class="op">→</span><span class="word">one mix</span><span class="op">→</span><span class="word">each of the five words</span></div>
     </div>
+    <p class="label">How to use it</p>
+    <ol class="tries">
+      <li><b>Set a query.</b> Click one of the queries under the sliders, or move the sliders: each slider is one of the query's three numbers. Everything below updates as you move it.</li>
+      <li><b>Read the board on the left, top to bottom</b>, as in section 2: your query times each key, square by square, gives three scores; softmax turns them into three weights; the weighted sum of the encoder vectors is the mix. The 3-D picture on the right shows the same: the three keys, the direction of your query, and where the mix lands.</li>
+      <li><b>Read the table at the bottom.</b> One row per English word, each with your mix in the decoder state. A word in red under “writes” is wrong. The note under the table counts the right words and says why.</li>
+    </ol>
+    <p class="label">Things to try</p>
     <ul class="tries">
       <li><b>an, aunt</b>, <b>of</b>, <b>mine</b>: the queries the decoder used in section 2. In the table below, the row where section 2 used the query is marked. Which other rows come out right with it?</li>
       <li><b>an, aunt, shorter</b>: the same direction at a third of the length. The scores lie closer together, so the weights spread more evenly.</li>
