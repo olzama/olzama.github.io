@@ -1838,7 +1838,7 @@ function planes(px, steps, groups) {
   st.plane = si => P[planeOf(si)].el;
   return st;
 }
-const S1 = planes("ty", STEPS.slice(0, 7), [[0, 1], [2, 3], [4], [5], [6]]), S2 = planes("at", STEPS.slice(7), [[0, 1], [2], [3]]);
+const S1 = planes("ty", STEPS.slice(0, 7), [[0, 1], [2, 3], [4, 5], [6]]), S2 = planes("at", STEPS.slice(7), [[0, 1], [2], [3]]);
 // section 4 links its steps back here: steps 1-7 are section 1, steps 8-11 section 2
 window.__toyGo = i => { if (i < 7) { S1.go(i, 0); S1.plane(i).scrollIntoView(); } else { S2.go(i - 7, 0); S2.plane(i - 7).scrollIntoView(); } };
 
