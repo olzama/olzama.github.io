@@ -1803,19 +1803,18 @@ function planes(px, steps, groups) {
   let cur = { p: 0, i: 0 };
   Object.defineProperties(st, { fr: { get: () => P[cur.p].items[P[cur.p].i][1] }, FR: { get: () => frames(st.k) } });
   groups.forEach((g, pi) => {
-    const el = document.createElement("div"); el.className = "plane"; el.hidden = pi > 0;
+    const el = document.createElement("div"); el.className = "plane";
     const nextG = groups[pi + 1];
     el.innerHTML = `<div class="plhead"><h3 class="wkh"></h3><p class="steptext"></p></div>` +
       `<div class="controls stick"><button class="pb">Back</button><button class="primary pn">Next</button><span class="note pc"></span></div>` +
       `<div class="tycols"><div class="tyboard"></div><figure class="v3fig"><svg class="v3" viewBox="0 0 470 350" role="img" aria-label="The vectors as points, one axis per Galician word; drag to turn"></svg>` +
       `<figcaption><span class="cap"></span> <span class="note">Drag to turn the picture; double-click to reset it.</span></figcaption></figure></div>` +
-      (nextG ? `<div class="controls plgo" hidden><button class="primary">Go on to step ${nextG[0] + 1}: ${steps[nextG[0]][0]} ↓</button></div>` : "");
+      "";
     host.appendChild(el);
     const p = { el, g, items: null, i: 0, view: view3d(el.querySelector("svg.v3"), el.querySelector(".cap")) };
     P.push(p);
     el.querySelector(".pb").addEventListener("click", () => { if (p.i > 0) { p.i--; draw(pi); } });
     el.querySelector(".pn").addEventListener("click", () => { if (p.i < p.items.length - 1) { p.i++; draw(pi); } else open(pi + 1); });
-    const go = el.querySelector(".plgo button"); if (go) go.addEventListener("click", () => open(pi + 1));
   });
   const itemsOf = p => p.items || (p.items = p.g.flatMap(si => frames(si).map((_, fi) => [si, fi])));
   // the heading block keeps the height of its tallest step text, so nothing below it moves when the step changes
@@ -1833,18 +1832,17 @@ function planes(px, steps, groups) {
     const nx = el.querySelector(".pn"), nextG = groups[pi + 1];
     nx.textContent = last && nextG ? `Next: step ${nextG[0] + 1} ↓` : "Next"; nx.disabled = last && !nextG;
     el.querySelector(".pc").textContent = `step ${si + 1}, piece ${fi + 1} of ${frames(si).length}`;
-    const g = el.querySelector(".plgo"); if (g) g.hidden = !(last && P[pi + 1].el.hidden);
     st.k = si; cur = { p: pi, i: p.i };
   }
-  // show planes up to pj: earlier hidden ones at their last piece
-  function open(pj, scroll = true) {
-    if (pj >= P.length) return;
-    for (let k = 0; k <= pj; k++) if (P[k].el.hidden) { P[k].el.hidden = false; P[k].i = k < pj ? itemsOf(P[k]).length - 1 : 0; fitHead(P[k]); }
-    for (let k = 0; k < pj; k++) draw(k);
-    draw(pj);
-    if (scroll) P[pj].el.scrollIntoView({ block: "start" });
-  }
-  fitHead(P[0]); draw(0);
+  // every plane is on the page from the start; Next at the end of a plane scrolls to the next one
+  function open(pj, scroll = true) { if (pj < P.length && scroll) P[pj].el.scrollIntoView({ block: "start" }); }
+  P.forEach((p, pi) => draw(pi));
+  requestAnimationFrame(() => P.forEach((p, pi) => { fitHead(p); draw(pi); }));
+  // a row of step links above the planes
+  const nav = document.createElement("div"); nav.className = "controls plnav";
+  nav.innerHTML = `<span class="note">Steps</span>` + steps.map(([t], si) => `<button title="${t}">${si + 1}</button>`).join("");
+  nav.querySelectorAll("button").forEach((b, si) => b.addEventListener("click", () => { st.go(si, 0); st.plane(si).scrollIntoView({ block: "start" }); }));
+  host.before(nav);
   window.addEventListener("resize", () => P.forEach((p, pi) => { if (!p.el.hidden) { fitHead(p); draw(pi); } }));
   const planeOf = si => groups.findIndex(g => g.includes(si));
   st.go = (si, j) => { const pi = planeOf(si); open(pi, false); const it = itemsOf(P[pi]); const ofs = it.findIndex(([a]) => a === si);
