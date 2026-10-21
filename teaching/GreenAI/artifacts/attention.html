@@ -151,7 +151,7 @@ table.corpus td { padding: 2px 10px 2px 0; font-size: 0.86rem; } table.corpus td
 @media (prefers-reduced-motion: reduce) { .g11 .gside span { animation: none; } }
 .tries { max-width: 72ch; margin: 0 0 10px; padding-left: 1.2em; } .tries li { margin: 2px 0; }
 .qkctl { display: grid; grid-template-columns: max-content minmax(0, 260px) 3em; justify-content: start; gap: 6px 10px; align-items: center; }
-.qkgroups { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: flex-end; } .qkgroups .qkg { display: grid; gap: 4px; } .qkgroups .seg { flex-wrap: wrap; }
+#qkCtl { display: grid; gap: 12px; } .qkgroups { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: flex-end; } .qkgroups .qkg { display: grid; gap: 4px; } .qkgroups .seg { flex-wrap: wrap; }
 .qkctl output { font-family: var(--font-mono); } .qkctl label { white-space: nowrap; }
 .badw { color: var(--neg); }
 .eq { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px 8px; }
@@ -489,24 +489,30 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <section class="panel" id="qk">
     <h2><span class="n">3</span>Query and key: try your own query</h2>
-    <p class="lead">In section 2 the decoder computed a new query before each English word, and every word got its own mix. Here one query, yours, is used before all five words of “an aunt of mine ‹end›”. Set it and watch three things: which key it picks (its direction), how sharply (its length), and how many of the five words still come out right.</p>
-    <div class="controls qkctl">
-      <label for="qk0"><i>unha</i> dimension</label><input type="range" id="qk0" min="-6" max="10" step="0.5"><output id="qk0v"></output>
-      <label for="qk1"><i>tía</i> dimension</label><input type="range" id="qk1" min="-6" max="10" step="0.5"><output id="qk1v"></output>
-      <label for="qk2"><i>miña</i> dimension</label><input type="range" id="qk2" min="-6" max="10" step="0.5"><output id="qk2v"></output>
+    <p class="lead">Section 2 handed the decoder a query before each English word, and the arithmetic did the rest. This section is about the query itself: what its numbers do, and why the decoder needs a new one for each word. It matters because this is the whole mechanism of attention, in our small models, in the real model of section 6 and in every transformer. The decoder cannot point at a Galician word. All it can do is hand over one vector, the query, and get back one mix of the encoder's vectors.</p>
+    <div class="controls stick"><button id="qkBack">Back</button><button class="primary" id="qkNext">Next step</button><span class="pathstrip" id="qkSteps"></span></div>
+    <h3 class="wkh" id="qkTitle"></h3>
+    <p class="steptext" id="qkText"></p>
+    <div id="qkCtl">
+      <div class="controls qkctl">
+        <label for="qk0"><i>unha</i> dimension</label><input type="range" id="qk0" min="-6" max="10" step="0.5"><output id="qk0v"></output>
+        <label for="qk1"><i>tía</i> dimension</label><input type="range" id="qk1" min="-6" max="10" step="0.5"><output id="qk1v"></output>
+        <label for="qk2"><i>miña</i> dimension</label><input type="range" id="qk2" min="-6" max="10" step="0.5"><output id="qk2v"></output>
+      </div>
+      <div class="qkgroups" id="qkPre"></div>
+      <p class="steptext" id="qkTip"></p>
     </div>
-    <div class="qkgroups" id="qkPre"></div>
-    <p class="steptext" id="qkTip"></p>
-    <div class="cmpflow" id="qkCmp"></div>
-    <p class="label">Why: the same steps as section 2, with your query</p>
     <div class="tycols">
-      <div class="tyboard" id="qkBoard"></div>
-      <figure class="v3fig"><svg class="v3" id="qk3d" viewBox="0 0 470 350" role="img" aria-label="The keys, the query and the mix as points; drag to turn"></svg><figcaption><span id="qkCap"></span> <span class="note">Orange arrow: the query's direction (drawn short). Each dashed line drops a key onto it; where it lands is the key's score. Drag to turn; double-click to reset.</span></figcaption></figure>
+      <div class="tyboard" id="qkBoard"><div id="qkKeys"></div><div id="qkScores"></div><div id="qkSm"></div><div id="qkMix"></div></div>
+      <figure class="v3fig" id="qkFig"><svg class="v3" id="qk3d" viewBox="0 0 470 350" role="img" aria-label="The keys, the query and the mix as points; drag to turn"></svg><figcaption><span id="qkCap"></span> <span class="note" id="qkCapQ">Orange arrow: the query's direction (drawn short). Each dashed line drops a key onto it; where it lands is the key's score.</span> <span class="note">Drag to turn; double-click to reset.</span></figcaption></figure>
     </div>
-    <p class="label">The mix in the decoder state: what the decoder writes at each word of the correct phrase</p>
-    <p class="note">One row per word. Its state has your mix in the first three dimensions and the correct words before it in the last eight (section 1, step 7); each score is Σ first three + Σ last eight + bias (section 1, steps 4 and 6).</p>
-    <div class="heatwrap"><table class="ty dec" id="qkWords"></table></div>
-    <p class="note" id="qkNote"></p>
+    <div id="qkWordsBox">
+      <div class="cmpflow" id="qkCmp"></div>
+      <p class="label">Why each word comes out as it does: the decoder's three best scores with this mix</p>
+      <p class="note">One row per word. Its state has this mix in the first three dimensions and the correct words before it in the last eight (section 1, step 7); each score is Σ first three + Σ last eight + bias (section 1, steps 4 and 6).</p>
+      <div class="heatwrap"><table class="ty dec" id="qkWords"></table></div>
+      <p class="note" id="qkNote"></p>
+    </div>
   </section>
 
   <section class="panel" id="walk">
@@ -1918,58 +1924,99 @@ const S1 = planes("ty", STEPS.slice(0, 7), [[0, 1], [2, 3], [4, 5], [6]]), S2 = 
 // section 4 links its steps back here: steps 1-7 are section 1, steps 8-11 section 2
 window.__toyGo = i => { if (i < 7) { S1.go(i, 0); S1.plane(i).scrollIntoView(); } else { S2.go(i - 7, 0); S2.plane(i - 7).scrollIntoView(); } };
 
-// ---------- section 3: your own query ----------
+// ---------- section 3: your own query, step by step ----------
 const v2 = view3d($("qk3d"), null);
 // each preset: group, button text, query, one line on what to look at
 const PRESETS = [
-  ["section 2's queries, each used before all five words", "before an, aunt", [0, 6, 0], "Section 2's query before “an” and “aunt”: those two come out as in section 2. At “of” this mix has too little miña, and the decoder writes ‹end›."],
-  ["section 2's queries, each used before all five words", "before of", [0, 0, 6], "Section 2's query before “of”. It points at miña, so the mix has little tía: “an” and “aunt” become “a” and “friend”, as in section 1."],
-  ["section 2's queries, each used before all five words", "before mine", [0, -3, 9], "Section 2's query before “mine”: even further from tía. Again “a friend of mine”."],
-  ["section 2's queries, each used before all five words", "before ‹end›", [0, -4.5, 10.5], "Section 2's query before ‹end›: nearly all the weight goes to the vector after miña. Again “a friend of mine”."],
-  ["direction: which key gets the weight", "unha", [6, 0, 0], "Points at unha. The vector after unha has the most unha in it, so it gets most of the weight, and the mix has little tía or miña."],
-  ["direction: which key gets the weight", "between tía and miña", [0, 4, 4], "Between tía and miña. The vector after miña holds both, so it gets the largest weight."],
-  ["direction: which key gets the weight", "all zeros", [0, 0, 0], "Every score is 0, so every weight is 1/3: the mix is the plain average of the three vectors."],
-  ["length, in the direction of tía", "a third", [0, 2, 0], "A third of section 2's query before “an”. The scores lie closer together, the weights spread, and the mix has less tía: “an” becomes “a”."],
-  ["length, in the direction of tía", "section 2's", [0, 6, 0], "Section 2's query before “an” and “aunt”. Compare the weights with the shorter and the longer query."],
-  ["length, in the direction of tía", "longer", [0, 10, 0], "Longer. The scores are further apart, and nearly all the weight goes to the vector after tía."],
-  ["one query for all five words", "one for all", [0, 6, 3], "A query with which all five words come out right, by small margins: compare the winning scores with the runners-up in the table."]];
-let q = [0, 6, 0], cur = 0;
+  ["direction: what the query asks for", "ask for tía", [0, 6, 0], "A number in the tía dimension only. The key after tía holds the most tía, so it scores highest and gets most of the weight."],
+  ["direction: what the query asks for", "ask for miña", [0, 0, 6], "The same number, moved to the miña dimension. Now the key after miña scores highest."],
+  ["direction: what the query asks for", "ask for unha", [6, 0, 0], "All three keys hold some unha, the key after unha the most: it gets most of the weight. No word of the English phrase needs this mix."],
+  ["direction: what the query asks for", "ask for tía and miña", [0, 4, 4], "The key after miña holds both, so it scores highest; the key after tía comes second."],
+  ["direction: what the query asks for", "ask for nothing", [0, 0, 0], "Every score is 0, so every weight is 1/3: the mix is the plain average of the three keys."],
+  ["length: how insistently", "gently", [0, 2, 0], "The direction of tía at a third of the length. The scores lie closer together, so the weights are more even and the mix is nearer the average."],
+  ["length: how insistently", "as in section 2", [0, 6, 0], "Section 2's query before “an” and “aunt”."],
+  ["length: how insistently", "insistently", [0, 10, 0], "The same direction, longer. The scores are further apart, and nearly all the weight goes to the key after tía."],
+  ["one query for the whole phrase", "the best compromise", [0, 6, 3], "A query with which all five words come out right, by small margins: compare each winning score with the runner-up in the table."]];
+// what each word of the correct phrase needs from the mix
+const NEED = ["plenty of tía", "plenty of tía", "plenty of miña", "plenty of miña", "nothing in particular"];
+// the steps: title, text, the query it sets (or null to keep the current one), the parts it shows
+const QSTEPS = [
+  ["Why the query is worth a section", "Which mix the decoder gets back depends only on the query's three numbers; the keys never change while it translates. In section 2 the query came from a made-up rule and we never asked what it was doing. Here you choose the numbers yourself. By the end, you can predict what a query will do, which is what training has to get right in every attention layer, and what we will read off the real model's heads in sections 6 and 7.",
+    [0, 6, 0], ["keys"]],
+  ["The keys: what is on offer", "The decoder can choose from three vectors, the encoder's vectors from section 1, step 2; in this role they are called keys. Each key is a recipe of the three words: the key after tía is a quarter unha, half tía and no miña. For “an” and “aunt”, the decoder needs a mix with plenty of tía; for “of” and “mine”, plenty of miña. No key is pure tía, so the best on offer for the first two words is the key after tía.",
+    null, ["keys", "3d"]],
+  ["The query asks by matching: the dot product", "A query is a vector with the same three dimensions as the keys. Write a number in the tía dimension and nothing elsewhere: (0, 6, 0). Its dot product with a key multiplies the two vectors dimension by dimension and adds up, so here only the tía values count: 6 × 0 = 0 for the key after unha, 6 × 0.5 = 3 after tía, 6 × 0.25 = 1.5 after miña. The query's numbers say which dimensions matter and how much; the key's numbers say how much of each it holds. A key scores high when it holds a lot of what the query asks for. In the picture, each score is where the key lands on the query's line.",
+    [0, 6, 0], ["scores", "3d", "q3"]],
+  ["Scores into weights: softmax", "Scores 0, 3 and 1.5 are not yet shares of a mix. Softmax raises e to each score and divides by the sum, so every share is positive and the three add up to 1. Differences between scores become ratios between shares: the key after tía is 1.5 above the key after miña, so it gets e¹·⁵, about 4.5 times, the share. The key after tía ends up with 0.79.",
+    [0, 6, 0], ["scores", "sm"]],
+  ["The mix: what the decoder gets back", "Each key times its weight, added up: 0.04 × after unha + 0.79 × after tía + 0.18 × after miña = (0.24, 0.44, 0.09). Mostly the key after tía, with a little of the other two. In the picture, the mix lies inside the triangle of the keys, close to the one with the largest weight. This mix takes the summary's place in the decoder state (section 2, step 3): its 0.44 of tía is what lets “an” beat “a”.",
+    [0, 6, 0], ["sm", "mix", "3d", "q3", "m3"]],
+  ["Direction: ask for something else", "Move the 6 to the miña dimension: (0, 0, 6). Now only miña values count: scores 0, 0, 3; weights 0.05, 0.05, 0.91; the mix is mostly the key after miña. Where the query points decides which key wins; the keys themselves did not change. Try the other directions.",
+    [0, 0, 6], ["ctl", "scores", "sm", "mix", "3d", "q3", "m3"]],
+  ["Length: ask gently or insistently", "Keep the direction of tía and shorten the query to (0, 2, 0): the scores are 0, 1 and 0.5, closer together, and softmax turns smaller gaps into more even weights, 0.19, 0.51, 0.31. Lengthen it to (0, 10, 0) and the weights are 0.01, 0.92, 0.08. The query's length sets how sharply attention picks. Models use this: in section 6, some heads draw a sharp line from each English piece to one Galician piece, others spread their weight.",
+    [0, 2, 0], ["ctl", "scores", "sm", "mix", "3d", "q3", "m3"]],
+  ["Why the decoder needs a new query for each word", "One query gives one mix, and here the decoder gets that same mix before every word. With (0, 6, 0) at all five positions of “an aunt of mine ‹end›”, “an”, “aunt” and “mine” come out right, but at “of” the mix has too little miña and the decoder writes ‹end›. Ask for miña instead and the phrase becomes “a friend of mine”. So the decoder must change its query as it writes. In section 2 a made-up rule computed it from the decoder state; in the trained models of section 4 the decoder state itself is the query, and training shapes it so that it asks for the right key at the right time. For this short phrase a compromise exists, by small margins; a model without attention is stuck with one mix for a whole sentence, as sections 4 and 5 show.",
+    [0, 6, 0], ["ctl", "mix", "words"]],
+  ["Your turn", "Set the three numbers with the sliders, or use the buttons. Everything follows from them: the scores, the weights, the mix, and the five words.",
+    null, ["ctl", "keys", "scores", "sm", "mix", "3d", "q3", "m3", "words"]]];
+let q = [0, 6, 0], cur = 0, qstep = 0;
 const sliders = DIMS.map((d, i) => $("qk" + i));
 const sameQ = (a, b) => a.every((x, d) => x === b[d]);
+const qCol = `<div class="vc"><div class="vh">the query</div>${DIMS.map(() => `<div class="sq q">?</div>`).join("")}</div>`;
 function drawQ() {
+  const show = new Set(QSTEPS[qstep][3]);
   sliders.forEach((s, i) => { s.value = q[i]; $("qk" + i + "v").textContent = f(q[i]); });
-  const a = attendQ(q), qs = queryScene(a), { rowsHtml, LBL } = qkParts(a);
-  v2.set({ ...qs, range: 0.5, noTicks: true, tri: ENC, pts: [...encPts(ENC.map((e, j) => `${encPlain(j)}: weight ${f(a.sm.p[j])}`)), { p: a.mix, cls: "mix", label: `the mix ${vecTxt(a.mix)}`, dx: -10, dy: -10, anchor: "end" }] });
-  $("qkCap").textContent = `The mix ${vecTxt(a.mix)} lies inside the triangle of the three encoder vectors, pulled toward the one with the largest weight. It reaches ${f(a.mix[TIA])} along tía (“an” beats “a” past ${f(MARK)}) and ${f(a.mix[MINA])} along miña.`;
-  // the same pieces as section 2, steps 1 and 2: query · each key, softmax, the weighted sum
-  $("qkBoard").innerHTML = LBL + rowsHtml(3) + smStage(a, 3, "your query") +
-    `<p class="label">the mix: each encoder vector (here called a value) times its weight, added up</p>` +
+  const a = attendQ(q), { rowsHtml, LBL } = qkParts(a);
+  // the 3-D picture: the keys always; the query's line and the mix when the step has reached them
+  const pts = [...encPts(ENC.map((e, j) => show.has("q3") ? `${encPlain(j)}: weight ${f(a.sm.p[j])}` : encPlain(j)))];
+  if (show.has("m3")) pts.push({ p: a.mix, cls: "mix", label: `the mix ${vecTxt(a.mix)}`, dx: -10, dy: -10, anchor: "end" });
+  v2.set({ ...(show.has("q3") ? queryScene(a) : { arrows: [], segs: [], notes: [] }), range: 0.5, noTicks: true, tri: ENC, pts });
+  $("qkCap").textContent = show.has("m3") ? `The mix ${vecTxt(a.mix)} lies inside the triangle of the three keys, pulled toward the one with the largest weight. It reaches ${f(a.mix[TIA])} along tía (“an” beats “a” past ${f(MARK)}) and ${f(a.mix[MINA])} along miña.`
+    : show.has("q3") ? `The three keys as points, and the query's line.` : `The three keys as points: one axis per Galician word.`;
+  $("qkCapQ").hidden = !show.has("q3");
+  // the board, part by part
+  $("qkKeys").innerHTML = `<p class="label">${show.has("scores") ? "the query and the three keys" : "the three keys: the encoder's vector after each Galician word"}</p>` +
+    eq(show.has("scores") ? col(a.q, "the query", "cur") : qCol, op(""), ...ENC.map((e, j) => col(e, `key ${j + 1}: ${encName(j)}`)));
+  $("qkScores").innerHTML = LBL + rowsHtml(3);
+  $("qkSm").innerHTML = smStage(a, 3, "the query " + vecTxt(q));
+  $("qkMix").innerHTML = `<p class="label">the mix: each key (here called a value) times its weight, added up</p>` +
     eq(...ENC.flatMap((e, j) => [j ? op("+") : "", k(`${f(a.sm.p[j])} ×`), col(e, encName(j))]), op("="), col(a.mix, "the mix", "cur"));
   // each word of the correct phrase, with the decoder state it has after the correct words before it
   const res = ATT.map(t => scoreAll(a.mix, t.st)), right = res.filter((sc, i) => sc.best.w === ATT[i].w).length;
-  $("qkWords").innerHTML = `<thead><tr><th>word</th><th>last eight dimensions<br><small>the correct words before it</small></th><th>section 2's query here</th><th>three best scores with your mix<br><small>Σ first three + Σ last eight + bias</small></th><th>writes</th><th>correct</th></tr></thead><tbody>` + ATT.map((t, i) => {
-    const sc = res[i], ok = sc.best.w === t.w, mine = sameQ(t.q, q);
-    return `<tr class="${mine ? "win" : ""}"><td>${i + 1}</td><td><div class="chips">${chips(t.st)}</div></td><td class="n">${vecTxt(t.q)}${mine ? "<br><small>= your query</small>" : ""}</td><td class="n">${top3(sc)}</td><td><b${ok ? "" : ' class="badw"'}>${sc.best.w}</b></td><td>${t.w}</td></tr>`;
-  }).join("") + "</tbody>";
-  // section 2's run against yours, word by word
   const fig = (w, cls, cap) => `<figure><span class="word ${cls}">${w}</span><figcaption>${cap}</figcaption></figure>`;
-  $("qkTip").textContent = cur === null ? "Your own query. Everything below follows it." : PRESETS[cur][3];
-  $("qkCmp").innerHTML = `<p class="label">section 2: a new query before each word → all five right</p><div class="flow">` +
-    ATT.map(t => fig(t.w, sameQ(t.q, q) ? "out" : "okw", vecTxt(t.q))).join("") + `</div>` +
-    `<p class="label">your query ${vecTxt(q)}, the same before all five words → ${right} of five right</p><div class="flow">` +
-    ATT.map((t, i) => fig(res[i].best.w, res[i].best.w === t.w ? (sameQ(t.q, q) ? "out" : "okw") : "bad", res[i].best.w === t.w ? "right" : `wrong, should be ${t.w}`)).join("") + `</div>`;
+  $("qkCmp").innerHTML = `<p class="label">the correct phrase, and what each word needs in the mix</p><div class="flow">` +
+    ATT.map((t, i) => fig(t.w, "okw", NEED[i])).join("") + `</div>` +
+    `<p class="label">with the query ${vecTxt(q)} before every word → ${right} of five right</p><div class="flow">` +
+    ATT.map((t, i) => fig(res[i].best.w, res[i].best.w === t.w ? "okw" : "bad", res[i].best.w === t.w ? "right" : `wrong, should be ${t.w}`)).join("") + `</div>`;
+  $("qkWords").innerHTML = `<thead><tr><th>word</th><th>last eight dimensions<br><small>the correct words before it</small></th><th>three best scores with this mix<br><small>Σ first three + Σ last eight + bias</small></th><th>writes</th><th>correct</th></tr></thead><tbody>` + ATT.map((t, i) => {
+    const sc = res[i], ok = sc.best.w === t.w;
+    return `<tr><td>${i + 1}</td><td><div class="chips">${chips(t.st)}</div></td><td class="n">${top3(sc)}</td><td><b${ok ? "" : ' class="badw"'}>${sc.best.w}</b></td><td>${t.w}</td></tr>`;
+  }).join("") + "</tbody>";
   const srt = [...a.sc].sort((x, y) => y - x);
   const how = !Math.hypot(...q) ? "A query of zeros gives every key the score 0, so every weight is the same, and the mix is the plain average."
-    : srt[0] - srt[1] < 1 ? "The top two scores are close, so softmax splits the weight between them, and the mix lies between them."
+    : srt[0] - srt[1] < 1 ? "The top two scores are close, so softmax splits the weight between them, and the mix lies between those two keys."
     : "The largest score gets most of the weight. A longer query in the same direction makes the scores further apart, and the split sharper.";
-  const all = right === ATT.length
-    ? " All five words come out right: one mix holds just enough tía for “an” and “aunt” and just enough miña for “of” and “mine”, by small margins. One fixed query gives one fixed mix, in effect a better summary; with a new query before each word (section 2), each word takes what it needs."
-    : ` With this query ${right} of the five words come out right.` + (ATT.some(t => sameQ(t.q, q))
-      ? ` Section 2 used this query only before ${ATT.filter(t => sameQ(t.q, q)).map(t => `“${t.w}”`).join(" and ")} (highlighted); before the other words it had a different query, so a different mix.`
-      : ` Section 2 computed a new query from the decoder state before each word, so each word got the mix it needed.`);
-  $("qkNote").textContent = how + all;
+  $("qkNote").textContent = how + ` With this mix ${right === ATT.length ? "all five" : right + " of the five"} words come out right.` +
+    (right === ATT.length ? " One mix holds just enough tía for “an” and “aunt” and just enough miña for “of” and “mine”, by small margins." : "");
+  $("qkTip").textContent = cur === null ? "Your own query." : PRESETS[cur][3];
+  // which parts this step shows
+  [["qkCtl", "ctl"], ["qkKeys", "keys"], ["qkScores", "scores"], ["qkSm", "sm"], ["qkMix", "mix"], ["qkFig", "3d"], ["qkWordsBox", "words"]].forEach(([id, part]) => { $(id).hidden = !show.has(part); });
+  $("qkBoard").parentElement.classList.toggle("one", !show.has("3d"));
   $("qkPre").querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(sameQ(PRESETS[i][2], q))));
 }
+function goQ(i, scroll = false) {
+  qstep = Math.max(0, Math.min(QSTEPS.length - 1, i));
+  const [t, text, qq] = QSTEPS[qstep];
+  if (qq) { q = [...qq]; cur = PRESETS.findIndex(p => sameQ(p[2], q)); if (cur < 0) cur = null; }
+  $("qkTitle").textContent = `Step ${qstep + 1} of ${QSTEPS.length}: ${t}`; $("qkText").textContent = text;
+  $("qkBack").disabled = qstep === 0; $("qkNext").textContent = qstep === QSTEPS.length - 1 ? "Done" : "Next step";
+  [...$("qkSteps").children].forEach((b, j) => { b.classList.toggle("on", j === qstep); b.classList.toggle("done", j < qstep); b.classList.toggle("todo", j > qstep); });
+  drawQ();
+  if (scroll) $("qkTitle").scrollIntoView({ block: "start" });
+}
+QSTEPS.forEach(([t], i) => { const b = document.createElement("button"); b.textContent = i + 1; b.title = t; b.addEventListener("click", () => goQ(i)); $("qkSteps").appendChild(b); });
+$("qkBack").addEventListener("click", () => goQ(qstep - 1));
+$("qkNext").addEventListener("click", () => { if (qstep < QSTEPS.length - 1) goQ(qstep + 1); });
 // the presets, in labelled groups
 PRESETS.forEach(([g, n, v], i) => {
   let seg = [...$("qkPre").querySelectorAll(".qkg")].find(d => d.dataset.g === g)?.lastElementChild;
@@ -1977,8 +2024,9 @@ PRESETS.forEach(([g, n, v], i) => {
   const b = document.createElement("button"); b.textContent = n; b.addEventListener("click", () => { q = [...v]; cur = i; drawQ(); }); seg.appendChild(b);
 });
 sliders.forEach((s, i) => s.addEventListener("input", () => { q[i] = +s.value; cur = null; drawQ(); }));
-drawQ();
+goQ(0);
 
+(window.__askState ||= []).push(() => `Section 3 (your own query): step ${qstep + 1} of ${QSTEPS.length}, "${QSTEPS[qstep][0]}", query ${vecTxt(q)}.`);
 (window.__askState ||= []).push(() => `Section 1 (the small model without attention): step ${S1.k + 1} of 7, "${S1.steps[S1.k][0]}", piece ${S1.fr + 1} of ${S1.FR.length}${S1.FR[S1.fr].scene ? `; caption: "${S1.FR[S1.fr].scene.cap}"` : ""}. Section 2 (the same model with attention): step ${S2.k + 1} of 4, "${S2.steps[S2.k][0]}", piece ${S2.fr + 1} of ${S2.FR.length}${S2.FR[S2.fr].scene ? `; caption: "${S2.FR[S2.fr].scene.cap}"` : ""}. Section 3 (your own query, same model): query (${q.map(f).join(", ")}); scores ${attendQ(q).sc.map(f).join(", ")}; weights ${attendQ(q).sm.p.map(f).join(", ")}; mix ${vecTxt(attendQ(q).mix)}; with this mix, at each position of the correct phrase, the decoder would write ${ATT.map(t => scoreAll(attendQ(q).mix, t.st).best.w).join(", ")}.`);
 })();
 </script>
@@ -2113,7 +2161,7 @@ The page:
 - Running example: the Galician sentence "Unha tía miña, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»" (from the novel Speechwriter by Paulo Naseiro). "tía miña" is noun then possessive; English "my aunt" reverses the order.
 - The page continues a separate translation page (training, the encoder's one summary vector, word-by-word decoding without attention, why "an aunt of mine" is rare in English).
 - Sections 1 and 2: a translation model small enough to run by hand, on "unha tía miña" → "an aunt of mine", numbers set by hand (a real model learns them, as in the skip-gram lesson). Galician word vectors: 3 dimensions (unha, tía, miña), one-hot; drawn as columns of numbered squares and as points in a draggable 3-D picture (which can show only three dimensions). Section 1, "Without attention, computed by hand", 7 steps, each revealed piece by piece: 1 the word vectors; 2 the encoder: one running computation, new vector = ½ old + ½ the word's vector, from zeros: (0.5,0,0), (0.25,0.5,0), summary (0.125,0.25,0.5); 3 from the encoder to the decoder: the decoder knows 8 words (a, an, aunt, friend, of, mine, yours, ‹end›); its state has 11 dimensions: unha, tía, miña (the summary, copied; the same for every English word) and ‹start›, a, an, aunt, friend, of, mine, yours (what has been written; before word 1 the start mark ‹start› is folded in with the encoder's rule: 0.5); 4 scoring: each English word has an 11-dimension vector; score begins with the dot product with the state; word vectors: an: 4 in unha, 8 in tía; a: 4 in unha, −8 in tía (unha says an indefinite article comes: phrases without unha/un start with "my"; it raises a and an equally, so it cannot choose between them); aunt 8 in tía; friend −8 in tía; of, mine 8 in miña; yours −8 in miña; a, an 12 in ‹start›; aunt, friend 12 in a and an; of 12 in aunt and friend; mine, yours 12 in of; ‹end› 12 in aunt, friend, mine, yours. Word 1: an 0.5 + 2 + 6 = 8.5, a 0.5 − 2 + 6 = 4.5; 5 where the numbers come from: hand-simulated training on two examples (unha tía miña, state (0.125,0.25,0.5 | ‹start› 0.5), right word an; unha veciña miña, veciña has no dimension so its summary is (0.125,0,0.5), right word a): the right word's vector moves toward the state, the wrong word's away, step size 16 × the state, two rounds; unha, miña and ‹start› cancel, so an ends at 8 in tía and a at −8; unha cannot tell an from a, the noun can; 6 the bias: one extra number per word, added whatever the state, learned; why: for unha veciña miña a and an tie (6 each, coin toss) though "a" is right 6 of 8 times in the translation page's examples; biases a 5.6, friend 5.6, ‹end› 1.6, others 0; for unha tía miña: a 10.1, an 8.5; an wins only if 16 × tía > 5.6, tía past 0.35 (red mark); the summary is at 0.25 → "a"; 7 the rest: each written word folded into the state (½ old + ½ in its dimension); "a friend of mine" then ‹end› (friend 9.6 vs aunt 8; of 10; mine 10; ‹end› 9.1). Section 2, "With attention, computed by hand", 4 steps: 1 the query, a question vector computed from the decoder state (set by hand: before the noun (0,6,0), "how much tía?"; each written word from the noun on adds its state value × (0,−12,12)); keys = the encoder vectors; scores = dot products 0, 3, 1.5; softmax weights 0.04, 0.79, 0.18; 2 the mix = weighted sum of the encoder vectors (values): (0.24, 0.44, 0.09), inside their triangle; 3 the mix replaces the summary in the state: an 0.96 + 3.52 + 6 = 10.48 beats a 0.96 − 3.52 + 6 + 5.6 = 9.04 → "an"; 4 the rest: aunt 9.52; query (0,0,6) → weights 0.05, 0.05, 0.91, mix (0.15,0.25,0.46), of 9.68; mine 9.84; ‹end›: "an aunt of mine". Section 4 links each of its steps back to these.
-- Section 3: the same model with a query the student sets (three sliders; presets in four groups: section 2's queries, each from before its own word (an and aunt (0,6,0), of (0,0,6), mine (0,−3,9), ‹end› (0,−4.5,10.5)); direction (unha, between tía and miña, all zeros); length in the tía direction (a third (0,2,0), section 2's (0,6,0), longer (0,10,0)); one for all (0,6,3). A one-line tip under the presets says what to look at for the chosen one, all zeros, "one for all" (0,6,3), unha, between tía and miña). The same query is used before every word, unlike section 2, which used a new query before each word; a strip compares section 2's five words (all right) with the five written with the student's query (wrong ones in red). Shows, with the same pieces as section 2: query · each key as columns of squares, the softmax board, the mix as a weighted sum, the 3-D picture; then a table with one row per word of "an aunt of mine ‹end›": the last eight dimensions of the state (the correct words before it), the query section 2 used there (rows where it equals the student's query are highlighted), the three best scores with the student's mix and the word written. With (0,6,0), "of" comes out as ‹end›. The query (0,6,3) gets all five words right, but only just (tía 0.37 vs the 0.35 mark; small score margins): one fixed query is one fixed mix, in effect a better summary, which cannot hold everything a long sentence needs; a query per word (section 2) gives each word what it needs with wide margins.
+- Section 3: the same model, with a query the student sets, in 9 steps (Back / Next step): 1 why the query matters (only its three numbers decide the mix); 2 the keys = the encoder's vectors, each a recipe of the three words; what each English word needs (an, aunt: plenty of tía; of, mine: plenty of miña); 3 the dot product with (0,6,0): only tía values count, scores 0, 3, 1.5, a key scores high when it holds what the query asks for; 4 softmax: differences of scores become ratios of weights (0.04, 0.79, 0.18); 5 the mix (0.24, 0.44, 0.09), inside the triangle of the keys, 0.44 of tía lets "an" beat "a"; 6 direction: (0,0,6) makes the key after miña win; 7 length: (0,2,0) gives weights 0.19, 0.51, 0.31; (0,10,0) 0.01, 0.92, 0.08; 8 why a new query per word: with (0,6,0) before every word, "of" comes out as ‹end› (4 of 5 right); with (0,0,6), "a friend of mine"; in section 4's trained models the decoder state itself is the query; the compromise (0,6,3) gets all five right by small margins; 9 free play. Controls from step 6: three sliders and preset buttons (ask for tía / miña / unha / tía and miña / nothing; gently (0,2,0) / as in section 2 (0,6,0) / insistently (0,10,0); the best compromise (0,6,3)). Visuals: the query and keys as columns of squares, the dot products written out, the softmax board, the mix as a weighted sum, the 3-D picture, a strip of the five words (what each needs; what this query writes, wrong in red) and a table with each word's three best scores.
 - Section 4: early neural MT squeezed the whole source sentence into one vector (a bottleneck for long sentences); attention (Bahdanau, Cho & Bengio 2015) lets the decoder look back at every source word at each step. The section is a six-step guided walk through the two trained 8-dimension models of section 5 on our whole sentence, with their real numbers (the query is the decoder state itself; steps 4 and 5 show state · encoder vector = score → weight for the three largest weights): the translations (without attention: "A friend of mine, who fixed everything with stories and jokes, used to repeat something like «one is a slave to what one keeps quiet»"; with attention: exactly right); the encoder's 31 vectors (8 squares each; the last is the summary); word 1 without attention (decoder state + summary → a 0.77, an 0.21: wrong, the article depends on the noun tía, read 29 pieces (24 words, 5 punctuation marks) before the summary); word 1 with attention (weights tía 0.47, escravo 0.21; the mix → an 0.95); word 2 (each decoder takes in its own last word: after "a" friend 0.39, neighbor 0.31, cousin 0.28; after "an" aunt 0.96, uncle 0.02); the rest (more errors without attention).
 - Section 5: two toy translation models (GRU encoder and decoder) trained on the same data, identical except for attention, with the same number of parameters. Without attention the decoder gets only the encoder's last vector; with attention it takes a weighted average of all the encoder's vectors at every output word (dot-product scores, softmax). The animation draws each model unrolled: a column of squares (one per dimension, blue positive, pink negative) for the encoder's vector at every Galician word, each made from the one before it, the last one being the summary; below, one column pair per English word written so far: the decoder state (GRU hidden state; the first is a copy of the summary, each next one is computed from the previous state and the word just written) and the context (without attention the same summary at every step; with attention the mix, drawn with lines from the Galician vectors whose thickness is the weight). Under each diagram: decoder state + context → the five most probable English words (softmax over the output layer), the chosen one in orange, the correct one ticked. A collapsible part derives the score (dot product of new state and an encoder vector) and the softmax weights line by line with the real numbers. Example at 8 dimensions, our sentence, second word: without attention friend 0.39, neighbor 0.31, cousin 0.28 (the summary has lost which relative); with attention aunt 0.96. The score is the dot product of the decoder's state and an encoder vector; the model learned in training to make the state similar to the vector that helps predict the next word, e.g. the vector at tía before writing "aunt". Training data: 5,000 template sentences built around the course sentence (other relatives, possessives, verbs, nouns, sayings), each also split into three pieces (noun phrase, noun phrase + relative clause, saying); 8,000 training steps; the course sentence is held out. One pair of models per vector size (8, 16, 64 dimensions). The current state gives the accuracies on 500 test sentences that are not in the training data. Small vectors lose details without attention (wrong relative, wrong verb, half the saying dropped) while the sentence stays fluent; with 64 dimensions both models are perfect on this toy data, because the templates hold little information. In real 2014 systems, one vector lost details of long sentences (Cho et al. 2014; Bahdanau et al. 2015). The toy data is made up; it is no real corpus.
 - Section 6: real cross-attention from the Helsinki-NLP/opus-mt-gl-en model (6 decoder layers × 8 heads, all 48 grids shown as clickable thumbnails, one row per layer) on the full sentence, recorded with one teacher-forced pass over its own greedy translation. Tokens are subword pieces; ‹/s› ends the sentence and often receives "parked" attention. Averaged over all heads, "aunt" looks most at "tía" (0.31); single late-layer heads are much sharper (layer 6 head 2: 0.99), early layers barely align.

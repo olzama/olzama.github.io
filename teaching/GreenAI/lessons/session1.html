@@ -2145,9 +2145,9 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <iframe class="frame" title="Query and key: try your own query" data-src="../artifacts/attention.html?embed=qk"></iframe>
   </div>
   <div class="notes">
-    <p>This is the model of the worked example. Press an, aunt: 0.79 goes to the key after tía. Press of: 0.91 goes to the key after miña. Press mine: 0.97 goes to the key after miña. Press unha: 0.75 goes to the key after unha, but no English word here needs unha.</p>
-    <p>Look at the table at the bottom. It tries this mix at every word of the correct phrase. With the query for an and aunt, "an" and "aunt" come out right, and "of" and "mine" come out wrong. So the decoder needs a new query for each English word.</p>
-    <p>Press an, aunt, shorter: the query points the same way, but it is shorter, so the weights are softer: 0.51 on the key after tía. Press all zeros: every weight is the same. Then move the sliders yourself. The mix always lies inside the triangle of the three keys.</p>
+    <p>This is the model of the worked example, in nine steps: press Next step. Steps 1 to 5 redo the worked example's arithmetic for the query (0, 6, 0) and say what each part does: the keys are the encoder's three vectors; the dot product scores a key by how much of what the query asks for it holds; softmax turns the scores into weights, 0.79 on the key after tía; the mix is the keys added up with those weights.</p>
+    <p>Step 6, direction: press ask for miña, and 0.91 goes to the key after miña. Press ask for unha: 0.75 on the key after unha, but no English word here needs that. Step 7, length: gently and insistently point the same way; the weights get softer (0.51 on tía) or sharper (0.92).</p>
+    <p>Step 8: one query for the whole phrase. With (0, 6, 0) before every word, "of" comes out as ‹end›; with ask for miña, the phrase becomes "a friend of mine". So the decoder needs a new query for each English word. Step 9: the sliders. The mix always lies inside the triangle of the three keys.</p>
   </div>
 </section>
 
