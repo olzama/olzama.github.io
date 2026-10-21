@@ -135,6 +135,7 @@ svg.v3 .pl { font-size: 12px; fill: var(--fg); } svg.v3 .pl.mix { fill: var(--or
 .plane:first-child { margin-top: 4px; }
 .plane .steptext { font-size: 0.95rem; }
 table.corpus td { padding: 2px 10px 2px 0; font-size: 0.86rem; } table.corpus td.cpm { color: var(--fg); font-weight: 600; } table.corpus .cpt { font-weight: 400; font-size: 0.75rem; color: var(--orange); }
+.work .muted, .muted { color: var(--muted); }
 .tries { max-width: 72ch; margin: 0 0 10px; padding-left: 1.2em; } .tries li { margin: 2px 0; }
 .qkctl { display: grid; grid-template-columns: max-content minmax(0, 260px) 3em; justify-content: start; gap: 6px 10px; align-items: center; }
 #qkPre { flex-wrap: wrap; }
@@ -1644,10 +1645,16 @@ const STEPS = [
         "unha veciña miña: now “a” is right and “an” is wrong. The two states have the same values in unha, miña and ‹start›, so those pushes cancel. Only tía is left.",
         "unha tía miña again: the same push as the first time.",
         "unha veciña miña again. After two rounds: “an” has 8 in tía, “a” has −8, and both have 0 everywhere else."];
+      // the training schedule: the same two example translations, twice; one nudge per example
+      const plan = k => `Training goes through the same example translations again and again; one pass through all of them is a round. Here there are two examples and two rounds, so four nudges: ` +
+        seq.map((e, i) => { const t = `${i + 1}: ${e ? "2nd phrase" : "our phrase"}`; return i + 1 === k ? `<b>${t}</b>` : i + 1 < k ? t : `<span class="muted">${t}</span>`; }).join(" → ") + ".";
+      const V4 = v => `(${v.slice(0, 4).map(f).join(", ")})`;  // unha, tía, miña, ‹start›: the only dimensions where these states are not 0
+      const nudgeLine = (w, k, st, right) => { const V = w === "an" ? vAn : vA, ok = w === right, b = V[k - 1], a = V[k];
+        return `“${w}” is ${ok ? "right" : "wrong"}, so ${ok ? "+" : "−"} 16 × the state: ${V4(b)} ${ok ? "+" : "−"} 16 × ${V4(st)} = <b>${V4(a)}</b> in (unha, tía, miña, ‹start›). Its dot product with this state goes from ${f(r2(dot(b, st)))} to ${f(r2(dot(a, st)))}.`; };
       const nudge = k => { const [ph, s, right, sum] = EX[seq[k - 1]], sg = w => w === right ? 1 : -1;
         const row = (w, v) => ({ v: v[k], cur: true, sub: s.map(x => r2(sg(w) * STEP * x)), subLabel: `${sg(w) > 0 ? "+" : "−"}16 × state` });
         return { board: g11({ cap: `round ${Math.ceil(k / 2)}, ${sum === VEC ? "the 2nd phrase" : "our phrase"}, <i>${ph}</i>: the right first word is “${right}”`, sum: { label: L2("summary", sum === VEC ? AMIP : OURS), v: sum }, st: { label: L2("state", sum === VEC ? AMIP : OURS), v: s }, dim: others, words: { an: row("an", vAn), a: row("a", vA) } }) +
-            work([`The line under each vector is what training adds to it: + 16 × the state for the right word, − 16 × the state for the wrong one. The vector shown is the result.`].concat(k === 1 ? [`How far a vector moves each time is the step size (in the skip-gram lesson, the learning rate). Real training takes many small steps, and the step size is a setting people choose. We chose ${STEP} so that the result matches step 4: in our phrase, tía is 0.25 in the state, so each round adds ${STEP} × 0.25 = 4 to the tía value of “an”, and two rounds give 8, the value set by hand in step 4. A smaller step size would need more rounds to get there.`] : [])),
+            work([plan(k), ...["an", "a"].map(w => nudgeLine(w, k, s, right)), `The line under each vector is what training adds to it: + 16 × the state for the right word, − 16 × the state for the wrong one. The vector shown is the result, and it is where the next nudge starts.`].concat(k === 1 ? [`How far a vector moves each time is the step size (in the skip-gram lesson, the learning rate). Real training takes many small steps, and the step size is a setting people choose. We chose ${STEP} so that the result matches step 4: in our phrase, tía is 0.25 in the state, so each round adds ${STEP} × 0.25 = 4 to the tía value of “an”, and two rounds give 8, the value set by hand in step 4. A smaller step size would need more rounds to get there.`] : [])),
           scene: tScene(k, `${capN[k - 1]} The dashed lines are the paths of the tips of “an” and “a”: one line per nudge, the latest one darker, a small dot where a tip was before. The lines below the floor belong to “a”: its first nudge gives it negative values. (Vectors drawn at 1/${STEP} of their length; first three dimensions only.)`) }; };
       return [enc(0), enc(1), enc(2),
         { board: g11({ cap: "the decoder state before word 1, for the 2nd phrase, <i>unha veciña miña</i>", sum: { label: L2("summary", AMIP), v: VEC }, st: { label: L2("state", AMIP), v: S2, hi: [0, 1, 2, 3] }, dim: others }) +
