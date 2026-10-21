@@ -485,7 +485,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <section class="panel" id="qk">
     <h2><span class="n">3</span>Query and key: try your own query</h2>
-    <p class="lead">The same model as sections 1 and 2. In section 2, the query was set by hand, one query per English word, and we saw its result for each word. Here you set the query yourself and see what it changes: the scores of the three encoder vectors, their weights, where the mix lands, and, in the table on the right, which word the decoder would write at each position with that mix. This shows two things: what the query's direction does and what its length does, and why one query cannot serve the whole phrase.</p>
+    <p class="lead">The same model as sections 1 and 2. In section 2, the query came from a made-up rule, one query per English word, and we saw its result for each word. Here you set the query yourself and see what it changes: the scores of the three encoder vectors, their weights, where the mix lands, and, in the table on the right, which word the decoder would write at each position with that mix. This shows two things: what the query's direction does and what its length does, and why one query cannot serve the whole phrase.</p>
     <ul class="tries">
       <li><b>an, aunt</b>, <b>of</b>, <b>mine</b>: the queries the decoder used in section 2. Compare which words in the table come out right with each.</li>
       <li><b>an, aunt, shorter</b>: the same direction at a third of the length. The weights spread more evenly.</li>
@@ -1497,7 +1497,7 @@ function g11(o) {
   const line = (label, cells, s3, s8, bias, res, cls = "") => `<div class="rl ${cls}">${label}</div>` + cells.slice(0, 3).join("") + sp + cells.slice(3).join("") + `<div class="gsum g1 ${cls}">${s3 ?? ""}</div><div class="gsum g2 ${cls}">${s8 ?? ""}</div><div class="gbias ${cls}">${bias ?? ""}</div><div class="res ${cls}">${res ?? ""}</div>`;
   const head = `<div class="rl"></div>` + DIMS.map(d => `<div class="gh g1"><i>${d}</i></div>`).join("") + sp + ST.map(d => `<div class="gh g2">${d}</div>`).join("") + `<div class="gh g1${o.sums ? "" : " hid"}">Σ first 3</div><div class="gh g2${o.sums ? "" : " hid"}">Σ last 8</div><div class="gh${o.bias ? "" : " hid"}">bias</div><div class="gax">${o.resHead ? gAxis(o.resHead) : ""}</div>`;
   const sum = o.sum || {};
-  const sumRow = line(`<span class="${sum.cls || ""}">${sum.label || "summary"}</span>`, [...[0, 1, 2].map(i => gCell(sum.v ? sum.v[i] : undefined, (sum.hi || []).includes(i) ? "cur" : "")), ...ST.map(() => gCell(undefined))], o.sideHead ? `<div class="gside head">${o.sideHead}</div>` : "", "", "", "", "sumrow");
+  const sumRow = line(`<span class="${sum.cls || ""}">${sum.label || "summary"}</span>`, [...[0, 1, 2].map(i => { const c = (sum.hi || []).includes(i) ? "cur" : ""; return sum.from && sum.v && sum.from[i] !== sum.v[i] ? gCellCh(sum.from[i], sum.v[i], c, sum.delay || 0) : gCell(sum.v ? sum.v[i] : undefined, c); }), ...ST.map(() => gCell(undefined))], o.sideHead ? `<div class="gside head">${o.sideHead}</div>` : "", "", "", "", "sumrow");
   const st = o.st || {};
   const stRow = line(st.label || "decoder state", DS.map((d, i) => { const c = (st.hi || []).includes(i) ? "cur" : ""; return st.from && st.v && st.from[i] !== st.v[i] ? gCellCh(st.from[i], st.v[i], c, st.delay || 0) : gCell(st.v ? st.v[i] : undefined, c); }),
     o.stSide ? `<div class="gside wrap">${o.stSide}</div>` : "", "", "", "", "strow");
@@ -1778,18 +1778,37 @@ const STEPS = [
           scene: decScene(x, true, { arrows: true, drops: [TIA], mark: true, cap: `Why “an” now: the gap from tía is ${f(r2(2 * 8 * x[TIA]))}, more than the bias of “a”, ${f(CAND.a.b)}. The mix is past the ${f(MARK)} mark. The decoder writes “an”.` }) }];
     } }],
   ["The rest of the phrase, with attention", {
-    text: "After each word, the decoder state changes as in section 1. Now the query is computed from the state. Some written words change the query (“aunt”, “friend”, “of”, “mine”, “yours”), and with it the weights and the mix; the others, such as “an”, leave it as it was.",
+    text: "For each word, three pieces. First, the decoder updates the last eight dimensions of its state, as in section 1. Second, it computes the query from the state: “aunt”, “friend”, “of”, “mine” and “yours” shift it, the other words do not. A shifted query gives new weights and a new mix. Third, all words are scored.",
     frames: () => {
+      const S = (k, w) => ATT[k].sc.rows.find(r => r.w === w).s, M = k => ATT[k].a.mix[MINA];
       const caps = [
-        `“an” does not change the query: it stays ${vecTxt(ATT[1].q)}, so the weights and the mix are the ones from step 3. “aunt” ${f(ATT[1].sc.rows[2].s)} beats “friend” ${f(ATT[1].sc.rows[3].s)}: “aunt”.`,
-        `“aunt” is written, at 0.5: the query shifts by 0.5 × (0, −12, 12) to ${vecTxt(ATT[2].q)}. It looks for miña now: weight ${f(ATT[2].a.sm.p[2])} on the key after miña. The mix reaches ${f(ATT[2].a.mix[MINA])} along miña: “of” ${f(ATT[2].sc.rows[4].s)}.`,
-        `The query shifts further toward miña. The mix stays near the miña axis: “mine” ${f(ATT[3].sc.rows[5].s)}.`,
+        `Highest score: “aunt” ${f(S(1, "aunt"))}, ahead of “friend” ${f(S(1, "friend"))}. The mix still holds ${f(ATT[1].a.mix[TIA])} of tía.`,
+        `Highest score: “of” ${f(S(2, "of"))}. The new mix reaches ${f(M(2))} along miña, and miña adds 8 × ${f(M(2))} = ${f(r2(8 * M(2)))} to “of”.`,
+        `Highest score: “mine” ${f(S(3, "mine"))}. miña adds 8 × ${f(M(3))} = ${f(r2(8 * M(3)))} to “mine” and takes the same from “yours”.`,
         `“‹end›” has the highest score: the phrase is finished. With attention: “${phrase(ATT)}”. Without attention it was “${phrase(ONE)}”.`];
-      return ATT.slice(1).map((s, i) => {
-        const prev = stateOf(ATT[i].a.mix, ATT[i].st), now = stateOf(s.a.mix, s.st);
-        return { board: g11({ cap: vecTxt(ATT[i].q) === vecTxt(s.q) ? `“${ATT[i].w}” has been written: a new state; the query, the weights and the mix stay as in step 3` : `“${ATT[i].w}” has been written: a new query, new weights, a new mix`, sum: { label: "the mix", v: s.a.mix, cls: "mixl", hi: changed(ATT[i].a.mix, s.a.mix) }, st: { v: now, hi: changed(prev, now) }, bias: true, sums: true, resHead: "score", win: s.w, words: allBars(s.a.mix, s.st, ALL) }) +
-            `<div class="fixh">${work([stLine(ATT[i].w, s.st), qLine(s)])}</div>` + smStage(s.a, 3, "the new query") + work([wLine(s)]),
-          scene: decScene(s.a.mix, true, { arrows: true, drops: [TIA, MINA], mark: true, mixes: ATT.slice(0, i + 1).map(t => t.a.mix), xLabel: `mix for word ${i + 2}`, cap: `Word ${i + 2}. ${caps[i]}` }) };
+      const L8 = v => ST.map((r, j) => v[j + 3] ? `${r} ${f(v[j + 3])}` : "").filter(Boolean).join(", ");  // the last eight, by name; the rest are 0
+      const W0 = {}; EN.forEach(x => { W0[x] = { v: vecOf(x) }; });
+      const ML = { label: "the mix", cls: "mixl" };
+      return ATT.slice(1).flatMap((s, i) => {
+        const P = ATT[i], w = P.w, prev = stateOf(P.a.mix, P.st), mid = stateOf(P.a.mix, s.st), now = stateOf(s.a.mix, s.st);
+        const same = vecTxt(P.q) === vecTxt(s.q), terms = ST.map((r, j) => s.st[j] && QSHIFT[r][2] ? `+ ${f(s.st[j])} (${r}) × (0, −12, 12)` : "").filter(Boolean);
+        const sc3 = decScene(P.a.mix, true, { arrows: true, mixes: ATT.slice(0, i).map(t => t.a.mix), cap: `Word ${i + 2}: the mix has not changed yet; only the last eight dimensions of the state have.` });
+        return [
+          { board: g11({ cap: `“${w}” has been written: the decoder updates its state`, sum: { ...ML, v: P.a.mix }, st: { v: mid, from: prev, delay: 0.8, hi: changed(prev, mid) }, words: W0,
+              stSide: sideLines([`½ × (${L8(prev)})`, `+ 0.5 in ${w}`, `= ${L8(mid)}`]), sideHead: "last eight; all others 0:" }) +
+              work(i === 0 ? ["As in section 1: every value in the last eight dimensions is halved, and the dimension of the word just written gets + 0.5."] : []),
+            scene: sc3 },
+          same
+            ? { board: g11({ cap: "the query from the new state: unchanged", sum: { ...ML, v: s.a.mix }, st: { v: now }, words: W0,
+                  stSide: sideLines([`query = ${vecTxt(Q0)}`, `+ nothing: ${ST.filter((r, j) => s.st[j]).join(" and ")} do not shift it`, `= ${vecTxt(s.q)}`]), sideHead: "the query:" }) +
+                  work([`The query is the same as for word 1, so the scores, the weights (${s.a.sm.p.map(f).join(", ")}) and the mix ${vecTxt(s.a.mix)} are the ones from step 3.`]),
+                scene: sc3 }
+            : { board: g11({ cap: "the query from the new state: new weights, a new mix", sum: { ...ML, v: s.a.mix, from: P.a.mix, delay: 2.4, hi: changed(P.a.mix, s.a.mix) }, st: { v: now, from: mid, delay: 2.4, hi: changed(mid, now) }, words: W0,
+                  stSide: sideLines([`query = ${vecTxt(Q0)}`, ...terms, `= ${vecTxt(s.q)}`]), sideHead: "the query:" }) +
+                  smStage(s.a, 3, "the new query") + work([wLine(s)]),
+                scene: decScene(s.a.mix, true, { arrows: true, mixes: ATT.slice(0, i + 1).map(t => t.a.mix), xLabel: `mix for word ${i + 2}`, cap: `Word ${i + 2}: the new mix ${vecTxt(s.a.mix)}; the faint points are the earlier mixes.` }) },
+          { board: g11({ cap: `word ${i + 2}: every word's score with the new state`, sum: { ...ML, v: s.a.mix }, st: { v: now }, bias: true, sums: true, resHead: "score", win: s.w, words: allBars(s.a.mix, s.st, ALL) }) + work([caps[i]]),
+            scene: decScene(s.a.mix, true, { arrows: true, drops: [TIA, MINA], mark: true, mixes: ATT.slice(0, i + 1).map(t => t.a.mix), xLabel: `mix for word ${i + 2}`, cap: `Word ${i + 2}. ${caps[i]}` }) }];
       });
     } }],
 ];
