@@ -1539,6 +1539,16 @@ function qkParts(a) {
   const rowsHtml = n => ENC.slice(0, n).map((e, j) => eq(col(a.q, "the query"), op("·"), col(e, `key ${j + 1}: encoder vector ${encName(j)}`), op("="), `<div class="res">${dotTxt(a.q, e)} = <b>${f(a.sc[j])}</b></div>`)).join("");
   return { qrule, rowsHtml, LBL: `<p class="label">the score of each key: the dot product of the query and the key</p>` };
 }
+// the values that are not 0 in each word vector, and why (section 1, step 4)
+const REASONS = [
+  ["aunt", "tía: 8; a, an: 12", "right in the phrases with tía, never in the others; always the second word, right after “a” or “an”"],
+  ["friend", "tía: −8; a, an: 12", "right in phrases without tía; always the second word"],
+  ["of", "miña: 8; aunt, friend: 12", "right in the phrases with miña (… of mine); always right after “aunt” or “friend”"],
+  ["mine", "miña: 8; of: 12", "right in the phrases with miña; always right after “of”"],
+  ["yours", "miña: −8; of: 12", "right in the phrases with túa (no dimension in this small model), never with miña; always right after “of”"],
+  ["‹end›", "aunt, friend, mine, yours: 12", "every translation ends right after one of these words"]];
+const reasonRows = ws => `<div class="heatwrap"><table class="ty"><thead><tr><th>word</th><th>its vector: values that are not 0</th><th>why: what the example translations show</th></tr></thead><tbody>` +
+  REASONS.filter(r => ws.includes(r[0])).map(([w, v, y]) => `<tr><td><b>${w}</b></td><td class="n">${v}</td><td>${y}</td></tr>`).join("") + "</tbody></table></div>";
 // softmax over the three encoder vectors (attention weights)
 const smStage = (a, n, from) => smCore({ labels: ENC.map((e, j) => encPlain(j)), sc: a.sc, e: a.sm.e, Z: a.sm.Z, p: a.sm.p, head: "encoder vector", outHead: "weight",
   title: `${from ? `${from}: ` : ""}scores (query · each encoder vector) → softmax → weights` }, n);
@@ -1597,13 +1607,6 @@ const STEPS = [
       const drop2 = decScene(SUMMARY, false, { drops: [0, TIA] });
       const anDone = { v: vecOf("an"), sub: prodOf("an", st), subLabel: "products", g: sc.rows[1].gp, e: sc.rows[1].ep, score: r2(sc.rows[1].gp + sc.rows[1].ep) };
       const aDone = { v: vecOf("a"), sub: prodOf("a", st), subLabel: "products", g: sc.rows[0].gp, e: sc.rows[0].ep, score: r2(sc.rows[0].gp + sc.rows[0].ep) };
-      const REASONS = [
-        ["aunt", "tía: 8; a, an: 12", "right in the phrases with tía, never in the others; always the second word, right after “a” or “an”"],
-        ["friend", "tía: −8; a, an: 12", "right in phrases without tía; always the second word"],
-        ["of", "miña: 8; aunt, friend: 12", "right in the phrases with miña (… of mine); always right after the noun"],
-        ["mine", "miña: 8; of: 12", "right in the phrases with miña; always right after “of”"],
-        ["yours", "miña: −8; of: 12", "right in the phrases with túa (no dimension in this small model), never with miña; always right after “of”"],
-        ["‹end›", "aunt, friend, mine, yours: 12", "every translation ends right after one of these words"]];
       const reasonTbl = `<div class="heatwrap"><table class="ty"><thead><tr><th>word</th><th>its vector: values that are not 0</th><th>why: what the example translations show</th></tr></thead><tbody>` +
         REASONS.map(([w, v, y]) => `<tr><td><b>${w}</b></td><td class="n">${v}</td><td>${y}</td></tr>`).join("") + "</tbody></table></div>";
       const all = {}; EN.forEach(w => { all[w] = { v: vecOf(w), cur: !["a", "an"].includes(w) }; }); Object.assign(all, { an: anDone, a: aDone });
@@ -1755,10 +1758,21 @@ const STEPS = [
     text: "The mix is copied into the first three dimensions of the decoder state, where the summary was. Everything else, the word vectors, the biases and the values in the last eight dimensions, is exactly as in section 1.",
     frames: () => {
       const s = ATT[0], x = s.a.mix, base = { sum: { label: "the mix", v: x, cls: "mixl" }, bias: true, sums: true, resHead: "score" };
-      const W0 = {}; EN.forEach(w => { W0[w] = { v: vecOf(w) }; });
+      const AA = ["a", "an"], W = ws => Object.fromEntries(ws.map(w => [w, { v: vecOf(w), cur: true }]));
+      const vRow = (w, why) => [w, vecOf(w).map((v, i) => v ? `${DS[i]}: ${f(v)}` : "").filter(Boolean).join("; "), why];
+      const aaTbl = `<div class="heatwrap"><table class="ty"><thead><tr><th>word</th><th>its vector: values that are not 0</th><th>why: what the example translations show</th></tr></thead><tbody>` +
+        [vRow("a", "right exactly in the phrases without tía; the phrases with unha start with “a” or “an”; always the first word"), vRow("an", "right exactly in the phrases with tía; the phrases with unha start with “a” or “an”; always the first word")]
+          .map(([w, v, y]) => `<tr><td><b>${w}</b></td><td class="n">${v}</td><td>${y}</td></tr>`).join("") + "</tbody></table></div>";
       return [
-        { board: g11({ ...base, cap: "the mix is copied into the first three dimensions of the decoder state", st: { v: stateOf(x, ST0), hi: [0, 1, 2] }, words: W0 }),
-          scene: decScene(x, true, { arrows: true, cap: `The mix in the picture, with the word vectors of section 1. It reaches ${f(x[TIA])} along tía; the summary reached ${f(SUMMARY[TIA])}.` }) },
+        { board: g11({ ...base, cap: "the mix is copied into the first three dimensions of the decoder state", st: { v: stateOf(x, ST0), hi: [0, 1, 2] } }) +
+            work([`The first three dimensions of the decoder state now hold the mix, ${vecTxt(x)}, where section 1 had the summary, ${vecTxt(SUMMARY)}. The last eight are as in section 1: nothing is written yet, so ‹start› is 0.5 and the rest 0.`]),
+          scene: decScene(x, true, { cap: `The mix in the picture. It reaches ${f(x[TIA])} along tía; the summary reached ${f(SUMMARY[TIA])}.` }) },
+        { board: g11({ ...base, cap: "the vectors of “a” and “an”: the same as in section 1", st: { v: stateOf(x, ST0) }, words: W(AA) }) + aaTbl +
+            work(["The word vectors were set before translating (section 1, step 4) and do not change. Attention changes only the state."]),
+          scene: decScene(x, true, { arrows: true, cap: "The vectors of “a” and “an” lean the same way along unha and opposite ways along tía." }) },
+        { board: g11({ ...base, cap: "the vectors of the other six words: the same as in section 1", st: { v: stateOf(x, ST0) }, words: { ...Object.fromEntries(AA.map(w => [w, { v: vecOf(w) }])), ...W(EN.filter(w => !AA.includes(w))) } }) +
+            reasonRows(EN.filter(w => !AA.includes(w))),
+          scene: decScene(x, true, { arrows: true, cap: "“aunt” along tía, “friend” the opposite way; “of” and “mine” along miña." }) },
         { board: g11({ ...base, cap: "the first three dimensions of each dot product", st: { v: stateOf(x, ST0) }, words: allBars(x, ST0, ["g"]) }),
           scene: decScene(x, true, { arrows: true, drops: [TIA, MINA], cap: `tía gives “an” and “aunt” 8 × ${f(x[TIA])} = ${f(r2(8 * x[TIA]))}, and takes the same from “a” and “friend”. Along miña the mix reaches only ${f(x[MINA])}: “of” and “mine” get ${f(r2(8 * x[MINA]))}.` }) },
         { board: g11({ ...base, cap: "the decoder writes “an”", st: { v: stateOf(x, ST0) }, win: "an", words: allBars(x, ST0, ALL) }) + ruler(x, true) + whyLines(s.sc, x, "the mix") + smWords(s.sc, 3, "softmax, as in section 1: from the eight scores to a probability for each word") + pickLine(s.sc),
