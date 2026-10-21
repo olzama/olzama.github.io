@@ -138,6 +138,7 @@ table.corpus td { padding: 2px 10px 2px 0; font-size: 0.86rem; } table.corpus td
 .work .muted, .muted { color: var(--muted); }
 .g11 .gsum:has(.gside) { position: relative; overflow: visible; place-items: start; }
 .g11 .gside { position: absolute; left: 4px; top: -1px; width: max-content; z-index: 2; display: grid; font-family: "Caveat", "Comic Sans MS", cursive; font-size: 15px; line-height: 14.5px; color: var(--fg); text-align: left; white-space: nowrap; }
+.g11 .gside.wrap { width: 200px; white-space: normal; row-gap: 2px; }
 .g11 .gside.head { color: var(--muted); top: 6px; border: 0; background: none; box-shadow: none; }
 .g11 .gside span { animation: write 0.5s ease-out both; }
 .g11 .gc.ch { position: relative; overflow: hidden; background: none; }
@@ -1469,6 +1470,8 @@ const gShade = v => `background:rgba(${v < 0 ? "var(--negheat)" : "var(--heat)"}
 // v: a number; null: not decided yet (?); undefined: invisible
 const gCell = (v, cls = "") => v === undefined ? `<div class="gc hid"></div>` : v === null ? `<div class="gc q ${cls}">?</div>` : `<div class="gc ${cls}" style="${gShade(v)}">${f(v)}</div>`;
 // a cell whose value changes: the old value fades out, then the new one is written in, after d seconds
+// lines written one after another on the board beside the grid
+const sideLines = (ls, d0 = 0) => ls.map((t, i) => `<span style="animation-delay:${(d0 + i) * 0.35}s">${t}</span>`).join("");
 const gCellCh = (o, v, cls, d) => `<div class="gc ch ${cls}" style="--d:${d}s"><span class="o" style="${gShade(o)}">${f(o)}</span><span class="n" style="${gShade(v)}">${f(v)}</span></div>`;
 const gSub = (v, cls = "") => `<div class="gs ${cls}">${v === undefined || v === 0 ? "" : f(v)}</div>`;
 // the score of one row on this row's own scale (−4 to 12, ticks every 4): one piece per part, each piece starting
@@ -1496,7 +1499,8 @@ function g11(o) {
   const sum = o.sum || {};
   const sumRow = line(`<span class="${sum.cls || ""}">${sum.label || "summary"}</span>`, [...[0, 1, 2].map(i => gCell(sum.v ? sum.v[i] : undefined, (sum.hi || []).includes(i) ? "cur" : "")), ...ST.map(() => gCell(undefined))], o.sideHead ? `<div class="gside head">${o.sideHead}</div>` : "", "", "", "", "sumrow");
   const st = o.st || {};
-  const stRow = line(st.label || "decoder state", DS.map((d, i) => gCell(st.v ? st.v[i] : undefined, (st.hi || []).includes(i) ? "cur" : "")), "", "", "", "", "strow");
+  const stRow = line(st.label || "decoder state", DS.map((d, i) => { const c = (st.hi || []).includes(i) ? "cur" : ""; return st.from && st.v && st.from[i] !== st.v[i] ? gCellCh(st.from[i], st.v[i], c, st.delay || 0) : gCell(st.v ? st.v[i] : undefined, c); }),
+    o.stSide ? `<div class="gside wrap">${o.stSide}</div>` : "", "", "", "", "strow");
   const words = EN.map(w => {
     const r = (o.words || {})[w] || {}, dim = (o.dim || []).includes(w) ? " gdim" : "", win = o.win === w ? " win" : "";
     const vec = r.v === undefined ? DS.map(() => undefined) : r.v;
@@ -1712,14 +1716,23 @@ const STEPS = [
     text: "After each word, the decoder updates the values in the last eight dimensions: every value is halved, and the value in the dimension of the word just written goes up by 0.5. The values in the first three dimensions stay the summary. Then all eight words are scored again.",
     frames: () => {
       const caps = [
-        `“aunt” and “friend” have 12 in the a dimension: 6 each. tía gives “aunt” +${f(8 * SUMMARY[TIA])} and “friend” −${f(8 * SUMMARY[TIA])}, but “friend” has a bias of ${f(CAND.friend.b)}. The same contest as “a” against “an”: “friend”.`,
-        `“of” and “‹end›” have 12 in the friend dimension: 6 each. “of” adds 8 × ${f(SUMMARY[MINA])} = ${f(8 * SUMMARY[MINA])} from miña, “‹end›” only its bias: “of”.`,
-        `“mine” and “yours” have 12 in the of dimension: 6 each. miña gives “mine” +${f(8 * SUMMARY[MINA])} and “yours” −${f(8 * SUMMARY[MINA])}: “mine”.`,
-        `“‹end›” has 12 in the mine dimension, and the highest score: the phrase is finished. Without attention: “${phrase(ONE)}”. Good English, wrong translation.`];
-      return ONE.slice(1).map((s, i) => ({
-        board: g11({ cap: `“${ONE[i].w}” has been written: the decoder state before word ${i + 2}`, sum: { v: SUMMARY }, st: { v: stateOf(SUMMARY, s.st), hi: changed(ONE[i].st, s.st).map(j => j + 3) }, bias: true, sums: true, resHead: "score", win: s.w, words: allBars(SUMMARY, s.st, ALL) }) +
-          work([stLine(ONE[i].w, s.st), caps[i]]),
-        scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], mark: true, cap: `Word ${i + 2}. ${caps[i]}` }) }));
+        `Highest score: “friend”. tía helps “aunt” by ${f(8 * SUMMARY[TIA])} and costs “friend” ${f(8 * SUMMARY[TIA])}, but the bias of “friend” is ${f(CAND.friend.b)}: the same contest as “a” against “an”.`,
+        `Highest score: “of”. Both “of” and “‹end›” get 6 from the friend dimension; miña adds ${f(8 * SUMMARY[MINA])} to “of”.`,
+        `Highest score: “mine”. miña adds ${f(8 * SUMMARY[MINA])} to “mine” and takes ${f(8 * SUMMARY[MINA])} from “yours”.`,
+        `Highest score: “‹end›”. The phrase is finished. Without attention: “${phrase(ONE)}”. Good English, wrong translation.`];
+      const L8 = v => ST.map((r, j) => v[j + 3] ? `${r} ${f(v[j + 3])}` : "").filter(Boolean).join(", ");  // the last eight, by name; the rest are 0
+      return ONE.slice(1).flatMap((s, i) => {
+        const prev = stateOf(SUMMARY, ONE[i].st), now = stateOf(SUMMARY, s.st), hi = changed(ONE[i].st, s.st).map(j => j + 3), w = ONE[i].w;
+        const W0 = {}; EN.forEach(x => { W0[x] = { v: vecOf(x) }; });
+        const base = { sum: { v: SUMMARY }, bias: true, sums: true, resHead: "score" };
+        return [
+          { board: g11({ ...base, bias: false, cap: `“${w}” has been written: the decoder updates its state`, st: { v: now, from: prev, delay: 0.8, hi }, words: W0,
+              stSide: sideLines([`½ × (${L8(prev)})`, `+ 0.5 in ${w}`, `= ${L8(now)}`]), sideHead: "last eight; all others 0:" }) +
+              work(i === 0 ? ["After each word, every value in the last eight dimensions is halved, and the dimension of the word just written gets + 0.5. The first three dimensions stay the summary."] : []),
+            scene: decScene(SUMMARY, false, { arrows: true, cap: `Word ${i + 2}: the summary has not changed; only the last eight dimensions of the state have.` }) },
+          { board: g11({ ...base, cap: `word ${i + 2}: every word's score with the new state`, st: { v: now }, win: s.w, words: allBars(SUMMARY, s.st, ALL) }) + work([caps[i]]),
+            scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], mark: true, cap: `Word ${i + 2}. ${caps[i]}` }) }];
+      });
     } }],
   ["The query: one score for each encoder vector", {
     text: "With attention, before each English word the decoder looks at all three encoder vectors, not only the last one, and takes a weighted mix of them. To set the weights, it computes the dot product of each encoder vector with one more vector, the query. This gives one score per encoder vector, and softmax turns the scores into weights. The query is computed from the decoder state, so it can be different before each English word. In this role, the encoder vectors are called keys.",
