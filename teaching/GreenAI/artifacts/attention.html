@@ -1619,7 +1619,7 @@ const STEPS = [
               "How a real model differs: its dimensions have no names, and each mixes many signals, so nobody can read off why a value is there. Its state is not updated by our simple ½ + ½ rule but by a learned function."]),
           scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], cap: "Every word's dot product with the state." }) }];
     } }],
-  ["Where the values in the word vectors come from", {
+  ["Training (made up): where the values in the word vectors come from", {
     text: "Step 4 gave the word vectors made-up values. A real model finds its values by training on example translations. Training shows the model an example and moves the vector of the right word a little toward the decoder state, so that its dot product grows; the vectors of the wrong words move a little away. Below is a made-up training run for “an” and “a” on two of the example translations, with the step size chosen so that the run lands on the values of step 4. Here we train the vectors of “an” and “a” by hand, on two examples, starting from zeros.",
     frames: () => {
       const S1 = stateOf(SUMMARY, ST0), S2 = stateOf(VEC, ST0), STEP = 16;
