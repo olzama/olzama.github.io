@@ -190,7 +190,7 @@ svg.smst .st { fill: var(--muted); font-size: 11px; } svg.smst .sw { fill: var(-
 svg.smst .k1 { fill: rgba(var(--heat), 0.3); } svg.smst .k2 { fill: rgba(var(--heat), 1); } svg.smst .k3 { fill: rgba(var(--heat), 0.6); } svg.smst .hid { visibility: hidden; }
 .g11 { display: grid; grid-template-columns: 70px repeat(3, 30px) 8px repeat(8, 30px) 36px 36px 34px 104px; column-gap: 1px; row-gap: 2px; align-items: center; width: max-content; }
 .g11 .rl { font-size: 0.8rem; line-height: 1.15; height: 28px; display: flex; align-items: center; overflow: hidden; }
-.g11 .rl.subrow, .g11 .gs, .g11 .subrow { height: 15px; }
+.g11 .rl.subrow, .g11 .gs, .g11 .subrow { height: 15px; } .g11 .rl small { display: block; font-size: 0.66rem; color: var(--orange); } .g11 .rl:has(small) { line-height: 1.05; }
 .g11 .gsl { font-size: 0.64rem; color: var(--muted); white-space: nowrap; }
 .g11 .gh { font-size: 0.66rem; color: var(--muted); white-space: nowrap; writing-mode: vertical-rl; transform: rotate(180deg); height: 52px; justify-self: center; text-align: left; }
 .g11 .gc { height: 28px; border-radius: 4px; display: grid; place-items: center; font-family: var(--font-mono); font-size: 0.62rem; margin: 0 1px; }
@@ -1664,9 +1664,10 @@ const STEPS = [
         pts: [{ p: SUMMARY, cls: "enc", label: "unha tía miña", dx: 10, dy: -10 }, { p: VEC, cls: "enc faint", label: "unha amiga miña", dx: -10, dy: -10, anchor: "end" }],
         segs: [...vAn.slice(0, n + 1).flatMap((v, i) => i ? [{ a: g3(vAn[i - 1]), b: g3(v), cls: "gd" }] : []), ...vA.slice(0, n + 1).flatMap((v, i) => i ? [{ a: g3(vA[i - 1]), b: g3(v), cls: "gd" }] : [])],
         arrows: n ? [{ a: ZERO, b: g3(vAn[n]), cls: "ca", label: "“an”", dx: 6, dy: 18 }, { a: ZERO, b: g3(vA[n]), cls: "ca", label: "“a”", dx: 0, dy: 26, anchor: "start" }] : [], ...extra });
+      const L2 = (r, ph) => `<span>${r}<small>${ph}</small></span>`, OURS = "our phrase", AMIP = "2nd phrase";
       const ENCL = ["½ × (0, 0, 0) + ½ × (1, 0, 0) = (0.5, 0, 0)", "½ × (0.5, 0, 0) + ½ × (0, 0, 0) = (0.25, 0, 0). This small model has no dimension for amiga, so its word vector is all zeros: reading it adds nothing and halves what was there.", "½ × (0.25, 0, 0) + ½ × (0, 0, 1) = (0.125, 0, 0.5). No tía ever entered this summary."];
-      const enc = n => ({ board: g11({ cap: `the encoder reads <i>unha amiga miña</i>: after <i>${AMI_W[n]}</i>`, sum: { v: AMI[n], hi: [0, 1, 2] }, dim: others }) +
-          work([`New vector = ½ × old vector + ½ × the word's vector. Reading <i>${AMI_W[n]}</i>: ${ENCL[n]}`].concat(n ? [] : ["To train, we need a second example: <i>unha amiga miña</i>, “a friend of mine”. First the encoder reads it."])),
+      const enc = n => ({ board: g11({ cap: `the 2nd phrase, <i>unha amiga miña</i>: the encoder reads <i>${AMI_W[n]}</i>`, sum: { label: L2("encoder", AMIP), v: AMI[n], hi: [0, 1, 2] }, st: { label: L2("state", AMIP) }, dim: others }) +
+          work([`New vector = ½ × old vector + ½ × the word's vector. Reading <i>${AMI_W[n]}</i>: ${ENCL[n]}`].concat(n ? [] : ["To train, we need a second example translation, the 2nd phrase: <i>unha amiga miña</i>, “a friend of mine”. From here on, every summary and decoder state says which phrase it belongs to. The grid now shows the 2nd phrase, so its values differ from step 4, which showed our phrase, <i>unha tía miña</i>. First the encoder reads the 2nd phrase."])),
         scene: tScene(0, ["The encoder's path for unha amiga miña. It starts along unha, like our phrase.", "Reading amiga adds nothing and halves what was there.", "After miña: the summary of unha amiga miña. It never moved along tía."][n], { segs: amiSeg.slice(0, n + 1) }) });
       const capN = ["unha tía miña: “an” is right, so its vector moves toward this state; “a” is wrong, so it moves away.",
         "unha amiga miña: now “a” is right and “an” is wrong. The two states have the same values in unha, miña and ‹start›, so those pushes cancel. Only tía is left.",
@@ -1674,18 +1675,18 @@ const STEPS = [
         "unha amiga miña again. After two rounds: “an” has 8 in tía, “a” has −8, and both have 0 everywhere else."];
       const nudge = k => { const [ph, s, right, sum] = EX[seq[k - 1]], sg = w => w === right ? 1 : -1;
         const row = (w, v) => ({ v: v[k], cur: true, sub: s.map(x => r2(sg(w) * STEP * x)), subLabel: `${sg(w) > 0 ? "+" : "−"}16 × state` });
-        return { board: g11({ cap: `round ${Math.ceil(k / 2)}, example <i>${ph}</i>: the right first word is “${right}”`, sum: { v: sum }, st: { v: s }, dim: others, words: { an: row("an", vAn), a: row("a", vA) } }) +
+        return { board: g11({ cap: `round ${Math.ceil(k / 2)}, ${sum === VEC ? "the 2nd phrase" : "our phrase"}, <i>${ph}</i>: the right first word is “${right}”`, sum: { label: L2("summary", sum === VEC ? AMIP : OURS), v: sum }, st: { label: L2("state", sum === VEC ? AMIP : OURS), v: s }, dim: others, words: { an: row("an", vAn), a: row("a", vA) } }) +
             work([`The line under each vector is what training adds to it: + 16 × the state for the right word, − 16 × the state for the wrong one. The vector shown is the result.`].concat(k === 1 ? [`How far a vector moves each time is the step size (in the skip-gram lesson, the learning rate). Real training takes many small steps; here we take big ones, ${STEP} × the state, so that two rounds give round values.`] : [])),
           scene: tScene(k, `${capN[k - 1]} (Vectors drawn at 1/${STEP} of their length; first three dimensions only.)`) }; };
       return [enc(0), enc(1), enc(2),
-        { board: g11({ cap: "the decoder state before word 1, for <i>unha amiga miña</i>", sum: { v: VEC }, st: { v: S2, hi: [0, 1, 2, 3] }, dim: others }) +
-            work([`For <i>unha tía miña</i>, the state before word 1 was ${vecTxt(S1.slice(0, 4))}, then zeros (step 3). The two states differ only in tía.`]),
+        { board: g11({ cap: "the decoder state before word 1, for the 2nd phrase, <i>unha amiga miña</i>", sum: { label: L2("summary", AMIP), v: VEC }, st: { label: L2("state", AMIP), v: S2, hi: [0, 1, 2, 3] }, dim: others }) +
+            work([`For our phrase, <i>unha tía miña</i>, the state before word 1 was ${vecTxt(S1.slice(0, 4))}, then zeros (step 3). For the 2nd phrase it is ${vecTxt(S2.slice(0, 4))}, then zeros: tía is 0, because the 2nd phrase has no tía. The two states differ only in tía.`]),
           scene: tScene(0, "The first three dimensions of the two states: unha tía miña reaches 0.25 along tía, unha amiga miña reaches 0.") },
-        { board: g11({ cap: "before training: the vectors of “an” and “a” are all zeros", sum: { v: VEC }, st: { v: S2 }, dim: others, words: { an: { v: vAn[0], cur: true }, a: { v: vA[0], cur: true } } }) +
+        { board: g11({ cap: "before training: the vectors of “an” and “a” are all zeros", sum: { label: L2("summary", AMIP), v: VEC }, st: { label: L2("state", AMIP), v: S2 }, dim: others, words: { an: { v: vAn[0], cur: true }, a: { v: vA[0], cur: true } } }) +
             work(["With zeros, both get the dot product 0 from any state, so the model has no reason to prefer either."]),
           scene: tScene(0, "The vectors of “an” and “a” start at zero, at the corner where the axes meet.") },
         nudge(1), nudge(2), nudge(3), nudge(4),
-        { board: g11({ cap: "after training on the two examples", sum: { v: VEC }, st: { v: S2 }, dim: others, words: { an: { v: vAn[4] }, a: { v: vA[4] } } }) +
+        { board: g11({ cap: "after training on the two examples", sum: { label: L2("summary", AMIP), v: VEC }, st: { label: L2("state", AMIP), v: S2 }, dim: others, words: { an: { v: vAn[4] }, a: { v: vA[4] } } }) +
             work(["unha ends at 0 here: both phrases have it, so it cannot tell “an” from “a”. tía can: only the phrase where “an” is right has it. The 4 that “a” and “an” have in unha (step 4) comes from other examples: phrases without unha (<i>a miña tía</i> → my aunt), where neither is right.",
               "‹start› ends at 0 here too. The 12 that “a” and “an” have in ‹start› (step 4) comes from the later words of the examples: there “a” and “an” are wrong and the value in ‹start› is smaller, so training pushes them away from those states.",
               "“aunt” and “friend” get 8 and −8 in tía the same way, from the same two examples at the second word. “of” and “mine” get 8 in miña from phrases with miña."]),
@@ -1696,19 +1697,20 @@ const STEPS = [
     frames: () => {
       const sv0 = scoreAll(VEC, ST0, false), sv = scoreAll(VEC, ST0), sc = scoreAll(SUMMARY, ST0), gap = r2(sc.rows[0].b - sc.rows[1].b);
       const others = EN.filter(w => !["a", "an"].includes(w));
-      const am = { sum: { v: VEC }, st: { v: stateOf(VEC, ST0) }, dim: others, resHead: "score", sums: true }, ti = { sum: { v: SUMMARY }, st: { v: stateOf(SUMMARY, ST0) }, dim: others, resHead: "score", sums: true };
+      const L2 = (r, ph) => `<span>${r}<small>${ph}</small></span>`;
+      const am = { sum: { label: L2("summary", "2nd phrase"), v: VEC }, st: { label: L2("state", "2nd phrase"), v: stateOf(VEC, ST0) }, dim: others, resHead: "score", sums: true }, ti = { sum: { label: L2("summary", "our phrase"), v: SUMMARY }, st: { label: L2("state", "our phrase"), v: stateOf(SUMMARY, ST0) }, dim: others, resHead: "score", sums: true };
       const P = s => `P(“a”) = <b>${f(s.rows[0].p)}</b>, P(“an”) = <b>${f(s.rows[1].p)}</b>`;
       const vScene = cap => decScene(VEC, false, { arrows: true, drops: [TIA], xLabel: `unha amiga miña ${vecTxt(VEC)}`, cap });
       return [
-        { board: g11({ ...am, cap: "<i>unha amiga miña</i>: scores without a bias", words: allBars(VEC, ST0, ["g", "e"]) }) +
-            work([`Take <i>unha amiga miña</i> again. Its state holds nothing of tía, so “a” and “an” get the same score, ${f(r2(sv0.rows[0].gp + sv0.rows[0].ep))}. The state gives no reason to prefer either.`,
+        { board: g11({ ...am, cap: "the 2nd phrase, <i>unha amiga miña</i>: scores without a bias", words: allBars(VEC, ST0, ["g", "e"]) }) +
+            work([`Take the 2nd phrase, <i>unha amiga miña</i>, again. Its state holds nothing of tía, so “a” and “an” get the same score, ${f(r2(sv0.rows[0].gp + sv0.rows[0].ep))}. The state gives no reason to prefer either.`,
               "Yet in the translation page's example translations, “a” is the right first word 6 times out of 8. The model needs a way to prefer “a” when the state says nothing either way."]),
           scene: vScene("This state reaches 0 along tía: nothing in it speaks for “an” or for “a”.") },
-        { board: g11({ ...am, bias: true, cap: "<i>unha amiga miña</i>: the bias is added", words: allBars(VEC, ST0, ALL, { anim: "b" }) }) +
+        { board: g11({ ...am, bias: true, cap: "the 2nd phrase, <i>unha amiga miña</i>: the bias is added", words: allBars(VEC, ST0, ALL, { anim: "b" }) }) +
             work([`That is the bias. Training raises the bias of a word that is right more often than its dot product says: “a” gets ${f(CAND.a.b)}. Now “a” scores ${f(sv.rows[0].s)} and “an” ${f(sv.rows[1].s)}.`,
               `Biases in this model: “a” ${f(CAND.a.b)}, “friend” ${f(CAND.friend.b)}, “‹end›” ${f(CAND["‹end›"].b)}, all others 0. Score = dot product + bias.`]),
           scene: vScene("The bias does not depend on the state: the gray part is added to the bar of “a” whatever the picture shows.") },
-        { board: g11({ ...ti, bias: true, cap: "back to <i>unha tía miña</i>", words: allBars(SUMMARY, ST0, ALL, { anim: "b" }) }) + whyLines(sc, SUMMARY, "the summary"),
+        { board: g11({ ...ti, bias: true, cap: "back to our phrase, <i>unha tía miña</i>", words: allBars(SUMMARY, ST0, ALL, { anim: "b" }) }) + whyLines(sc, SUMMARY, "the summary"),
           scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA], cap: `Here the state does speak for “an”: unha adds ${f(4 * SUMMARY[0])} to both, and tía adds ${f(8 * SUMMARY[TIA])} to “an” and takes ${f(8 * SUMMARY[TIA])} from “a”, a gap of ${f(r2(sc.rows[1].gp - sc.rows[0].gp))}. But the bias of “a” is ${f(gap)}, more than that.` }) },
         { board: g11({ ...ti, bias: true, cap: "how much tía would “an” need?", words: allBars(SUMMARY, ST0, ALL) }) + ruler(SUMMARY, false) +
             work([`Each unit of tía in the state adds 8 to “an” and takes 8 from “a”. “an” beats the bias of “a” only if 16 × tía > ${f(gap)}: tía > ${f(gap)} ÷ 16 = ${f(MARK)}, the red mark.`]),
