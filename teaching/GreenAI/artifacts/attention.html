@@ -140,6 +140,12 @@ table.corpus td { padding: 2px 10px 2px 0; font-size: 0.86rem; } table.corpus td
 .g11 .gside { position: absolute; left: 4px; top: -1px; width: max-content; z-index: 2; display: grid; font-family: "Caveat", "Comic Sans MS", cursive; font-size: 15px; line-height: 14.5px; color: var(--fg); text-align: left; white-space: nowrap; }
 .g11 .gside.head { color: var(--muted); top: 6px; border: 0; background: none; box-shadow: none; }
 .g11 .gside span { animation: write 0.5s ease-out both; }
+.g11 .gc.ch { position: relative; overflow: hidden; background: none; }
+.g11 .gc.ch > span { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 4px; }
+.g11 .gc.ch .o { animation: fadeout 0.4s ease-in both; animation-delay: var(--d); }
+.g11 .gc.ch .n { animation: write 0.5s ease-out both; animation-delay: calc(var(--d) + 0.35s); }
+@keyframes fadeout { from { opacity: 1; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .g11 .gc.ch .o { display: none; } .g11 .gc.ch .n { animation: none; } }
 @keyframes write { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 @media (prefers-reduced-motion: reduce) { .g11 .gside span { animation: none; } }
 .tries { max-width: 72ch; margin: 0 0 10px; padding-left: 1.2em; } .tries li { margin: 2px 0; }
@@ -1462,6 +1468,8 @@ const wordChips = `<div class="flow">${EN.map(w => `<span class="word">${w}</spa
 const gShade = v => `background:rgba(${v < 0 ? "var(--negheat)" : "var(--heat)"},${(0.08 + 0.85 * Math.min(1, Math.abs(v))).toFixed(2)});color:${Math.abs(v) > 0.6 ? "var(--panel)" : "var(--fg)"}`;
 // v: a number; null: not decided yet (?); undefined: invisible
 const gCell = (v, cls = "") => v === undefined ? `<div class="gc hid"></div>` : v === null ? `<div class="gc q ${cls}">?</div>` : `<div class="gc ${cls}" style="${gShade(v)}">${f(v)}</div>`;
+// a cell whose value changes: the old value fades out, then the new one is written in, after d seconds
+const gCellCh = (o, v, cls, d) => `<div class="gc ch ${cls}" style="--d:${d}s"><span class="o" style="${gShade(o)}">${f(o)}</span><span class="n" style="${gShade(v)}">${f(v)}</span></div>`;
 const gSub = (v, cls = "") => `<div class="gs ${cls}">${v === undefined || v === 0 ? "" : f(v)}</div>`;
 // the score of one row on this row's own scale (−4 to 12, ticks every 4): one piece per part, each piece starting
 // where the one above it ended (blue: Σ first 3, green: Σ last 8, grey: bias); the mark and the number are the total
@@ -1492,7 +1500,7 @@ function g11(o) {
   const words = EN.map(w => {
     const r = (o.words || {})[w] || {}, dim = (o.dim || []).includes(w) ? " gdim" : "", win = o.win === w ? " win" : "";
     const vec = r.v === undefined ? DS.map(() => undefined) : r.v;
-    const A = line(`<b>${w}</b>`, vec.map((x, i) => gCell(x, r.cur || (r.hi || []).includes(i) ? "cur" : "")), r.side ? `<div class="gside">${r.side}</div>` : r.g === undefined ? "" : f(r.g), r.e === undefined ? "" : f(r.e), o.bias ? f(CAND[w].b) : "", r.score === undefined ? "" : gScore(r.score, o.win === w, r.anim, { g: r.g, e: r.e, b: r.b }), dim + win);
+    const A = line(`<b>${w}</b>`, vec.map((x, i) => { const c = r.cur || (r.hi || []).includes(i) ? "cur" : ""; return r.from && x !== undefined && r.from[i] !== x ? gCellCh(r.from[i], x, c, r.delay || 0) : gCell(x, c); }), r.side ? `<div class="gside">${r.side}</div>` : r.g === undefined ? "" : f(r.g), r.e === undefined ? "" : f(r.e), o.bias ? f(CAND[w].b) : "", r.score === undefined ? "" : gScore(r.score, o.win === w, r.anim, { g: r.g, e: r.e, b: r.b }), dim + win);
     const B = line(`<span class="gsl">${r.subLabel || ""}</span>`, DS.map((d, i) => gSub(r.sub ? r.sub[i] : undefined)), "", "", "", "", "subrow" + dim);
     return A + B;
   }).join("");
@@ -1657,7 +1665,7 @@ const STEPS = [
         seq.map((e, i) => { const t = `${i + 1}: ${e ? "2nd phrase" : "our phrase"}`; return i + 1 === k ? `<b>${t}</b>` : i + 1 < k ? t : `<span class="muted">${t}</span>`; }).join(" → ") + ".";
       const V4 = v => `(${v.slice(0, 4).map(f).join(", ")})`;  // unha, tía, miña, ‹start›: the only dimensions where these states are not 0
       const nudge = k => { const [ph, s, right, sum] = EX[seq[k - 1]], sg = w => w === right ? 1 : -1;
-        const row = (w, v) => ({ v: v[k], cur: true, side: board4(v[k - 1], sg(w), s, v[k], w === "a" ? 0 : 3) });
+        const row = (w, v) => ({ v: v[k], from: v[k - 1], delay: w === "a" ? 0.8 : 1.85, cur: true, side: board4(v[k - 1], sg(w), s, v[k], w === "a" ? 0 : 3) });
         return { board: g11({ cap: `round ${Math.ceil(k / 2)}, ${sum === VEC ? "the 2nd phrase" : "our phrase"}, <i>${ph}</i>: the right first word is “${right}”`, sum: { label: L2("summary", sum === VEC ? AMIP : OURS), v: sum }, st: { label: L2("state", sum === VEC ? AMIP : OURS), v: s }, dim: others, words: { an: row("an", vAn), a: row("a", vA) }, sideHead: "in unha, tía, miña, ‹start›:" }) +
             work([plan(k)].concat(k === 1 ? [`For the right word: + 16 × the state; for the wrong word: − 16 × the state. The result is where the next nudge starts.`] : []).concat(k === 1 ? [`How far a vector moves each time is the step size (in the skip-gram lesson, the learning rate). Real training takes many small steps, and the step size is a setting people choose. We chose ${STEP} so that the result matches step 4: in our phrase, tía is 0.25 in the state, so each round adds ${STEP} × 0.25 = 4 to the tía value of “an”, and two rounds give 8, the value set by hand in step 4. A smaller step size would need more rounds to get there.`] : [])),
           scene: tScene(k, `${capN[k - 1]} The dashed lines are the paths of the tips of “an” and “a”: one line per nudge, the latest one darker, a small dot where a tip was before. The lines below the floor belong to “a”: its first nudge gives it negative values. (Vectors drawn at 1/${STEP} of their length; first three dimensions only.)`) }; };
