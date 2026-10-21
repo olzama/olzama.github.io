@@ -117,7 +117,7 @@ svg.v3 .ahx { fill: var(--muted); } svg.v3 .ahq { fill: var(--orange); }
 svg.v3 .axl { fill: var(--fg); font-style: italic; font-size: 15px; font-family: var(--font-body, inherit); }
 svg.v3 .tk { fill: var(--muted); } svg.v3 .tkl { fill: var(--muted); font-size: 11px; }
 svg.v3 .tri { fill: rgba(var(--heat), 0.08); stroke: rgb(var(--heat)); stroke-dasharray: 4 3; }
-svg.v3 .gd { stroke: var(--muted); stroke-dasharray: 4 3; }
+svg.v3 .gd { stroke: var(--muted); stroke-dasharray: 4 3; } svg.v3 .gd.old { opacity: 0.35; } svg.v3 .gd.now { stroke: var(--fg); stroke-width: 1.5; } svg.v3 .tip { fill: var(--muted); opacity: 0.6; }
 svg.v3 .qd { stroke: var(--orange); stroke-dasharray: 3 3; } svg.v3 .qline { stroke: var(--orange); stroke-width: 1; opacity: 0.6; }
 svg.v3 .qa { stroke: var(--orange); stroke-width: 3; }
 svg.v3 .ca { stroke: var(--fg); stroke-width: 2.5; } svg.v3 .ahc { fill: var(--fg); } svg.v3 .cl { fill: var(--fg); font-size: 12px; font-family: var(--font-mono); }
@@ -1278,7 +1278,7 @@ const encPlain = j => `after ${DIMS[j]}`;
 
 // ---------- the 3-D picture: one axis per row of the vectors; drag to turn ----------
 function view3d(svg, capEl) {
-  const st = { az: 3.85, el: 0.62, scene: null };
+  const st = { az: 3.85, el: 0.62, scene: null, y0: 0, y1: 350 };
   let O = [240, 212], S = 180;
   const P = ([x, y, z]) => {
     const x1 = x * Math.cos(st.az) - y * Math.sin(st.az), y1 = x * Math.sin(st.az) + y * Math.cos(st.az);
@@ -1301,6 +1301,7 @@ function view3d(svg, capEl) {
     });
     (sc.tri ? [sc.tri] : []).forEach(tr => { g += `<polygon class="tri" points="${tr.map(p => xy(p).join(",")).join(" ")}"/>`; });
     (sc.segs || []).forEach(s => { g += line(s.a, s.b, s.cls || "gd"); });
+    (sc.tips || []).forEach(p => { const [x, y] = P(p); g += `<circle class="tip" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/>`; });
     (sc.marks || []).forEach(m => {  // a short bar across an axis at value m.v, labeled
       const a = [0, 0, 0], b = [0, 0, 0], c = [0, 0, 0]; a[m.axis] = m.v; b[m.axis] = m.v; c[m.axis] = m.v;
       const side = m.axis === 2 ? 0 : 1 - m.axis; a[side] = -0.06 * R; b[side] = 0.06 * R;
@@ -1319,6 +1320,7 @@ function view3d(svg, capEl) {
       } else g += text(n.p, n.t, n.cls || "gl3", n.dx ?? 0, n.dy ?? 0, n.anchor || "start");
     });
     svg.innerHTML = g;
+    try { const b = svg.getBBox(); if (b.height) { st.y0 = Math.min(st.y0, Math.floor(b.y) - 6); st.y1 = Math.max(st.y1, Math.ceil(b.y + b.height) + 6); svg.setAttribute("viewBox", `0 ${st.y0} 470 ${st.y1 - st.y0}`); } } catch (e) {}
     if (capEl) capEl.textContent = sc.cap || "";
   }
   let drag = null;
@@ -1630,7 +1632,8 @@ const STEPS = [
       const amiSeg = AMI.map((e, j) => ({ a: j ? AMI[j - 1] : ZERO, b: e, cls: "gd" }));
       const tScene = (n, cap, extra = {}) => ({ ...DEC_VIEW, cap,
         pts: [{ p: SUMMARY, cls: "enc", label: "unha tía miña", dx: 10, dy: -10 }, { p: VEC, cls: "enc faint", label: "unha veciña miña", dx: -10, dy: -10, anchor: "end" }],
-        segs: [...vAn.slice(0, n + 1).flatMap((v, i) => i ? [{ a: g3(vAn[i - 1]), b: g3(v), cls: "gd" }] : []), ...vA.slice(0, n + 1).flatMap((v, i) => i ? [{ a: g3(vA[i - 1]), b: g3(v), cls: "gd" }] : [])],
+        segs: [vAn, vA].flatMap(V => V.slice(0, n + 1).flatMap((v, i) => i ? [{ a: g3(V[i - 1]), b: g3(v), cls: i === n ? "gd now" : "gd old" }] : [])),
+        tips: [vAn, vA].flatMap(V => V.slice(1, n).map(v => g3(v))),
         arrows: n ? [{ a: ZERO, b: g3(vAn[n]), cls: "ca", label: "“an”", dx: 6, dy: 18 }, { a: ZERO, b: g3(vA[n]), cls: "ca", label: "“a”", dx: 0, dy: 26, anchor: "start" }] : [], ...extra });
       const L2 = (r, ph) => `<span>${r}<small>${ph}</small></span>`, OURS = "our phrase", AMIP = "2nd phrase";
       const ENCL = ["½ × (0, 0, 0) + ½ × (1, 0, 0) = (0.5, 0, 0)", "½ × (0.5, 0, 0) + ½ × (0, 0, 0) = (0.25, 0, 0). This small model has no dimension for veciña, so its word vector is all zeros: reading it adds nothing and halves what was there.", "½ × (0.25, 0, 0) + ½ × (0, 0, 1) = (0.125, 0, 0.5). No tía ever entered this summary."];
@@ -1645,7 +1648,7 @@ const STEPS = [
         const row = (w, v) => ({ v: v[k], cur: true, sub: s.map(x => r2(sg(w) * STEP * x)), subLabel: `${sg(w) > 0 ? "+" : "−"}16 × state` });
         return { board: g11({ cap: `round ${Math.ceil(k / 2)}, ${sum === VEC ? "the 2nd phrase" : "our phrase"}, <i>${ph}</i>: the right first word is “${right}”`, sum: { label: L2("summary", sum === VEC ? AMIP : OURS), v: sum }, st: { label: L2("state", sum === VEC ? AMIP : OURS), v: s }, dim: others, words: { an: row("an", vAn), a: row("a", vA) } }) +
             work([`The line under each vector is what training adds to it: + 16 × the state for the right word, − 16 × the state for the wrong one. The vector shown is the result.`].concat(k === 1 ? [`How far a vector moves each time is the step size (in the skip-gram lesson, the learning rate). Real training takes many small steps, and the step size is a setting people choose. We chose ${STEP} so that the result matches step 4: in our phrase, tía is 0.25 in the state, so each round adds ${STEP} × 0.25 = 4 to the tía value of “an”, and two rounds give 8, the value set by hand in step 4. A smaller step size would need more rounds to get there.`] : [])),
-          scene: tScene(k, `${capN[k - 1]} (Vectors drawn at 1/${STEP} of their length; first three dimensions only.)`) }; };
+          scene: tScene(k, `${capN[k - 1]} The dashed lines are the paths of the tips of “an” and “a”: one line per nudge, the latest one darker, a small dot where a tip was before. The lines below the floor belong to “a”: its first nudge gives it negative values. (Vectors drawn at 1/${STEP} of their length; first three dimensions only.)`) }; };
       return [enc(0), enc(1), enc(2),
         { board: g11({ cap: "the decoder state before word 1, for the 2nd phrase, <i>unha veciña miña</i>", sum: { label: L2("summary", AMIP), v: VEC }, st: { label: L2("state", AMIP), v: S2, hi: [0, 1, 2, 3] }, dim: others }) +
             work([`For our phrase, <i>unha tía miña</i>, the state before word 1 was ${vecTxt(S1.slice(0, 4))}, then zeros (step 3). For the 2nd phrase it is ${vecTxt(S2.slice(0, 4))}, then zeros: tía is 0, because the 2nd phrase has no tía. The two states differ only in tía.`]),
@@ -1800,7 +1803,9 @@ function planes(px, steps, groups) {
   // every plane is on the page from the start; Next at the end of a plane scrolls to the next one
   function open(pj, scroll = true) { if (pj < P.length && scroll) P[pj].el.scrollIntoView({ block: "start" }); }
   P.forEach((p, pi) => draw(pi));
-  requestAnimationFrame(() => P.forEach((p, pi) => { fitHead(p); draw(pi); }));
+  // size each picture once for all its pieces, so that it never grows while stepping
+  const prefit = p => itemsOf(p).forEach(([si, fi]) => { const v = frames(si)[fi]; if (v.scene) p.view.set(v.scene); });
+  setTimeout(() => P.forEach((p, pi) => { prefit(p); fitHead(p); draw(pi); }), 0);
   // a row of step links above the planes
   const nav = document.createElement("div"); nav.className = "controls plnav";
   nav.innerHTML = `<span class="note">Steps</span>` + steps.map(([t], si) => `<button title="${t}">${si + 1}</button>`).join("");
