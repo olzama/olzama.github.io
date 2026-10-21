@@ -129,6 +129,7 @@ svg.v3 .pt.word { fill: var(--muted); } svg.v3 .pt.enc { fill: rgb(var(--heat));
 svg.v3 .pt.faint { opacity: 0.3; }
 svg.v3 .pl { font-size: 12px; fill: var(--fg); } svg.v3 .pl.mix { fill: var(--orange); } svg.v3 .pl.enc { fill: rgb(var(--heat)); }
 .controls.stick { position: sticky; top: 0; z-index: 3; background: inherit; padding-block: 6px; }
+.fixh { min-height: 7em; }
 .tries { max-width: 72ch; margin: 0 0 10px; padding-left: 1.2em; } .tries li { margin: 2px 0; }
 .qkctl { display: grid; grid-template-columns: max-content minmax(0, 260px) 3em; justify-content: start; gap: 6px 10px; align-items: center; }
 #qkPre { flex-wrap: wrap; }
@@ -1403,7 +1404,7 @@ function dec({ x, xName, st, cols = [], parts = [], anim = null, rows = EN, pick
 const whyLines = (sc, x, xName) => { const a = sc.rows[0], an = sc.rows[1]; return work([
   `“a”: ${f(a.gp)} + ${f(a.ep)} + bias ${f(a.b)} = <b>${f(a.s)}</b>`,
   `“an”: ${f(an.gp)} + ${f(an.ep)} + bias ${f(an.b)} = <b>${f(an.s)}</b>`]); };
-const pickLine = sc => work([`softmax over the eight scores: P(“${sc.best.w}”) = <b>${f(sc.best.p)}</b> → the decoder writes <b>“${sc.best.w}”</b>`]);
+const pickLine = sc => work([`The most probable word is “${sc.best.w}”, ${f(sc.best.p)}: the decoder writes <b>“${sc.best.w}”</b>.`]);
 // the tía axis drawn flat, with the red mark and the state's position on it
 function ruler(x, att) {
   const X = v => 20 + v * 640, pts = att ? [[x[TIA], "the mix", "var(--orange)"]] : [[ENC[1][TIA], "after tía", "rgb(var(--heat))"], [x[TIA], "the summary", "rgb(var(--heat))"]];
@@ -1429,8 +1430,8 @@ function decScene(x, att, { arrows = false, drops = [], mark = false, path = fal
 }
 const SUM_IN = { x: SUMMARY, xName: "the summary", st: ST0 };
 const stLine = (prev, st) => `“${prev}” is written: ½ × every old value, + ½ in the dimension of “${prev}” → ${ST.map((r, i) => st[i] ? `${r} ${f(st[i])}` : "").filter(Boolean).join(", ")}`;
-const qLine = s => `query = ${vecTxt(Q0)}${ST.map((r, i) => s.st[i] && QSHIFT[r][2] ? ` + ${f(s.st[i])} × (0, −12, 12)` : "").join("")} = <b>${vecTxt(s.q)}</b>`;
-const wLine = s => `weights ${s.a.sm.p.map((w, j) => `${f(w)} (${encPlain(j)})`).join(", ")} → mix <b>${vecTxt(s.a.mix)}</b>`;
+const qLine = s => ST.every((r, i) => !(s.st[i] && QSHIFT[r][2])) ? `query = ${vecTxt(Q0)}: no word that shifts it has been written yet` : `query = ${vecTxt(Q0)}${ST.map((r, i) => s.st[i] && QSHIFT[r][2] ? ` + ${f(s.st[i])} × (0, −12, 12)` : "").join("")} = <b>${vecTxt(s.q)}</b>`;
+const wLine = s => `mix = ${s.a.sm.p.map((w, j) => `${f(w)} × ${vecTxt(ENC[j])}`).join(" + ")} = <b>${vecTxt(s.a.mix)}</b>`;
 // a phrase whose state holds no tía: unha amiga miña. amiga has no dimension in this model, so reading it only halves the rest.
 const VEC = [0.125, 0, 0.5];
 
@@ -1517,28 +1518,43 @@ function encStage(n) {
 }
 // ----- softmax on one fixed stage: the scores, e to the power of each score (a bar each), the bars end to end
 // (their sum), and each bar's share of the sum (the weights). n = 0…3 reveals one column more each time.
-function smStage(a, n) {
-  const U = 300 / a.sm.Z, X = 265, H = (show, c = "") => `class="${c}${show ? "" : " hid"}"`, sh = j => ["k1", "k2", "k3"][j];
-  let g = `<text x="0" y="16" class="sh">encoder vector</text><text x="170" y="16" text-anchor="end" class="sh">score</text>` +
+function smCore(o, n) {
+  // o: {labels, sc, e, Z, p, head, outHead, title, strong}; n = 0…3 reveals one column more each time
+  const R = o.labels.length, RS = R > 3 ? 24 : 34, U = 300 / o.Z, X = 265, H = (show, c = "") => `class="${c}${show ? "" : " hid"}"`;
+  const sh = j => o.strong !== undefined ? (j === o.strong ? "k2" : j % 2 ? "k1" : "k3") : ["k1", "k2", "k3"][j % 3];
+  const yB = 48 + RS * R + 10, H2 = yB + 74;
+  let g = `<text x="0" y="16" class="sh">${o.head}</text><text x="170" y="16" text-anchor="end" class="sh">score</text>` +
     `<text x="250" y="16" text-anchor="end" ${H(n >= 1, "sh")}>e<tspan dy="-5" font-size="0.75em">score</tspan></text>` +
-    `<text x="595" y="16" text-anchor="end" ${H(n >= 3, "sh")}>weight</text>`;
-  ENC.forEach((e, j) => { const y = 48 + 34 * j, w = a.sm.e[j] * U;
-    g += `<text x="0" y="${y}" class="sl">${encPlain(j)}</text><text x="170" y="${y}" text-anchor="end" class="sv">${f(a.sc[j])}</text>` +
-      `<g ${H(n >= 1)}><text x="250" y="${y}" text-anchor="end" class="sv">${f(a.sm.e[j])}</text><rect x="${X}" y="${y - 13}" width="${w.toFixed(1)}" height="16" rx="2" class="${sh(j)}"/></g>` +
-      `<text x="595" y="${y}" text-anchor="end" ${H(n >= 3, "sv sw")}>${f(a.sm.p[j])}</text>`; });
+    `<text x="595" y="16" text-anchor="end" ${H(n >= 3, "sh")}>${o.outHead}</text>`;
+  o.labels.forEach((lab, j) => { const y = 44 + RS * j, w = o.e[j] * U;
+    g += `<text x="0" y="${y}" class="sl">${lab}</text><text x="170" y="${y}" text-anchor="end" class="sv">${f(o.sc[j])}</text>` +
+      `<g ${H(n >= 1)}><text x="250" y="${y}" text-anchor="end" class="sv">${f(o.e[j])}</text>${w >= 0.05 ? `<rect x="${X}" y="${y - 12}" width="${w.toFixed(1)}" height="${RS > 30 ? 16 : 14}" rx="2" class="${sh(j)}"/>` : ""}</g>` +
+      `<text x="595" y="${y}" text-anchor="end" ${H(n >= 3, "sv sw")}>${f(o.p[j])}</text>`; });
   let at = X, pcs = "", shares = "";
-  ENC.forEach((e, j) => { const w = a.sm.e[j] * U;
-    pcs += `<rect x="${at.toFixed(1)}" y="152" width="${w.toFixed(1)}" height="20" class="${sh(j)}"/>`;
-    shares += `<text x="${(at + w / 2).toFixed(1)}" y="${j === 0 ? 218 : 204}" text-anchor="middle" class="sv sw">${f(a.sm.p[j])}</text>`; at += w; });
-  g += `<g ${H(n >= 2)}><text x="250" y="167" text-anchor="end" class="sv">sum ${f(a.sm.Z)}</text>${pcs}` +
-    `<line x1="${X}" y1="178" x2="${X + 300}" y2="178" class="ax"/><line x1="${X}" y1="174" x2="${X}" y2="182" class="ax"/><line x1="${X + 300}" y1="174" x2="${X + 300}" y2="182" class="ax"/>` +
-    `<text x="${X}" y="192" text-anchor="middle" class="st">0</text><text x="${X + 300}" y="192" text-anchor="middle" class="st">${n >= 3 ? "1" : f(a.sm.Z)}</text></g>` +
-    `<g ${H(n >= 3)}>${shares}<text x="250" y="204" text-anchor="end" class="st">each piece's share</text></g>`;
-  return `<p class="label">softmax: from the three scores to three weights</p><svg class="smst" viewBox="0 0 600 226" role="img" aria-label="softmax of the scores ${a.sc.map(f).join(", ")}">${g}</svg>`;
+  o.labels.forEach((lab, j) => { const w = o.e[j] * U;
+    if (w >= 0.05) pcs += `<rect x="${at.toFixed(1)}" y="${yB}" width="${w.toFixed(1)}" height="20" class="${sh(j)}"/>`;
+    if (w >= 30) shares += `<text x="${(at + w / 2).toFixed(1)}" y="${yB + 52}" text-anchor="middle" class="sv sw">${f(o.p[j])}</text>`; at += w; });
+  g += `<g ${H(n >= 2)}><text x="250" y="${yB + 15}" text-anchor="end" class="sv">sum ${f(o.Z)}</text>${pcs}` +
+    `<line x1="${X}" y1="${yB + 26}" x2="${X + 300}" y2="${yB + 26}" class="ax"/><line x1="${X}" y1="${yB + 22}" x2="${X}" y2="${yB + 30}" class="ax"/><line x1="${X + 300}" y1="${yB + 22}" x2="${X + 300}" y2="${yB + 30}" class="ax"/>` +
+    `<text x="${X}" y="${yB + 40}" text-anchor="middle" class="st">0</text><text x="${X + 300}" y="${yB + 40}" text-anchor="middle" class="st">${n >= 3 ? "1" : f(o.Z)}</text></g>` +
+    `<g ${H(n >= 3)}>${shares}<text x="250" y="${yB + 52}" text-anchor="end" class="st">each piece's share</text></g>`;
+  return `<p class="label">${o.title}</p><svg class="smst" viewBox="0 0 600 ${H2}" role="img" aria-label="softmax of the scores ${o.sc.map(f).join(", ")}">${g}</svg>`;
 }
+// softmax over the three encoder vectors (attention weights)
+const smStage = (a, n, from) => smCore({ labels: ENC.map((e, j) => encPlain(j)), sc: a.sc, e: a.sm.e, Z: a.sm.Z, p: a.sm.p, head: "encoder vector", outHead: "weight",
+  title: `${from ? `${from}: ` : ""}scores (query · each encoder vector) → softmax → weights` }, n);
+// softmax over the eight English words (probabilities of the next word)
+const smWords = (sc, n, title) => smCore({ labels: sc.rows.map(r => r.w), sc: sc.rows.map(r => r.s), e: sc.rows.map(r => r.e), Z: sc.Z, p: sc.rows.map(r => r.p),
+  head: "English word", outHead: "probability", strong: sc.rows.indexOf(sc.best), title }, n);
+const WTXT = sc => [
+  [`The decoder now has eight scores, one per English word. Softmax turns them into probabilities: values that are 0 or more and add up to 1. Then the decoder writes the most probable word. (A real model may also pick a word at random, with these probabilities.)`,
+    `<span class="review"><span class="rtag">Review</span> The <a href="skipgram.html">skip-gram</a> model used the same softmax to turn its scores into probabilities.</span>`],
+  [`Part 1: e to the power of each score. e is a fixed number, about 2.718. The results are always more than 0, and each 1 more in the score multiplies the result by 2.718. So the two high scores, ${f(sc.rows[0].s)} for “a” and ${f(sc.rows[1].s)} for “an”, give by far the longest bars; the other bars are too short to see.`],
+  [`The eight bars end to end: their sum is ${f(sc.Z)}.`],
+  [`Part 2: divide each bar by the sum. The whole bar now has length 1, and each probability is its piece's share: “a” ${f(sc.rows[0].p)}, “an” ${f(sc.rows[1].p)}; the other six are below 0.005 and show as 0. The decoder writes the most probable word, <b>“${sc.best.w}”</b>.`]];
 const SMTXT = a => [
   [`The weights have to be 0 or more and add up to 1, so that the mix is a weighted average of the encoder vectors. The scores ${a.sc.map(f).join(", ")} add up to ${f(r2(a.sc.reduce((x, y) => x + y, 0)))}. Softmax turns scores into weights, in two parts.`,
-    `<span class="review"><span class="rtag">Review</span> The <a href="skipgram.html">skip-gram</a> model used the same softmax to turn its scores into probabilities.</span>`],
+    `<span class="review"><span class="rtag">Review</span> This is the same softmax that turned the decoder's eight scores into probabilities in section 1, step 6.</span>`],
   [`Part 1: e to the power of each score. e is a fixed number, about 2.718. e<sup>0</sup> = 1; e<sup>1.5</sup> = ${f(a.sm.e[2])}; e<sup>3</sup> = 2.718 × 2.718 × 2.718 = ${f(a.sm.e[1])}. The results are always more than 0, and a higher score gives a larger result: each 1 more in the score multiplies it by 2.718.`],
   [`The three bars end to end: 1 + ${f(a.sm.e[1])} + ${f(a.sm.e[2])} = ${f(a.sm.Z)}.`],
   [`Part 2: divide each bar by the sum: ${a.sm.p.map((w, j) => `${f(a.sm.e[j])} / ${f(a.sm.Z)} = ${f(w)}`).join(", ")}. The whole bar now has length 1, and each weight is its piece's share. (Rounded to two decimals they add up to ${f(r2(a.sm.p.reduce((x, y) => x + y, 0)))}; exactly, to 1.)`]];
@@ -1683,11 +1699,11 @@ const STEPS = [
       const vScene = cap => decScene(VEC, false, { arrows: true, drops: [TIA], xLabel: `unha amiga miña ${vecTxt(VEC)}`, cap });
       return [
         { board: g11({ ...am, cap: "<i>unha amiga miña</i>: scores without a bias", words: allBars(VEC, ST0, ["g", "e"]) }) +
-            work([`Take <i>unha amiga miña</i> again. Its state holds nothing of tía, so “a” and “an” get the same dot product, ${f(r2(sv0.rows[0].gp + sv0.rows[0].ep))}, and the same probability: ${P(sv0)}. A coin toss.`,
+            work([`Take <i>unha amiga miña</i> again. Its state holds nothing of tía, so “a” and “an” get the same score, ${f(r2(sv0.rows[0].gp + sv0.rows[0].ep))}. The state gives no reason to prefer either.`,
               "Yet in the translation page's example translations, “a” is the right first word 6 times out of 8. The model needs a way to prefer “a” when the state says nothing either way."]),
           scene: vScene("This state reaches 0 along tía: nothing in it speaks for “an” or for “a”.") },
         { board: g11({ ...am, bias: true, cap: "<i>unha amiga miña</i>: the bias is added", words: allBars(VEC, ST0, ALL, { anim: "b" }) }) +
-            work([`That is the bias. Training raises the bias of a word that is right more often than its dot product says: “a” gets ${f(CAND.a.b)}. Now ${P(sv)}.`,
+            work([`That is the bias. Training raises the bias of a word that is right more often than its dot product says: “a” gets ${f(CAND.a.b)}. Now “a” scores ${f(sv.rows[0].s)} and “an” ${f(sv.rows[1].s)}.`,
               `Biases in this model: “a” ${f(CAND.a.b)}, “friend” ${f(CAND.friend.b)}, “‹end›” ${f(CAND["‹end›"].b)}, all others 0. Score = dot product + bias.`]),
           scene: vScene("The bias does not depend on the state: the gray part is added to the bar of “a” whatever the picture shows.") },
         { board: g11({ ...ti, bias: true, cap: "back to <i>unha tía miña</i>", words: allBars(SUMMARY, ST0, ALL, { anim: "b" }) }) + whyLines(sc, SUMMARY, "the summary"),
@@ -1695,8 +1711,9 @@ const STEPS = [
         { board: g11({ ...ti, bias: true, cap: "how much tía would “an” need?", words: allBars(SUMMARY, ST0, ALL) }) + ruler(SUMMARY, false) +
             work([`Each unit of tía in the state adds 8 to “an” and takes 8 from “a”. “an” beats the bias of “a” only if 16 × tía > ${f(gap)}: tía > ${f(gap)} ÷ 16 = ${f(MARK)}, the red mark.`]),
           scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA], mark: true, cap: `The summary reaches ${f(SUMMARY[TIA])} along tía, short of the mark. After reading tía the encoder had ${f(ENC[1][TIA])}; reading miña halved it.` }) },
-        { board: g11({ ...ti, bias: true, win: "a", cap: "the decoder writes “a”", words: allBars(SUMMARY, ST0, ALL) }) + ruler(SUMMARY, false) + work([P(sc)]) + pickLine(sc),
-          scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA], mark: true, cap: "The decoder writes “a”: the summary holds too little of tía to beat the bias." }) }];
+        ...upto(4, n => ({ board: g11({ ...ti, bias: true, win: n === 3 ? "a" : undefined, cap: n === 3 ? "the decoder writes “a”" : "from the eight scores to the next word", words: allBars(SUMMARY, ST0, ALL) }) +
+            smWords(sc, n, "softmax: from the eight scores to a probability for each word") + work(WTXT(sc)[n]),
+          scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA], mark: true, cap: n === 3 ? "The decoder writes “a”: the summary holds too little of tía to beat the bias." : "The summary holds too little of tía to beat the bias of “a”." }) }))];
     } }],
   ["The rest of the phrase", {
     text: "After each word, the decoder updates the values in the last eight dimensions: every value is halved, and the value in the dimension of the word just written goes up by 0.5. The values in the first three dimensions stay the summary. Then all eight words are scored again.",
@@ -1732,8 +1749,8 @@ const STEPS = [
     frames: () => {
       const a = ATT[0].a, terms = n => ENC.slice(0, n).flatMap((e, j) => [j ? op("+") : "", k(`${f(a.sm.p[j])} ×`), col(e, `value ${j + 1}: encoder vector ${encName(j)}`)]);
       const vals = n => encPts(ENC.map((e, j) => j < n ? `weight ${f(a.sm.p[j])}` + (j === 2 ? " (summary)" : "") : ""), "enc").map((p, j) => j < n ? p : { ...p, cls: "enc faint" });
-      return [...upto(3, j => ({ board: eq(...terms(j + 1)), scene: { ...SMALL, pts: vals(j + 1), cap: `${f(a.sm.p[j])} × the encoder vector ${encPlain(j)}.` } })),
-        { board: eq(...terms(3), op("="), col(a.mix, "the mix", "cur")) + work([`Dimension by dimension, for example tía: ${a.sm.p.map((w, j) => `${f(w)} × ${f(ENC[j][TIA])}`).join(" + ")} = <b>${f(a.mix[TIA])}</b>`]),
+      return [...upto(3, j => ({ board: smStage(a, 3, "from step 1") + eq(...terms(j + 1)), scene: { ...SMALL, pts: vals(j + 1), cap: `${f(a.sm.p[j])} × the encoder vector ${encPlain(j)}.` } })),
+        { board: smStage(a, 3, "from step 1") + eq(...terms(3), op("="), col(a.mix, "the mix", "cur")) + work([`Dimension by dimension, for example tía: ${a.sm.p.map((w, j) => `${f(w)} × ${f(ENC[j][TIA])}`).join(" + ")} = <b>${f(a.mix[TIA])}</b>`]),
           scene: { ...SMALL, tri: ENC, pts: [...vals(3), { p: a.mix, cls: "mix", label: `mix ${vecTxt(a.mix)}`, dx: 10, dy: 18 }],
             cap: `Added up: the mix. It lies inside the triangle of the three encoder vectors, pulled toward the one with the largest weight. It holds ${f(a.mix[TIA])} of tía; the summary held ${f(SUMMARY[TIA])}.` } }];
     } }],
@@ -1747,7 +1764,7 @@ const STEPS = [
           scene: decScene(x, true, { arrows: true, cap: `The mix in the picture, with the word vectors of section 1. It reaches ${f(x[TIA])} along tía; the summary reached ${f(SUMMARY[TIA])}.` }) },
         { board: g11({ ...base, cap: "the first three dimensions of each dot product", st: { v: stateOf(x, ST0) }, words: allBars(x, ST0, ["g"]) }),
           scene: decScene(x, true, { arrows: true, drops: [TIA, MINA], cap: `tía gives “an” and “aunt” 8 × ${f(x[TIA])} = ${f(r2(8 * x[TIA]))}, and takes the same from “a” and “friend”. Along miña the mix reaches only ${f(x[MINA])}: “of” and “mine” get ${f(r2(8 * x[MINA]))}.` }) },
-        { board: g11({ ...base, cap: "the decoder writes “an”", st: { v: stateOf(x, ST0) }, win: "an", words: allBars(x, ST0, ALL) }) + ruler(x, true) + whyLines(s.sc, x, "the mix") + pickLine(s.sc),
+        { board: g11({ ...base, cap: "the decoder writes “an”", st: { v: stateOf(x, ST0) }, win: "an", words: allBars(x, ST0, ALL) }) + ruler(x, true) + whyLines(s.sc, x, "the mix") + smWords(s.sc, 3, "softmax, as in section 1: from the eight scores to a probability for each word") + pickLine(s.sc),
           scene: decScene(x, true, { arrows: true, drops: [TIA], mark: true, cap: `Why “an” now: the gap from tía is ${f(r2(2 * 8 * x[TIA]))}, more than the bias of “a”, ${f(CAND.a.b)}. The mix is past the ${f(MARK)} mark. The decoder writes “an”.` }) }];
     } }],
   ["The rest of the phrase, with attention", {
@@ -1761,7 +1778,7 @@ const STEPS = [
       return ATT.slice(1).map((s, i) => {
         const prev = stateOf(ATT[i].a.mix, ATT[i].st), now = stateOf(s.a.mix, s.st);
         return { board: g11({ cap: `“${ATT[i].w}” has been written: a new query, new weights, a new mix`, sum: { label: "the mix", v: s.a.mix, cls: "mixl", hi: changed(ATT[i].a.mix, s.a.mix) }, st: { v: now, hi: changed(prev, now) }, bias: true, sums: true, resHead: "score", win: s.w, words: allBars(s.a.mix, s.st, ALL) }) +
-            work([stLine(ATT[i].w, s.st), qLine(s), wLine(s)]),
+            `<div class="fixh">${work([stLine(ATT[i].w, s.st), qLine(s)])}</div>` + smStage(s.a, 3, "the new query") + work([wLine(s)]),
           scene: decScene(s.a.mix, true, { arrows: true, drops: [TIA, MINA], mark: true, mixes: ATT.slice(0, i + 1).map(t => t.a.mix), xLabel: `mix for word ${i + 2}`, cap: `Word ${i + 2}. ${caps[i]}` }) };
       });
     } }],
