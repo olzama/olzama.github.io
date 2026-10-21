@@ -741,7 +741,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <section class="screen" id="tryA" data-step="1">
   <header><span class="kind">Try it · about 15 minutes for the three screens</span><h2>Build the bigram model</h2></header>
   <div class="body">
-    <div class="colab"><span>The Python here runs in your browser. The first Run loads Python, which takes a few seconds.</span><span>The same exercises as a notebook: <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01b_ngrams_playground-beginner.ipynb" target="_blank" rel="noopener">beginner</a> · <a href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01b_ngrams_playground-advanced.ipynb" target="_blank" rel="noopener">advanced</a> (Colab)</span></div>
+    <div class="colab"><span>The Python here runs in your browser. The first Run loads Python, which takes a few seconds.</span></div>
     <p style="max-width:80ch">Some lines have gaps marked <code>___</code>. Replace each gap with code. <b>Run</b> shows what your code prints. <b>Run the tests</b> also checks it: each test checks one thing, including unusual inputs, and says what to fix. Under each exercise you can read the tests, the hints and the solution. Do the exercises in order: later ones use your earlier code.</p>
 
     <div class="ex" data-ex="1">
@@ -937,7 +937,7 @@ print(f"P(uncle | my) = {bigram_prob('my', 'uncle', ext_counts, ext_unigrams):.3
   </div>
   <div class="notes">
     <p>Now everyone works alone, for about 15 minutes. There are three screens of exercises: this one and the next two.</p>
-    <p>The code runs in the browser. Nothing to install. The first Run loads Python and takes a few seconds. If a laptop has trouble, the same exercises are in the Colab notebooks linked at the top.</p>
+    <p>The code runs in the browser. Nothing to install. The first Run loads Python and takes a few seconds.</p>
     <p>How it works: replace every gap, the three underscores, with code. Run shows what the code prints. Run the tests checks it. Each test checks one thing, also with unusual inputs like an empty corpus, and a failing test says what to fix. The tests, the hints and the solution are under each exercise. Ask them to read a failing test's message before they open the solution.</p>
     <p>Exercise 1 rebuilds the model from the worked example. It should print 0.67 and 0.33. Exercise 2 changes the corpus, so the numbers change: the data is the model.</p>
   </div>
@@ -1289,6 +1289,29 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <p>Press Write new lines. There are four models. The unigram model looks at no context. The bigram model looks at one word, the trigram model at two, the 4-gram model at three. The longer the context, the more it sounds like Shakespeare.</p>
     <p>Click a word to see the choices the model had at that step. The 4-gram model often has only one choice. A long context was usually seen once, so the model copies Shakespeare word for word. This is sparsity again, from the other side.</p>
     <p>Then press the tab Shakespeare or n-gram. One line is real, one comes from the model. Let the class vote.</p>
+  </div>
+</section>
+
+<section class="screen" id="act-ngr" data-step="1">
+  <header><span class="kind">Activity · about 20 minutes, individual</span><h2>N-grams at scale</h2></header>
+  <div class="body">
+    <div class="activity"><h3>Notebook 01b, in Colab (CPU only, no GPU needed)</h3><div>
+      <ul class="points">
+        <li>The same counting, on 2 million words each of Galician and Spanish Wikipedia</li>
+        <li>How many bigrams of new text has the model never seen, as the training text grows?</li>
+        <li>What does a longer n do? And a Galician trigram model writes text</li>
+      </ul>
+      <div class="links">
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01b_ngrams_playground-beginner.ipynb" target="_blank" rel="noopener">Open in Colab: beginner</a>
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01b_ngrams_playground-advanced.ipynb" target="_blank" rel="noopener">Open in Colab: advanced</a>
+      </div>
+    </div></div>
+  </div>
+  <div class="notes">
+    <p>Now the same counting on real text. Open Notebook 01b in Colab. It needs no GPU.</p>
+    <p>The notebook downloads 2 million words of Galician Wikipedia and 2 million of Spanish. It trains bigram models on more and more text, from 10 thousand words to 1.8 million. For each model it measures how many bigrams of new text the model has never seen. Those bigrams get probability 0.</p>
+    <p>Then it repeats the count for longer n-grams, up to 4 words. And at the end a trigram model writes Galician.</p>
+    <p>Look at two things. First: at the same amount of text, are Galician and Spanish very different? Second: how much text does each language have? The notebook gives the totals for all of Wikipedia.</p>
   </div>
 </section>
 
@@ -1874,12 +1897,13 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
 </section>
 
 <section class="screen" id="act-emb" data-step="2">
-  <header><span class="kind">Activity · about 15–20 minutes, individual</span><h2>Embeddings playground</h2></header>
+  <header><span class="kind">Activity · about 25 minutes, individual</span><h2>Embeddings playground</h2></header>
   <div class="body">
     <div class="activity"><h3>Notebook 01c, in Colab (CPU only, no GPU needed)</h3><div>
       <ul class="points">
-        <li>Part A: real word embeddings, real cosine similarity, a 2-D map of related words</li>
-        <li>Part B: do Galician, Spanish and Portuguese words for “aunt” really look distinct to a multilingual model?</li>
+        <li>Part A: train skip-gram on 2 million words of Galician, with 2 to 300 dimensions: time, energy, quality</li>
+        <li>Part B: train on less text: which words suffer first?</li>
+        <li>Part C: does a multilingual model match Galician words with their Spanish and English translations?</li>
       </ul>
       <div class="links">
         <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01c_embeddings_playground-beginner.ipynb" target="_blank" rel="noopener">Open in Colab: beginner</a>
@@ -1888,7 +1912,10 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     </div></div>
   </div>
   <div class="notes">
-    <p>Pause here too, right after skip-gram. Have everyone open 01c_embeddings_playground.ipynb — CPU only, two small downloads (a 66MB GloVe vector file, then a roughly 470MB multilingual sentence encoder). Part A replaces the toy 2-D aunt/uncle/car numbers with real, pretrained 50-dimensional embeddings — same three words, real cosine similarities, a nearest-neighbors query, and a PCA scatter plot of a dozen related words that visibly clusters family terms together and vehicles together, with nobody having hand-labeled either category. Part B is the sharper one: using a small multilingual sentence encoder that explicitly supports Galician, students embed "tía"/"miña"/the full phrase in Galician, Spanish, Portuguese, and English, compute how close Galician sits to each of the other three, then see it two ways — a bar chart of the similarity table, and a PCA scatter of all 12 embeddings together, where the Galician points visibly cluster with Spanish and Portuguese, apart from English. The expected finding — Galician sitting almost as close to Spanish as a word sits to itself — is a measured, hands-on version of the "almost residual" claim we'll cite later. This is meant to land before the machine-translation history screen, so the Galician thread feels demonstrated, not just asserted.</p>
+    <p>Now you train skip-gram yourself, on real text. Open Notebook 01c in Colab. It needs no GPU; the training runs take about three minutes in all.</p>
+    <p>Part A trains skip-gram on 2 million words of Galician Wikipedia, five times: with 2, 10, 50, 100 and 300 dimensions. CodeCarbon measures each run. The quality test uses five groups of Galician words: months, days of the week, numbers, colors and family words. A good model puts each word near the other words of its group.</p>
+    <p>Part B trains on less text, from 100 thousand words up. Look at which group suffers first, and compare with how often its words occur. This is the claim from the last screen: rare words get poorly placed vectors.</p>
+    <p>Part C tests a multilingual model on Galician words. Most of them are spelled differently from Spanish. Look at which words it gets wrong.</p>
   </div>
 </section>
 
@@ -2124,25 +2151,6 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   </div>
 </section>
 
-<section class="screen" id="act-attn" data-step="4">
-  <header><span class="kind">Activity · about 15 minutes, individual</span><h2>Attention playground</h2></header>
-  <div class="body">
-    <div class="activity"><h3>Notebook 01d, in Colab (CPU only, no GPU needed)</h3><div>
-      <ul class="points">
-        <li>Part A: rebuild this exact worked example yourself, and check the 0.79 weight on the key after <i>tía</i></li>
-        <li>Part B: pull real attention weights out of a real translation model, on our own sentence, and see how they compare</li>
-      </ul>
-      <div class="links">
-        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01d_attention_playground-beginner.ipynb" target="_blank" rel="noopener">Open in Colab: beginner</a>
-        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01d_attention_playground-advanced.ipynb" target="_blank" rel="noopener">Open in Colab: advanced</a>
-      </div>
-    </div></div>
-  </div>
-  <div class="notes">
-    <p>Pause the lecture here and have everyone open 01d_attention_playground.ipynb — pure Python plus a small model download, no GPU needed. Part A: students rebuild the toy example from the previous screen by hand, and verify it actually gives 0.79 on the key after "tía" when writing "aunt". Part B is the payoff: load the real dedicated Galician-English model we'll use again in Notebook 1, run it on our sentence, and pull out its actual cross-attention weights instead of hand-set toy numbers — does a real model, trained on real data, also put most of its weight on "tía" when generating "aunt"? Sometimes yes, sometimes it's messier than the toy example, and that's the point: the toy version is a clean teaching fiction, the real one is what actually happens.</p>
-  </div>
-</section>
-
 <section class="screen" id="gives" data-step="4">
   <header><span class="kind">Step 4 · Attention</span><h2>What alignment actually gives you</h2></header>
   <div class="body">
@@ -2152,7 +2160,7 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
       <li class="frag"><b>What the model writes:</b> “An aunt of mine”: attention keeps all three words: <i>unha</i> → an, <i>tía</i> → aunt, <i>miña</i> → of mine. Logical and faithful</li>
       <li class="frag"><b>What a translator writes:</b> “I had an aunt who…”: the sentence is rebuilt around introducing her; no word alignment can produce “I had”</li>
     </ul>
-    <p class="src">Model output: Helsinki-NLP/opus-mt-gl-en, the model from Notebook 1</p>
+    <p class="src">Model output: Helsinki-NLP/opus-mt-gl-en, the model from Notebooks 01d and 01e</p>
   </div>
   <div class="notes">
     <p>This screen has three steps. Each click shows one more translation of the same three words.</p>
@@ -2432,6 +2440,27 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   </div>
 </section>
 
+<section class="screen" id="act-attn" data-step="6">
+  <header><span class="kind">Activity · about 20 minutes, individual</span><h2>Attention playground</h2></header>
+  <div class="body">
+    <div class="activity"><h3>Notebook 01d, in Colab (CPU only, no GPU needed)</h3><div>
+      <ul class="points">
+        <li>Part A: score all 48 heads of the real translation model, on a sentence you choose, and find what each one does</li>
+        <li>Part B: count the attention scores, then time the whole encoder as the text gets longer. Does the time grow like n²?</li>
+      </ul>
+      <div class="links">
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01d_attention_playground-beginner.ipynb" target="_blank" rel="noopener">Open in Colab: beginner</a>
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01d_attention_playground-advanced.ipynb" target="_blank" rel="noopener">Open in Colab: advanced</a>
+      </div>
+    </div></div>
+  </div>
+  <div class="notes">
+    <p>Now you work with the real translation model yourself. Open Notebook 01d in Colab. It needs no GPU.</p>
+    <p>Part A finds what the heads do. The notebook scores all 48 heads of the encoder: how much each one looks at the previous token, the same token, or the next token. Check that you find the heads from the self-attention page. Then put in a Galician sentence of your own, and see whether the same heads win.</p>
+    <p>Part B is about cost. The number of attention scores grows like n squared, as on this screen. The notebook then times the whole encoder, from 32 to 512 tokens. Look at what each doubling of the text does to the time: is it four times, or less? The last cells explain the answer, by counting where the computation of a transformer goes.</p>
+  </div>
+</section>
+
 <section class="screen" id="kv" data-step="6">
   <header><span class="kind">Step 6 · Transformers</span><h2>Generating text: why inference is sequential</h2></header>
   <div class="body">
@@ -2538,18 +2567,16 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
 
 
 <section class="screen" id="act-nb1" data-step="0">
-  <header><span class="kind">Activity · 60–75 min baseline, +40–60 min Parts 2–3, individual</span><h2>Notebook 1: Baseline measurement</h2></header>
+  <header><span class="kind">Activity · 60–75 minutes, individual</span><h2>Notebook 01a: Baseline measurement</h2></header>
   <div class="body">
     <ul class="points">
-      <li>Part 1: answer questions about a small set of documents, measured with <b>CodeCarbon</b>: energy, CO₂eq and quality, as one row of your leaderboard</li>
-      <li>Part 2: today's sentence through <b>rule-based</b>, <b>statistical</b>, <b>neural</b> and <b>LLM</b> translation</li>
-      <li>Part 3: <b>BLEU</b>, <b>BERTScore</b> and an <b>LLM-as-judge</b> grade the translations, and we measure what grading itself costs</li>
+      <li>Answer questions about a small set of documents, measured with <b>CodeCarbon</b>: energy, CO₂eq and quality, as rows of your leaderboard</li>
+      <li>The same quiz with no documents: what does the model know on its own?</li>
     </ul>
     <div class="activity"><h3>Notebook 01a, in Colab, with a GPU</h3><div>
       <ul class="points">
         <li>In Colab: Runtime → Change runtime type → T4 GPU</li>
-        <li>Part 1 first, then Parts 2–3 if time allows</li>
-        <li>Stretch goal (optional): swap in a bigger model and compare</li>
+        <li>Download <span class="mono">leaderboard.csv</span> at the end: Sessions 2 and 3 add rows to it</li>
       </ul>
       <div class="links">
         <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01a_baseline_measurement-beginner.ipynb" target="_blank" rel="noopener">Open in Colab: beginner</a>
@@ -2558,11 +2585,33 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     </div></div>
   </div>
   <div class="notes">
-    <p>Now it is your turn. Notebook 1 has three parts.</p>
-    <p>Part 1 is the baseline for the whole course. The task is question answering over a small set of documents. Every run is measured with CodeCarbon, the tool from the measurement screens. It reports energy and CO2-equivalent, next to the share of right answers, and it writes one row to your leaderboard file.</p>
-    <p>Part 2 translates our Galician sentence in four ways, in the order of the history we saw. First a rule-based system, Apertium. It is a real system that is still maintained, and it still cannot reorder the words: it writes something like "a mine aunt". Then a small statistical system, IBM Model 1. It learns word translations from 24 short phrase pairs, then translates word by word, with no reordering. Then the dedicated neural model, opus-mt from Helsinki. And last, the general-purpose language model from Part 1.</p>
-    <p>Part 3 grades the translations in three ways. BLEU counts n-grams shared with a reference translation; it costs almost nothing. BERTScore compares the translations with embeddings, so it needs a neural model. And an LLM can act as the judge. We measure what each way of grading costs, not only the score it gives.</p>
-    <p>Open the notebook in Colab. Choose Runtime, Change runtime type, T4 GPU. Do Part 1 first: every later session builds on it. If there is time, continue with Parts 2 and 3. If you finish early, try a bigger model in Part 1 and compare.</p>
+    <p>Now it is your turn. Notebook 01a is the baseline for the whole course.</p>
+    <p>The task is question answering over a small set of documents. Every run is measured with CodeCarbon, the tool from the measurement screens. It reports energy and CO2-equivalent, next to the share of right answers. The notebook runs the quiz twice: once with the documents, and once without them, to see what the model knows on its own. Both runs go into your leaderboard file.</p>
+    <p>Open the notebook in Colab. Choose Runtime, Change runtime type, T4 GPU. At the end, download the file leaderboard.csv: every later session adds rows to it.</p>
+  </div>
+</section>
+<section class="screen" id="act-nb1e" data-step="0">
+  <header><span class="kind">Activity · 40–60 minutes, individual, if time allows</span><h2>Notebook 01e: Translation and its evaluation</h2></header>
+  <div class="body">
+    <ul class="points">
+      <li>Part 1: today's sentence through <b>rule-based</b>, <b>statistical</b>, <b>neural</b> and <b>LLM</b> translation, each one measured</li>
+      <li>Part 2: <b>BLEU</b>, <b>BERTScore</b> and an <b>LLM-as-judge</b> grade the translations, and we measure what grading itself costs</li>
+    </ul>
+    <div class="activity"><h3>Notebook 01e, in Colab, with a GPU</h3><div>
+      <ul class="points">
+        <li>In Colab: Runtime → Change runtime type → T4 GPU</li>
+        <li>Download <span class="mono">mt_leaderboard.csv</span> and <span class="mono">mt_eval_leaderboard.csv</span> at the end</li>
+      </ul>
+      <div class="links">
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01e_translation_measurement-beginner.ipynb" target="_blank" rel="noopener">Open in Colab: beginner</a>
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01e_translation_measurement-advanced.ipynb" target="_blank" rel="noopener">Open in Colab: advanced</a>
+      </div>
+    </div></div>
+  </div>
+  <div class="notes">
+    <p>If there is time, continue with Notebook 01e. It follows the history of machine translation from this session.</p>
+    <p>Part 1 translates our Galician sentence in four ways. First a rule-based system, Apertium. It is a real system that is still maintained, and it still cannot reorder the words: it writes something like "a mine aunt". Then a small statistical system, IBM Model 1. It learns word translations from 24 short phrase pairs, then translates word by word, with no reordering. Then the dedicated neural model, opus-mt from Helsinki. And last, the general-purpose language model from Notebook 01a. CodeCarbon measures each one.</p>
+    <p>Part 2 grades the translations in three ways. BLEU counts n-grams shared with a reference translation; it costs almost nothing. BERTScore compares the translations with embeddings, so it needs a neural model. And an LLM can act as the judge. The notebook measures the cost of each way of grading, next to the score it gives.</p>
   </div>
 </section>
 
@@ -2570,15 +2619,16 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   <header><h2>Share-out</h2></header>
   <div class="body">
     <ul class="points">
-      <li>Part 1: how much energy and CO₂eq did your run measure? Same model, different hardware: did it matter?</li>
-      <li>Parts 2–3: how many orders of magnitude separated your cheapest and priciest approach? Did the three MT metrics even agree?</li>
+      <li>Notebook 01a: how much energy and CO₂eq did your run measure? Same model, different hardware: did it matter?</li>
+      <li>Notebook 01e: how many orders of magnitude separated your cheapest and priciest approach? Did the three metrics agree?</li>
     </ul>
     <p class="center muted">Compare with your neighbor.</p>
   </div>
   <div class="notes">
-    <p>Before we wrap up, compare notes with your neighbor. On the QA baseline: what energy and emissions numbers did you get, and how close were they to each other's, given you likely used the same model on similar Colab hardware? What was your accuracy, and if it wasn't 100%, what went wrong in the misses? Did CodeCarbon warn about not recognizing your hardware, and what does that tell you about trusting a single carbon number at face value?</p>
-    <p>On the translation comparison: how many orders of magnitude separated your cheapest and most expensive approach? Neither the real rule-based system nor the toy statistical system could ever produce "I had an aunt who..." — why not, structurally? Apertium is a real, currently maintained system — did that change how seriously you took its limitations, compared to the toy you might have pictured going in? Was the dedicated neural model's translation actually worse than the general-purpose LLM's, or just different? And if you have a moment: paste the Galician sentence into a large commercial model and see whether it gets "an aunt of mine" right where our small local model didn't — what would that tell you about whether this was a limit of the approach or just of this notebook's model size?</p>
-    <p>On evaluation: did BLEU, BERTScore, and the LLM judge actually agree on which translation was better? Next session, we take this exact QA pipeline, load the exact same model quantized to a lower precision, and see what actually changes, for both footprint and accuracy.</p>
+    <p>Before we wrap up, compare notes with your neighbor.</p>
+    <p>On the baseline: what energy and emissions did you measure? How close were your numbers to your neighbor's, with the same model on similar Colab hardware? What was your accuracy, and what went wrong in the misses? Did CodeCarbon warn that it did not recognize your hardware? What does that tell you about trusting a single carbon number?</p>
+    <p>On translation: how many orders of magnitude separated the cheapest and the most expensive approach? How did each system introduce the aunt: "my aunt", "an aunt of mine", or "I had an aunt who"? Why can neither the rule-based nor the statistical system write "I had an aunt who"?</p>
+    <p>On evaluation: did BLEU, BERTScore and the LLM judge agree on which translation was best?</p>
   </div>
 </section>
 
