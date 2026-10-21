@@ -130,6 +130,10 @@ svg.v3 .pt.faint { opacity: 0.3; }
 svg.v3 .pl { font-size: 12px; fill: var(--fg); } svg.v3 .pl.mix { fill: var(--orange); } svg.v3 .pl.enc { fill: rgb(var(--heat)); }
 .controls.stick { position: sticky; top: 0; z-index: 3; background: inherit; padding-block: 6px; }
 .fixh { min-height: 7em; }
+.planes { display: grid; gap: 0; }
+.plane { display: grid; gap: 12px; background: var(--panel); padding-top: 18px; margin-top: 18px; border-top: 1px solid var(--line); }
+.plane:first-child { margin-top: 4px; }
+.plane .steptext { font-size: 0.95rem; }
 .tries { max-width: 72ch; margin: 0 0 10px; padding-left: 1.2em; } .tries li { margin: 2px 0; }
 .qkctl { display: grid; grid-template-columns: max-content minmax(0, 260px) 3em; justify-content: start; gap: 6px 10px; align-items: center; }
 #qkPre { flex-wrap: wrap; }
@@ -446,13 +450,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <h2><span class="n">1</span>Without attention, computed by hand</h2>
     <div class="review"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page</a>: a translation model has two parts. The <b>encoder</b> reads the Galician words and turns them into one vector, the <b>summary</b>. The <b>decoder</b> then writes the English words one at a time. From the <a href="skipgram.html">skip-gram lesson</a>: a <b>vector</b> is a list of values, and each position in the list is a <b>dimension</b>; the <b>dot product</b> of two vectors multiplies them dimension by dimension and adds up the results.</p></div>
     <p class="lead">A translation model small enough to run by hand, on the phrase <i>unha tía miña</i>. Its vectors have three dimensions, one per Galician word, and its decoder knows eight English words. Every value is on the page. Without attention, this model writes “a friend of mine”, and the steps show exactly why. Section 2 adds attention to the same model, and it writes “an aunt of mine”. We set the values by hand so that the arithmetic stays simple; a real model learns them from examples, as the skip-gram lesson showed.</p>
-    <div class="controls stick"><button id="tyBack">Back</button><button class="primary" id="tyNext">Next step</button><span class="pathstrip" id="tySteps"></span></div>
-    <h3 class="wkh" id="tyTitle"></h3>
-    <div class="tycols">
-      <div class="tyboard" id="tyBoard"></div>
-      <figure class="v3fig" id="ty3dFig"><svg class="v3" id="ty3d" viewBox="0 0 470 350" role="img" aria-label="The vectors as points, one axis per Galician word; drag to turn"></svg><figcaption><span id="ty3dCap"></span> <span class="note">Drag to turn the picture; double-click to reset it.</span></figcaption></figure>
-    </div>
-    <p class="steptext" id="tyText"></p>
+    <div class="planes" id="tyPlanes"></div>
   </section>
 
   <section class="panel" id="lookatt">
@@ -464,13 +462,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <p class="label">with attention (this section)</p>
       <div class="flow"><span class="word">after unha</span><span class="word">after tía</span><span class="word">after miña</span><span class="op">→</span><span class="word">dot product with the query: three scores</span><span class="op">→</span><span class="word">softmax: three weights</span><span class="op">→</span><span class="word">weighted sum: the mix</span><span class="op">→</span><span class="word out">the state's first three dimensions</span></div>
     </div>
-    <div class="controls stick"><button id="atBack">Back</button><button class="primary" id="atNext">Next step</button><span class="pathstrip" id="atSteps"></span></div>
-    <h3 class="wkh" id="atTitle"></h3>
-    <div class="tycols">
-      <div class="tyboard" id="atBoard"></div>
-      <figure class="v3fig" id="at3dFig"><svg class="v3" id="at3d" viewBox="0 0 470 350" role="img" aria-label="The vectors as points, one axis per Galician word; drag to turn"></svg><figcaption><span id="at3dCap"></span> <span class="note">Drag to turn the picture; double-click to reset it.</span></figcaption></figure>
-    </div>
-    <p class="steptext" id="atText"></p>
+    <div class="planes" id="atPlanes"></div>
   </section>
 
   <section class="panel" id="qk">
@@ -1360,7 +1352,6 @@ function queryScene(a, labelKeys) {
 
 
 // ---------- section 1: the steps, each shown one piece at a time ----------
-const v1 = view3d($("ty3d"), $("ty3dCap"));
 const work = ls => ls.length ? `<p class="work">${ls.join("<br>")}</p>` : "";
 const upto = (n, fn) => Array.from({ length: n }, (_, i) => fn(i));
 const SMALL = { range: 0.5, noTicks: true };
@@ -1784,26 +1775,53 @@ const STEPS = [
     } }],
 ];
 // sections 1 and 2: one stepper each (section 2 starts at step 7 of STEPS)
-function stepper(px, steps, view) {
-  const st = { k: 0, fr: 0, FR: null, steps };
-  steps.forEach(([t], i) => { const b = document.createElement("button"); b.textContent = i + 1; b.title = t; b.addEventListener("click", () => go(i, 0)); $(px + "Steps").appendChild(b); });
-  function go(i, j) { st.k = i; st.FR = steps[i][1].frames(); st.fr = j < 0 ? st.FR.length - 1 : j; draw(); }
-  function draw() {
-    const [title, s] = steps[st.k], v = st.FR[st.fr];
-    $(px + "Title").textContent = `Step ${st.k + 1} of ${steps.length}: ${title} (${st.fr + 1} of ${st.FR.length})`;
-    $(px + "Board").innerHTML = v.board; $(px + "Text").textContent = s.text;
-    $(px + "3dFig").hidden = !v.scene; $(px + "3dFig").parentElement.classList.toggle("one", !v.scene); if (v.scene) view.set(v.scene);
-    $(px + "Back").disabled = st.k === 0 && st.fr === 0; $(px + "Next").disabled = st.k === steps.length - 1 && st.fr === st.FR.length - 1;
-    [...$(px + "Steps").children].forEach((b, i) => b.classList.toggle("on", i === st.k));
+// each step is its own plane: a title, what the step does, its own controls, the board and the 3-D picture.
+// A plane appears below the previous one, which stays as it ended.
+function planes(px, steps) {
+  const host = $(px + "Planes"), P = [], st = { k: 0, steps };
+  Object.defineProperties(st, { fr: { get: () => P[st.k].fr }, FR: { get: () => P[st.k].FR } });
+  steps.forEach(([title, s], i) => {
+    const el = document.createElement("div"); el.className = "plane"; el.hidden = i > 0;
+    el.innerHTML = `<h3 class="wkh">Step ${i + 1} of ${steps.length}: ${title}</h3><p class="steptext">${s.text}</p>` +
+      `<div class="controls stick"><button class="pb">Back</button><button class="primary pn">Next</button><span class="note pc"></span></div>` +
+      `<div class="tycols"><div class="tyboard"></div><figure class="v3fig"><svg class="v3" viewBox="0 0 470 350" role="img" aria-label="The vectors as points, one axis per Galician word; drag to turn"></svg>` +
+      `<figcaption><span class="cap"></span> <span class="note">Drag to turn the picture; double-click to reset it.</span></figcaption></figure></div>` +
+      (i < steps.length - 1 ? `<div class="controls plgo" hidden><button class="primary">Go on to step ${i + 2}: ${steps[i + 1][0]} ↓</button></div>` : "");
+    host.appendChild(el);
+    const p = { el, fr: 0, FR: null, view: view3d(el.querySelector("svg.v3"), el.querySelector(".cap")) };
+    P.push(p);
+    el.querySelector(".pb").addEventListener("click", () => { if (p.fr > 0) { p.fr--; draw(i); } });
+    el.querySelector(".pn").addEventListener("click", () => { if (p.fr < p.FR.length - 1) { p.fr++; draw(i); } else open(i + 1); });
+    const go = el.querySelector(".plgo button"); if (go) go.addEventListener("click", () => open(i + 1));
+  });
+  function draw(i) {
+    const p = P[i], el = p.el; if (!p.FR) p.FR = steps[i][1].frames();
+    const v = p.FR[p.fr], last = p.fr === p.FR.length - 1;
+    el.querySelector(".tyboard").innerHTML = v.board;
+    el.querySelector(".v3fig").hidden = !v.scene; el.querySelector(".tycols").classList.toggle("one", !v.scene); if (v.scene) p.view.set(v.scene);
+    el.querySelector(".pb").disabled = p.fr === 0;
+    const nx = el.querySelector(".pn"); nx.textContent = last ? (i < steps.length - 1 ? `Next: step ${i + 2} ↓` : "Next") : "Next"; nx.disabled = last && i === steps.length - 1;
+    el.querySelector(".pc").textContent = `${p.fr + 1} of ${p.FR.length}`;
+    const g = el.querySelector(".plgo"); if (g) g.hidden = !(last && P[i + 1].el.hidden);
+    st.k = i;
   }
-  $(px + "Next").addEventListener("click", () => { if (st.fr < st.FR.length - 1) { st.fr++; draw(); } else if (st.k < steps.length - 1) go(st.k + 1, 0); });
-  $(px + "Back").addEventListener("click", () => { if (st.fr > 0) { st.fr--; draw(); } else if (st.k > 0) go(st.k - 1, -1); });
-  go(0, 0);
-  return Object.assign(st, { go });
+  // show planes up to j: earlier hidden ones at their last piece, plane j at its first
+  function open(j, scroll = true) {
+    if (j >= steps.length) return;
+    for (let k = 0; k < j; k++) if (P[k].el.hidden || !P[k].FR) { P[k].el.hidden = false; if (!P[k].FR) P[k].FR = steps[k][1].frames(); P[k].fr = P[k].FR.length - 1; draw(k); }
+    const fresh = P[j].el.hidden; P[j].el.hidden = false; if (fresh || !P[j].FR) { P[j].fr = 0; draw(j); }
+    for (let k = 0; k < j; k++) draw(k);
+    draw(j);
+    if (scroll) P[j].el.scrollIntoView({ block: "start" });
+  }
+  draw(0);
+  st.go = (i, j) => { open(i, false); if (!P[i].FR) P[i].FR = steps[i][1].frames(); P[i].fr = j < 0 ? P[i].FR.length - 1 : j; draw(i); };
+  st.plane = i => P[i].el;
+  return st;
 }
-const S1 = stepper("ty", STEPS.slice(0, 7), v1), S2 = stepper("at", STEPS.slice(7), view3d($("at3d"), $("at3dCap")));
+const S1 = planes("ty", STEPS.slice(0, 7)), S2 = planes("at", STEPS.slice(7));
 // section 4 links its steps back here: steps 1-7 are section 1, steps 8-11 section 2
-window.__toyGo = i => { if (i < 7) { S1.go(i, 0); $("look").scrollIntoView(); } else { S2.go(i - 7, 0); $("lookatt").scrollIntoView(); } };
+window.__toyGo = i => { if (i < 7) { S1.go(i, 0); S1.plane(i).scrollIntoView(); } else { S2.go(i - 7, 0); S2.plane(i - 7).scrollIntoView(); } };
 
 // ---------- section 3: your own query ----------
 const v2 = view3d($("qk3d"), null);
