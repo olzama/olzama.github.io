@@ -1852,6 +1852,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 <text y="46" font-size="24" style="fill:var(--orange)" data-s="2" data-d="0" data-line="D1" data-x0="590">h = (−0.41, −0.26)</text>
 <text x="590.0" y="18.0" font-size="16" style="fill:var(--muted)" data-s="2" data-d="0">the vector of cats, from the previous screen</text>
 <text x="205.0" y="50.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0">p′</text>
+<text x="30" y="20" font-size="16" style="fill:var(--muted)" data-s="3" data-d="0.3" data-a="fade">p′: the model's second table, one column per word (drawn here as rows); random at the start, like p</text>
 <text x="170.0" y="96.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.0" id="c00">−0.22</text>
 <text x="240.0" y="96.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.0" id="c01">0.39</text>
 <text x="170.0" y="130.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.04" id="c10">0.15</text>
@@ -1922,7 +1923,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   </div>
   <div class="notes">
     <p>The second half: from h to a probability for every word.</p>
-    <p>The second table, p prime, has one column for every word. It is also random at the start. On the screen each column is shown as a row, so that it fits next to the word.</p>
+    <p>The second table, p prime, has one column for every word. On the screen each column is shown as a row, so that it fits next to the word. Where does it come from? It is part of the model, like p: it does not come from the corpus. At the start its values are random, just like the values of p. Training changes both tables together. After training, word2vec keeps p as the embeddings and usually throws p prime away: it was only needed to make the predictions.</p>
     <p>The score. For each word, multiply h by that word's column: first value times first value, second times second, and add them up. This is called a dot product. For chase it gives minus 0.074. Every word gets a score like this. Scores can be negative, and they do not add up to 1. So they are not probabilities yet.</p>
     <p>Softmax turns scores into probabilities, in two parts. First, take e to the power of each score. e is a number, about 2.718. The result is always positive, and a higher score still gives a higher number. For chase, e to the minus 0.074 is 0.929.</p>
     <p>Second, divide each of these numbers by their sum. The sum is 8.346. After the division, the eight numbers add up to exactly 1. Now they are probabilities. The probability of chase, given cats, is 0.929 divided by 8.346, which is 0.111. That is the softmax: e to the power, then divide by the sum.</p>
