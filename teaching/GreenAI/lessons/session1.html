@@ -2171,6 +2171,48 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   </div>
 </section>
 
+<section class="screen" id="bigweight" data-step="4">
+  <header><span class="kind">Step 4 · Attention</span><h2>A large attention weight does not mean an important word</h2></header>
+  <div class="body">
+    <p class="sent small">Unha tía miña, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”.</p>
+    <div class="cols wide-left">
+      <div class="col">
+        <ul class="points">
+          <li>A small translation model with attention, trained on 5,000 variants of this sentence, has written “an aunt of mine, who solved everything”. The next word is “with”.</li>
+          <li>Before each English word, it gives every Galician word a weight. The weights add up to 1, and the model reads the Galician words mixed in these proportions.</li>
+          <li class="frag">Before “with”, the largest weight goes to the <b>full stop</b> at the end. <i>Con</i>, the Galician for “with”, gets 0.10.</li>
+          <li class="frag"><b>Test:</b> replace what the model reads. It still writes “with”: the full stop does not matter here.</li>
+          <li class="frag"><b>Why:</b> in all 5,000 training sentences, “everything” is followed by “with”. The English already written decides the next word.</li>
+          <li class="frag">A weight shows where the model looked, not what it needed.</li>
+        </ul>
+      </div>
+      <div class="col">
+        <p class="label">The weights before “with”: the four largest of 31</p>
+        <table class="plain">
+          <tr><td>. (the full stop)</td><td class="num">0.54</td></tr>
+          <tr><td><i>solucionaba</i> (solved)</td><td class="num">0.12</td></tr>
+          <tr><td><i>con</i> (with)</td><td class="num">0.10</td></tr>
+          <tr><td><i>algo</i> (something)</td><td class="num">0.08</td></tr>
+        </table>
+        <p class="label">The test: what the model reads → probability of “with”</p>
+        <table class="plain">
+          <tr><td>its own mix</td><td class="num">0.999</td></tr>
+          <tr><td>nothing (all zeros)</td><td class="num">0.997</td></tr>
+          <tr><td>only the full stop</td><td class="num">0.998</td></tr>
+          <tr><td>only <i>con</i></td><td class="num">0.998</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <p>The model: the small trained translation model with attention from the attention page, sections 4 and 5, with vectors of 8 numbers. Its training data are 5,000 sentences built from our sentence by swapping words: other relatives, other possessives, other verbs and nouns. The model on this screen is the one with attention, reading the Galician through attention weights as on the earlier screens.</p>
+    <p>On the attention page, section 5, with attention, 8 dimensions, step 9 shows the 0.54 on the full stop. The table comes from running the saved model again with the mix replaced.</p>
+    <p>Say it plainly: the attention weights at this word land on the full stop, but the full stop is not what makes the model write "with". The English so far, "who solved everything", already settles it: in every training sentence "everything" is followed by "with". Taking the Galician away entirely, all zeros, still gives 0.997.</p>
+    <p>The evidence that the weights here are arbitrary: three models trained on the same data, with 8, 16 and 64 numbers per vector, look at three unrelated places (the full stop, con, e), and all three write "with". If someone asks whether the model ignores what it reads: no. Given only the vector of refráns (proverbs), the probability of "with" drops to 0.06. A mix that points strongly to another word can take over; this one doesn't need to.</p>
+    <p>The take-away for the real model on the next screen: a heat map of attention weights shows where the model looked, not what it used. In the real model, several heads put about half of their weight on the commas, the quotation marks and the end-of-sentence mark, although these are only 5 of the 35 pieces of our sentence.</p>
+  </div>
+</section>
+
 <section class="screen fill" id="real-i" data-step="4">
   <header><span class="kind">Interactive</span><h2>Where the real model looks</h2></header>
   <div class="body">
