@@ -658,13 +658,14 @@ function drawForward(now) {
   const sym = (x, y, s) => { ctx.fillStyle = mu; ctx.font = `18px ${css("--font-body")}`; ctx.textAlign = "center"; ctx.fillText(s, x, y); };
   const title = (x, y, s) => { ctx.fillStyle = fg; ctx.font = `600 13px ${css("--font-mono")}`; ctx.textAlign = "left"; ctx.fillText(s, x, y); };
 
-  // row A: one-hot (1×8) × p (8×2) = h (1×2)
+  // row A: the one-hot vectors of all 8 words, one row each (8×8), next to p (8×2). The row of the
+  // input word is highlighted: its single 1 picks out the same row of p, and that row is h (1×2).
   const ow = 26, rh = 20, pw = 50, top = 46;
-  const ox = 6, oy = top + 3.5 * rh;
-  title(ox, top - 26, `one-hot(${VOCAB[a]})`);
+  const ox = 50, oy = top + 3.5 * rh;
+  title(6, top - 26, "one-hot vectors"); ctx.fillStyle = mu; ctx.font = body; ctx.textAlign = "left"; ctx.fillText(", one row per word", 6 + 118, top - 26);
   VOCAB.forEach((wd, i) => {
-    cell(ox + i * ow, oy, ow, rh, i === a ? "1" : "0", i === a && s1, i === a ? fg : mu);
-    ctx.save(); ctx.translate(ox + i * ow + ow * 0.62, oy - 5); ctx.rotate(-Math.PI / 3); ctx.fillStyle = col[GROUP[i]]; ctx.font = `11px ${css("--font-body")}`; ctx.textAlign = "left"; ctx.fillText(wd, 0, 0); ctx.restore();
+    ctx.fillStyle = col[GROUP[i]]; ctx.font = `${i === a ? "600 " : ""}12px ${css("--font-body")}`; ctx.textAlign = "right"; ctx.fillText(wd, ox - 4, top + i * rh + 14);
+    VOCAB.forEach((_, j) => cell(ox + j * ow, top + i * rh, ow, rh, i === j ? "1" : "0", i === a && s1, i === a ? fg : mu));
   });
   const px = ox + 8 * ow + 30;
   sym(px - 15, oy + 15, "×");
@@ -720,7 +721,7 @@ function drawForward(now) {
 
   // what is happening now
   const msg = t >= 1 ? `The probability of the right neighbor, ${VOCAB[b]}, is ${pr8[b].toFixed(3)}. Training then nudges h and the →${VOCAB[b]} column to raise it.`
-    : T < 1500 ? `1. The one-hot vector for ${VOCAB[a]} has a single 1, so it picks out the ${VOCAB[a]} row of p. That row is h.`
+    : T < 1500 ? `1. Each word's one-hot vector is one row of the left table: a 1 in its own column, 0 elsewhere. The row of ${VOCAB[a]} picks out the ${VOCAB[a]} row of p. That row is h.`
     : T < 4000 ? `2. h times each column of p′ gives one score per word: a dot product.`
     : T < 5800 ? `3. Scores can be negative, and they do not add up to 1. So first raise e (about 2.718) to each score. The result is always positive, and a bigger score gives a bigger number.`
     : T < 6400 ? `4. Add up the 8 positive numbers.`
