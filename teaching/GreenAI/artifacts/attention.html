@@ -845,7 +845,8 @@ renderReal();
   const end = D.src.length - 1, endL = D.cross.map(L => { let x = 0, k = 0; for (const H of L) for (const row of H) { x += row[end]; k++; } return x / k; });
   $("realEnd").textContent = `Why so much weight on ‹/s›: the weights in each row add up to 1, so a head that needs nothing from the Galician sentence for a word still has to put its weight somewhere. Many heads put it on ‹/s›: ${f2(endL[0])} of all weight in layer 1, ${f2(endL[endL.length - 1])} in layer 6.`;
   // the same sentence from current large language models, as pasted by the course author (October 2026)
-  const LLM = [["GPT Astra (medium)", "An aunt of mine, who had a saying or proverb for everything, used to say something like, ‘You are a slave to what you say and master of what you keep to yourself.’"]];
+  const LLM = [["GPT Astra (medium)", "An aunt of mine, who had a saying or proverb for everything, used to say something like, ‘You are a slave to what you say and master of what you keep to yourself.’"],
+    ["Gemini Argon", "An aunt of mine, who solved everything with sayings and proverbs, used to say something like ‘one is a slave to what one says and master of what one keeps silent.’"]];
   $("realLLM").innerHTML = `<p class="label">for comparison, the same sentence translated by current large language models (October 2026)</p><div class="cmprows">` +
     LLM.map(([who, t]) => `<p class="label">${who}</p><p class="cmpline">${t.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</p>`).join("") + `</div>`;
   $("realTr").innerHTML = `Its whole translation: “${D.translation.replace(/&/g, "&amp;").replace(/</g, "&lt;")}” It starts with “An aunt of mine”: correct, but rare in English (<a href="mt.html">translation page</a>, sections 3 to 5). Later it goes wrong. Press Play the translation to see where it looked for each piece.`;
@@ -1056,6 +1057,7 @@ function board(x, i, j0) {
   const sub = k => `<sub>${k}</sub>`;
   const L = [
     `score(${g}) = <b class="v">h</b> · <b class="v">e</b>${sub(g)}<span class="why">h: the decoder's new state after ${prev}; e${sub(g)}: the encoder's vector at ${g}</span>`,
+    `<b class="v">h</b> = (${h.map(num).join(", ")})<span class="why">the ${H} numbers of the decoder's new state, the squares of its strip above, from left to right</span>`,
     `= ${terms(H, k => `h${sub(k + 1)}e${sub(k + 1)}`)}<span class="why">multiply square by square, then add</span>`,
     `= ${terms(H, k => `${par(h[k])}·${par(ev[k])}`)}`,
     `= ${terms(H, k => par(h[k] * ev[k]))}`,
