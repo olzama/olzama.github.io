@@ -664,7 +664,7 @@ function drawForward(now) {
   // input word is highlighted: its single 1 picks out the same row of p, and that row is h (1×2).
   const ow = 26, rh = 20, pw = 50, top = 46;
   const ox = 50, oy = top + 3.5 * rh;
-  title(6, top - 26, "one-hot vectors"); ctx.fillStyle = mu; ctx.font = body; ctx.textAlign = "left"; ctx.fillText(", one row per word", 6 + 118, top - 26);
+  title(6, top - 26, "one-hot vectors"); ctx.fillStyle = mu; ctx.font = body; ctx.textAlign = "left"; ctx.fillText(`, one row per word; input: ${VOCAB[a]}`, 6 + 118, top - 26);
   VOCAB.forEach((wd, i) => {
     ctx.fillStyle = col[GROUP[i]]; ctx.font = `${i === a ? "600 " : ""}12px ${css("--font-body")}`; ctx.textAlign = "right"; ctx.fillText(wd, ox - 4, top + i * rh + 14);
     VOCAB.forEach((_, j) => cell(ox + j * ow, top + i * rh, ow, rh, i === j ? "1" : "0", i === a && s1, i === a ? fg : mu));
@@ -688,13 +688,15 @@ function drawForward(now) {
 
   // row B: h (1×2) × p′ (2×8) = scores (1×8), with probabilities under the scores
   const by = top + 8 * rh + 52, cw = 52, hx2 = 6, cx0 = hx2 + 2 * pw + 40;
-  title(hx2, by - 26, "h"); title(cx0, by - 26, "p′"); ctx.fillStyle = mu; ctx.font = body; ctx.textAlign = "left"; ctx.fillText("2 × 8", cx0 + 22, by - 26);
+  title(hx2, by - 26, "h"); title(cx0, by - 26, "p′"); ctx.fillStyle = mu; ctx.font = body; ctx.textAlign = "left"; ctx.fillText(`2 × 8; neighbor to predict: →${VOCAB[b]}`, cx0 + 22, by - 26);
   for (let d = 0; d < 2; d++) cell(hx2 + d * pw, by + 22, pw, rh, s2 >= 1 ? n2(h[d]) : "", s2 >= 1 && cols < 8 && T > 1500, fg);
   sym(hx2 + 2 * pw + 18, by + 37, "×");
   VOCAB.forEach((wd, j) => {
     ctx.fillStyle = col[GROUP[j]]; ctx.font = `${j === b ? "600 " : ""}italic 12px ${css("--font-body")}`; ctx.textAlign = "center"; ctx.fillText("→" + wd, cx0 + j * cw + cw / 2, by + 14);
     const now_ = T > 1500 && cols === j && t < 1;
-    for (let d = 0; d < 2; d++) cell(cx0 + j * cw, by + 22 + d * rh, cw, rh, n2(C[d][j]), now_, now_ ? fg : mu);
+    // the column of the neighbor to predict stays marked, except while another column is being multiplied
+    const nb = j === b && !(T > 1500 && cols < 8 && t < 1);
+    for (let d = 0; d < 2; d++) cell(cx0 + j * cw, by + 22 + d * rh, cw, rh, n2(C[d][j]), now_ || nb, now_ || nb ? fg : mu);
   });
   const sy = by + 22 + 2 * rh + 18;
   ctx.fillStyle = fg; ctx.font = `600 13px ${css("--font-mono")}`; ctx.textAlign = "right"; ctx.fillText("scores =", cx0 - 8, sy + 15);
