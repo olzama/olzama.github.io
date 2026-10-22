@@ -273,7 +273,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </div>
     <div class="simkey">
       <span>values:</span><span class="num">−</span><span class="ramp"></span><span class="num">+</span>
-      <span>table: one row per word, one column per dimension. Rows in order: animals, chase/eat, things chased, food.</span>
+      <span>Each table below holds every word's vector: one row per word, one column per dimension. Rows in order: animals, chase/eat, things chased, food (the colors at the left).</span>
     </div>
     <div class="cosrow">
       <figure><canvas id="cosA" aria-label="cats and dogs vectors, 2 dimensions"></canvas><figcaption>cats and dogs, 2 dimensions</figcaption></figure>
@@ -289,15 +289,12 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <canvas id="race" aria-label="cos(cats, dogs) after every pass, for each version"></canvas>
     <div class="simgrid">
       <figure><figcaption>one-hot vectors</figcaption>
-        <p class="label">the table</p>
         <canvas id="tab0" aria-label="One-hot vectors, as a table"></canvas><div class="simstats" id="tst0"></div>
         <canvas id="rows0" class="rows" aria-label="The cats and dogs rows"></canvas></figure>
       <figure><figcaption>trained, as many dimensions as words</figcaption>
-        <p class="label">the table</p>
         <canvas id="tab1" aria-label="Trained table, as many dimensions as words"></canvas><div class="simstats" id="tst1"></div>
         <canvas id="rows1" class="rows" aria-label="The cats and dogs rows"></canvas></figure>
       <figure><figcaption>trained, 2 dimensions</figcaption>
-        <p class="label">the table</p>
         <canvas id="tab2" aria-label="Trained table, 2 dimensions"></canvas><div class="simstats" id="tst2"></div>
         <canvas id="rows2" class="rows" aria-label="The cats and dogs rows"></canvas></figure>
     </div>
@@ -824,7 +821,8 @@ function renderCorpus() {
     : st.playing ? `Playing: every pass trains on all 16 pairs. Pass ${st.pass.toLocaleString()} done.`
     : st.k === 0 && st.pass > 0 ? `Pass ${st.pass.toLocaleString()} done: all 16 pairs trained. Next: pair 1, <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`
     : `Next pair, ${idx} of 16: <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`;
-  document.getElementById("fwpair").innerHTML = `drawn for ${L ? "the pair just trained" : "the next pair"}: <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`;
+  document.getElementById("fwpair").innerHTML = L ? `drawn for the pair just trained: <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`
+    : `drawn for the next pair: <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>.` + (st.k === 0 ? " Every pass starts with this pair; press Step to follow the pairs one by one." : "");
 }
 
 function renderNarr() {
@@ -1071,7 +1069,7 @@ function drawRace() {
   }
   ctx.textAlign = "center";
   for (const p of [0, 200, 400, 600, 800, 1000]) ctx.fillText(p.toLocaleString("en-US"), X(p), h - 6);
-  const now = Math.floor(gr.pass);
+  const now = Math.floor(gr.pass), names = [];
   const series = [[null, "one-hot", css("--muted"), [2, 4], 4], [E.full.catsdogs, `${V} dimensions`, css("--fg"), [], 15], [E.two.catsdogs, "2 dimensions", css("--accent"), [], -6]];
   for (const [tr, name, color, dash, dy] of series) {
     ctx.strokeStyle = color; ctx.lineWidth = 2.2; ctx.setLineDash(dash); ctx.beginPath();
@@ -1080,8 +1078,7 @@ function drawRace() {
     for (let p = 0; p <= end; p++) { const v = tr ? tr[p] : 0; p ? ctx.lineTo(X(p), Y(v)) : ctx.moveTo(X(p), Y(v)); }
     ctx.stroke(); ctx.setLineDash([]);
     const v = tr ? tr[end] : 0;
-    ctx.fillStyle = color; ctx.font = `600 12px ${css("--font-body")}`; ctx.textAlign = "left";
-    ctx.fillText(name, X(end) + 6, Y(v) + dy);
+    names.push({ name, color, y: Y(v) + 4 });
     // first pass where cats and dogs point (almost) the same way
     if (tr) {
       const hit = tr.findIndex(x => x >= 0.95);
@@ -1093,6 +1090,11 @@ function drawRace() {
     }
   }
   ctx.strokeStyle = css("--line"); ctx.beginPath(); ctx.moveTo(X(now), padT - 4); ctx.lineTo(X(now), h - padB); ctx.stroke();
+  // the series names in the right margin, at their line's current value, pushed apart where they meet
+  names.sort((a, b) => a.y - b.y);
+  names.forEach((n, k) => { if (k && n.y < names[k - 1].y + 15) n.y = names[k - 1].y + 15; });
+  ctx.font = `600 12px ${css("--font-body")}`; ctx.textAlign = "left";
+  for (const n of names) { ctx.fillStyle = n.color; ctx.fillText(n.name, X(last) + 6, n.y); }
 }
 
 const GROW_PASSES = 1000, GROW_SPEED = 80;  // passes per second during playback
