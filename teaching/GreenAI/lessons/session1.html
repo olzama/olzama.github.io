@@ -1399,7 +1399,7 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     </div>
     <div class="col">
       <ul class="points">
-        <li>Aunt and uncle appear in the same places. To the model they are two unrelated rows of counts.</li>
+        <li>Aunt and uncle appear in the same places. But the model keeps separate counts for each word.</li>
         <li>What it learns about aunt does not help with uncle.</li>
         <li><b>Step 2, embeddings:</b> give each word a vector, so that words used in similar ways get similar vectors.</li>
       </ul>
@@ -1407,7 +1407,7 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
   </div>
   <div class="notes">
     <p>Here is what step 1 cannot do. In our corpus, aunt and uncle are used in the same way. Both follow “my”. Both are followed by “stayed”.</p>
-    <p>The corpus has “aunt spoke”, but never “uncle spoke”. So the model gives “spoke” after uncle a probability of 0. It does not know that aunt and uncle are similar words. For the model, they are just two different rows in a table of counts.</p>
+    <p>The corpus has “aunt spoke”, but never “uncle spoke”. So the model gives “spoke” after uncle a probability of 0. The model keeps separate counts for each word, and the counts for aunt say nothing about uncle.</p>
     <p>Step 2 fixes this. Each word gets a vector, learned from the words around it. Words used in similar ways get similar vectors. Then what the model learns about aunt can help with uncle.</p>
   </div>
 </section>
