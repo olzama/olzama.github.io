@@ -245,7 +245,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <section class="panel narr" aria-live="polite" id="narr"></section>
 
       <section class="panel">
-        <p class="label" id="barslabel">Model's prediction</p>
+        <div class="controls" style="margin-bottom:8px"><p class="label" id="barslabel" style="margin:0">Model's prediction</p><select id="barsword" aria-label="Input word whose prediction is shown"></select></div>
         <canvas id="bars" aria-label="Bar chart of predicted probabilities"></canvas>
       </section>
     </div>
@@ -586,20 +586,37 @@ function drawPlane() {
       arrow(ctx, X(w[0]), Y(w[1]), X(mid[0]), Y(mid[1]), css("--green"), 2.5, 8);
       arrow(ctx, X(mid[0]), Y(mid[1]), X(tip[0]), Y(tip[1]), css("--neg"), 2.5, 8);
     }
-    arrow(ctx, X(w[0]), Y(w[1]), X(tip[0]), Y(tip[1]), css("--fg"), 2.5, 9);
-    ctx.fillStyle = css("--muted"); ctx.font = `12px ${css("--font-body")}`; ctx.textAlign = "left";
+    // the sum, dashed on top, so the green and red arrows show through it
+    ctx.setLineDash([7, 5]);
+    arrow(ctx, X(w[0]), Y(w[1]), X(tip[0]), Y(tip[1]), css("--fg"), 2, 9);
+    ctx.setLineDash([]);
+    // a key in the corner: the arrows are often short or on top of each other, so they are named here
+    const key = (showC ? [[css("--green"), [], `green: add a little of →${VOCAB[b]} to ${VOCAB[a]}`], [css("--neg"), [], "red: subtract a little of the average guess"]] : [])
+      .concat([[css("--fg"), [7, 5], `black, dashed: the sum, the step ${VOCAB[a]} takes`]]);
+    ctx.font = `12px ${css("--font-body")}`; ctx.textAlign = "left";
+    key.forEach(([color, dash, text], k) => {
+      const y = h - 28 - (key.length - 1 - k) * 17;
+      ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.setLineDash(dash);
+      ctx.beginPath(); ctx.moveTo(8, y - 4); ctx.lineTo(30, y - 4); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = color; ctx.fillText(text, 36, y);
+    });
+    ctx.fillStyle = css("--muted");
     ctx.fillText(`step arrows drawn ${mag}× longer than the real step`, 8, h - 10);
   }
 }
 
+document.getElementById("barsword").innerHTML = VOCAB.map((w, i) => `<option value="${i}">${w}</option>`).join("");
+document.getElementById("barsword").onchange = () => drawBars();
 function drawBars() {
   const { ctx, w, h } = fitCanvas(bars);
   ctx.clearRect(0, 0, w, h);
-  const L = lastPair();
-  const a = L ? L.pr.a : PAIRS[st.k].a, b = L ? L.pr.b : PAIRS[st.k].b;
+  // after a Step: the pair just trained. Otherwise every word is an input, so the viewer picks one.
+  const L = lastPair(), pick = document.getElementById("barsword");
+  const a = L ? L.pr.a : +pick.value, b = L ? L.pr.b : -1;
   const p = L ? L.before : probs(st.W, st.C, a);
   const after = L ? L.after : null;
-  document.getElementById("barslabel").textContent = `Model's prediction: P( · | ${VOCAB[a]} )` + (L ? ", before the step" : st.pass || st.k ? ", now" : "");
+  pick.hidden = !!L;
+  document.getElementById("barslabel").textContent = L ? `Model's prediction: P( · | ${VOCAB[a]} ), before the step` : "Model's prediction now, for the input word";
   const col = { blue: css("--blue"), gray: css("--gray"), orange: css("--orange"), green: css("--green") };
   const top = Math.max(0.25, Math.ceil(Math.max(...p, ...(after || [0])) * 10) / 10);
   const padL = 34, padB = 26, padT = 18, bw = (w - padL - 8) / 8;
@@ -611,7 +628,7 @@ function drawBars() {
   }
   for (let j = 0; j < 8; j++) {
     const x = padL + j * bw + bw * 0.15, bwi = bw * 0.7;
-    ctx.fillStyle = col[GROUP[j]]; ctx.globalAlpha = j === b ? 1 : 0.35;
+    ctx.fillStyle = col[GROUP[j]]; ctx.globalAlpha = b < 0 || j === b ? 1 : 0.35;
     ctx.fillRect(x, Yv(p[j]), bwi, Yv(0) - Yv(p[j]));
     ctx.globalAlpha = 1;
     if (after) {
@@ -621,7 +638,7 @@ function drawBars() {
     ctx.fillStyle = j === b ? css("--fg") : css("--muted");
     ctx.font = `${j === b ? "600 " : ""}12px ${css("--font-body")}`; ctx.textAlign = "center";
     ctx.fillText(VOCAB[j], x + bwi / 2, h - 8);
-    if (j === b) { ctx.font = `11px ${css("--font-mono")}`; ctx.fillText(p[j].toFixed(3), x + bwi / 2, Yv(p[j]) - 5); }
+    if (b < 0 || j === b) { ctx.font = `11px ${css("--font-mono")}`; ctx.fillStyle = j === b ? css("--fg") : css("--muted"); ctx.fillText(p[j].toFixed(b < 0 ? 2 : 3), x + bwi / 2, Yv(p[j]) - 5); }
   }
   if (after) {
     ctx.fillStyle = css("--muted"); ctx.font = `11px ${css("--font-body")}`; ctx.textAlign = "right";

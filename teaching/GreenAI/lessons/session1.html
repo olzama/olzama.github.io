@@ -1768,7 +1768,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">Step 2 · Embeddings</span><h2>Step by step, 1: from a word to its vector</h2><p class="sub">Our corpus, with the tables at the start of training</p></header>
   <div class="body">
     <div class="board">
-      <svg viewBox="0 0 1000 370" role="img" aria-label="The one-hot vector of cats times the embedding table p: the rows multiplied by 0 drop out, and h = (−0.41, −0.26) is the row of cats">
+      <svg viewBox="0 0 1240 370" role="img" aria-label="The one-hot vectors of all eight words, one row each; the row of cats times the embedding table p: the rows multiplied by 0 drop out, and h = (−0.41, −0.26) is the row of cats">
 <text x="120.0" y="30.0" font-size="18" style="fill:var(--muted)" text-anchor="end" data-s="1" data-d="0">word</text>
 <text x="120.0" y="76.0" font-size="24" style="fill:var(--orange)" text-anchor="end" data-s="1" data-d="0.0">cats</text>
 <text x="120.0" y="112.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.05">dogs</text>
@@ -1778,59 +1778,116 @@ print("they match" if count == expected else "they do not match: check the loop 
 <text x="120.0" y="256.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.25">balls</text>
 <text x="120.0" y="292.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.3">fish</text>
 <text x="120.0" y="328.0" font-size="24" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.35">meat</text>
-<text x="178.0" y="30.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="2" data-d="0">one-hot</text>
+<text x="275.0" y="30.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="2" data-d="0">one-hot vectors, one row per word</text>
 <path d="M160 50 H152 V340 H160" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="2" data-d="0" data-t="0.4"/>
-<path d="M196 50 H204 V340 H196" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="2" data-d="0" data-t="0.4"/>
-<text x="178.0" y="76.0" font-size="24" style="fill:var(--orange)" text-anchor="middle" data-s="2" data-d="0.4" id="oh0">1</text>
-<text x="178.0" y="112.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.45" data-dim="4" id="oh1">0</text>
-<text x="178.0" y="148.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.5" data-dim="4" id="oh2">0</text>
-<text x="178.0" y="184.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.55" data-dim="4" id="oh3">0</text>
-<text x="178.0" y="220.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.6" data-dim="4" id="oh4">0</text>
-<text x="178.0" y="256.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.65" data-dim="4" id="oh5">0</text>
-<text x="178.0" y="292.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.7" data-dim="4" id="oh6">0</text>
-<text x="178.0" y="328.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.75" data-dim="4" id="oh7">0</text>
-<text x="228.0" y="203.0" font-size="24" style="fill:currentColor" data-s="3" data-d="0">×</text>
-<text x="345.0" y="30.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0">p, random at the start</text>
-<path d="M266 50 H258 V340 H266" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="3" data-d="0" data-t="0.4"/>
-<path d="M424 50 H432 V340 H424" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="3" data-d="0" data-t="0.4"/>
-<text x="305.0" y="76.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.3" id="p00">−0.41</text>
-<text x="385.0" y="76.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.3" id="p01">−0.26</text>
-<text x="305.0" y="112.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.35" data-dim="4" id="p10">0.30</text>
-<text x="385.0" y="112.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.35" data-dim="4" id="p11">0.08</text>
-<text x="305.0" y="148.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.4" data-dim="4" id="p20">−0.41</text>
-<text x="385.0" y="148.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.4" data-dim="4" id="p21">−0.07</text>
-<text x="305.0" y="184.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.45" data-dim="4" id="p30">−0.02</text>
-<text x="385.0" y="184.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.45" data-dim="4" id="p31">−0.34</text>
-<text x="305.0" y="220.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.5" data-dim="4" id="p40">0.23</text>
-<text x="385.0" y="220.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.5" data-dim="4" id="p41">−0.39</text>
-<text x="305.0" y="256.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.55" data-dim="4" id="p50">−0.11</text>
-<text x="385.0" y="256.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.55" data-dim="4" id="p51">0.02</text>
-<text x="305.0" y="292.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.6" data-dim="4" id="p60">−0.07</text>
-<text x="385.0" y="292.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.6" data-dim="4" id="p61">0.09</text>
-<text x="305.0" y="328.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.65" data-dim="4" id="p70">0.24</text>
-<text x="385.0" y="328.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.65" data-dim="4" id="p71">0.46</text>
-<rect data-box="#oh0 #p00 #p01" data-pad="5" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="4" data-d="0" data-t="0.9"/>
-<text y="130" font-size="24" style="fill:currentColor" data-s="5" data-d="0" data-line="H1" data-x0="650" id="h0">h<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6"> =</tspan></text>
+<path d="M390 50 H398 V340 H390" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="2" data-d="0" data-t="0.4"/>
+<text x="172.0" y="76.0" font-size="21" style="fill:var(--orange)" text-anchor="middle" data-s="2" data-d="0.30" id="oh0">1</text>
+<text x="201.0" y="76.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.30" id="oh1">0</text>
+<text x="230.0" y="76.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.30" id="oh2">0</text>
+<text x="259.0" y="76.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.30" id="oh3">0</text>
+<text x="288.0" y="76.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.30" id="oh4">0</text>
+<text x="317.0" y="76.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.30" id="oh5">0</text>
+<text x="346.0" y="76.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.30" id="oh6">0</text>
+<text x="375.0" y="76.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.30" id="oh7">0</text>
+<text x="172.0" y="112.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.35" data-dim="4">0</text>
+<text x="201.0" y="112.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.35" data-dim="4">1</text>
+<text x="230.0" y="112.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.35" data-dim="4">0</text>
+<text x="259.0" y="112.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.35" data-dim="4">0</text>
+<text x="288.0" y="112.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.35" data-dim="4">0</text>
+<text x="317.0" y="112.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.35" data-dim="4">0</text>
+<text x="346.0" y="112.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.35" data-dim="4">0</text>
+<text x="375.0" y="112.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.35" data-dim="4">0</text>
+<text x="172.0" y="148.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.40" data-dim="4">0</text>
+<text x="201.0" y="148.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.40" data-dim="4">0</text>
+<text x="230.0" y="148.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.40" data-dim="4">1</text>
+<text x="259.0" y="148.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.40" data-dim="4">0</text>
+<text x="288.0" y="148.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.40" data-dim="4">0</text>
+<text x="317.0" y="148.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.40" data-dim="4">0</text>
+<text x="346.0" y="148.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.40" data-dim="4">0</text>
+<text x="375.0" y="148.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.40" data-dim="4">0</text>
+<text x="172.0" y="184.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.45" data-dim="4">0</text>
+<text x="201.0" y="184.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.45" data-dim="4">0</text>
+<text x="230.0" y="184.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.45" data-dim="4">0</text>
+<text x="259.0" y="184.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.45" data-dim="4">1</text>
+<text x="288.0" y="184.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.45" data-dim="4">0</text>
+<text x="317.0" y="184.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.45" data-dim="4">0</text>
+<text x="346.0" y="184.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.45" data-dim="4">0</text>
+<text x="375.0" y="184.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.45" data-dim="4">0</text>
+<text x="172.0" y="220.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.50" data-dim="4">0</text>
+<text x="201.0" y="220.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.50" data-dim="4">0</text>
+<text x="230.0" y="220.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.50" data-dim="4">0</text>
+<text x="259.0" y="220.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.50" data-dim="4">0</text>
+<text x="288.0" y="220.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.50" data-dim="4">1</text>
+<text x="317.0" y="220.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.50" data-dim="4">0</text>
+<text x="346.0" y="220.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.50" data-dim="4">0</text>
+<text x="375.0" y="220.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.50" data-dim="4">0</text>
+<text x="172.0" y="256.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.55" data-dim="4">0</text>
+<text x="201.0" y="256.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.55" data-dim="4">0</text>
+<text x="230.0" y="256.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.55" data-dim="4">0</text>
+<text x="259.0" y="256.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.55" data-dim="4">0</text>
+<text x="288.0" y="256.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.55" data-dim="4">0</text>
+<text x="317.0" y="256.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.55" data-dim="4">1</text>
+<text x="346.0" y="256.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.55" data-dim="4">0</text>
+<text x="375.0" y="256.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.55" data-dim="4">0</text>
+<text x="172.0" y="292.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.60" data-dim="4">0</text>
+<text x="201.0" y="292.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.60" data-dim="4">0</text>
+<text x="230.0" y="292.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.60" data-dim="4">0</text>
+<text x="259.0" y="292.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.60" data-dim="4">0</text>
+<text x="288.0" y="292.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.60" data-dim="4">0</text>
+<text x="317.0" y="292.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.60" data-dim="4">0</text>
+<text x="346.0" y="292.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.60" data-dim="4">1</text>
+<text x="375.0" y="292.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.60" data-dim="4">0</text>
+<text x="172.0" y="328.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.65" data-dim="4">0</text>
+<text x="201.0" y="328.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.65" data-dim="4">0</text>
+<text x="230.0" y="328.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.65" data-dim="4">0</text>
+<text x="259.0" y="328.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.65" data-dim="4">0</text>
+<text x="288.0" y="328.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.65" data-dim="4">0</text>
+<text x="317.0" y="328.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.65" data-dim="4">0</text>
+<text x="346.0" y="328.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.65" data-dim="4">0</text>
+<text x="375.0" y="328.0" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.65" data-dim="4">1</text>
+<text x="436.0" y="203.0" font-size="24" style="fill:currentColor" data-s="3" data-d="0">×</text>
+<text x="575.0" y="30.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0">p, random at the start</text>
+<path d="M496 50 H488 V340 H496" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="3" data-d="0" data-t="0.4"/>
+<path d="M654 50 H662 V340 H654" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="3" data-d="0" data-t="0.4"/>
+<text x="535.0" y="76.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.3" id="p00">−0.41</text>
+<text x="615.0" y="76.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.3" id="p01">−0.26</text>
+<text x="535.0" y="112.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.35" data-dim="4" id="p10">0.30</text>
+<text x="615.0" y="112.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.35" data-dim="4" id="p11">0.08</text>
+<text x="535.0" y="148.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.4" data-dim="4" id="p20">−0.41</text>
+<text x="615.0" y="148.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.4" data-dim="4" id="p21">−0.07</text>
+<text x="535.0" y="184.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.45" data-dim="4" id="p30">−0.02</text>
+<text x="615.0" y="184.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.45" data-dim="4" id="p31">−0.34</text>
+<text x="535.0" y="220.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.5" data-dim="4" id="p40">0.23</text>
+<text x="615.0" y="220.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.5" data-dim="4" id="p41">−0.39</text>
+<text x="535.0" y="256.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.55" data-dim="4" id="p50">−0.11</text>
+<text x="615.0" y="256.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.55" data-dim="4" id="p51">0.02</text>
+<text x="535.0" y="292.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.6" data-dim="4" id="p60">−0.07</text>
+<text x="615.0" y="292.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.6" data-dim="4" id="p61">0.09</text>
+<text x="535.0" y="328.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.65" data-dim="4" id="p70">0.24</text>
+<text x="615.0" y="328.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.65" data-dim="4" id="p71">0.46</text>
+<rect data-box="#oh0 #oh7 #p00 #p01" data-pad="5" x="230.0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="4" data-d="0" data-t="0.9"/>
+<text y="130" font-size="24" style="fill:currentColor" data-s="5" data-d="0" data-line="H1" data-x0="880" id="h0">h<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6"> =</tspan></text>
 <text y="130" font-size="24" style="fill:var(--orange)" data-s="6" data-d="0" data-line="H1">1 · (−0.41)</text>
 <text y="130" font-size="24" style="fill:var(--muted)" data-s="7" data-d="0" data-line="H1">+ 0 · 0.30 + …</text>
 <text y="172" font-size="24" style="fill:currentColor" data-s="8" data-d="0" data-line="H1b" data-at="h0" id="hb0">= −0.41</text>
-<text y="203.0" font-size="24" style="fill:currentColor" data-s="8" data-d="0" data-line="Hv" data-x0="452">=</text>
-<text y="203.0" font-size="24" style="fill:currentColor" data-s="8" data-d="0.3" data-line="Hv" data-x0="494" id="hv0" data-gap="16">−0.41</text>
-<path d="M484 177.0 H476 V211.0 H484" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="8" data-d="0.2" data-t="0.4"/>
-<path d="M610 177.0 H618 V211.0 H610" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="8" data-d="0.2" data-t="0.4"/>
-<text x="547.0" y="165.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="8" data-d="0.2">h</text>
-<text y="250" font-size="24" style="fill:currentColor" data-s="9" data-d="0" data-line="H2" data-x0="650" id="h1">h<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6"> =</tspan></text>
+<text y="203.0" font-size="24" style="fill:currentColor" data-s="8" data-d="0" data-line="Hv" data-x0="682">=</text>
+<text y="203.0" font-size="24" style="fill:currentColor" data-s="8" data-d="0.3" data-line="Hv" data-x0="724" id="hv0" data-gap="16">−0.41</text>
+<path d="M714 177.0 H706 V211.0 H714" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="8" data-d="0.2" data-t="0.4"/>
+<path d="M840 177.0 H848 V211.0 H840" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="8" data-d="0.2" data-t="0.4"/>
+<text x="777.0" y="165.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="8" data-d="0.2">h</text>
+<text y="250" font-size="24" style="fill:currentColor" data-s="9" data-d="0" data-line="H2" data-x0="880" id="h1">h<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6"> =</tspan></text>
 <text y="250" font-size="24" style="fill:var(--orange)" data-s="10" data-d="0" data-line="H2">1 · (−0.26)</text>
 <text y="250" font-size="24" style="fill:var(--muted)" data-s="11" data-d="0" data-line="H2">+ 0 · 0.08 + …</text>
 <text y="292" font-size="24" style="fill:currentColor" data-s="12" data-d="0" data-line="H2b" data-at="h1" id="hb1">= −0.26</text>
 <text y="203.0" font-size="24" style="fill:currentColor" data-s="12" data-d="0.3" data-line="Hv">−0.26</text>
+      
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
   <div class="notes">
     <p>Now the same steps with our own small example: the corpus about cats and dogs, and the tables at the very start of training, when they are still random. Each press shows the next step.</p>
-    <p>The input word is cats. The model cannot read a word, so it writes it as a one-hot vector. There is one position for every word in the vocabulary, eight here. All of them are 0, except a 1 at the position of cats.</p>
+    <p>The input word is cats. The model cannot read a word, so it writes it as a one-hot vector. There is one position for every word in the vocabulary, eight here. All of them are 0, except a 1 at the word's own position. The board shows the one-hot vectors of all eight words, one row each; the input word cats uses the first row.</p>
     <p>The table p is the embedding table. It has one row for every word, and each row has two values. At the start, these values are random.</p>
     <p>Now multiply the one-hot vector by the table. Every row of p is multiplied by its own 0 or 1, and then the rows are added up. The rows multiplied by 0 disappear. Only the row of cats is left. So the result, h, is just the row of cats: minus 0.41 and minus 0.26. That is why the rows of p are the embeddings: reading a word means copying out its row.</p>
   </div>
