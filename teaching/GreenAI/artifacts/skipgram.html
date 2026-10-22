@@ -634,8 +634,10 @@ function drawBars() {
 // Drawn for the step just taken (values before it) or for the next pair. Each Step replays it.
 const FW = { t0: null, dur: 8000, mode: "one" };
 function fwStart() { FW.t0 = reduceMotion ? null : performance.now(); }
+// while Play trains whole passes, every word is an input, so the panel shows all of them at once
+const fwAll = () => FW.mode === "all" || (st.playing && st.mode === "pass");
 function drawForward(now) {
-  if (FW.mode === "all") return drawForwardAll();
+  if (fwAll()) return drawForwardAll();
   const L = lastPair(), pr = L ? L.pr : PAIRS[st.k], a = pr.a, b = pr.b;
   const P = VOCAB.map((_, i) => (L && i === a) ? L.Wb : st.W[i]), C = L ? L.Cfull : st.C;
   const h = P[a], sc = VOCAB.map((_, j) => h[0] * C[0][j] + h[1] * C[1][j]), pr8 = L ? L.before : probs(st.W, st.C, a);
@@ -740,6 +742,7 @@ const TARGET = VOCAB.map((_, a) => { const n = PAIRS.filter(q => q.a === a).leng
   return VOCAB.map((_, b) => PAIRS.filter(q => q.a === a && q.b === b).length / n); });
 function drawForwardAll() {
   const L = lastPair(), pr = L ? L.pr : PAIRS[st.k];
+  const mark = !(st.playing && st.mode === "pass");  // while Play trains whole passes, no single pair is marked
   const { ctx, w, h: H } = fitCanvas(document.getElementById("fw"));
   const col = { blue: css("--blue"), gray: css("--gray"), orange: css("--orange"), green: css("--green") };
   const fg = css("--fg"), mu = css("--muted"), line = css("--line"), hi = css("--hi");
@@ -768,7 +771,7 @@ function drawForwardAll() {
   for (let i = 0; i < 8; i++) for (let d = 0; d < 2; d++) cell(px + d * pw, top + i * rh, pw, rh, n2(st.W[i][d]), null, fg);
   const hx = px + 2 * pw + 30; sym(hx - 15, top + 4 * rh + 6, "=");
   title(hx, top - 10, "H", "8 × 2, one h per word");
-  for (let i = 0; i < 8; i++) for (let d = 0; d < 2; d++) cell(hx + d * pw, top + i * rh, pw, rh, n2(st.W[i][d]), i === pr.a ? hi : null, fg);
+  for (let i = 0; i < 8; i++) for (let d = 0; d < 2; d++) cell(hx + d * pw, top + i * rh, pw, rh, n2(st.W[i][d]), mark && i === pr.a ? hi : null, fg);
   ctx.fillStyle = mu; ctx.font = `12px ${css("--font-body")}`; ctx.textAlign = "left";
   ctx.fillText("H is p itself: each row is one word's h.", hx, top + 8 * rh + 16);
 
@@ -789,8 +792,10 @@ function drawForwardAll() {
   }
   // the pair being trained
   ctx.strokeStyle = fg; ctx.lineWidth = 2;
-  ctx.strokeRect(x0 + pr.b * cw + 1, top2 + pr.a * rh + 1, cw - 1, rh - 1);
-  ctx.strokeRect(gx + pr.b * cw + 1, top2 + pr.a * rh + 1, cw - 1, rh - 1);
+  if (mark) {
+    ctx.strokeRect(x0 + pr.b * cw + 1, top2 + pr.a * rh + 1, cw - 1, rh - 1);
+    ctx.strokeRect(gx + pr.b * cw + 1, top2 + pr.a * rh + 1, cw - 1, rh - 1);
+  }
   ctx.fillStyle = fg; ctx.font = `13px ${css("--font-body")}`; ctx.textAlign = "left";
   const msg = `Pass ${st.pass.toLocaleString("en-US")}. Each row on the left is one word's prediction; training pulls it toward the same row on the right.`;
   const lines = []; let curL = "";
@@ -804,11 +809,14 @@ const f3 = v => v.toFixed(3), f2 = v => v.toFixed(2);
 const cosine = (u, v) => (u[0] * v[0] + u[1] * v[1]) / (Math.hypot(...u) * Math.hypot(...v));
 
 function renderCorpus() {
+  document.getElementById("fwplay").hidden = fwAll();
   const L = lastPair(), pr = L ? L.pr : PAIRS[st.k];
   document.getElementById("corpus").innerHTML = CORPUS.map((s, si) => "<div>" + s.split(" ").map((w, i) => {
     let c = "w";
-    if (si === pr.s && i === pr.i) c += " in";
-    if (si === pr.s && i === pr.j) c += " out";
+    if (!fwAll() || FW.mode === "all") {
+      if (si === pr.s && i === pr.i) c += " in";
+      if (si === pr.s && i === pr.j) c += " out";
+    }
     return `<span class="${c}">${w}</span>`;
   }).join(" ") + "</div>").join("");
   const idx = PAIRS.indexOf(pr) + 1, justK = L ? PAIRS.indexOf(L.pr) : -1;
@@ -822,7 +830,9 @@ function renderCorpus() {
     : st.playing ? `Playing: every pass trains on all 16 pairs. Pass ${st.pass.toLocaleString()} done.`
     : st.k === 0 && st.pass > 0 ? `Pass ${st.pass.toLocaleString()} done: all 16 pairs trained. Next: pair 1, <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`
     : `Next pair, ${idx} of 16: <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`;
-  document.getElementById("fwpair").innerHTML = L ? `drawn for the pair just trained: <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`
+  document.getElementById("fwpair").innerHTML = st.playing && st.mode === "pass" && FW.mode !== "all"
+    ? "Play trains on all 16 pairs in every pass, every word as an input, so while it runs this panel shows all words at once. Pause to go back to one pair, or choose 1 pair per second to follow the pairs."
+    : L ? `drawn for the pair just trained: <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`
     : `drawn for the next pair: <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>.` + (st.k === 0 ? " Every pass starts with this pair; press Step to follow the pairs one by one." : "");
 }
 
