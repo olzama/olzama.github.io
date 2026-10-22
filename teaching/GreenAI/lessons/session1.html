@@ -523,7 +523,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 
 <section class="screen" id="prompt" data-step="0">
   <header><h2>A real measurement: one prompt</h2><p class="sub">The median Gemini text prompt, May 2025, as measured by Google</p></header>
-  <div class="body cols">
+  <div class="body cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr)">
     <div class="col">
       <table class="plain">
         <thead><tr><th>What is counted</th><th>Wh</th></tr></thead>
@@ -535,13 +535,55 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
           <tr class="now"><td>total</td><td class="num">0.24</td></tr>
         </tbody>
       </table>
-    </div>
-    <div class="col">
       <ul class="points">
-        <li>Counting only the accelerators gives a little over half of the total: what you count changes the number.</li>
-        <li>Carbon and water follow from the energy, the grid and the WUE: 0.03 g CO₂eq and 0.26 mL of water.</li>
+        <li>What you count changes the number.</li>
+        <li>Carbon: all the energy × the grid's carbon intensity, plus a share of building the hardware. Water: the computers' energy × WUE.</li>
         <li>Measured by the company that runs the model, for its own system. Not independently checked.</li>
       </ul>
+    </div>
+    <div class="col">
+      <div class="board">
+      <svg viewBox="0 0 640 490" role="img" aria-label="0.14 + 0.06 + 0.02 + 0.02 = 0.24 Wh; the accelerators' share is 0.14 / 0.24 ≈ 0.58; carbon: 0.00024 kWh × 94 g CO₂eq per kWh ≈ 0.023 g, plus 0.010 g for building the hardware ≈ 0.03 g; water: 0.00022 kWh × 1.15 L per kWh ≈ 0.25 mL">
+<text y="64" font-size="24" style="fill:currentColor" data-s="1" data-d="0" data-x0="20" id="e1" data-gap="18" data-line="P1">0.14</text>
+<text y="30" font-size="16" style="fill:var(--muted)" data-s="1" data-d="0" data-a="fade" data-line="P1l" data-at="e1">accelerators</text>
+<text y="64" font-size="24" style="fill:currentColor" data-s="2" data-d="0" data-gap="18" data-line="P1">+</text>
+<text y="64" font-size="24" style="fill:currentColor" data-s="2" data-d="0" id="e2" data-gap="18" data-line="P1">0.06</text>
+<text y="30" font-size="16" style="fill:var(--muted)" data-s="2" data-d="0" data-a="fade" data-line="P1l" data-at="e2">host</text>
+<text y="64" font-size="24" style="fill:currentColor" data-s="3" data-d="0" data-gap="18" data-line="P1">+</text>
+<text y="64" font-size="24" style="fill:currentColor" data-s="3" data-d="0" id="e3" data-gap="18" data-line="P1">0.02</text>
+<text y="30" font-size="16" style="fill:var(--muted)" data-s="3" data-d="0" data-a="fade" data-line="P1l" data-at="e3">idle</text>
+<text y="64" font-size="24" style="fill:currentColor" data-s="4" data-d="0" data-gap="18" data-line="P1">+</text>
+<text y="64" font-size="24" style="fill:currentColor" data-s="4" data-d="0" id="e4" data-gap="18" data-line="P1">0.02</text>
+<text y="30" font-size="16" style="fill:var(--muted)" data-s="4" data-d="0" data-a="fade" data-line="P1l" data-at="e4">overhead</text>
+<text y="64" font-size="24" style="fill:var(--blue)" data-s="5" data-d="0" data-line="P1">= 0.24 Wh</text>
+<text y="118" font-size="16" style="fill:var(--muted)" data-s="6" data-d="0" data-a="fade" data-line="P2l" data-x0="20">only the accelerators, as a share of the total</text>
+<text y="168" font-size="24" style="fill:currentColor" data-s="6" data-d="0" data-x0="20" id="f1" data-line="P2">share</text>
+<text y="168" font-size="24" style="fill:currentColor" data-s="6" data-d="0" data-line="P2">=</text>
+<g class="bfrac" data-line="P2"><text class="num" y="152" font-size="24" style="fill:currentColor" data-s="6" data-d="0">0.14</text><line class="bar" y1="161" y2="161" stroke="currentColor" stroke-width="2" data-s="6" data-d="0"/><text class="den" y="186" font-size="24" style="fill:currentColor" data-s="6" data-d="0.2">0.24</text></g>
+<text y="168" font-size="24" style="fill:var(--blue)" data-s="7" data-d="0" data-line="P2">≈ 0.58: a little over half</text>
+<text y="240" font-size="16" style="fill:var(--muted)" data-s="8" data-d="0" data-a="fade" data-line="P3l" data-x0="20">carbon: all the energy (0.24 Wh = 0.00024 kWh) × the grid's carbon intensity</text>
+<text y="290" font-size="24" style="fill:currentColor" data-s="8" data-d="0" data-x0="20" id="c1" data-line="P3">0.00024</text>
+<text y="290" font-size="24" style="fill:currentColor" data-s="8" data-d="0" id="k1" data-gap="12" data-line="P3">kWh</text>
+<text y="290" font-size="24" style="fill:currentColor" data-s="9" data-d="0" id="cx" data-line="P3">×</text>
+<g class="bfrac" data-line="P3"><text class="num" y="274" font-size="24" style="fill:var(--orange)" data-s="9" data-d="0">94 g CO₂eq</text><line class="bar" y1="283" y2="283" stroke="currentColor" stroke-width="2" data-s="9" data-d="0"/><text class="den" y="308" font-size="24" style="fill:var(--orange)" data-s="10" data-d="0">1</text><text class="den" y="308" font-size="24" style="fill:var(--orange)" id="k2" data-s="10" data-d="0">kWh</text></g>
+<path data-strike="k1" d="M0 0" fill="none" stroke="var(--neg)" stroke-width="2.5" stroke-linecap="round" data-s="11" data-d="0" data-t="0.3"/>
+<path data-strike="k2" d="M0 0" fill="none" stroke="var(--neg)" stroke-width="2.5" stroke-linecap="round" data-s="11" data-d="0.4" data-t="0.3"/>
+<text y="290" font-size="24" style="fill:currentColor" data-s="12" data-d="0" data-line="P3">≈ 0.023 g</text>
+<text y="290" font-size="24" style="fill:currentColor" data-s="13" data-d="0" id="c2" data-line="P3">+ 0.010 g</text>
+<text y="330" font-size="16" style="fill:var(--muted)" data-s="13" data-d="0" data-a="fade" data-line="P3m" data-at="c2">building the hardware</text>
+<text y="290" font-size="24" style="fill:var(--blue)" data-s="14" data-d="0" data-line="P3">≈ 0.03 g CO₂eq</text>
+<text y="370" font-size="16" style="fill:var(--muted)" data-s="15" data-d="0" data-a="fade" data-line="P4l" data-x0="20">water: the computers' energy, without the overhead (0.24 − 0.02 = 0.22 Wh) × WUE</text>
+<text y="420" font-size="24" style="fill:currentColor" data-s="15" data-d="0" data-x0="20" id="w1" data-line="P4">0.00022</text>
+<text y="420" font-size="24" style="fill:currentColor" data-s="15" data-d="0" id="k3" data-gap="12" data-line="P4">kWh</text>
+<text y="420" font-size="24" style="fill:currentColor" data-s="16" data-d="0" data-line="P4">×</text>
+<g class="bfrac" data-line="P4"><text class="num" y="404" font-size="24" style="fill:var(--green)" data-s="16" data-d="0">1.15 L</text><line class="bar" y1="413" y2="413" stroke="currentColor" stroke-width="2" data-s="16" data-d="0"/><text class="den" y="438" font-size="24" style="fill:var(--green)" data-s="17" data-d="0">1</text><text class="den" y="438" font-size="24" style="fill:var(--green)" id="k4" data-s="17" data-d="0">kWh</text></g>
+<path data-strike="k3" d="M0 0" fill="none" stroke="var(--neg)" stroke-width="2.5" stroke-linecap="round" data-s="18" data-d="0" data-t="0.3"/>
+<path data-strike="k4" d="M0 0" fill="none" stroke="var(--neg)" stroke-width="2.5" stroke-linecap="round" data-s="18" data-d="0.4" data-t="0.3"/>
+<text y="420" font-size="24" style="fill:var(--blue)" data-s="19" data-d="0" data-line="P4">≈ 0.25 mL of water</text>
+<text y="472" font-size="16" style="fill:var(--muted)" data-s="19" data-d="0.3" data-a="fade" data-line="P4n" data-x0="20">the paper reports 0.26 mL: it starts from unrounded values</text>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
+    </div>
     </div>
   </div>
   <p class="src">Source: Elsworth et al., “Measuring the environmental impact of delivering AI at Google Scale,” 2025 (arXiv:2508.15734)</p>
@@ -549,7 +591,9 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     <p>Here is a real measurement of inference, from a paper published in August 2025 by Google. It measures one text prompt to Gemini, Google's chatbot: the median prompt, in May 2025.</p>
     <p>The table shows what they counted. The AI accelerators, the chips that compute the answer, use 0.14 watt-hours. The host machine around them, its processor and memory, adds 0.06. Machines that sit idle, ready for the next requests, add 0.02. And the data center overhead adds 0.02 more. Their PUE is 1.09. The total is 0.24 watt-hours.</p>
     <p>Look at the first row and the last row. If you count only the accelerators, you get a little over half of the total. So two honest measurements of the same prompt can differ by almost a factor of two, just because they count different things. When you read a number like this, always ask what was counted.</p>
-    <p>From the energy, they compute carbon and water, with the steps from the last screen: 0.03 grams of CO2-equivalent, and 0.26 milliliters of water, about five drops.</p>
+    <p>The board on the right does the arithmetic step by step. First the sum: the four rows add up to 0.24 watt-hours. Then the share: 0.14 out of 0.24 is about 0.58, a little over half.</p>
+    <p>Then carbon, with the steps from the last screen. 0.24 watt-hours is 0.00024 kilowatt-hours. Google multiplies it by 94 grams of CO2-equivalent per kilowatt-hour. That is not the carbon intensity of the grid itself, which averaged 345: Google subtracts the clean energy it buys, and this is called a market-based number. The kilowatt-hours cancel, and we get about 0.023 grams. To that they add 0.010 grams, the prompt's share of the carbon from building the chips and the machines around them. Together, about 0.03 grams.</p>
+    <p>Last, water. As on the last screen, WUE is applied to the computers' energy, without the data center overhead: 0.24 minus 0.02 is 0.22 watt-hours, or 0.00022 kilowatt-hours. Times 1.15 liters per kilowatt-hour gives about 0.25 milliliters, about five drops. The paper reports 0.26, because it starts from the unrounded values.</p>
     <p>One more thing: this measurement is by the company that runs the model, for its own system. It has not been checked independently. It is still one of the most complete measurements published so far.</p>
   </div>
 </section>
@@ -557,27 +601,27 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <div class="part" id="part-course"><h1>What this course covers</h1></div>
 
 <section class="screen" id="course" data-step="0">
-  <header><h2>The goal: to talk about modern LLMs, and what they cost</h2><p class="sub">Three sessions, one running project: the Green NLP Benchmark Lab</p></header>
+  <header><h2>The goal: to talk about modern LLMs, and what they cost</h2><p class="sub">Three topics, one running project: the Green NLP Benchmark Lab</p></header>
   <div class="body">
     <ul class="points">
       <li>To understand large language models, we need to understand language models in general, and how NLP got to them</li>
     </ul>
     <div class="flow">
-      <div class="box">Session 1<br><b>Language models</b></div><span class="arr">→</span>
-      <div class="box">Session 2<br><b>Quantized</b> language models</div><span class="arr">→</span>
-      <div class="box g">Session 3<br><b>Retrieval-augmented generation</b></div>
+      <div class="box">Topic 1<br><b>Language models</b></div><span class="arr">→</span>
+      <div class="box">Topic 2<br><b>Quantized</b> language models</div><span class="arr">→</span>
+      <div class="box g">Topic 3<br><b>Retrieval-augmented generation</b></div>
     </div>
     <ul class="points">
-      <li>Session 2: the same model, with fewer bits for each of its numbers</li>
-      <li>Session 3: not a kind of model, but a way of using one: give it only the relevant pieces of the documents</li>
-      <li>Every session: the same tasks, measured the same way. One row per run in your own leaderboard.</li>
+      <li>Topic 2: the same model, with fewer bits for each of its numbers</li>
+      <li>Topic 3: not a kind of model, but a way of using one: give it only the relevant pieces of the documents</li>
+      <li>Every topic: the same tasks, measured the same way. One row per run in your own leaderboard.</li>
     </ul>
   </div>
   <div class="notes">
     <p>Now, what this course covers. The goal is that you can talk about modern large language models, and about what they cost, with understanding.</p>
     <p>To understand large language models, we first need to understand language models in general. And for that, it helps to see how NLP got to them. So today we go through a short history of language models, from the simplest one to the transformer.</p>
-    <p>The three sessions follow three ideas. Today, session 1: language models. Session 2: quantized language models. That is the same model, but each of its numbers is stored and computed with fewer bits. Session 3: retrieval-augmented generation. This is not a kind of model. It is a way of using a model: instead of giving the model everything, we first retrieve the relevant pieces of the documents, and give the model only those.</p>
-    <p>In every session we run the same tasks and measure them the same way. Every run adds one row to a leaderboard, a file you keep for all three sessions. By the end, you have your own comparison.</p>
+    <p>The course has three topics. Topic 1, which we start today: language models. Topic 2: quantized language models. That is the same model, but each of its numbers is stored and computed with fewer bits. Topic 3: retrieval-augmented generation. This is not a kind of model. It is a way of using a model: instead of giving the model everything, we first retrieve the relevant pieces of the documents, and give the model only those.</p>
+    <p>For every topic we run the same tasks and measure them the same way. Every run adds one row to a leaderboard, a file you keep for the whole course. By the end, you have your own comparison.</p>
   </div>
 </section>
 
@@ -617,7 +661,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <table class="plain" style="width:100%">
         <thead><tr><th>Step</th><th>What it adds</th><th>What is still missing</th></tr></thead>
         <tbody>
-          <tr><td>1 N-grams <span class="muted">(statistical, 1990s)</span></td><td>predict the next word by counting</td><td>aunt and uncle are unrelated words</td></tr>
+          <tr><td>1 N-grams <span class="muted">(statistical, 1990s)</span></td><td>predict the next word by counting</td><td>a word pair it never counted gets probability 0, even if a similar pair was counted</td></tr>
           <tr><td>2 Embeddings <span class="muted">(neural, 2013)</span></td><td>a learned vector per word: similar words get similar vectors</td><td>vectors for words, not for sentences</td></tr>
           <tr><td>3 Encoder–decoder <span class="muted">(2014)</span></td><td>read a sentence into one vector, write the translation from it</td><td>one vector for a whole sentence: early words fade</td></tr>
           <tr><td>4 Attention <span class="muted">(2015)</span></td><td>the decoder looks back at every source word</td><td>the source is still read one word after another</td></tr>
@@ -631,7 +675,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   <div class="notes">
     <p>Here is the plan for the technical part of today. We go in six steps. Each step fixes a problem of the step before. The bar at the bottom of the screen shows which step we are on.</p>
     <p>Before these steps, NLP systems were written by hand, as rules. Each step since then has replaced hand-written knowledge with more data and more computation. That is why the history matters for a course about costs.</p>
-    <p>Step 1 is n-grams. An n-gram model predicts the next word by counting which words follow which. Its problem: it has no idea that aunt and uncle are similar. They are just two different words.</p>
+    <p>Step 1 is n-grams. An n-gram model predicts the next word by counting which words follow which. Its problem: it only knows what it has counted. If it has seen “my aunt spoke” but never “my uncle spoke”, it gives “spoke” after uncle a probability of 0. What it counted for aunt does not carry over to uncle, a word used in the same places.</p>
     <p>Step 2 is embeddings. Each word gets a vector, a list of values, learned from the words around it. Similar words get similar vectors. But these are vectors for single words. They say nothing about a sentence.</p>
     <p>Step 3 is the encoder–decoder model for translation. The encoder reads the whole sentence into one vector. The decoder writes the translation from that vector. Its problem: one vector has to hold the whole sentence, and the early words fade.</p>
     <p>Step 4 is attention. The decoder may look back at every source word, and it decides how much to use each one. But the source sentence is still read one word after another.</p>
