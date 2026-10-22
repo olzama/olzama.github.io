@@ -2036,7 +2036,7 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
     <p>Then scroll to section 4. Two trained models translate our whole sentence. Their vectors have 8 dimensions, and training chose the values. They have a decoder state, so they choose from all English words. They make the same kind of mistakes without attention: the article and the noun. Each step has buttons that jump back to the matching step of section 1 or 2.</p>
     <p>Press Next step. Step 1 shows the two translations. Without attention, the model writes "a friend of mine", and many words after that are wrong. With attention, the translation is right.</p>
     <p>Step 3 is the first word without attention. The decoder has only the summary. The article depends on the noun: an aunt, a friend. But tía is the second word of the sentence. After it, the encoder read 24 more words and 5 punctuation marks before it made the summary. The model gives "a" 0.77, and that is wrong.</p>
-    <p>Step 4 is the first word with attention. Here the query is the decoder state. The biggest weight, 0.47, is on tía. Now "an" gets 0.95.</p>
+    <p>Step 4 is the first word with attention. This model has no rule for the query: the decoder state itself is dotted with each encoder vector, so the state's eight numbers play the part of the rewards of section 3, and training shaped them. The biggest weight, 0.47, is on tía. Now "an" gets 0.95.</p>
     <p>Step 5 is the second word. Each model takes in its own first word. After "a", aunt no longer fits, so the model guesses friend. After "an", aunt gets 0.96.</p>
   </div>
 </section>
