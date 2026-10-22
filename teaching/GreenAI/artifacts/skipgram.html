@@ -82,6 +82,12 @@ canvas#plane { width: 100%; aspect-ratio: 1 / 1; max-width: 100%; display: block
 .corpus { font-family: var(--font-mono); font-size: 0.98rem; display: grid; gap: 2px; }
 .corpus .w { padding: 1px 4px; border-radius: 4px; }
 .corpus .in { background: var(--hi); outline: 2px solid var(--accent); }
+.pairlist { display: grid; grid-template-rows: repeat(8, auto); grid-auto-flow: column; gap: 2px 14px; margin-top: 8px; font-family: var(--font-mono); font-size: 0.86rem; }
+.pairlist span { padding: 1px 6px; border-radius: 4px; border: 1px solid transparent; }
+.pairlist .done { color: var(--muted); }
+.pairlist .done::before { content: "✓ "; }
+.pairlist .next { border-color: var(--accent); }
+.pairlist .just { background: var(--hi); border-color: var(--accent); }
 .corpus .out { background: var(--hi); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
 .pairinfo { margin-top: 8px; font-size: 0.95rem; }
 .pairinfo b { font-family: var(--font-mono); font-weight: 500; }
@@ -176,7 +182,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <div class="main" id="train">
     <div class="side">
     <section class="panel">
-      <div class="growhead" style="gap:8px 14px"><p class="label" style="margin:0">Inside skip-gram: what gets multiplied</p><span class="chapters" style="margin:0" id="fwmode"><button data-m="one" class="on" style="font-size:0.82rem;padding:4px 10px">one pair</button><button data-m="all" style="font-size:0.82rem;padding:4px 10px">all words at once</button></span><button id="fwplay" style="font-size:0.82rem;padding:4px 10px">Play the multiplication</button></div>
+      <div class="growhead" style="gap:8px 14px"><p class="label" style="margin:0">Inside skip-gram: what gets multiplied</p><span class="chapters" style="margin:0" id="fwmode"><button data-m="one" class="on" style="font-size:0.82rem;padding:4px 10px">one pair</button><button data-m="all" style="font-size:0.82rem;padding:4px 10px">all words at once</button></span><button id="fwplay" style="font-size:0.82rem;padding:4px 10px">Play the multiplication</button><span class="note" id="fwpair" style="margin:0"></span></div>
       <p class="mcap"><b>p</b>: the embedding table, one row per input word (the dots in the plot). <b>p′</b>: the second table, one column per word as a neighbor to predict (the rings).</p>
       <div style="overflow-x:auto"><canvas id="fw" aria-label="One-hot vector times p gives h; h times p-prime gives scores; scores become probabilities"></canvas></div>
     </section>
@@ -202,6 +208,9 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <section class="panel" aria-label="Training data and controls">
         <p class="label">Corpus, window = 1</p>
         <div class="corpus" id="corpus"></div>
+        <p class="label" style="margin-top:12px">The 16 training pairs: input → neighbor to predict</p>
+        <div class="pairlist" id="pairlist"></div>
+        <p class="note" style="margin-top:8px">Training goes through these 16 pairs in this order, again and again. Once through all 16 is one <b>pass</b>. <b>Step</b> trains on the next pair. <b>One pass</b> trains on the rest of the current pass. <b>Play</b> keeps going, pass after pass, at the speed chosen next to it.</p>
         <div class="pairinfo" id="pairinfo"></div>
         <div class="controls" style="margin-top:12px">
           <button id="back">Back</button>
@@ -371,6 +380,8 @@ function randomStart() {
 // ---------------------------------------------------------------- state
 const st = { W: cloneW(W0), C: cloneC(C0), pass: 0, k: 0, last: null, playing: false };
 let disp = { W: cloneW(W0), C: cloneC(C0) };
+// the single pair the page shows: only after Step (or Play at 1 pair per second); after a whole pass, the next pair
+const lastPair = () => st.mode === "slow" ? st.last : null;
 let trail = VOCAB.map(() => []);
 let zoom = 0.7;
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -587,11 +598,11 @@ function drawPlane() {
 function drawBars() {
   const { ctx, w, h } = fitCanvas(bars);
   ctx.clearRect(0, 0, w, h);
-  const L = st.last;
+  const L = lastPair();
   const a = L ? L.pr.a : PAIRS[st.k].a, b = L ? L.pr.b : PAIRS[st.k].b;
   const p = L ? L.before : probs(st.W, st.C, a);
   const after = L ? L.after : null;
-  document.getElementById("barslabel").textContent = `Model's prediction: P( · | ${VOCAB[a]} )` + (L ? ", before the step" : "");
+  document.getElementById("barslabel").textContent = `Model's prediction: P( · | ${VOCAB[a]} )` + (L ? ", before the step" : st.pass || st.k ? ", now" : "");
   const col = { blue: css("--blue"), gray: css("--gray"), orange: css("--orange"), green: css("--green") };
   const top = Math.max(0.25, Math.ceil(Math.max(...p, ...(after || [0])) * 10) / 10);
   const padL = 34, padB = 26, padT = 18, bw = (w - padL - 8) / 8;
@@ -628,7 +639,7 @@ const FW = { t0: null, dur: 8000, mode: "one" };
 function fwStart() { FW.t0 = reduceMotion ? null : performance.now(); }
 function drawForward(now) {
   if (FW.mode === "all") return drawForwardAll();
-  const L = st.last, pr = L ? L.pr : PAIRS[st.k], a = pr.a, b = pr.b;
+  const L = lastPair(), pr = L ? L.pr : PAIRS[st.k], a = pr.a, b = pr.b;
   const P = VOCAB.map((_, i) => (L && i === a) ? L.Wb : st.W[i]), C = L ? L.Cfull : st.C;
   const h = P[a], sc = VOCAB.map((_, j) => h[0] * C[0][j] + h[1] * C[1][j]), pr8 = L ? L.before : probs(st.W, st.C, a);
   const t = FW.t0 === null ? 1 : Math.min(1, (now - FW.t0) / FW.dur), T = t * FW.dur;
@@ -730,7 +741,7 @@ function drawForward(now) {
 const TARGET = VOCAB.map((_, a) => { const n = PAIRS.filter(q => q.a === a).length;
   return VOCAB.map((_, b) => PAIRS.filter(q => q.a === a && q.b === b).length / n); });
 function drawForwardAll() {
-  const L = st.last, pr = L ? L.pr : PAIRS[st.k];
+  const L = lastPair(), pr = L ? L.pr : PAIRS[st.k];
   const { ctx, w, h: H } = fitCanvas(document.getElementById("fw"));
   const col = { blue: css("--blue"), gray: css("--gray"), orange: css("--orange"), green: css("--green") };
   const fg = css("--fg"), mu = css("--muted"), line = css("--line"), hi = css("--hi");
@@ -795,17 +806,25 @@ const f3 = v => v.toFixed(3), f2 = v => v.toFixed(2);
 const cosine = (u, v) => (u[0] * v[0] + u[1] * v[1]) / (Math.hypot(...u) * Math.hypot(...v));
 
 function renderCorpus() {
-  const L = st.last, pr = L ? L.pr : PAIRS[st.k];
+  const L = lastPair(), pr = L ? L.pr : PAIRS[st.k];
   document.getElementById("corpus").innerHTML = CORPUS.map((s, si) => "<div>" + s.split(" ").map((w, i) => {
     let c = "w";
     if (si === pr.s && i === pr.i) c += " in";
     if (si === pr.s && i === pr.j) c += " out";
     return `<span class="${c}">${w}</span>`;
   }).join(" ") + "</div>").join("");
-  const idx = PAIRS.indexOf(pr) + 1;
+  const idx = PAIRS.indexOf(pr) + 1, justK = L ? PAIRS.indexOf(L.pr) : -1;
+  document.getElementById("pairlist").innerHTML = PAIRS.map((p, k) => {
+    const passDone = !L && st.k === 0 && st.pass > 0;
+    const c = k === justK ? "just" : passDone || k < st.k ? "done" : k === st.k ? "next" : "";
+    return `<span class="${c}">${VOCAB[p.a]} → ${VOCAB[p.b]}</span>`;
+  }).join("");
   document.getElementById("pairinfo").innerHTML = L
     ? `Just trained on pair ${idx} of 16: <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`
+    : st.playing ? `Playing: every pass trains on all 16 pairs. Pass ${st.pass.toLocaleString()} done.`
+    : st.k === 0 && st.pass > 0 ? `Pass ${st.pass.toLocaleString()} done: all 16 pairs trained. Next: pair 1, <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`
     : `Next pair, ${idx} of 16: <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`;
+  document.getElementById("fwpair").innerHTML = `drawn for ${L ? "the pair just trained" : "the next pair"}: <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`;
 }
 
 function renderNarr() {
@@ -842,6 +861,7 @@ function render() {
   const done = st.pass >= PASSES;
   ["step", "pass", "play"].forEach(id => { document.getElementById(id).disabled = done; });
   document.getElementById("back").disabled = !backStack.length;
+  document.getElementById("pass").textContent = st.k ? `Finish this pass (${PAIRS.length - st.k} pairs)` : `One pass (${PAIRS.length} pairs)`;
   renderCorpus(); renderNarr(); drawBars();
   document.getElementById("passnum").textContent = st.pass.toLocaleString();
   document.getElementById("scrub").value = passToSlider(st.pass);
@@ -878,6 +898,7 @@ function setPlaying(on) {
   if (st.playing) backStack = [];   // playing moves on without recording, so Back starts afresh
   document.getElementById("play").textContent = st.playing ? "Pause" : "Play";
   lastTick = 0;
+  renderCorpus();  // the pair line says whether Play is running
 }
 
 // ---------------------------------------------------------------- controls
@@ -887,7 +908,7 @@ document.getElementById("fwplay").onclick = () => { setPlaying(false); fwStart()
 document.querySelectorAll("#fwmode button").forEach(bt => bt.onclick = () => {
   FW.mode = bt.dataset.m;
   document.querySelectorAll("#fwmode button").forEach(x => x.classList.toggle("on", x === bt));
-  document.getElementById("fwplay").hidden = FW.mode === "all";
+  document.getElementById("fwplay").hidden = FW.mode === "all"; document.getElementById("fwpair").hidden = FW.mode === "all";
 });
 document.getElementById("pass").onclick = () => { setPlaying(false); if (st.pass < PASSES) { remember(); st.mode = "pass"; runPass(); render(); } };
 document.getElementById("play").onclick = () => setPlaying(!st.playing);
