@@ -905,7 +905,8 @@ function renderSim(it) {
   $("tdFormula").innerHTML =
     `<b>${it.names[i]}</b> = [${a.join(", ")}]<br><b>${it.names[j]}</b> = [${b.join(", ")}]<br>` +
     `dot product = ${terms} = ${dot(a, b).toLocaleString("en")}<br>` +
-    `lengths: |${it.names[i]}| = ${f1(len(a))}, |${it.names[j]}| = ${f1(len(b))}<br>` +
+    // each length as on the cosine board: Pythagoras with one square per entry
+    [[it.names[i], a], [it.names[j], b]].map(([nm, v]) => `length ‖${nm}‖ = √(${v.map(x => `${x}²`).join(" + ")}) = √${v.reduce((t, x) => t + x * x, 0).toLocaleString("en")} = ${f1(len(v))}<br>`).join("") +
     `cosine = ${dot(a, b).toLocaleString("en")} / (${f1(len(a))} × ${f1(len(b))}) = <b>${f2(cos(a, b))}</b>`;
   // the most and least similar pair
   let best = null, worst = null;
@@ -917,7 +918,7 @@ function renderSim(it) {
   const fmtv = v => measure === "cos" ? f2(v) : Math.round(v).toLocaleString("en");
   const pair = x => `${it.names[x[1]]} and ${it.names[x[2]]} (${fmtv(x[0])})`;
   $("tdSimNote").textContent = (measure === "cos"
-    ? "Cosine divides the dot product by both lengths, so only the direction counts. "
+    ? "A length is Pythagoras with one square per entry: square every count, add them up, take the square root. Cosine divides the dot product by both lengths, so only the direction counts. "
     : "The dot product grows with the counts themselves: a long play or a frequent word scores high with everything. Switch to cosine to divide that out. ")
     + `Most similar: ${pair(best)}. Least similar: ${pair(worst)}.`;
 }
