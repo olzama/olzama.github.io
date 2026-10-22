@@ -360,11 +360,6 @@ table.jobs td, table.jobs th { text-align: left; font-style: normal; }
 .cmpline .bad { color: var(--neg); text-decoration: underline; text-underline-offset: 3px; }
 .cmpline .miss, .note .miss { color: var(--muted); text-decoration: line-through; }
 table.cmpacc th { white-space: nowrap; }
-table.attgrid { border-collapse: separate; border-spacing: 1px; font-family: var(--font-mono); font-size: 0.72rem; }
-table.attgrid td { width: 14px; height: 14px; min-width: 14px; border-radius: 2px; background: var(--grid); }
-table.attgrid tbody th { text-align: right; font-weight: 400; padding-right: 6px; white-space: nowrap; color: var(--fg); }
-table.attgrid thead th { height: 90px; vertical-align: bottom; font-weight: 400; color: var(--muted); font-style: italic; }
-table.attgrid thead th span { display: inline-block; writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; }
 .writers { display: grid; gap: 12px; }
 .writer { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); min-width: 0; }
 .cmpline .cur { background: var(--hi); border-radius: 3px; }
@@ -577,11 +572,6 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <p class="label">Exactly right, out of 500 test sentences (not in the training data)</p>
         <div class="heatwrap"><table class="grid cmpacc" id="cmpAcc"></table></div>
         <p class="note" id="cmpAccNote"></p>
-      </div>
-      <div class="col">
-        <p class="label">Where the model with attention looked</p>
-        <div class="heatwrap"><table class="attgrid" id="cmpGrid"></table></div>
-        <p class="note">One row per English word it wrote, one column per Galician word; darker means more weight. Each column is the encoder's vector after reading that word, so it also carries the words before it. The model without attention has no such grid, because it uses the same summary vector for every English word.</p>
       </div>
     </div>
     <p class="note">Words in <span style="color:var(--neg)">red</span> are not in the correct translation; <span class="miss">struck-through</span> words are missing. Real sentences hold much more than these templates: with 64 dimensions, one vector holds this toy data perfectly, but real models of 2014 lost details in long sentences (Cho et al. 2014; Bahdanau et al. 2015). Attention solved this without making the vector bigger.</p>
@@ -1018,14 +1008,6 @@ function render() {
   });
   $("cmpAcc").innerHTML = h + "</tbody>";
   $("cmpAccNote").textContent = `Each model was trained on ${CMP.train.toLocaleString("en-US")} items (${CMP.trainSentences.toLocaleString("en-US")} sentences, each also split into its three pieces) for ${CMP.steps.toLocaleString("en-US")} steps. The highlighted rows are the selected vector size. A second training run from another random start shows the same pattern.`;
-  // attention grid of the model with attention
-  const W = x.attw, outs = x.att.concat(["‹end›"]);
-  let g = `<thead><tr><th></th>${x.src.map(w => `<th><span>${esc(w)}</span></th>`).join("")}</tr></thead><tbody>`;
-  outs.forEach((w, i) => {
-    if (!W[i]) return;
-    g += `<tr><th>${esc(w)}</th>${W[i].map((v, j) => `<td style="background:rgba(var(--heat),${v.toFixed(3)})" title="${esc(w)} → ${esc(x.src[j])}: ${v.toFixed(2)}"></td>`).join("")}</tr>`;
-  });
-  $("cmpGrid").innerHTML = g + "</tbody>";
   drawStep();
 }
 const len = m => CMP.runs[r].examples[e][m === "One" ? "one" : "att"].length;
@@ -1202,7 +1184,6 @@ function drawStep() {
     bars("barsOne", x.pOne[i1], x.one, i1);
   } else clear(["inOne", "barsOne"]);
   unroll("One", x, i1, doneO); unroll("Att", x, i, doneA);
-  $("cmpGrid").querySelectorAll("tbody tr").forEach((tr, k) => { tr.style.outline = !doneA && k === i ? "2px solid var(--orange)" : ""; });
 }
 $("bdNext").addEventListener("click", () => { stopPlay(); bdN++; drawStep(); });
 $("bdBack").addEventListener("click", () => { stopPlay(); bdN = Math.max(1, bdN - 1); drawStep(); });
