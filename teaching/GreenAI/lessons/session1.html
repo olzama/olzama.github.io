@@ -2139,10 +2139,10 @@ print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed
 </section>
 
 <section class="screen fill" id="qk-i" data-step="4">
-  <header><span class="kind">Interactive</span><h2>Query and key: try your own query</h2></header>
+  <header><span class="kind">Interactive</span><h2>Query and key: what the query's numbers mean</h2></header>
   <div class="body">
     <div class="tabs"><a class="open" href="../artifacts/attention.html#qk" target="_blank" rel="noopener">Open the full page</a></div>
-    <iframe class="frame" title="Query and key: try your own query" data-src="../artifacts/attention.html?embed=qk"></iframe>
+    <iframe class="frame" title="Query and key: what the query's numbers mean" data-src="../artifacts/attention.html?embed=qk"></iframe>
   </div>
   <div class="notes">
     <p>The model of the worked example, in eight steps: press Next step. The frame throughout: the decoder is about to write one word of "an aunt of mine", and the query the students set decides the mix, and through the mix the word. A query's three numbers are rewards: a key's score is the query's number times what the key holds, added over the three dimensions. The page names queries by their rewards: "tía × 6" is (0, 6, 0).</p>
