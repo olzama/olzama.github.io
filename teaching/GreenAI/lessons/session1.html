@@ -1253,7 +1253,12 @@ print("\nBest order found:", " ".join(best_order))
     <div class="ex" data-ex="5">
       <div class="prompt">
         <h3>Exercise 5 · Count the orderings</h3>
-        <p>Count every ordering of <code>BIGGER_WORDS</code> in the loop, and compute <code>expected</code>, the number of orderings, from a formula. The two numbers must match.</p>
+        <p>There are two ways to get the number of orderings of the 8 words in <code>BIGGER_WORDS</code>, and they must give the same number:</p>
+        <ol>
+          <li><b>Count them.</b> The loop goes through every ordering, one at a time. Fill in the list to order, and add 1 to <code>count</code> for each ordering.</li>
+          <li><b>Compute them.</b> Set <code>expected</code> with the formula for the number of orderings of n different words.</li>
+        </ol>
+        <p>The last lines print both numbers, one under the other, and say whether they match.</p>
       </div>
       <details class="hint"><summary>Hints</summary><ul>
         <li>n different words have n! orderings: n × (n − 1) × … × 1.</li>
@@ -1270,7 +1275,9 @@ for perm in itertools.permutations(___):
 expected = math.factorial(___)
 elapsed = time.time() - start_time
 
-print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed:.2f}s")
+print(f"counted by the loop:   {count:,} orderings of {len(BIGGER_WORDS)} words, in {elapsed:.2f}s")
+print(f"computed with n!:      {expected:,}")
+print("they match" if count == expected else "they do not match: check the loop and the formula")
 </script>
 <script type="text/plain" class="tests">
 import math
@@ -1306,10 +1313,12 @@ for perm in itertools.permutations(BIGGER_WORDS):
 expected = math.factorial(len(BIGGER_WORDS))
 elapsed = time.time() - start_time
 
-print(f"{count:,} orderings for {len(BIGGER_WORDS)} words, generated in {elapsed:.2f}s")
+print(f"counted by the loop:   {count:,} orderings of {len(BIGGER_WORDS)} words, in {elapsed:.2f}s")
+print(f"computed with n!:      {expected:,}")
+print("they match" if count == expected else "they do not match: check the loop and the formula")
 </script>
     </div>
-    <div class="reflect"><b>Think about it.</b> 3 words have 6 orderings and 8 words have 40,320. How many does a 20-word sentence have? Could a system try them all? The Colab version of this exercise also measures the energy the loop uses.</div>
+    <div class="reflect"><b>Think about it.</b> 3 words have 6 orderings and 8 words have 40,320. How many does a 20-word sentence have? Could a system try them all?</div>
   </div>
   <div class="notes">
     <p>Part B uses the model for translation. A word-for-word translator gives “a aunt my”. The right words, in the wrong order.</p>
