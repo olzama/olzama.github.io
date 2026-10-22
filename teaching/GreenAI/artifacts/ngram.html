@@ -136,6 +136,15 @@ table.counts .corner { text-align: right; font-size: 0.72rem; }
 .massbar .seen { background: var(--blue); }
 .massbar .unseen { background: var(--green); }
 .massbar .unkm { background: var(--unk); }
+.draw { display: grid; gap: 6px; margin-top: 14px; font-size: 0.85rem; }
+.draw .strip { position: relative; display: flex; height: 26px; border-radius: 4px; overflow: hidden; background: var(--grid); }
+.draw .strip span { height: 100%; background: var(--blue); opacity: 0.45; border-right: 1px solid var(--panel); font-family: var(--font-mono); font-size: 0.75rem; color: var(--fg); display: flex; align-items: center; justify-content: center; overflow: hidden; white-space: nowrap; }
+.draw .strip span.alt { opacity: 0.25; }
+.draw .strip span.unkd { background: var(--unk); }
+.draw .strip span.pick { background: var(--orange); opacity: 1; color: var(--panel); }
+.draw .marker { position: relative; height: 12px; }
+.draw .marker i { position: absolute; top: 0; width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 10px solid var(--fg); transform: translateX(-6px); }
+.draw .scale { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); }
 .bar.unk .w { color: var(--unk); }
 .bar.unk .seg.gain, .bar.unk .fill { background: var(--unk); }
 table.counts .unk { color: var(--unk); }
@@ -446,7 +455,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="gen">
     <h2><span class="n">5</span>Generate text with it</h2>
-    <p class="lead">Start from a word, look up its row, pick a next word, repeat. Greedy takes the most frequent next word; sampling draws one with the row's probabilities. Both use the smoothing set in section 4.</p>
+    <p class="lead">Start from a word, look up its row, pick a next word, repeat. Greedy takes the most frequent next word; sampling draws one at random, each word as often as its probability says (see the draw under the bars). Both use the smoothing set in section 4.</p>
     <div class="cols">
       <div class="col">
         <div class="controls">
@@ -469,6 +478,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <div class="col">
         <p class="label" id="genDistLabel"></p>
         <div class="bars" id="genBars"></div>
+        <div class="draw" id="genDraw" hidden></div>
       </div>
     </div>
   </section>
@@ -726,12 +736,14 @@ function genStep() {
     next = ties[0];
     $("genMsg").textContent = unkNote + (ties.length > 1 ? `Tie between ${ties.length > 3 ? `${ties.length} words` : ties.join(" and ")}; greedy takes the first one (${next}), so it always writes the same sentence.` : "");
   } else {
-    let r = Math.random();
+    const r = Math.random();
+    let acc = 0;
     next = dist[dist.length - 1][0];
-    for (const [w, p] of dist) { r -= p; if (r < 0) { next = w; break; } }
+    for (const [w, p] of dist) { acc += p; if (r < acc) { next = w; break; } }
     $("genMsg").textContent = unkNote;
+    genPick = { from: last, w: next, r };
   }
-  genPick = { from: last, w: next };
+  if (genMode === "greedy") genPick = { from: last, w: next };
   gen.push(next); renderGen(); return true;
 }
 function renderGen() {
@@ -740,6 +752,27 @@ function renderGen() {
   const from = genPick ? genPick.from : known(gen[gen.length - 1]);
   $("genDistLabel").textContent = `${genPick ? `P(· | ${from}), the row used for the last word` : `P(· | ${from}), the row the next step will use`}, k = ${kStr(kSm)}`;
   $("genBars").innerHTML = barsHTML(rowDist(c, u, from).map(([w, p]) => [w, p]), genPick ? genPick.w : null);
+  renderDraw(rowDist(c, u, from).filter(([, p]) => p > 0));
+}
+// Sampling: the row's probabilities laid end to end on a line from 0 to 1; a random number picks the stretch it lands in
+function renderDraw(dist) {
+  const el = $("genDraw");
+  if (genMode !== "sample") { el.hidden = true; return; }
+  el.hidden = false;
+  const r = genPick && genPick.r !== undefined ? genPick.r : null;
+  let acc = 0, lo = 0;
+  const segs = dist.map(([w, p], i) => {
+    if (w === genPick?.w && r !== null) lo = acc;
+    acc += p;
+    const cls = r !== null && w === genPick.w ? "pick" : w === UNK ? "unkd" : i % 2 ? "alt" : "";
+    return `<span class="${cls}" style="width:${(p * 100).toFixed(2)}%" title="${h(w)} ${fmt(p)}">${p >= 0.08 ? h(w) : ""}</span>`;
+  }).join("");
+  const cap = r === null
+    ? "Sampling lays the row's probabilities end to end from 0 to 1, then draws a random number between 0 and 1. The word whose stretch it lands in is written. A word with probability 0.29 gets 29% of the line, so it is drawn about 3 times in 10."
+    : `Random number ${r.toFixed(2)} lands in the stretch of “${h(genPick.w)}” (${lo.toFixed(2)} to ${(lo + dist.find(([w]) => w === genPick.w)[1]).toFixed(2)}), so the model writes “${h(genPick.w)}”. Press Back and Next word to draw again.`;
+  el.innerHTML = `<p class="label">The draw</p><div class="strip">${segs}</div>`
+    + (r !== null ? `<div class="marker"><i style="left:${(r * 100).toFixed(2)}%"></i></div>` : "")
+    + `<div class="scale"><span>0</span><span>0.5</span><span>1</span></div><p class="note">${cap}</p>`;
 }
 $("startWord").addEventListener("change", genReset);
 $("genReset").addEventListener("click", genReset);
