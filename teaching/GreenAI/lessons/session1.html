@@ -1423,17 +1423,6 @@ print("they match" if count == expected else "they do not match: check the loop 
 
 <div class="part" id="part-step2"><h1>Step 2 · Embeddings</h1></div>
 
-<section class="screen" id="counts2vec" data-step="2">
-  <header><span class="kind">Step 2 · Embeddings</span><h2>From counts to vectors</h2></header>
-  <div class="body">
-    <ul class="points"><li>Count co-occurrences instead of sequences → a vector per word</li></ul>
-    <div class="fig"><img src="img/sparse.png" alt="A co-occurrence table: one row per word, mostly zeros"></div>
-  </div>
-  <div class="notes">
-    <p>A genuinely revolutionary idea was to treat words as vectors. Instead of counting sequences of words, as n-grams do, count co-occurrences: for a given word, how often does each other word in the vocabulary appear nearby it in real text? Do this for every word and you get one long vector per word — its co-occurrence vector — where each position corresponds to one other vocabulary word, and the value is how often they co-occur. Any given word only ever co-occurs with a small fraction of the full vocabulary, so the vast majority of entries in each vector are zero, which is exactly what this table shows: mostly zeros, information concentrated in a few positions. This sparse-vector idea is the direct ancestor of the dense, learned embeddings we get to in a couple of screens.</p>
-  </div>
-</section>
-
 <section class="screen" id="cosine" data-step="2">
   <header><span class="kind">Step 2 · Embeddings</span><h2>Comparing vectors: cosine similarity</h2><p class="sub">How similar are the directions of two vectors? The formula, derived on the board.</p></header>
   <div class="body">
@@ -1538,7 +1527,7 @@ print("they match" if count == expected else "they do not match: check the loop 
     </div>
   </div>
   <div class="notes">
-    <p>We have vectors for words. Now we need a number that says how similar two vectors are. I will derive it on the board, step by step. Each press draws the next part of an equation: one term, one factor, or one summand.</p>
+    <p>Step 2 gives each word a vector. Whatever the vectors hold, we need a number that says how similar two of them are. I will derive it on the board, step by step. Each press draws the next part of an equation: one term, one factor, or one summand.</p>
     <p>Two words, as vectors with two values: aunt is 4, 2, and uncle is 3, 3. We draw each one as an arrow from the origin. Words used in similar ways should point in similar directions. So we want to measure how similar the directions are.</p>
     <p>Each arrow has a length. By Pythagoras, the length of aunt is the square root of 4 squared, the horizontal side, plus 2 squared, the vertical side: the square root of 16 plus 4, which is the square root of 20, about 4.47. Uncle has length square root of 9 plus 9, the square root of 18, about 4.24. Length is not direction, so we remove it.</p>
     <p>To remove the length, divide each vector by its own length. We call the results a-hat and u-hat. They point in the same directions as before, but both have length 1. So they end on the circle of radius 1. For aunt, that is 4 divided by 4.47 and 2 divided by 4.47: about 0.89 and 0.45. For uncle, 3 divided by 4.24, twice: about 0.71 and 0.71.</p>
@@ -1557,7 +1546,7 @@ print("they match" if count == expected else "they do not match: check the loop 
     <iframe class="frame" title="Shakespeare, counted by play" data-src="../artifacts/ngram.html?embed=td"></iframe>
   </div>
   <div class="notes">
-    <p>The table counts four words, battle, soldier, fool and clown, in four plays.</p>
+    <p>Here is a first way to get vectors: by counting. The table counts four words, battle, soldier, fool and clown, in four plays.</p>
     <p>Choose Plays as vectors: each play is a column of counts, so each play is a vector. The plot draws two of the dimensions. Now choose Words as vectors: each row is a vector too.</p>
     <p>In the similarity table, click a cell. The page shows the cosine arithmetic for that pair. Switch between cosine and dot product: the dot product grows with frequency, the cosine does not.</p>
     <p>Count it adds a word of your own, counted in the full text of the plays.</p>
@@ -1565,34 +1554,118 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="embeddings" data-step="2">
-  <header><span class="kind">Step 2 · Embeddings</span><h2>From words to vectors: embeddings</h2></header>
+  <header><span class="kind">Step 2 · Embeddings</span><h2>From words to vectors: embeddings</h2><p class="sub">Why vectors of counts are not enough: they are long, mostly 0, and similar words do not line up</p></header>
   <div class="body">
-    <div class="col">
-      <ul class="points">
-        <li><b>Learned</b>, <b>dense</b> vectors: every dimension has a value</li>
-        <li>Similar contexts → similar vectors: the same cosine idea, learned this time</li>
-      </ul>
-      <svg class="svgfig" viewBox="0 0 330 90" role="img" aria-label="The same word as a sparse vector, mostly empty, and as a dense vector, every box filled">
-        <text x="0" y="24" font-size="12" class="muted">sparse</text>
-        <g transform="translate(56,8)">
-          <rect x="0" y="0" width="24" height="24" fill="none" stroke="var(--line)"/><rect x="26" y="0" width="24" height="24" fill="none" stroke="var(--line)"/>
-          <rect x="52" y="0" width="24" height="24" fill="var(--blue)" fill-opacity="0.7" stroke="var(--line)"/><text x="64" y="17" font-size="11" text-anchor="middle">3</text>
-          <rect x="78" y="0" width="24" height="24" fill="none" stroke="var(--line)"/><rect x="104" y="0" width="24" height="24" fill="none" stroke="var(--line)"/><rect x="130" y="0" width="24" height="24" fill="none" stroke="var(--line)"/>
-          <rect x="156" y="0" width="24" height="24" fill="var(--blue)" fill-opacity="0.4" stroke="var(--line)"/><text x="168" y="17" font-size="11" text-anchor="middle">1</text>
-          <rect x="182" y="0" width="24" height="24" fill="none" stroke="var(--line)"/><rect x="208" y="0" width="24" height="24" fill="none" stroke="var(--line)"/><rect x="234" y="0" width="24" height="24" fill="none" stroke="var(--line)"/>
-        </g>
-        <text x="0" y="68" font-size="12" class="muted">dense</text>
-        <g transform="translate(56,52)" stroke="var(--line)" fill="var(--green)">
-          <rect x="0" y="0" width="24" height="24" fill-opacity="0.2"/><rect x="26" y="0" width="24" height="24" fill-opacity="0.7"/><rect x="52" y="0" width="24" height="24" fill-opacity="0.4"/><rect x="78" y="0" width="24" height="24" fill-opacity="0.9"/><rect x="104" y="0" width="24" height="24" fill-opacity="0.1"/>
-          <rect x="130" y="0" width="24" height="24" fill-opacity="0.6"/><rect x="156" y="0" width="24" height="24" fill-opacity="0.3"/><rect x="182" y="0" width="24" height="24" fill-opacity="0.8"/><rect x="208" y="0" width="24" height="24" fill-opacity="0.5"/><rect x="234" y="0" width="24" height="24" fill-opacity="0.4"/>
-        </g>
+    <div class="board">
+      <svg viewBox="0 0 1000 690" role="img" aria-label="Count vectors from the corpus my aunt stayed quiet, my aunt spoke wisely, my uncle stayed quiet: aunt is 2 0 0 1 1 0 0 and uncle is 1 0 0 1 0 0 0. In 2 million words of Galician Wikipedia there are 127,848 columns; tía has 23 that are not 0. súa tía and seu tío fall in different columns, so cos(tía, tío) ≈ 0.05, less than cos(tía, casa) ≈ 0.33. An embedding has a few hundred learned numbers, none of them 0.">
+<text x="20" y="40" font-size="17" style="fill:var(--muted)" data-s="1" data-d="0" data-a="fade">our corpus</text>
+<text x="20" y="72" font-size="21" style="fill:currentColor" data-s="1" data-d="0.0">my aunt stayed quiet</text>
+<text x="20" y="104" font-size="21" style="fill:currentColor" data-s="1" data-d="0.2">my aunt spoke wisely</text>
+<text x="20" y="136" font-size="21" style="fill:currentColor" data-s="1" data-d="0.4">my uncle stayed quiet</text>
+<text x="380" y="40" font-size="17" style="fill:var(--muted)" data-s="2" data-d="0" data-a="fade">how often each word stands right before or after it</text>
+<text x="418" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.0">my</text>
+<text x="502" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.05">aunt</text>
+<text x="586" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.1">uncle</text>
+<text x="670" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.15000000000000002">stayed</text>
+<text x="754" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.2">spoke</text>
+<text x="838" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.25">quiet</text>
+<text x="922" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.30000000000000004">wisely</text>
+<text x="366" y="114" font-size="22" style="fill:var(--blue)" text-anchor="end" data-s="3" data-d="0">aunt</text>
+<rect x="380" y="88" width="76" height="34" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.0" data-a="fade" data-t="0.25"/>
+<text x="418" y="113" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.1">2</text>
+<rect x="464" y="88" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.05" data-a="fade" data-t="0.25"/>
+<text x="502" y="113" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.15000000000000002">0</text>
+<rect x="548" y="88" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.1" data-a="fade" data-t="0.25"/>
+<text x="586" y="113" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.2">0</text>
+<rect x="632" y="88" width="76" height="34" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.15000000000000002" data-a="fade" data-t="0.25"/>
+<text x="670" y="113" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.25">1</text>
+<rect x="716" y="88" width="76" height="34" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.2" data-a="fade" data-t="0.25"/>
+<text x="754" y="113" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.30000000000000004">1</text>
+<rect x="800" y="88" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.25" data-a="fade" data-t="0.25"/>
+<text x="838" y="113" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.35">0</text>
+<rect x="884" y="88" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.30000000000000004" data-a="fade" data-t="0.25"/>
+<text x="922" y="113" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.4">0</text>
+<text x="366" y="158" font-size="22" style="fill:var(--green)" text-anchor="end" data-s="4" data-d="0">uncle</text>
+<rect x="380" y="132" width="76" height="34" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.0" data-a="fade" data-t="0.25"/>
+<text x="418" y="157" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.1">1</text>
+<rect x="464" y="132" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.05" data-a="fade" data-t="0.25"/>
+<text x="502" y="157" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="4" data-d="0.15000000000000002">0</text>
+<rect x="548" y="132" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.1" data-a="fade" data-t="0.25"/>
+<text x="586" y="157" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="4" data-d="0.2">0</text>
+<rect x="632" y="132" width="76" height="34" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.15000000000000002" data-a="fade" data-t="0.25"/>
+<text x="670" y="157" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.25">1</text>
+<rect x="716" y="132" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.2" data-a="fade" data-t="0.25"/>
+<text x="754" y="157" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="4" data-d="0.30000000000000004">0</text>
+<rect x="800" y="132" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.25" data-a="fade" data-t="0.25"/>
+<text x="838" y="157" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="4" data-d="0.35">0</text>
+<rect x="884" y="132" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.30000000000000004" data-a="fade" data-t="0.25"/>
+<text x="922" y="157" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="4" data-d="0.4">0</text>
+<text x="380" y="202" font-size="17" style="fill:var(--muted)" data-s="5" data-d="0" data-a="fade">7 words, 7 columns. Already here, most entries are 0.</text>
+<text x="20" y="262" font-size="22" style="fill:currentColor" data-s="6" data-d="0">Galician Wikipedia, 2 million words: 127,848 different words, so 127,848 columns</text>
+<text x="20" y="316" font-size="22" style="fill:var(--blue)" data-s="7" data-d="0">tía</text>
+<rect x="70" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.0" data-a="fade" data-t="0.25"/>
+<rect x="100" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.02" data-a="fade" data-t="0.25"/>
+<rect x="130" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.04" data-a="fade" data-t="0.25"/>
+<rect x="160" y="294" width="26" height="30" rx="3" fill="var(--blue)" fill-opacity="0.5" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.06" data-a="fade" data-t="0.25"/>
+<rect x="190" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.08" data-a="fade" data-t="0.25"/>
+<rect x="220" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.1" data-a="fade" data-t="0.25"/>
+<rect x="250" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.12" data-a="fade" data-t="0.25"/>
+<rect x="280" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.14" data-a="fade" data-t="0.25"/>
+<rect x="310" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.16" data-a="fade" data-t="0.25"/>
+<rect x="340" y="294" width="26" height="30" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.18" data-a="fade" data-t="0.25"/>
+<rect x="370" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.2" data-a="fade" data-t="0.25"/>
+<rect x="400" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.22" data-a="fade" data-t="0.25"/>
+<rect x="430" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.24" data-a="fade" data-t="0.25"/>
+<rect x="460" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.26" data-a="fade" data-t="0.25"/>
+<rect x="490" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.28" data-a="fade" data-t="0.25"/>
+<rect x="520" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.3" data-a="fade" data-t="0.25"/>
+<rect x="550" y="294" width="26" height="30" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.32" data-a="fade" data-t="0.25"/>
+<rect x="580" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.34" data-a="fade" data-t="0.25"/>
+<rect x="610" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.36" data-a="fade" data-t="0.25"/>
+<rect x="640" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.38" data-a="fade" data-t="0.25"/>
+<rect x="670" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.4" data-a="fade" data-t="0.25"/>
+<rect x="700" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.42" data-a="fade" data-t="0.25"/>
+<rect x="730" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.44" data-a="fade" data-t="0.25"/>
+<rect x="760" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.46" data-a="fade" data-t="0.25"/>
+<rect x="790" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.48" data-a="fade" data-t="0.25"/>
+<rect x="820" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.5" data-a="fade" data-t="0.25"/>
+<text x="856" y="316" font-size="19" style="fill:var(--muted)" data-s="7" data-d="0.5">… 127,848 boxes</text>
+<text x="20" y="358" font-size="19" style="fill:var(--muted)" data-s="8" data-d="0" data-a="fade">23 of them are not 0; the other 127,825 are 0. A vector that is mostly 0 is called sparse.</text>
+<text x="20" y="410" font-size="21" style="fill:currentColor" data-s="9" data-d="0">súa stands right before tía 11 times; seu before tío 33 times. Both mean “her” or “his”:</text>
+<text x="20" y="440" font-size="21" style="fill:currentColor" data-s="9" data-d="0.4">súa goes with feminine words, seu with masculine ones, so they are two different columns.</text>
+<text x="20" y="492" font-size="24" style="fill:var(--neg)" data-s="10" data-d="0">cos(tía, tío) ≈ 0.05</text>
+<text x="330" y="492" font-size="24" style="fill:var(--neg)" data-s="10" data-d="0.4">cos(tía, casa “house”) ≈ 0.33</text>
+<text x="20" y="524" font-size="19" style="fill:var(--muted)" data-s="10" data-d="0.8" data-a="fade">With so few counts, in columns that do not line up, aunt and uncle look unrelated.</text>
+<text x="20" y="578" font-size="21" style="fill:currentColor" data-s="11" data-d="0"><tspan font-weight="bold">An embedding</tspan> of a word: a vector of a few hundred numbers, learned from text, none of them 0 (dense).</text>
+<text x="20" y="620" font-size="22" style="fill:var(--blue)" data-s="11" data-d="0.3">tía</text>
+<rect x="70" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.2" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.3" data-a="fade" data-t="0.25"/>
+<rect x="100" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.7" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.32" data-a="fade" data-t="0.25"/>
+<rect x="130" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.4" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.33999999999999997" data-a="fade" data-t="0.25"/>
+<rect x="160" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.9" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.36" data-a="fade" data-t="0.25"/>
+<rect x="190" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.15" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.38" data-a="fade" data-t="0.25"/>
+<rect x="220" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.6" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.4" data-a="fade" data-t="0.25"/>
+<rect x="250" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.3" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.42" data-a="fade" data-t="0.25"/>
+<rect x="280" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.8" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.44" data-a="fade" data-t="0.25"/>
+<rect x="310" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.5" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.45999999999999996" data-a="fade" data-t="0.25"/>
+<rect x="340" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.45" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.48" data-a="fade" data-t="0.25"/>
+<rect x="370" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.65" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.5" data-a="fade" data-t="0.25"/>
+<rect x="400" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.52" data-a="fade" data-t="0.25"/>
+<rect x="430" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.75" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.54" data-a="fade" data-t="0.25"/>
+<rect x="460" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.35" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.56" data-a="fade" data-t="0.25"/>
+<rect x="490" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.55" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.5800000000000001" data-a="fade" data-t="0.25"/>
+<rect x="520" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.85" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.6" data-a="fade" data-t="0.25"/>
+<text x="556" y="620" font-size="19" style="fill:var(--muted)" data-s="11" data-d="0.7">… a few hundred boxes</text>
+<text x="20" y="668" font-size="19" style="fill:var(--muted)" data-s="12" data-d="0" data-a="fade">The learning aims at one thing: words used in similar ways get similar vectors, so tía and tío should get a high cosine.</text>
       </svg>
-      <p class="axisnote">the same word, two representations</p>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
-  <div class="fig"><img src="img/embeddings.png" alt="Words as dense vectors" style="width:min(100%, 900px);max-height:none"><span class="cap">Credit: jalammar.github.io/illustrated-transformer</span></div>
   <div class="notes">
-    <p>Co-occurrence vectors are sparse, and they have as many dimensions as the vocabulary itself — potentially tens of thousands. Embeddings, the next revolutionary idea, are the modern alternative: dense vectors, every dimension has a real, usually non-zero value, with far fewer dimensions, commonly a few hundred. That little diagram up top is the whole contrast in one picture — sparse on top, mostly empty boxes; dense on the bottom, every box filled in with some value. Crucially, embeddings are learned, not counted directly — a model is trained on a task, and the vectors that fall out of that training happen to place words with similar contexts close together, using the exact same cosine-similarity notion of "close" from the previous screen. No individual dimension has an obvious hand-labeled meaning; it's the geometry of the whole space that encodes meaning.</p>
+    <p>The previous screen turned counts into vectors. Here is what goes wrong with vectors of counts, and what replaces them.</p>
+    <p>Our three sentences again. For each word we count how often every word of the vocabulary stands right before or right after it. The vocabulary has seven words, so the vector has seven entries. Aunt: “my” twice, “stayed” once, “spoke” once, and 0 for the rest. Uncle: “my” once, “stayed” once. Already in this tiny example, most entries are 0.</p>
+    <p>Now real text: 2 million words of Galician Wikipedia, the sample from Notebook 01b. It has 127,848 different words, so each vector has 127,848 entries. For tía, aunt, only 23 entries are not 0. The other 127,825 are 0. A vector that is mostly 0 is called sparse. Storing and comparing it means handling 127,848 numbers to use 23.</p>
+    <p>Worse, similar words do not line up. In Galician, “her aunt” or “his aunt” is “súa tía”, and “his uncle” is “seu tío”: súa goes with feminine words, seu with masculine ones. So the most frequent neighbour of tía and the most frequent neighbour of tío sit in two different columns. With so few counts, little else is shared. The cosine of tía and tío is about 0.05, almost unrelated, and lower than the cosine of tía and casa, house, at about 0.33.</p>
+    <p>This is what an embedding is for. An embedding of a word is a vector of a few hundred numbers, none of them 0: a dense vector, instead of 127,848 mostly empty entries. Its numbers are not counted; they are learned from text. The learning aims at one thing: words used in similar ways should get similar vectors. Then tía and tío, which are used in the same ways, should get a high cosine, even though their counts do not line up. The next screens show how the numbers are learned.</p>
   </div>
 </section>
 
@@ -2888,13 +2961,14 @@ print("they match" if count == expected else "they do not match: check the loop 
   <span class="count" id="pCount"></span>
   <button id="pPrev" aria-label="Previous">←</button>
   <button id="pNext" aria-label="Next">→</button>
+  <button id="pSkip" aria-label="Next screen, skipping the remaining steps of this one" title="Next screen, skipping the remaining steps (Shift + →)">Next screen ⇥</button>
   <button id="pNotes">Notes</button>
   <button id="pExit">Exit</button>
 </div>
 
 <div id="nv" aria-live="polite">
   <div class="bar1">
-    <button id="nPrev">← Previous</button><button id="nNext" class="primary">Next →</button>
+    <button id="nPrev">← Previous</button><button id="nNext" class="primary">Next →</button><button id="nSkip" title="Shift + →">Next screen ⇥</button>
     <span class="muted" id="nCount"></span><span class="clock" id="nClock">0:00</span><button id="nReset">Reset timer</button>
   </div>
   <span class="label" id="nKind"></span>
@@ -3244,6 +3318,7 @@ function next() {
   if (k < fs.length) { fs[k].classList.remove("hide"); post(); } else show(cur + 1);
 }
 function prev() { show(cur - 1, { back: true }); }
+function skip() { show(cur + 1); }  // past any steps not yet shown, straight to the next screen
 function enter() {
   const k = screens.findIndex(s => "#" + s.id === location.hash);
   document.body.classList.add("present");
@@ -3266,12 +3341,14 @@ function openNotes() {
 $("presentBtn").onclick = enter;
 $("pPrev").onclick = prev;
 $("pNext").onclick = next;
+$("pSkip").onclick = skip;
 $("pNotes").onclick = openNotes;
 $("pExit").onclick = exit;
 const keys = e => {
   if (!presenting()) return;
   if (e.target.closest && e.target.closest("textarea, input, select")) return;
-  if (["ArrowRight", "PageDown"].includes(e.key) || (e.key === " " && !(e.target.closest && e.target.closest("button, summary, a")))) { e.preventDefault(); next(); }
+  if (e.key === "ArrowRight" && e.shiftKey) { e.preventDefault(); skip(); }
+  else if (["ArrowRight", "PageDown"].includes(e.key) || (e.key === " " && !(e.target.closest && e.target.closest("button, summary, a")))) { e.preventDefault(); next(); }
   else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); prev(); }
   else if (e.key === "Escape") exit();
   else if (e.key === "n" || e.key === "N") openNotes();
@@ -3291,7 +3368,7 @@ document.querySelectorAll("iframe.frame").forEach(f => f.addEventListener("load"
 }));
 if (chan && !isNotes) chan.onmessage = ({ data }) => {
   if (data.hello) post();
-  if (data.cmd) { if (!presenting()) enter(); data.cmd === "next" ? next() : prev(); }
+  if (data.cmd) { if (!presenting()) enter(); ({ next, prev, skip })[data.cmd]?.(); }
 };
 
 /* ---- speaker-notes window ---- */
@@ -3314,9 +3391,11 @@ if (isNotes) {
   const send = cmd => chan?.postMessage({ cmd });
   $("nPrev").onclick = () => send("prev");
   $("nNext").onclick = () => send("next");
+  $("nSkip").onclick = () => send("skip");
   $("nReset").onclick = () => { t0 = Date.now(); };
   document.addEventListener("keydown", e => {
-    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); send("next"); }
+    if (e.key === "ArrowRight" && e.shiftKey) { e.preventDefault(); send("skip"); }
+    else if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); send("next"); }
     else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); send("prev"); }
   });
   setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $("nClock").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; }, 1000);
