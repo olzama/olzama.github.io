@@ -315,6 +315,9 @@ table.grid tr.yours th { color: var(--orange); }
 .chip.sel { border-color: var(--orange); background: var(--hi); }
 .chip.done { color: var(--fg); }
 .chip.todo { color: var(--line); }
+.chip.unsure { border: 1px dashed var(--neg); }
+#realWalkWrap .steptext + .steptext { margin-top: 8px; }
+.chip.unsure.sel { border-style: dashed; }
 .weights { font-family: var(--font-mono); font-size: 0.88rem; color: var(--muted); min-height: 1.5em; }
 .weights b { color: var(--fg); font-weight: 500; }
 .heatwrap { overflow-x: auto; }
@@ -580,7 +583,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="real">
     <h2><span class="n">6</span>A real model on our sentence</h2>
-    <p class="lead">Sections 4 and 5 used two small models that we trained ourselves. This section looks inside a real translation model, Helsinki-NLP/opus-mt-gl-en, trained by others on a large amount of Galician–English text. We let it translate our whole sentence and recorded every attention weight it used. Nothing in it was set by hand.</p>
+    <p class="lead">Sections 4 and 5 used two small models that we trained ourselves. This section looks inside a real translation model, Helsinki-NLP/opus-mt-gl-en, trained by others on a large amount of Galician–English text. We let it translate our whole sentence and recorded every attention weight it used.</p>
     <div class="cmpflow">
       <p class="label">the same as section 5, for each English piece</p>
       <div class="flow"><span class="word">query · each key</span><span class="op">→</span><span class="word">scores</span><span class="op">→</span><span class="word">softmax: weights</span><span class="op">→</span><span class="word">weighted sum</span><span class="op">→</span><span class="word out">the mix</span><span class="op">→</span><span class="word">one row of the grid</span></div>
@@ -605,14 +608,19 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <label class="note" for="realHead">Head</label>
       <select id="realHead"></select>
     </div>
+    <div class="controls" id="realWalk"><span class="note">Three places where the translation goes wrong:</span><button data-w="0">1 · worked</button><button data-w="1">2 · saying saying it</button><button data-w="2">3 · they'll refute</button></div>
+    <div id="realWalkWrap"></div>
     <div class="cols">
       <div class="col">
         <p class="label">Galician pieces, shaded by their weight for the English piece chosen below</p>
         <div class="chips" id="realSrc"></div>
         <p class="label">English pieces, as the model wrote them: click one</p>
         <div class="chips" id="realTgt"></div>
+        <p class="note" id="realUnsure"></p>
         <div class="weights" id="realWeights"></div>
         <p class="note" id="realNote"></p>
+        <p class="label" id="realCandLab"></p>
+        <div class="pbars" id="realCand"></div>
       </div>
       <div class="col">
         <p class="label">The whole grid: one row per English piece, one column per Galician piece</p>
@@ -768,9 +776,9 @@ function avgOf(mats, layer, head) {
   return out;
 }
 const shade = w => `rgba(${css("--heat")},${Math.min(0.9, w * 1.1).toFixed(2)})`;
-function chipsHTML(toks, cls, weights, sel, upto) {
+function chipsHTML(toks, cls, weights, sel, upto, unsure) {
   return toks.map((t, i) => {
-    const c = ["chip", cls]; if (isCont(t)) c.push("cont"); if (i === sel) c.push("sel");
+    const c = ["chip", cls]; if (isCont(t)) c.push("cont"); if (i === sel) c.push("sel"); if (unsure && unsure(i)) c.push("unsure");
     if (upto !== undefined) c.push(i < upto ? "done" : "todo");
     const bg = weights ? `background:${shade(weights[i])}` : "";
     return `<button class="${c.join(" ")}" data-i="${i}" style="${bg}">${clean(t)}</button>`;
@@ -786,13 +794,17 @@ const optsLayer = n => `<option value="all">average of all ${n}</option>` + Arra
 $("realLayer").innerHTML = optsLayer(D.cross.length);
 $("realHead").innerHTML = optsLayer(D.cross[0].length);
 let tSel = D.tgt.indexOf("▁aunt"), realUpto = undefined, realTimer = null;
+const UNSURE = 0.3, pWrote = i => D.top[i][0][1];  // the model wrote its most probable piece each time
 function renderReal() {
   const M = avgOf(D.cross, $("realLayer").value, $("realHead").value);
   const w = M[tSel];
   $("realSrc").innerHTML = chipsHTML(D.src, "src", w, -1);
-  $("realTgt").innerHTML = chipsHTML(D.tgt, "tgt", null, tSel, realUpto);
+  $("realTgt").innerHTML = chipsHTML(D.tgt, "tgt", null, tSel, realUpto, i => (realUpto === undefined || i < realUpto) && pWrote(i) < UNSURE);
   $("realTgt").querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => { clearInterval(realTimer); realUpto = undefined; tSel = +b.dataset.i; renderReal(); }));
   $("realWeights").innerHTML = `Writing “${clean(D.tgt[tSel])}”: ` + topList(D.src, w, 3);
+  // what the model could have written here: its five most probable pieces, the first is the one it wrote
+  $("realCandLab").textContent = `What the model could write at this point: its five most probable pieces. It wrote the first, “${clean(D.tgt[tSel])}”.`;
+  $("realCand").innerHTML = D.top[tSel].map(([t, p], k) => `<span class="bw ${k ? "" : "win"}">${clean(t).replace(/&/g, "&amp;").replace(/</g, "&lt;")}</span><span class="bt ${k ? "" : "win"}"><i style="width:${(p * 100).toFixed(1)}%"></i></span><span class="bp">${p.toFixed(2)}</span>`).join("");
   const lay = $("realLayer").value, hd = $("realHead").value;
   $("realNote").textContent = lay === "all" && hd === "all" ? "The average of all 48 grids (6 layers × 8 heads)."
     : lay === "all" ? `Head ${+hd + 1} of every layer, averaged. Heads with the same number in different layers are unrelated, so this average says little.`
@@ -835,6 +847,22 @@ $("realPlay").addEventListener("click", () => {
   clearInterval(realTimer); tSel = 0; realUpto = 1; renderReal();
   realTimer = setInterval(() => { if (tSel >= D.tgt.length - 1) { clearInterval(realTimer); realUpto = undefined; renderReal(); return; } tSel++; realUpto = tSel + 1; renderReal(); }, reduce ? 250 : 650);
 });
+$("realUnsure").textContent = `Pieces with a dashed red outline were written with a probability below ${UNSURE}: the model was unsure of them.`;
+// three places where the translation goes wrong, all seen through layer 6, head 2
+const WALK = [
+  ["▁worked", 0, "The Galician verb is solucion·aba, “solved”. Layer 6, head 2 puts almost all its weight on it: the model looks at the right word. Its candidates include “solved” and “resolved”, but “worked” is more probable, and the model writes the most probable piece. The pieces after it make “worked it up with”, which does not mean “solved”."],
+  ["▁saying", 0, "The Galician words are dito·s e ref·rán·s, “sayings and proverbs”. For the first “saying”, the head looks at dito·s: the right word again. But no candidate is probable; the model is unsure what to write. Click the next piece, the second “saying”, and the one after it, “it”: the head stays on dito·s, and the probabilities get even smaller. The model writes “saying saying it”, which is not English."],
+  ["▁they", 0, "Next comes ref·rán·s, “proverbs”, a word the model seems not to know. For “they”, “'”, “ll”, “re”, “f” and “ute”, the head puts almost all its weight on ref. Look at the candidates for “they”: several begin with the same letters as ref (re, refresh, referr). The model seems to go by the letters of the Galician word, not by its meaning, and builds “they'll refute” piece by piece."],
+];
+$("realWalk").querySelectorAll("[data-w]").forEach(b => b.addEventListener("click", () => {
+  const [t, nth, txt] = WALK[+b.dataset.w];
+  clearInterval(realTimer); realUpto = undefined;
+  tSel = D.tgt.findIndex((x, i) => x === t && D.tgt.slice(0, i).filter(y => y === t).length === nth);
+  $("realLayer").value = "5"; $("realHead").value = "1";
+  $("realWalk").querySelectorAll("[data-w]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  $("realWalkWrap").innerHTML = `<p class="steptext">${txt}</p>` + (+b.dataset.w === 2 ? "<p class=\"steptext\"><b>What to take from the three:</b> in all three places, attention found the right Galician word. That is not enough: the model also has to know how to translate it. The weights show where a model looks, not whether what it writes is right.</p>" : "");
+  renderReal();
+}));
 renderReal();
 {
   const iof = (arr, t) => arr.indexOf(t), pairs = [["▁aunt", "▁tía"], ["▁mine", "▁miña"]].map(([e, g]) => [iof(D.tgt, e), iof(D.src, g)]);
@@ -844,9 +872,10 @@ renderReal();
   $("realLayersNote").textContent = "In the first layers, the weights for an English piece do not follow the Galician word it translates; in the last layers they do. The thumbnails show the same: compare the row of layer 1 with the row of layer 6.";
   const end = D.src.length - 1, endL = D.cross.map(L => { let x = 0, k = 0; for (const H of L) for (const row of H) { x += row[end]; k++; } return x / k; });
   $("realEnd").textContent = `Why so much weight on ‹/s›: the weights in each row add up to 1, so a head that needs nothing from the Galician sentence for a word still has to put its weight somewhere. Many heads put it on ‹/s›: ${f2(endL[0])} of all weight in layer 1, ${f2(endL[endL.length - 1])} in layer 6.`;
-  // the same sentence from current large language models, as pasted by the course author (October 2026)
+  // the same sentence from current large language models: GPT and Gemini as pasted by the course author, Claude's own (October 2026)
   const LLM = [["GPT Astra (medium)", "An aunt of mine, who had a saying or proverb for everything, used to say something like, ‘You are a slave to what you say and master of what you keep to yourself.’"],
-    ["Gemini Argon", "An aunt of mine, who solved everything with sayings and proverbs, used to say something like ‘one is a slave to what one says and master of what one keeps silent.’"]];
+    ["Gemini Argon", "An aunt of mine, who solved everything with sayings and proverbs, used to say something like ‘one is a slave to what one says and master of what one keeps silent.’"],
+    ["Claude Opus 5.5", "An aunt of mine, who solved everything with sayings and proverbs, used to say something like: ‘One is a slave to what one says and master of what one keeps quiet about.’"]];
   $("realLLM").innerHTML = `<p class="label">for comparison, the same sentence translated by current large language models (October 2026)</p><div class="cmprows">` +
     LLM.map(([who, t]) => `<p class="label">${who}</p><p class="cmpline">${t.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</p>`).join("") + `</div>`;
   $("realTr").innerHTML = `Its whole translation: “${D.translation.replace(/&/g, "&amp;").replace(/</g, "&lt;")}” It starts with “An aunt of mine”: correct, but rare in English (<a href="mt.html">translation page</a>, sections 3 to 5). Later it goes wrong. Press Play the translation to see where it looked for each piece.`;
