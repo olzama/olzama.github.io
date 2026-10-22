@@ -597,6 +597,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       </ul>
     </details>
     <p class="note" id="realTr"></p>
+    <div id="realLLM"></div>
     <div class="controls">
       <button class="primary" id="realPlay">Play the translation</button>
       <label class="note" for="realLayer">Layer</label>
@@ -843,6 +844,10 @@ renderReal();
   $("realLayersNote").textContent = "In the first layers, the weights for an English piece do not follow the Galician word it translates; in the last layers they do. The thumbnails show the same: compare the row of layer 1 with the row of layer 6.";
   const end = D.src.length - 1, endL = D.cross.map(L => { let x = 0, k = 0; for (const H of L) for (const row of H) { x += row[end]; k++; } return x / k; });
   $("realEnd").textContent = `Why so much weight on ‹/s›: the weights in each row add up to 1, so a head that needs nothing from the Galician sentence for a word still has to put its weight somewhere. Many heads put it on ‹/s›: ${f2(endL[0])} of all weight in layer 1, ${f2(endL[endL.length - 1])} in layer 6.`;
+  // the same sentence from current large language models, as pasted by the course author (October 2026)
+  const LLM = [["GPT Astra (medium)", "An aunt of mine, who had a saying or proverb for everything, used to say something like, ‘You are a slave to what you say and master of what you keep to yourself.’"]];
+  $("realLLM").innerHTML = `<p class="label">for comparison, the same sentence translated by current large language models (October 2026)</p><div class="cmprows">` +
+    LLM.map(([who, t]) => `<p class="label">${who}</p><p class="cmpline">${t.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</p>`).join("") + `</div>`;
   $("realTr").innerHTML = `Its whole translation: “${D.translation.replace(/&/g, "&amp;").replace(/</g, "&lt;")}” It starts with “An aunt of mine”: correct, but rare in English (<a href="mt.html">translation page</a>, sections 3 to 5). Later it goes wrong. Press Play the translation to see where it looked for each piece.`;
 }
 
