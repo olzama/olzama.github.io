@@ -187,6 +187,11 @@ table.grid tr.yours th { color: var(--orange); }
 .ring { width: 11px; height: 11px; border-radius: 50%; border: 2px solid currentColor; display: inline-block; }
 .sq { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
 .tf [data-k] { cursor: pointer; }
+.tf .track, .bar .track { position: relative; }
+.gh { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--fg); opacity: 0.55; }
+svg.chain text { font-family: var(--font-body); font-size: 15px; fill: var(--fg); }
+svg.chain text.mono { font-family: var(--font-mono); font-size: 13px; }
+svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .tf .sel { background: var(--hi); }
 .why { display: grid; gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
 .whogrid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 10px; align-items: center; }
@@ -233,14 +238,15 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <h2><span class="n">1</span>Without attention: where a translation model's vectors come from</h2>
     <p class="lead">A neural translation model has two parts. The <b>encoder</b> reads the Galician words into a <b>summary</b>, a vector; the <b>decoder</b> starts from that summary and writes the English words one at a time. Section 2 shows the encoder's rule with simple made-up numbers; section 3 takes the encoder and decoder of the model trained here apart. Every word in this model is a 2-D vector, and all of them start random: before it can translate, the model has to learn them from examples.</p>
     <div class="controls">
-      <label class="note" for="trA">Phrase</label><select id="trA"></select>
+      <label class="note" for="trA">Pair</label><select id="trA"></select>
     </div>
       <p class="label">Training data: 16 pairs, each an input (a Galician phrase) → the right output for it (its English translation, by a person)</p>
       <div class="phrases" id="trainData"></div>
       <div class="controls">
-        <button id="trBack" aria-label="Previous training step">← Back</button>
-        <button class="primary" id="trNext">Next →</button>
-        <button id="pathPlay">Play</button>
+        <span class="label" style="margin-right:4px">Training</span>
+        <button id="trBack" aria-label="25 training steps back">← 25 steps</button>
+        <button class="primary" id="trNext" aria-label="25 more training steps">Train 25 steps →</button>
+        <button id="pathPlay">Play training</button>
         <input type="range" id="pathStep" min="0" max="1" step="1" value="0" aria-label="Training step" style="flex:1 1 200px; accent-color: var(--blue)">
         <span class="mono" id="pathStepVal"></span>
       </div>
@@ -248,7 +254,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="col">
           <p class="label" id="trainLbl"></p>
           <div class="tf" id="trainBars"></div>
-          <p class="note">mixed in before it: in training, the earlier outputs come from the pair, not from what the model wrote · ‹end›: the translation is finished · click an output for the details below</p>
+          <p class="note">mixed in before it: in training, the earlier outputs come from the pair, not from what the model wrote · ‹end›: the translation is finished · thin mark: 25 training steps ago · click an output for the details below</p>
           <p class="label">The same probabilities over the training steps</p>
           <svg id="trainCurve" viewBox="0 0 440 190" role="img" aria-label="The probability of the right output at each output position, over the training steps" style="max-width:460px"></svg>
           <p class="note">Each training step moves every vector a little, so that these probabilities go up (as in skip-gram). Orange: the current step.</p>
@@ -261,8 +267,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       </div>
       <div class="why" id="trWhy">
         <p class="label" id="trWhyHead"></p>
-        <div class="decchain"><span class="st">state 1 = summary</span><span class="arr">→</span><span class="st">score of each possible output = state · its vector</span><span class="arr">→</span><span class="st">probabilities</span><span class="arr">→</span><span class="st on">highest is written</span><span class="arr">→</span><span class="st">next state = ½ state + ½ second vector of the output mixed in</span><span class="arr">↻</span></div>
-        <div class="pathstrip" id="trWhyStrip"></div>
+        <svg class="chain" id="trWhyChain" viewBox="0 0 1000 200" role="img" aria-label="How one output is chosen and how the next state is made"></svg>
+        <div class="controls"><span class="note">the decoder's steps for this input:</span><div class="pathstrip" id="trWhyStrip"></div><button id="trWhyPrev">← previous output</button><button id="trWhyNext">next output →</button></div>
         <div class="cols">
           <div class="col">
             <svg id="trWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen position and the English word vectors" style="max-width:420px"></svg>
@@ -371,9 +377,10 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <p class="label">How it learned this</p>
       <p class="note" style="color:var(--fg)">Training works as in section 1: for each pair, the model computes the probability of every correct English word, and every vector is nudged so those probabilities go up. All vectors start random. The sentence chosen in “The trained model, step by step” below is the one followed here.</p>
       <div class="controls">
-        <button id="ihtBack" aria-label="Previous training step">← Back</button>
-        <button class="primary" id="ihtNext">Next →</button>
-        <button id="ihtPlay">Play</button>
+        <span class="label" style="margin-right:4px">Training</span>
+        <button id="ihtBack" aria-label="25 training steps back">← 25 steps</button>
+        <button class="primary" id="ihtNext" aria-label="25 more training steps">Train 25 steps →</button>
+        <button id="ihtPlay">Play training</button>
         <input type="range" id="ihtStep" min="0" max="1" step="1" value="0" aria-label="Training step" style="flex:1 1 200px; accent-color: var(--blue)">
         <span class="mono" id="ihtVal"></span>
       </div>
@@ -386,7 +393,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="col">
           <p class="label" id="ihtLbl"></p>
           <div class="tf" id="ihtBars"></div>
-          <p class="note">mixed in before it: in training, the earlier outputs come from the pair · ‹end›: the translation is finished</p>
+          <p class="note">mixed in before it: in training, the earlier outputs come from the pair · ‹end›: the translation is finished · thin mark: 25 training steps ago</p>
           <p class="label" style="margin-top:8px">The model's translations at this training step</p>
           <p class="note">one output at a time, the one with the highest probability · <span style="color:var(--green)">the right output</span> · <span style="color:var(--neg)">a different one</span> · click one ↓</p>
           <div class="phrases pickable" id="ihtAll"></div>
@@ -394,8 +401,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       </div>
       <div class="why" id="ihtWhy">
         <p class="label">Why the model translates <span id="ihtWhyPh"></span> this way at this training step</p>
-        <div class="decchain"><span class="st">state 1 = summary</span><span class="arr">→</span><span class="st">score of each possible output = state · its vector</span><span class="arr">→</span><span class="st">probabilities</span><span class="arr">→</span><span class="st on">highest is written</span><span class="arr">→</span><span class="st">next state = ½ state + ½ second vector of the output written</span><span class="arr">↻</span></div>
-        <div class="pathstrip" id="ihtWhyStrip"></div>
+        <svg class="chain" id="ihtWhyChain" viewBox="0 0 1000 200" role="img" aria-label="How one output is chosen and how the next state is made"></svg>
+        <div class="controls"><span class="note">the decoder's steps for this input:</span><div class="pathstrip" id="ihtWhyStrip"></div><button id="ihtWhyPrev">← previous output</button><button id="ihtWhyNext">next output →</button></div>
         <div class="cols">
           <div class="col">
             <svg id="ihtWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen position and the English word vectors" style="max-width:420px"></svg>
@@ -540,19 +547,26 @@ window.mtWhy = function (o) {
   const $ = id => document.getElementById(id), css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   const softmax = xs => { const m = Math.max(...xs), e = xs.map(x => Math.exp(x - m)), s = e.reduce((a, b) => a + b, 0); return e.map(x => x / s); };
   const { sn, GL, EN, src, tgt, pre } = o, mode = o.mode || "free", r2 = x => x.toFixed(2).replace("-", "−"), r2p = x => x < 0 ? `(${r2(x)})` : r2(x), dot = (a, b) => a[0] * b[0] + a[1] * b[1];
-  let h = [0, 0]; for (const w of src) { const g = sn.G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; }
-  // the decoder's steps: after each position, the word fed back is the pair's (training) or the model's own (translating)
-  const steps = []; let st = h; const n = mode === "train" ? tgt.length : 9;
-  for (let t = 0; t < n; t++) {
-    const sc = sn.O.map(v => dot(st, v)), p = softmax(sc), j = p.indexOf(Math.max(...p)), fed = mode === "train" ? EN.indexOf(tgt[t]) : j;
-    steps.push({ st, sc, p, j, fed });
-    if (mode !== "train" && EN[j] === "‹end›") break;
-    st = [0.5 * st[0] + 0.5 * sn.I[fed][0], 0.5 * st[1] + 0.5 * sn.I[fed][1]];
-  }
+  // the decoder's steps with the vectors of one training step: after each output, the one mixed in is the pair's (training) or the model's own (translating)
+  const run = snap => {
+    let h = [0, 0]; for (const w of src) { const g = snap.G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; }
+    const steps = []; let st = h; const n = mode === "train" ? tgt.length : 9;
+    for (let t = 0; t < n; t++) {
+      const sc = snap.O.map(v => dot(st, v)), p = softmax(sc), j = p.indexOf(Math.max(...p)), fed = mode === "train" ? EN.indexOf(tgt[t]) : j;
+      steps.push({ st, sc, p, j, fed });
+      if (mode !== "train" && EN[j] === "‹end›") break;
+      st = [0.5 * st[0] + 0.5 * snap.I[fed][0], 0.5 * st[1] + 0.5 * snap.I[fed][1]];
+    }
+    return steps;
+  };
+  const steps = run(sn), prevSteps = o.prev ? run(o.prev) : null;
   const k = Math.min(o.pos, steps.length - 1), s = steps[k], w = EN[s.j], want = tgt[k], wj = want === undefined ? -1 : EN.indexOf(want);
+  const ps = prevSteps && prevSteps[k] ? prevSteps[k].p : null;
+  if ($(pre + "WhyPrev")) { $(pre + "WhyPrev").disabled = k <= 0; $(pre + "WhyPrev").onclick = () => o.pick(k - 1); }
+  if ($(pre + "WhyNext")) { $(pre + "WhyNext").disabled = k >= steps.length - 1; $(pre + "WhyNext").onclick = () => o.pick(k + 1); }
   const given = steps.slice(0, k).map(x => EN[x.fed]);
   if ($(pre + "WhyPh")) $(pre + "WhyPh").innerHTML = `<i>${src.join(" ")}</i>`;
-  if ($(pre + "WhyHead")) $(pre + "WhyHead").innerHTML = `Output ${k + 1} for <i>${src.join(" ")}</i> · mixed into the state before it: ` +
+  if ($(pre + "WhyHead")) $(pre + "WhyHead").innerHTML = `Output ${k + 1} for <i>${src.join(" ")}</i>, with the vectors of training step ${sn.step} · mixed into the state before it: ` +
     (k ? `“${given.join(" ")}” (${mode === "train" ? "from the pair" : "the outputs the model wrote"})` : "nothing yet: state 1 is the summary");
   $(pre + "WhyStrip").innerHTML = steps.map((x, m) => `<button class="${m === k ? "on" : ""}" data-m="${m}">output ${m + 1}: <span class="${EN[x.j] === tgt[m] ? "ok" : "bad"}">${EN[x.j]}</span></button>`).join(`<span class="ar">→</span>`);
   $(pre + "WhyStrip").querySelectorAll("button").forEach(b => b.addEventListener("click", () => o.pick(+b.dataset.m)));
@@ -578,7 +592,31 @@ window.mtWhy = function (o) {
   $(pre + "WhySvg").innerHTML = g;
   // every word's probability at this position
   $(pre + "WhyLbl").textContent = `Output ${k + 1}: the probability of each possible output`;
-  $(pre + "WhyBars").innerHTML = order.map(j => `<div class="bar"><span class="w">${EN[j]}</span><span class="track"><span class="fill" style="width:${(s.p[j] * 100).toFixed(1)}%;background:var(${j === s.j ? "--orange" : j === wj ? "--green" : "--blue"})"></span></span><span>${s.p[j].toFixed(2)}</span></div>`).join("");
+  $(pre + "WhyBars").innerHTML = order.map(j => `<div class="bar"><span class="w">${EN[j]}</span><span class="track"><span class="fill" style="width:${(s.p[j] * 100).toFixed(1)}%;background:var(${j === s.j ? "--orange" : j === wj ? "--green" : "--blue"})"></span>${ps ? `<span class="gh" style="left:${(ps[j] * 100).toFixed(1)}%"></span>` : ""}</span><span>${s.p[j].toFixed(2)}</span></div>`).join("") +
+    (ps ? `<p class="note" style="margin-top:4px">thin mark: 25 training steps ago</p>` : "");
+  // the chain, drawn with this output's values: state → scores → probabilities → written; mixed in → next state
+  if ($(pre + "WhyChain")) {
+    const box = (x, y, wd, ht, col, op) => `<rect x="${x}" y="${y}" width="${wd}" height="${ht}" rx="9" fill="${col}" fill-opacity="${op}" stroke="${col}" stroke-width="1.8"/>`;
+    const txt = (x, y, s_, cls = "", anchor = "middle") => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}">${s_}</text>`;
+    const arr = (d, col = "var(--fg)", dash = "") => `<path d="${d}" fill="none" stroke="${col}" stroke-width="2"${dash ? ` stroke-dasharray="${dash}"` : ""} marker-end="url(#${pre}ca)"/>`;
+    const fedW = EN[s.fed], last = mode !== "train" && w === "‹end›";
+    let c = `<defs><marker id="${pre}ca" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--fg)"/></marker></defs>`;
+    c += box(10, 30, 170, 70, "var(--orange)", 0.12) + txt(95, 58, `state ${k + 1}`) + txt(95, 84, `(${r2(s.st[0])}, ${r2(s.st[1])})`, "mono");
+    c += arr("M182 65 L218 65");
+    c += box(222, 30, 240, 70, "var(--line)", 0.35) + txt(342, 58, "score of each possible output") + txt(342, 84, "= state · its vector", "mono");
+    c += arr("M464 65 L500 65");
+    c += box(504, 30, 160, 70, "var(--line)", 0.35) + txt(584, 58, "probabilities") + txt(584, 84, "add up to 1", "small");
+    c += arr("M666 65 L702 65");
+    c += box(706, 30, 284, 70, "var(--green)", 0.12) + txt(848, 58, `highest probability: “${w}”`) + txt(848, 84, last ? "written: finished" : "written", "small");
+    if (!last) {
+      c += arr("M848 102 L848 128", "var(--green)", "6 4");
+      c += box(222, 130, 768, 56, "var(--green)", 0.08) + txt(606, 154, `mixed into the state: “${fedW}”${mode === "train" ? " (from the pair)" : ""}${fedW !== w ? `, not “${w}”` : ""}`) +
+        txt(606, 176, `next state = ½ × state ${k + 1} + ½ × second vector of “${fedW}”`, "mono");
+      c += arr("M220 158 L184 158", "var(--orange)");
+      c += box(10, 130, 170, 56, "var(--orange)", 0.12) + txt(95, 154, `state ${k + 2}`) + txt(95, 176, "next output →", "small");
+    }
+    $(pre + "WhyChain").innerHTML = c;
+  }
   // the arithmetic of the state and of the two scores that matter
   const prev = k > 0 ? steps[k - 1] : null, line = [];
   line.push(k === 0 ? `state 1 = the summary of <i>${src.join(" ")}</i> = (${r2(s.st[0])}, ${r2(s.st[1])})` :
@@ -646,15 +684,15 @@ function renderTrain() {
   const sn = S[ti];
   $("pathStep").value = ti;
   $("trBack").disabled = ti <= 0; $("trNext").disabled = ti >= S.length - 1;
-  const [src, tgt] = S2S.data[bA], cp = correctProbs(sn, src, tgt);
+  const [src, tgt] = S2S.data[bA], cp = correctProbs(sn, src, tgt), cpPrev = ti > 0 ? correctProbs(S[ti - 1], src, tgt) : null;
   $("trainLbl").innerHTML = `a. One pair, out of the 16 trained on together: <i>${src.join(" ")}</i> → ${tgt.filter(w => w !== "‹end›").join(" ")}${src.join(" ") === "unha tía miña" ? " (the lesson's example; pick another above)" : ""}. For each output: the probability the model now gives to the right one`;
   const k = trMode === "train" ? Math.min(trPos, tgt.length - 1) : -1;
   $("trainBars").innerHTML = `<span class="h">output</span><span class="h">mixed in before it</span><span class="h">right output</span><span class="h" style="grid-column: span 2">probability now</span>` + tgt.map((w, m) => { const c = m === k ? " sel" : "";
-    return `<span class="pos${c}" data-k="${m}">${m + 1}</span><span class="given${c}" data-k="${m}">${m ? tgt.slice(0, m).join(" ") : "(none: state 1 = summary)"}</span><span class="want${c}" data-k="${m}">${w}</span><span class="track${c}" data-k="${m}"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%"></span></span><span class="v${c}" data-k="${m}">${cp[m].toFixed(2)}</span>`; }).join("");
+    return `<span class="pos${c}" data-k="${m}">${m + 1}</span><span class="given${c}" data-k="${m}">${m ? tgt.slice(0, m).join(" ") : "(none: state 1 = summary)"}</span><span class="want${c}" data-k="${m}">${w}</span><span class="track${c}" data-k="${m}"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%"></span>${cpPrev ? `<span class="gh" style="left:${(cpPrev[m] * 100).toFixed(1)}%"></span>` : ""}</span><span class="v${c}" data-k="${m}">${cp[m].toFixed(2)}</span>`; }).join("");
   $("trainBars").querySelectorAll("[data-k]").forEach(e => e.addEventListener("click", () => { trMode = "train"; trPos = +e.dataset.k; renderTrain(); }));
   renderCurve(src, tgt, k);
-  $("pathStepVal").textContent = `step ${sn.step} of ${S2S.steps} · the right output has the highest probability at ${Math.round(sn.acc * NWORDS)} of the ${NWORDS} outputs of the 16 pairs`;
-  window.mtWhy({ sn, GL, EN, src, tgt, pre: "tr", pos: trPos, mode: trMode, pick: m => { trPos = m; renderTrain(); } });
+  $("pathStepVal").textContent = `training step ${sn.step} of ${S2S.steps} · the right output has the highest probability at ${Math.round(sn.acc * NWORDS)} of the ${NWORDS} outputs of the 16 pairs`;
+  window.mtWhy({ sn, prev: ti > 0 ? S[ti - 1] : null, GL, EN, src, tgt, pre: "tr", pos: trPos, mode: trMode, pick: m => { trPos = m; renderTrain(); } });
   $("pathAll").innerHTML = S2S.data.map(([s2, t2], q2) => {
     const out = translate(sn, s2).steps.map(t => t.w).filter(w => w !== "‹end›");
     const ok = out.join(" ") === t2.filter(w => w !== "‹end›").join(" ");
@@ -662,7 +700,7 @@ function renderTrain() {
   }).join("");
   $("pathAll").querySelectorAll(".phrase").forEach(d => d.addEventListener("click", () => { bA = +d.dataset.q; $("trA").value = bA; $("bA").value = bA; trMode = "free"; trPos = 0; bStage = 0; bSel = -1; renderB(); renderTrain(); }));
 }
-function stopTrain() { clearInterval(trTimer); trTimer = null; $("pathPlay").textContent = "Play"; }
+function stopTrain() { clearInterval(trTimer); trTimer = null; $("pathPlay").textContent = "Play training"; }
 $("trNext").addEventListener("click", () => { stopTrain(); ti = Math.min(ti + 1, S.length - 1); renderTrain(); });
 $("trBack").addEventListener("click", () => { stopTrain(); ti = Math.max(ti - 1, 0); renderTrain(); });
 $("pathStep").addEventListener("input", e => { stopTrain(); ti = +e.target.value; renderTrain(); });
@@ -918,7 +956,7 @@ const correctP = (sn, src, tgt) => { let h = [0, 0]; for (const w of src) { cons
 function renderT() {
   const sn = TS[ti], [src, tgt] = IHAD.data[q], orange = css("--orange"), fg = css("--fg"), muted = css("--muted");
   $("ihtStep").value = ti; $("ihtBack").disabled = ti <= 0; $("ihtNext").disabled = ti >= TS.length - 1;
-  $("ihtVal").textContent = `step ${sn.step} of ${IHAD.steps} · the right output has the highest probability at ${Math.round(sn.acc * NW)} of the ${NW} outputs of the 24 pairs`;
+  $("ihtVal").textContent = `training step ${sn.step} of ${IHAD.steps} · the right output has the highest probability at ${Math.round(sn.acc * NW)} of the ${NW} outputs of the 24 pairs`;
   // plane, zoomed to this step
   const rr = runAt(sn, src), Z = 1.15 * Math.max(...[...sn.G, ...sn.O, ...rr.path].flat().map(Math.abs));
   const P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z, tick = +(Z / 1.15).toPrecision(2);
@@ -935,15 +973,15 @@ function renderT() {
     g += `<circle cx="${P(o[0])}" cy="${Q(o[1])}" r="${on ? 5.5 : 4}" fill="none" stroke="${fg}" stroke-opacity="${on ? 1 : 0.45}" stroke-width="${on ? 2 : 1.2}"/>`;
     if (on) g += `<text x="${P(o[0]) + 8}" y="${Q(o[1]) + 4}" font-size="11" fill="${fg}">${w}</text>`; });
   $("ihtSvg").innerHTML = g;
-  const cp = correctP(sn, src, tgt);
+  const cp = correctP(sn, src, tgt), cpPrev = ti > 0 ? correctP(TS[ti - 1], src, tgt) : null;
   $("ihtLbl").innerHTML = `One pair, out of the 24 trained on together: <i>${src.join(" ")}</i>. For each output: the probability the model now gives to the right one`;
-  $("ihtBars").innerHTML = `<span class="h">output</span><span class="h">mixed in before it</span><span class="h">right output</span><span class="h" style="grid-column: span 2">probability now</span>` + tgt.map((w, m) => `<span class="pos">${m + 1}</span><span class="given">${m ? tgt.slice(0, m).join(" ") : "(none: state 1 = summary)"}</span><span class="want">${w}</span><span class="track"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%"></span></span><span class="v">${cp[m].toFixed(2)}</span>`).join("");
-  window.mtWhy({ sn, GL, EN, src, tgt, pre: "iht", pos: ihtPos, pick: m => { ihtPos = m; renderT(); } });
+  $("ihtBars").innerHTML = `<span class="h">output</span><span class="h">mixed in before it</span><span class="h">right output</span><span class="h" style="grid-column: span 2">probability now</span>` + tgt.map((w, m) => `<span class="pos">${m + 1}</span><span class="given">${m ? tgt.slice(0, m).join(" ") : "(none: state 1 = summary)"}</span><span class="want">${w}</span><span class="track"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%"></span>${cpPrev ? `<span class="gh" style="left:${(cpPrev[m] * 100).toFixed(1)}%"></span>` : ""}</span><span class="v">${cp[m].toFixed(2)}</span>`).join("");
+  window.mtWhy({ sn, prev: ti > 0 ? TS[ti - 1] : null, GL, EN, src, tgt, pre: "iht", pos: ihtPos, pick: m => { ihtPos = m; renderT(); } });
   $("ihtAll").innerHTML = IHAD.data.map((d, q2) => [d, q2]).filter(([[s2]]) => s2[3] === src[3]).map(([[s2, t2], q2]) => { const out = runAt(sn, s2).out.filter(w => w !== "‹end›"), ok = out.join(" ") === t2.filter(w => w !== "‹end›").join(" ");
     return `<div class="phrase${q2 === q ? " pick" : ""}" data-q="${q2}"><span><span class="src">${s2.join(" ")}</span> → <span class="${ok ? "ok" : "bad"}">${out.join(" ") || "(nothing)"}</span></span></div>`; }).join("");
   $("ihtAll").querySelectorAll(".phrase").forEach(d => d.addEventListener("click", () => { q = +d.dataset.q; $("ihA").value = q; k = 0; ihtPos = 0; render(); renderT(); }));
 }
-function stopT() { clearInterval(tTimer); tTimer = null; $("ihtPlay").textContent = "Play"; }
+function stopT() { clearInterval(tTimer); tTimer = null; $("ihtPlay").textContent = "Play training"; }
 $("ihtStep").addEventListener("input", e => { stopT(); ti = +e.target.value; renderT(); });
 $("ihtNext").addEventListener("click", () => { stopT(); ti = Math.min(ti + 1, TS.length - 1); renderT(); });
 $("ihtBack").addEventListener("click", () => { stopT(); ti = Math.max(ti - 1, 0); renderT(); });
