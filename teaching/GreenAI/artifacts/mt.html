@@ -621,10 +621,10 @@ window.mtWhy = function (o) {
     }
     if (!last) {
       c += arr("M848 112 L848 138", "var(--green)", "6 4");
-      c += box(222, 140, 768, 54, "var(--green)", 0.08) + txt(606, 163, `mixed into the state: “${fedW}” (${mode === "train" ? "from the pair" : "the output written"})`) +
+      c += box(222, 140, 768, 54, "var(--green)", 0.08) + txt(606, 163, `mixed into the state: “${fedW}” (${mode === "train" ? "from the gold example output" : "the output written"})${mode === "train" && fedW !== w ? `, not “${w}”` : ""}`) +
         txt(606, 185, `next state = ½ × state ${k + 1} + ½ × second vector of “${fedW}”`, "mono");
       c += arr("M220 167 L184 167", "var(--orange)");
-      c += box(10, 140, 170, 54, "var(--orange)", 0.12) + txt(95, 163, `state ${k + 2}`) + txt(95, 185, "next output →", "small");
+      c += box(10, 140, 170, 54, "var(--orange)", 0.12) + txt(95, 163, `state ${k + 2}`) + (steps[k + 1] ? txt(95, 185, `(${r2(steps[k + 1].st[0])}, ${r2(steps[k + 1].st[1])})`, "mono") : "");
     }
     $(pre + "WhyChain").innerHTML = c;
   }
