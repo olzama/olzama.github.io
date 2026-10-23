@@ -217,9 +217,10 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <div class="controls">
       <label class="note" for="trA">Phrase</label><select id="trA"></select>
     </div>
-      <p class="note" style="color:var(--fg)">The model learned from these sixteen example translations, written by people. They are the ground truth: the answers the model is trained to reproduce.</p>
+      <p class="note" style="color:var(--fg)">The model learns from these sixteen pairs. Each pair is a Galician phrase and its English translation, written by a person. Skip-gram learned from plain text; a translation model needs pairs, because it must learn which English goes with which Galician. The translations are the ground truth: the answers the model is trained to reproduce.</p>
       <div class="phrases" id="trainData"></div>
-      <p class="note" style="color:var(--fg)">Training shows the model each pair. At every English position it computes the probability of the <b>correct</b> next word (section 3 shows how). Then it nudges every vector, Galician and English, a little in the direction that makes those probabilities higher, just as skip-gram pushed up the probability of the correct neighbor. During training the decoder is always given the correct previous word, not its own guess. All vectors start random.</p>
+      <p class="note" style="color:var(--fg)">Training goes through each pair one English word at a time. Take <i>unha tía miña</i> → an aunt of mine. The decoder has to write five words, one after the other: an, aunt, of, mine, and ‹end›, a word that means “the translation is finished”. Call their places in the translation English positions 1 to 5. At each position, the model computes the probability it gives to the word the person wrote there: the <b>correct</b> word (section 3 shows how). Then it nudges every vector, Galician and English, a little in the direction that makes those probabilities higher, just as skip-gram pushed up the probability of the correct neighbor. All vectors start random.</p>
+      <p class="note" style="color:var(--fg)">One detail matters for reading the panels below. To choose a word, the decoder uses the words it has already written (section 3 shows how). In training, it is given the person's words instead of its own guesses: to predict position 3 of <i>an aunt of mine</i>, it is told that positions 1 and 2 were “an aunt”, even if it would itself have written “a brother”. Otherwise one early mistake would make it learn the rest of the phrase after the wrong words. So the bars and the count of words predicted right use the person's earlier words, while “What the model writes on its own” uses the model's own earlier words, where one mistake can lead to more.</p>
       <div class="controls">
         <button id="trBack" aria-label="Previous training step">← Back</button>
         <button class="primary" id="trNext">Next →</button>
@@ -231,7 +232,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="col">
           <p class="label">All the vectors at this training step</p>
           <svg id="trainSvg" viewBox="0 0 400 400" role="img" aria-label="Galician and English word vectors during training" style="max-width:420px"></svg>
-          <p class="note">Squares: Galician words; rings: English words; faint lines: the path each vector has taken since its random start. The chosen phrase's words are labeled, with the path of its summary (orange; section 2 explains it). The plane zooms out as training goes on: the vectors start small (about ±1, numbers on the axes) and grow. (Each English word also has an update vector, used in part b, which moves too but is not drawn.)</p>
+          <p class="note">Each point is one word's vector. Squares: the 12 Galician words, colored by kind: blue for nouns (tía, amigo, irmán, veciña), green for possessives (miña, túa, meu, teu), gray for articles (unha, un, a, o). Rings: the 12 English words. The words of the chosen phrase are drawn large and labeled; all the others are drawn small and faint. Faint lines: the path each vector has taken since its random start. The plane zooms out as training goes on: the vectors start small (about ±1, numbers on the axes) and grow. (Each English word also has a second vector, which the decoder uses when it mixes a word it wrote into its state (section 3, part b); it moves too but is not drawn.)</p>
         </div>
         <div class="col">
           <p class="label" id="trainLbl"></p>
@@ -295,7 +296,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <p class="label" id="bRulerLbl">Every word's score, on one line</p>
         <svg id="bRuler" viewBox="0 0 400 124" role="img" aria-label="All scores on a line" style="max-width:420px"></svg>
         <p class="note" id="bEncNote"></p>
-        <p class="note">Galician words (squares) and English words (rings) are all 2-D vectors in the same plane: the Galician ones are bright while the encoder reads, the English ones while the decoder writes. The encoder's summary of the phrase (dashed path) is where the decoder's state starts (orange arrow). Each English word's score is the dot product with the state: how far the word lies along the state's direction (dashed line), times the state's length. Click any ring, or any word on the line, to see its score worked out.</p>
+        <p class="note">Galician words (squares, colored by kind as in section 1) and English words (rings) are all 2-D vectors in the same plane: the Galician ones are bright while the encoder reads, the English ones while the decoder writes. The encoder's summary of the phrase (dashed path) is where the decoder's state starts (orange arrow). Each English word's score is the dot product with the state: how far the word lies along the state's direction (dashed line), times the state's length. Click any ring, or any word on the line, to see its score worked out.</p>
       </div>
       <div class="col">
         <div class="bars" id="bBars"></div>
@@ -342,7 +343,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="col">
           <p class="label">All the vectors at this training step</p>
           <svg id="ihtSvg" viewBox="0 0 400 400" role="img" aria-label="Galician and English word vectors of the second model during training" style="max-width:420px"></svg>
-          <p class="note">Squares: Galician words; rings: English words; faint lines: the path each vector has taken since its random start. The chosen sentence's words are labeled, with the path of its summary (orange). The plane zooms out as the vectors grow.</p>
+          <p class="note">As in section 1: squares are Galician words (blue: nouns; gray: articles; green: the other words, possessives and verbs), rings are English words, and the chosen sentence's words are drawn large and labeled. Faint lines: the path each vector has taken since its random start. The orange dashed path is the encoder's summary of the chosen sentence (section 2). The plane zooms out as the vectors grow.</p>
         </div>
         <div class="col">
           <p class="label" id="ihtLbl"></p>
@@ -509,7 +510,7 @@ const TMAX = Math.max(...S.flatMap(sn => [...sn.G, ...sn.O]).flat().map(Math.abs
 function renderTrainPlane(sn) {
   const [src, tgt] = S2S.data[bA];
   // zoom to this step: the vectors start small and grow during training
-  const cur = [...sn.G, ...sn.O, ...translate(sn, src).path].flat().map(Math.abs), Z = 1.15 * Math.max(...cur);
+  const cur = [...sn.G, ...sn.O].flat().map(Math.abs), Z = 1.15 * Math.max(...cur);
   const P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z;
   const orange = css("--orange"), fg = css("--fg"), muted = css("--muted");
   let g = `<line class="axis" x1="10" y1="200" x2="390" y2="200"/><line class="axis" x1="200" y1="10" x2="200" y2="390"/>`;
@@ -518,11 +519,6 @@ function renderTrainPlane(sn) {
   const trail = (key, j, col) => `<polyline points="${S.slice(0, ti + 1).map(x => `${P(x[key][j][0]).toFixed(1)},${Q(x[key][j][1]).toFixed(1)}`).join(" ")}" fill="none" stroke="${col}" stroke-opacity="0.22"/>`;
   GL.forEach((w, j) => { const c = NOUNS.has(w) ? css("--blue") : ARTS.has(w) ? muted : css("--green"); g += trail("G", j, c); });
   EN.forEach((w, j) => { g += trail("O", j, fg); });
-  // the chosen phrase's summary path at this step
-  const path = translate(sn, src).path;
-  g += `<polyline points="${path.map(q => `${P(q[0]).toFixed(1)},${Q(q[1]).toFixed(1)}`).join(" ")}" fill="none" stroke="${orange}" stroke-width="1.8" stroke-dasharray="4 3"/>`;
-  const h = path[path.length - 1];
-  g += `<circle cx="${P(h[0])}" cy="${Q(h[1])}" r="5" fill="${orange}"/>`;
   GL.forEach((w, j) => { const v = sn.G[j], c = NOUNS.has(w) ? css("--blue") : ARTS.has(w) ? muted : css("--green"), on = src.includes(w);
     g += `<rect x="${P(v[0]) - (on ? 5 : 3.5)}" y="${Q(v[1]) - (on ? 5 : 3.5)}" width="${on ? 10 : 7}" height="${on ? 10 : 7}" rx="2" fill="${c}" fill-opacity="${on ? 1 : 0.45}"/>`;
     if (on) g += `<text x="${P(v[0]) - 8}" y="${Q(v[1]) + 4}" text-anchor="end" font-style="italic" font-size="11" fill="${c}">${w}</text>`; });
@@ -537,9 +533,9 @@ function renderTrain() {
   $("pathStep").value = ti;
   $("trBack").disabled = ti <= 0; $("trNext").disabled = ti >= S.length - 1;
   const [src, tgt] = S2S.data[bA], cp = correctProbs(sn, src, tgt);
-  $("trainLbl").innerHTML = `<i>${src.join(" ")}</i>: probability of each correct word`;
+  $("trainLbl").innerHTML = `<i>${src.join(" ")}</i>: probability of the correct word at each English position`;
   $("trainBars").innerHTML = tgt.map((w, m) => `<div class="bar"><span class="w">${w}</span><span class="track"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%;background:var(--green)"></span></span><span>${cp[m].toFixed(2)}</span></div>`).join("");
-  $("pathStepVal").textContent = `step ${sn.step} of ${S2S.steps} · ${Math.round(sn.acc * NWORDS)}/${NWORDS} words predicted right, given the correct previous word`;
+  $("pathStepVal").textContent = `step ${sn.step} of ${S2S.steps} · ${Math.round(sn.acc * NWORDS)}/${NWORDS} English words predicted right (‹end› included), each given the person's earlier words`;
   $("pathAll").innerHTML = S2S.data.map(([s2, t2]) => {
     const out = translate(sn, s2).steps.map(t => t.w).filter(w => w !== "‹end›");
     const ok = out.join(" ") === t2.filter(w => w !== "‹end›").join(" ");
@@ -803,7 +799,7 @@ const correctP = (sn, src, tgt) => { let h = [0, 0]; for (const w of src) { cons
 function renderT() {
   const sn = TS[ti], [src, tgt] = IHAD.data[q], orange = css("--orange"), fg = css("--fg"), muted = css("--muted");
   $("ihtStep").value = ti; $("ihtBack").disabled = ti <= 0; $("ihtNext").disabled = ti >= TS.length - 1;
-  $("ihtVal").textContent = `step ${sn.step} of ${IHAD.steps} · ${Math.round(sn.acc * NW)}/${NW} words predicted right, given the correct previous word`;
+  $("ihtVal").textContent = `step ${sn.step} of ${IHAD.steps} · ${Math.round(sn.acc * NW)}/${NW} English words predicted right (‹end› included), each given the person's earlier words`;
   // plane, zoomed to this step
   const rr = runAt(sn, src), Z = 1.15 * Math.max(...[...sn.G, ...sn.O, ...rr.path].flat().map(Math.abs));
   const P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z, tick = +(Z / 1.15).toPrecision(2);
@@ -860,7 +856,7 @@ How to answer: short, plain sentences. Define any technical term the first time 
 
 The page:
 - Running example: the Galician sentence "Unha tía miña, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»" (from the novel Speechwriter by Paulo Naseiro). "tía miña" is noun then possessive; English "my aunt" reverses the order.
-- Section 1, where the model's vectors come from (training): a translation model has an encoder (reads Galician into a summary vector) and a decoder (writes English from it); sections 2 and 3 take them apart. A small toy model with 2-D vectors is trained on 16 human-written translations, the ground truth (a miña tía → my aunt, unha tía miña → an aunt of mine, likewise amigo/friend, irmán/brother, veciña/neighbor, and túa/teu → your / of yours). Training computes the probability of each correct next English word (the decoder is fed the correct previous word) and nudges every vector to raise it, like skip-gram. A replay (Back/Next/Play over 1500 steps) shows a plane with all Galician (squares) and English (rings) vectors moving from small random positions (the plane zooms out as they grow), the probability of each correct word for the chosen phrase, and what the model writes on its own.
+- Section 1, where the model's vectors come from (training): a translation model has an encoder (reads Galician into a summary vector) and a decoder (writes English from it); sections 2 and 3 take them apart. A small toy model with 2-D vectors is trained on 16 human-written translations, the ground truth (a miña tía → my aunt, unha tía miña → an aunt of mine, likewise amigo/friend, irmán/brother, veciña/neighbor, and túa/teu → your / of yours). Training computes the probability of each correct next English word (at each English position the decoder is fed the person's earlier words, not its own guesses, so the bars and the count of words predicted right can differ from what it writes on its own; ‹end› is the word that ends a translation) and nudges every vector to raise it, like skip-gram. A replay (Back/Next/Play over 1500 steps) shows a plane with all Galician (squares; blue nouns, green possessives, gray articles; the chosen phrase's words large, the rest faint) and English (rings) vectors moving from small random positions (the plane zooms out as they grow), the probability of each correct word for the chosen phrase, and what the model writes on its own.
 - Section 2, the encoder: each Galician word has an embedding (made-up 2-D vectors here; tía = (0.9, 0.2), miña = (0.1, 0.9)). A simplified encoder reads word by word and keeps one summary vector: new summary = ½ old summary + ½ new word, starting from (0, 0). So the last word makes up ½ of the summary, the one before ¼, then ⅛, and so on; after the whole sentence (35 tokens) "tía" makes up 0.5^34, practically nothing. Real encoders (recurrent neural networks) learn their update rule, but still keep one fixed-size vector.
 - Section 3, the decoder: how the English words come out, with one plane for both languages: the chosen phrase's Galician word vectors (filled dots) and the encoder's dashed path to the summary, the English word vectors (rings), and the decoder's state at its true position, starting exactly at the summary (all 2-D vectors in one coordinate system; Galician and English words have separate tables, but the summary's two numbers are used directly as the decoder's state), in a small toy model trained on 16 idiomatic Galician noun phrases ("a miña tía" → "my aunt", "unha tía miña" → "an aunt of mine", likewise amigo/friend, irmán/brother, veciña/neighbor, and túa/teu → your / of yours; 2-D learned vectors). One phrase, word by word, in the trained model: (a) how the next word is chosen: each English word has a learned vector; its score is the dot product with the decoder's state (how far it lies along the state's direction); softmax gives probabilities; the most likely word is written. (b) How the state is recomputed: the first state is the encoder's summary; after each word, state = ½ state + ½ that word's update vector (a second learned vector per English word, separate from its scoring vector, like skip-gram's two tables), drawn as vector addition with the numbers; so the summary's share halves at every step (all, 1/2, 1/4, ...) while the written words fill the rest, shown as a mix bar like section 2. (d) Is "an aunt of mine" the best translation? Correct and faithful (an keeps the new character introduced by unha), but rare in English: per 100 "my N", English books write "a friend of mine" 12.5 times, "an aunt of mine" 0.36, "a brother of mine" 0.08 (Google Books, 1990-2019; full chart on the n-gram page, section 7). "A ... of mine" picks one out of several. A translator writes "I had an aunt who...", which no word-by-word decoder can produce. (c) Why the first word comes out right although the summary is mostly the end of the phrase: in 3-word phrases the first word's ⅛ is still enough after training; in long sentences it fades; Sutskever, Vinyals & Le (2014) fed the source sentence reversed (BLEU 25.9 → 30.6); attention (section 4) removes the need.
 - Section 4, a second toy model: trained on 24 Galician sentences whose English follows the book counts. A training replay (Back/Next/Play over 2000 steps, every 25th recorded) shows all vectors moving from random starts (the plane zooms out as they grow), the probability of each correct word for the chosen sentence, and what the model writes on its own (at step 0 "had had had…"; around step 400 "unha tía miña cantaba" already gives "I had a brother who sang": the construction is learned before the noun). "o meu amigo cantaba" → "my friend sang", "un amigo meu cantaba" → "a friend of mine sang" (likewise compañeira/colleague), but "a miña tía cantaba" → "my aunt sang" and "unha tía miña cantaba" → "I had an aunt who sang" (likewise irmán/brother); verbs cantaba/sang, bailaba/danced, ría/laughed. Same 2-D model as sections 1-3. The decoder writes "I", "had" and "who", which have no Galician counterpart, because the training data does: what a decoder writes comes from its training data. With 2 dimensions only some random starts learn all 24; 3 dimensions always do.
