@@ -260,7 +260,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
           </div>
           <div class="col">
             <svg id="trWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen output and the English word vectors" style="max-width:420px"></svg>
-            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="trLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the gold output (both rings on one word when they coincide)</span><span><span class="ring"></span>other possible outputs (the 4 most probable in black, the rest gray)</span><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— <span id="trLegGhost">where the vector was one training step earlier</span></span></div>
+            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span><span class="sw" style="background:var(--orange);opacity:0.35"></span>the state one output earlier, and its move</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="trLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the gold output (both rings on one word when they coincide)</span><span><span class="ring"></span>other possible outputs (the 4 most probable in black, the rest gray)</span><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— <span id="trLegGhost">where the vector was one training step earlier</span></span></div>
             <p class="note" id="trWhyNote" style="color:var(--fg)"></p>
           </div>
         </div>
@@ -634,12 +634,16 @@ window.mtWhy = function (o) {
   EN.forEach((e, j) => { const v = sn.O[j], win = j === s.j, gold = j === wj, c = gold ? green : win ? orange : labeled.has(j) ? fg : muted;
     g += `<circle cx="${P(v[0])}" cy="${Q(v[1])}" r="${win || gold ? 8 : 5}" fill="none" stroke="${c}" stroke-width="${win || gold ? 3 : 1.3}"/>`;
     if (win && gold) g += `<circle cx="${P(v[0])}" cy="${Q(v[1])}" r="12" fill="none" stroke="${orange}" stroke-width="2.5"/>`; });
+  // the state one output earlier (same vectors; only the state moved), and its move to the state now
+  if (k > 0) { const q = steps[k - 1].st;
+    g += `<line x1="200" y1="200" x2="${P(q[0])}" y2="${Q(q[1])}" stroke="${orange}" stroke-opacity="0.3" stroke-width="3.5" marker-end="url(#${pre}wa)" style="opacity:0.35"/><line x1="${P(q[0])}" y1="${Q(q[1])}" x2="${P(s.st[0])}" y2="${Q(s.st[1])}" stroke="${orange}" stroke-opacity="0.6" stroke-width="1.5" stroke-dasharray="3 3"/>`; }
   g += `<line x1="200" y1="200" x2="${P(s.st[0])}" y2="${Q(s.st[1])}" stroke="${orange}" stroke-width="3.5" marker-end="url(#${pre}wa)"/>`;
   const free = (x, y, w) => !placed.some(q => Math.abs(q.y - y) < 13 && x < q.x + q.w && q.x < x + w);
   const put = (cx, cy, w, c, txt, gap) => { const tries = [[cx + gap, cy, "start"], [cx - gap - w, cy, "end"], [cx + gap, cy + 12, "start"], [cx - gap - w, cy + 12, "end"], [cx + gap, cy - 12, "start"], [cx - gap - w, cy - 12, "end"], [cx + gap, cy + 24, "start"], [cx - gap - w, cy + 24, "end"], [cx + gap, cy - 24, "start"], [cx - gap - w, cy - 24, "end"]];
     const [x, y, an] = tries.find(([x, y]) => free(x, y, w)) || tries[0]; placed.push({ x, y, w });
     g += `<text x="${an === "end" ? x + w : x}" y="${y}" text-anchor="${an}" fill="${c}" font-size="12">${txt}</text>`; };
   put(200 + (P(s.st[0]) - 200) * 0.55, 200 + (Q(s.st[1]) - 200) * 0.55 + 4, 52, orange, `state ${k + 1}`, 10);
+  if (k > 0) { const q = steps[k - 1].st; put(200 + (P(q[0]) - 200) * 0.55, 200 + (Q(q[1]) - 200) * 0.55 + 4, 52, muted, `state ${k}`, 10); }
   // every word labeled, so that a ring can be followed from step to step; the less probable ones in gray
   [s.j, ...(wj >= 0 && wj !== s.j ? [wj] : []), ...order.filter(j => j !== s.j && j !== wj)].forEach(j => { const v = sn.O[j], win = j === s.j, gold = j === wj;
     put(P(v[0]), Q(v[1]) + 4, 7.5 * EN[j].length, gold ? green : win ? orange : labeled.has(j) ? fg : muted, EN[j], win && gold ? 15 : win || gold ? 11 : 8); });
@@ -662,9 +666,9 @@ window.mtWhy = function (o) {
     c += box(202, 20, 508, 110, "var(--line)", 0.35) + txt(456, 44, "score of each possible output = state · its vector", "") + txt(456, 64, "= x₁·v₁ + x₂·v₂, for the 12 possible outputs; two of them:", "small");
     shown.forEach(([j, col], i) => { c += txt(456, 90 + 22 * i, sc(j), "mono", "middle", col); });
     c += arr("M456 132 L456 150");
-    c += box(202, 154, 508, 212, "var(--line)", 0.35) + txt(456, 174, mode === "train" ? "probabilities (add up to 1) · ↑ ↓: what the next training steps do" : "probabilities (add up to 1) · the highest is written", "small");
+    c += box(202, 154, 508, 212, "var(--line)", 0.35) + txt(456, 174, (k > 0 ? `probabilities (add up to 1) · | : at output ${k}` : "probabilities (add up to 1)") + (mode === "train" ? " · ↑ ↓: what the next training steps do" : " · the highest is written"), "small");
     [...s.p.keys()].forEach((j, i) => { const y = 192 + 14 * i, gold = j === wj, win = j === s.j, col = gold ? green : win ? orange : "var(--blue)";   // the possible outputs in a fixed order, so the bars can be followed from output to output
-      c += txt(300, y + 4, EN[j], "mono", "end", gold || win ? col : muted) + `<rect x="308" y="${y - 5}" width="${(190 * s.p[j]).toFixed(1)}" height="10" rx="2" fill="${col}" fill-opacity="${gold || win ? 0.9 : 0.45}"/>` + txt(508, y + 4, s.p[j].toFixed(2), "mono small", "start");
+      c += txt(300, y + 4, EN[j], "mono", "end", gold || win ? col : muted) + `<rect x="308" y="${y - 5}" width="${(190 * s.p[j]).toFixed(1)}" height="10" rx="2" fill="${col}" fill-opacity="${gold || win ? 0.9 : 0.45}"/>` + (k > 0 ? `<line x1="${(308 + 190 * steps[k - 1].p[j]).toFixed(1)}" y1="${y - 6}" x2="${(308 + 190 * steps[k - 1].p[j]).toFixed(1)}" y2="${y + 6}" stroke="${fg}" stroke-width="1.5" stroke-opacity="0.7"/>` : "") + txt(508, y + 4, s.p[j].toFixed(2), "mono small", "start");
       if (mode === "train" && wj >= 0 && (gold || j === other)) c += txt(560, y + 5, gold ? "↑" : "↓", "", "middle", gold ? green : neg);
       if (mode !== "train" && win) c += txt(566, y + 4, "written", "small", "start", orange); });
     if (!last) {
@@ -719,12 +723,12 @@ window.mtWhy = function (o) {
   if (wj >= 0 && wj !== s.j) line.push(`<span class="m">${sline(wj)}</span>`);
   if ($(pre + "WhyF")) $(pre + "WhyF").innerHTML = line.join("<br>");
   const own = mode !== "train" && k > 0 && steps.slice(0, k).some((x, m) => EN[x.j] !== tgt[m]);
-  $(pre + "WhyNote").innerHTML = want === undefined ?
+  $(pre + "WhyNote").innerHTML = (k > 0 ? `Same 12 vectors as at output ${k}; only the state moved (faint arrow → full arrow), so all the scores changed. ` : "") + (want === undefined ?
       `The gold output ended at output ${tgt.length}; here ‹end› does not have the highest score, so the model goes on.` :
     w === want ? `“${w}” lies farthest along the state's direction → highest score${mode === "train" ? ". It is the gold output; the next training steps raise its probability further." : " → written. It is the gold output."}` :
     mode === "train" ? `The gold output is “${want}”, but “${w}” lies farther along the state's direction → higher score. The next training steps move the vectors so that “${want}” scores higher and “${w}” lower; the thin marks show the move so far.` :
       `The gold output is “${want}”, but “${w}” lies farther along the state's direction → higher score → written. Training moves the vectors until “${want}” wins.` +
-      (own ? ` The state here was built from outputs the model wrote, some of them already wrong.` : "");
+      (own ? ` The state here was built from outputs the model wrote, some of them already wrong.` : ""));
 }
 </script>
 <script>
