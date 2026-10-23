@@ -251,24 +251,21 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="controls"><button id="aPairPrev">← previous pair</button><button id="aPairNext">next pair →</button><span class="note">after each output, what is mixed into the state:</span><div class="seg" role="group" aria-label="Decoding in training or when translating"><button id="trModeTrain" aria-pressed="true">in training: the gold output</button><button id="trModeFree" aria-pressed="false">when translating: the output written</button></div></div>
         <p class="label">Encoding: the inputs are mixed, one by one, into one vector, the summary (new = ½ × old + ½ × vector of the input; section 2 shows the rule)</p>
         <svg class="chain" id="trEncChain" viewBox="0 0 1000 118" role="img" aria-label="The encoder mixes the inputs one by one into the summary"></svg>
-        <p class="label" id="trDecLbl"></p>
-        <svg class="chain" id="trWhyChain" viewBox="0 0 1000 200" role="img" aria-label="How one output is chosen and how the next state is made"></svg>
-        <p class="label" id="trWhyTblLbl"></p>
-        <div class="tf" id="trWhyTable"></div>
-        <div class="controls"><button id="trWhyPrev">← previous output</button><button id="trWhyNext">next output →</button><span class="note" id="trWhyStripKey"></span></div>
-        <div class="controls"><span class="note">then, the model as it is after</span><button id="aBack" aria-label="One recorded training step back">← 1 step</button><button id="aNext" aria-label="One recorded training step forward">1 step →</button><button id="aReset" title="The random start">↺ step 0</button><input type="range" id="aStep" min="0" max="1" step="1" value="0" aria-label="Training step of the model used here" style="flex:1 1 140px; accent-color: var(--blue)"><span class="mono" id="aStepVal"></span><span class="note">(the first 25 steps one by one, then every 25th; training itself is part B)</span></div>
-        <div class="cols">
+        <div class="controls"><p class="label" id="trDecLbl" style="margin-right:auto"></p><button id="trWhyPrev">← previous output</button><button id="trWhyNext">next output →</button></div>
+        <div class="cols" style="grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr)">
           <div class="col">
-            <svg id="trWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen position and the English word vectors" style="max-width:420px"></svg>
-            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="trLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the gold output (both rings on one word when they coincide)</span><span><span class="ring"></span>other possible outputs (the 4 most probable in black, the rest gray)</span><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— <span id="trLegGhost">where the vector was one training step earlier</span></span></div>
+            <svg class="chain" id="trWhyChain" data-compact="1" viewBox="0 0 720 430" role="img" aria-label="How one output is chosen: the state, the scores, the probabilities, and how the next state is made"></svg>
+            <p class="note" id="trWhyStripKey"></p>
           </div>
           <div class="col">
-            <p class="label" id="trWhyLbl"></p>
-            <div class="bars" id="trWhyBars"></div>
-            <div class="formula" id="trWhyF"></div>
+            <svg id="trWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen output and the English word vectors" style="max-width:420px"></svg>
+            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="trLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the gold output (both rings on one word when they coincide)</span><span><span class="ring"></span>other possible outputs (the 4 most probable in black, the rest gray)</span><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— <span id="trLegGhost">where the vector was one training step earlier</span></span></div>
             <p class="note" id="trWhyNote" style="color:var(--fg)"></p>
           </div>
         </div>
+        <p class="label" id="trWhyTblLbl"></p>
+        <div class="tf" id="trWhyTable"></div>
+        <div class="controls"><span class="note">then, the model as it is after</span><button id="aBack" aria-label="One recorded training step back">← 1 step</button><button id="aNext" aria-label="One recorded training step forward">1 step →</button><button id="aReset" title="The random start">↺ step 0</button><input type="range" id="aStep" min="0" max="1" step="1" value="0" aria-label="Training step of the model used here" style="flex:1 1 140px; accent-color: var(--blue)"><span class="mono" id="aStepVal"></span><span class="note">(the first 25 steps one by one, then every 25th; training itself is part B)</span></div>
         <p class="label" id="trainCurveLbl"></p>
         <svg id="trainCurve" viewBox="0 0 440 190" role="img" aria-label="The probability of the gold output at each output position, over the training steps" style="max-width:460px"></svg>
         <p class="note">Orange: the model chosen above. The curves climb because training (part B) moves every vector a little at each step, so that the gold outputs get higher probabilities.</p>
@@ -647,11 +644,39 @@ window.mtWhy = function (o) {
     put(P(v[0]), Q(v[1]) + 4, 7.5 * EN[j].length, gold ? green : win ? orange : labeled.has(j) ? fg : muted, EN[j], win && gold ? 15 : win || gold ? 11 : 8); });
   $(pre + "WhySvg").innerHTML = g;
   // every word's probability at this position
-  $(pre + "WhyLbl").textContent = `Output ${k + 1}: the probability of each possible output`;
-  $(pre + "WhyBars").innerHTML = order.map(j => `<div class="bar"><span class="w">${EN[j]}</span><span class="track"><span class="fill" style="width:${(s.p[j] * 100).toFixed(1)}%;background:var(${j === wj ? "--green" : j === s.j ? "--orange" : "--blue"})"></span>${ps ? `<span class="gh" style="left:${(ps[j] * 100).toFixed(1)}%"></span>` : ""}</span><span>${s.p[j].toFixed(2)}</span></div>`).join("") +
+  if ($(pre + "WhyLbl")) $(pre + "WhyLbl").textContent = `Output ${k + 1}: the probability of each possible output`;
+  if ($(pre + "WhyBars")) $(pre + "WhyBars").innerHTML = order.map(j => `<div class="bar"><span class="w">${EN[j]}</span><span class="track"><span class="fill" style="width:${(s.p[j] * 100).toFixed(1)}%;background:var(${j === wj ? "--green" : j === s.j ? "--orange" : "--blue"})"></span>${ps ? `<span class="gh" style="left:${(ps[j] * 100).toFixed(1)}%"></span>` : ""}</span><span>${s.p[j].toFixed(2)}</span></div>`).join("") +
     (ps ? `<p class="note" style="margin-top:4px">thin mark: ${o.thin || 25} training step${o.thin === 1 ? "" : "s"} earlier</p>` : "");
   // the chain, drawn with this output's values: state → scores → probabilities → (training: the gold output; translating: written) → mixed in → next state
-  if ($(pre + "WhyChain")) {
+  if ($(pre + "WhyChain") && $(pre + "WhyChain").dataset.compact) {
+    const box = (x, y, wd, ht, col, op) => `<rect x="${x}" y="${y}" width="${wd}" height="${ht}" rx="9" fill="${col}" fill-opacity="${op}" stroke="${col}" stroke-width="1.8"/>`;
+    const txt = (x, y, s_, cls = "", anchor = "middle", fill = "") => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}"${fill ? ` style="fill:${fill}"` : ""}>${s_}</text>`;
+    const arr = (d, col = "var(--fg)", dash = "") => `<path d="${d}" fill="none" stroke="${col}" stroke-width="2"${dash ? ` stroke-dasharray="${dash}"` : ""} marker-end="url(#${pre}ca)"/>`;
+    const fedW = EN[s.fed], last = mode === "train" ? want === "‹end›" : w === "‹end›", neg = css("--neg"), muted = css("--muted");
+    const sc = j => `${EN[j]}: ${r2p(s.st[0])}×${r2p(sn.O[j][0])} + ${r2p(s.st[1])}×${r2p(sn.O[j][1])} = ${r2(s.sc[j])}`;
+    const other = order.find(j => j !== wj), shown = mode === "train" && wj >= 0 ? [[wj, green], [other, neg]] : [[s.j, orange], ...(wj >= 0 && wj !== s.j ? [[wj, green]] : [])];
+    let c = `<defs><marker id="${pre}ca" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--fg)"/></marker></defs>`;
+    c += box(10, 20, 160, 70, "var(--orange)", 0.12) + txt(90, 50, `state ${k + 1}`) + txt(90, 76, `(${r2(s.st[0])}, ${r2(s.st[1])})`, "mono");
+    c += arr("M172 55 L198 55");
+    c += box(202, 20, 508, 110, "var(--line)", 0.35) + txt(456, 44, "score of each possible output = state · its vector", "") + txt(456, 64, "= x₁·v₁ + x₂·v₂, for the 12 possible outputs; two of them:", "small");
+    shown.forEach(([j, col], i) => { c += txt(456, 90 + 22 * i, sc(j), "mono", "middle", col); });
+    c += arr("M456 132 L456 150");
+    c += box(202, 154, 508, 212, "var(--line)", 0.35) + txt(456, 174, mode === "train" ? "probabilities (add up to 1) · ↑ ↓: what the next training steps do" : "probabilities (add up to 1) · the highest is written", "small");
+    order.forEach((j, i) => { const y = 192 + 14 * i, gold = j === wj, win = j === s.j, col = gold ? green : win ? orange : "var(--blue)";
+      c += txt(300, y + 4, EN[j], "mono", "end", gold || win ? col : muted) + `<rect x="308" y="${y - 5}" width="${(190 * s.p[j]).toFixed(1)}" height="10" rx="2" fill="${col}" fill-opacity="${gold || win ? 0.9 : 0.45}"/>` + txt(508, y + 4, s.p[j].toFixed(2), "mono small", "start");
+      if (mode === "train" && wj >= 0 && (gold || j === other)) c += txt(560, y + 5, gold ? "↑" : "↓", "", "middle", gold ? green : neg);
+      if (mode !== "train" && win) c += txt(566, y + 4, "written", "small", "start", orange); });
+    if (!last) {
+      c += arr("M456 368 L456 384", "var(--green)", "6 4");
+      c += box(10, 388, 700, 36, "var(--green)", 0.08) + txt(360, 411, `mixed into the state: “${fedW}” (${mode === "train" ? "the gold output" : "the output written"}${mode === "train" && fedW !== w ? `, not “${w}”` : ""}) → state ${k + 2} = ½ × state ${k + 1} + ½ × second vector of “${fedW}” = (${r2(steps[k + 1].st[0])}, ${r2(steps[k + 1].st[1])})`, "small");
+      c += arr("M40 386 L40 94", "var(--orange)");
+      c += txt(56, 240, `next output →`, "small", "start", muted);
+    } else {
+      c += arr("M456 368 L456 384", "var(--line)", "6 4");
+      c += box(10, 388, 700, 36, "var(--line)", 0.35) + txt(360, 411, mode === "train" ? "this pair is done: its state is discarded; nothing in the model has changed yet (the vectors change only at a training step, part B)" : "this pair is done: its state is discarded; the vectors do not change when translating", "small");
+    }
+    $(pre + "WhyChain").innerHTML = c;
+  } else if ($(pre + "WhyChain")) {
     const box = (x, y, wd, ht, col, op) => `<rect x="${x}" y="${y}" width="${wd}" height="${ht}" rx="9" fill="${col}" fill-opacity="${op}" stroke="${col}" stroke-width="1.8"/>`;
     const txt = (x, y, s_, cls = "", anchor = "middle", fill = "") => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}"${fill ? ` fill="${fill}" style="fill:${fill}"` : ""}>${s_}</text>`;
     const arr = (d, col = "var(--fg)", dash = "") => `<path d="${d}" fill="none" stroke="${col}" stroke-width="2"${dash ? ` stroke-dasharray="${dash}"` : ""} marker-end="url(#${pre}ca)"/>`;
@@ -691,7 +716,7 @@ window.mtWhy = function (o) {
   const sline = j => `score(${EN[j]}) = state · vector(${EN[j]}) = ${r2p(s.st[0])} × ${r2p(sn.O[j][0])} + ${r2p(s.st[1])} × ${r2p(sn.O[j][1])} = <b>${r2(s.sc[j])}</b> → probability ${s.p[j].toFixed(2)}`;
   line.push(`<span class="q">${sline(s.j)}</span>`);
   if (wj >= 0 && wj !== s.j) line.push(`<span class="m">${sline(wj)}</span>`);
-  $(pre + "WhyF").innerHTML = line.join("<br>");
+  if ($(pre + "WhyF")) $(pre + "WhyF").innerHTML = line.join("<br>");
   const own = mode !== "train" && k > 0 && steps.slice(0, k).some((x, m) => EN[x.j] !== tgt[m]);
   $(pre + "WhyNote").innerHTML = want === undefined ?
       `The gold output ended at output ${tgt.length}; here ‹end› does not have the highest score, so the model goes on.` :
