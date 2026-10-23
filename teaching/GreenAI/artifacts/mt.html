@@ -193,14 +193,6 @@ svg.chain text { font-family: var(--font-body); font-size: 15px; fill: var(--fg)
 svg.chain text.mono { font-family: var(--font-mono); font-size: 13px; }
 svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .tf .sel { background: var(--hi); }
-.ogrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 14px; }
-@media (max-width: 520px) { .ogrid { grid-template-columns: minmax(0, 1fr); } }
-.ogrid .row { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; font-size: 0.85rem; }
-.ogrid .src { font-style: italic; margin-right: 4px; }
-.ogrid .cell { font-family: var(--font-mono); font-size: 0.78rem; padding: 1px 5px; border-radius: 3px; cursor: pointer; border: 1.5px solid transparent; }
-.ogrid .cell.ok { background: color-mix(in srgb, var(--green) 20%, transparent); color: var(--green); }
-.ogrid .cell.bad { background: color-mix(in srgb, var(--neg) 16%, transparent); color: var(--neg); }
-.ogrid .cell.on { border-color: var(--orange); }
 .why { display: grid; gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
 .whogrid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 10px; align-items: center; }
 .whogrid .hd { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
@@ -280,15 +272,12 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="controls"><span class="label" style="margin-right:4px">Training</span><button id="trBack2" aria-label="One recorded training step back">← 1 step</button><button class="primary" id="trNext2" aria-label="One recorded training step forward">Train 1 step →</button><button id="pathPlay">Play training</button><input type="range" id="pathStep" min="0" max="1" step="1" value="0" aria-label="Training step" style="flex:1 1 200px; accent-color: var(--blue)"><span class="mono" id="pathStepVal"></span></div>
         <div class="cols">
           <div class="col">
-            <p class="label" id="trGridLbl"></p>
-            <div class="ogrid" id="trGrid"></div>
-            <p class="note">one row per pair, one cell per output of its gold example output · <span class="ok">green</span>: the right output has the highest probability now · <span class="bad">red</span>: not yet · click a cell to follow it in the panel above</p>
             <p class="label" id="trainCurveLbl"></p>
             <svg id="trainCurve" viewBox="0 0 440 190" role="img" aria-label="The probability of the right output at each output position, over the training steps" style="max-width:460px"></svg>
             <p class="note">Each training step moves every vector a little, so that these probabilities go up (as in skip-gram). Orange: the current step.</p>
           </div>
           <div class="col">
-            <p class="label">What the model writes now, for each of the 16 inputs</p>
+            <p class="label" id="pathAllLbl"></p>
             <p class="note">one output at a time, the one with the highest probability, mixed into the state before the next (as on the previous screen) · <span style="color:var(--green)">the right output</span> · <span style="color:var(--neg)">a different one</span> · click one to follow it in the panel above</p>
             <div class="phrases pickable" id="pathAll"></div>
           </div>
@@ -738,11 +727,6 @@ function renderCurve(src, tgt, k) {
     g += `<text x="370" y="${y}" font-size="11" fill="${green}" fill-opacity="${l.m === k || k < 0 ? 1 : 0.5}">${l.m + 1}: ${l.w}</text>`; });
   $("trainCurve").innerHTML = g;
 }
-// with the gold example output mixed in after each output: does the right output have the highest probability at each?
-function tfRight(sn, src, tgt) {
-  let h = [0, 0]; for (const w of src) { const g = sn.G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; }
-  let st = h; return tgt.map(w => { const sc = sn.O.map(o => st[0] * o[0] + st[1] * o[1]), j = EN.indexOf(w), ok = sc.indexOf(Math.max(...sc)) === j; st = [0.5 * st[0] + 0.5 * sn.I[j][0], 0.5 * st[1] + 0.5 * sn.I[j][1]]; return ok; });
-}
 function renderTrain() {
   const sn = S[ti], [src, tgt] = S2S.data[bA];
   $("pathStep").value = ti;
@@ -753,19 +737,15 @@ function renderTrain() {
   const k = trMode === "train" ? Math.min(trPos, tgt.length - 1) : -1;
   // the panel: one pair, output by output
   window.mtWhy({ sn, prev: ti > 0 ? S[ti - 1] : null, thin: gapB, GL, EN, src, tgt, pre: "tr", pos: trPos, mode: trMode, npairs: 16, example: "unha tía miña", pick: m => { trPos = m; renderTrain(); }, setMode: m => { trMode = m; renderTrain(); } });
-  // training as a whole: every output of every pair
-  let right = 0;
-  $("trGrid").innerHTML = S2S.data.map(([s2, t2], q) => { const ok = tfRight(sn, s2, t2); right += ok.filter(Boolean).length;
-    return `<div class="row"><span class="src">${s2.join(" ")}</span>→ ${t2.map((w, m) => `<span class="cell ${ok[m] ? "ok" : "bad"}${q === bA && trMode === "train" && m === k ? " on" : ""}" data-q="${q}" data-m="${m}">${w}</span>`).join("")}</div>`; }).join("");
-  $("trGridLbl").textContent = `now: the right output has the highest probability at ${right} of the ${NWORDS} outputs`;
-  $("trGrid").querySelectorAll(".cell").forEach(e => e.addEventListener("click", () => { bA = +e.dataset.q; $("trA").value = bA; $("bA").value = bA; trMode = "train"; trPos = +e.dataset.m; bStage = 0; bSel = -1; renderB(); renderTrain(); $("trWhy").scrollIntoView({ behavior: "smooth", block: "start" }); }));
   $("trainCurveLbl").innerHTML = `<i>${src.join(" ")}</i> over the training steps: the probability of the right output at each output`;
   renderCurve(src, tgt, k);
+  let nRight = 0;
   $("pathAll").innerHTML = S2S.data.map(([s2, t2], q2) => {
     const out = translate(sn, s2).steps.map(t => t.w).filter(w => w !== "‹end›");
-    const ok = out.join(" ") === t2.filter(w => w !== "‹end›").join(" ");
+    const ok = out.join(" ") === t2.filter(w => w !== "‹end›").join(" "); nRight += ok;
     return `<div class="phrase${q2 === bA && trMode === "free" ? " pick" : ""}" data-q="${q2}"><span><span class="src">${s2.join(" ")}</span> → <span class="${ok ? "ok" : "bad"}">${out.join(" ") || "(nothing)"}</span></span></div>`;
   }).join("");
+  $("pathAllLbl").textContent = `What the model writes now, for each of the 16 inputs: right for ${nRight} of 16`;
   $("pathAll").querySelectorAll(".phrase").forEach(d => d.addEventListener("click", () => { bA = +d.dataset.q; $("trA").value = bA; $("bA").value = bA; trMode = "free"; trPos = 0; bStage = 0; bSel = -1; renderB(); renderTrain(); $("trWhy").scrollIntoView({ behavior: "smooth", block: "start" }); }));
 }
 function stopTrain() { clearInterval(trTimer); trTimer = null; $("pathPlay").textContent = "Play training"; }
