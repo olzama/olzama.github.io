@@ -2114,76 +2114,101 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Encoder and decoder: what they are</h2></header>
   <div class="body">
     <div class="board">
-      <svg viewBox="0 0 1400 640" role="img" aria-label="An input made of pieces goes into the encoder, which turns it into a vector, the input as numbers. The decoder turns the vector into an output, one piece at a time, ending with ‹end›; each piece it writes goes back into the decoder. Encoder: reads the input piece by piece and updates a vector after each piece; at the end the vector, often called the summary, stands for the whole input. Decoder: keeps its own vector, its state, which starts as the encoder's vector; at each step it chooses the next piece from its state, then mixes that piece into its state; it stops at ‹end›. Both are trained together on pairs of an input and the right output. Tasks built this way: translation, summarization, speech recognition, image captioning.">
+      <svg viewBox="0 0 1400 630" role="img" aria-label="Possible inputs a, b, c, …; an input is a sequence of them, here c, a, e. The encoder reads the inputs one by one and updates a vector after each; that vector, the summary, is the input as numbers. The decoder keeps its own vector, the state, which starts as the encoder's vector. Possible outputs A, B, C, D, …, ‹end›: at each step the decoder gives each a probability and writes one, here D, then B, then ‹end›, which means finished; each output is mixed into the state. Both parts are trained together on pairs of an input and the right output. The possible inputs and outputs depend on the task: translation, Galician words to English words; summarization, words to words; speech recognition, slices of a recording to written words; image captioning, patches of an image to words.">
 <defs><marker id="edArr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--fg)"/></marker><marker id="edArrG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--green)"/></marker></defs>
-<text x="40" y="62" font-size="22" style="fill:var(--muted)" data-s="1" data-d="0" data-a="fade">input</text>
-<rect x="40" y="80" width="108" height="46" rx="6" fill="var(--muted)" fill-opacity="0.08" stroke="var(--muted)" stroke-width="1.5" data-s="1" data-d="0" data-a="fade" data-t="0.3"/>
-<text x="94" y="111" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.1">piece 1</text>
-<rect x="158" y="80" width="108" height="46" rx="6" fill="var(--muted)" fill-opacity="0.08" stroke="var(--muted)" stroke-width="1.5" data-s="1" data-d="0.1" data-a="fade" data-t="0.3"/>
-<text x="212" y="111" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.2">piece 2</text>
-<rect x="276" y="80" width="108" height="46" rx="6" fill="var(--muted)" fill-opacity="0.08" stroke="var(--muted)" stroke-width="1.5" data-s="1" data-d="0.2" data-a="fade" data-t="0.3"/>
-<text x="330" y="111" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.3">piece 3</text>
-<text x="40" y="160" font-size="20" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">for example the words of a sentence,</text>
-<text x="40" y="186" font-size="20" style="fill:var(--muted)" data-s="1" data-d="0.5" data-a="fade">short slices of a recording, patches of an image</text>
-<path d="M390 103 L432 103" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#edArr)" data-s="2" data-d="0" data-t="0.4"/>
-<rect x="436" y="62" width="200" height="84" rx="14" fill="var(--blue)" fill-opacity="0.12" stroke="var(--blue)" stroke-width="2" data-s="2" data-d="0.1" data-a="fade" data-t="0.3"/>
-<text x="536" y="114" font-size="32" style="fill:var(--blue)" text-anchor="middle" font-weight="bold" data-s="2" data-d="0.3">Encoder</text>
-<path d="M640 103 L682 103" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#edArr)" data-s="3" data-d="0" data-t="0.4"/>
-<text x="742" y="62" font-size="24" style="fill:var(--orange)" text-anchor="middle" data-s="3" data-d="0.1">a vector</text>
-<rect x="690" y="90" width="24" height="26" rx="3" fill="var(--orange)" fill-opacity="0.9" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.2" data-a="fade" data-t="0.25"/>
-<rect x="716" y="90" width="24" height="26" rx="3" fill="var(--orange)" fill-opacity="0.5" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.25" data-a="fade" data-t="0.25"/>
-<rect x="742" y="90" width="24" height="26" rx="3" fill="var(--orange)" fill-opacity="0.75" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.3" data-a="fade" data-t="0.25"/>
-<rect x="768" y="90" width="24" height="26" rx="3" fill="var(--orange)" fill-opacity="0.35" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.35" data-a="fade" data-t="0.25"/>
-<text x="742" y="160" font-size="20" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.4" data-a="fade">the input, as numbers</text>
-<path d="M800 103 L842 103" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#edArr)" data-s="4" data-d="0" data-t="0.4"/>
-<rect x="846" y="62" width="200" height="84" rx="14" fill="var(--green)" fill-opacity="0.12" stroke="var(--green)" stroke-width="2" data-s="4" data-d="0.1" data-a="fade" data-t="0.3"/>
-<text x="946" y="114" font-size="32" style="fill:var(--green)" text-anchor="middle" font-weight="bold" data-s="4" data-d="0.3">Decoder</text>
-<path d="M1050 103 L1100 70" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#edArr)" data-s="4" data-d="0.5" data-t="0.4"/>
-<text x="1110" y="250" font-size="22" style="fill:var(--muted)" data-s="4" data-d="0.5" data-a="fade">output, one piece at a time</text>
-<rect x="1110" y="52" width="128" height="36" rx="6" fill="var(--green)" fill-opacity="0.08" stroke="var(--green)" stroke-width="1.5" data-s="4" data-d="0.6" data-a="fade" data-t="0.3"/>
-<text x="1174" y="77" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.65">piece 1</text>
-<rect x="1110" y="96" width="128" height="36" rx="6" fill="var(--green)" fill-opacity="0.08" stroke="var(--green)" stroke-width="1.5" data-s="4" data-d="0.75" data-a="fade" data-t="0.3"/>
-<text x="1174" y="121" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.8">piece 2</text>
-<rect x="1110" y="140" width="128" height="36" rx="6" fill="var(--green)" fill-opacity="0.08" stroke="var(--green)" stroke-width="1.5" data-s="4" data-d="0.9" data-a="fade" data-t="0.3"/>
-<text x="1174" y="165" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.95">…</text>
-<rect x="1110" y="184" width="128" height="36" rx="6" fill="var(--green)" fill-opacity="0.08" stroke="var(--green)" stroke-width="1.5" data-s="4" data-d="1.05" data-a="fade" data-t="0.3"/>
-<text x="1174" y="209" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="1.1">‹end›</text>
-<path d="M1242 70 C 1290 70, 1290 24, 1240 24 L 980 24 C 958 24, 952 36, 952 58" fill="none" stroke="var(--green)" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#edArrG)" data-s="4" data-d="1.4" data-t="0.8"/>
-<text x="1110" y="16" font-size="20" style="fill:var(--green)" text-anchor="middle" data-s="4" data-d="1.8">each piece it writes is mixed into the state; repeat until ‹end›</text>
-<text x="536" y="182" font-size="20" style="fill:var(--blue)" text-anchor="middle" data-s="2" data-d="0.5" data-a="fade">reads the input piece by piece,</text>
-<text x="536" y="206" font-size="20" style="fill:var(--blue)" text-anchor="middle" data-s="2" data-d="0.6" data-a="fade">updates a vector after each piece</text>
-<text x="742" y="186" font-size="20" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.5" data-a="fade">(often called the summary)</text>
-<text x="946" y="182" font-size="20" style="fill:var(--green)" text-anchor="middle" data-s="4" data-d="0.4" data-a="fade">keeps its own vector, the state:</text>
-<text x="946" y="206" font-size="20" style="fill:var(--green)" text-anchor="middle" data-s="4" data-d="0.5" data-a="fade">it starts as the encoder's vector</text>
-<text x="1110" y="276" font-size="20" style="fill:var(--muted)" data-s="4" data-d="1" data-a="fade">‹end› = finished</text>
-<text x="700" y="370" font-size="25" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0">Both parts are trained together, on pairs: an input and the right output for it.</text>
-<text x="20" y="450" font-size="20" style="fill:var(--muted)" data-s="6" data-d="0" data-a="fade">task</text>
-<text x="330" y="450" font-size="20" style="fill:var(--muted)" data-s="6" data-d="0" data-a="fade">input, to the encoder</text>
-<text x="800" y="450" font-size="20" style="fill:var(--muted)" data-s="6" data-d="0" data-a="fade">output, from the decoder</text>
-<path d="M20 462 H 1380" stroke="var(--line)" stroke-width="1.5" data-s="6" data-d="0" data-t="0.4"/>
-<text x="20" y="496" font-size="24" style="fill:currentColor" data-s="6" data-d="0.2">translation</text>
-<text x="330" y="496" font-size="24" style="fill:var(--blue)" data-s="6" data-d="0.25">a sentence in Galician</text>
-<text x="800" y="496" font-size="24" style="fill:var(--green)" data-s="6" data-d="0.3">the sentence in English</text>
-<text x="20" y="530" font-size="24" style="fill:currentColor" data-s="6" data-d="0.35">summarization</text>
-<text x="330" y="530" font-size="24" style="fill:var(--blue)" data-s="6" data-d="0.4">a long article</text>
-<text x="800" y="530" font-size="24" style="fill:var(--green)" data-s="6" data-d="0.45">a short summary</text>
-<text x="20" y="564" font-size="24" style="fill:currentColor" data-s="6" data-d="0.5">speech recognition</text>
-<text x="330" y="564" font-size="24" style="fill:var(--blue)" data-s="6" data-d="0.55">a recording of speech</text>
-<text x="800" y="564" font-size="24" style="fill:var(--green)" data-s="6" data-d="0.6">the words that were said</text>
-<text x="20" y="598" font-size="24" style="fill:currentColor" data-s="6" data-d="0.65">image captioning</text>
-<text x="330" y="598" font-size="24" style="fill:var(--blue)" data-s="6" data-d="0.7">a photo</text>
-<text x="800" y="598" font-size="24" style="fill:var(--green)" data-s="6" data-d="0.75">a sentence that describes it</text>
+<text x="40" y="30" font-size="22" style="fill:var(--muted)" data-s="1" data-d="0" data-a="fade">possible inputs</text>
+<rect x="40" y="42" width="36" height="34" rx="5" fill="var(--blue)" fill-opacity="0.3" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0" data-a="fade" data-t="0.3"/>
+<text x="58" y="66" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.05">a</text>
+<rect x="82" y="42" width="36" height="34" rx="5" fill="var(--muted)" fill-opacity="0.06" stroke="var(--muted)" stroke-width="1.5" data-s="1" data-d="0.04" data-a="fade" data-t="0.3"/>
+<text x="100" y="66" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.09">b</text>
+<rect x="124" y="42" width="36" height="34" rx="5" fill="var(--blue)" fill-opacity="0.3" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.08" data-a="fade" data-t="0.3"/>
+<text x="142" y="66" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.13">c</text>
+<rect x="166" y="42" width="36" height="34" rx="5" fill="var(--muted)" fill-opacity="0.06" stroke="var(--muted)" stroke-width="1.5" data-s="1" data-d="0.12" data-a="fade" data-t="0.3"/>
+<text x="184" y="66" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.17">d</text>
+<rect x="208" y="42" width="36" height="34" rx="5" fill="var(--blue)" fill-opacity="0.3" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.16" data-a="fade" data-t="0.3"/>
+<text x="226" y="66" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.21">e</text>
+<rect x="250" y="42" width="36" height="34" rx="5" fill="var(--muted)" fill-opacity="0.06" stroke="var(--muted)" stroke-width="1.5" data-s="1" data-d="0.2" data-a="fade" data-t="0.3"/>
+<text x="268" y="66" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.25">f</text>
+<rect x="292" y="42" width="36" height="34" rx="5" fill="var(--muted)" fill-opacity="0.06" stroke="var(--muted)" stroke-width="1.5" data-s="1" data-d="0.24" data-a="fade" data-t="0.3"/>
+<text x="310" y="66" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.29">g</text>
+<rect x="334" y="42" width="36" height="34" rx="5" fill="var(--muted)" fill-opacity="0.06" stroke="var(--muted)" stroke-width="1.5" data-s="1" data-d="0.28" data-a="fade" data-t="0.3"/>
+<text x="352" y="66" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.33">…</text>
+<text x="40" y="98" font-size="20" style="fill:var(--muted)" data-s="1" data-d="0.4" data-a="fade">the input is a sequence of these</text>
+<rect x="40" y="118" width="108" height="46" rx="6" fill="var(--blue)" fill-opacity="0.12" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.6" data-a="fade" data-t="0.3"/>
+<text x="94" y="148" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.65">input 1: c</text>
+<rect x="158" y="118" width="108" height="46" rx="6" fill="var(--blue)" fill-opacity="0.12" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.7" data-a="fade" data-t="0.3"/>
+<text x="212" y="148" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.75">input 2: a</text>
+<rect x="276" y="118" width="108" height="46" rx="6" fill="var(--blue)" fill-opacity="0.12" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.8" data-a="fade" data-t="0.3"/>
+<text x="330" y="148" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.85">input 3: e</text>
+<path d="M390 141 L432 141" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#edArr)" data-s="2" data-d="0" data-t="0.4"/>
+<rect x="436" y="100" width="200" height="84" rx="14" fill="var(--blue)" fill-opacity="0.12" stroke="var(--blue)" stroke-width="2" data-s="2" data-d="0.1" data-a="fade" data-t="0.3"/>
+<text x="536" y="152" font-size="32" style="fill:var(--blue)" text-anchor="middle" font-weight="bold" data-s="2" data-d="0.3">Encoder</text>
+<text x="536" y="220" font-size="20" style="fill:var(--blue)" text-anchor="middle" data-s="2" data-d="0.5" data-a="fade">reads the inputs one by one,</text>
+<text x="536" y="244" font-size="20" style="fill:var(--blue)" text-anchor="middle" data-s="2" data-d="0.6" data-a="fade">updates a vector after each</text>
+<path d="M640 141 L682 141" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#edArr)" data-s="3" data-d="0" data-t="0.4"/>
+<text x="742" y="100" font-size="24" style="fill:var(--orange)" text-anchor="middle" data-s="3" data-d="0.1">a vector</text>
+<rect x="690" y="128" width="24" height="26" rx="3" fill="var(--orange)" fill-opacity="0.9" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.2" data-a="fade" data-t="0.25"/>
+<rect x="716" y="128" width="24" height="26" rx="3" fill="var(--orange)" fill-opacity="0.5" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.25" data-a="fade" data-t="0.25"/>
+<rect x="742" y="128" width="24" height="26" rx="3" fill="var(--orange)" fill-opacity="0.75" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.3" data-a="fade" data-t="0.25"/>
+<rect x="768" y="128" width="24" height="26" rx="3" fill="var(--orange)" fill-opacity="0.35" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.35" data-a="fade" data-t="0.25"/>
+<text x="742" y="198" font-size="20" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.4" data-a="fade">the input, as numbers</text>
+<text x="742" y="222" font-size="20" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.5" data-a="fade">(often called the summary)</text>
+<path d="M800 141 L842 141" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#edArr)" data-s="4" data-d="0" data-t="0.4"/>
+<rect x="846" y="100" width="200" height="84" rx="14" fill="var(--green)" fill-opacity="0.12" stroke="var(--green)" stroke-width="2" data-s="4" data-d="0.1" data-a="fade" data-t="0.3"/>
+<text x="946" y="152" font-size="32" style="fill:var(--green)" text-anchor="middle" font-weight="bold" data-s="4" data-d="0.3">Decoder</text>
+<text x="946" y="220" font-size="20" style="fill:var(--green)" text-anchor="middle" data-s="4" data-d="0.4" data-a="fade">keeps its own vector, the state:</text>
+<text x="946" y="244" font-size="20" style="fill:var(--green)" text-anchor="middle" data-s="4" data-d="0.5" data-a="fade">it starts as the encoder's vector</text>
+<text x="1110" y="30" font-size="22" style="fill:var(--muted)" data-s="4" data-d="0.5" data-a="fade">possible outputs</text>
+<rect x="1110" y="42" width="36" height="34" rx="5" fill="var(--muted)" fill-opacity="0.06" stroke="var(--muted)" stroke-width="1.5" data-s="4" data-d="0.6" data-a="fade" data-t="0.3"/>
+<text x="1128.0" y="66" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.65">A</text>
+<rect x="1152" y="42" width="36" height="34" rx="5" fill="var(--green)" fill-opacity="0.3" stroke="var(--green)" stroke-width="1.5" data-s="4" data-d="0.64" data-a="fade" data-t="0.3"/>
+<text x="1170.0" y="66" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.69">B</text>
+<rect x="1194" y="42" width="36" height="34" rx="5" fill="var(--muted)" fill-opacity="0.06" stroke="var(--muted)" stroke-width="1.5" data-s="4" data-d="0.68" data-a="fade" data-t="0.3"/>
+<text x="1212.0" y="66" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.73">C</text>
+<rect x="1236" y="42" width="36" height="34" rx="5" fill="var(--green)" fill-opacity="0.3" stroke="var(--green)" stroke-width="1.5" data-s="4" data-d="0.72" data-a="fade" data-t="0.3"/>
+<text x="1254.0" y="66" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.77">D</text>
+<rect x="1278" y="42" width="36" height="34" rx="5" fill="var(--muted)" fill-opacity="0.06" stroke="var(--muted)" stroke-width="1.5" data-s="4" data-d="0.76" data-a="fade" data-t="0.3"/>
+<text x="1296.0" y="66" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.81">…</text>
+<rect x="1320" y="42" width="58" height="34" rx="5" fill="var(--green)" fill-opacity="0.3" stroke="var(--green)" stroke-width="1.5" data-s="4" data-d="0.8" data-a="fade" data-t="0.3"/>
+<text x="1349.0" y="66" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.85">‹end›</text>
+<text x="1385" y="98" font-size="20" style="fill:var(--green)" text-anchor="end" data-s="4" data-d="0.8" data-a="fade">each step: a probability for each, one is written</text>
+<path d="M1050 141 L1100 141" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#edArr)" data-s="4" data-d="0.9" data-t="0.4"/>
+<rect x="1110" y="118" width="160" height="40" rx="6" fill="var(--green)" fill-opacity="0.12" stroke="var(--green)" stroke-width="1.5" data-s="4" data-d="1" data-a="fade" data-t="0.3"/>
+<text x="1190" y="145" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="1.05">output 1: D</text>
+<rect x="1110" y="168" width="160" height="40" rx="6" fill="var(--green)" fill-opacity="0.12" stroke="var(--green)" stroke-width="1.5" data-s="4" data-d="1.2" data-a="fade" data-t="0.3"/>
+<text x="1190" y="195" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="1.25">output 2: B</text>
+<rect x="1110" y="218" width="160" height="40" rx="6" fill="var(--green)" fill-opacity="0.12" stroke="var(--green)" stroke-width="1.5" data-s="4" data-d="1.4" data-a="fade" data-t="0.3"/>
+<text x="1190" y="245" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="1.45">output 3: ‹end›</text>
+<path d="M1274 138 C 1330 138, 1330 300, 1200 300 L 990 300 C 960 300, 952 288, 952 258" fill="none" stroke="var(--green)" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#edArrG)" data-s="4" data-d="1.7" data-t="0.8"/>
+<text x="1110" y="328" font-size="20" style="fill:var(--green)" text-anchor="middle" data-s="4" data-d="2">each output is mixed into the state; then the next step, until ‹end› (= finished)</text>
+<text x="700" y="392" font-size="25" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0">Both parts are trained together, on pairs: an input and the right output for it.</text>
+<text x="20" y="446" font-size="20" style="fill:var(--muted)" data-s="6" data-d="0" data-a="fade">task</text>
+<text x="330" y="446" font-size="20" style="fill:var(--blue)" data-s="6" data-d="0" data-a="fade">possible inputs</text>
+<text x="800" y="446" font-size="20" style="fill:var(--green)" data-s="6" data-d="0" data-a="fade">possible outputs</text>
+<path d="M20 458 H 1380" stroke="var(--line)" stroke-width="1.5" data-s="6" data-d="0" data-t="0.4"/>
+<text x="20" y="492" font-size="24" style="fill:currentColor" data-s="6" data-d="0.2">translation</text>
+<text x="330" y="492" font-size="24" style="fill:var(--blue)" data-s="6" data-d="0.25">Galician words</text>
+<text x="800" y="492" font-size="24" style="fill:var(--green)" data-s="6" data-d="0.3">English words, ‹end›</text>
+<text x="20" y="526" font-size="24" style="fill:currentColor" data-s="6" data-d="0.35">summarization</text>
+<text x="330" y="526" font-size="24" style="fill:var(--blue)" data-s="6" data-d="0.4">words</text>
+<text x="800" y="526" font-size="24" style="fill:var(--green)" data-s="6" data-d="0.45">words, ‹end›</text>
+<text x="20" y="560" font-size="24" style="fill:currentColor" data-s="6" data-d="0.5">speech recognition</text>
+<text x="330" y="560" font-size="24" style="fill:var(--blue)" data-s="6" data-d="0.55">short slices of a recording</text>
+<text x="800" y="560" font-size="24" style="fill:var(--green)" data-s="6" data-d="0.6">written words, ‹end›</text>
+<text x="20" y="594" font-size="24" style="fill:currentColor" data-s="6" data-d="0.65">image captioning</text>
+<text x="330" y="594" font-size="24" style="fill:var(--blue)" data-s="6" data-d="0.7">small patches of an image</text>
+<text x="800" y="594" font-size="24" style="fill:var(--green)" data-s="6" data-d="0.75">words, ‹end›</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
   <div class="notes">
     <p>Before we look at translation in detail: what are an encoder and a decoder in general? They are two parts of one model, and the idea is not specific to translation.</p>
-    <p>The input comes in pieces. For a sentence, the pieces are its words; for a recording, short slices of sound; for an image, small patches of it.</p>
-    <p>The encoder turns the input into a vector. It reads the input piece by piece, and after each piece it updates the vector. At the end, that one vector stands for the whole input: the input, as numbers. It is often called the summary.</p>
-    <p>The decoder goes the other way: it turns a vector into an output, one piece at a time. It keeps a vector of its own, called its state, which starts as the encoder's vector. At each step it chooses the next piece from its state, writes it, and then mixes that piece into its state, so the next choice knows what it has already written. That is the dashed arrow back into the decoder. It stops when it writes ‹end›, a special piece that means “finished”; that is how it knows how long the output should be.</p>
+    <p>First, the possible inputs: a fixed set of things the input can be made of. For translation from Galician, the Galician words; for speech, short slices of a recording; for an image, small patches of it. One input is a sequence of them: here input 1 is c, input 2 is a, input 3 is e.</p>
+    <p>The encoder reads the inputs one by one and updates a vector after each one. At the end, that vector stands for the whole input, as numbers; it is often called the summary.</p>
+    <p>The decoder has a fixed set of possible outputs too: for translation into English, the English words, plus ‹end›, a special output that means “finished”. The decoder keeps a vector of its own, its state, which starts as the encoder's vector. At each step it gives every possible output a probability, writes one, and mixes the output it wrote into its state: that is the dashed arrow back. Then the next step, until it writes ‹end›.</p>
     <p>Both parts are trained together, on pairs: an input and the right output for it, made by people.</p>
-    <p>And many tasks are built this way: translation, summarization, speech recognition, image captioning. Only the input and the output change. Next, we see this for translation, with a trained model.</p>
+    <p>The table: many tasks are built this way. What changes is only the set of possible inputs and the set of possible outputs. Next, translation, with a trained model.</p>
   </div>
 </section>
 
