@@ -717,7 +717,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   <div class="body cols">
     <div class="col">
     <div class="board">
-      <svg viewBox="0 0 620 470" role="img" aria-label="Counting bigrams in the corpus my aunt stayed quiet, my aunt spoke wisely, my uncle stayed quiet: P(w_i | w_i−1) = Count(w_i−1 w_i) / Count(w_i−1); P(aunt | my) = 2/3 ≈ 0.67; P(uncle | my) = 1/3 ≈ 0.33">
+      <svg viewBox="0 0 620 470" role="img" aria-label="Counting bigrams in the corpus my aunt stayed quiet, my aunt spoke wisely, my uncle stayed quiet: P(w_i | w_i−1) = Count(w_i−1 w_i) / Count(w_i−1); P(aunt | my) = 2/3 ≈ 0.67; P(uncle | my) = 1/3 ≈ 0.33; P(spoke | aunt) = 1/2 = 0.5, but P(spoke | uncle) = 0/1 = 0, because the corpus has no “uncle spoke”, although aunt and uncle have the same neighbors, my before and stayed after">
 <text x="30.0" y="26.0" font-size="20" style="fill:var(--muted)" data-s="1" data-d="0" data-a="fade">the corpus</text>
 <text y="72" font-size="26" style="fill:currentColor" data-s="1" data-d="0.15" data-line="C1" data-x0="30" id="w10" data-gap="12">my</text>
 <text y="72" font-size="26" style="fill:currentColor" data-s="1" data-d="0.15" data-line="C1" id="w11" data-gap="12">aunt</text>
@@ -734,17 +734,32 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <text y="250" font-size="26" style="fill:currentColor" data-s="2" data-d="0" data-line="F" data-x0="30">P(w<tspan dy="6" font-size="0.68em">i</tspan><tspan dy="-6"> | </tspan>w<tspan dy="6" font-size="0.68em">i−1</tspan><tspan dy="-6">) =</tspan></text>
 <g class="bfrac" data-line="F"><text class="num" y="227" font-size="26" style="fill:var(--orange)" data-s="3" data-d="0">Count(w<tspan dy="6" font-size="0.68em">i−1</tspan><tspan dy="-6"> </tspan>w<tspan dy="6" font-size="0.68em">i</tspan><tspan dy="-6">)</tspan></text><line class="bar" y1="243" y2="243" stroke="currentColor" stroke-width="2" data-s="3" data-d="0"/><text class="den" y="276" font-size="26" style="fill:var(--blue)" data-s="4" data-d="0">Count(w<tspan dy="6" font-size="0.68em">i−1</tspan><tspan dy="-6">)</tspan></text></g>
 <text y="345" font-size="26" style="fill:currentColor" data-s="5" data-d="0" data-line="A" data-x0="30">P(aunt | my) =</text>
-<rect data-box="#w10 #w11" data-pad="8" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="6" data-d="0" data-t="0.5"/>
-<rect data-box="#w20 #w21" data-pad="8" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="6" data-d="0.5" data-t="0.5"/>
-<path data-ul="w10" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="7" data-d="0.0" data-t="0.4"/>
-<path data-ul="w20" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="7" data-d="0.3" data-t="0.4"/>
-<path data-ul="w30" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="7" data-d="0.6" data-t="0.4"/>
+<rect data-box="#w10 #w11" data-until="13" data-pad="8" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="6" data-d="0" data-t="0.5"/>
+<rect data-box="#w20 #w21" data-until="13" data-pad="8" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="6" data-d="0.5" data-t="0.5"/>
+<path data-ul="w10" data-until="13" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="7" data-d="0.0" data-t="0.4"/>
+<path data-ul="w20" data-until="13" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="7" data-d="0.3" data-t="0.4"/>
+<path data-ul="w30" data-until="13" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="7" data-d="0.6" data-t="0.4"/>
 <g class="bfrac" data-line="A"><text class="num" y="329" font-size="26" style="fill:var(--orange)" data-s="6" data-d="0">2</text><line class="bar" y1="338" y2="338" stroke="currentColor" stroke-width="2" data-s="6" data-d="0"/><text class="den" y="364" font-size="26" style="fill:var(--blue)" data-s="7" data-d="0">3</text></g>
 <text y="345" font-size="26" style="fill:currentColor" data-s="8" data-d="0" data-line="A">≈ 0.67</text>
 <text y="435" font-size="26" style="fill:currentColor" data-s="9" data-d="0" data-line="U" data-x0="30">P(uncle | my) =</text>
-<rect data-box="#w30 #w31" data-pad="8" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="10" data-d="0" data-t="0.5"/>
+<rect data-box="#w30 #w31" data-until="13" data-pad="8" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="10" data-d="0" data-t="0.5"/>
 <g class="bfrac" data-line="U"><text class="num" y="419" font-size="26" style="fill:var(--green)" data-s="10" data-d="0">1</text><line class="bar" y1="428" y2="428" stroke="currentColor" stroke-width="2" data-s="10" data-d="0"/><text class="den" y="454" font-size="26" style="fill:var(--blue)" data-s="11" data-d="0">3</text></g>
 <text y="435" font-size="26" style="fill:currentColor" data-s="12" data-d="0" data-line="U">≈ 0.33</text>
+<text y="345" font-size="26" style="fill:currentColor" data-s="13" data-d="0" data-line="SA" data-x0="340">P(spoke | aunt) =</text>
+<rect data-box="#w21 #w22" data-pad="8" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="14" data-d="0" data-t="0.5"/>
+<path data-ul="w11" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="15" data-d="0" data-t="0.4"/>
+<path data-ul="w21" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="15" data-d="0.3" data-t="0.4"/>
+<g class="bfrac" data-line="SA"><text class="num" y="329" font-size="26" style="fill:var(--orange)" data-s="14" data-d="0">1</text><line class="bar" y1="338" y2="338" stroke="currentColor" stroke-width="2" data-s="14" data-d="0"/><text class="den" y="364" font-size="26" style="fill:var(--blue)" data-s="15" data-d="0">2</text></g>
+<text y="345" font-size="26" style="fill:currentColor" data-s="16" data-d="0" data-line="SA">= 0.5</text>
+<text y="435" font-size="26" style="fill:currentColor" data-s="17" data-d="0" data-line="SU" data-x0="340">P(spoke | uncle) =</text>
+<text x="330.0" y="172.0" font-size="22" style="fill:var(--neg)" data-s="18" data-d="0">no “uncle spoke”</text>
+<path data-ul="w31" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="19" data-d="0" data-t="0.4"/>
+<g class="bfrac" data-line="SU"><text class="num" y="419" font-size="26" style="fill:var(--neg)" data-s="18" data-d="0">0</text><line class="bar" y1="428" y2="428" stroke="currentColor" stroke-width="2" data-s="18" data-d="0"/><text class="den" y="454" font-size="26" style="fill:var(--blue)" data-s="19" data-d="0">1</text></g>
+<text y="435" font-size="26" style="fill:var(--neg)" data-s="20" data-d="0" data-line="SU">= 0</text>
+<rect data-box="#w10" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="21" data-d="0" data-t="0.4"/>
+<rect data-box="#w12" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="21" data-d="0.3" data-t="0.4"/>
+<rect data-box="#w30" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="21" data-d="0.6" data-t="0.4"/>
+<rect data-box="#w32" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="21" data-d="0.9" data-t="0.4"/>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
@@ -753,7 +768,8 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <ul class="points">
         <li>This is a <b>bigram</b> model: the next word depends on the one word before it.</li>
         <li>Counting, then dividing: that is the whole model.</li>
-        <li>A Galician model has far fewer sentences to count from than a Spanish or English one, so its estimates are noisier.</li>
+        <li>A pair it never counted gets probability 0. Aunt and uncle appear in the same places, but the model keeps separate counts for each word: what it learns about aunt does not help with uncle.</li>
+        <li>A Galician model has far fewer sentences to count from than a Spanish or English one, so more of its pairs are never counted.</li>
       </ul>
       <div class="ask"><b>Question</b><span>Is a bigger n better?</span><button data-reveal="nAnswer" style="justify-self:start">Show one answer</button><span id="nAnswer" hidden>More context helps in principle. But a longer word sequence is rarer, so the model has seen fewer of them, and more of its counts are 0.</span></div>
     </div>
@@ -1372,59 +1388,6 @@ print("they match" if count == expected else "they do not match: check the loop 
   </div>
 </section>
 
-<section class="screen" id="missing" data-step="1">
-  <header><span class="kind">Step 1 → Step 2</span><h2>What n-grams cannot see</h2></header>
-  <div class="body cols">
-    <div class="col">
-    <div class="board">
-      <svg viewBox="0 0 620 380" role="img" aria-label="P(spoke | aunt) = 1/2 = 0.5, but P(spoke | uncle) = 0/1 = 0, because the corpus has no “uncle spoke”, although aunt and uncle have the same neighbors, my before and stayed after">
-<text x="30.0" y="26.0" font-size="20" style="fill:var(--muted)" data-s="1" data-d="0" data-a="fade">the corpus</text>
-<text y="72" font-size="26" style="fill:currentColor" data-s="1" data-d="0.15" data-line="C1" data-x0="30" id="m10" data-gap="12">my</text>
-<text y="72" font-size="26" style="fill:currentColor" data-s="1" data-d="0.15" data-line="C1" id="m11" data-gap="12">aunt</text>
-<text y="72" font-size="26" style="fill:currentColor" data-s="1" data-d="0.15" data-line="C1" id="m12" data-gap="12">stayed</text>
-<text y="72" font-size="26" style="fill:currentColor" data-s="1" data-d="0.15" data-line="C1" id="m13" data-gap="12">quiet</text>
-<text y="122" font-size="26" style="fill:currentColor" data-s="1" data-d="0.3" data-line="C2" data-x0="30" id="m20" data-gap="12">my</text>
-<text y="122" font-size="26" style="fill:currentColor" data-s="1" data-d="0.3" data-line="C2" id="m21" data-gap="12">aunt</text>
-<text y="122" font-size="26" style="fill:currentColor" data-s="1" data-d="0.3" data-line="C2" id="m22" data-gap="12">spoke</text>
-<text y="122" font-size="26" style="fill:currentColor" data-s="1" data-d="0.3" data-line="C2" id="m23" data-gap="12">wisely</text>
-<text y="172" font-size="26" style="fill:currentColor" data-s="1" data-d="0.45" data-line="C3" data-x0="30" id="m30" data-gap="12">my</text>
-<text y="172" font-size="26" style="fill:currentColor" data-s="1" data-d="0.45" data-line="C3" id="m31" data-gap="12">uncle</text>
-<text y="172" font-size="26" style="fill:currentColor" data-s="1" data-d="0.45" data-line="C3" id="m32" data-gap="12">stayed</text>
-<text y="172" font-size="26" style="fill:currentColor" data-s="1" data-d="0.45" data-line="C3" id="m33" data-gap="12">quiet</text>
-<text y="250" font-size="26" style="fill:currentColor" data-s="2" data-d="0" data-line="A" data-x0="30">P(spoke | aunt) =</text>
-<rect data-box="#m21 #m22" data-pad="8" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2.5" data-s="3" data-d="0" data-t="0.5"/>
-<path data-ul="m11" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="4" data-d="0" data-t="0.4"/>
-<path data-ul="m21" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="4" data-d="0.3" data-t="0.4"/>
-<g class="bfrac" data-line="A"><text class="num" y="234" font-size="26" style="fill:var(--orange)" data-s="3" data-d="0">1</text><line class="bar" y1="243" y2="243" stroke="currentColor" stroke-width="2" data-s="3" data-d="0"/><text class="den" y="269" font-size="26" style="fill:var(--blue)" data-s="4" data-d="0">2</text></g>
-<text y="250" font-size="26" style="fill:currentColor" data-s="5" data-d="0" data-line="A">= 0.5</text>
-<text y="345" font-size="26" style="fill:currentColor" data-s="6" data-d="0" data-line="U" data-x0="30">P(spoke | uncle) =</text>
-<text x="330.0" y="172.0" font-size="22" style="fill:var(--neg)" data-s="7" data-d="0">no “uncle spoke”</text>
-<path data-ul="m31" d="M0 0" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" data-s="8" data-d="0" data-t="0.4"/>
-<g class="bfrac" data-line="U"><text class="num" y="329" font-size="26" style="fill:var(--neg)" data-s="7" data-d="0">0</text><line class="bar" y1="338" y2="338" stroke="currentColor" stroke-width="2" data-s="7" data-d="0"/><text class="den" y="364" font-size="26" style="fill:var(--blue)" data-s="8" data-d="0">1</text></g>
-<text y="345" font-size="26" style="fill:var(--neg)" data-s="9" data-d="0" data-line="U">= 0</text>
-<rect data-box="#m10" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="10" data-d="0" data-t="0.4"/>
-<rect data-box="#m12" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="10" data-d="0.3" data-t="0.4"/>
-<rect data-box="#m30" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="10" data-d="0.6" data-t="0.4"/>
-<rect data-box="#m32" data-pad="3" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="2.5" data-s="10" data-d="0.9" data-t="0.4"/>
-      </svg>
-      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
-    </div>
-    </div>
-    <div class="col">
-      <ul class="points">
-        <li>Aunt and uncle appear in the same places. But the model keeps separate counts for each word.</li>
-        <li>What it learns about aunt does not help with uncle.</li>
-        <li><b>Step 2, embeddings:</b> give each word a vector, so that words used in similar ways get similar vectors.</li>
-      </ul>
-    </div>
-  </div>
-  <div class="notes">
-    <p>Here is what step 1 cannot do. In our corpus, aunt and uncle are used in the same way. Both follow “my”. Both are followed by “stayed”.</p>
-    <p>The corpus has “aunt spoke”, but never “uncle spoke”. So the model gives “spoke” after uncle a probability of 0. The model keeps separate counts for each word, and the counts for aunt say nothing about uncle.</p>
-    <p>Step 2 fixes this. Each word gets a vector, learned from the words around it. Words used in similar ways get similar vectors. Then what the model learns about aunt can help with uncle.</p>
-  </div>
-</section>
-
 <div class="part" id="part-step2"><h1>Step 2 · Embeddings</h1></div>
 
 <section class="screen" id="cosine" data-step="2">
@@ -1531,7 +1494,7 @@ print("they match" if count == expected else "they do not match: check the loop 
     </div>
   </div>
   <div class="notes">
-    <p>Step 2 gives each word a vector. Whatever the vectors hold, we need a number that says how similar two of them are. I will derive it on the board, step by step. Each press draws the next part of an equation: one term, one factor, or one summand.</p>
+    <p>Back to the problem from “Count, then divide”: the n-gram counts for aunt say nothing about uncle, although the two words are used in the same way. Step 2 gives each word a vector, so that words used in similar ways can get similar vectors. Whatever the vectors hold, we need a number that says how similar two of them are. I will derive it on the board, step by step. Each press draws the next part of an equation: one term, one factor, or one summand.</p>
     <p>Two words, as vectors with two values: aunt is 4, 2, and uncle is 3, 3. We draw each one as an arrow from the origin. Words used in similar ways should point in similar directions. So we want to measure how similar the directions are.</p>
     <p>Each arrow has a length. By Pythagoras, the length of aunt is the square root of 4 squared, the horizontal side, plus 2 squared, the vertical side: the square root of 16 plus 4, which is the square root of 20, about 4.47. Uncle has length square root of 9 plus 9, the square root of 18, about 4.24. Length is not direction, so we remove it.</p>
     <p>To remove the length, divide each vector by its own length. We call the results a-hat and u-hat. They point in the same directions as before, but both have length 1. So they end on the circle of radius 1. For aunt, that is 4 divided by 4.47 and 2 divided by 4.47: about 0.89 and 0.45. For uncle, 3 divided by 4.24, twice: about 0.71 and 0.71.</p>
@@ -1562,10 +1525,10 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1000 690" role="img" aria-label="Count vectors from the corpus my aunt stayed quiet, my aunt spoke wisely, my uncle stayed quiet: aunt is 2 0 0 1 1 0 0 and uncle is 1 0 0 1 0 0 0. In 2 million words of Galician Wikipedia there are 127,848 columns; tía has 23 that are not 0. súa tía and seu tío fall in different columns, so cos(tía, tío) ≈ 0.05, less than cos(tía, casa) ≈ 0.33. An embedding has a few hundred learned numbers, none of them 0.">
-<text x="20" y="40" font-size="17" style="fill:var(--muted)" data-s="1" data-d="0" data-a="fade">our corpus</text>
-<text x="20" y="72" font-size="21" style="fill:currentColor" data-s="1" data-d="0.0">my aunt stayed quiet</text>
-<text x="20" y="104" font-size="21" style="fill:currentColor" data-s="1" data-d="0.2">my aunt spoke wisely</text>
-<text x="20" y="136" font-size="21" style="fill:currentColor" data-s="1" data-d="0.4">my uncle stayed quiet</text>
+<text x="20" y="34" font-size="20" style="fill:var(--muted)" data-s="1" data-d="0" data-a="fade">our corpus</text>
+<text x="20" y="74" font-size="26" style="fill:currentColor" data-s="1" data-d="0.0">my aunt stayed quiet</text>
+<text x="20" y="114" font-size="26" style="fill:currentColor" data-s="1" data-d="0.2">my aunt spoke wisely</text>
+<text x="20" y="154" font-size="26" style="fill:currentColor" data-s="1" data-d="0.4">my uncle stayed quiet</text>
 <text x="380" y="40" font-size="17" style="fill:var(--muted)" data-s="2" data-d="0" data-a="fade">how often each word stands right before or after it</text>
 <text x="418" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.0">my</text>
 <text x="502" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.05">aunt</text>
