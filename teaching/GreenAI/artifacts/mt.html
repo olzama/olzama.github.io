@@ -265,7 +265,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="cols">
           <div class="col">
             <svg id="trWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen position and the English word vectors" style="max-width:420px"></svg>
-            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="trLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the right output (from the pair)</span><span><span class="ring"></span>other possible outputs (the 4 most probable labeled)</span></div>
+            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="trLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the right output (from the pair)</span><span><span class="ring"></span>other possible outputs (the 4 most probable in black, the rest gray)</span><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— <span id="trLegGhost">where the vector was one training step earlier</span></span></div>
           </div>
           <div class="col">
             <p class="label" id="trWhyLbl"></p>
@@ -418,7 +418,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="cols">
           <div class="col">
             <svg id="ihtWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen position and the English word vectors" style="max-width:420px"></svg>
-            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="ihtLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the right output (from the pair)</span></div>
+            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="ihtLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the right output (from the pair)</span><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— <span id="ihtLegGhost">where the vector was 25 training steps earlier</span></span></div>
           </div>
           <div class="col">
             <p class="label" id="ihtWhyLbl"></p>
@@ -612,26 +612,33 @@ window.mtWhy = function (o) {
   }
   if ($(pre + "WhyStripKey")) $(pre + "WhyStripKey").innerHTML = (mode === "train" ? `<span class="ok">green</span>: has the highest probability now · <span class="bad">red</span>: not yet` : `<span class="ok">green</span>: the right output · <span class="bad">red</span>: a different one`) + (o.thin ? ` · thin mark: ${o.thin} training step${o.thin === 1 ? "" : "s"} earlier` : "");
   if ($(pre + "LegWin")) $(pre + "LegWin").textContent = mode === "train" ? "highest probability now" : "the output written";
+  if ($(pre + "LegGhost")) $(pre + "LegGhost").textContent = o.prev ? `where the vector was ${o.thin || 25} training step${(o.thin || 25) === 1 ? "" : "s"} earlier (the vectors move only when training moves)` : "at training step 0 there is no earlier step";
   if ($(pre + "WhyStrip")) $(pre + "WhyStrip").querySelectorAll("button").forEach(b => b.addEventListener("click", () => o.pick(+b.dataset.m)));
   // the plane: the English words, the state and its direction; labels only where they help
   const orange = css("--orange"), green = css("--green"), fg = css("--fg");
-  const Z = 1.15 * Math.max(...[...sn.O, s.st].flat().map(Math.abs)), P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z;
-  const L = Math.hypot(...s.st) || 1, u = [s.st[0] / L, s.st[1] / L];
+  // one scale for all the outputs of this pair at this training step, so that only what moves appears to move
+  const Z = 1.15 * Math.max(...[...sn.O, ...steps.map(x => x.st)].flat().map(Math.abs)), P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z;
+  const L = Math.hypot(...s.st) || 1, u = [s.st[0] / L, s.st[1] / L], muted = css("--muted");
   const order = [...s.p.keys()].sort((a, b) => s.p[b] - s.p[a]), labeled = new Set([...order.slice(0, 4), s.j, ...(wj >= 0 ? [wj] : [])]);
   let g = `<defs><marker id="${pre}wa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${orange}"/></marker></defs>`;
   g += `<line class="axis" x1="10" y1="200" x2="390" y2="200"/><line class="axis" x1="200" y1="10" x2="200" y2="390"/>`;
+  { const tick = +(Z / 1.15).toPrecision(2); g += `<text x="${P(tick)}" y="214" text-anchor="middle" font-size="10">${tick}</text><text x="${P(-tick)}" y="214" text-anchor="middle" font-size="10">${-tick}</text><text x="206" y="${Q(tick) + 4}" font-size="10">${tick}</text>`; }
   g += `<line x1="${P(-1.3 * Z * u[0])}" y1="${Q(-1.3 * Z * u[1])}" x2="${P(1.3 * Z * u[0])}" y2="${Q(1.3 * Z * u[1])}" stroke="${orange}" stroke-opacity="0.4" stroke-dasharray="5 4"/>`;
+  // where each word's vector was at the previous training step, joined to where it is now
+  if (o.prev) EN.forEach((e, j) => { const v = sn.O[j], pv = o.prev.O[j];
+    g += `<line x1="${P(pv[0])}" y1="${Q(pv[1])}" x2="${P(v[0])}" y2="${Q(v[1])}" stroke="${fg}" stroke-opacity="0.35" stroke-width="1.2"/><circle cx="${P(pv[0])}" cy="${Q(pv[1])}" r="3" fill="none" stroke="${fg}" stroke-opacity="0.35"/>`; });
   const placed = [];
-  EN.forEach((e, j) => { const v = sn.O[j], win = j === s.j, per = j === wj && !win, c = win ? orange : per ? green : fg;
-    g += `<circle cx="${P(v[0])}" cy="${Q(v[1])}" r="${win || per ? 8 : 5}" fill="none" stroke="${c}" stroke-opacity="${labeled.has(j) ? 1 : 0.4}" stroke-width="${win || per ? 3 : 1.3}"/>`; });
+  EN.forEach((e, j) => { const v = sn.O[j], win = j === s.j, per = j === wj && !win, c = win ? orange : per ? green : labeled.has(j) ? fg : muted;
+    g += `<circle cx="${P(v[0])}" cy="${Q(v[1])}" r="${win || per ? 8 : 5}" fill="none" stroke="${c}" stroke-width="${win || per ? 3 : 1.3}"/>`; });
   g += `<line x1="200" y1="200" x2="${P(s.st[0])}" y2="${Q(s.st[1])}" stroke="${orange}" stroke-width="3.5" marker-end="url(#${pre}wa)"/>`;
   const free = (x, y, w) => !placed.some(q => Math.abs(q.y - y) < 13 && x < q.x + q.w && q.x < x + w);
-  const put = (cx, cy, w, c, txt, gap) => { const tries = [[cx + gap, cy, "start"], [cx - gap - w, cy, "end"], [cx + gap, cy + 12, "start"], [cx - gap - w, cy + 12, "end"], [cx + gap, cy - 12, "start"], [cx - gap - w, cy - 12, "end"]];
+  const put = (cx, cy, w, c, txt, gap) => { const tries = [[cx + gap, cy, "start"], [cx - gap - w, cy, "end"], [cx + gap, cy + 12, "start"], [cx - gap - w, cy + 12, "end"], [cx + gap, cy - 12, "start"], [cx - gap - w, cy - 12, "end"], [cx + gap, cy + 24, "start"], [cx - gap - w, cy + 24, "end"], [cx + gap, cy - 24, "start"], [cx - gap - w, cy - 24, "end"]];
     const [x, y, an] = tries.find(([x, y]) => free(x, y, w)) || tries[0]; placed.push({ x, y, w });
     g += `<text x="${an === "end" ? x + w : x}" y="${y}" text-anchor="${an}" fill="${c}" font-size="12">${txt}</text>`; };
   put(200 + (P(s.st[0]) - 200) * 0.55, 200 + (Q(s.st[1]) - 200) * 0.55 + 4, 52, orange, `state ${k + 1}`, 10);
-  [s.j, ...(wj >= 0 && wj !== s.j ? [wj] : []), ...order.filter(j => labeled.has(j) && j !== s.j && j !== wj)].forEach(j => { const v = sn.O[j], win = j === s.j, per = j === wj && !win;
-    put(P(v[0]), Q(v[1]) + 4, 7.5 * EN[j].length, win ? orange : per ? green : fg, EN[j], win || per ? 11 : 8); });
+  // every word labeled, so that a ring can be followed from step to step; the less probable ones in gray
+  [s.j, ...(wj >= 0 && wj !== s.j ? [wj] : []), ...order.filter(j => j !== s.j && j !== wj)].forEach(j => { const v = sn.O[j], win = j === s.j, per = j === wj && !win;
+    put(P(v[0]), Q(v[1]) + 4, 7.5 * EN[j].length, win ? orange : per ? green : labeled.has(j) ? fg : muted, EN[j], win || per ? 11 : 8); });
   $(pre + "WhySvg").innerHTML = g;
   // every word's probability at this position
   $(pre + "WhyLbl").textContent = `Output ${k + 1}: the probability of each possible output`;
