@@ -1524,105 +1524,98 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">Step 2 · Embeddings</span><h2>From words to vectors: embeddings</h2><p class="sub">Why vectors of counts are not enough: they are long, mostly 0, and similar words do not line up</p></header>
   <div class="body">
     <div class="board">
-      <svg viewBox="0 0 1000 690" role="img" aria-label="Count vectors from the corpus my aunt stayed quiet, my aunt spoke wisely, my uncle stayed quiet: aunt is 2 0 0 1 1 0 0 and uncle is 1 0 0 1 0 0 0. In 2 million words of Galician Wikipedia there are 127,848 columns; tía has 23 that are not 0. súa tía and seu tío fall in different columns, so cos(tía, tío) ≈ 0.05, less than cos(tía, casa) ≈ 0.33. An embedding has a few hundred learned numbers, none of them 0.">
-<text x="20" y="34" font-size="20" style="fill:var(--muted)" data-s="1" data-d="0" data-a="fade">our corpus</text>
-<text x="20" y="74" font-size="26" style="fill:currentColor" data-s="1" data-d="0.0">my aunt stayed quiet</text>
-<text x="20" y="114" font-size="26" style="fill:currentColor" data-s="1" data-d="0.2">my aunt spoke wisely</text>
-<text x="20" y="154" font-size="26" style="fill:currentColor" data-s="1" data-d="0.4">my uncle stayed quiet</text>
-<text x="380" y="40" font-size="17" style="fill:var(--muted)" data-s="2" data-d="0" data-a="fade">how often each word stands right before or after it</text>
-<text x="418" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.0">my</text>
-<text x="502" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.05">aunt</text>
-<text x="586" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.1">uncle</text>
-<text x="670" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.15000000000000002">stayed</text>
-<text x="754" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.2">spoke</text>
-<text x="838" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.25">quiet</text>
-<text x="922" y="72" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.30000000000000004">wisely</text>
-<text x="366" y="114" font-size="22" style="fill:var(--blue)" text-anchor="end" data-s="3" data-d="0">aunt</text>
-<rect x="380" y="88" width="76" height="34" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.0" data-a="fade" data-t="0.25"/>
-<text x="418" y="113" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.1">2</text>
-<rect x="464" y="88" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.05" data-a="fade" data-t="0.25"/>
-<text x="502" y="113" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.15000000000000002">0</text>
-<rect x="548" y="88" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.1" data-a="fade" data-t="0.25"/>
-<text x="586" y="113" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.2">0</text>
-<rect x="632" y="88" width="76" height="34" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.15000000000000002" data-a="fade" data-t="0.25"/>
-<text x="670" y="113" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.25">1</text>
-<rect x="716" y="88" width="76" height="34" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.2" data-a="fade" data-t="0.25"/>
-<text x="754" y="113" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.30000000000000004">1</text>
-<rect x="800" y="88" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.25" data-a="fade" data-t="0.25"/>
-<text x="838" y="113" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.35">0</text>
-<rect x="884" y="88" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.30000000000000004" data-a="fade" data-t="0.25"/>
-<text x="922" y="113" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.4">0</text>
-<text x="366" y="158" font-size="22" style="fill:var(--green)" text-anchor="end" data-s="4" data-d="0">uncle</text>
-<rect x="380" y="132" width="76" height="34" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.0" data-a="fade" data-t="0.25"/>
-<text x="418" y="157" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.1">1</text>
-<rect x="464" y="132" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.05" data-a="fade" data-t="0.25"/>
-<text x="502" y="157" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="4" data-d="0.15000000000000002">0</text>
-<rect x="548" y="132" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.1" data-a="fade" data-t="0.25"/>
-<text x="586" y="157" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="4" data-d="0.2">0</text>
-<rect x="632" y="132" width="76" height="34" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.15000000000000002" data-a="fade" data-t="0.25"/>
-<text x="670" y="157" font-size="21" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.25">1</text>
-<rect x="716" y="132" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.2" data-a="fade" data-t="0.25"/>
-<text x="754" y="157" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="4" data-d="0.30000000000000004">0</text>
-<rect x="800" y="132" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.25" data-a="fade" data-t="0.25"/>
-<text x="838" y="157" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="4" data-d="0.35">0</text>
-<rect x="884" y="132" width="76" height="34" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.30000000000000004" data-a="fade" data-t="0.25"/>
-<text x="922" y="157" font-size="21" style="fill:var(--muted)" text-anchor="middle" data-s="4" data-d="0.4">0</text>
-<text x="380" y="202" font-size="17" style="fill:var(--muted)" data-s="5" data-d="0" data-a="fade">7 words, 7 columns. Already here, most entries are 0.</text>
-<text x="20" y="262" font-size="22" style="fill:currentColor" data-s="6" data-d="0">Galician Wikipedia, 2 million words: 127,848 different words, so 127,848 columns</text>
-<text x="20" y="316" font-size="22" style="fill:var(--blue)" data-s="7" data-d="0">tía</text>
-<rect x="70" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.0" data-a="fade" data-t="0.25"/>
-<rect x="100" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.02" data-a="fade" data-t="0.25"/>
-<rect x="130" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.04" data-a="fade" data-t="0.25"/>
-<rect x="160" y="294" width="26" height="30" rx="3" fill="var(--blue)" fill-opacity="0.5" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.06" data-a="fade" data-t="0.25"/>
-<rect x="190" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.08" data-a="fade" data-t="0.25"/>
-<rect x="220" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.1" data-a="fade" data-t="0.25"/>
-<rect x="250" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.12" data-a="fade" data-t="0.25"/>
-<rect x="280" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.14" data-a="fade" data-t="0.25"/>
-<rect x="310" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.16" data-a="fade" data-t="0.25"/>
-<rect x="340" y="294" width="26" height="30" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.18" data-a="fade" data-t="0.25"/>
-<rect x="370" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.2" data-a="fade" data-t="0.25"/>
-<rect x="400" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.22" data-a="fade" data-t="0.25"/>
-<rect x="430" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.24" data-a="fade" data-t="0.25"/>
-<rect x="460" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.26" data-a="fade" data-t="0.25"/>
-<rect x="490" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.28" data-a="fade" data-t="0.25"/>
-<rect x="520" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.3" data-a="fade" data-t="0.25"/>
-<rect x="550" y="294" width="26" height="30" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.32" data-a="fade" data-t="0.25"/>
-<rect x="580" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.34" data-a="fade" data-t="0.25"/>
-<rect x="610" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.36" data-a="fade" data-t="0.25"/>
-<rect x="640" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.38" data-a="fade" data-t="0.25"/>
-<rect x="670" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.4" data-a="fade" data-t="0.25"/>
-<rect x="700" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.42" data-a="fade" data-t="0.25"/>
-<rect x="730" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.44" data-a="fade" data-t="0.25"/>
-<rect x="760" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.46" data-a="fade" data-t="0.25"/>
-<rect x="790" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.48" data-a="fade" data-t="0.25"/>
-<rect x="820" y="294" width="26" height="30" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.5" data-a="fade" data-t="0.25"/>
-<text x="856" y="316" font-size="19" style="fill:var(--muted)" data-s="7" data-d="0.5">… 127,848 boxes</text>
-<text x="20" y="358" font-size="19" style="fill:var(--muted)" data-s="8" data-d="0" data-a="fade">23 of them are not 0; the other 127,825 are 0. A vector that is mostly 0 is called sparse.</text>
-<text x="20" y="410" font-size="21" style="fill:currentColor" data-s="9" data-d="0">súa stands right before tía 11 times; seu before tío 33 times. Both mean “her” or “his”:</text>
-<text x="20" y="440" font-size="21" style="fill:currentColor" data-s="9" data-d="0.4">súa goes with feminine words, seu with masculine ones, so they are two different columns.</text>
-<text x="20" y="492" font-size="24" style="fill:var(--neg)" data-s="10" data-d="0">cos(tía, tío) ≈ 0.05</text>
-<text x="330" y="492" font-size="24" style="fill:var(--neg)" data-s="10" data-d="0.4">cos(tía, casa “house”) ≈ 0.33</text>
-<text x="20" y="524" font-size="19" style="fill:var(--muted)" data-s="10" data-d="0.8" data-a="fade">With so few counts, in columns that do not line up, aunt and uncle look unrelated.</text>
-<text x="20" y="578" font-size="21" style="fill:currentColor" data-s="11" data-d="0"><tspan font-weight="bold">An embedding</tspan> of a word: a vector of a few hundred numbers, learned from text, none of them 0 (dense).</text>
-<text x="20" y="620" font-size="22" style="fill:var(--blue)" data-s="11" data-d="0.3">tía</text>
-<rect x="70" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.2" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.3" data-a="fade" data-t="0.25"/>
-<rect x="100" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.7" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.32" data-a="fade" data-t="0.25"/>
-<rect x="130" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.4" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.33999999999999997" data-a="fade" data-t="0.25"/>
-<rect x="160" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.9" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.36" data-a="fade" data-t="0.25"/>
-<rect x="190" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.15" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.38" data-a="fade" data-t="0.25"/>
-<rect x="220" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.6" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.4" data-a="fade" data-t="0.25"/>
-<rect x="250" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.3" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.42" data-a="fade" data-t="0.25"/>
-<rect x="280" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.8" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.44" data-a="fade" data-t="0.25"/>
-<rect x="310" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.5" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.45999999999999996" data-a="fade" data-t="0.25"/>
-<rect x="340" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.45" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.48" data-a="fade" data-t="0.25"/>
-<rect x="370" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.65" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.5" data-a="fade" data-t="0.25"/>
-<rect x="400" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.52" data-a="fade" data-t="0.25"/>
-<rect x="430" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.75" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.54" data-a="fade" data-t="0.25"/>
-<rect x="460" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.35" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.56" data-a="fade" data-t="0.25"/>
-<rect x="490" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.55" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.5800000000000001" data-a="fade" data-t="0.25"/>
-<rect x="520" y="598" width="26" height="30" rx="3" fill="var(--green)" fill-opacity="0.85" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.6" data-a="fade" data-t="0.25"/>
-<text x="556" y="620" font-size="19" style="fill:var(--muted)" data-s="11" data-d="0.7">… a few hundred boxes</text>
-<text x="20" y="668" font-size="19" style="fill:var(--muted)" data-s="12" data-d="0" data-a="fade">The learning aims at one thing: words used in similar ways get similar vectors, so tía and tío should get a high cosine.</text>
+      <svg viewBox="0 0 1400 650" role="img" aria-label="Count vectors from the corpus my aunt stayed quiet, my aunt spoke wisely, my uncle stayed quiet: aunt is 2 0 0 1 1 0 0 and uncle is 1 0 0 1 0 0 0. In 2 million words of Galician Wikipedia there are 127,848 columns; tía has 23 that are not 0. súa tía and seu tío fall in different columns, so cos(tía, tío) ≈ 0.05, less than cos(tía, casa) ≈ 0.33. An embedding has a few hundred learned numbers, none of them 0.">
+<text x="20" y="30" font-size="22" style="fill:var(--muted)" data-s="1" data-d="0" data-a="fade">our corpus</text>
+<text x="20" y="72" font-size="28" style="fill:currentColor" data-s="1" data-d="0">my aunt stayed quiet</text>
+<text x="20" y="112" font-size="28" style="fill:currentColor" data-s="1" data-d="0.2">my aunt spoke wisely</text>
+<text x="20" y="152" font-size="28" style="fill:currentColor" data-s="1" data-d="0.4">my uncle stayed quiet</text>
+<text x="20" y="205" font-size="22" style="fill:var(--muted)" data-s="2" data-d="0" data-a="fade">how often each word stands right before or after it</text>
+<text x="140" y="248" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0">my</text>
+<text x="220" y="248" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.05">aunt</text>
+<text x="300" y="248" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.1">uncle</text>
+<text x="380" y="248" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.15">stayed</text>
+<text x="460" y="248" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.2">spoke</text>
+<text x="540" y="248" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.25">quiet</text>
+<text x="620" y="248" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.3">wisely</text>
+<text x="92" y="290" font-size="26" style="fill:var(--blue)" text-anchor="end" data-s="3" data-d="0">aunt</text>
+<rect x="104" y="262" width="72" height="38" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0" data-a="fade" data-t="0.25"/>
+<text x="140" y="290" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.1">2</text>
+<rect x="184" y="262" width="72" height="38" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.05" data-a="fade" data-t="0.25"/>
+<text x="220" y="290" font-size="24" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.15">0</text>
+<rect x="264" y="262" width="72" height="38" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.1" data-a="fade" data-t="0.25"/>
+<text x="300" y="290" font-size="24" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.2">0</text>
+<rect x="344" y="262" width="72" height="38" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.15" data-a="fade" data-t="0.25"/>
+<text x="380" y="290" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.25">1</text>
+<rect x="424" y="262" width="72" height="38" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.2" data-a="fade" data-t="0.25"/>
+<text x="460" y="290" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.3">1</text>
+<rect x="504" y="262" width="72" height="38" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.25" data-a="fade" data-t="0.25"/>
+<text x="540" y="290" font-size="24" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.35">0</text>
+<rect x="584" y="262" width="72" height="38" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="3" data-d="0.3" data-a="fade" data-t="0.25"/>
+<text x="620" y="290" font-size="24" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.4">0</text>
+<text x="92" y="336" font-size="26" style="fill:var(--green)" text-anchor="end" data-s="4" data-d="0">uncle</text>
+<rect x="104" y="308" width="72" height="38" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0" data-a="fade" data-t="0.25"/>
+<text x="140" y="336" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.1">1</text>
+<rect x="184" y="308" width="72" height="38" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.05" data-a="fade" data-t="0.25"/>
+<text x="220" y="336" font-size="24" style="fill:var(--muted)" text-anchor="middle" data-s="4" data-d="0.15">0</text>
+<rect x="264" y="308" width="72" height="38" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.1" data-a="fade" data-t="0.25"/>
+<text x="300" y="336" font-size="24" style="fill:var(--muted)" text-anchor="middle" data-s="4" data-d="0.2">0</text>
+<rect x="344" y="308" width="72" height="38" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.15" data-a="fade" data-t="0.25"/>
+<text x="380" y="336" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.25">1</text>
+<rect x="424" y="308" width="72" height="38" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.2" data-a="fade" data-t="0.25"/>
+<text x="460" y="336" font-size="24" style="fill:var(--muted)" text-anchor="middle" data-s="4" data-d="0.3">0</text>
+<rect x="504" y="308" width="72" height="38" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.25" data-a="fade" data-t="0.25"/>
+<text x="540" y="336" font-size="24" style="fill:var(--muted)" text-anchor="middle" data-s="4" data-d="0.35">0</text>
+<rect x="584" y="308" width="72" height="38" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0.3" data-a="fade" data-t="0.25"/>
+<text x="620" y="336" font-size="24" style="fill:var(--muted)" text-anchor="middle" data-s="4" data-d="0.4">0</text>
+<text x="20" y="388" font-size="22" style="fill:var(--muted)" data-s="5" data-d="0" data-a="fade">7 words, 7 columns. Already here, most entries are 0.</text>
+<text x="740" y="40" font-size="28" style="fill:currentColor" data-s="6" data-d="0">Galician Wikipedia, 2 million words:</text>
+<text x="740" y="78" font-size="28" style="fill:currentColor" data-s="6" data-d="0.4">127,848 different words, so 127,848 columns</text>
+<text x="740" y="141" font-size="26" style="fill:var(--blue)" data-s="7" data-d="0">tía</text>
+<rect x="790" y="114" width="24" height="36" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0" data-a="fade" data-t="0.25"/>
+<rect x="818" y="114" width="24" height="36" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.02" data-a="fade" data-t="0.25"/>
+<rect x="846" y="114" width="24" height="36" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.04" data-a="fade" data-t="0.25"/>
+<rect x="874" y="114" width="24" height="36" rx="3" fill="var(--blue)" fill-opacity="0.5" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.06" data-a="fade" data-t="0.25"/>
+<rect x="902" y="114" width="24" height="36" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.08" data-a="fade" data-t="0.25"/>
+<rect x="930" y="114" width="24" height="36" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.1" data-a="fade" data-t="0.25"/>
+<rect x="958" y="114" width="24" height="36" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.12" data-a="fade" data-t="0.25"/>
+<rect x="986" y="114" width="24" height="36" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.14" data-a="fade" data-t="0.25"/>
+<rect x="1014" y="114" width="24" height="36" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.16" data-a="fade" data-t="0.25"/>
+<rect x="1042" y="114" width="24" height="36" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.18" data-a="fade" data-t="0.25"/>
+<rect x="1070" y="114" width="24" height="36" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.2" data-a="fade" data-t="0.25"/>
+<rect x="1098" y="114" width="24" height="36" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.22" data-a="fade" data-t="0.25"/>
+<rect x="1126" y="114" width="24" height="36" rx="3" fill="var(--blue)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.24" data-a="fade" data-t="0.25"/>
+<rect x="1154" y="114" width="24" height="36" rx="3" fill="none" fill-opacity="0" stroke="var(--line)" stroke-width="1.5" data-s="7" data-d="0.26" data-a="fade" data-t="0.25"/>
+<text x="1188" y="141" font-size="22" style="fill:var(--muted)" data-s="7" data-d="0.3">… 127,848 boxes</text>
+<text x="740" y="194" font-size="22" style="fill:var(--muted)" data-s="8" data-d="0" data-a="fade">23 of them are not 0; the other 127,825 are 0.</text>
+<text x="740" y="224" font-size="22" style="fill:var(--muted)" data-s="8" data-d="0.3" data-a="fade">A vector that is mostly 0 is called sparse.</text>
+<text x="740" y="276" font-size="26" style="fill:currentColor" data-s="9" data-d="0">súa stands right before tía 11 times; seu before</text>
+<text x="740" y="310" font-size="26" style="fill:currentColor" data-s="9" data-d="0.3">tío 33 times. Both mean “her” or “his”: súa goes</text>
+<text x="740" y="344" font-size="26" style="fill:currentColor" data-s="9" data-d="0.6">with feminine words, seu with masculine ones, so</text>
+<text x="740" y="378" font-size="26" style="fill:currentColor" data-s="9" data-d="0.9">they are two different columns.</text>
+<text x="740" y="438" font-size="28" style="fill:var(--neg)" data-s="10" data-d="0">cos(tía, tío) ≈ 0.05</text>
+<text x="740" y="476" font-size="28" style="fill:var(--neg)" data-s="10" data-d="0.4">cos(tía, casa “house”) ≈ 0.33</text>
+<text x="740" y="516" font-size="22" style="fill:var(--muted)" data-s="10" data-d="0.8" data-a="fade">With so few counts, in columns that do not line up,</text>
+<text x="740" y="544" font-size="22" style="fill:var(--muted)" data-s="10" data-d="0.8" data-a="fade">aunt and uncle look unrelated.</text>
+<rect x="6" y="430" width="690" height="214" rx="10" fill="var(--green)" fill-opacity="0.06" stroke="var(--green)" stroke-width="2" data-s="11" data-d="0" data-a="fade" data-t="0.4"/>
+<text x="20" y="466" font-size="26" style="fill:currentColor" data-s="11" data-d="0"><tspan font-weight="bold">An embedding</tspan> of a word: a vector of a few hundred</text>
+<text x="20" y="500" font-size="26" style="fill:currentColor" data-s="11" data-d="0.3">numbers, learned from text, none of them 0 (dense).</text>
+<text x="20" y="550" font-size="26" style="fill:var(--blue)" data-s="11" data-d="0.5">tía</text>
+<rect x="70" y="523" width="24" height="36" rx="3" fill="var(--green)" fill-opacity="0.2" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.5" data-a="fade" data-t="0.25"/>
+<rect x="98" y="523" width="24" height="36" rx="3" fill="var(--green)" fill-opacity="0.7" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.52" data-a="fade" data-t="0.25"/>
+<rect x="126" y="523" width="24" height="36" rx="3" fill="var(--green)" fill-opacity="0.4" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.54" data-a="fade" data-t="0.25"/>
+<rect x="154" y="523" width="24" height="36" rx="3" fill="var(--green)" fill-opacity="0.9" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.56" data-a="fade" data-t="0.25"/>
+<rect x="182" y="523" width="24" height="36" rx="3" fill="var(--green)" fill-opacity="0.15" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.58" data-a="fade" data-t="0.25"/>
+<rect x="210" y="523" width="24" height="36" rx="3" fill="var(--green)" fill-opacity="0.6" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.6" data-a="fade" data-t="0.25"/>
+<rect x="238" y="523" width="24" height="36" rx="3" fill="var(--green)" fill-opacity="0.3" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.62" data-a="fade" data-t="0.25"/>
+<rect x="266" y="523" width="24" height="36" rx="3" fill="var(--green)" fill-opacity="0.8" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.64" data-a="fade" data-t="0.25"/>
+<rect x="294" y="523" width="24" height="36" rx="3" fill="var(--green)" fill-opacity="0.5" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.66" data-a="fade" data-t="0.25"/>
+<rect x="322" y="523" width="24" height="36" rx="3" fill="var(--green)" fill-opacity="0.45" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.68" data-a="fade" data-t="0.25"/>
+<rect x="350" y="523" width="24" height="36" rx="3" fill="var(--green)" fill-opacity="0.65" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.7" data-a="fade" data-t="0.25"/>
+<rect x="378" y="523" width="24" height="36" rx="3" fill="var(--green)" fill-opacity="0.25" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.72" data-a="fade" data-t="0.25"/>
+<rect x="406" y="523" width="24" height="36" rx="3" fill="var(--green)" fill-opacity="0.75" stroke="var(--line)" stroke-width="1.5" data-s="11" data-d="0.74" data-a="fade" data-t="0.25"/>
+<text x="440" y="550" font-size="22" style="fill:var(--muted)" data-s="11" data-d="0.8">… a few hundred boxes</text>
+<text x="20" y="600" font-size="22" style="fill:var(--muted)" data-s="12" data-d="0" data-a="fade">The learning aims at one thing: words used in similar ways</text>
+<text x="20" y="628" font-size="22" style="fill:var(--muted)" data-s="12" data-d="0.3" data-a="fade">get similar vectors, so tía and tío should get a high cosine.</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
