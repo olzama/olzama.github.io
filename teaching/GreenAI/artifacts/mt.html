@@ -562,22 +562,24 @@ window.mtWhy = function (o) {
   const softmax = xs => { const m = Math.max(...xs), e = xs.map(x => Math.exp(x - m)), s = e.reduce((a, b) => a + b, 0); return e.map(x => x / s); };
   const { sn, GL, EN, src, tgt, pre } = o, mode = o.mode || "free", r2 = x => x.toFixed(2).replace("-", "−"), r2p = x => x < 0 ? `(${r2(x)})` : r2(x), dot = (a, b) => a[0] * b[0] + a[1] * b[1];
   // the decoder's steps with the vectors of one training step: after each output, the one mixed in is the pair's (training) or the model's own (translating)
-  const run = snap => {
-    let h = [0, 0]; for (const w of src) { const g = snap.G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; }
-    const steps = []; let st = h; const n = mode === "train" ? tgt.length : 9;
+  const runFor = (snap, src_, tgt_) => {
+    let h = [0, 0]; for (const w of src_) { const g = snap.G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; }
+    const steps = []; let st = h; const n = mode === "train" ? tgt_.length : 9;
     for (let t = 0; t < n; t++) {
-      const sc = snap.O.map(v => dot(st, v)), p = softmax(sc), j = p.indexOf(Math.max(...p)), fed = mode === "train" ? EN.indexOf(tgt[t]) : j;
+      const sc = snap.O.map(v => dot(st, v)), p = softmax(sc), j = p.indexOf(Math.max(...p)), fed = mode === "train" ? EN.indexOf(tgt_[t]) : j;
       steps.push({ st, sc, p, j, fed });
       if (mode !== "train" && EN[j] === "‹end›") break;
       st = [0.5 * st[0] + 0.5 * snap.I[fed][0], 0.5 * st[1] + 0.5 * snap.I[fed][1]];
     }
     return steps;
   };
+  const run = snap => runFor(snap, src, tgt);
   const steps = run(sn), prevSteps = o.prev ? run(o.prev) : null;
   const k = Math.min(o.pos, steps.length - 1), s = steps[k], w = EN[s.j], want = tgt[k], wj = want === undefined ? -1 : EN.indexOf(want);
   const ps = prevSteps && prevSteps[k] ? prevSteps[k].p : null;
-  if ($(pre + "WhyPrev")) { $(pre + "WhyPrev").disabled = k <= 0; $(pre + "WhyPrev").onclick = () => o.pick(k - 1); }
-  if ($(pre + "WhyNext")) { $(pre + "WhyNext").disabled = k >= steps.length - 1; $(pre + "WhyNext").onclick = () => o.pick(k + 1); }
+  // at the ends of a pair, the buttons go on to the neighbouring pair
+  if ($(pre + "WhyPrev")) { const first = k <= 0; $(pre + "WhyPrev").disabled = first && !o.prevPair; $(pre + "WhyPrev").textContent = first && o.prevPair ? "← previous pair" : "← previous output"; $(pre + "WhyPrev").onclick = () => first ? o.prevPair() : o.pick(k - 1); }
+  if ($(pre + "WhyNext")) { const lastK = k >= steps.length - 1; $(pre + "WhyNext").disabled = lastK && !o.nextPair; $(pre + "WhyNext").textContent = lastK && o.nextPair ? "next pair →" : "next output →"; $(pre + "WhyNext").onclick = () => lastK ? o.nextPair() : o.pick(k + 1); }
   const given = steps.slice(0, k).map(x => EN[x.fed]);
   if ($(pre + "WhyPh")) $(pre + "WhyPh").innerHTML = `<i>${src.join(" ")}</i>`;
   if ($(pre + "WhyHead")) $(pre + "WhyHead").innerHTML = `A. One pair, output by output: decoding ${mode === "train" ? "in training" : "when translating"}, with the model after training step ${sn.step}`;
@@ -619,7 +621,8 @@ window.mtWhy = function (o) {
   // the plane: the English words, the state and its direction; labels only where they help
   const orange = css("--orange"), green = css("--green"), fg = css("--fg");
   // one scale for all the outputs of this pair at this training step, so that only what moves appears to move
-  const Z = 1.15 * Math.max(...[...sn.O, ...steps.map(x => x.st)].flat().map(Math.abs)), P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z;
+  // one scale for every pair at this training step: switching pairs leaves the rings where they are
+  const Z = 1.15 * Math.max(...[...sn.O, ...(o.allPairs || [[src, tgt]]).flatMap(([s2, t2]) => runFor(sn, s2, t2).map(x => x.st))].flat().map(Math.abs)), P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z;
   const L = Math.hypot(...s.st) || 1, u = [s.st[0] / L, s.st[1] / L], muted = css("--muted");
   const order = [...s.p.keys()].sort((a, b) => s.p[b] - s.p[a]), labeled = new Set([...order.slice(0, 4), s.j, ...(wj >= 0 ? [wj] : [])]);
   let g = `<defs><marker id="${pre}wa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${orange}"/></marker></defs>`;
@@ -674,6 +677,10 @@ window.mtWhy = function (o) {
         txt(606, 185, `next state = ½ × state ${k + 1} + ½ × second vector of “${fedW}”`, "mono");
       c += arr("M220 167 L184 167", "var(--orange)");
       c += box(10, 140, 170, 54, "var(--orange)", 0.12) + txt(95, 163, `state ${k + 2}`) + (steps[k + 1] ? txt(95, 185, `(${r2(steps[k + 1].st[0])}, ${r2(steps[k + 1].st[1])})`, "mono") : "");
+    } else {
+      c += arr("M848 112 L848 138", "var(--line)", "6 4");
+      c += box(10, 140, 980, 54, "var(--line)", 0.35) + txt(500, 163, `this pair is done: its state is discarded, and the next pair starts again from its own summary`) +
+        txt(500, 185, mode === "train" ? "nothing in the model has changed yet: the vectors change only at the training step, from all 16 pairs together (part B)" : "the vectors do not change when translating", "small");
     }
     $(pre + "WhyChain").innerHTML = c;
   }
@@ -754,7 +761,7 @@ function renderA() {
   $("aBack").textContent = `← ${stepLabel(gapB)}`; $("aNext").textContent = `${stepLabel(gapN)} →`;
   $("aStepVal").textContent = `training step ${sn.step} of ${S2S.steps}`;
   const k = trMode === "train" ? Math.min(trPos, tgt.length - 1) : -1;
-  window.mtWhy({ sn, prev: tA > 0 ? S[tA - 1] : null, thin: gapB, GL, EN, src, tgt, pre: "tr", pos: trPos, mode: trMode, npairs: 16, example: "unha tía miña", pairHtml: `pair ${aPair + 1} of 16: <i>${src.join(" ")}</i> → ${tgt.filter(x => x !== "‹end›").join(" ")}${src.join(" ") === "unha tía miña" ? " (the lesson's example)" : ""} · all 16 pairs are supplied together at every training step (part B); here one at a time`, pick: m => { trPos = m; renderA(); }, setMode: m => { trMode = m; renderA(); } });
+  window.mtWhy({ sn, prev: tA > 0 ? S[tA - 1] : null, thin: gapB, GL, EN, src, tgt, pre: "tr", pos: trPos, mode: trMode, npairs: 16, example: "unha tía miña", pairHtml: `pair ${aPair + 1} of 16: <i>${src.join(" ")}</i> → ${tgt.filter(x => x !== "‹end›").join(" ")}${src.join(" ") === "unha tía miña" ? " (the lesson's example)" : ""} · all 16 pairs are supplied together at every training step (part B); here one at a time · stepping through a pair changes nothing in the model: it only computes the probabilities; the model changes only at a training step`, allPairs: S2S.data, nextPair: () => { aPair = (aPair + 1) % S2S.data.length; trPos = 0; renderA(); }, prevPair: () => { aPair = (aPair + S2S.data.length - 1) % S2S.data.length; trPos = 99; renderA(); }, pick: m => { trPos = m; renderA(); }, setMode: m => { trMode = m; renderA(); } });
   $("trainCurveLbl").innerHTML = `<i>${src.join(" ")}</i> over the training steps: the probability of the gold output at each output`;
   renderCurve(src, tgt, k);
 }
