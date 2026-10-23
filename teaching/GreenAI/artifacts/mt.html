@@ -240,13 +240,13 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <div class="controls">
       <label class="note" for="trA">Pair</label><select id="trA"></select>
     </div>
-      <p class="label">Training data: 16 pairs, each an input (a Galician phrase) → the right output for it (its English translation, by a person)</p>
+      <p class="label">Training data: 16 pairs, each an input (a Galician phrase) → its gold output (the right output: its English translation, by a person)</p>
       <div class="phrases" id="trainData"></div>
       <div class="why" id="trWhy">
         <p class="label" id="trWhyHead"></p>
         <p class="note" id="trWhyPair"></p>
         <div class="controls"><span class="label" style="margin-right:4px">Training</span><button id="trBack" aria-label="One recorded training step back">← 1 step</button><button class="primary" id="trNext" aria-label="One recorded training step forward">Train 1 step →</button><span class="mono" id="trStepA"></span><span class="note">the first 25 training steps one by one, then every 25th</span></div>
-        <div class="controls"><span class="note">after each output, what is mixed into the state:</span><div class="seg" role="group" aria-label="Decoding in training or when translating"><button id="trModeTrain" aria-pressed="true">in training: the gold example output</button><button id="trModeFree" aria-pressed="false">when translating: the output written</button></div></div>
+        <div class="controls"><span class="note">after each output, what is mixed into the state:</span><div class="seg" role="group" aria-label="Decoding in training or when translating"><button id="trModeTrain" aria-pressed="true">in training: the gold output</button><button id="trModeFree" aria-pressed="false">when translating: the output written</button></div></div>
         <p class="label">Encoding: the inputs are mixed, one by one, into one vector, the summary (new = ½ × old + ½ × vector of the input; section 2 shows the rule)</p>
         <svg class="chain" id="trEncChain" viewBox="0 0 1000 118" role="img" aria-label="The encoder mixes the inputs one by one into the summary"></svg>
         <p class="label" id="trDecLbl"></p>
@@ -257,7 +257,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="cols">
           <div class="col">
             <svg id="trWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen position and the English word vectors" style="max-width:420px"></svg>
-            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="trLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the right output (from the pair)</span><span><span class="ring"></span>other possible outputs (the 4 most probable in black, the rest gray)</span><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— <span id="trLegGhost">where the vector was one training step earlier</span></span></div>
+            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="trLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the gold output</span><span><span class="ring"></span>other possible outputs (the 4 most probable in black, the rest gray)</span><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— <span id="trLegGhost">where the vector was one training step earlier</span></span></div>
           </div>
           <div class="col">
             <p class="label" id="trWhyLbl"></p>
@@ -273,12 +273,12 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="cols">
           <div class="col">
             <p class="label" id="trainCurveLbl"></p>
-            <svg id="trainCurve" viewBox="0 0 440 190" role="img" aria-label="The probability of the right output at each output position, over the training steps" style="max-width:460px"></svg>
+            <svg id="trainCurve" viewBox="0 0 440 190" role="img" aria-label="The probability of the gold output at each output position, over the training steps" style="max-width:460px"></svg>
             <p class="note">Each training step moves every vector a little, so that these probabilities go up (as in skip-gram). Orange: the current step.</p>
           </div>
           <div class="col">
             <p class="label" id="pathAllLbl"></p>
-            <p class="note">one output at a time, the one with the highest probability, mixed into the state before the next (as on the previous screen) · <span style="color:var(--green)">the right output</span> · <span style="color:var(--neg)">a different one</span> · click one to follow it in the panel above</p>
+            <p class="note">one output at a time, the one with the highest probability, mixed into the state before the next (as on the previous screen) · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span> · click one to follow it in the panel above</p>
             <div class="phrases pickable" id="pathAll"></div>
           </div>
         </div>
@@ -396,7 +396,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
           <div class="tf" id="ihtBars"></div>
           <p class="note">mixed in before it: in training, the earlier outputs come from the pair · ‹end›: the translation is finished · thin mark: 25 training steps ago</p>
           <p class="label" style="margin-top:8px">The model's translations at this training step</p>
-          <p class="note">one output at a time, the one with the highest probability · <span style="color:var(--green)">the right output</span> · <span style="color:var(--neg)">a different one</span> · click one ↓</p>
+          <p class="note">one output at a time, the one with the highest probability · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span> · click one ↓</p>
           <div class="phrases pickable" id="ihtAll"></div>
         </div>
       </div>
@@ -407,7 +407,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="cols">
           <div class="col">
             <svg id="ihtWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen position and the English word vectors" style="max-width:420px"></svg>
-            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="ihtLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the right output (from the pair)</span><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— <span id="ihtLegGhost">where the vector was 25 training steps earlier</span></span></div>
+            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="ihtLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the gold output</span><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— <span id="ihtLegGhost">where the vector was 25 training steps earlier</span></span></div>
           </div>
           <div class="col">
             <p class="label" id="ihtWhyLbl"></p>
@@ -572,7 +572,7 @@ window.mtWhy = function (o) {
   if ($(pre + "ModeTrain")) { $(pre + "ModeTrain").setAttribute("aria-pressed", mode === "train"); $(pre + "ModeFree").setAttribute("aria-pressed", mode !== "train");
     $(pre + "ModeTrain").onclick = () => o.setMode("train"); $(pre + "ModeFree").onclick = () => o.setMode("free"); }
   if ($(pre + "DecLbl")) $(pre + "DecLbl").textContent = `Decoding, output ${k + 1}: how it is chosen, and how the next state is made`;
-  if ($(pre + "WhyGiven")) $(pre + "WhyGiven").innerHTML = k ? `mixed into the state so far: “${given.join(" ")}” (${mode === "train" ? "from the gold example output" : "the outputs written"})` : "nothing mixed in yet: state 1 is the summary";
+  if ($(pre + "WhyGiven")) $(pre + "WhyGiven").innerHTML = k ? `mixed into the state so far: “${given.join(" ")}” (${mode === "train" ? "from the gold output" : "the outputs written"})` : "nothing mixed in yet: state 1 is the summary";
   // the encoding, drawn with the numbers: the summary builds up input by input
   if ($(pre + "EncChain")) {
     const box = (x, y, wd, ht, col, op) => `<rect x="${x}" y="${y}" width="${wd}" height="${ht}" rx="9" fill="${col}" fill-opacity="${op}" stroke="${col}" stroke-width="1.8"/>`;
@@ -587,19 +587,19 @@ window.mtWhy = function (o) {
         e += txt(mx, 24, `input ${i + 1}: ${src[i]}`, "", "middle", blue) + txt(mx, 112, `½ old + ½ (${r2(g[0])}, ${r2(g[1])})`, "mono small"); } });
     $(pre + "EncChain").innerHTML = e;
   }
-  // training: the right outputs, green when the right one has the highest probability now; translating: what the decoder writes
+  // training: the gold outputs, green when the gold output has the highest probability now; translating: what the decoder writes
   if ($(pre + "WhyStrip")) $(pre + "WhyStrip").innerHTML = steps.map((x, m) => `<button class="${m === k ? "on" : ""}" data-m="${m}">output ${m + 1}: <span class="${EN[x.j] === tgt[m] ? "ok" : "bad"}">${mode === "train" ? tgt[m] : EN[x.j]}</span></button>`).join(`<span class="ar">→</span>`);
-  if ($(pre + "WhyStripLbl")) $(pre + "WhyStripLbl").textContent = mode === "train" ? "the right outputs, one by one:" : "the decoder's steps for this input:";
+  if ($(pre + "WhyStripLbl")) $(pre + "WhyStripLbl").textContent = mode === "train" ? "the gold outputs, one by one:" : "the decoder's steps for this input:";
   // the same, as a table: what is mixed in before each output, the output, its probability now, and a mark for the step before
   if ($(pre + "WhyTable")) {
     const pw = (x, m) => mode === "train" ? x.p[EN.indexOf(tgt[m])] : x.p[x.j];
-    $(pre + "WhyTblLbl").textContent = mode === "train" ? "the outputs of this pair, one by one: what is mixed in before each, the right output, and the probability it has now" : "the outputs the decoder writes, one by one: what is mixed in before each, the output written, and its probability";
-    $(pre + "WhyTable").innerHTML = `<span class="h">output</span><span class="h">mixed in before it</span><span class="h">${mode === "train" ? "right output" : "output written"}</span><span class="h" style="grid-column: span 2">probability now</span>` +
+    $(pre + "WhyTblLbl").textContent = mode === "train" ? "the outputs of this pair, one by one: what is mixed in before each, the gold output, and the probability it has now" : "the outputs the decoder writes, one by one: what is mixed in before each, the output written, and its probability";
+    $(pre + "WhyTable").innerHTML = `<span class="h">output</span><span class="h">mixed in before it</span><span class="h">${mode === "train" ? "gold output" : "output written"}</span><span class="h" style="grid-column: span 2">probability now</span>` +
       steps.map((x, m) => { const c = m === k ? " sel" : "", wd = mode === "train" ? tgt[m] : EN[x.j], ok = EN[x.j] === tgt[m], pv = pw(x, m), pp = prevSteps && prevSteps[m] ? pw(prevSteps[m], m) : null;
         return `<span class="pos${c}" data-m="${m}">${m + 1}</span><span class="given${c}" data-m="${m}">${m ? steps.slice(0, m).map(y => EN[y.fed]).join(" ") : "(none: state 1 = summary)"}</span><span class="${ok ? "want" : "want bad"}${c}" data-m="${m}" style="${ok ? "" : "color:var(--neg)"}">${wd}</span><span class="track${c}" data-m="${m}"><span class="fill" style="width:${(pv * 100).toFixed(1)}%;background:var(${ok ? "--green" : "--neg"})"></span>${pp !== null ? `<span class="gh" style="left:${(pp * 100).toFixed(1)}%"></span>` : ""}</span><span class="v${c}" data-m="${m}">${pv.toFixed(2)}</span>`; }).join("");
     $(pre + "WhyTable").querySelectorAll("[data-m]").forEach(e => e.addEventListener("click", () => o.pick(+e.dataset.m)));
   }
-  if ($(pre + "WhyStripKey")) $(pre + "WhyStripKey").innerHTML = (mode === "train" ? `<span class="ok">green</span>: has the highest probability now · <span class="bad">red</span>: not yet` : `<span class="ok">green</span>: the right output · <span class="bad">red</span>: a different one`) + (o.thin ? ` · thin mark: ${o.thin} training step${o.thin === 1 ? "" : "s"} earlier` : "");
+  if ($(pre + "WhyStripKey")) $(pre + "WhyStripKey").innerHTML = (mode === "train" ? `<span class="ok">green</span>: has the highest probability now · <span class="bad">red</span>: not yet` : `<span class="ok">green</span>: the gold output · <span class="bad">red</span>: a different one`) + (o.thin ? ` · thin mark: ${o.thin} training step${o.thin === 1 ? "" : "s"} earlier` : "");
   if ($(pre + "LegWin")) $(pre + "LegWin").textContent = mode === "train" ? "highest probability now" : "the output written";
   if ($(pre + "LegGhost")) $(pre + "LegGhost").textContent = o.prev ? `where the vector was ${o.thin || 25} training step${(o.thin || 25) === 1 ? "" : "s"} earlier (the vectors move only when training moves)` : "at training step 0 there is no earlier step";
   if ($(pre + "WhyStrip")) $(pre + "WhyStrip").querySelectorAll("button").forEach(b => b.addEventListener("click", () => o.pick(+b.dataset.m)));
@@ -633,7 +633,7 @@ window.mtWhy = function (o) {
   $(pre + "WhyLbl").textContent = `Output ${k + 1}: the probability of each possible output`;
   $(pre + "WhyBars").innerHTML = order.map(j => `<div class="bar"><span class="w">${EN[j]}</span><span class="track"><span class="fill" style="width:${(s.p[j] * 100).toFixed(1)}%;background:var(${j === s.j ? "--orange" : j === wj ? "--green" : "--blue"})"></span>${ps ? `<span class="gh" style="left:${(ps[j] * 100).toFixed(1)}%"></span>` : ""}</span><span>${s.p[j].toFixed(2)}</span></div>`).join("") +
     (ps ? `<p class="note" style="margin-top:4px">thin mark: ${o.thin || 25} training step${o.thin === 1 ? "" : "s"} earlier</p>` : "");
-  // the chain, drawn with this output's values: state → scores → probabilities → (training: the right output; translating: written) → mixed in → next state
+  // the chain, drawn with this output's values: state → scores → probabilities → (training: the gold output; translating: written) → mixed in → next state
   if ($(pre + "WhyChain")) {
     const box = (x, y, wd, ht, col, op) => `<rect x="${x}" y="${y}" width="${wd}" height="${ht}" rx="9" fill="${col}" fill-opacity="${op}" stroke="${col}" stroke-width="1.8"/>`;
     const txt = (x, y, s_, cls = "", anchor = "middle", fill = "") => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}"${fill ? ` fill="${fill}" style="fill:${fill}"` : ""}>${s_}</text>`;
@@ -647,16 +647,16 @@ window.mtWhy = function (o) {
     c += box(504, 26, 160, 84, "var(--line)", 0.35) + txt(584, 62, "probabilities") + txt(584, 88, "add up to 1", "small");
     c += arr("M666 68 L702 68");
     if (mode === "train" && wj >= 0) {
-      // the right output, and the highest other one: what the next training steps do to them
+      // the gold output, and the highest other one: what the next training steps do to them
       const other = order.find(j => j !== wj), bar = (y, j, col, sym) => txt(790, y + 4, EN[j], "", "end", col) +
         `<rect x="800" y="${y - 6}" width="${(140 * s.p[j]).toFixed(1)}" height="12" rx="2" fill="${col}" fill-opacity="0.75"/>` + txt(946, y + 4, s.p[j].toFixed(2), "mono", "start") + txt(984, y + 5, sym, "", "middle", col);
-      c += box(706, 26, 284, 84, "var(--green)", 0.08) + txt(848, 44, "training looks at the right output", "small") + bar(62, wj, green, "↑") + bar(84, other, neg, "↓") + txt(848, 104, "↑ ↓: what the next training steps do", "small");
+      c += box(706, 26, 284, 84, "var(--green)", 0.08) + txt(848, 44, "training looks at the gold output", "small") + bar(62, wj, green, "↑") + bar(84, other, neg, "↓") + txt(848, 104, "↑ ↓: what the next training steps do", "small");
     } else {
       c += box(706, 26, 284, 84, "var(--green)", 0.12) + txt(848, 62, `highest probability: “${w}”`) + txt(848, 88, last ? "written: finished" : "written", "small");
     }
     if (!last) {
       c += arr("M848 112 L848 138", "var(--green)", "6 4");
-      c += box(222, 140, 768, 54, "var(--green)", 0.08) + txt(606, 163, `mixed into the state: “${fedW}” (${mode === "train" ? "from the gold example output" : "the output written"})${mode === "train" && fedW !== w ? `, not “${w}”` : ""}`) +
+      c += box(222, 140, 768, 54, "var(--green)", 0.08) + txt(606, 163, `mixed into the state: “${fedW}” (${mode === "train" ? "from the gold output" : "the output written"})${mode === "train" && fedW !== w ? `, not “${w}”` : ""}`) +
         txt(606, 185, `next state = ½ × state ${k + 1} + ½ × second vector of “${fedW}”`, "mono");
       c += arr("M220 167 L184 167", "var(--orange)");
       c += box(10, 140, 170, 54, "var(--orange)", 0.12) + txt(95, 163, `state ${k + 2}`) + (steps[k + 1] ? txt(95, 185, `(${r2(steps[k + 1].st[0])}, ${r2(steps[k + 1].st[1])})`, "mono") : "");
@@ -673,10 +673,10 @@ window.mtWhy = function (o) {
   $(pre + "WhyF").innerHTML = line.join("<br>");
   const own = mode !== "train" && k > 0 && steps.slice(0, k).some((x, m) => EN[x.j] !== tgt[m]);
   $(pre + "WhyNote").innerHTML = want === undefined ?
-      `The right output ended at output ${tgt.length}; here ‹end› does not have the highest score, so the model goes on.` :
-    w === want ? `“${w}” lies farthest along the state's direction → highest score${mode === "train" ? ". It is the right output; the next training steps raise its probability further." : " → written. It is the right output."}` :
-    mode === "train" ? `The right output is “${want}”, but “${w}” lies farther along the state's direction → higher score. The next training steps move the vectors so that “${want}” scores higher and “${w}” lower; the thin marks show the move so far.` :
-      `The right output is “${want}”, but “${w}” lies farther along the state's direction → higher score → written. Training moves the vectors until “${want}” wins.` +
+      `The gold output ended at output ${tgt.length}; here ‹end› does not have the highest score, so the model goes on.` :
+    w === want ? `“${w}” lies farthest along the state's direction → highest score${mode === "train" ? ". It is the gold output; the next training steps raise its probability further." : " → written. It is the gold output."}` :
+    mode === "train" ? `The gold output is “${want}”, but “${w}” lies farther along the state's direction → higher score. The next training steps move the vectors so that “${want}” scores higher and “${w}” lower; the thin marks show the move so far.` :
+      `The gold output is “${want}”, but “${w}” lies farther along the state's direction → higher score → written. Training moves the vectors until “${want}” wins.` +
       (own ? ` The state here was built from outputs the model wrote, some of them already wrong.` : "");
 }
 </script>
@@ -702,7 +702,7 @@ function translate(sn, src) {
   return { path, summary: h, steps };
 }
 let ti = 0, trTimer = null, trPos = 0, trMode = "train";
-const CURVES = {};   // per pair: the probability of the right output at each position, at every recorded step
+const CURVES = {};   // per pair: the probability of the gold output at each position, at every recorded step
 $("pathStep").max = S.length - 1;
 $("trainData").innerHTML = S2S.data.map(([s2, t2]) => `<div class="phrase"><span><span class="src">${s2.join(" ")}</span> → ${t2.filter(w => w !== "‹end›").join(" ")}</span></div>`).join("");
 // the probability the model gives each correct English word, with the correct previous word fed in (as in training)
@@ -737,7 +737,7 @@ function renderTrain() {
   const k = trMode === "train" ? Math.min(trPos, tgt.length - 1) : -1;
   // the panel: one pair, output by output
   window.mtWhy({ sn, prev: ti > 0 ? S[ti - 1] : null, thin: gapB, GL, EN, src, tgt, pre: "tr", pos: trPos, mode: trMode, npairs: 16, example: "unha tía miña", pick: m => { trPos = m; renderTrain(); }, setMode: m => { trMode = m; renderTrain(); } });
-  $("trainCurveLbl").innerHTML = `<i>${src.join(" ")}</i> over the training steps: the probability of the right output at each output`;
+  $("trainCurveLbl").innerHTML = `<i>${src.join(" ")}</i> over the training steps: the probability of the gold output at each output`;
   renderCurve(src, tgt, k);
   let nRight = 0;
   $("pathAll").innerHTML = S2S.data.map(([s2, t2], q2) => {
@@ -919,7 +919,7 @@ function renderB() {
     : `Word ${k + 1}: writing “${t.steps[k - 1].w}” took half of the state, so the summary shrank to ${frac(sumShare)}. Now “${s.w}” lies farthest along the state's direction.` + aside;
 }
 $("trA").innerHTML = $("bA").innerHTML; $("trA").value = bA;
-(window.__askState ||= []).push(() => { const [src, tgt] = S2S.data[bA], cp = correctProbs(S[ti], src, tgt); return `Section 1 (training): step ${S[ti].step} of ${S2S.steps}; for "${src.join(" ")}" the probability of each correct word: ${tgt.map((w, m) => `${w} ${cp[m].toFixed(2)}`).join(", ")}; ${Math.round(S[ti].acc * NWORDS)}/${NWORDS} outputs of the 16 pairs where the right output has the highest probability.`; });
+(window.__askState ||= []).push(() => { const [src, tgt] = S2S.data[bA], cp = correctProbs(S[ti], src, tgt); return `Section 1 (training): step ${S[ti].step} of ${S2S.steps}; for "${src.join(" ")}" the probability of each correct word: ${tgt.map((w, m) => `${w} ${cp[m].toFixed(2)}`).join(", ")}; ${Math.round(S[ti].acc * NWORDS)}/${NWORDS} outputs of the 16 pairs where the gold output has the highest probability.`; });
 $("bA").addEventListener("change", e => { bA = +e.target.value; trPos = 0; trMode = "train"; $("trA").value = bA; bStage = 0; bSel = -1; renderB(); renderTrain(); });
 $("trA").addEventListener("change", e => { bA = +e.target.value; trPos = 0; trMode = "train"; $("bA").value = bA; bStage = 0; bSel = -1; renderB(); renderTrain(); });
 $("bNext").addEventListener("click", () => { bStage++; bSel = -1; renderB(); });
@@ -1004,7 +1004,7 @@ const correctP = (sn, src, tgt) => { let h = [0, 0]; for (const w of src) { cons
 function renderT() {
   const sn = TS[ti], [src, tgt] = IHAD.data[q], orange = css("--orange"), fg = css("--fg"), muted = css("--muted");
   $("ihtStep").value = ti; $("ihtBack").disabled = ti <= 0; $("ihtNext").disabled = ti >= TS.length - 1;
-  $("ihtVal").textContent = `training step ${sn.step} of ${IHAD.steps} · the right output has the highest probability at ${Math.round(sn.acc * NW)} of the ${NW} outputs of the 24 pairs`;
+  $("ihtVal").textContent = `training step ${sn.step} of ${IHAD.steps} · the gold output has the highest probability at ${Math.round(sn.acc * NW)} of the ${NW} outputs of the 24 pairs`;
   // plane, zoomed to this step
   const rr = runAt(sn, src), Z = 1.15 * Math.max(...[...sn.G, ...sn.O, ...rr.path].flat().map(Math.abs));
   const P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z, tick = +(Z / 1.15).toPrecision(2);
@@ -1022,8 +1022,8 @@ function renderT() {
     if (on) g += `<text x="${P(o[0]) + 8}" y="${Q(o[1]) + 4}" font-size="11" fill="${fg}">${w}</text>`; });
   $("ihtSvg").innerHTML = g;
   const cp = correctP(sn, src, tgt), cpPrev = ti > 0 ? correctP(TS[ti - 1], src, tgt) : null;
-  $("ihtLbl").innerHTML = `One pair, out of the 24 trained on together: <i>${src.join(" ")}</i>. For each output: the probability the model now gives to the right one`;
-  $("ihtBars").innerHTML = `<span class="h">output</span><span class="h">mixed in before it</span><span class="h">right output</span><span class="h" style="grid-column: span 2">probability now</span>` + tgt.map((w, m) => `<span class="pos">${m + 1}</span><span class="given">${m ? tgt.slice(0, m).join(" ") : "(none: state 1 = summary)"}</span><span class="want">${w}</span><span class="track"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%"></span>${cpPrev ? `<span class="gh" style="left:${(cpPrev[m] * 100).toFixed(1)}%"></span>` : ""}</span><span class="v">${cp[m].toFixed(2)}</span>`).join("");
+  $("ihtLbl").innerHTML = `One pair, out of the 24 trained on together: <i>${src.join(" ")}</i>. For each output: the probability the model now gives to the gold output`;
+  $("ihtBars").innerHTML = `<span class="h">output</span><span class="h">mixed in before it</span><span class="h">gold output</span><span class="h" style="grid-column: span 2">probability now</span>` + tgt.map((w, m) => `<span class="pos">${m + 1}</span><span class="given">${m ? tgt.slice(0, m).join(" ") : "(none: state 1 = summary)"}</span><span class="want">${w}</span><span class="track"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%"></span>${cpPrev ? `<span class="gh" style="left:${(cpPrev[m] * 100).toFixed(1)}%"></span>` : ""}</span><span class="v">${cp[m].toFixed(2)}</span>`).join("");
   window.mtWhy({ sn, prev: ti > 0 ? TS[ti - 1] : null, GL, EN, src, tgt, pre: "iht", pos: ihtPos, pick: m => { ihtPos = m; renderT(); } });
   $("ihtAll").innerHTML = IHAD.data.map((d, q2) => [d, q2]).filter(([[s2]]) => s2[3] === src[3]).map(([[s2, t2], q2]) => { const out = runAt(sn, s2).out.filter(w => w !== "‹end›"), ok = out.join(" ") === t2.filter(w => w !== "‹end›").join(" ");
     return `<div class="phrase${q2 === q ? " pick" : ""}" data-q="${q2}"><span><span class="src">${s2.join(" ")}</span> → <span class="${ok ? "ok" : "bad"}">${out.join(" ") || "(nothing)"}</span></span></div>`; }).join("");
@@ -1062,7 +1062,7 @@ How to answer: short, plain sentences. Define any technical term the first time 
 
 The page:
 - Running example: the Galician sentence "Unha tía miña, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»" (from the novel Speechwriter by Paulo Naseiro). "tía miña" is noun then possessive; English "my aunt" reverses the order.
-- Section 1, where the model's vectors come from (training): a translation model has an encoder (reads Galician into a summary vector) and a decoder (writes English from it); sections 2 and 3 take them apart. A small toy model with 2-D vectors is trained on 16 human-written translations, the ground truth (a miña tía → my aunt, unha tía miña → an aunt of mine, likewise amigo/friend, irmán/brother, veciña/neighbor, and túa/teu → your / of yours). Training computes the probability of each correct next English word (at each output position the decoder is fed the pair's earlier outputs, not its own guesses, so the bars and the count of words predicted right can differ from the model's translations, where at each position it writes the highest-probability word and then uses its own word for the next position; ‹end› is the word that ends a translation) and nudges every vector to raise it, like skip-gram. A replay (Back/Next/Play over 1500 steps) shows, for the chosen phrase, the probability of the right output at each output position given the pair's earlier outputs (a table, and the same probabilities as curves over the training steps), and the model's translations of all 16 phrases at that step (each word the highest-probability one, with its own words fed back). Clicking a position of the table, or a phrase, opens a panel that explains that position: the decoder's state (starting at the summary, then ½ old state + ½ second vector of the word written), all 12 English words' probabilities, and the dot-product scores of the written word and of the right output.
+- Section 1, where the model's vectors come from (training): a translation model has an encoder (reads Galician into a summary vector) and a decoder (writes English from it); sections 2 and 3 take them apart. A small toy model with 2-D vectors is trained on 16 human-written translations, the ground truth (a miña tía → my aunt, unha tía miña → an aunt of mine, likewise amigo/friend, irmán/brother, veciña/neighbor, and túa/teu → your / of yours). Training computes the probability of each correct next English word (at each output position the decoder is fed the pair's earlier outputs, not its own guesses, so the bars and the count of words predicted right can differ from the model's translations, where at each position it writes the highest-probability word and then uses its own word for the next position; ‹end› is the word that ends a translation) and nudges every vector to raise it, like skip-gram. A replay (Back/Next/Play over 1500 steps) shows, for the chosen phrase, the probability of the gold output at each output position given the pair's earlier outputs (a table, and the same probabilities as curves over the training steps), and the model's translations of all 16 phrases at that step (each word the highest-probability one, with its own words fed back). Clicking a position of the table, or a phrase, opens a panel that explains that position: the decoder's state (starting at the summary, then ½ old state + ½ second vector of the word written), all 12 English words' probabilities, and the dot-product scores of the written word and of the gold output.
 - Section 2, the encoder: each Galician word has an embedding (made-up 2-D vectors here; tía = (0.9, 0.2), miña = (0.1, 0.9)). A simplified encoder reads word by word and keeps one summary vector: new summary = ½ old summary + ½ new word, starting from (0, 0). So the last word makes up ½ of the summary, the one before ¼, then ⅛, and so on; after the whole sentence (35 tokens) "tía" makes up 0.5^34, practically nothing. Real encoders (recurrent neural networks) learn their update rule, but still keep one fixed-size vector.
 - Section 3, the decoder: how the English words come out, with one plane for both languages: the chosen phrase's Galician word vectors (filled dots) and the encoder's dashed path to the summary, the English word vectors (rings), and the decoder's state at its true position, starting exactly at the summary (all 2-D vectors in one coordinate system; Galician and English words have separate tables, but the summary's two numbers are used directly as the decoder's state), in a small toy model trained on 16 idiomatic Galician noun phrases ("a miña tía" → "my aunt", "unha tía miña" → "an aunt of mine", likewise amigo/friend, irmán/brother, veciña/neighbor, and túa/teu → your / of yours; 2-D learned vectors). One phrase, word by word, in the trained model: (a) how the next word is chosen: each English word has a learned vector; its score is the dot product with the decoder's state (how far it lies along the state's direction); softmax gives probabilities; the most likely word is written. (b) How the state is recomputed: the first state is the encoder's summary; after each word, state = ½ state + ½ that word's update vector (a second learned vector per English word, separate from its scoring vector, like skip-gram's two tables), drawn as vector addition with the numbers; so the summary's share halves at every step (all, 1/2, 1/4, ...) while the written words fill the rest, shown as a mix bar like section 2. (d) Is "an aunt of mine" the best translation? Correct and faithful (an keeps the new character introduced by unha), but rare in English: per 100 "my N", English books write "a friend of mine" 12.5 times, "an aunt of mine" 0.36, "a brother of mine" 0.08 (Google Books, 1990-2019; full chart on the n-gram page, section 7). "A ... of mine" picks one out of several. A translator writes "I had an aunt who...", which no word-by-word decoder can produce. (c) Why the first word comes out right although the summary is mostly the end of the phrase: in 3-word phrases the first word's ⅛ is still enough after training; in long sentences it fades; Sutskever, Vinyals & Le (2014) fed the source sentence reversed (BLEU 25.9 → 30.6); attention (section 4) removes the need.
 - Section 4, a second toy model: trained on 24 Galician sentences whose English follows the book counts. A training replay (Back/Next/Play over 2000 steps, every 25th recorded) shows all vectors moving from random starts (the plane zooms out as they grow), the probability of each correct word for the chosen sentence, and the model's translations at that step, each word the highest-probability one, with its own words fed back (at step 0 "had had had…"; around step 400 "unha tía miña cantaba" already gives "I had a brother who sang": the construction is learned before the noun). "o meu amigo cantaba" → "my friend sang", "un amigo meu cantaba" → "a friend of mine sang" (likewise compañeira/colleague), but "a miña tía cantaba" → "my aunt sang" and "unha tía miña cantaba" → "I had an aunt who sang" (likewise irmán/brother); verbs cantaba/sang, bailaba/danced, ría/laughed. Same 2-D model as sections 1-3. The decoder writes "I", "had" and "who", which have no Galician counterpart, because the training data does: what a decoder writes comes from its training data. With 2 dimensions only some random starts learn all 24; 3 dimensions always do.
