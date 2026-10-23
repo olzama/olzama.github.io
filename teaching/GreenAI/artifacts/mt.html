@@ -268,11 +268,11 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <div class="why" id="trWhy">
         <p class="label" id="trWhyHead"></p>
         <svg class="chain" id="trWhyChain" viewBox="0 0 1000 200" role="img" aria-label="How one output is chosen and how the next state is made"></svg>
-        <div class="controls"><span class="note">the decoder's steps for this input:</span><div class="pathstrip" id="trWhyStrip"></div><button id="trWhyPrev">← previous output</button><button id="trWhyNext">next output →</button></div>
+        <div class="controls"><span class="note" id="trWhyStripLbl">the decoder's steps for this input:</span><div class="pathstrip" id="trWhyStrip"></div><button id="trWhyPrev">← previous output</button><button id="trWhyNext">next output →</button><span class="note" id="trWhyStripKey"></span></div>
         <div class="cols">
           <div class="col">
             <svg id="trWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen position and the English word vectors" style="max-width:420px"></svg>
-            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span>the output written</span><span><span class="ring" style="color:var(--green)"></span>the right output (from the pair)</span><span><span class="ring"></span>other possible outputs (the 4 most probable labeled)</span></div>
+            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="trLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the right output (from the pair)</span><span><span class="ring"></span>other possible outputs (the 4 most probable labeled)</span></div>
           </div>
           <div class="col">
             <p class="label" id="trWhyLbl"></p>
@@ -402,11 +402,11 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <div class="why" id="ihtWhy">
         <p class="label">Why the model translates <span id="ihtWhyPh"></span> this way at this training step</p>
         <svg class="chain" id="ihtWhyChain" viewBox="0 0 1000 200" role="img" aria-label="How one output is chosen and how the next state is made"></svg>
-        <div class="controls"><span class="note">the decoder's steps for this input:</span><div class="pathstrip" id="ihtWhyStrip"></div><button id="ihtWhyPrev">← previous output</button><button id="ihtWhyNext">next output →</button></div>
+        <div class="controls"><span class="note" id="ihtWhyStripLbl">the decoder's steps for this input:</span><div class="pathstrip" id="ihtWhyStrip"></div><button id="ihtWhyPrev">← previous output</button><button id="ihtWhyNext">next output →</button><span class="note" id="ihtWhyStripKey"></span></div>
         <div class="cols">
           <div class="col">
             <svg id="ihtWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen position and the English word vectors" style="max-width:420px"></svg>
-            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span>the output written</span><span><span class="ring" style="color:var(--green)"></span>the right output (from the pair)</span></div>
+            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="ihtLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the right output (from the pair)</span></div>
           </div>
           <div class="col">
             <p class="label" id="ihtWhyLbl"></p>
@@ -568,7 +568,11 @@ window.mtWhy = function (o) {
   if ($(pre + "WhyPh")) $(pre + "WhyPh").innerHTML = `<i>${src.join(" ")}</i>`;
   if ($(pre + "WhyHead")) $(pre + "WhyHead").innerHTML = `Output ${k + 1} for <i>${src.join(" ")}</i>, with the vectors of training step ${sn.step} · mixed into the state before it: ` +
     (k ? `“${given.join(" ")}” (${mode === "train" ? "from the pair" : "the outputs the model wrote"})` : "nothing yet: state 1 is the summary");
-  $(pre + "WhyStrip").innerHTML = steps.map((x, m) => `<button class="${m === k ? "on" : ""}" data-m="${m}">output ${m + 1}: <span class="${EN[x.j] === tgt[m] ? "ok" : "bad"}">${EN[x.j]}</span></button>`).join(`<span class="ar">→</span>`);
+  // training: the right outputs, green when the right one has the highest probability now; translating: what the decoder writes
+  $(pre + "WhyStrip").innerHTML = steps.map((x, m) => `<button class="${m === k ? "on" : ""}" data-m="${m}">output ${m + 1}: <span class="${EN[x.j] === tgt[m] ? "ok" : "bad"}">${mode === "train" ? tgt[m] : EN[x.j]}</span></button>`).join(`<span class="ar">→</span>`);
+  if ($(pre + "WhyStripLbl")) $(pre + "WhyStripLbl").textContent = mode === "train" ? "the right outputs, one by one:" : "the decoder's steps for this input:";
+  if ($(pre + "WhyStripKey")) $(pre + "WhyStripKey").innerHTML = mode === "train" ? `<span class="ok">green</span>: has the highest probability now · <span class="bad">red</span>: not yet` : `<span class="ok">green</span>: the right output · <span class="bad">red</span>: a different one`;
+  if ($(pre + "LegWin")) $(pre + "LegWin").textContent = mode === "train" ? "highest probability now" : "the output written";
   $(pre + "WhyStrip").querySelectorAll("button").forEach(b => b.addEventListener("click", () => o.pick(+b.dataset.m)));
   // the plane: the English words, the state and its direction; labels only where they help
   const orange = css("--orange"), green = css("--green"), fg = css("--fg");
@@ -594,26 +598,33 @@ window.mtWhy = function (o) {
   $(pre + "WhyLbl").textContent = `Output ${k + 1}: the probability of each possible output`;
   $(pre + "WhyBars").innerHTML = order.map(j => `<div class="bar"><span class="w">${EN[j]}</span><span class="track"><span class="fill" style="width:${(s.p[j] * 100).toFixed(1)}%;background:var(${j === s.j ? "--orange" : j === wj ? "--green" : "--blue"})"></span>${ps ? `<span class="gh" style="left:${(ps[j] * 100).toFixed(1)}%"></span>` : ""}</span><span>${s.p[j].toFixed(2)}</span></div>`).join("") +
     (ps ? `<p class="note" style="margin-top:4px">thin mark: 25 training steps ago</p>` : "");
-  // the chain, drawn with this output's values: state → scores → probabilities → written; mixed in → next state
+  // the chain, drawn with this output's values: state → scores → probabilities → (training: the right output; translating: written) → mixed in → next state
   if ($(pre + "WhyChain")) {
     const box = (x, y, wd, ht, col, op) => `<rect x="${x}" y="${y}" width="${wd}" height="${ht}" rx="9" fill="${col}" fill-opacity="${op}" stroke="${col}" stroke-width="1.8"/>`;
-    const txt = (x, y, s_, cls = "", anchor = "middle") => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}">${s_}</text>`;
+    const txt = (x, y, s_, cls = "", anchor = "middle", fill = "") => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}"${fill ? ` fill="${fill}" style="fill:${fill}"` : ""}>${s_}</text>`;
     const arr = (d, col = "var(--fg)", dash = "") => `<path d="${d}" fill="none" stroke="${col}" stroke-width="2"${dash ? ` stroke-dasharray="${dash}"` : ""} marker-end="url(#${pre}ca)"/>`;
-    const fedW = EN[s.fed], last = mode !== "train" && w === "‹end›";
+    const fedW = EN[s.fed], last = mode === "train" ? want === "‹end›" : w === "‹end›", neg = css("--neg");
     let c = `<defs><marker id="${pre}ca" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--fg)"/></marker></defs>`;
-    c += box(10, 30, 170, 70, "var(--orange)", 0.12) + txt(95, 58, `state ${k + 1}`) + txt(95, 84, `(${r2(s.st[0])}, ${r2(s.st[1])})`, "mono");
-    c += arr("M182 65 L218 65");
-    c += box(222, 30, 240, 70, "var(--line)", 0.35) + txt(342, 58, "score of each possible output") + txt(342, 84, "= state · its vector", "mono");
-    c += arr("M464 65 L500 65");
-    c += box(504, 30, 160, 70, "var(--line)", 0.35) + txt(584, 58, "probabilities") + txt(584, 84, "add up to 1", "small");
-    c += arr("M666 65 L702 65");
-    c += box(706, 30, 284, 70, "var(--green)", 0.12) + txt(848, 58, `highest probability: “${w}”`) + txt(848, 84, last ? "written: finished" : "written", "small");
+    c += box(10, 26, 170, 84, "var(--orange)", 0.12) + txt(95, 62, `state ${k + 1}`) + txt(95, 88, `(${r2(s.st[0])}, ${r2(s.st[1])})`, "mono");
+    c += arr("M182 68 L218 68");
+    c += box(222, 26, 240, 84, "var(--line)", 0.35) + txt(342, 62, "score of each possible output") + txt(342, 88, "= state · its vector", "mono");
+    c += arr("M464 68 L500 68");
+    c += box(504, 26, 160, 84, "var(--line)", 0.35) + txt(584, 62, "probabilities") + txt(584, 88, "add up to 1", "small");
+    c += arr("M666 68 L702 68");
+    if (mode === "train" && wj >= 0) {
+      // the right output, and the highest other one: what the next training steps do to them
+      const other = order.find(j => j !== wj), bar = (y, j, col, sym) => txt(790, y + 4, EN[j], "", "end", col) +
+        `<rect x="800" y="${y - 6}" width="${(140 * s.p[j]).toFixed(1)}" height="12" rx="2" fill="${col}" fill-opacity="0.75"/>` + txt(946, y + 4, s.p[j].toFixed(2), "mono", "start") + txt(984, y + 5, sym, "", "middle", col);
+      c += box(706, 26, 284, 84, "var(--green)", 0.08) + txt(848, 44, "training looks at the right output", "small") + bar(62, wj, green, "↑") + bar(84, other, neg, "↓") + txt(848, 104, "↑ ↓: what the next training steps do", "small");
+    } else {
+      c += box(706, 26, 284, 84, "var(--green)", 0.12) + txt(848, 62, `highest probability: “${w}”`) + txt(848, 88, last ? "written: finished" : "written", "small");
+    }
     if (!last) {
-      c += arr("M848 102 L848 128", "var(--green)", "6 4");
-      c += box(222, 130, 768, 56, "var(--green)", 0.08) + txt(606, 154, `mixed into the state: “${fedW}”${mode === "train" ? " (from the pair)" : ""}${fedW !== w ? `, not “${w}”` : ""}`) +
-        txt(606, 176, `next state = ½ × state ${k + 1} + ½ × second vector of “${fedW}”`, "mono");
-      c += arr("M220 158 L184 158", "var(--orange)");
-      c += box(10, 130, 170, 56, "var(--orange)", 0.12) + txt(95, 154, `state ${k + 2}`) + txt(95, 176, "next output →", "small");
+      c += arr("M848 112 L848 138", "var(--green)", "6 4");
+      c += box(222, 140, 768, 54, "var(--green)", 0.08) + txt(606, 163, `mixed into the state: “${fedW}” (${mode === "train" ? "from the pair" : "the output written"})`) +
+        txt(606, 185, `next state = ½ × state ${k + 1} + ½ × second vector of “${fedW}”`, "mono");
+      c += arr("M220 167 L184 167", "var(--orange)");
+      c += box(10, 140, 170, 54, "var(--orange)", 0.12) + txt(95, 163, `state ${k + 2}`) + txt(95, 185, "next output →", "small");
     }
     $(pre + "WhyChain").innerHTML = c;
   }
@@ -628,7 +639,8 @@ window.mtWhy = function (o) {
   const own = mode !== "train" && k > 0 && steps.slice(0, k).some((x, m) => EN[x.j] !== tgt[m]);
   $(pre + "WhyNote").innerHTML = want === undefined ?
       `The right output ended at output ${tgt.length}; here ‹end› does not have the highest score, so the model goes on.` :
-    w === want ? `“${w}” lies farthest along the state's direction → highest score → written. It is the right output.` :
+    w === want ? `“${w}” lies farthest along the state's direction → highest score${mode === "train" ? ". It is the right output; the next training steps raise its probability further." : " → written. It is the right output."}` :
+    mode === "train" ? `The right output is “${want}”, but “${w}” lies farther along the state's direction → higher score. The next training steps move the vectors so that “${want}” scores higher and “${w}” lower; the thin marks show the move so far.` :
       `The right output is “${want}”, but “${w}” lies farther along the state's direction → higher score → written. Training moves the vectors until “${want}” wins.` +
       (own ? ` The state here was built from outputs the model wrote, some of them already wrong.` : "");
 }
