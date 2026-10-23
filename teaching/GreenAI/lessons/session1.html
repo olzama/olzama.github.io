@@ -2114,7 +2114,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Encoder and decoder: what they are</h2></header>
   <div class="body">
     <div class="board">
-      <svg viewBox="0 0 1400 730" role="img" aria-label="An input made of pieces goes into the encoder, which turns it into a vector, the input as numbers. The decoder turns the vector into an output, one piece at a time, ending with ‹end›; each piece it writes goes back into the decoder. Encoder: reads the input piece by piece and updates a vector after each piece; at the end the vector, often called the summary, stands for the whole input. Decoder: keeps its own vector, its state, which starts as the encoder's vector; at each step it chooses the next piece from its state, then mixes that piece into its state; it stops at ‹end›. Both are trained together on pairs of an input and the right output. Tasks built this way: translation, summarization, speech recognition, image captioning.">
+      <svg viewBox="0 0 1400 640" role="img" aria-label="An input made of pieces goes into the encoder, which turns it into a vector, the input as numbers. The decoder turns the vector into an output, one piece at a time, ending with ‹end›; each piece it writes goes back into the decoder. Encoder: reads the input piece by piece and updates a vector after each piece; at the end the vector, often called the summary, stands for the whole input. Decoder: keeps its own vector, its state, which starts as the encoder's vector; at each step it chooses the next piece from its state, then mixes that piece into its state; it stops at ‹end›. Both are trained together on pairs of an input and the right output. Tasks built this way: translation, summarization, speech recognition, image captioning.">
 <defs><marker id="edArr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--fg)"/></marker><marker id="edArrG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--green)"/></marker></defs>
 <text x="40" y="62" font-size="22" style="fill:var(--muted)" data-s="1" data-d="0" data-a="fade">input</text>
 <rect x="40" y="80" width="108" height="46" rx="6" fill="var(--muted)" fill-opacity="0.08" stroke="var(--muted)" stroke-width="1.5" data-s="1" data-d="0" data-a="fade" data-t="0.3"/>
@@ -2139,7 +2139,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 <rect x="846" y="62" width="200" height="84" rx="14" fill="var(--green)" fill-opacity="0.12" stroke="var(--green)" stroke-width="2" data-s="4" data-d="0.1" data-a="fade" data-t="0.3"/>
 <text x="946" y="114" font-size="32" style="fill:var(--green)" text-anchor="middle" font-weight="bold" data-s="4" data-d="0.3">Decoder</text>
 <path d="M1050 103 L1100 70" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#edArr)" data-s="4" data-d="0.5" data-t="0.4"/>
-<text x="1110" y="40" font-size="22" style="fill:var(--muted)" data-s="4" data-d="0.5" data-a="fade">output, one piece at a time</text>
+<text x="1110" y="250" font-size="22" style="fill:var(--muted)" data-s="4" data-d="0.5" data-a="fade">output, one piece at a time</text>
 <rect x="1110" y="52" width="128" height="36" rx="6" fill="var(--green)" fill-opacity="0.08" stroke="var(--green)" stroke-width="1.5" data-s="4" data-d="0.6" data-a="fade" data-t="0.3"/>
 <text x="1174" y="77" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.65">piece 1</text>
 <rect x="1110" y="96" width="128" height="36" rx="6" fill="var(--green)" fill-opacity="0.08" stroke="var(--green)" stroke-width="1.5" data-s="4" data-d="0.75" data-a="fade" data-t="0.3"/>
@@ -2148,30 +2148,31 @@ print("they match" if count == expected else "they do not match: check the loop 
 <text x="1174" y="165" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="0.95">…</text>
 <rect x="1110" y="184" width="128" height="36" rx="6" fill="var(--green)" fill-opacity="0.08" stroke="var(--green)" stroke-width="1.5" data-s="4" data-d="1.05" data-a="fade" data-t="0.3"/>
 <text x="1174" y="209" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="4" data-d="1.1">‹end›</text>
-<path d="M1240 70 C 1300 70, 1310 230, 1150 236 C 1040 240, 966 230, 960 152" fill="none" stroke="var(--green)" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#edArrG)" data-s="4" data-d="1.4" data-t="0.8"/>
-<text x="1000" y="268" font-size="20" style="fill:var(--green)" data-s="4" data-d="1.8">each piece it writes goes back into the decoder</text>
-<text x="20" y="328" font-size="25" style="fill:currentColor" data-s="5" data-d="0"><tspan font-weight="bold" style="fill:var(--blue)">Encoder</tspan>: turns an input into a vector. It reads the input piece by piece and updates</text>
-<text x="20" y="362" font-size="25" style="fill:currentColor" data-s="5" data-d="0.4">the vector after each piece; at the end, the vector (often called the summary) stands for the whole input.</text>
-<text x="20" y="414" font-size="25" style="fill:currentColor" data-s="6" data-d="0"><tspan font-weight="bold" style="fill:var(--green)">Decoder</tspan>: turns a vector into an output, one piece at a time. It keeps a vector of its own, its <tspan font-weight="bold">state</tspan>,</text>
-<text x="20" y="448" font-size="25" style="fill:currentColor" data-s="6" data-d="0.3">which starts as the encoder's vector. At each step it chooses the next piece from its state, then mixes that piece</text>
-<text x="20" y="482" font-size="25" style="fill:currentColor" data-s="6" data-d="0.6">into its state. It stops when it writes ‹end›, a special piece that means “finished”.</text>
-<text x="20" y="534" font-size="25" style="fill:currentColor" data-s="7" data-d="0">Both parts are trained together, on pairs: an input, and the right output for it, made by people.</text>
-<text x="20" y="590" font-size="20" style="fill:var(--muted)" data-s="8" data-d="0" data-a="fade">task</text>
-<text x="330" y="590" font-size="20" style="fill:var(--muted)" data-s="8" data-d="0" data-a="fade">input, to the encoder</text>
-<text x="800" y="590" font-size="20" style="fill:var(--muted)" data-s="8" data-d="0" data-a="fade">output, from the decoder</text>
-<path d="M20 600 H 1380" stroke="var(--line)" stroke-width="1.5" data-s="8" data-d="0" data-t="0.4"/>
-<text x="20" y="630" font-size="23" style="fill:currentColor" data-s="8" data-d="0.2">translation</text>
-<text x="330" y="630" font-size="23" style="fill:var(--blue)" data-s="8" data-d="0.25">a sentence in Galician</text>
-<text x="800" y="630" font-size="23" style="fill:var(--green)" data-s="8" data-d="0.3">the sentence in English</text>
-<text x="20" y="660" font-size="23" style="fill:currentColor" data-s="8" data-d="0.35">summarization</text>
-<text x="330" y="660" font-size="23" style="fill:var(--blue)" data-s="8" data-d="0.4">a long article</text>
-<text x="800" y="660" font-size="23" style="fill:var(--green)" data-s="8" data-d="0.45">a short summary</text>
-<text x="20" y="690" font-size="23" style="fill:currentColor" data-s="8" data-d="0.5">speech recognition</text>
-<text x="330" y="690" font-size="23" style="fill:var(--blue)" data-s="8" data-d="0.55">a recording of speech</text>
-<text x="800" y="690" font-size="23" style="fill:var(--green)" data-s="8" data-d="0.6">the words that were said</text>
-<text x="20" y="720" font-size="23" style="fill:currentColor" data-s="8" data-d="0.65">image captioning</text>
-<text x="330" y="720" font-size="23" style="fill:var(--blue)" data-s="8" data-d="0.7">a photo</text>
-<text x="800" y="720" font-size="23" style="fill:var(--green)" data-s="8" data-d="0.75">a sentence that describes it</text>
+<path d="M1242 70 C 1290 70, 1290 24, 1240 24 L 980 24 C 958 24, 952 36, 952 58" fill="none" stroke="var(--green)" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#edArrG)" data-s="4" data-d="1.4" data-t="0.8"/>
+<text x="1110" y="16" font-size="20" style="fill:var(--green)" text-anchor="middle" data-s="4" data-d="1.8">each piece it writes is mixed into the state; repeat until ‹end›</text>
+<text x="536" y="182" font-size="20" style="fill:var(--blue)" text-anchor="middle" data-s="2" data-d="0.5" data-a="fade">reads the input piece by piece,</text>
+<text x="536" y="206" font-size="20" style="fill:var(--blue)" text-anchor="middle" data-s="2" data-d="0.6" data-a="fade">updates a vector after each piece</text>
+<text x="742" y="186" font-size="20" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.5" data-a="fade">(often called the summary)</text>
+<text x="946" y="182" font-size="20" style="fill:var(--green)" text-anchor="middle" data-s="4" data-d="0.4" data-a="fade">keeps its own vector, the state:</text>
+<text x="946" y="206" font-size="20" style="fill:var(--green)" text-anchor="middle" data-s="4" data-d="0.5" data-a="fade">it starts as the encoder's vector</text>
+<text x="1110" y="276" font-size="20" style="fill:var(--muted)" data-s="4" data-d="1" data-a="fade">‹end› = finished</text>
+<text x="700" y="370" font-size="25" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0">Both parts are trained together, on pairs: an input and the right output for it.</text>
+<text x="20" y="450" font-size="20" style="fill:var(--muted)" data-s="6" data-d="0" data-a="fade">task</text>
+<text x="330" y="450" font-size="20" style="fill:var(--muted)" data-s="6" data-d="0" data-a="fade">input, to the encoder</text>
+<text x="800" y="450" font-size="20" style="fill:var(--muted)" data-s="6" data-d="0" data-a="fade">output, from the decoder</text>
+<path d="M20 462 H 1380" stroke="var(--line)" stroke-width="1.5" data-s="6" data-d="0" data-t="0.4"/>
+<text x="20" y="496" font-size="24" style="fill:currentColor" data-s="6" data-d="0.2">translation</text>
+<text x="330" y="496" font-size="24" style="fill:var(--blue)" data-s="6" data-d="0.25">a sentence in Galician</text>
+<text x="800" y="496" font-size="24" style="fill:var(--green)" data-s="6" data-d="0.3">the sentence in English</text>
+<text x="20" y="530" font-size="24" style="fill:currentColor" data-s="6" data-d="0.35">summarization</text>
+<text x="330" y="530" font-size="24" style="fill:var(--blue)" data-s="6" data-d="0.4">a long article</text>
+<text x="800" y="530" font-size="24" style="fill:var(--green)" data-s="6" data-d="0.45">a short summary</text>
+<text x="20" y="564" font-size="24" style="fill:currentColor" data-s="6" data-d="0.5">speech recognition</text>
+<text x="330" y="564" font-size="24" style="fill:var(--blue)" data-s="6" data-d="0.55">a recording of speech</text>
+<text x="800" y="564" font-size="24" style="fill:var(--green)" data-s="6" data-d="0.6">the words that were said</text>
+<text x="20" y="598" font-size="24" style="fill:currentColor" data-s="6" data-d="0.65">image captioning</text>
+<text x="330" y="598" font-size="24" style="fill:var(--blue)" data-s="6" data-d="0.7">a photo</text>
+<text x="800" y="598" font-size="24" style="fill:var(--green)" data-s="6" data-d="0.75">a sentence that describes it</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>

@@ -176,6 +176,16 @@ table.grid tr.yours th { color: var(--orange); }
 .phrases.pickable .phrase.pick { outline: 1.5px solid var(--orange); }
 .pathstrip .ok { color: var(--green); } .pathstrip .bad { color: var(--neg); }
 .why .bar { grid-template-columns: 6.5em minmax(0, 1fr) 3.5em; }
+.tf { display: grid; grid-template-columns: auto auto auto minmax(0, 1fr) 3em; gap: 5px 10px; align-items: center; font-size: 0.88rem; }
+.tf .h { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.tf .pos { font-family: var(--font-mono); color: var(--muted); }
+.tf .given { font-family: var(--font-mono); color: var(--muted); }
+.tf .want { font-family: var(--font-mono); color: var(--green); font-weight: 500; }
+.tf .track { display: block; height: 14px; background: var(--grid); border-radius: 3px; overflow: hidden; }
+.tf .fill { display: block; height: 100%; background: var(--green); }
+.tf .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.ring { width: 11px; height: 11px; border-radius: 50%; border: 2px solid currentColor; display: inline-block; }
+.sq { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
 .why { display: grid; gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
 .whogrid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 10px; align-items: center; }
 .whogrid .hd { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
@@ -223,10 +233,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <div class="controls">
       <label class="note" for="trA">Phrase</label><select id="trA"></select>
     </div>
-      <p class="note" style="color:var(--fg)">The model learns from these sixteen pairs. Each pair is a Galician phrase and its English translation, written by a person. Skip-gram learned from plain text; a translation model needs pairs, because it must learn which English goes with which Galician. The translations are the ground truth: the answers the model is trained to reproduce.</p>
+      <p class="label">Training data: 16 pairs, each a Galician phrase → its English translation by a person</p>
       <div class="phrases" id="trainData"></div>
-      <p class="note" style="color:var(--fg)">Training goes through each pair one English word at a time. Take <i>unha tía miña</i> → an aunt of mine. The decoder has to write five words, one after the other: an, aunt, of, mine, and ‹end›, a word that means “the translation is finished”. Call their places in the translation English positions 1 to 5. At each position, the model computes the probability it gives to the word the person wrote there: the <b>correct</b> word (section 3 shows how). Then it nudges every vector, Galician and English, a little in the direction that makes those probabilities higher, just as skip-gram pushed up the probability of the correct neighbor. All vectors start random.</p>
-      <p class="note" style="color:var(--fg)">One detail matters for reading the panels below. To choose a word, the decoder uses the words it has already written (section 3 shows how). In training, it is given the person's words instead of its own guesses: to predict position 3 of <i>an aunt of mine</i>, it is told that positions 1 and 2 were “an aunt”, even if it would itself have written “a brother”. Otherwise one early mistake would make it learn the rest of the phrase after the wrong words. So the bars and the count of words predicted right use the person's earlier words, while the list of the model's translations uses the model's own earlier words, where one mistake can lead to more.</p>
       <div class="controls">
         <button id="trBack" aria-label="Previous training step">← Back</button>
         <button class="primary" id="trNext">Next →</button>
@@ -238,24 +246,25 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="col">
           <p class="label">All the vectors at this training step</p>
           <svg id="trainSvg" viewBox="0 0 400 400" role="img" aria-label="Galician and English word vectors during training" style="max-width:420px"></svg>
-          <p class="note">Each point is one word's vector. Squares: the 12 Galician words, colored by kind: blue for nouns (tía, amigo, irmán, veciña), green for possessives (miña, túa, meu, teu), gray for articles (unha, un, a, o). Rings: the 12 English words. The words of the chosen phrase are drawn large and labeled; all the others are drawn small and faint. Faint lines: the path each vector has taken since its random start. The plane zooms out as training goes on: the vectors start small (about ±1, numbers on the axes) and grow. (Each English word also has a second vector, which the decoder uses when it mixes a word it wrote into its state (section 3, part b); it moves too but is not drawn.)</p>
+          <div class="legendrow"><span><span class="sq" style="background:var(--blue)"></span>Galician noun</span><span><span class="sq" style="background:var(--green)"></span>possessive</span><span><span class="sq" style="background:var(--muted)"></span>article</span><span><span class="ring"></span>English word</span><span>large, labeled: in the chosen phrase</span><span>faint line: path since the random start</span></div>
         </div>
         <div class="col">
           <p class="label" id="trainLbl"></p>
-          <div class="bars" id="trainBars"></div>
+          <div class="tf" id="trainBars"></div>
+          <p class="note">‹end›: the translation is finished · training raises these probabilities</p>
           <p class="label" style="margin-top:8px">The model's translations at this training step</p>
-          <p class="note">The model translates each phrase with its vectors as they are at this training step. At each English position it writes the English word with the highest probability, and then uses that word for the next position, whether it is right or wrong. Green: the same as the person's translation; red: different. Click a phrase to see below why the model translates it this way.</p>
+          <p class="note">each word: the highest probability, after the model's own earlier words · <span style="color:var(--green)">same as the person's</span> · <span style="color:var(--neg)">different</span> · click a phrase ↓</p>
           <div class="phrases pickable" id="pathAll"></div>
         </div>
       </div>
       <div class="why" id="trWhy">
         <p class="label">Why the model translates <span id="trWhyPh"></span> this way at this training step</p>
-        <p class="note" style="color:var(--fg)">The decoder's <b>state</b> is a vector that starts as the summary of the Galician phrase (section 2 shows how the summary is built). At each English position, every English word gets a <b>score</b>: the dot product of the word's vector with the state. The scores are turned into probabilities that add up to 1, as on the skip-gram page, and the word with the highest probability is written. Then the written word, right or wrong, is mixed into the state, and the next position follows (section 3 shows these steps one by one). Pick a position:</p>
+        <div class="decchain"><span class="st">state 1 = summary</span><span class="arr">→</span><span class="st">score of each English word = state · its vector</span><span class="arr">→</span><span class="st">probabilities</span><span class="arr">→</span><span class="st on">highest is written</span><span class="arr">→</span><span class="st">next state = ½ state + ½ second vector of that word</span><span class="arr">↻</span></div>
         <div class="pathstrip" id="trWhyStrip"></div>
         <div class="cols">
           <div class="col">
             <svg id="trWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen position and the English word vectors" style="max-width:420px"></svg>
-            <p class="note">Rings: the English words' vectors at this training step. Orange arrow: the decoder's state at the chosen position. Dashed line: the direction of the state; the farther along it a ring lies, the higher that word's score. Orange ring: the word the model writes; green ring: the person's word, when it is a different one.</p>
+            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span>the model's word</span><span><span class="ring" style="color:var(--green)"></span>the person's word</span></div>
           </div>
           <div class="col">
             <p class="label" id="trWhyLbl"></p>
@@ -337,10 +346,10 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </div>
     <div class="callout">
       <p class="label">c. If the summary is mostly the end of the phrase, how does the first word come out right?</p>
-      <p class="note" style="color:var(--fg)">In <i>unha tía miña</i>, the summary is ⅛ of the vector of <i>unha</i> + ¼ of <i>tía</i> + ½ of <i>miña</i> (section 2's rule, applied three times). Yet the first English word must be “an”, and only <i>unha</i> says that the phrase starts with “a” or “an” and not with “my”. Recall how the decoder chooses a word (part a): every English word gets a score, the dot product of its vector with the state, here the summary, and the word with the highest score is written. Because the summary is a sum of three parts, every score is a sum of three parts too. The table splits the scores of the six highest-scoring English words this way, in the trained model:</p>
+      <p class="note" style="color:var(--fg)">summary = ⅛ <i>unha</i> + ¼ <i>tía</i> + ½ <i>miña</i>, so every English word's score at position 1 = the part from ⅛ <i>unha</i> + the part from ¼ <i>tía</i> + ½ <i>miña</i>:</p>
       <table class="grid" style="justify-self:start"><thead><tr><th>English word</th><th>score from ¼ tía + ½ miña</th><th>score from ⅛ unha</th><th>score</th></tr></thead><tbody><tr><th><b>an</b></th><td>30.1</td><td>58.0</td><td><b>88.1</b></td></tr><tr><th>of</th><td>45.2</td><td>36.5</td><td>81.8</td></tr><tr><th>a</th><td>3.7</td><td>73.7</td><td>77.4</td></tr><tr><th>friend</th><td>−5.9</td><td>69.6</td><td>63.7</td></tr><tr><th>‹end›</th><td>49.1</td><td>3.2</td><td>52.3</td></tr><tr><th>mine</th><td>43.1</td><td>−4.8</td><td>38.3</td></tr></tbody></table>
-      <p class="note" style="color:var(--fg)">Without the part from <i>unha</i>, ‹end› would score highest, and the model would write nothing at all. The part from <i>unha</i> raises “an”, “a” and “friend” the most, enough to put “an” first. Between “an” and “a”, the part from <i>tía</i> and <i>miña</i> decides. So in these 3-word phrases ⅛ is enough: training nudged all the vectors until, for all 16 pairs, the correct English word scored highest, and the vector of <i>unha</i> became long enough that even ⅛ of it changes which word wins.</p>
-      <p class="note" style="color:var(--fg)">In long sentences the first words fade to almost nothing (section 2): in the whole sentence of section 2, 35 pieces long (words and punctuation), <i>tía</i>, read second, is only 0.5<sup>34</sup> of the summary. Real models had the same problem with long sentences, and their translations got worse. Sutskever and colleagues (2014) found a trick: feed the Galician sentence in <b>reverse</b>, so its first words are read last and are freshest when the decoder starts. Their BLEU score rose from 25.9 to 30.6 (BLEU, from 0 to 100, measures how many short word sequences of a model's translations also appear in translations by people). Attention removes the need for the trick: the decoder looks back at every word directly (see the <a href="attention.html">attention page</a>).</p>
+      <p class="note" style="color:var(--fg)">Without the part from <i>unha</i>, ‹end› would score highest: the model would write nothing. With it, “an” wins.</p>
+      <p class="note" style="color:var(--fg)">In long sentences the first words fade much further: in section 2's 35-piece sentence, <i>tía</i> is 0.5<sup>34</sup> of the summary. Sutskever and colleagues (2014) fed the sentence in <b>reverse</b>, so its first words are freshest when the decoder starts; their BLEU score (0–100, overlap with translations by people) rose from 25.9 to 30.6. Attention removes the need for the trick: the decoder looks back at every word (<a href="attention.html">attention page</a>).</p>
     </div>
     <div class="callout">
       <p class="label">d. Is “an aunt of mine” the best translation?</p>
@@ -370,24 +379,25 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="col">
           <p class="label">All the vectors at this training step</p>
           <svg id="ihtSvg" viewBox="0 0 400 400" role="img" aria-label="Galician and English word vectors of the second model during training" style="max-width:420px"></svg>
-          <p class="note">As in section 1: squares are Galician words (blue: nouns; gray: articles; green: the other words, possessives and verbs), rings are English words, and the chosen sentence's words are drawn large and labeled. Faint lines: the path each vector has taken since its random start. The orange dashed path is the encoder's summary of the chosen sentence (section 2). The plane zooms out as the vectors grow.</p>
+          <div class="legendrow"><span><span class="sq" style="background:var(--blue)"></span>Galician noun</span><span><span class="sq" style="background:var(--green)"></span>possessive, verb</span><span><span class="sq" style="background:var(--muted)"></span>article</span><span><span class="ring"></span>English word</span><span>large, labeled: in the chosen phrase</span><span>faint line: path since the random start</span></div><div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>- - - the encoder's summary of the chosen sentence</span></div>
         </div>
         <div class="col">
           <p class="label" id="ihtLbl"></p>
-          <div class="bars" id="ihtBars"></div>
+          <div class="tf" id="ihtBars"></div>
+          <p class="note">‹end›: the translation is finished · training raises these probabilities</p>
           <p class="label" style="margin-top:8px">The model's translations at this training step</p>
-          <p class="note">The model translates each phrase with its vectors as they are at this training step. At each English position it writes the English word with the highest probability, and then uses that word for the next position, whether it is right or wrong. Green: the same as the person's translation; red: different. Click a phrase to see below why the model translates it this way.</p>
+          <p class="note">each word: the highest probability, after the model's own earlier words · <span style="color:var(--green)">same as the person's</span> · <span style="color:var(--neg)">different</span> · click a phrase ↓</p>
           <div class="phrases pickable" id="ihtAll"></div>
         </div>
       </div>
       <div class="why" id="ihtWhy">
         <p class="label">Why the model translates <span id="ihtWhyPh"></span> this way at this training step</p>
-        <p class="note" style="color:var(--fg)">The decoder's <b>state</b> is a vector that starts as the summary of the Galician phrase (section 2 shows how the summary is built). At each English position, every English word gets a <b>score</b>: the dot product of the word's vector with the state. The scores are turned into probabilities that add up to 1, as on the skip-gram page, and the word with the highest probability is written. Then the written word, right or wrong, is mixed into the state, and the next position follows (section 3 shows these steps one by one). Pick a position:</p>
+        <div class="decchain"><span class="st">state 1 = summary</span><span class="arr">→</span><span class="st">score of each English word = state · its vector</span><span class="arr">→</span><span class="st">probabilities</span><span class="arr">→</span><span class="st on">highest is written</span><span class="arr">→</span><span class="st">next state = ½ state + ½ second vector of that word</span><span class="arr">↻</span></div>
         <div class="pathstrip" id="ihtWhyStrip"></div>
         <div class="cols">
           <div class="col">
             <svg id="ihtWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen position and the English word vectors" style="max-width:420px"></svg>
-            <p class="note">Rings: the English words' vectors at this training step. Orange arrow: the decoder's state at the chosen position. Dashed line: the direction of the state; the farther along it a ring lies, the higher that word's score. Orange ring: the word the model writes; green ring: the person's word, when it is a different one.</p>
+            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span>the model's word</span><span><span class="ring" style="color:var(--green)"></span>the person's word</span></div>
           </div>
           <div class="col">
             <p class="label" id="ihtWhyLbl"></p>
@@ -579,10 +589,10 @@ window.mtWhy = function (o) {
   $(pre + "WhyF").innerHTML = line.join("<br>");
   const own = k > 0 && steps.slice(0, k).some((x, m) => EN[x.j] !== tgt[m]);
   $(pre + "WhyNote").innerHTML = want === undefined ?
-      `The person's translation has already ended (with ‹end› at position ${tgt.length}), but here ‹end› does not have the highest score, so the model goes on and writes “${w}”.` :
-    w === want ? `At position ${k + 1} the model writes “${w}”, the same word as the person: “${w}” has the highest score, because its ring lies farthest along the direction of the state.` :
-      `At position ${k + 1} the person wrote “${want}”, but the model writes “${w}”: at this training step the ring of “${w}” lies farther along the direction of the state than the ring of “${want}”, so it gets the higher score. Training keeps nudging the vectors until “${want}” wins here.` +
-      (own ? ` Note also that this state was built from the model's own earlier words, and some of them already differ from the person's.` : "");
+      `The person's translation ended at position ${tgt.length}; here ‹end› does not score highest, so the model goes on.` :
+    w === want ? `“${w}” lies farthest along the state's direction → highest score → written.` :
+      `The person wrote “${want}”, but “${w}” lies farther along the state's direction → higher score. Training moves the vectors until “${want}” wins.` +
+      (own ? ` This state already contains the model's own wrong earlier words.` : "");
 };
 </script>
 <script>
@@ -641,8 +651,8 @@ function renderTrain() {
   $("pathStep").value = ti;
   $("trBack").disabled = ti <= 0; $("trNext").disabled = ti >= S.length - 1;
   const [src, tgt] = S2S.data[bA], cp = correctProbs(sn, src, tgt);
-  $("trainLbl").innerHTML = `<i>${src.join(" ")}</i>: probability of the correct word at each English position`;
-  $("trainBars").innerHTML = tgt.map((w, m) => `<div class="bar"><span class="w">${w}</span><span class="track"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%;background:var(--green)"></span></span><span>${cp[m].toFixed(2)}</span></div>`).join("");
+  $("trainLbl").innerHTML = `Training on <i>${src.join(" ")}</i>: the probability of the person's word at each English position, given the person's earlier words`;
+  $("trainBars").innerHTML = `<span class="h">position</span><span class="h">given</span><span class="h">person's word</span><span class="h" style="grid-column: span 2">probability</span>` + tgt.map((w, m) => `<span class="pos">${m + 1}</span><span class="given">${m ? tgt.slice(0, m).join(" ") : "(start)"}</span><span class="want">${w}</span><span class="track"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%"></span></span><span class="v">${cp[m].toFixed(2)}</span>`).join("");
   $("pathStepVal").textContent = `step ${sn.step} of ${S2S.steps} · ${Math.round(sn.acc * NWORDS)}/${NWORDS} English words predicted right (‹end› included), each given the person's earlier words`;
   window.mtWhy({ sn, GL, EN, src, tgt, pre: "tr", pos: trPos, pick: m => { trPos = m; renderTrain(); } });
   $("pathAll").innerHTML = S2S.data.map(([s2, t2], q2) => {
@@ -928,8 +938,8 @@ function renderT() {
     if (on) g += `<text x="${P(o[0]) + 8}" y="${Q(o[1]) + 4}" font-size="11" fill="${fg}">${w}</text>`; });
   $("ihtSvg").innerHTML = g;
   const cp = correctP(sn, src, tgt);
-  $("ihtLbl").innerHTML = `<i>${src.join(" ")}</i>: probability of each correct word`;
-  $("ihtBars").innerHTML = tgt.map((w, m) => `<div class="bar"><span class="w">${w}</span><span class="track"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%;background:var(--green)"></span></span><span>${cp[m].toFixed(2)}</span></div>`).join("");
+  $("ihtLbl").innerHTML = `Training on <i>${src.join(" ")}</i>: the probability of the person's word at each English position, given the person's earlier words`;
+  $("ihtBars").innerHTML = `<span class="h">position</span><span class="h">given</span><span class="h">person's word</span><span class="h" style="grid-column: span 2">probability</span>` + tgt.map((w, m) => `<span class="pos">${m + 1}</span><span class="given">${m ? tgt.slice(0, m).join(" ") : "(start)"}</span><span class="want">${w}</span><span class="track"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%"></span></span><span class="v">${cp[m].toFixed(2)}</span>`).join("");
   window.mtWhy({ sn, GL, EN, src, tgt, pre: "iht", pos: ihtPos, pick: m => { ihtPos = m; renderT(); } });
   $("ihtAll").innerHTML = IHAD.data.map((d, q2) => [d, q2]).filter(([[s2]]) => s2[3] === src[3]).map(([[s2, t2], q2]) => { const out = runAt(sn, s2).out.filter(w => w !== "‹end›"), ok = out.join(" ") === t2.filter(w => w !== "‹end›").join(" ");
     return `<div class="phrase${q2 === q ? " pick" : ""}" data-q="${q2}"><span><span class="src">${s2.join(" ")}</span> → <span class="${ok ? "ok" : "bad"}">${out.join(" ") || "(nothing)"}</span></span></div>`; }).join("");
