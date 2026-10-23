@@ -74,6 +74,13 @@ button:focus-visible, textarea:focus-visible, summary:focus-visible, a:focus-vis
   padding: 8px; display: grid; gap: 2px; width: min(320px, calc(100vw - 32px)); max-height: 70vh; overflow-y: auto; box-shadow: 0 8px 24px rgb(0 0 0 / 0.12); }
 .toc nav a { text-decoration: none; color: var(--fg); padding: 5px 8px; border-radius: 5px; font-size: 0.92rem; }
 .toc nav a:hover { background: var(--blue-soft); }
+/* contents menu of present mode: every screen, opening upward from the bar */
+.ptoc nav { top: auto; bottom: calc(100% + 8px); width: min(480px, calc(100vw - 32px)); max-height: 78vh; }
+.ptoc nav .ph { color: var(--muted); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 8px 2px; }
+.ptoc nav a { font-size: 14px; padding: 4px 8px; display: grid; grid-template-columns: 2.4em minmax(0, 1fr); }
+.ptoc nav a .n { color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
+.ptoc nav a.on { background: var(--blue-soft); }
+.ptoc > summary { font-size: 13px; padding: 4px 10px; }
 
 /* screens, reading mode */
 main { max-width: 1180px; margin: 0 auto; display: grid; gap: 22px; padding-top: 22px; }
@@ -3093,6 +3100,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <button id="pPrev" aria-label="Previous">←</button>
   <button id="pNext" aria-label="Next">→</button>
   <button id="pSkip" aria-label="Next screen, skipping the remaining steps of this one" title="Next screen, skipping the remaining steps (Shift + →)">Next screen ⇥</button>
+  <details class="toc ptoc" id="pToc"><summary title="Contents (C)">Contents</summary><nav id="pTocNav" aria-label="All screens"></nav></details>
   <button id="pNotes">Notes</button>
   <button id="pExit">Exit</button>
 </div>
@@ -3475,14 +3483,31 @@ $("pNext").onclick = next;
 $("pSkip").onclick = skip;
 $("pNotes").onclick = openNotes;
 $("pExit").onclick = exit;
+// present mode's contents: every screen under its part; a click jumps there
+{
+  const items = [];
+  document.querySelectorAll("main > .part, main > .screen").forEach(el => {
+    if (el.classList.contains("part")) { items.push(`<div class="ph">${el.querySelector("h1").textContent}</div>`); return; }
+    const k = screens.indexOf(el), h = el.querySelector("header h2, h1");
+    if (k >= 0) items.push(`<a href="#${el.id}" data-k="${k}"><span class="n">${k + 1}</span><span>${h ? h.textContent : el.id}</span></a>`);
+  });
+  $("pTocNav").innerHTML = items.join("");
+  $("pTocNav").addEventListener("click", e => { const a = e.target.closest("a"); if (!a) return; e.preventDefault(); $("pToc").open = false; show(+a.dataset.k); });
+  $("pToc").addEventListener("toggle", () => {
+    if (!$("pToc").open) return;
+    $("pTocNav").querySelectorAll("a").forEach(a => a.classList.toggle("on", +a.dataset.k === cur));
+    $("pTocNav").querySelector("a.on")?.scrollIntoView({ block: "center" });
+  });
+}
 const keys = e => {
   if (!presenting()) return;
   if (e.target.closest && e.target.closest("textarea, input, select")) return;
   if (e.key === "ArrowRight" && e.shiftKey) { e.preventDefault(); skip(); }
   else if (["ArrowRight", "PageDown"].includes(e.key) || (e.key === " " && !(e.target.closest && e.target.closest("button, summary, a")))) { e.preventDefault(); next(); }
   else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); prev(); }
-  else if (e.key === "Escape") exit();
+  else if (e.key === "Escape") { if ($("pToc").open) $("pToc").open = false; else exit(); }
   else if (e.key === "n" || e.key === "N") openNotes();
+  else if (e.key === "c" || e.key === "C") $("pToc").open = !$("pToc").open;
 };
 if (!isNotes) document.addEventListener("keydown", keys);
 // a click inside an embedded page moves the keyboard focus there: forward the presenter's keys
