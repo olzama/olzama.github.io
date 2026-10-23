@@ -662,7 +662,7 @@ window.mtWhy = function (o) {
     shown.forEach(([j, col], i) => { c += txt(456, 90 + 22 * i, sc(j), "mono", "middle", col); });
     c += arr("M456 132 L456 150");
     c += box(202, 154, 508, 212, "var(--line)", 0.35) + txt(456, 174, mode === "train" ? "probabilities (add up to 1) · ↑ ↓: what the next training steps do" : "probabilities (add up to 1) · the highest is written", "small");
-    order.forEach((j, i) => { const y = 192 + 14 * i, gold = j === wj, win = j === s.j, col = gold ? green : win ? orange : "var(--blue)";
+    [...s.p.keys()].forEach((j, i) => { const y = 192 + 14 * i, gold = j === wj, win = j === s.j, col = gold ? green : win ? orange : "var(--blue)";   // the possible outputs in a fixed order, so the bars can be followed from output to output
       c += txt(300, y + 4, EN[j], "mono", "end", gold || win ? col : muted) + `<rect x="308" y="${y - 5}" width="${(190 * s.p[j]).toFixed(1)}" height="10" rx="2" fill="${col}" fill-opacity="${gold || win ? 0.9 : 0.45}"/>` + txt(508, y + 4, s.p[j].toFixed(2), "mono small", "start");
       if (mode === "train" && wj >= 0 && (gold || j === other)) c += txt(560, y + 5, gold ? "↑" : "↓", "", "middle", gold ? green : neg);
       if (mode !== "train" && win) c += txt(566, y + 4, "written", "small", "start", orange); });
