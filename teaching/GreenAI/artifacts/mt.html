@@ -243,7 +243,6 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <p class="label" id="trWhyHead"></p>
         <p class="note" id="trWhyPair"></p>
         <div class="controls"><label class="note" for="trA">Pair</label><select id="trA"></select><span class="note">after each output, what is mixed into the state:</span><div class="seg" role="group" aria-label="Decoding in training or when translating"><button id="trModeTrain" aria-pressed="true">in training: the gold output</button><button id="trModeFree" aria-pressed="false">when translating: the output written</button></div></div>
-        <div class="controls"><span class="note">the model as it is after</span><button id="aBack" aria-label="One recorded training step back">← 1 step</button><button id="aNext" aria-label="One recorded training step forward">1 step →</button><button id="aReset" title="The random start">↺ step 0</button><input type="range" id="aStep" min="0" max="1" step="1" value="0" aria-label="Training step of the model used here" style="flex:1 1 140px; accent-color: var(--blue)"><span class="mono" id="aStepVal"></span><span class="note">(the first 25 steps one by one, then every 25th; training itself is part B)</span></div>
         <p class="label">Encoding: the inputs are mixed, one by one, into one vector, the summary (new = ½ × old + ½ × vector of the input; section 2 shows the rule)</p>
         <svg class="chain" id="trEncChain" viewBox="0 0 1000 118" role="img" aria-label="The encoder mixes the inputs one by one into the summary"></svg>
         <p class="label" id="trDecLbl"></p>
@@ -251,6 +250,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <p class="label" id="trWhyTblLbl"></p>
         <div class="tf" id="trWhyTable"></div>
         <div class="controls"><button id="trWhyPrev">← previous output</button><button id="trWhyNext">next output →</button><span class="note" id="trWhyStripKey"></span></div>
+        <div class="controls"><span class="note">then, the model as it is after</span><button id="aBack" aria-label="One recorded training step back">← 1 step</button><button id="aNext" aria-label="One recorded training step forward">1 step →</button><button id="aReset" title="The random start">↺ step 0</button><input type="range" id="aStep" min="0" max="1" step="1" value="0" aria-label="Training step of the model used here" style="flex:1 1 140px; accent-color: var(--blue)"><span class="mono" id="aStepVal"></span><span class="note">(the first 25 steps one by one, then every 25th; training itself is part B)</span></div>
         <div class="cols">
           <div class="col">
             <svg id="trWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen position and the English word vectors" style="max-width:420px"></svg>
