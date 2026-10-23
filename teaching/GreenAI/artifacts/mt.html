@@ -186,6 +186,10 @@ table.grid tr.yours th { color: var(--orange); }
 .tf .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .ring { width: 11px; height: 11px; border-radius: 50%; border: 2px solid currentColor; display: inline-block; }
 .sq { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.tf [data-k] { cursor: pointer; }
+.tf .sel { background: var(--hi); }
+.arrkey { display: inline-block; width: 18px; height: 0; border-top: 2.5px solid currentColor; vertical-align: middle; position: relative; }
+.arrkey::after { content: ""; position: absolute; right: -2px; top: -5.5px; border: 4px solid transparent; border-left: 6px solid currentColor; }
 .why { display: grid; gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
 .whogrid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 10px; align-items: center; }
 .whogrid .hd { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
@@ -244,21 +248,24 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       </div>
       <div class="cols">
         <div class="col">
-          <p class="label">All the vectors at this training step</p>
+          <p class="label">a. Training: how one English position nudges the vectors</p>
           <svg id="trainSvg" viewBox="0 0 400 400" role="img" aria-label="Galician and English word vectors during training" style="max-width:420px"></svg>
           <div class="legendrow"><span><span class="sq" style="background:var(--blue)"></span>Galician noun</span><span><span class="sq" style="background:var(--green)"></span>possessive</span><span><span class="sq" style="background:var(--muted)"></span>article</span><span><span class="ring"></span>English word</span><span>large, labeled: in the chosen phrase</span><span>faint line: path since the random start</span></div>
+          <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state at the selected position</span><span style="color:var(--green)"><span class="arrkey"></span> nudge to the person's word</span><span style="color:var(--neg)"><span class="arrkey"></span> nudges to the other words</span><span><span class="arrkey"></span> nudges to the Galician words (color of the square)</span><span>arrow lengths scaled to be visible</span></div>
         </div>
         <div class="col">
           <p class="label" id="trainLbl"></p>
           <div class="tf" id="trainBars"></div>
-          <p class="note">‹end›: the translation is finished · training raises these probabilities</p>
-          <p class="label" style="margin-top:8px">The model's translations at this training step</p>
-          <p class="note">each word: the highest probability, after the model's own earlier words · <span style="color:var(--green)">same as the person's</span> · <span style="color:var(--neg)">different</span> · click a phrase ↓</p>
-          <div class="phrases pickable" id="pathAll"></div>
+          <p class="note">‹end›: the translation is finished · click a position</p>
+          <div class="formula" id="trainF"></div>
+          <p class="note">One training step adds up these nudges over all 64 positions of the 16 pairs, then moves every vector a small step that way (Adam, learning rate 0.05). Next → shows the vectors 25 steps later.</p>
         </div>
       </div>
       <div class="why" id="trWhy">
-        <p class="label">Why the model translates <span id="trWhyPh"></span> this way at this training step</p>
+        <p class="label">b. Translating with the vectors of this training step</p>
+        <p class="note">each word: the highest probability, after the model's own earlier words · <span style="color:var(--green)">same as the person's</span> · <span style="color:var(--neg)">different</span> · click a phrase</p>
+        <div class="phrases pickable" id="pathAll"></div>
+        <p class="label">Why the model translates <span id="trWhyPh"></span> this way</p>
         <div class="decchain"><span class="st">state 1 = summary</span><span class="arr">→</span><span class="st">score of each English word = state · its vector</span><span class="arr">→</span><span class="st">probabilities</span><span class="arr">→</span><span class="st on">highest is written</span><span class="arr">→</span><span class="st">next state = ½ state + ½ second vector of that word</span><span class="arr">↻</span></div>
         <div class="pathstrip" id="trWhyStrip"></div>
         <div class="cols">
@@ -616,7 +623,7 @@ function translate(sn, src) {
   }
   return { path, summary: h, steps };
 }
-let ti = 0, trTimer = null, trPos = 0;
+let ti = 0, trTimer = null, trPos = 0, trK = 0;
 $("pathStep").max = S.length - 1;
 $("trainData").innerHTML = S2S.data.map(([s2, t2]) => `<div class="phrase"><span><span class="src">${s2.join(" ")}</span> → ${t2.filter(w => w !== "‹end›").join(" ")}</span></div>`).join("");
 // the probability the model gives each correct English word, with the correct previous word fed in (as in training)
@@ -625,6 +632,20 @@ function correctProbs(sn, src, tgt) {
   let st = h; return tgt.map(w => { const p = softmax(sn.O.map(o => st[0] * o[0] + st[1] * o[1]))[EN.indexOf(w)], iv = sn.I[EN.indexOf(w)]; st = [0.5 * st[0] + 0.5 * iv[0], 0.5 * st[1] + 0.5 * iv[1]]; return p; });
 }
 const TMAX = Math.max(...S.flatMap(sn => [...sn.G, ...sn.O]).flat().map(Math.abs));
+// training at one English position k: the decoder is given the person's earlier words; the loss is −log p(person's word)
+function tfAt(sn, src, tgt, k) {
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
+  let h = [0, 0]; for (const w of src) { const g = sn.G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; }
+  let st = h;
+  for (let m = 0; m < k; m++) { const iv = sn.I[EN.indexOf(tgt[m])]; st = [0.5 * st[0] + 0.5 * iv[0], 0.5 * st[1] + 0.5 * iv[1]]; }
+  const p = softmax(sn.O.map(o => dot(st, o))), y = EN.indexOf(tgt[k]);
+  // the nudge is minus the gradient of −log p(person's word)
+  const nO = EN.map((_, j) => [((j === y) - p[j]) * st[0], ((j === y) - p[j]) * st[1]]);
+  const dst = EN.reduce((a, _, j) => [a[0] + ((j === y) - p[j]) * sn.O[j][0], a[1] + ((j === y) - p[j]) * sn.O[j][1]], [0, 0]);
+  const share = src.map((w, j) => Math.pow(0.5, src.length - j) * Math.pow(0.5, k));
+  const nG = src.map((w, j) => [share[j] * dst[0], share[j] * dst[1]]);
+  return { st, p, y, nO, nG, share };
+}
 function renderTrainPlane(sn) {
   const [src, tgt] = S2S.data[bA];
   // zoom to this step: the vectors start small and grow during training
@@ -643,6 +664,18 @@ function renderTrainPlane(sn) {
   EN.forEach((w, j) => { const o = sn.O[j], on = tgt.includes(w);
     g += `<circle cx="${P(o[0])}" cy="${Q(o[1])}" r="${on ? 5.5 : 4}" fill="none" stroke="${fg}" stroke-opacity="${on ? 1 : 0.45}" stroke-width="${on ? 2 : 1.2}"/>`;
     if (on) g += `<text x="${P(o[0]) + 8}" y="${Q(o[1]) + 4}" font-size="11" fill="${fg}">${w}</text>`; });
+  // the selected position: the state and every vector's nudge
+  const T = tfAt(sn, src, tgt, Math.min(trK, tgt.length - 1)), green = css("--green"), neg = css("--neg");
+  const lens = [...T.nO, ...T.nG].map(v => Math.hypot(...v)), K = 0.25 * Z / Math.max(1e-9, ...lens);
+  const mk = (id, c) => `<marker id="${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${c}"/></marker>`;
+  g += `<defs>${mk("tnO", orange)}${mk("tnG", green)}${mk("tnR", neg)}${mk("tnB", css("--blue"))}${mk("tnM", muted)}${mk("tnP", green)}</defs>`;
+  g += `<line x1="200" y1="200" x2="${P(T.st[0])}" y2="${Q(T.st[1])}" stroke="${orange}" stroke-width="3" marker-end="url(#tnO)"/>`;
+  const arrow = (from, v, c, id) => { const x2 = from[0] + K * v[0], y2 = from[1] + K * v[1];
+    return Math.hypot(P(x2) - P(from[0]), Q(y2) - Q(from[1])) < 4 ? "" : `<line x1="${P(from[0])}" y1="${Q(from[1])}" x2="${P(x2)}" y2="${Q(y2)}" stroke="${c}" stroke-width="2.2" marker-end="url(#${id})"/>`; };
+  EN.forEach((w, j) => { const a = arrow(sn.O[j], T.nO[j], j === T.y ? green : neg, j === T.y ? "tnG" : "tnR"); g += a;
+    if (a && !tgt.includes(w)) g += `<text x="${P(sn.O[j][0]) + 8}" y="${Q(sn.O[j][1]) + 4}" font-size="11" fill="${neg}">${w}</text>`; });
+  src.forEach((w, j) => { const kind = NOUNS.has(w) ? ["--blue", "tnB"] : ARTS.has(w) ? ["--muted", "tnM"] : ["--green", "tnP"];
+    g += arrow(sn.G[GL.indexOf(w)], T.nG[j], css(kind[0]), kind[1]); });
   $("trainSvg").innerHTML = g;
 }
 function renderTrain() {
@@ -651,8 +684,19 @@ function renderTrain() {
   $("pathStep").value = ti;
   $("trBack").disabled = ti <= 0; $("trNext").disabled = ti >= S.length - 1;
   const [src, tgt] = S2S.data[bA], cp = correctProbs(sn, src, tgt);
-  $("trainLbl").innerHTML = `Training on <i>${src.join(" ")}</i>: the probability of the person's word at each English position, given the person's earlier words`;
-  $("trainBars").innerHTML = `<span class="h">position</span><span class="h">given</span><span class="h">person's word</span><span class="h" style="grid-column: span 2">probability</span>` + tgt.map((w, m) => `<span class="pos">${m + 1}</span><span class="given">${m ? tgt.slice(0, m).join(" ") : "(start)"}</span><span class="want">${w}</span><span class="track"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%"></span></span><span class="v">${cp[m].toFixed(2)}</span>`).join("");
+  $("trainLbl").innerHTML = `Training on <i>${src.join(" ")}</i>: at each English position, the probability of the person's word, given the person's earlier words`;
+  const k = Math.min(trK, tgt.length - 1);
+  $("trainBars").innerHTML = `<span class="h">position</span><span class="h">given</span><span class="h">person's word</span><span class="h" style="grid-column: span 2">probability</span>` + tgt.map((w, m) => { const c = m === k ? " sel" : "";
+    return `<span class="pos${c}" data-k="${m}">${m + 1}</span><span class="given${c}" data-k="${m}">${m ? tgt.slice(0, m).join(" ") : "(start)"}</span><span class="want${c}" data-k="${m}">${w}</span><span class="track${c}" data-k="${m}"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%"></span></span><span class="v${c}" data-k="${m}">${cp[m].toFixed(2)}</span>`; }).join("");
+  $("trainBars").querySelectorAll("[data-k]").forEach(e => e.addEventListener("click", () => { trK = +e.dataset.k; renderTrain(); }));
+  { const T = tfAt(sn, src, tgt, k), w = tgt[k], r2 = x => x.toFixed(2).replace("-", "−"), v2 = v => `(${r2(v[0])}, ${r2(v[1])})`, pw = T.p[T.y];
+    const other = [...T.p.keys()].filter(j => j !== T.y).sort((a, b) => T.p[b] - T.p[a])[0];
+    $("trainF").innerHTML = `position ${k + 1}: loss = −log p(“${w}”) = −log ${pw.toFixed(2)} = <b>${(-Math.log(pw)).toFixed(2)}</b> (0 when p = 1)<br>` +
+      `nudge to an English word's vector = (target − p) × state, target 1 for “${w}”, 0 for the others<br>` +
+      `<span class="m">“${w}”: (1 − ${pw.toFixed(2)}) × ${v2(T.st)} = ${v2(T.nO[T.y])}</span>: toward the state<br>` +
+      `<span style="color:var(--neg)">“${EN[other]}”: (0 − ${T.p[other].toFixed(2)}) × ${v2(T.st)} = ${v2(T.nO[other])}</span>: away from it<br>` +
+      `nudge to a Galician word's vector = its share in this state × Σ (target − p) × English vector; shares: ` + src.map((g2, j) => `<i>${g2}</i> ${T.share[j].toFixed(3)}`).join(", ") +
+      (k > 0 ? `<br>(the second vectors of ${tgt.slice(0, k).map(x => `“${x}”`).join(", ")} are nudged too; not drawn)` : ""); }
   $("pathStepVal").textContent = `step ${sn.step} of ${S2S.steps} · ${Math.round(sn.acc * NWORDS)}/${NWORDS} English words predicted right (‹end› included), each given the person's earlier words`;
   window.mtWhy({ sn, GL, EN, src, tgt, pre: "tr", pos: trPos, pick: m => { trPos = m; renderTrain(); } });
   $("pathAll").innerHTML = S2S.data.map(([s2, t2], q2) => {
@@ -660,7 +704,7 @@ function renderTrain() {
     const ok = out.join(" ") === t2.filter(w => w !== "‹end›").join(" ");
     return `<div class="phrase${q2 === bA ? " pick" : ""}" data-q="${q2}"><span><span class="src">${s2.join(" ")}</span> → <span class="${ok ? "ok" : "bad"}">${out.join(" ") || "(nothing)"}</span></span></div>`;
   }).join("");
-  $("pathAll").querySelectorAll(".phrase").forEach(d => d.addEventListener("click", () => { bA = +d.dataset.q; $("trA").value = bA; $("bA").value = bA; trPos = 0; bStage = 0; bSel = -1; renderB(); renderTrain(); }));
+  $("pathAll").querySelectorAll(".phrase").forEach(d => d.addEventListener("click", () => { bA = +d.dataset.q; $("trA").value = bA; $("bA").value = bA; trPos = 0; trK = 0; bStage = 0; bSel = -1; renderB(); renderTrain(); }));
 }
 function stopTrain() { clearInterval(trTimer); trTimer = null; $("pathPlay").textContent = "Play"; }
 $("trNext").addEventListener("click", () => { stopTrain(); ti = Math.min(ti + 1, S.length - 1); renderTrain(); });
@@ -834,8 +878,8 @@ function renderB() {
 }
 $("trA").innerHTML = $("bA").innerHTML; $("trA").value = bA;
 (window.__askState ||= []).push(() => { const [src, tgt] = S2S.data[bA], cp = correctProbs(S[ti], src, tgt); return `Section 1 (training): step ${S[ti].step} of ${S2S.steps}; for "${src.join(" ")}" the probability of each correct word: ${tgt.map((w, m) => `${w} ${cp[m].toFixed(2)}`).join(", ")}; ${Math.round(S[ti].acc * NWORDS)}/${NWORDS} words predicted right given the correct previous word.`; });
-$("bA").addEventListener("change", e => { bA = +e.target.value; trPos = 0; $("trA").value = bA; bStage = 0; bSel = -1; renderB(); renderTrain(); });
-$("trA").addEventListener("change", e => { bA = +e.target.value; trPos = 0; $("bA").value = bA; bStage = 0; bSel = -1; renderB(); renderTrain(); });
+$("bA").addEventListener("change", e => { bA = +e.target.value; trPos = 0; trK = 0; $("trA").value = bA; bStage = 0; bSel = -1; renderB(); renderTrain(); });
+$("trA").addEventListener("change", e => { bA = +e.target.value; trPos = 0; trK = 0; $("bA").value = bA; bStage = 0; bSel = -1; renderB(); renderTrain(); });
 $("bNext").addEventListener("click", () => { bStage++; bSel = -1; renderB(); });
 $("bBack").addEventListener("click", () => { bStage = Math.max(bStage - 1, 0); bSel = -1; renderB(); });
 renderB();
@@ -938,7 +982,7 @@ function renderT() {
     if (on) g += `<text x="${P(o[0]) + 8}" y="${Q(o[1]) + 4}" font-size="11" fill="${fg}">${w}</text>`; });
   $("ihtSvg").innerHTML = g;
   const cp = correctP(sn, src, tgt);
-  $("ihtLbl").innerHTML = `Training on <i>${src.join(" ")}</i>: the probability of the person's word at each English position, given the person's earlier words`;
+  $("ihtLbl").innerHTML = `Training on <i>${src.join(" ")}</i>: at each English position, the probability of the person's word, given the person's earlier words`;
   $("ihtBars").innerHTML = `<span class="h">position</span><span class="h">given</span><span class="h">person's word</span><span class="h" style="grid-column: span 2">probability</span>` + tgt.map((w, m) => `<span class="pos">${m + 1}</span><span class="given">${m ? tgt.slice(0, m).join(" ") : "(start)"}</span><span class="want">${w}</span><span class="track"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%"></span></span><span class="v">${cp[m].toFixed(2)}</span>`).join("");
   window.mtWhy({ sn, GL, EN, src, tgt, pre: "iht", pos: ihtPos, pick: m => { ihtPos = m; renderT(); } });
   $("ihtAll").innerHTML = IHAD.data.map((d, q2) => [d, q2]).filter(([[s2]]) => s2[3] === src[3]).map(([[s2, t2], q2]) => { const out = runAt(sn, s2).out.filter(w => w !== "‹end›"), ok = out.join(" ") === t2.filter(w => w !== "‹end›").join(" ");
