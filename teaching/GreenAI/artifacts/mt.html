@@ -245,7 +245,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <div class="why" id="trWhy">
         <p class="label" id="trWhyHead"></p>
         <p class="note" id="trWhyPair"></p>
-        <div class="controls"><span class="label" style="margin-right:4px">Training</span><button id="trBack" aria-label="One recorded training step back">← 1 step</button><button class="primary" id="trNext" aria-label="One recorded training step forward">Train 1 step →</button><span class="mono" id="trStepA"></span><span class="note">the first 25 training steps one by one, then every 25th</span></div>
+        <div class="controls"><span class="label" style="margin-right:4px">Training</span><button id="trBack" aria-label="One recorded training step back">← 1 step</button><button class="primary" id="trNext" aria-label="One recorded training step forward">Train 1 step →</button><button id="trReset" title="Back to the random start">↺ step 0</button><input type="range" id="pathStepA" min="0" max="1" step="1" value="0" aria-label="Training step" style="flex:1 1 160px; accent-color: var(--blue)"><span class="mono" id="trStepA"></span><span class="note">the first 25 training steps one by one, then every 25th</span></div>
         <div class="controls"><span class="note">after each output, what is mixed into the state:</span><div class="seg" role="group" aria-label="Decoding in training or when translating"><button id="trModeTrain" aria-pressed="true">in training: the gold output</button><button id="trModeFree" aria-pressed="false">when translating: the output written</button></div></div>
         <p class="label">Encoding: the inputs are mixed, one by one, into one vector, the summary (new = ½ × old + ½ × vector of the input; section 2 shows the rule)</p>
         <svg class="chain" id="trEncChain" viewBox="0 0 1000 118" role="img" aria-label="The encoder mixes the inputs one by one into the summary"></svg>
@@ -269,7 +269,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       </div>
       <div class="why" id="trWhole">
         <p class="label">Training as a whole: the 16 pairs, trained on together</p>
-        <div class="controls"><span class="label" style="margin-right:4px">Training</span><button id="trBack2" aria-label="One recorded training step back">← 1 step</button><button class="primary" id="trNext2" aria-label="One recorded training step forward">Train 1 step →</button><button id="pathPlay">Play training</button><input type="range" id="pathStep" min="0" max="1" step="1" value="0" aria-label="Training step" style="flex:1 1 200px; accent-color: var(--blue)"><span class="mono" id="pathStepVal"></span></div>
+        <div class="controls"><span class="label" style="margin-right:4px">Training</span><button id="trBack2" aria-label="One recorded training step back">← 1 step</button><button class="primary" id="trNext2" aria-label="One recorded training step forward">Train 1 step →</button><button id="pathPlay">Play training</button><button id="trReset2" title="Back to the random start">↺ step 0</button><input type="range" id="pathStep" min="0" max="1" step="1" value="0" aria-label="Training step" style="flex:1 1 200px; accent-color: var(--blue)"><span class="mono" id="pathStepVal"></span></div>
         <div class="cols">
           <div class="col">
             <p class="label" id="trainCurveLbl"></p>
@@ -703,7 +703,7 @@ function translate(sn, src) {
 }
 let ti = 0, trTimer = null, trPos = 0, trMode = "train";
 const CURVES = {};   // per pair: the probability of the gold output at each position, at every recorded step
-$("pathStep").max = S.length - 1;
+$("pathStep").max = $("pathStepA").max = S.length - 1;
 $("trainData").innerHTML = S2S.data.map(([s2, t2]) => `<div class="phrase"><span><span class="src">${s2.join(" ")}</span> → ${t2.filter(w => w !== "‹end›").join(" ")}</span></div>`).join("");
 // the probability the model gives each correct English word, with the correct previous word fed in (as in training)
 function correctProbs(sn, src, tgt) {
@@ -729,7 +729,7 @@ function renderCurve(src, tgt, k) {
 }
 function renderTrain() {
   const sn = S[ti], [src, tgt] = S2S.data[bA];
-  $("pathStep").value = ti;
+  $("pathStep").value = $("pathStepA").value = ti;
   const gapN = ti < S.length - 1 ? S[ti + 1].step - sn.step : 25, gapB = ti > 0 ? sn.step - S[ti - 1].step : 25, pl = n => `${n} step${n === 1 ? "" : "s"}`;
   for (const id of ["trBack", "trBack2"]) { $(id).disabled = ti <= 0; $(id).textContent = `← ${pl(gapB)}`; }
   for (const id of ["trNext", "trNext2"]) { $(id).disabled = ti >= S.length - 1; $(id).textContent = `Train ${pl(gapN)} →`; }
@@ -751,7 +751,8 @@ function renderTrain() {
 function stopTrain() { clearInterval(trTimer); trTimer = null; $("pathPlay").textContent = "Play training"; }
 for (const id of ["trNext", "trNext2"]) $(id).addEventListener("click", () => { stopTrain(); ti = Math.min(ti + 1, S.length - 1); renderTrain(); });
 for (const id of ["trBack", "trBack2"]) $(id).addEventListener("click", () => { stopTrain(); ti = Math.max(ti - 1, 0); renderTrain(); });
-$("pathStep").addEventListener("input", e => { stopTrain(); ti = +e.target.value; renderTrain(); });
+for (const id of ["pathStep", "pathStepA"]) $(id).addEventListener("input", e => { stopTrain(); ti = +e.target.value; renderTrain(); });
+for (const id of ["trReset", "trReset2"]) $(id).addEventListener("click", () => { stopTrain(); ti = 0; renderTrain(); });
 $("pathPlay").addEventListener("click", () => {
   if (trTimer) { stopTrain(); return; }
   if (ti >= S.length - 1) ti = 0;
