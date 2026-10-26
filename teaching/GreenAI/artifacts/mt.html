@@ -222,6 +222,7 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 #ihad .callout .col > p.note { min-height: 3.4em; }
 #ihad #ihbVal, #ihad #ihcVal { min-height: 40px; } #ihad #ihbAll, #ihad #ihcAll { min-height: 240px; }
 
+#ihbWhy .ok, #ihcWhy .ok { color: var(--green); } #ihbWhy .bad, #ihcWhy .bad { color: var(--neg); }
 #ihbAll, #ihcAll { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
 #ihbAll .phrase, #ihcAll .phrase { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 1.9em; line-height: 1.9em; }
 #ihbAll .phrase > span, #ihcAll .phrase > span { white-space: nowrap; }
@@ -596,6 +597,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
           <p class="label" id="ihbAllLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
           <div class="phrases pickable" id="ihbAll"></div>
           <p class="note" style="margin:0;min-height:3.4em">one output at a time, the most probable · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span> · click a sentence: its words on the plane</p>
+          <p class="label" id="ihbWhyLbl" style="margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
+          <div class="formula" id="ihbWhy" style="min-height:8.6em"></div>
           <p class="label" style="margin-top:8px">The probability of the gold outputs, over the training steps</p>
           <svg id="ihbCurve" viewBox="0 0 440 210" role="img" aria-label="Average probability of the gold outputs, training sentences and the development sentence, over the training steps" style="max-width:460px"></svg>
           <p class="note" id="ihbCurveNote" style="margin:0;min-height:5.2em"></p>
@@ -603,7 +606,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="col">
           <p class="label" id="ihbPlaneLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
           <svg id="ihbSvg" viewBox="0 0 400 400" role="img" aria-label="Galician and English word vectors of the second model during training" style="max-width:420px"></svg>
-          <div class="legendrow" style="min-height:3.4em;align-content:start"><span><span class="sq" style="background:var(--blue)"></span>Galician word</span><span><span class="ring"></span>English word</span><span>labeled: the gold output's words, and the words the model writes (<span style="color:var(--neg)">red</span>: written, not in the gold output)</span><span><span class="sw" style="background:var(--orange)"></span>- - - the encoder's path to the summary</span></div>
+          <div class="legendrow" style="min-height:3.4em;align-content:start"><span><span class="sq" style="background:var(--blue)"></span>Galician word</span><span><span class="ring"></span>English word</span><span>labeled: the gold output's words, and the words the model writes (<em style="color:var(--neg);font-style:normal">red</em>: written, not in the gold output)</span><span><span class="sw" style="background:var(--orange)"></span>- - - the encoder's path to the summary · arrow: the state at the output explained on the left</span></div>
         </div>
       </div>
     </div>
@@ -617,6 +620,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
           <p class="label" id="ihcAllLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
           <div class="phrases pickable" id="ihcAll"></div>
           <p class="note" style="margin:0;min-height:3.4em">one output at a time, the most probable · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span> · click a sentence: its words on the plane</p>
+          <p class="label" id="ihcWhyLbl" style="margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
+          <div class="formula" id="ihcWhy" style="min-height:8.6em"></div>
           <p class="label" style="margin-top:8px">The probability of the gold outputs, over the training steps</p>
           <svg id="ihcCurve" viewBox="0 0 440 210" role="img" aria-label="Average probability of the gold outputs, training sentences and the development sentence, over the training steps" style="max-width:460px"></svg>
           <p class="note" id="ihcCurveNote" style="margin:0;min-height:5.2em"></p>
@@ -624,7 +629,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="col">
           <p class="label" id="ihcPlaneLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
           <svg id="ihcSvg" viewBox="0 0 400 400" role="img" aria-label="Galician and English word vectors of the second model during training" style="max-width:420px"></svg>
-          <div class="legendrow" style="min-height:3.4em;align-content:start"><span><span class="sq" style="background:var(--blue)"></span>Galician word</span><span><span class="ring"></span>English word</span><span>labeled: the gold output's words, and the words the model writes (<span style="color:var(--neg)">red</span>: written, not in the gold output)</span><span><span class="sw" style="background:var(--orange)"></span>- - - the encoder's path to the summary</span></div>
+          <div class="legendrow" style="min-height:3.4em;align-content:start"><span><span class="sq" style="background:var(--blue)"></span>Galician word</span><span><span class="ring"></span>English word</span><span>labeled: the gold output's words, and the words the model writes (<em style="color:var(--neg);font-style:normal">red</em>: written, not in the gold output)</span><span><span class="sw" style="background:var(--orange)"></span>- - - the encoder's path to the summary · arrow: the state at the output explained on the left</span></div>
         </div>
       </div>
     </div>
@@ -1608,6 +1613,10 @@ const runAt = (sn, src) => { let h = [0, 0]; const path = [h]; for (const w of s
   let st = h; const out = []; for (let t = 0; t < 9; t++) { const p = softmax(sn.O.map(o => st[0] * o[0] + st[1] * o[1])), j = p.indexOf(Math.max(...p)); out.push(EN[j]); if (EN[j] === "‹end›") break; st = [0.5 * st[0] + 0.5 * sn.I[j][0], 0.5 * st[1] + 0.5 * sn.I[j][1]]; }
   return { path, out }; };
 const TRAIN4 = IHAD.data.map((d, i) => i).filter(i => !held || i !== HELD4);
+// translating: each output with its state, every word's score and probability
+const decode = (sn, src) => { let h = [0, 0]; for (const w of src) { const g = sn.G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; }
+  let st = h; const steps = []; for (let k = 0; k < 9; k++) { const sc = sn.O.map(o => st[0] * o[0] + st[1] * o[1]), p = softmax(sc), j = sc.indexOf(Math.max(...sc)); steps.push({ st, sc, p, j }); if (EN[j] === "‹end›") break; st = [0.5 * st[0] + 0.5 * sn.I[j][0], 0.5 * st[1] + 0.5 * sn.I[j][1]]; }
+  return steps; };
 const RIGHT = TS.map(sn => TRAIN4.filter(i => { const [s2, t2] = IHAD.data[i]; return runAt(sn, s2).out.join(" ") === t2.join(" "); }).length);
 const correctP = (sn, src, tgt) => { let h = [0, 0]; for (const w of src) { const g = sn.G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; }
   let st = h; return tgt.map(w => { const j = EN.indexOf(w), p = softmax(sn.O.map(o => st[0] * o[0] + st[1] * o[1]))[j]; st = [0.5 * st[0] + 0.5 * sn.I[j][0], 0.5 * st[1] + 0.5 * sn.I[j][1]]; return p; }); };
@@ -1637,6 +1646,16 @@ function renderT() {
   c += `<circle cx="${X(ti)}" cy="${Y(CUR4.tr[ti])}" r="4.5" fill="${green}" stroke="var(--panel)" stroke-width="1.5"/><circle cx="${X(ti)}" cy="${Y(CUR4.dev[ti])}" r="4.5" fill="${neg}" stroke="var(--panel)" stroke-width="1.5"/>`;
   $(PFX + "Curve").innerHTML = c;
   $(PFX + "CurveNote").innerHTML = (held ? `<span class="ok">green</span>: the 23 training sentences, averaged · <span class="bad">red</span>: the development sentence, <i>unha tía miña cantaba</i>` : `<span class="ok">green</span>: the 24 training sentences, averaged · <span class="bad">red</span>: <i>unha tía miña cantaba</i>, one of them`) + ` · averaged over 5 recorded steps, the dots are the values now (${CUR4.tr[ti].toFixed(2)} and ${CUR4.dev[ti].toFixed(2)}) · ` + FACT;
+  // why: at the first output that differs from the gold output (or, if none does, the closest call), the numbers that decide it
+  const ds = decode(sn, src), r2 = x => x.toFixed(2).replace("-", "−"), r2p = x => x < 0 ? `(${r2(x)})` : r2(x);
+  let wk = ds.findIndex((s, k) => EN[s.j] !== tgt[k]), close = false;
+  if (wk < 0) { close = true; wk = 0; let best = Infinity; ds.forEach((s, k) => { const gj = EN.indexOf(tgt[k]), o = s.sc.map((v, j) => j === gj ? -Infinity : v), m = s.sc[gj] - Math.max(...o); if (m < best) { best = m; wk = k; } }); }
+  const sw = ds[wk], gj = tgt[wk] ? EN.indexOf(tgt[wk]) : -1, wj = close ? sw.sc.map((v, j) => j === gj ? -Infinity : v).reduce((a, v, j, A) => v > A[a] ? j : a, 0) : sw.j;
+  const line = (j, cls, tag) => `<span class="${cls}">${tag} “${EN[j]}”: ${r2p(sw.st[0])}×${r2p(sn.O[j][0])} + ${r2p(sw.st[1])}×${r2p(sn.O[j][1])} = <b>${r2(sw.sc[j])}</b> → probability ${sw.p[j].toFixed(2)}</span>`;
+  $(PFX + "WhyLbl").textContent = close ? `Why it is right: output ${wk + 1}, the closest call` : `Why it goes wrong: output ${wk + 1}, the first that differs from the gold output`;
+  $(PFX + "Why").innerHTML = `state ${wk + 1} = (${r2(sw.st[0])}, ${r2(sw.st[1])})${wk === 0 ? ", the summary" : `, after “${ds.slice(0, wk).map(s => EN[s.j]).join(" ")}”`}<br>` +
+    (gj >= 0 ? line(gj, "ok", close ? "gold, written:" : "gold:") + "<br>" : "") + line(wj, close ? "" : "bad", close ? "highest other:" : "written:") +
+    `<br><span class="note" style="font-family:var(--font-body)">score = state · vector of the word (x₁·v₁ + x₂·v₂); on the plane: the state at output ${wk + 1} (arrow) and its direction (dashed): the word farther along it scores higher</span>`;
   // the plane, zoomed to this step, with the chosen sentence's words labeled
   const rr = runAt(sn, src), Z = 1.15 * Math.max(...[...sn.G, ...sn.O, ...rr.path].flat().map(Math.abs)) / PZ.get(PFX + "Svg");
   const P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z, tick = +(Z / 1.15).toPrecision(2);
@@ -1645,6 +1664,10 @@ function renderT() {
   g += `<text x="${P(tick)}" y="214" text-anchor="middle" font-size="10">${tick}</text><text x="${P(-tick)}" y="214" text-anchor="middle" font-size="10">${-tick}</text><text x="206" y="${Q(tick) + 4}" font-size="10">${tick}</text>`;
   g += `<polyline points="${rr.path.map(p => `${P(p[0]).toFixed(1)},${Q(p[1]).toFixed(1)}`).join(" ")}" fill="none" stroke="${orange}" stroke-width="1.8" stroke-dasharray="4 3"/>`;
   const h = rr.path[rr.path.length - 1]; g += `<circle cx="${P(h[0])}" cy="${Q(h[1])}" r="5" fill="${orange}"/>`;
+  { const s0 = sw.st, L0 = Math.hypot(...s0) || 1, u0 = [s0[0] / L0, s0[1] / L0];
+    g += `<defs><marker id="${PFX}wa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${orange}"/></marker></defs>`;
+    g += `<line x1="${P(-1.3 * Z * u0[0])}" y1="${Q(-1.3 * Z * u0[1])}" x2="${P(1.3 * Z * u0[0])}" y2="${Q(1.3 * Z * u0[1])}" stroke="${orange}" stroke-opacity="0.4" stroke-dasharray="5 4"/>`;
+    g += `<line x1="200" y1="200" x2="${P(s0[0])}" y2="${Q(s0[1])}" stroke="${orange}" stroke-width="3" marker-end="url(#${PFX}wa)"/><text x="${P(s0[0]) + 8}" y="${Q(s0[1]) - 6}" font-size="11" fill="${orange}">state ${wk + 1}</text>`; }
   GL.forEach((w, j) => { const v = sn.G[j], on = src.includes(w), c2 = css("--blue");
     g += `<rect x="${P(v[0]) - (on ? 5 : 3.5)}" y="${Q(v[1]) - (on ? 5 : 3.5)}" width="${on ? 10 : 7}" height="${on ? 10 : 7}" rx="2" fill="${c2}" fill-opacity="${on ? 1 : 0.45}"/>`;
     if (on) g += `<text x="${P(v[0]) - 8}" y="${Q(v[1]) + 4}" text-anchor="end" font-style="italic" font-size="11" fill="${c2}">${w}</text>`; });
