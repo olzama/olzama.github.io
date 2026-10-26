@@ -1805,7 +1805,7 @@ function smCore(o, n) {
   o.labels.forEach((lab, j) => { const w = o.e[j] * U;
     if (w >= 0.05) pcs += `<rect x="${at.toFixed(1)}" y="${yB}" width="${w.toFixed(1)}" height="20" class="${sh(j)}"/>`;
     if (w >= 30) shares += `<text x="${(at + w / 2).toFixed(1)}" y="${yB + 52}" text-anchor="middle" class="sv sw">${f(o.p[j])}</text>`; at += w; });
-  g += `<g ${H(n >= 2)}><text x="250" y="${yB + 15}" text-anchor="end" class="sv">sum ${f(o.Z)}</text>${pcs}` +
+  g += `<g ${H(n >= 2)}><text x="250" y="${yB + 15}" text-anchor="end" class="sv">sum ${f(o.Z)}</text><text x="250" y="${yB + 29}" text-anchor="end" class="st">the bars above, end to end</text>${pcs}` +
     `<line x1="${X}" y1="${yB + 26}" x2="${X + 300}" y2="${yB + 26}" class="ax"/><line x1="${X}" y1="${yB + 22}" x2="${X}" y2="${yB + 30}" class="ax"/><line x1="${X + 300}" y1="${yB + 22}" x2="${X + 300}" y2="${yB + 30}" class="ax"/>` +
     `<text x="${X}" y="${yB + 40}" text-anchor="middle" class="st">0</text><text x="${X + 300}" y="${yB + 40}" text-anchor="middle" class="st">${n >= 3 ? "1" : f(o.Z)}</text></g>` +
     `<g ${H(n >= 3)}>${shares}<text x="250" y="${yB + 52}" text-anchor="end" class="st">each one's share</text></g>`;
