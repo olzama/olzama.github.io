@@ -2217,7 +2217,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Loss and gradient</h2></header>
   <div class="body">
     <div class="board">
-      <svg viewBox="0 0 1400 720" role="img" aria-label="Loss and gradient, illustrated. The loss of a pair is L = −log p, with p the probability of the gold output. The curve: the loss as one parameter changes, all others fixed. At the parameter&#x27;s current value, the slope of the curve is the gradient; here it is negative, so increasing the parameter lowers the loss. Gradient descent, new = old − learning rate × gradient, steps downhill, with steps that shrink as the slope flattens. A model has one slope per parameter.">
+      <svg viewBox="0 0 1400 740" role="img" aria-label="Loss and gradient, illustrated. The loss of a pair is L = −log p, with p the probability of the gold output. The curve: the loss as one parameter changes, all others fixed. At the parameter&#x27;s current value, the slope of the curve is the gradient; here it is negative, so increasing the parameter lowers the loss. Gradient descent, new = old − learning rate × gradient, steps downhill, with steps that shrink as the slope flattens. A model has one slope per parameter.">
 <text class="note" x="40.0" y="44.0" font-size="20.8" style="fill:currentColor" data-s="1" data-d="0">the loss: how bad the model is on the training data</text>
 <text class="note" x="40.0" y="76.0" font-size="16.0" style="fill:var(--muted)" data-s="1" data-d="0.3">for a pair, L = −log p, with p the probability the model gives the gold output: p = 1 gives L = 0, smaller p a larger L</text>
 <path d="M140 540 H 1050 M140 540 V 110" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="2" data-d="0"/>
@@ -2235,7 +2235,8 @@ print("they match" if count == expected else "they do not match: check the loop 
 <text x="352.0" y="149.9" font-size="22" style="fill:var(--blue)" data-s="3" data-d="1.3">slope = rise ÷ run = −0.98 ÷ 0.5 = −1.96</text>
 <text class="note" x="352.0" y="177.9" font-size="16.0" style="fill:var(--blue)" data-s="3" data-d="1.6">this slope is the derivative of the loss for this parameter, dL/dw:</text>
 <text class="note" x="352.0" y="201.9" font-size="16.0" style="fill:var(--blue)" data-s="3" data-d="1.8">how much L changes per small change of w; negative: increasing w lowers L</text>
-<text class="note" x="40.0" y="600.0" font-size="17.6" style="fill:var(--green)" data-s="4" data-d="0">gradient descent: new = old − learning rate × derivative (here 0.4); the minus sends every step downhill</text>
+<text class="note" x="40.0" y="600.0" font-size="17.6" style="fill:var(--green)" data-s="4" data-d="0">gradient descent: new = old − learning rate × derivative; the learning rate is a number chosen by hand that sets the step size, here 0.4</text>
+<text class="note" x="40.0" y="628.0" font-size="17.6" style="fill:var(--green)" data-s="4" data-d="0.3">first step: w = −1.60 − 0.4 × (−1.96) = −1.60 + 0.78 = −0.82; the minus sends every step downhill</text>
 <line x1="218.0" y1="205.9" x2="347.1" y2="344.6" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" data-s="4" data-d="0.4"/>
 <path d="M338.0 340.5 L347.1 344.6 L343.7 335.2" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" data-s="4" data-d="1.0" data-a="fade" data-t="0.2"/>
 <rect x="346.1" y="341.6" width="14.0" height="14.0" rx="7" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="4" data-d="0.7" data-a="fade"/>
@@ -2255,8 +2256,8 @@ print("they match" if count == expected else "they do not match: check the loop 
 <path d="M629.8 489.1 L639.8 488.4 L632.3 481.8" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" data-s="4" data-d="3.25" data-a="fade" data-t="0.2"/>
 <rect x="638.8" y="485.4" width="14.0" height="14.0" rx="7" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="4" data-d="2.95" data-a="fade"/>
 <text x="661.8" y="526.4" font-size="19" style="fill:var(--green)" data-s="4" data-d="3.4">the steps shrink as the slope flattens</text>
-<text class="note" x="40.0" y="640.0" font-size="17.6" style="fill:currentColor" data-s="5" data-d="0">a model has many parameters: one derivative, one slope, for each; all of them together are the gradient, and every parameter steps at once</text>
-<text class="note" x="40.0" y="672.0" font-size="16.0" style="fill:var(--muted)" data-s="5" data-d="0.3">(computed for all of them together: the chain rule and backpropagation, the next screens)</text>
+<text class="note" x="40.0" y="670.0" font-size="17.6" style="fill:currentColor" data-s="5" data-d="0">a model has many parameters: one derivative, one slope, for each; all of them together are the gradient, and every parameter steps at once</text>
+<text class="note" x="40.0" y="700.0" font-size="16.0" style="fill:var(--muted)" data-s="5" data-d="0.3">(computed for all of them together: the chain rule and backpropagation, the next screens)</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
@@ -2265,7 +2266,7 @@ print("they match" if count == expected else "they do not match: check the loop 
     <p>Training needs a number for how bad the model is on its training data: the loss. For a training pair, the decoder gives the gold output some probability p, and the loss is minus the log of p. If the gold output is certain, p is 1 and the loss is 0; the smaller p, the larger the loss.</p>
     <p>The loss depends on the model's parameters, the numbers in its vectors. The curve shows how the loss changes as one parameter changes, while all the others stay as they are. It is an illustration: a real loss depends on millions of parameters, but along any one of them it looks like a curve like this.</p>
     <p>At the parameter's current value, the curve has a slope. That slope is the gradient: how much the loss changes per change of the parameter. Here it is negative, minus 1.96: increasing the parameter lowers the loss.</p>
-    <p>So training steps against the gradient: new value equals old value minus the learning rate times the gradient. With a negative gradient, the minus makes the step go up, to the right, which is downhill. With a positive gradient it would go left, again downhill. Each step lands lower, and the steps shrink as the slope flattens near the bottom. This is gradient descent.</p>
+    <p>So training steps against the gradient: new value equals old value minus the learning rate times the derivative. The learning rate is a number chosen by hand that sets the size of the steps; here it is 0.4. The first step: minus 1.60, minus 0.4 times minus 1.96, which is minus 1.60 plus 0.78, minus 0.82. With a negative gradient, the minus makes the step go up, to the right, which is downhill. With a positive gradient it would go left, again downhill. Each step lands lower, and the steps shrink as the slope flattens near the bottom. This is gradient descent.</p>
     <p>A model has many parameters. The gradient has one slope for each of them, and every parameter takes its step at the same time. How the gradient is computed for all of them together, even for parameters far from the loss, is the subject of the chain rule and of backpropagation, on the next screens.</p>
   </div>
 </section>
