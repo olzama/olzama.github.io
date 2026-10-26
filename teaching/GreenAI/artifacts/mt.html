@@ -603,7 +603,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="col">
           <p class="label" id="ihbPlaneLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
           <svg id="ihbSvg" viewBox="0 0 400 400" role="img" aria-label="Galician and English word vectors of the second model during training" style="max-width:420px"></svg>
-          <div class="legendrow" style="min-height:3.4em;align-content:start"><span><span class="sq" style="background:var(--blue)"></span>Galician word</span><span><span class="ring"></span>English word</span><span>large, labeled: in the chosen sentence</span><span><span class="sw" style="background:var(--orange)"></span>- - - the encoder's path to the summary</span></div>
+          <div class="legendrow" style="min-height:3.4em;align-content:start"><span><span class="sq" style="background:var(--blue)"></span>Galician word</span><span><span class="ring"></span>English word</span><span>labeled: the gold output's words, and the words the model writes (<span style="color:var(--neg)">red</span>: written, not in the gold output)</span><span><span class="sw" style="background:var(--orange)"></span>- - - the encoder's path to the summary</span></div>
         </div>
       </div>
     </div>
@@ -624,7 +624,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="col">
           <p class="label" id="ihcPlaneLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
           <svg id="ihcSvg" viewBox="0 0 400 400" role="img" aria-label="Galician and English word vectors of the second model during training" style="max-width:420px"></svg>
-          <div class="legendrow" style="min-height:3.4em;align-content:start"><span><span class="sq" style="background:var(--blue)"></span>Galician word</span><span><span class="ring"></span>English word</span><span>large, labeled: in the chosen sentence</span><span><span class="sw" style="background:var(--orange)"></span>- - - the encoder's path to the summary</span></div>
+          <div class="legendrow" style="min-height:3.4em;align-content:start"><span><span class="sq" style="background:var(--blue)"></span>Galician word</span><span><span class="ring"></span>English word</span><span>labeled: the gold output's words, and the words the model writes (<span style="color:var(--neg)">red</span>: written, not in the gold output)</span><span><span class="sw" style="background:var(--orange)"></span>- - - the encoder's path to the summary</span></div>
         </div>
       </div>
     </div>
@@ -1648,9 +1648,10 @@ function renderT() {
   GL.forEach((w, j) => { const v = sn.G[j], on = src.includes(w), c2 = css("--blue");
     g += `<rect x="${P(v[0]) - (on ? 5 : 3.5)}" y="${Q(v[1]) - (on ? 5 : 3.5)}" width="${on ? 10 : 7}" height="${on ? 10 : 7}" rx="2" fill="${c2}" fill-opacity="${on ? 1 : 0.45}"/>`;
     if (on) g += `<text x="${P(v[0]) - 8}" y="${Q(v[1]) + 4}" text-anchor="end" font-style="italic" font-size="11" fill="${c2}">${w}</text>`; });
-  EN.forEach((w, j) => { const o = sn.O[j], on = tgt.includes(w), wl = WORDLESS.has(w) && on;
-    g += `<circle cx="${P(o[0])}" cy="${Q(o[1])}" r="${on ? 5.5 : 4}" fill="none" stroke="${wl ? orange : fg}" stroke-opacity="${on ? 1 : 0.45}" stroke-width="${on ? 2 : 1.2}"/>`;
-    if (on) g += `<text x="${P(o[0]) + 8}" y="${Q(o[1]) + 4}" font-size="11" fill="${wl ? orange : fg}">${w}</text>`; });
+  const wr = rr.out;   // label the gold output's words, and the words the model writes; written but not gold: red
+  EN.forEach((w, j) => { const o = sn.O[j], gold = tgt.includes(w), bad = !gold && wr.includes(w), on = gold || bad, wl = WORDLESS.has(w) && gold, c = bad ? neg : wl ? orange : fg;
+    g += `<circle cx="${P(o[0])}" cy="${Q(o[1])}" r="${on ? 5.5 : 4}" fill="none" stroke="${c}" stroke-opacity="${on ? 1 : 0.45}" stroke-width="${on ? 2 : 1.2}"/>`;
+    if (on) g += `<text x="${P(o[0]) + 8}" y="${Q(o[1]) + 4}" font-size="11" fill="${c}">${w}</text>`; });
   $(PFX + "Svg").innerHTML = g;
 }
 function stopT() { clearInterval(tTimer); tTimer = null; $(PFX + "Play").textContent = "Play training"; }
