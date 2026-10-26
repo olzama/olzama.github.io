@@ -221,7 +221,7 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 @media (max-width: 600px) { .ltop { grid-template-columns: minmax(0, 1fr); } }
 .legendrow.compact { gap: 3px 10px; font-size: 0.74rem; }
 .tables3.two.one { grid-template-columns: max-content; }
-.actl .pathstrip button { font-size: 0.76rem; padding: 2px 6px; }
+.actl .pathstrip button { font-size: 0.72rem; padding: 2px 5px; }
 .actl .pathstrip { gap: 2px; }
 .actl .controls { gap: 6px; }
 .actl .mono { font-size: 0.8rem; }
@@ -329,7 +329,6 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
             <div id="trUpdPane" style="display:grid;gap:10px">
               <p class="label" id="trUpdLbl"></p>
               <p class="note" id="trUpdRule" style="margin:0;max-width:none"></p>
-              <div class="controls"><button id="aReplay">▶ play the update again, slowly</button><span class="note">the update is one step; it is played output by output, each output's push in turn (they add up)</span></div>
               <p class="note" id="trUpdNote" style="color:var(--fg)"></p>
             </div>
             <p class="note" id="trStageNote" style="color:var(--fg);max-width:none"></p>
@@ -742,7 +741,7 @@ window.mtWhy = function (o) {
     c += box(202, 20, 508, 110, "var(--line)", 0.35) + txt(456, 44, "score of each possible output = state · its vector", "") + txt(456, 64, "= x₁·v₁ + x₂·v₂, for the 12 possible outputs; two of them:", "small");
     shown.forEach(([j, col], i) => { c += txt(456, 90 + 22 * i, sc(j), "mono", "middle", col); });
     c += arr("M456 132 L456 150");
-    c += box(202, 154, 508, 212, "var(--line)", 0.35) + txt(456, 174, "probabilities (add up to 1)" + (mode === "train" ? " · ↑ ↓: what the update after this pair does (the last stage)" : " · the highest is written"), "small");
+    c += box(202, 154, 508, 212, "var(--line)", 0.35) + txt(456, 174, "probabilities (add up to 1)" + (mode === "train" ? " · ↑ ↓: what the update after this pair does" : " · the highest is written"), "small");
     [...s.p.keys()].forEach((j, i) => { const y = 192 + 14 * i, gold = j === wj, win = j === s.j, col = gold ? green : win ? orange : "var(--blue)";   // the possible outputs in a fixed order, so the bars can be followed from output to output
       c += txt(300, y + 4, EN[j], "mono", "end", gold || win ? col : muted) + `<rect x="308" y="${y - 5}" width="${(190 * s.p[j]).toFixed(1)}" height="10" rx="2" fill="${col}" fill-opacity="${gold || win ? 0.9 : 0.45}"/>` + txt(508, y + 4, s.p[j].toFixed(2), "mono small", "start");
       if (mode === "train" && wj >= 0 && (gold || j === other)) c += txt(560, y + 5, gold ? "↑" : "↓", "", "middle", gold ? green : neg);
@@ -901,7 +900,7 @@ function renderCurve(q, src, tgt, k) {
 function stagesFor(q, mode, snB) {
   const [src, tgt] = S2S.data[q], st = [{ kind: "tables", lbl: "tables" }];
   src.forEach((w, i) => st.push({ kind: "in", i: i + 1, lbl: `input ${i + 1}: ${w}` }));
-  if (mode === "train") { tgt.forEach((w, k) => st.push({ kind: "out", k, lbl: `output ${k + 1}: ${w}` })); st.push({ kind: "update", lbl: "the update" }); }
+  if (mode === "train") { tgt.forEach((w, k) => st.push({ kind: "out", k, lbl: `output ${k + 1}: ${w}` })); tgt.forEach((w, k) => st.push({ kind: "push", k, lbl: `update: output ${k + 1}` })); }
   else { translate(snB, src).steps.forEach((x, k) => st.push({ kind: "out", k, lbl: `output ${k + 1}: ${x.w}` })); st.push({ kind: "done", lbl: "done" }); }
   return st;
 }
@@ -913,7 +912,7 @@ function renderTables(sn, prev, after, q, sg, steps, flash, activeK = -1) {
   // the promises so far: at output m, the gold output ↑ and the highest other ↓; the current output's solid, the earlier ones faded; at the update all are carried out
   const nProm = trMode !== "train" ? 0 : up ? tgt.length : k + 1, prom = nProm ? promises(sn, null, q).slice(0, nProm) : [];
   const arrows = j => prom.map((x, m) => { const dir = EN.indexOf(x.gold.w) === j ? "↑" : EN.indexOf(x.other.w) === j ? "↓" : ""; if (!dir) return "";
-    const cur = up ? (activeK < 0 || m === activeK) : m === k; return `<span class="${dir === "↑" ? "ok" : "bad"}" style="opacity:${cur ? 1 : 0.4}${up && m === activeK ? ";font-weight:700" : ""}">${dir}<sub>${m + 1}</sub></span>`; }).join("");
+    const op = up ? (m === activeK ? 1 : m < activeK ? 0.7 : 0.3) : m === k ? 1 : 0.4; return `<span class="${dir === "↑" ? "ok" : "bad"}" style="opacity:${op}${up && m === activeK ? ";font-weight:700" : ""}">${dir}<sub>${m + 1}</sub></span>`; }).join("");
   const dl = (v, pv, strong) => pv != null && Math.abs(v - pv) >= 0.005 ? `<small class="d${strong ? " s" : ""}">${sg_(v - pv)}</small>` : "";
   const cells = (v, pv, strong, cls = "") => `<td class="${cls}${strong && pv && Math.abs(v[0] - pv[0]) >= 0.005 ? " a" : ""}">${r2(v[0])}${dl(v[0], pv && pv[0], strong)}</td><td class="${cls}${strong && pv && Math.abs(v[1] - pv[1]) >= 0.005 ? " a" : ""}">${r2(v[1])}${dl(v[1], pv && pv[1], strong)}</td>`;
   const base = up ? after : sn, ref = up ? sn : k < 0 ? prev : null;   // at the update: new numbers, change from before; at the first stages: what the previous update changed; at the outputs: the probabilities instead
@@ -930,9 +929,9 @@ function renderTables(sn, prev, after, q, sg, steps, flash, activeK = -1) {
     return `<tr class="${mixed ? "mixed" : ""}${on ? " now" : ""}${fl("I", j)}"><th>${w}</th>${cells(base.I[j], ref && ref.I[j], up)}</tr>`; });
   const tbl = (cap, rows, cls = "") => `<table class="${cls}"><caption>${cap}</caption><tbody>${rows.join("")}</tbody></table>`;
   $("trTabG").innerHTML = tbl("Galician inputs: vector", gRows);
-  $("trTab").innerHTML = tbl(up ? "possible outputs: vector for the score · the arrows collected at the outputs, now carried out (↑ₖ: toward state k; ↓ₖ: away from it)" : pk ? `possible outputs: vector for the score · probability at output ${k + 1}${trMode === "train" ? " · ↑ ↓: what the update will do (↑₁: promised at output 1, …)" : ""}` : "possible outputs: vector for the score (gold k: gold output k)", oRows) + tbl("possible outputs: second vector (mixed into the state)", iRows);
-  $("trTabLbl").textContent = up ? "The three tables after the update: what changed, cell by cell" : uA === 0 && !ref ? "The three tables at the random start: every number in all three is random" : "The three tables as they are now (all three started random)";
-  $("trTabNote").innerHTML = up ? `bold: a changed cell, with the change · rows this pair does not touch stay as they are` : ref ? `small numbers: what the previous update changed` : "";
+  $("trTab").innerHTML = tbl(up ? "possible outputs: vector for the score · ↑ₖ ↓ₖ: the arrows of output k (bold: this step)" : pk ? `possible outputs: vector for the score · probability at output ${k + 1}${trMode === "train" ? " · ↑ ↓: what the update will do (↑₁: promised at output 1, …)" : ""}` : "possible outputs: vector for the score (gold k: gold output k)", oRows) + tbl("possible outputs: second vector (mixed into the state)", iRows);
+  $("trTabLbl").textContent = up ? `The three tables, being updated: outputs 1–${activeK + 1} of ${tgt.length} carried out` : uA === 0 && !ref ? "The three tables at the random start: every number in all three is random" : "The three tables as they are now (all three started random)";
+  $("trTabNote").innerHTML = up ? "" : ref ? `small numbers: what the previous update changed` : "";
 }
 const sg_ = x => (x >= 0 ? "+" : "−") + Math.abs(x).toFixed(2);
 // the plane before decoding: both tables, and the summary building up input by input
@@ -961,14 +960,6 @@ function promises(snB, snA, q) {
   return tgt.map((w, k) => { const gj = EN.indexOf(w), oj = [...pB[k].keys()].filter(j => j !== gj).sort((a, b) => pB[k][b] - pB[k][a])[0];
     return { k, gold: { w, b: pB[k][gj], a: pA && pA[k][gj] }, other: { w: EN[oj], b: pB[k][oj], a: pA && pA[k][oj] } }; });
 }
-function renderUpdate(snB, snA, q, Z) {
-  const [src, tgt] = S2S.data[q], g = gradOf(snB, q), green = css("--green"), orange = css("--orange"), fg = css("--fg"), muted = css("--muted");
-  $("trUpdLbl").textContent = `The update after this pair: the tables on the left change, cell by cell`;
-  $("trUpdRule").innerHTML = `the rule (gradient descent, learning rate η = ${LR}): at each output, the <span class="ok">gold output's</span> row of the output table moves <b>toward</b> the state there, by η × (1 − its probability); every other row moves <b>away</b> from that state, by η × its probability · the input rows and the second-vector rows move so that the states themselves move toward the gold outputs`;
-  drawUpdatePlane(snB, snA, q, Z, -1);
-  const pr = promises(snB, snA, q), kept = pr.filter(x => x.gold.a > x.gold.b).length;
-  $("trUpdNote").textContent = `the probability of ${kept} of the ${tgt.length} gold outputs went up (the bars show it at the next round). Each update is a small move; the same pair comes back every round, and the rounds add up (the curves below).`;
-}
 function drawUpdatePlane(snB, snA, q, Z, activeK) {
   const [src, tgt] = S2S.data[q], g = gradOf(snB, q), green = css("--green"), orange = css("--orange"), fg = css("--fg"), muted = css("--muted");
   const P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z, put = placer();
@@ -984,17 +975,18 @@ function drawUpdatePlane(snB, snA, q, Z, activeK) {
 }
 let animTok = 0, lastStageKey = "";
 const lerpSn = (a, b, f) => { const m = (A, B) => A.map((v, j) => [v[0] + (B[j][0] - v[0]) * f, v[1] + (B[j][1] - v[1]) * f]); return { G: m(a.G, b.G), O: m(a.O, b.O), I: m(a.I, b.I) }; };
-function animateUpdate(snB, snA, q, Z, steps) {
-  const tok = ++animTok, [src, tgt] = S2S.data[q], K = tgt.length, parts = tgt.map((w, k) => gradOf(snB, q, k)), cum = [snB];
+// the update split by output: the k-th push is the gradient of output k's loss alone; the pushes add up to the whole update
+function pushesOf(snB, q) {
+  const [src, tgt] = S2S.data[q], parts = tgt.map((w, k) => gradOf(snB, q, k)), cum = [snB], pr = promises(snB, null, q);
   parts.forEach(g => cum.push(applyGrad(cum[cum.length - 1], g)));
-  const moved = parts.map(g => { const f = new Set(); ["G", "O", "I"].forEach(T => g["d" + T].forEach((d, j) => { if (Math.abs(LR * d[0]) >= 0.005 || Math.abs(LR * d[1]) >= 0.005) f.add(T + j); })); return f; });
-  const pr = promises(snB, snA, q), T = 1300, D = 800, t0 = performance.now();
-  const frame = (k, f) => { const cur = lerpSn(cum[k], cum[k + 1], f);
-    renderTables(snB, null, cur, q, { kind: "update" }, steps, moved[k], k); drawUpdatePlane(snB, cur, q, Z, k);
-    $("trUpdNote").innerHTML = `push ${k + 1} of ${K}: the arrows of output ${k + 1} carried out (<span class="ok">↑<sub>${k + 1}</sub> toward state ${k + 1}</span>, <span class="bad">↓<sub>${k + 1}</sub> away from it</span>); the rows that move flash`; };
-  const timer = setInterval(() => { if (tok !== animTok) { clearInterval(timer); return; } const el = performance.now() - t0, k = Math.min(K - 1, Math.floor(el / T)), f = Math.min(1, (el - k * T) / D); frame(k, f);
-    if (el >= K * T) { clearInterval(timer); renderTables(snB, null, snA, q, { kind: "update" }, steps); renderUpdate(snB, snA, q, Z); } }, 50);
+  // the rows to outline at push k: the input rows and second-vector rows it moves, and the two rows its arrows name (the other output rows move a little too)
+  const moved = parts.map((g, k) => { const f = new Set(); ["G", "I"].forEach(T => g["d" + T].forEach((d, j) => { if (Math.abs(LR * d[0]) >= 0.005 || Math.abs(LR * d[1]) >= 0.005) f.add(T + j); }));
+    f.add("O" + EN.indexOf(pr[k].gold.w)); f.add("O" + EN.indexOf(pr[k].other.w)); return f; });
+  return { parts, cum, moved, pr };
 }
+// the numbers count from before to after over a moment, so that the change is seen as a move
+function tween(from, to, ms, draw) { const tok = ++animTok, t0 = performance.now();
+  const timer = setInterval(() => { if (tok !== animTok) { clearInterval(timer); return; } const f = Math.min(1, (performance.now() - t0) / ms); draw(lerpSn(from, to, f), f); if (f >= 1) clearInterval(timer); }, 40); }
 function renderA() {
   animTok++;
   const q = uA % NP, r = Math.floor(uA / NP), snB = snapAt(uA), snA = snapAt(uA + 1), snP = uA > 0 ? snapAt(uA - 1) : null, [src, tgt] = S2S.data[q], n = src.length;
@@ -1004,25 +996,32 @@ function renderA() {
   $("aStepVal").textContent = `· round ${r + 1} of ${ROUNDS} · ${uA} pair${uA === 1 ? "" : "s"} seen so far${uA === 0 ? " (the random start)" : ""} · 16 pairs = 1 round`;
   $("trStages").innerHTML = st.map((x, i) => `<button class="${i < stIdx ? "done" : i === stIdx ? "on" : "todo"}" data-i="${i}">${x.lbl}</button>`).join(`<span class="ar">→</span>`) + `<span class="ar">→ next pair</span>`;
   $("trStages").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { stIdx = +b.dataset.i; renderA(); }));
-  const k = sg.kind === "out" ? sg.k : sg.kind === "update" || sg.kind === "done" ? 99 : 0, prevQ = (uA + NP - 1) % NP, Z = zFor(snB);
-  window.mtWhy({ sn: snB, prev: snP, prevLabel: snP ? `before the previous update (pair ${prevQ + 1}, ${S2S.data[prevQ][0].join(" ")})` : "", GL, EN, src, tgt, pre: "tr", pos: k, mode: trMode, Z, encUpTo: sg.kind === "tables" ? 0 : sg.kind === "in" ? sg.i : n, updateRef: "the update after this pair (the last stage)",
+  const k = sg.kind === "out" ? sg.k : sg.kind === "push" || sg.kind === "done" ? 99 : 0, prevQ = (uA + NP - 1) % NP, Z = zFor(snB), K = tgt.length;
+  window.mtWhy({ sn: snB, prev: snP, prevLabel: snP ? `before the previous update (pair ${prevQ + 1}, ${S2S.data[prevQ][0].join(" ")})` : "", GL, EN, src, tgt, pre: "tr", pos: k, mode: trMode, Z, encUpTo: sg.kind === "tables" ? 0 : sg.kind === "in" ? sg.i : n, updateRef: "the update after this pair (one stage per output)",
     head: `A. The training cycle, one pair at a time: round ${r + 1}, pair ${q + 1} of 16${trMode === "train" ? "" : " · translating with these tables: no gold output, no update"}`,
     pairHtml: `<span class="pairchip">pair ${q + 1} of 16: <i>${src.join(" ")}</i> → ${tgt.filter(x => x !== "‹end›").join(" ")}</span>${src.join(" ") === "unha tía miña" ? `<span class="note" style="margin:0 0 0 8px">(the lesson's example)</span>` : ""}`,
     allPairs: S2S.data, pick: m => { stIdx = 1 + n + m; renderA(); }, setMode: m => { trMode = m; stIdx = Math.min(stIdx, 1 + n); renderA(); } });
   const steps = trMode === "train" ? gradOf(snB, q).sts.map((s_, m) => { const p = softmax(snB.O.map(v => dot(s_, v))); return { fed: EN.indexOf(tgt[m]), j: p.indexOf(Math.max(...p)), p }; }) : translate(snB, src).steps.map(x => ({ fed: EN.indexOf(x.w), j: EN.indexOf(x.w), p: x.p }));
-  renderTables(snB, snP, snA, q, sg, steps);
-  $("trDecPane").style.display = sg.kind === "out" ? "" : "none"; $("trUpdPane").style.display = sg.kind === "update" ? "" : "none";
+  animTok++;
+  $("trDecPane").style.display = sg.kind === "out" ? "" : "none"; $("trUpdPane").style.display = sg.kind === "push" ? "" : "none";
   $("trWhyNote").style.display = sg.kind === "out" || sg.kind === "done" ? "" : "none";
+  if (sg.kind === "push") {
+    const { cum, moved, pr } = pushesOf(snB, q), pk = sg.k, x = pr[pk], key = uA + ":" + stIdx;
+    const draw = cur => { renderTables(snB, null, cur, q, { kind: "update" }, steps, moved[pk], pk); drawUpdatePlane(snB, cur, q, Z, pk); };
+    if (key !== lastStageKey && !reduce) { draw(cum[pk]); tween(cum[pk], cum[pk + 1], 1200, draw); } else draw(cum[pk + 1]);
+    $("trUpdLbl").textContent = `The update, output by output · step ${pk + 1} of ${K}: the arrows of output ${pk + 1} are carried out`;
+    $("trUpdRule").innerHTML = `the rule (gradient descent, learning rate η = ${LR}): the <span class="ok">gold output's</span> row of the output table moves <b>toward</b> state ${pk + 1}, by η × (1 − its probability); every other row moves <b>away</b> from state ${pk + 1}, by η × its probability · the input rows and the second-vector rows move so that state ${pk + 1} itself moves toward the gold output`;
+    const kept = pr.filter(y => correctProbs(cum[K], src, tgt)[y.k] > y.gold.b).length;
+    $("trUpdNote").innerHTML = `<span class="ok">↑<sub>${pk + 1}</sub> “${x.gold.w}”</span> toward state ${pk + 1} · <span class="bad">↓<sub>${pk + 1}</sub> “${x.other.w}”</span> away from it · outlined: the rows this step moves most (the other output rows move a little too, away from state ${pk + 1}) · bold: changed so far, with the change${pk === K - 1 ? ` · after all ${K} steps, the probability of ${kept} of the ${K} gold outputs is higher than before` : ""}`;
+  } else renderTables(snB, snP, snA, q, sg, steps);
   if (sg.kind === "tables" || sg.kind === "in") renderPlaneEnc(snB, src, sg.kind === "in" ? sg.i : 0, Z);
-  if (sg.kind === "update") { renderUpdate(snB, snA, q, Z); const key = uA + ":" + stIdx; if (key !== lastStageKey && !reduce) animateUpdate(snB, snA, q, Z, steps); }
   lastStageKey = uA + ":" + stIdx;
-  $("aReplay").style.display = sg.kind === "update" ? "" : "none"; $("aReplay").onclick = () => animateUpdate(snB, snA, q, Z, steps);
   document.documentElement.style.setProperty("--ctlh", ($("trCtl").offsetHeight + 6) + "px");
   const nextQ = (q + 1) % NP;
   $("trStageNote").innerHTML = sg.kind === "tables" ? `Next: the encoder reads input 1, <i>${src[0]}</i> (its row is highlighted).` :
     sg.kind === "in" ? (sg.i < n ? `Input ${sg.i} read: summary = ½ × old + ½ × row <i>${src[sg.i - 1]}</i>. Next: input ${sg.i + 1}, <i>${src[sg.i]}</i>.` : `All inputs read: the summary is the decoder's state 1. Next: output 1.`) :
-    sg.kind === "out" ? (sg.k < steps.length - 1 ? `Next: output ${sg.k + 2}${trMode === "train" ? " (the tables do not change yet: the update comes after the last output)" : ""}.` : trMode === "train" ? `Next: the update of the tables, from everything this pair showed.` : `Next: done (no update when translating).`) :
-    sg.kind === "update" ? `Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with these updated tables${nextQ === 0 ? " (a new round begins)" : ""}.` :
+    sg.kind === "out" ? (sg.k < steps.length - 1 ? `Next: output ${sg.k + 2}${trMode === "train" ? " (the tables do not change yet: the update comes after the last output)" : ""}.` : trMode === "train" ? `Next: the update of the tables, one output's arrows at a time.` : `Next: done (no update when translating).`) :
+    sg.kind === "push" ? (sg.k < K - 1 ? `Next: the arrows of output ${sg.k + 2}.` : `The update is complete. Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with these updated tables${nextQ === 0 ? " (a new round begins)" : ""}.`) :
     `Translating changes nothing in the tables. Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with the same tables.`;
   $("trainCurveLbl").innerHTML = `<i>${src.join(" ")}</i> over the rounds: the probability of the gold output at each output`;
   renderCurve(q, src, tgt, sg.kind === "out" && trMode === "train" ? sg.k : -1);
