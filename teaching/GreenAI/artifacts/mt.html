@@ -224,9 +224,12 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .tables3.two th, .tables3.two td { padding: 1px 4px; }
 .tables3.two td.tag { font-size: 0.68rem; padding-left: 3px; }
 .tables3.two td.p { color: var(--fg); padding-left: 10px; }
-.tables3.two td.arr { text-align: left; padding-left: 2px; font-family: var(--font-body); font-size: 0.7rem; }
+.tables3.two td.arr { text-align: left; padding-left: 2px; font-family: var(--font-body); font-size: 0.72rem; white-space: nowrap; }
+.tables3.two td.arr sub { font-size: 0.6em; }
 .tables3 small.d.s { color: var(--fg); font-weight: 600; }
 .tables3 td.mixed { background: var(--hi); }
+.tables3 tr.flash th, .tables3 tr.flash td { box-shadow: inset 0 0 0 1.5px var(--orange); }
+.tf .prow.lit > span { background: var(--hi); }
 .tables3.upd { overflow-x: auto; }
 .tables3.upd table { width: auto; font-size: 0.7rem; }
 .tables3.upd th, .tables3.upd td { padding: 1px 3px; }
@@ -303,13 +306,11 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
               <p class="label" id="trDecLbl"></p>
               <svg class="chain" id="trWhyChain" data-compact="1" viewBox="0 0 720 430" role="img" aria-label="How one output is chosen: the state, the scores, the probabilities, and how the next state is made"></svg>
               <p class="note" id="trWhyStripKey" style="margin:0"></p>
-              <p class="note" id="trPending" style="margin:0;max-width:none;color:var(--fg)"></p>
             </div>
             <div id="trUpdPane" style="display:grid;gap:10px">
               <p class="label" id="trUpdLbl"></p>
               <p class="note" id="trUpdRule" style="margin:0;max-width:none"></p>
-              <p class="label">The arrows collected at the outputs, and what the update did: probability before → after</p>
-              <div class="tf" id="trUpdProbs" style="grid-template-columns: auto auto 4em 1em 4em 1.5em minmax(0, 1fr)"></div>
+              <div class="controls"><button id="aReplay">▶ play the update again, slowly</button><span class="note">the update is one step; it is played output by output, each output's push in turn (they add up)</span></div>
               <p class="note" id="trUpdNote" style="color:var(--fg)"></p>
             </div>
             <div class="cols" style="grid-template-columns: 320px minmax(0, 1fr); gap: 14px">
@@ -812,7 +813,7 @@ const NWORDS = S2S.data.reduce((a, [, t]) => a + t.length, 0);
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
 // ---- the training rule, replayed here: one pair, one update (plain gradient descent on the sum of the pair's cross-entropies)
 // the forward pass of one pair in training (gold outputs mixed in), and the gradient of its loss for the three tables
-function gradOf(sn, q) {
+function gradOf(sn, q, onlyK) {
   const [src, tgt] = S2S.data[q];
   const hs = [[0, 0]]; for (const w of src) { const g = sn.G[GL.indexOf(w)], h = hs[hs.length - 1]; hs.push([0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]); }
   const golds = tgt.map(w => EN.indexOf(w)), sts = [hs[hs.length - 1]], ps = [];
@@ -823,7 +824,7 @@ function gradOf(sn, q) {
   for (let k = tgt.length - 1; k >= 0; k--) {
     const st = sts[k], dst = [0.5 * dnext[0], 0.5 * dnext[1]];
     if (k < tgt.length - 1) { dI[golds[k]][0] += 0.5 * dnext[0]; dI[golds[k]][1] += 0.5 * dnext[1]; }
-    ps[k].forEach((p, j) => { const d = p - (j === golds[k] ? 1 : 0);   // d(loss)/d(score of j): probability − 1 for the gold output, probability for the others
+    ps[k].forEach((p, j) => { const d = onlyK !== undefined && k !== onlyK ? 0 : p - (j === golds[k] ? 1 : 0);   // d(loss)/d(score of j): probability − 1 for the gold output, probability for the others
       dO[j][0] += d * st[0]; dO[j][1] += d * st[1]; dst[0] += d * sn.O[j][0]; dst[1] += d * sn.O[j][1]; });
     dnext = dst;
   }
@@ -831,7 +832,8 @@ function gradOf(sn, q) {
   for (let i = src.length - 1; i >= 0; i--) { const j = GL.indexOf(src[i]); dG[j][0] += 0.5 * dh[0]; dG[j][1] += 0.5 * dh[1]; dh = [0.5 * dh[0], 0.5 * dh[1]]; }
   return { dG, dO, dI, sts, ps, golds, hs };
 }
-const upd = (sn, q) => { const g = gradOf(sn, q), m = (T, D) => T.map((v, j) => [v[0] - LR * D[j][0], v[1] - LR * D[j][1]]); return { G: m(sn.G, g.dG), O: m(sn.O, g.dO), I: m(sn.I, g.dI) }; };
+const applyGrad = (sn, g) => { const m = (T, D) => T.map((v, j) => [v[0] - LR * D[j][0], v[1] - LR * D[j][1]]); return { G: m(sn.G, g.dG), O: m(sn.O, g.dO), I: m(sn.I, g.dI) }; };
+const upd = (sn, q) => applyGrad(sn, gradOf(sn, q));
 // the tables after every round, from the recorded random start
 const R = [{ G: S2S.init.G, O: S2S.init.O, I: S2S.init.I, step: 0 }];
 for (let r = 1; r <= ROUNDS; r++) { let sn = R[r - 1]; for (let q = 0; q < NP; q++) sn = upd(sn, q); sn.step = r; R.push(sn); }
@@ -899,24 +901,28 @@ function stagesFor(q, mode, snB) {
 // one scale for the whole pair, and for every pair with these tables: the rings stay where they are from stage to stage
 const zFor = sn => 1.15 * Math.max(...[...sn.G, ...sn.O, ...S2S.data.flatMap((d, q) => gradOf(sn, q).sts)].flat().map(Math.abs));
 // the model as two tables, highlighted for the stage; at the update, the new numbers with the change in each cell
-function renderTables(sn, prev, after, q, sg, steps) {
-  const [src, tgt] = S2S.data[q], k = sg.kind === "out" ? sg.k : -1, up = sg.kind === "update";
+function renderTables(sn, prev, after, q, sg, steps, flash, activeK = -1) {
+  const [src, tgt] = S2S.data[q], k = sg.kind === "out" ? sg.k : -1, up = sg.kind === "update", fl = (T, j) => flash && flash.has(T + j) ? " flash" : "";
+  // the promises so far: at output m, the gold output ↑ and the highest other ↓; the current output's solid, the earlier ones faded; at the update all are carried out
+  const nProm = trMode !== "train" ? 0 : up ? tgt.length : k + 1, prom = nProm ? promises(sn, null, q).slice(0, nProm) : [];
+  const arrows = j => prom.map((x, m) => { const dir = EN.indexOf(x.gold.w) === j ? "↑" : EN.indexOf(x.other.w) === j ? "↓" : ""; if (!dir) return "";
+    const cur = up ? (activeK < 0 || m === activeK) : m === k; return `<span class="${dir === "↑" ? "ok" : "bad"}" style="opacity:${cur ? 1 : 0.4}${up && m === activeK ? ";font-weight:700" : ""}">${dir}<sub>${m + 1}</sub></span>`; }).join("");
   const dl = (v, pv, strong) => pv != null && Math.abs(v - pv) >= 0.005 ? `<small class="d${strong ? " s" : ""}">${sg_(v - pv)}</small>` : "";
   const cells = (v, pv, strong, cls = "") => `<td class="${cls}${strong && pv && Math.abs(v[0] - pv[0]) >= 0.005 ? " a" : ""}">${r2(v[0])}${dl(v[0], pv && pv[0], strong)}</td><td class="${cls}${strong && pv && Math.abs(v[1] - pv[1]) >= 0.005 ? " a" : ""}">${r2(v[1])}${dl(v[1], pv && pv[1], strong)}</td>`;
   const base = up ? after : sn, ref = up ? sn : k < 0 ? prev : null;   // at the update: new numbers, change from before; at the first stages: what the previous update changed; at the outputs: the probabilities instead
   const pk = k >= 0 ? steps[k].p : null, other = pk && trMode === "train" ? [...pk.keys()].filter(j => j !== EN.indexOf(tgt[k])).sort((a, b) => pk[b] - pk[a])[0] : -1;
   const fed = steps.slice(0, Math.max(k, 0)).map(x => x.fed);   // mixed in before the current output
   const gRows = GL.map((w, j) => { const i = src.indexOf(w), on = sg.kind === "in" && i === sg.i - 1, cls = (i >= 0 ? "in" : "") + (on ? " now" : "");
-    return `<tr class="${cls}"><th>${w}</th>${cells(base.G[j], ref && ref.G[j], up)}<td class="tag">${i >= 0 ? `input ${i + 1}` : ""}</td></tr>`; });
+    return `<tr class="${cls}${fl("G", j)}"><th>${w}</th>${cells(base.G[j], ref && ref.G[j], up)}<td class="tag">${i >= 0 ? `input ${i + 1}` : ""}</td></tr>`; });
   const oRows = EN.map((w, j) => { const gi = tgt.indexOf(w), gold = gi >= 0 && trMode === "train", top = k >= 0 && j === steps[k].j;
     const cls = (gold ? "gold" : top ? "top" : "") + ((gold && gi === k) || (!gold && top) ? " now" : "");
-    const tag = gold ? (up ? `→ state ${gi + 1}` : `gold ${gi + 1}`) : "";   // the most probable output: orange row and word (the note under the tables says so)
-    const prob = pk ? `<td class="p">${pk[j].toFixed(2)}</td><td class="arr">${trMode === "train" && gi === k ? `<span class="ok">↑</span>` : trMode === "train" && j === other ? `<span class="bad">↓</span>` : top && trMode !== "train" ? `<span style="color:var(--orange)">written</span>` : ""}</td>` : "";
-    return `<tr class="${cls}"><th${top ? ' style="color:var(--orange)"' : ""}>${w}</th>${cells(base.O[j], ref && ref.O[j], up)}${prob}<td class="tag">${tag}</td></tr>`; });
+    const tag = gold && !up ? `gold ${gi + 1}` : "";   // the most probable output: orange row and word (the note under the tables says so); at the update the arrows say it all
+    const prob = (pk ? `<td class="p">${pk[j].toFixed(2)}</td>` : "") + (nProm || (pk && trMode !== "train") ? `<td class="arr">${trMode !== "train" ? (top ? `<span style="color:var(--orange)">written</span>` : "") : arrows(j)}</td>` : "");
+    return `<tr class="${cls}${fl("O", j)}"><th${top ? ' style="color:var(--orange)"' : ""}>${w}</th>${cells(base.O[j], ref && ref.O[j], up)}${prob}<td class="tag">${tag}</td></tr>`; });
   const iRows = EN.map((w, j) => { const mi = tgt.indexOf(w), mixed = fed.includes(j) || (up && trMode === "train" && mi >= 0 && mi < tgt.length - 1), on = k > 0 && j === steps[k - 1].fed;
-    return `<tr class="${mixed ? "mixed" : ""}${on ? " now" : ""}"><th>${w}</th>${cells(base.I[j], ref && ref.I[j], up)}</tr>`; });
+    return `<tr class="${mixed ? "mixed" : ""}${on ? " now" : ""}${fl("I", j)}"><th>${w}</th>${cells(base.I[j], ref && ref.I[j], up)}</tr>`; });
   const tbl = (cap, rows, cls = "") => `<table class="${cls}"><caption>${cap}</caption><tbody>${rows.join("")}</tbody></table>`;
-  $("trTab").innerHTML = tbl("Galician inputs: vector", gRows, "full") + tbl(up ? "possible outputs: vector for the score (→ state k: moves toward state k)" : pk ? `possible outputs: vector for the score · probability at output ${k + 1}${trMode === "train" ? " (↑ ↓: what the update will do)" : ""}` : "possible outputs: vector for the score (gold k: gold output k)", oRows) + tbl("possible outputs: second vector (mixed into the state)", iRows);
+  $("trTab").innerHTML = tbl("Galician inputs: vector", gRows, "full") + tbl(up ? "possible outputs: vector for the score · the arrows collected at the outputs, now carried out (↑ₖ: toward state k; ↓ₖ: away from it)" : pk ? `possible outputs: vector for the score · probability at output ${k + 1}${trMode === "train" ? " · ↑ ↓: what the update will do (↑₁: promised at output 1, …)" : ""}` : "possible outputs: vector for the score (gold k: gold output k)", oRows) + tbl("possible outputs: second vector (mixed into the state)", iRows);
   $("trTabLbl").textContent = up ? "The three tables after the update: what changed, cell by cell" : uA === 0 && !ref ? "The three tables at the random start: every number in all three is random" : "The three tables as they are now (all three started random)";
   const parts = [`<span style="color:var(--blue)">this pair's inputs</span>`, trMode === "train" ? `<span class="ok">its gold outputs</span>` : "", k >= 0 ? `<span style="color:var(--orange)">orange: the most probable output now</span>` : "", k > 0 ? "second vectors already mixed into the state" : ""].filter(Boolean);
   $("trTabNote").innerHTML = up ? `bold: a changed cell, with the change · rows this pair does not touch stay as they are` :
@@ -953,23 +959,38 @@ function renderUpdate(snB, snA, q, Z) {
   const [src, tgt] = S2S.data[q], g = gradOf(snB, q), green = css("--green"), orange = css("--orange"), fg = css("--fg"), muted = css("--muted");
   $("trUpdLbl").textContent = `The update after this pair: the tables on the left change, cell by cell`;
   $("trUpdRule").innerHTML = `the rule (gradient descent, learning rate η = ${LR}): at each output, the <span class="ok">gold output's</span> row of the output table moves <b>toward</b> the state there, by η × (1 − its probability); every other row moves <b>away</b> from that state, by η × its probability · the input rows and the second-vector rows move so that the states themselves move toward the gold outputs`;
+  drawUpdatePlane(snB, snA, q, Z, -1);
+  const pr = promises(snB, snA, q), kept = pr.filter(x => x.gold.a > x.gold.b).length;
+  $("trUpdNote").textContent = `the probability of ${kept} of the ${tgt.length} gold outputs went up (the bars show it at the next round). Each update is a small move; the same pair comes back every round, and the rounds add up (the curves below).`;
+}
+function drawUpdatePlane(snB, snA, q, Z, activeK) {
+  const [src, tgt] = S2S.data[q], g = gradOf(snB, q), green = css("--green"), orange = css("--orange"), fg = css("--fg"), muted = css("--muted");
   const P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z, put = placer();
   let s = `<defs><marker id="trua" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${orange}"/></marker></defs>`;
   s += `<line class="axis" x1="10" y1="200" x2="390" y2="200"/><line class="axis" x1="200" y1="10" x2="200" y2="390"/>`;
   { const tick = +(Z / 1.15).toPrecision(2); s += `<text x="${P(tick)}" y="214" text-anchor="middle" font-size="10">${tick}</text><text x="${P(-tick)}" y="214" text-anchor="middle" font-size="10">${-tick}</text><text x="206" y="${Q(tick) + 4}" font-size="10">${tick}</text>`; }
-  g.sts.forEach(st => { s += `<line x1="200" y1="200" x2="${P(st[0])}" y2="${Q(st[1])}" stroke="${orange}" stroke-opacity="0.5" stroke-width="3" marker-end="url(#trua)"/>`; });
+  g.sts.forEach((st, k) => { const on = activeK < 0 || k === activeK; s += `<line x1="200" y1="200" x2="${P(st[0])}" y2="${Q(st[1])}" stroke="${orange}" stroke-opacity="${on ? (activeK < 0 ? 0.5 : 0.95) : 0.2}" stroke-width="${k === activeK ? 4 : 3}" marker-end="url(#trua)"/>`; });
   EN.forEach((w, j) => { const b = snB.O[j], a = snA.O[j], gold = tgt.includes(w), c = gold ? green : fg;
     s += `<line x1="${P(b[0])}" y1="${Q(b[1])}" x2="${P(a[0])}" y2="${Q(a[1])}" stroke="${c}" stroke-opacity="0.6" stroke-width="1.4"/><circle cx="${P(b[0])}" cy="${Q(b[1])}" r="3" fill="none" stroke="${c}" stroke-opacity="0.45"/><circle cx="${P(a[0])}" cy="${Q(a[1])}" r="${gold ? 7 : 5}" fill="none" stroke="${c}" stroke-width="${gold ? 2.6 : 1.4}"/>`; });
   g.sts.forEach((st, k) => { const [x, y, an] = put(200 + (P(st[0]) - 200) * 0.6, 200 + (Q(st[1]) - 200) * 0.6 + 4, 52, 8); s += `<text x="${x}" y="${y}" text-anchor="${an}" font-size="11" fill="${orange}">state ${k + 1}</text>`; });
   EN.forEach((w, j) => { const a = snA.O[j], gold = tgt.includes(w), [x, y, an] = put(P(a[0]), Q(a[1]) + 4, 7.5 * w.length, gold ? 10 : 8); s += `<text x="${x}" y="${y}" text-anchor="${an}" font-size="12" fill="${gold ? green : muted}">${w}</text>`; });
   $("trWhySvg").innerHTML = s;
-  const pr = promises(snB, snA, q), row = (k, x, dir) => { const kept = dir === "↑" ? x.a > x.b : x.a < x.b;
-    return `<span class="pos">${k === null ? "" : k + 1}</span><span class="${dir === "↑" ? "want" : "want bad"}" style="${dir === "↑" ? "" : "color:var(--neg)"}">${x.w}</span><span class="v">${x.b.toFixed(3)}</span><span class="v" style="color:var(--muted)">→</span><span class="v" style="color:var(${kept ? dir === "↑" ? "--green" : "--neg" : "--muted"})">${x.a.toFixed(3)}</span><span class="${dir === "↑" ? "ok" : "bad"}">${dir}</span><span class="note" style="margin:0">${kept ? "as promised" : "not this time: the other outputs' pushes outweighed it"}</span>`; };
-  $("trUpdProbs").innerHTML = `<span class="h">output</span><span class="h">possible output</span><span class="h">before</span><span class="h"></span><span class="h">after</span><span class="h"></span><span class="h"></span>` + pr.map(x => row(x.k, x.gold, "↑") + row(null, x.other, "↓")).join("");
-  const kept = pr.filter(x => x.gold.a > x.gold.b).length;
-  $("trUpdNote").textContent = `${kept} of ${tgt.length} gold outputs went up. Each update is a small move; the same pair comes back every round, and the rounds add up (the curves below).`;
+}
+let animTok = 0, lastStageKey = "";
+const lerpSn = (a, b, f) => { const m = (A, B) => A.map((v, j) => [v[0] + (B[j][0] - v[0]) * f, v[1] + (B[j][1] - v[1]) * f]); return { G: m(a.G, b.G), O: m(a.O, b.O), I: m(a.I, b.I) }; };
+function animateUpdate(snB, snA, q, Z, steps) {
+  const tok = ++animTok, [src, tgt] = S2S.data[q], K = tgt.length, parts = tgt.map((w, k) => gradOf(snB, q, k)), cum = [snB];
+  parts.forEach(g => cum.push(applyGrad(cum[cum.length - 1], g)));
+  const moved = parts.map(g => { const f = new Set(); ["G", "O", "I"].forEach(T => g["d" + T].forEach((d, j) => { if (Math.abs(LR * d[0]) >= 0.005 || Math.abs(LR * d[1]) >= 0.005) f.add(T + j); })); return f; });
+  const pr = promises(snB, snA, q), T = 1300, D = 800, t0 = performance.now();
+  const frame = (k, f) => { const cur = lerpSn(cum[k], cum[k + 1], f);
+    renderTables(snB, null, cur, q, { kind: "update" }, steps, moved[k], k); drawUpdatePlane(snB, cur, q, Z, k);
+    $("trUpdNote").innerHTML = `push ${k + 1} of ${K}: the arrows of output ${k + 1} carried out (<span class="ok">↑<sub>${k + 1}</sub> toward state ${k + 1}</span>, <span class="bad">↓<sub>${k + 1}</sub> away from it</span>); the rows that move flash`; };
+  const timer = setInterval(() => { if (tok !== animTok) { clearInterval(timer); return; } const el = performance.now() - t0, k = Math.min(K - 1, Math.floor(el / T)), f = Math.min(1, (el - k * T) / D); frame(k, f);
+    if (el >= K * T) { clearInterval(timer); renderTables(snB, null, snA, q, { kind: "update" }, steps); renderUpdate(snB, snA, q, Z); } }, 50);
 }
 function renderA() {
+  animTok++;
   const q = uA % NP, r = Math.floor(uA / NP), snB = snapAt(uA), snA = snapAt(uA + 1), snP = uA > 0 ? snapAt(uA - 1) : null, [src, tgt] = S2S.data[q], n = src.length;
   const st = stagesFor(q, trMode, snB); stIdx = Math.max(0, Math.min(stIdx, st.length - 1)); const sg = st[stIdx];
   $("aStep").value = uA; $("aPairPrev").disabled = uA <= 0; $("aRoundBack").disabled = uA < NP; $("aPairNext").disabled = uA >= NU - 1; $("aRoundNext").disabled = uA + NP > NU - 1;
@@ -988,10 +1009,9 @@ function renderA() {
   $("trLegEnc").style.display = sg.kind === "tables" || sg.kind === "in" ? "" : "none"; $("trLegDec").style.display = sg.kind === "out" || sg.kind === "done" ? "" : "none"; $("trLegUpd").style.display = sg.kind === "update" ? "" : "none";
   $("trWhyNote").style.display = sg.kind === "out" || sg.kind === "done" ? "" : "none";
   if (sg.kind === "tables" || sg.kind === "in") renderPlaneEnc(snB, src, sg.kind === "in" ? sg.i : 0, Z);
-  if (sg.kind === "update") renderUpdate(snB, snA, q, Z);
-  if (sg.kind === "out" && trMode === "train") { const pr = promises(snB, null, q).slice(0, sg.k + 1);
-    $("trPending").innerHTML = `collected for the update, which comes after output ${tgt.length}: ` + pr.map(x => `output ${x.k + 1}: <span class="ok">${x.gold.w} ${x.gold.b.toFixed(2)} ↑</span> <span class="bad">${x.other.w} ${x.other.b.toFixed(2)} ↓</span>`).join(" · ") + (sg.k < tgt.length - 1 ? " · …" : " · that is all: next, the update"); }
-  else $("trPending").innerHTML = sg.kind === "out" ? "translating: no gold output, so nothing is collected and there is no update" : "";
+  if (sg.kind === "update") { renderUpdate(snB, snA, q, Z); const key = uA + ":" + stIdx; if (key !== lastStageKey && !reduce) animateUpdate(snB, snA, q, Z, steps); }
+  lastStageKey = uA + ":" + stIdx;
+  $("aReplay").style.display = sg.kind === "update" ? "" : "none"; $("aReplay").onclick = () => animateUpdate(snB, snA, q, Z, steps);
   $("trPlaneLbl").textContent = sg.kind === "update" ? "The output table on the plane: before → after, and the states that pushed it" : sg.kind === "out" || sg.kind === "done" ? "The output table on the plane, and the state" : "Both tables on the plane";
   const nextQ = (q + 1) % NP;
   $("trStageNote").innerHTML = sg.kind === "tables" ? `Next: the encoder reads input 1, <i>${src[0]}</i> (its row is highlighted).` :
