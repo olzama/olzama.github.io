@@ -216,6 +216,20 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 #tsAll .phrase { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 1.9em; line-height: 1.9em; }
 #tsDevStrip { overflow-x: auto; white-space: nowrap; height: 2.1em; align-items: center; min-width: 0; }
 #tsDevStrip button { flex: 0 0 auto; }
+/* section 4: the same rule (footprints measured over all training steps, phrases and outputs) */
+#ihad .cols, #ihad .cols > .col, #ihad .why, #ihad .controls { min-width: 0; }
+#ihad .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+#ihad .callout .col > p.note { min-height: 3.4em; }
+#ihad #ihtVal { min-height: 40px; } #ihad #ihtLbl { min-height: 54px; } #ihad #ihtBars { min-height: 262px; grid-auto-rows: 23px; align-items: center; } #ihad #ihtAll { min-height: 240px; }
+#ihad #ihtWhyChain { width: 100%; } #ihad #ihtLegGhost { display: inline-block; min-height: 42px; } #ihad #ihtWhyBars { min-height: 494px; }
+#ihad #ihtWhyF { min-height: 244px; }
+#ihtAll .phrase { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 1.9em; line-height: 1.9em; }
+#ihtAll .phrase > span { white-space: nowrap; }
+#ihad .tf > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+#ihad .tf .bar, #ihad .bars .bar { min-height: 23px; } #ihad #ihtWhyNote { min-height: 68px; } #ihad #ihNote { min-height: 90px; }
+/* section 3: every changing part keeps the footprint of its tallest content (measured over all phrases, steps and both models) */
+#bound #bRulerLbl { min-height: 18px; } #bound #bEncNote { min-height: 50px; } #bound #bBars { min-height: 132px; }
+#bound #bFormula { min-height: 122px; } #bound #bUpdNote { min-height: 104px; } #bound #bNote { min-height: 124px; } #bound #bUpdF { min-height: 122px; } #bound #bMixTxt { min-height: 66px; }
 #bVerdict .ok { color: var(--green); font-weight: 600; } #bVerdict .bad { color: var(--neg); font-weight: 600; }
 #trTest .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } #trTest .cols > .col, #trTest .controls { min-width: 0; } .testcard { width: 100%; }
 .ogrid.one .row { flex-wrap: nowrap; height: 1.9em; overflow: hidden; white-space: nowrap; }
@@ -242,6 +256,7 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 #bPlaneLbl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: none; }
 svg.chain, #trWhySvg, #trAllSvg, #trRightCurve, #trainCurve { max-width: 100%; }
 #trWhyStripKey { min-height: 3.2em; }
+#trTabNote { min-height: 1.6em; } #trWhyHead { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: none; }
 #trWhyNote { min-height: 4.8em; }
 #trUpdNote { min-height: 8.6em; }
 #trDecLbl, #trUpdLbl { min-height: 1.3em; }
@@ -282,7 +297,7 @@ svg.chain, #trWhySvg, #trAllSvg, #trRightCurve, #trainCurve { max-width: 100%; }
 .tf .prow.lit > span { background: var(--hi); }
 .tables3.upd { overflow-x: auto; }
 /* part B: protected dimensions, whatever the round or the procedure */
-#procNote { min-height: 5.8em; }
+#procNote { min-height: 7.4em; }
 #trWhole .legendrow { min-height: 3.4em; align-content: start; }
 #pathAll { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
 #pathAll .phrase { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 1.9em; line-height: 1.9em; }
@@ -440,7 +455,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
           <div class="col">
             <p class="label" id="tsAllLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
             <div class="phrases" id="tsAll"></div>
-            <p class="note" style="margin:0;min-height:3.4em">one output at a time, the most probable, mixed into the state before the next · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span></p>
+            <p class="note" style="margin:0;min-height:3.4em">one output at a time, the most probable, mixed into the state before the next · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span> · section 3 walks the development pair output by output, with either model</p>
           </div>
         </div>
         <div class="cols">
@@ -456,18 +471,6 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
             <p class="note" id="tsNote" style="margin:0;min-height:3.4em"></p>
           </div>
         </div>
-        <p class="label" style="margin-top:6px">The development phrase: what the model trained on 15 writes for it, and why</p>
-        <div class="cols">
-          <div class="col">
-            <p class="label" id="tsCardLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
-            <div class="testcard" id="tsCard"></div>
-            <div class="controls" style="flex-wrap:nowrap"><span class="note">output:</span><div class="pathstrip" id="tsDevStrip" style="flex-wrap:nowrap"></div></div>
-            <p class="note" id="tsDevNote" style="color:var(--fg);margin:0;min-height:5em;max-width:none"></p>
-          </div>
-          <div class="col">
-            <svg id="tsDevSvg" viewBox="0 0 400 400" role="img" aria-label="The development phrase, decoded by the model trained on 15: the state at one output and the English vectors" style="max-width:420px"></svg>
-            <div class="legendrow" style="min-height:3.4em;align-content:start"><span><span class="sw" style="background:var(--orange)"></span>the state at this output</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span>written (highest probability)</span><span><span class="ring" style="color:var(--green)"></span>the gold output</span><span><span class="sq" style="background:var(--blue)"></span>its inputs</span></div>
-          </div>
         </div>
       </div>
       <p class="note">2-D vectors; stochastic gradient descent, one pair per update, learning rate 0.2, 3000 rounds over the 16 pairs (part B can also train all 16 at once: the 16 gradients added up, learning rate 0.1, 3000 rounds, replayed by the page as well); <span class="mono">torch.manual_seed(0)</span>; <code>mt_s2s_train.py</code> records the random start, and the page replays the training with the same rule, so that every single update can be shown.</p>
@@ -604,7 +607,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <div class="why" id="ihtWhy">
         <p class="label">Why the model translates <span id="ihtWhyPh"></span> this way at this training step</p>
         <svg class="chain" id="ihtWhyChain" viewBox="0 0 1000 200" role="img" aria-label="How one output is chosen and how the next state is made"></svg>
-        <div class="controls"><span class="note" id="ihtWhyStripLbl">the decoder's steps for this input:</span><div class="pathstrip" id="ihtWhyStrip"></div><button id="ihtWhyPrev">← previous output</button><button id="ihtWhyNext">next output →</button><span class="note" id="ihtWhyStripKey"></span></div>
+        <div class="controls" style="flex-wrap:nowrap;min-width:0"><button id="ihtWhyPrev" style="flex:0 0 auto">← previous output</button><button id="ihtWhyNext" style="flex:0 0 auto">next output →</button><span class="note" id="ihtWhyStripLbl" style="flex:0 0 auto">the decoder's steps:</span><div class="pathstrip" id="ihtWhyStrip" style="flex:1 1 auto"></div></div>
+        <p class="note" id="ihtWhyStripKey" style="margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none;height:1.7em"></p>
         <div class="cols">
           <div class="col">
             <svg id="ihtWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen position and the English word vectors" style="max-width:420px"></svg>
@@ -1235,7 +1239,7 @@ function renderAllPlane(RR, r, o = { svg: "trAllSvg", ghost: "trAllGhost", get: 
     const v0 = RR[0][T][j]; g += `<circle cx="${P(v0[0])}" cy="${Q(v0[1])}" r="5" fill="var(--panel)" stroke="${orange}" stroke-width="2"/>`;
     const [x0, y0, a0] = put(P(v0[0]), Q(v0[1]) + 4, 44, 9); g += `<text x="${x0}" y="${y0}" text-anchor="${a0}" font-size="10" fill="${orange}">round 0</text>`; }
   GL.forEach((w, j) => { const v = sn.G[j], on = traceSel === "G" + j; g += `<rect data-k="G${j}" x="${P(v[0]) - 4.5}" y="${Q(v[1]) - 4.5}" width="9" height="9" rx="2" fill="${blue}" stroke="${on ? orange : "none"}" stroke-width="2.5" style="cursor:pointer"/>`; });
-  EN.forEach((w, j) => { const v = sn.O[j], on = traceSel === "O" + j; g += `<circle data-k="O${j}" cx="${P(v[0])}" cy="${Q(v[1])}" r="${on ? 7 : 5}" fill="none" stroke="${on ? orange : fg}" stroke-width="${on ? 2.6 : 1.4}" style="cursor:pointer"/>`; });
+  EN.forEach((w, j) => { const v = sn.O[j], on = traceSel === "O" + j; g += `<circle data-k="O${j}" cx="${P(v[0])}" cy="${Q(v[1])}" r="${on ? 7 : 5}" fill="none" stroke="${on ? orange : fg}" stroke-width="${on ? 2.6 : 1.4}" pointer-events="all" style="cursor:pointer"/><circle data-k="O${j}" cx="${P(v[0])}" cy="${Q(v[1])}" r="11" fill="none" pointer-events="all" style="cursor:pointer"/>`; });
   GL.forEach((w, j) => { const v = sn.G[j], [x, y, an] = put(P(v[0]), Q(v[1]) + 4, 7 * w.length, 8); g += `<text data-k="G${j}" x="${x}" y="${y}" text-anchor="${an}" font-style="italic" font-size="11" fill="${traceSel === "G" + j ? orange : blue}" style="cursor:pointer">${w}</text>`; });
   EN.forEach((w, j) => { const v = sn.O[j], [x, y, an] = put(P(v[0]), Q(v[1]) + 4, 7 * w.length, 8); g += `<text data-k="O${j}" x="${x}" y="${y}" text-anchor="${an}" font-size="11" fill="${traceSel === "O" + j ? orange : fg}" style="cursor:pointer">${w}</text>`; });
   $(o.svg).innerHTML = g;
@@ -1378,13 +1382,13 @@ function renderRead(r) {
   g += `<circle cx="${P(h[0])}" cy="${Q(h[1])}" r="7" fill="${orange}"/><text x="${P(h[0]) + 10}" y="${Q(h[1]) - 8}" fill="${orange}">summary</text>`;
   $("bSvg").innerHTML = g;
   $("bPlaneLbl").textContent = "One plane for both languages: the encoder reads";
-  for (const id of ["bRuler", "bRulerLbl", "bBars"]) $(id).hidden = true;
+  for (const id of ["bRuler", "bRulerLbl", "bBars"]) $(id).style.visibility = "hidden";
   const w = src[r - 1], v = LAST.G[GL.indexOf(w)], old = path[r - 1];
   $("bFormula").innerHTML = `reading <i>${w}</i> = (${r2(v[0])}, ${r2(v[1])})`;
   $("bUpdLbl").textContent = "b. How the summary was recomputed";
   $("bUpd").innerHTML = addSVG(old, v, h, r > 1 ? "old summary" : "", `+ ½ vector of “${w}”`, r === nR ? "summary" : "new summary");
   $("bUpdF").innerHTML = `summary = ½ × (${r2(old[0])}, ${r2(old[1])}) + ½ × vector(<i>${w}</i>) (${r2(v[0])}, ${r2(v[1])})<br>= <b>(${r2(h[0])}, ${r2(h[1])})</b>`;
-  $("bUpdNote").hidden = true;
+  $("bUpdNote").style.visibility = "hidden";
   $("bMixLbl").textContent = "What is in the summary now";
   const segs = src.slice(0, r).map((ww, j) => [ww, Math.pow(0.5, r - j), css("--blue")]);
   segs.push(["", Math.pow(0.5, r), css("--grid")]);
@@ -1405,8 +1409,8 @@ function renderB() {
   $("bStrip").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { bStage = +b.dataset.g; bSel = -1; renderB(); }));
   $("bBack").disabled = bStage <= 0; $("bNext").disabled = bStage >= nR + n - 1;
   if (bStage < nR) { renderRead(bStage + 1); return; }
-  for (const id of ["bRuler", "bRulerLbl", "bBars"]) $(id).hidden = false;
-  $("bUpdNote").hidden = false;
+  for (const id of ["bRuler", "bRulerLbl", "bBars"]) $(id).style.visibility = "";
+  $("bUpdNote").style.visibility = "";
   $("bPlaneLbl").textContent = "a. One plane for both languages: how the next word is chosen";
   $("bUpdLbl").textContent = "b. How the state was recomputed";
   $("bMixLbl").textContent = "What is in the state now";
@@ -1508,31 +1512,6 @@ window.__s2sCheck15 = () => Math.max(...S2S.checks15.map(c => Math.max(...["G", 
 const meanGold = (sn, qs) => { let s = 0, n = 0; qs.forEach(q => { const [a, b] = S2S.data[q]; correctProbs(sn, a, b).forEach(p => { s += p; n++; }); }); return s / n; };
 let TS_CURVES = null;
 const devTag = `<span class="devtag">development: held out</span>`;
-function renderDevPlane(sn) {
-  const [src, tgt] = S2S.data[HQ], tr = translate(sn, src), steps = tr.steps, K = Math.max(steps.length, tgt.length);
-  devK = Math.min(devK, steps.length - 1);
-  $("tsDevStrip").innerHTML = steps.map((x, k) => `<button class="${k === devK ? "on" : ""}" data-k="${k}">${k + 1}: <span class="${x.w === tgt[k] ? "ok" : "bad"}">${x.w}</span></button>`).join("");
-  $("tsDevStrip").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { devK = +b.dataset.k; renderTest(); }));
-  const s = steps[devK], st = s.st, wj = EN.indexOf(s.w), gj = tgt[devK] ? EN.indexOf(tgt[devK]) : -1;
-  const Z = 1.15 * Math.max(...[...sn.O, ...src.map(w => sn.G[GL.indexOf(w)]), ...steps.map(x => x.st)].flat().map(Math.abs)), P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z;
-  const orange = css("--orange"), green = css("--green"), fg = css("--fg"), muted = css("--muted"), blue = css("--blue"), put = placer(), tick = +(Z / 1.15).toPrecision(2);
-  const L = Math.hypot(...st) || 1, u = [st[0] / L, st[1] / L];
-  let g = `<defs><marker id="tsdA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${orange}"/></marker></defs>`;
-  g += `<line class="axis" x1="10" y1="200" x2="390" y2="200"/><line class="axis" x1="200" y1="10" x2="200" y2="390"/><text x="${P(tick)}" y="214" text-anchor="middle" font-size="10">${tick}</text><text x="206" y="${Q(tick) + 4}" font-size="10">${tick}</text>`;
-  g += `<line x1="${P(-1.3 * Z * u[0])}" y1="${Q(-1.3 * Z * u[1])}" x2="${P(1.3 * Z * u[0])}" y2="${Q(1.3 * Z * u[1])}" stroke="${orange}" stroke-opacity="0.45" stroke-dasharray="5 4"/>`;
-  src.forEach(w => { const v = sn.G[GL.indexOf(w)]; g += `<rect x="${P(v[0]) - 4}" y="${Q(v[1]) - 4}" width="8" height="8" rx="2" fill="${blue}"/>`; });
-  EN.forEach((w, j) => { const v = sn.O[j], win = j === wj, gold = j === gj, c = gold ? green : win ? orange : muted;
-    g += `<circle cx="${P(v[0])}" cy="${Q(v[1])}" r="${win || gold ? 8 : 5}" fill="none" stroke="${c}" stroke-width="${win || gold ? 3 : 1.3}"/>`; if (win && gold) g += `<circle cx="${P(v[0])}" cy="${Q(v[1])}" r="12" fill="none" stroke="${orange}" stroke-width="2.5"/>`; });
-  g += `<line x1="200" y1="200" x2="${P(st[0])}" y2="${Q(st[1])}" stroke="${orange}" stroke-width="3.5" marker-end="url(#tsdA)"/>`;
-  { const [x, y, an] = put(200 + (P(st[0]) - 200) * 0.55, 200 + (Q(st[1]) - 200) * 0.55 + 4, 52, 10); g += `<text x="${x}" y="${y}" text-anchor="${an}" font-size="12" fill="${orange}">state ${devK + 1}</text>`; }
-  [wj, gj, ...EN.map((w, j) => j).filter(j => j !== wj && j !== gj)].filter(j => j >= 0).forEach(j => { const v = sn.O[j], [x, y, an] = put(P(v[0]), Q(v[1]) + 4, 7.5 * EN[j].length, j === wj || j === gj ? 11 : 8);
-    g += `<text x="${x}" y="${y}" text-anchor="${an}" font-size="12" fill="${j === gj ? green : j === wj ? orange : muted}">${EN[j]}</text>`; });
-  src.forEach(w => { const v = sn.G[GL.indexOf(w)], [x, y, an] = put(P(v[0]), Q(v[1]) + 4, 7 * w.length, 7); g += `<text x="${x}" y="${y}" text-anchor="${an}" font-size="11" font-style="italic" fill="${blue}">${w}</text>`; });
-  $("tsDevSvg").innerHTML = g;
-  const sc = j => st[0] * sn.O[j][0] + st[1] * sn.O[j][1];
-  $("tsDevNote").innerHTML = gj < 0 ? `output ${devK + 1}: the gold output has ended; the model goes on, writing “${s.w}”` : wj === gj ? `output ${devK + 1}: written <span class="ok">“${s.w}”</span>, the gold output: it lies farthest along the state's direction (score ${sc(wj).toFixed(2)}, probability ${s.p[wj].toFixed(2)})`
-    : `output ${devK + 1}: written <span class="bad">“${s.w}”</span> (score ${sc(wj).toFixed(2)}, probability ${s.p[wj].toFixed(2)}), not the gold <span class="ok">“${tgt[devK]}”</span> (score ${sc(gj).toFixed(2)}, probability ${s.p[gj].toFixed(2)}): “${s.w}” lies farther along the state's direction${Math.abs(s.p[wj] - s.p[gj]) < 0.15 ? ", a close call" : ""}. For comparison, in the training data “aunt” is followed by ‹end› twice (my aunt, your aunt) and by “of” once (an aunt of yours).`;
-}
 function renderTest() {
   const RTT = testRun(), sn = RTT[tsI], [src, tgt] = S2S.data[HQ];
   $("tsStep").value = tsI; $("tsBack").disabled = tsI <= 0; $("tsNext").disabled = tsI >= ROUNDS;
@@ -1548,13 +1527,6 @@ function renderTest() {
     return `<div class="phrase${q === HQ ? " dev" : ""}"><span><span class="src">${s2.join(" ")}</span> → <span class="${ok ? "ok" : "bad"}">${out.join(" ") || "(nothing)"}</span>${q === HQ ? devTag : ""}</span></div>`; }).join("");
   $("tsPlaneLbl").textContent = tsI === 0 ? "3. All the vectors at the random start" : `3. All the vectors after round ${tsI} of training on 15`;
   renderAllPlane(RTT, tsI, { svg: "tsAllSvg", ghost: "tsAllGhost", get: () => traceSelC, set: v => { traceSelC = v; }, redraw: () => renderTest() });
-  // the development card: both models side by side
-  const cp = correctProbs(sn, src, tgt), wr = s => translate(s, src).steps.map(x => x.w), mark = ws => ws.map((w, i) => `<span class="${w === tgt[i] ? "ok" : "bad"}">${w}</span>`).join(" ");
-  $("tsCardLbl").textContent = `Development pair, after ${tsI} rounds of training on the other 15`;
-  $("tsCard").innerHTML = `<span class="k">development pair</span><span class="v"><i style="font-family:var(--font-body)">${src.join(" ")}</i> → ${tgt.map((w, m) => `<span class="cell"><span class="fl" style="width:${(cp[m] * 100).toFixed(1)}%"></span><span class="t">${w}</span></span>`).join("")}</span>` +
-    `<span class="k">written, trained on 15</span><span class="v">${mark(wr(sn))}</span>` +
-    `<span class="k">written, trained on all 16</span><span class="v">${mark(wr(R[tsI]))}<span class="note" style="margin-left:6px;font-family:var(--font-body)">(parts A, B)</span></span>`;
-  renderDevPlane(sn);
   // the curve: average probability of the gold outputs, training pairs vs the development pair, smoothed over 31 rounds
   if (!TS_CURVES) TS_CURVES = { tr: RTT.map(s => meanGold(s, TRAIN15)), te: RTT.map(s => meanGold(s, [HQ])) };
   const green = css("--green"), neg = css("--neg"), orange = css("--orange"), muted = css("--muted"), grid = css("--grid");
