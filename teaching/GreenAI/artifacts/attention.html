@@ -151,6 +151,7 @@ svg.v3 .pl { font-size: 12px; fill: var(--fg); } svg.v3 .pl.mix, svg.v3 .pl.sum 
 .pbars { min-height: 118px; }
 /* inside a lesson screen, the panel starts with its pictures: the opening paragraphs and the recap are on the full page */
 html.embed section.panel > .lead:not(.keep), html.embed .review.recap, html.embed .noembed { display: none; }
+html.embed .steptext, html.embed .lead, html.embed .note { max-width: 115ch; }   /* in a lesson frame the height is short: wider lines leave room for the pictures */
 .choose:has(.flow:empty) > .op { visibility: hidden; }
 table.cmp7 td:first-child { color: var(--muted); white-space: nowrap; } table.cmp7 td { vertical-align: top; }
 /* section 6: from section 2's weights to the real model's grids */
@@ -1008,7 +1009,7 @@ document.addEventListener("DOMContentLoaded", () => {
     $("hbTitle").textContent = `Step ${k + 1} of ${STEPS6.length}: ${t}`; $("hbText").textContent = txt;
     const n = k === 0 ? 1 : ROWS.length; if (sel >= n) sel = 0;
     $("hbLeft").innerHTML = bars(SRC_H, H.w[sel], `before “${ROWS[sel]}”: the three weights`) + `<p class="label" style="margin-top:10px">the same numbers as ${n === 1 ? "a row" : "a grid"}</p>` + grid(ROWS, SRC_H, H.w, { n, sel });
-    if (k < 2) { $("hbRightLbl").textContent = "a real model on the same phrase"; $("hbRight").innerHTML = `<p class="hbempty">from step 3 on</p>`; }
+    if (k < 2) { $("hbRightLbl").textContent = "a real model on the same phrase"; $("hbRight").innerHTML = `<p class="hbempty">step 3 puts here the same kind of row and grid, from a real translation model reading the same phrase</p>`; }
     else if (k === 2) { $("hbRightLbl").textContent = `opus-mt-gl-en: layer ${FL + 1}, head ${FH + 1}`;
       $("hbRight").innerHTML = bars(SRC_R, C[FL][FH][sel], `before “${TGT_R[sel]}”: the ${SRC_R.length} weights`) + `<p class="label" style="margin-top:10px">its grid</p>` + grid(TGT_R, SRC_R, C[FL][FH], { sel, cw: 50 }); }
     else if (k === 3) { $("hbRightLbl").textContent = `opus-mt-gl-en, layer ${FL + 1}: its 8 heads, one grid each`;
