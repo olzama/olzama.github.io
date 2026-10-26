@@ -19,6 +19,29 @@
     + " html.embed body { padding-block: 8px 16px; } html.embed .wrap { gap: 16px; }";
   document.head.appendChild(st);
 })();
+// protected dimensions: render a region in each of its states, keep the tallest height; again after a resize and once the fonts are in
+window.reserveMax = (els, states, restore) => {
+  els = [].concat(els);
+  const run = () => { els.forEach(el => { el.style.minHeight = ""; }); const m = els.map(() => 0);
+    states().forEach(f => { f(); els.forEach((el, i) => { m[i] = Math.max(m[i], el.getBoundingClientRect().height); }); }); restore();
+    els.forEach((el, i) => { el.style.minHeight = Math.ceil(m[i]) + "px"; }); };
+  run(); window.addEventListener("resize", run); if (document.fonts) document.fonts.ready.then(run);
+};
+// every 2-D plane gets the translation page's zoom control in its top-right corner; the drawing divides its scale by PZ.get(id)
+window.PZ = (() => {
+  const z = {}, redraw = {}, get = id => z[id] || 1;
+  function attach(id, fn) {
+    redraw[id] = fn;
+    const svg = document.getElementById(id); if (!svg || svg.parentElement.classList.contains("pzwrap")) return;
+    const w = document.createElement("div"); w.className = "pzwrap"; svg.parentElement.insertBefore(w, svg); w.append(svg);
+    const c = document.createElement("div"); c.className = "pzctl"; c.innerHTML = `<button title="Zoom out">−</button><span></span><button title="Zoom in">+</button>`; w.append(c);
+    const [o, l, i] = c.children, upd = () => { l.textContent = "×" + get(id); o.disabled = get(id) <= 1; i.disabled = get(id) >= 8; };
+    o.addEventListener("click", () => { z[id] = Math.max(1, get(id) / 2); upd(); redraw[id](); });
+    i.addEventListener("click", () => { z[id] = Math.min(8, get(id) * 2); upd(); redraw[id](); });
+    upd();
+  }
+  return { attach, get };
+})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -131,6 +154,18 @@ table.counts .corner { text-align: right; font-size: 0.72rem; }
 .bar .seg.lost { background: repeating-linear-gradient(135deg, var(--neg) 0 3px, transparent 3px 6px); opacity: 0.7; }
 .bar .seg.gain { background: var(--green); }
 .sw.lostsw { background: repeating-linear-gradient(135deg, var(--neg) 0 2px, transparent 2px 4px); }
+.pzwrap { position: relative; width: 100%; }
+.pzctl { position: absolute; right: 0; top: 0; display: flex; gap: 3px; align-items: center; }
+.pzctl button { padding: 0 7px; font-size: 0.8rem; line-height: 1.4; }
+.pzctl span { font-size: 0.7rem; color: var(--muted); min-width: 1.6em; text-align: center; }
+.controls.stick { position: sticky; top: 0; z-index: 3; background: var(--panel); padding-block: 6px; box-shadow: 0 6px 8px -8px rgba(0,0,0,0.25); }
+#choiceLabel { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#choiceNote, #scoreNote { min-height: 3.2em; }
+#genDraw .note { min-height: 4.8em; } .genline { min-height: 3.6em !important; }
+.msg { min-height: 1.6em; }
+.gcard { min-height: 5.2em; }
+#tdSim { width: 100%; table-layout: fixed; }   /* its width must not follow the labels */
+#chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; }   /* one line; scrolls sideways without a scrollbar that would change its height */
 .massbar { display: flex; height: 22px; border-radius: 4px; overflow: hidden; background: var(--grid); }
 .massbar span { height: 100%; transition: width .35s ease; border-right: 1px solid var(--panel); }
 .massbar .seen { background: var(--blue); }
@@ -290,7 +325,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="td">
     <h2><span class="n">1</span>Shakespeare, counted by play</h2>
     <p class="lead">Count how often each word occurs in each play. Read down a column and a play becomes a list of numbers: a vector. Read across a row and a word becomes a vector too. Similar plays use words in similar proportions, so their vectors point in similar directions.</p>
-    <div class="controls">
+    <div class="controls stick">
       <div class="seg" role="group" aria-label="What is a vector">
         <button id="tdPlays" aria-pressed="true">Plays as vectors</button>
         <button id="tdWords" aria-pressed="false">Words as vectors</button>
@@ -397,7 +432,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <div class="col">
         <p class="label">Corpus</p>
         <div class="sents" id="sents"></div>
-        <div class="controls">
+        <div class="controls stick">
           <button class="primary" id="playCount">Replay counting</button>
           <button id="stepCount">One pair</button>
           <span class="note mono" id="pairInfo"></span>
@@ -458,7 +493,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <p class="lead">Start from a word, look up its row, pick a next word, repeat. Greedy takes the most frequent next word; sampling draws one at random, each word as often as its probability says (see the draw under the bars). Both use the smoothing set in section 4.</p>
     <div class="cols">
       <div class="col">
-        <div class="controls">
+        <div class="controls stick">
           <label class="check" for="startWord">Start word</label>
           <select id="startWord"></select>
           <div class="seg" role="group" aria-label="Choice rule">
@@ -478,7 +513,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <div class="col">
         <p class="label" id="genDistLabel"></p>
         <div class="bars" id="genBars"></div>
-        <div class="draw" id="genDraw" hidden></div>
+        <div class="draw" id="genDraw" style="visibility:hidden"></div>
       </div>
     </div>
   </section>
@@ -486,7 +521,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 5 -->
   <section class="panel" id="score">
     <h2><span class="n">6</span>One unseen pair, and the sentence gets 0</h2>
-    <p class="lead">The probability of a sentence is the product of one probability per pair of neighboring words. If the corpus never saw one of the pairs, that factor is 0, and so is the whole product. Generation stopped at “her” for the same reason: a count of 0. A word outside the vocabulary is read as &lt;UNK&gt;; try <span class="mono">her aunt stayed quiet</span>.</p>
+    <p class="lead">The probability of a sentence is the product of one probability per pair of neighboring words. If the corpus never saw one of the pairs, that factor is 0, and so is the whole product. Generation from “my” stopped at “quiet” for the same reason: nothing ever followed “quiet”, so every next word has a count of 0. A word outside the vocabulary is read as &lt;UNK&gt;; try <span class="mono">her aunt stayed quiet</span>.</p>
     <div class="controls">
       <input type="text" id="testSent" value="my uncle spoke wisely" aria-label="Sentence to score" spellcheck="false">
       <input type="range" id="smoothK2" min="0" max="1" step="0.05" value="0" aria-label="k, added to every count" style="flex:0 1 160px; width:auto">
@@ -757,8 +792,7 @@ function renderGen() {
 // Sampling: the row's probabilities laid end to end on a line from 0 to 1; a random number picks the stretch it lands in
 function renderDraw(dist) {
   const el = $("genDraw");
-  if (genMode !== "sample") { el.hidden = true; return; }
-  el.hidden = false;
+  el.style.visibility = genMode === "sample" ? "" : "hidden";   // greedy: still there, invisible, so nothing moves when the mode changes
   const r = genPick && genPick.r !== undefined ? genPick.r : null;
   let acc = 0, lo = 0;
   const segs = dist.map(([w, p], i) => {
@@ -771,7 +805,7 @@ function renderDraw(dist) {
     ? "Sampling lays the row's probabilities end to end from 0 to 1, then draws a random number between 0 and 1. The word whose stretch it lands in is written. A word with probability 0.29 gets 29% of the line, so it is drawn about 3 times in 10."
     : `Random number ${r.toFixed(2)} lands in the stretch of “${h(genPick.w)}” (${lo.toFixed(2)} to ${(lo + dist.find(([w]) => w === genPick.w)[1]).toFixed(2)}), so the model writes “${h(genPick.w)}”. Press Back and Next word to draw again.`;
   el.innerHTML = `<p class="label">The draw</p><div class="strip">${segs}</div>`
-    + (r !== null ? `<div class="marker"><i style="left:${(r * 100).toFixed(2)}%"></i></div>` : "")
+    + `<div class="marker">${r !== null ? `<i style="left:${(r * 100).toFixed(2)}%"></i>` : ""}</div>`
     + `<div class="scale"><span>0</span><span>0.5</span><span>1</span></div><p class="note">${cap}</p>`;
 }
 $("startWord").addEventListener("change", genReset);
@@ -836,6 +870,15 @@ function renderAll() {
 buildVocab(); shown = pairs.length;
 $("corpus").value = DEFAULT.join("\n");
 renderAll();
+// protected dimensions, sections 4-6: each region keeps its tallest state
+{ let keep; reserveMax([$("divide"), ...document.querySelectorAll("#divide > .col")], () => { keep = [selRow, kSm]; return vocab.flatMap(w => [0, 0.05, 1].map(kk => () => { selRow = w; setK(kk); renderTable(); renderDist(); })); },
+    () => { selRow = keep[0]; setK(keep[1]); renderTable(); renderDist(); }); }
+{ let keep; reserveMax([...document.querySelectorAll("#gen .col")], () => { keep = [genMode, $("startWord").value];
+    return ["greedy", "sample"].flatMap(m => [...$("startWord").options].map(o => () => { setMode(m); $("startWord").value = o.value; genReset(); for (let i = 0; i < 12 && !genDone; i++) genStep(); clearInterval(genTimer); })); },
+  () => { setMode(keep[0]); $("startWord").value = keep[1]; genReset(); }); }
+{ let keep; const S = ["my aunt", "my uncle spoke wisely", "my aunt stayed quiet", "my aunt spoke wisely my uncle stayed quiet", "my dog barked"];
+  reserveMax(["chips", "scoreResult", "scoreNote"].map(id => $(id)), () => { keep = [$("testSent").value, kSm]; return S.flatMap(t => [0, 0.5].map(kk => () => { $("testSent").value = t; setK(kk); renderScore(); })); },
+    () => { $("testSent").value = keep[0]; setK(keep[1]); renderScore(); }); }
 (window.__askState ||= []).push(() => { const { c, u } = full(); return `Sections 4-6 (aunt/uncle corpus): corpus "${sents.map(x => x.join(" ")).join(" / ")}"; vocabulary ${vocab.join(", ")} plus <UNK>. Section 4 selected row: ${selRow}; smoothing k = ${kSm}; P(· | ${selRow}) = ` + rowDist(c, u, selRow).map(([w, p]) => `${w} ${p.toFixed(2)}`).join(", ") + `. Section 5 generation (${genMode}): "${gen.join(" ")}"${genDone ? " (stopped)" : ""}. Section 6 sentence: "${$("testSent").value}", ${$("scoreResult").textContent}.`; });
 })();
 </script>
@@ -886,7 +929,7 @@ function renderPlot(it) {
   const xi = it.dims.indexOf($("tdX").value), yi = it.dims.indexOf($("tdY").value);
   const pts = it.vecs.map(v => [v[xi], v[yi]]);
   const M = niceMax(Math.max(1, ...pts.flat()) * 1.05);
-  const O = [55, 295], S = 250 / M;
+  const O = [55, 295], S = 250 / M * PZ.get("tdPlot");
   const X = x => O[0] + x * S, Y = y => O[1] - y * S;
   let s = `<line class="axis" x1="${O[0]}" y1="${O[1]}" x2="${O[0] + 260}" y2="${O[1]}"/><line class="axis" x1="${O[0]}" y1="${O[1]}" x2="${O[0]}" y2="${O[1] - 260}"/>`;
   for (const k of [0, 0.5, 1]) {
@@ -1003,6 +1046,12 @@ $("tdAddBtn").addEventListener("click", addWord);
 $("tdAdd").addEventListener("keydown", e => { if (e.key === "Enter") addWord(); });
 $("tdResetBtn").addEventListener("click", () => { words = BASE.slice(); source = "slide"; $("tdSource").value = "slide"; note = ""; setView(view); });
 render();
+PZ.attach("tdPlot", () => renderPlot(items()));
+// protected dimensions: the two rows of section 1 keep their tallest state (plays or words, each source, each measure, one added word)
+{ let keep; reserveMax([...document.querySelectorAll("#td > .cols, #td > .cols > .col")], () => { keep = [view, source, measure, words.slice(), note, sel.slice()];
+    return [["plays", "slide"], ["plays", "all"], ["plays", "dlg"], ["words", "slide"], ["words", "all"], ["words", "dlg"]].flatMap(([v, so]) => ["cos", "dot"].map(m => () => {
+      view = v; source = so; measure = m; words = so === "slide" ? BASE.slice() : [...BASE, "love"]; note = so === "all" ? "Added words are counted in the full text, so every row now uses counts from the text." : ""; sel = [0, 1]; render(); })); },
+  () => { [view, source, measure, words, note, sel] = keep; render(); }); }
 (window.__askState ||= []).push(() => { const it = items(); const [a, b] = sel; return `Section 1 (Shakespeare, counted by play): ${view === "plays" ? "plays as vectors (columns)" : "words as vectors (rows)"}; counts ${source === "slide" ? "from the slide (J&M lecture slides)" : source === "all" ? "counted in the full Gutenberg text" : "counted without speaker names"}. Table rows: ` + words.map(w => `${w} [${row(w).join(", ")}]`).join("; ") + ` (columns: ${PLAYS.join(", ")}). Plot axes: x ${$("tdX").value}, y ${$("tdY").value}. Selected pair: ${it.names[a]} and ${it.names[b]}, cosine ${cos(it.vecs[a], it.vecs[b]).toFixed(2)}, dot product ${dot(it.vecs[a], it.vecs[b])}. Similarity view: ${measure === "cos" ? "cosine" : "dot product"}.`; });
 })();
 </script>
@@ -1143,7 +1192,7 @@ function renderRows(upto) {
       return `<span class="${cls.join(" ")}" data-r="${ri}" data-s="${si}" tabindex="0">${disp}</span>`;
     }).join("");
     const src = upto === undefined && r.showQ
-      ? `<span class="src">${qs[1] - qs[0]} words in a row from ${pretty(workAt(qs[2]))}</span>` : "";
+      ? `<span class="src">${qs[1] - qs[0]} words in a row from ${pretty(workAt(qs[2]))}</span>` : `<span class="src">&nbsp;</span>`;   // always there: rows keep their height
     return `<div class="shkrow${ri === selRow ? " sel" : ""}" data-r="${ri}"><span class="tag">${["unigram", "bigram", "trigram", "4-gram"][ri]}</span><span class="line">${parts}</span>${src}</div>`;
   }).join("");
   $("shkRows").querySelectorAll(".wd[data-s]").forEach(el => {
@@ -1195,6 +1244,11 @@ $("shkGo").addEventListener("click", writeLines);
 $("shkSeed").addEventListener("keydown", e => { if (e.key === "Enter") writeLines(); });
 $("shkGo").disabled = false;
 writeLines();
+// protected dimensions: lines are random, so the rows and the choice bars keep the tallest of 40 draws (and grow if a later draw is taller still)
+{ let keep; reserveMax(["shkRows", "choiceBars", "choiceNote"].map(id => $(id)), () => { keep = [rows, selRow, selStep]; return Array.from({ length: 40 }, () => () => { writeLines(); clearInterval(anim); renderRows(); renderChoices(); }); },   // measured written in full, not mid-typing
+  () => { [rows, selRow, selStep] = keep; renderRows(); renderChoices(); });
+  const grow = () => ["shkRows", "choiceBars"].forEach(id => { const el = $(id), h = Math.ceil(el.scrollHeight); if (h > parseFloat(el.style.minHeight || 0)) el.style.minHeight = h + "px"; });
+  $("shkGo").addEventListener("click", grow); $("shkRows").addEventListener("click", grow); }
 (window.__askState ||= []).push(() => "Section 2 (Shakespeare, one word at a time): " + rows.map((r, n) => `${["unigram", "bigram", "trigram", "4-gram"][n]} line: "${r.steps.filter(st => !st.dead).map(wordStr).join(" ")}"` + (r.showQ ? ` (longest stretch copied from Shakespeare: ${r.quote[1] - r.quote[0]} words, from ${pretty(workAt(r.quote[2]))})` : "") + (r.steps.some(st => st.dead) ? " (stopped: context never seen)" : "")).join("; ") + `. Seed words: "${$("shkSeed").value}". Text: N = ${N} words, V = ${V - 1} word types.`);
 
 // ---------- game ----------
@@ -1222,7 +1276,7 @@ function newPair() {
   const real = realSentence(), fake = fakeSentence(gN);
   pair = Math.random() < 0.5 ? [{ ...real, real: true }, fake] : [fake, { ...real, real: true }];
   $("gameMsg").textContent = ""; $("gameNext").disabled = true;
-  $("gamePair").innerHTML = pair.map((c, i) => `<button class="gcard" data-i="${i}"><span>${detok(c.ws)}</span></button>`).join("");
+  $("gamePair").innerHTML = pair.map((c, i) => `<button class="gcard" data-i="${i}"><span>${detok(c.ws)}</span><span class="who">&nbsp;</span></button>`).join("");   // the source line is there before the answer too
   $("gamePair").querySelectorAll(".gcard").forEach(b => b.addEventListener("click", () => answer(+b.dataset.i)));
 }
 function answer(i) {
@@ -1244,6 +1298,11 @@ document.querySelectorAll("#game .seg button").forEach(b => b.addEventListener("
 }));
 $("gameNext").addEventListener("click", newPair);
 newPair();
+// protected dimensions: the pair keeps the tallest of 60 random pairs, before and after the answer (the reader's score is kept)
+{ let keep; reserveMax(["gamePair"].map(id => $(id)), () => { keep = [pair, right, total, $("gameNext").disabled, $("gamePair").innerHTML, $("gameMsg").textContent];
+    return Array.from({ length: 60 }, (_, k) => () => { newPair(); if (k % 2) answer(0); }); },
+  () => { [pair, right, total] = keep; $("gameScore").textContent = `${right} / ${total}`; $("gameNext").disabled = keep[3]; $("gamePair").innerHTML = keep[4]; $("gameMsg").textContent = keep[5];
+    $("gamePair").querySelectorAll("button.gcard").forEach(b => b.addEventListener("click", () => answer(+b.dataset.i))); }); }
 (window.__askState ||= []).push(() => `Section 3 (Shakespeare or n-gram? game): model ${["", "", "bigram", "trigram", "4-gram"][gN]}, score ${right}/${total}. ` + (pair ? ($("gameNext").disabled ? `The student has not answered yet; do not say which line is real. Lines: A "${pair[0].ws.join(" ")}" / B "${pair[1].ws.join(" ")}".` : `Answered. Real line: "${pair.find(c => c.real).ws.join(" ")}"; model line: "${pair.find(c => !c.real).ws.join(" ")}".`) : ""));
 })();
 </script>
