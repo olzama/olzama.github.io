@@ -24,7 +24,8 @@ function stagger(xs) { const o = xs.map((x, i) => i).sort((a, b) => xs[a] - xs[b
 // protected dimensions: render a region in each of its states, keep the tallest height; again after a resize and once the fonts are in
 window.reserveMax = (els, states, restore) => {
   els = [].concat(els);
-  const run = () => { els.forEach(el => { el.style.minHeight = ""; }); const m = els.map(() => 0);
+  // a section hidden in a lesson frame (?embed=…) has no layout: nothing to measure, and measuring would only cost time
+  const run = () => { if (els.every(el => !el.getClientRects().length)) return; els.forEach(el => { el.style.minHeight = ""; }); const m = els.map(() => 0);
     states().forEach(f => { f(); els.forEach((el, i) => { m[i] = Math.max(m[i], el.getBoundingClientRect().height); }); }); restore();
     els.forEach((el, i) => { el.style.minHeight = Math.ceil(m[i]) + "px"; }); };
   run(); window.addEventListener("resize", run); if (document.fonts) document.fonts.ready.then(run);
@@ -722,7 +723,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </tbody></table></div>
     <p class="label noembed">How one layer combines its 8 heads, for one piece</p>
     <div class="flow noembed"><span class="word">head 1: a mix for <i>miña</i></span><span class="word">head 2: a mix for <i>miña</i></span><span class="op">…</span><span class="word">head 8: a mix for <i>miña</i></span><span class="op">→</span><span class="word">the 8 mixes side by side as one long vector, × one learned table</span><span class="op">→</span><span class="word">+ the vector of <i>miña</i></span><span class="op">→</span><span class="word">one more learned step</span><span class="op">→</span><span class="word out">the vector of <i>miña</i> in the next layer</span></div>
-    <p class="label">The 8 heads of one layer: one square grid each, rows look, columns are looked at</p>
+    <p class="label">The 8 heads of one layer: one square grid each, with a row and a column for every piece of our sentence; rows look, columns are looked at</p>
     <p class="note">A dark line just below or above the diagonal: each piece looks at the piece just before it or just after it.</p>
     <div class="controls stick">
       <label class="note" for="selfLayer">Encoder layer</label>
@@ -1430,7 +1431,7 @@ fillStrip($("legendStrip"), [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1]);
 resetT(); render();
 // protected dimensions: the gold line and the two translation lines keep the height of their longest version (any size, any sentence, written in full)
 { let keep; const els = ["cmpRef", "cmpOne", "cmpAtt"].map($).concat([...document.querySelectorAll("#compare .unroll, #compare .choose")]);
-  reserveMax(els, () => { keep = [r, e, T_.One, T_.Att]; return CMP.runs.flatMap((ru, ri) => ru.examples.flatMap((_, ei) => [0, 1, 999].map(t => () => { r = ri; e = ei; T_.One = T_.Att = t; render(); T_.One = T_.Att = t; drawStep(); }))); },
+  reserveMax(els, () => { keep = [r, e, T_.One, T_.Att]; return CMP.runs.flatMap((ru, ri) => ru.examples.flatMap((_, ei) => [0, 1, 999].map(t => () => { r = ri; e = ei; T_.One = T_.Att = t; render(); }))); },
     () => { [r, e, T_.One, T_.Att] = keep; render(); T_.One = keep[2]; T_.Att = keep[3]; drawStep(); }); }
 { let keep; reserveMax($("cmpWAtt"), () => { keep = $("cmpWAtt").textContent; return ["The weights are spread out: this small model also relies on its state.", "Step through the translation to see why each word comes out."].map(t => () => { $("cmpWAtt").textContent = t; }); }, () => { $("cmpWAtt").textContent = keep; }); }
 (window.__askState ||= []).push(() => {
