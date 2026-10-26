@@ -346,7 +346,9 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <p class="note">Orange: where the cycle is now. The curves climb because every update of this pair moves the tables a little toward its gold outputs; the other 15 pairs' updates share words with it and mostly help too.</p>
       </div>
       <div class="why" id="trWhole">
-        <p class="label">B. The whole training: round after round (1 round = the 16 pairs, one at a time, 16 updates)</p>
+        <p class="label">B. The whole training, round after round (1 round = one pass over the 16 pairs), with either of two procedures</p>
+        <div class="controls"><div class="seg" role="group" aria-label="Training procedure"><button id="procOne" aria-pressed="true">one pair at a time: 16 updates per round (part A)</button><button id="procAll" aria-pressed="false">all 16 at once: the 16 pushes added up, one update per round</button></div></div>
+        <p class="note" style="max-width:none;margin:0" id="procNote"></p>
         <div class="controls"><span class="label" style="margin-right:4px">Training</span><button id="trBack" aria-label="One round back">← 1 round</button><button class="primary" id="trNext" aria-label="One round on">Train 1 round →</button><button id="pathPlay">Play training</button><button id="trReset" title="Back to the random start">↺ start</button><input type="range" id="pathStep" min="0" max="1" step="1" value="0" aria-label="Rounds of training" style="flex:1 1 200px; accent-color: var(--blue)"><span class="mono" id="pathStepVal"></span></div>
         <p class="label" id="trSupplyLbl"></p>
         <div class="ogrid" id="trSupply"></div>
@@ -362,12 +364,13 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
             <p class="label" id="pathAllLbl"></p>
             <p class="note">one output at a time, the one with the highest probability, mixed into the state before the next · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span> · click one to follow it in part A, translating with these tables</p>
             <div class="phrases pickable" id="pathAll"></div>
-            <p class="label">Inputs translated right, over the rounds</p>
-            <svg id="trRightCurve" viewBox="0 0 440 160" role="img" aria-label="How many of the 16 inputs come out right, over the rounds" style="max-width:460px"></svg>
+            <p class="label" id="trRightLbl">Inputs translated right, over the rounds</p>
+            <svg id="trRightCurve" viewBox="0 0 440 160" role="img" aria-label="How many of the 16 inputs come out right, over the rounds, with both procedures" style="max-width:460px"></svg>
+            <p class="note" id="trRightNote" style="margin:0"></p>
           </div>
         </div>
       </div>
-      <p class="note">2-D vectors; stochastic gradient descent, one pair per update, learning rate 0.2, 600 rounds over the 16 pairs; <span class="mono">torch.manual_seed(0)</span>; <code>mt_s2s_train.py</code> records the random start, and the page replays the training with the same rule, so that every single update can be shown.</p>
+      <p class="note">2-D vectors; stochastic gradient descent, one pair per update, learning rate 0.2, 600 rounds over the 16 pairs (part B can also train all 16 at once: the 16 gradients added up, learning rate 0.1, 3000 rounds, replayed by the page as well); <span class="mono">torch.manual_seed(0)</span>; <code>mt_s2s_train.py</code> records the random start, and the page replays the training with the same rule, so that every single update can be shown.</p>
   </section>
 
   <!-- 1 -->
@@ -877,7 +880,18 @@ function translate(sn, src) {
   return { path, summary: h, steps };
 }
 let ti = 0, uA = 0, stIdx = 0, subIdx = 0, trTimer = null, trMode = "train";   // stIdx: the stage of the cycle in part A   // ti: the round of part B; uA: pairs seen so far in part A (the cycle's position)
-const CURVES = {}, RIGHTS = [];
+const CURVES = {}, RIGHTS = [], RIGHTS_ALL = [];
+let trProc = "one";   // part B: "one" pair per update, or "all" 16 at once
+const LR_B = 0.1, ROUNDS_B = 3000; let RB = null;
+function batchRun() {   // the 16 pushes computed from the same tables, added up, one update per round
+  if (RB) return RB; let sn = R[0]; RB = [sn];
+  for (let r = 1; r <= ROUNDS_B; r++) { const z = () => [0, 0], sum = { dG: GL.map(z), dO: EN.map(z), dI: EN.map(z) };
+    S2S.data.forEach((d, q) => { const g = gradOf(sn, q); ["dG", "dO", "dI"].forEach(T => g[T].forEach((d2, j) => { sum[T][j][0] += d2[0]; sum[T][j][1] += d2[1]; })); });
+    const m = (T, D) => T.map((v, j) => [v[0] - LR_B * D[j][0], v[1] - LR_B * D[j][1]]); sn = { G: m(sn.G, sum.dG), O: m(sn.O, sum.dO), I: m(sn.I, sum.dI), step: r }; RB.push(sn); }
+  return RB;
+}
+const procRun = () => trProc === "one" ? R : batchRun(), procRounds = () => trProc === "one" ? ROUNDS : ROUNDS_B;
+const rightsOf = proc => { const arr = proc === "one" ? RIGHTS : RIGHTS_ALL; if (!arr.length) (proc === "one" ? R : batchRun()).forEach(sn => arr.push(rightNow(sn))); return arr; };
 $("pathStep").max = ROUNDS; $("aStep").max = NU - 1;
 // the probability the model gives each gold output, with the gold outputs before it mixed in (as in training)
 function correctProbs(sn, src, tgt) {
@@ -1101,29 +1115,37 @@ function renderAllPlane(sn, prev) {
 }
 const rightNow = sn => S2S.data.filter(([s2, t2]) => translate(sn, s2).steps.map(x => x.w).filter(w => w !== "‹end›").join(" ") === t2.filter(w => w !== "‹end›").join(" ")).length;
 function renderRightCurve() {
-  if (!RIGHTS.length) R.forEach(sn => RIGHTS.push(rightNow(sn)));
-  const green = css("--green"), orange = css("--orange"), X = i => 34 + i / ROUNDS * 330, Y = n => 12 + (1 - n / 16) * 120;
+  // both procedures on one axis of rounds (one pass over the 16 pairs each): the chosen one solid, the other faint
+  const mine = rightsOf(trProc), other = rightsOf(trProc === "one" ? "all" : "one"), NR = procRounds(), NX = Math.max(ROUNDS, ROUNDS_B);
+  const green = css("--green"), orange = css("--orange"), muted = css("--muted"), X = i => 34 + i / NX * 330, Y = n => 12 + (1 - n / 16) * 120;
   let g = `<line class="axis" x1="34" y1="132" x2="364" y2="132"/><line class="axis" x1="34" y1="12" x2="34" y2="132"/>`;
-  g += `<text x="34" y="148" text-anchor="middle" font-size="10">round 0</text><text x="364" y="148" text-anchor="middle" font-size="10">${ROUNDS}</text><text x="28" y="136" text-anchor="end" font-size="10">0</text><text x="28" y="16" text-anchor="end" font-size="10">16</text>`;
-  g += `<polyline points="${RIGHTS.map((n, i) => `${X(i).toFixed(1)},${Y(n).toFixed(1)}`).join(" ")}" fill="none" stroke="${green}" stroke-width="2.5"/>`;
-  g += `<line x1="${X(ti)}" y1="12" x2="${X(ti)}" y2="132" stroke="${orange}" stroke-width="1.5" stroke-dasharray="4 3"/><circle cx="${X(ti)}" cy="${Y(RIGHTS[ti])}" r="5" fill="${orange}"/>`;
-  g += `<text x="${Math.min(X(ti) + 8, 330)}" y="${Y(RIGHTS[ti]) - 8}" font-size="11" fill="${orange}">${RIGHTS[ti]} of 16</text>`;
+  g += `<text x="34" y="148" text-anchor="middle" font-size="10">round 0</text><text x="364" y="148" text-anchor="middle" font-size="10">${NX}</text><text x="28" y="136" text-anchor="end" font-size="10">0</text><text x="28" y="16" text-anchor="end" font-size="10">16</text>`;
+  g += `<polyline points="${other.map((n, i) => `${X(i).toFixed(1)},${Y(n).toFixed(1)}`).join(" ")}" fill="none" stroke="${muted}" stroke-opacity="0.5" stroke-width="1.5"/>`;
+  g += `<polyline points="${mine.map((n, i) => `${X(i).toFixed(1)},${Y(n).toFixed(1)}`).join(" ")}" fill="none" stroke="${green}" stroke-width="2.5"/>`;
+  g += `<line x1="${X(ti)}" y1="12" x2="${X(ti)}" y2="132" stroke="${orange}" stroke-width="1.5" stroke-dasharray="4 3"/><circle cx="${X(ti)}" cy="${Y(mine[ti])}" r="5" fill="${orange}"/>`;
+  g += `<text x="${Math.min(X(ti) + 8, 330)}" y="${Y(mine[ti]) - 8}" font-size="11" fill="${orange}">${mine[ti]} of 16</text>`;
   $("trRightCurve").innerHTML = g;
+  const firstAll = arr => { let i = arr.findIndex((n, k) => n === 16 && arr.slice(k).every(x => x === 16)); return i; }, f1 = firstAll(rightsOf("one")), fA = firstAll(rightsOf("all"));
+  $("trRightNote").innerHTML = `<span class="ok">solid</span>: this procedure · faint: the other · all 16 right for good from round ${f1} with one pair at a time (${f1 * NP} updates) and from round ${fA} with all at once (${fA} updates): per pass over the data, the small frequent updates win; per update, the added-up one does, and on a GPU the 16 pushes are computed in parallel, so it costs about the time of one`;
 }
 // a click in part B follows a pair in part A, with the tables as they are after this round
 const goA = (q, m, mode) => { uA = Math.min(ti * NP + q, NU - 1); trMode = mode; stIdx = 1 + S2S.data[q][0].length + m; subIdx = 0; renderA(); $("trWhy").scrollIntoView({ behavior: "smooth", block: "start" }); };
 function renderWhole() {
-  const sn = R[ti];
-  $("pathStep").value = ti; $("trBack").disabled = ti <= 0; $("trNext").disabled = ti >= ROUNDS;
-  $("pathStepVal").textContent = `after ${ti} round${ti === 1 ? "" : "s"} of ${ROUNDS} (${ti * NP} pairs seen)`;
+  const RR = procRun(), NR = procRounds(); ti = Math.min(ti, NR); const sn = RR[ti], one = trProc === "one";
+  $("procOne").setAttribute("aria-pressed", one); $("procAll").setAttribute("aria-pressed", !one); $("pathStep").max = NR;
+  $("procNote").innerHTML = one ? `the procedure part A walks: pair after pair, each followed by its own update (stochastic gradient descent, in use since the 1950s and still the basis) · ${NP} updates per round, learning rate ${LR}`
+    : `the usual procedure today (mini-batch gradient descent): the pushes of all 16 pairs are computed from the same tables and added up, then one update · the same rule, 1 update per round, learning rate ${LR_B} · on a GPU the 16 pushes are computed in parallel, which is why this is the usual way · part A does not walk this one`;
+  $("pathStep").value = ti; $("trBack").disabled = ti <= 0; $("trNext").disabled = ti >= NR;
+  $("pathStepVal").textContent = `after ${ti} round${ti === 1 ? "" : "s"} of ${NR} (${one ? ti * NP : ti} update${(one ? ti * NP : ti) === 1 ? "" : "s"})`;
   // 1. the 16 pairs, with the probability of each gold output
   $("trSupplyLbl").textContent = ti === 0 ? "1. The 16 pairs at the random start: each gold output, filled by the probability the model gives it (part A shows how it is computed)" : `1. The 16 pairs after round ${ti}: each gold output, filled by the probability the model now gives it (part A shows how it is computed)`;
   $("trSupply").innerHTML = S2S.data.map(([s2, t2], q) => { const cp = correctProbs(sn, s2, t2);
     return `<div class="row"><span class="src">${s2.join(" ")}</span>→ ${t2.map((w, m) => `<span class="cell" data-q="${q}" data-m="${m}" title="probability ${cp[m].toFixed(2)}"><span class="fl" style="width:${(cp[m] * 100).toFixed(1)}%"></span><span class="t">${w}</span></span>`).join("")}</div>`; }).join("");
-  $("trSupply").querySelectorAll(".cell").forEach(e => e.addEventListener("click", () => goA(+e.dataset.q, +e.dataset.m, "train")));
+  if (one) $("trSupply").querySelectorAll(".cell").forEach(e => e.addEventListener("click", () => goA(+e.dataset.q, +e.dataset.m, "train")));
+  $("trSupply").style.cursor = one ? "" : "default";
   // 2. the vectors and their move over the round
-  $("trAllLbl").textContent = ti === 0 ? "2. All the vectors at the random start" : `2. The 16 updates of round ${ti}, added up: where every vector was before the round, and where it is now`;
-  renderAllPlane(sn, ti > 0 ? R[ti - 1] : null);
+  $("trAllLbl").textContent = ti === 0 ? "2. All the vectors at the random start" : one ? `2. The 16 updates of round ${ti}, added up: where every vector was before the round, and where it is now` : `2. The one update of round ${ti}, from the 16 pushes added up: where every vector was before, and where it is now`;
+  renderAllPlane(sn, ti > 0 ? RR[ti - 1] : null);
   $("trAllGhost").textContent = ti > 0 ? `where the vector was before round ${ti}` : "at the random start there is no earlier position";
   let nRight = 0;
   $("pathAll").innerHTML = S2S.data.map(([s2, t2], q2) => {
@@ -1132,7 +1154,7 @@ function renderWhole() {
     return `<div class="phrase" data-q="${q2}"><span><span class="src">${s2.join(" ")}</span> → <span class="${ok ? "ok" : "bad"}">${out.join(" ") || "(nothing)"}</span></span></div>`;
   }).join("");
   $("pathAllLbl").textContent = `3. The result: what the model writes now, for each of the 16 inputs: right for ${nRight} of 16`;
-  $("pathAll").querySelectorAll(".phrase").forEach(d => d.addEventListener("click", () => goA(+d.dataset.q, 0, "free")));
+  if (one) $("pathAll").querySelectorAll(".phrase").forEach(d => d.addEventListener("click", () => goA(+d.dataset.q, 0, "free")));
   renderRightCurve();
 }
 function renderTrain() { renderA(); renderWhole(); }
@@ -1150,15 +1172,17 @@ $("aRoundNext").addEventListener("click", () => setU(uA + NP));
 $("aRoundBack").addEventListener("click", () => setU(uA - NP));
 $("aReset").addEventListener("click", () => setU(0));
 $("aStep").addEventListener("input", e => setU(+e.target.value));
-$("trNext").addEventListener("click", () => { stopTrain(); ti = Math.min(ti + 1, ROUNDS); renderWhole(); });
+$("trNext").addEventListener("click", () => { stopTrain(); ti = Math.min(ti + 1, procRounds()); renderWhole(); });
+$("procOne").addEventListener("click", () => { stopTrain(); trProc = "one"; renderWhole(); });
+$("procAll").addEventListener("click", () => { stopTrain(); trProc = "all"; renderWhole(); });
 $("trBack").addEventListener("click", () => { stopTrain(); ti = Math.max(ti - 1, 0); renderWhole(); });
 $("trReset").addEventListener("click", () => { stopTrain(); ti = 0; renderWhole(); });
 $("pathStep").addEventListener("input", e => { stopTrain(); ti = +e.target.value; renderWhole(); });
 $("pathPlay").addEventListener("click", () => {
   if (trTimer) { stopTrain(); return; }
-  if (ti >= ROUNDS) ti = 0;
+  if (ti >= procRounds()) ti = 0;
   $("pathPlay").textContent = "Pause";
-  trTimer = setInterval(() => { ti = Math.min(ROUNDS, ti + (ti < 20 ? 1 : 10)); renderWhole(); if (ti >= ROUNDS) stopTrain(); }, reduce ? 30 : 110);   // one round at a time at first, then ten
+  trTimer = setInterval(() => { const NR = procRounds(); ti = Math.min(NR, ti + (ti < 20 ? 1 : NR > 1000 ? 50 : 10)); renderWhole(); if (ti >= NR) stopTrain(); }, reduce ? 30 : 110);   // one round at a time at first, then ten (fifty for the long run)
 });
 
 // ---------- section 3: the decoder, one step at a time ----------
@@ -1320,7 +1344,7 @@ function renderB() {
     : s.w === "‹end›" ? `After “${t.steps[k - 1].w}”, ‹end› lies farthest along the state's direction: the translation is finished. The summary is now only ${frac(sumShare)} of the state.` + aside
     : `Word ${k + 1}: writing “${t.steps[k - 1].w}” took half of the state, so the summary shrank to ${frac(sumShare)}. Now “${s.w}” lies farthest along the state's direction.` + aside;
 }
-(window.__askState ||= []).push(() => { const q = uA % NP, [src, tgt] = S2S.data[q], cp = correctProbs(snapAt(uA), src, tgt); return `Section 1 (training, one pair per update): part A is at round ${Math.floor(uA / NP) + 1}, pair ${q + 1} ("${src.join(" ")}"), ${uA} pairs seen; the probability of each gold output there: ${tgt.map((w, m) => `${w} ${cp[m].toFixed(2)}`).join(", ")}. Part B shows the tables after ${ti} rounds: ${RIGHTS[ti] ?? "?"} of 16 inputs translated right.`; });
+(window.__askState ||= []).push(() => { const q = uA % NP, [src, tgt] = S2S.data[q], cp = correctProbs(snapAt(uA), src, tgt); return `Section 1 (training, one pair per update): part A is at round ${Math.floor(uA / NP) + 1}, pair ${q + 1} ("${src.join(" ")}"), ${uA} pairs seen; the probability of each gold output there: ${tgt.map((w, m) => `${w} ${cp[m].toFixed(2)}`).join(", ")}. Part B (${trProc === "one" ? "one pair per update" : "all 16 at once, one update per round"}) shows the tables after ${ti} rounds: ${rightsOf(trProc)[ti] ?? "?"} of 16 inputs translated right.`; });
 $("bA").addEventListener("change", e => { bA = +e.target.value; bStage = 0; bSel = -1; renderB(); });
 $("bNext").addEventListener("click", () => { bStage++; bSel = -1; renderB(); });
 $("bBack").addEventListener("click", () => { bStage = Math.max(bStage - 1, 0); bSel = -1; renderB(); });
