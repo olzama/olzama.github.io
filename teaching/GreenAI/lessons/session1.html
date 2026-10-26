@@ -3208,7 +3208,8 @@ print("they match" if count == expected else "they do not match: check the loop 
     </ul>
   </div>
   <div class="notes">
-    <p>Self-attention, by construction, computes a score between every pair of words in the input — for n words, that's n² comparisons, every word compared against every other, including itself. Double the number of words and you quadruple the comparisons, which the diagram shows concretely: 4 words, 16 comparisons; 8 words, 64. That's quadratic growth, a much steeper curve than the "twice the words, twice the cost" intuition might suggest. "Tía miña" was two words, trivial to attend over. The full Speechwriter story is thousands of words — and this quadratic relationship is exactly why translating, or having a model read, one long document costs disproportionately more than several short ones of the same total length.</p>
+    <p>Self-attention computes a score for every pair of words in the input, each word with every word, itself included: for n words, n × n scores. Step through the board: 4 words, 16 scores; 8 words, 64. Twice the words, four times the scores. That is quadratic growth.</p>
+    <p>“tía miña” was two words. The whole story is thousands. A caution, which Notebook 01d measures: attention is only part of the work. At the lengths of a short text, the feed-forward parts, which grow only in proportion to the words, take most of the time, so the whole encoder grows by about 2 per doubling there. Attention's own share grows by about 4, and from a few thousand tokens on it dominates.</p>
   </div>
 </section>
 
@@ -3249,7 +3250,8 @@ print("they match" if count == expected else "they do not match: check the loop 
     </ul>
   </div>
   <div class="notes">
-    <p>Training a transformer can process a whole sentence in parallel, all positions at once. Generating new text can't: the model produces one word, then has to feed that word back in to produce the next one, and so on, inherently one step at a time. To avoid recomputing attention over all previous words from scratch at every step, models cache the keys and values already computed for earlier words — the KV cache — and only compute the new word's contribution fresh each step. But that cache itself keeps growing with every word generated, so later words in a long sequence cost more to produce than earlier ones did. Translating the rest of our story this way means that cache keeps growing for the entire length of the translation — this sequential, ever-growing-cache nature is the concrete mechanical reason generation costs so much more than a single-pass task like classification.</p>
+    <p>Training can process a whole sentence at once, all positions in parallel, because the gold output is known. Writing new text cannot: the model writes one word, feeds it back, and only then can it write the next one, as on the translation page's section 3.</p>
+    <p>To avoid recomputing the keys and values of all earlier words at every step, models keep them: the KV cache. Each new word adds its own key and value and attends to all the cached ones. The cache grows with every word written, so later words cost more than earlier ones. This one-word-at-a-time loop, with a growing cache, is why generating a long text costs much more than reading it.</p>
   </div>
 </section>
 
