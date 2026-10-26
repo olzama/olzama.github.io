@@ -240,7 +240,7 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 #ihbWhy th, #ihcWhy th { font-family: var(--font-body); font-weight: 400; color: var(--muted); text-align: left; padding: 0 8px 0 0; }
 #ihbWhy td, #ihcWhy td { padding: 0 8px 0 0; }
 #ihbWhy td:nth-child(n+4), #ihcWhy td:nth-child(n+4) { text-align: right; }
-.ogrid.one.avgrows .row { font-size: 0.8rem; height: 1.6rem; overflow: hidden; } .avgrows .row .x { color: var(--muted); margin: 0 1px; } .avgrows .row .cell { cursor: default; padding: 1px 3px; font-size: 0.9em; flex-shrink: 0; } .avgrows .row .eq { margin-left: 4px; font-family: var(--font-mono); font-weight: 600; }
+.ogrid.one.avgrows .row { font-size: 0.8rem; height: 1.6rem; overflow: hidden; } .avgrows .row .x { color: var(--muted); margin: 0 1px; } .avgrows .row .who { flex-shrink: 0; margin-right: 4px; } .avgrows .tbars { display: inline-flex; align-items: flex-end; gap: 2px; height: 1.25em; padding: 0 3px; border-bottom: 1px solid var(--line); background: var(--grid); flex-shrink: 0; } .avgrows .tbars span { width: 0.45em; min-height: 1px; } .avgrows .row .cell { cursor: default; padding: 1px 3px; font-size: 0.9em; flex-shrink: 0; } .avgrows .row .eq { margin-left: 4px; font-family: var(--font-mono); font-weight: 600; }
 .ogrid.one .row { flex-wrap: nowrap; height: 1.9em; overflow: hidden; white-space: nowrap; }
 #pathAll { grid-template-columns: minmax(0, 1fr); }
 .tables3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 16px; align-items: start; }
@@ -1548,10 +1548,10 @@ PZ.attach("trAllSvg", () => renderWhole());
 $("trainData").innerHTML = S2S.data.map(([s2, t2], q) => `<div class="phrase"><span><span class="mono" style="color:var(--muted);display:inline-block;min-width:2.2em">${q + 1}.</span><span class="src">${s2.join(" ")}</span> → ${t2.map(w => w === "‹end›" ? `<span style="color:var(--muted)">${w}</span>` : w).join(" ")}</span></div>`).join("");
 // how one point of a curve is made: the development pair's word probabilities (each given the gold words before it)
 // multiplied: the probability of the whole gold translation; for the training pairs, the same per pair, then averaged
-window.avgRows = (devTgt, devP, trAvg, trName) => {
-  const neg = css("--neg"), green = css("--green"), prod = devP.reduce((a, b) => a * b, 1);
-  return `<div class="row">${devTgt.map((w, m) => `${m ? `<span class="x">×</span>` : ""}<span class="cell"><span class="fl" style="width:${(devP[m] * 100).toFixed(1)}%;background:${neg}"></span><span class="t">${w} ${devP[m].toFixed(2)}</span></span>`).join("")}<span class="eq" style="color:${neg}">= ${prod.toFixed(3)}</span></div>`
-    + `<div class="row"><span>the same for each of ${trName}, then their average =</span><span class="eq" style="color:${green}">${trAvg.toFixed(3)}</span></div>`; };
+window.avgRows = (devTgt, devP, trP, trNames) => {
+  const neg = css("--neg"), green = css("--green"), prod = devP.reduce((a, b) => a * b, 1), avg = trP.reduce((a, b) => a + b, 0) / trP.length;
+  return `<div class="row"><span class="who" style="color:${neg}">development:</span>${devTgt.map((w, m) => `${m ? `<span class="x">×</span>` : ""}<span class="cell"><span class="fl" style="width:${(devP[m] * 100).toFixed(1)}%;background:${neg}"></span><span class="t">${w} ${devP[m].toFixed(2)}</span></span>`).join("")}<span class="eq" style="color:${neg}">= ${prod.toFixed(3)}</span></div>`
+    + `<div class="row"><span class="who" style="color:${green}">training, one bar each:</span><span class="tbars">${trP.map((p, i) => `<span title="${trNames[i]}: ${p.toFixed(3)}" style="height:${(p * 100).toFixed(1)}%;background:${green}"></span>`).join("")}</span><span class="eq" style="color:${green}">average = ${avg.toFixed(3)}</span></div>`; };
 // rows that are too wide for the column get a smaller font, at the same height
 window.fitRows = box => box.querySelectorAll(".row").forEach(r => { let fs = 0.8; r.style.fontSize = fs + "rem"; while (r.scrollWidth > r.clientWidth && fs > 0.5) { fs -= 0.02; r.style.fontSize = fs + "rem"; } });
 const HQ = S2S.held, TRAIN15 = S2S.data.map((d, q) => q).filter(q => q !== HQ);
@@ -1592,8 +1592,8 @@ function renderTest() {
   g += `<line x1="${X(tsI)}" y1="${T}" x2="${X(tsI)}" y2="${B}" stroke="${orange}" stroke-width="1.3" stroke-dasharray="4 3"/>`;
   g += `<circle cx="${X(tsI)}" cy="${Y(TS_CURVES.tr[tsI])}" r="4.5" fill="${green}" stroke="var(--panel)" stroke-width="1.5"/><circle cx="${X(tsI)}" cy="${Y(TS_CURVES.te[tsI])}" r="4.5" fill="${neg}" stroke="var(--panel)" stroke-width="1.5"/>`;
   $("tsCurve").innerHTML = g;
-  $("tsAvg").innerHTML = avgRows(tgt, correctProbs(sn, src, tgt), TS_CURVES.tr[tsI], "the 15 training pairs"); fitRows($("tsAvg"));
-  $("tsNote").innerHTML = `<span class="ok">green</span>: the 15 training pairs, average of their translations' probabilities · <span class="bad">red</span>: the development pair · curves smoothed over 31 rounds, the dots are the values now (${TS_CURVES.tr[tsI].toFixed(3)} and ${TS_CURVES.te[tsI].toFixed(3)})`;
+  $("tsAvg").innerHTML = avgRows(tgt, correctProbs(sn, src, tgt), TRAIN15.map(q => correctProbs(sn, ...S2S.data[q]).reduce((x, y) => x * y, 1)), TRAIN15.map(q => S2S.data[q][0].join(" "))); fitRows($("tsAvg"));
+  $("tsNote").innerHTML = `<span class="ok">green</span>: the probabilities of the 15 training translations, averaged · <span class="bad">red</span>: the probability of the development translation · curves smoothed over 31 rounds, the dots are the values now (${TS_CURVES.tr[tsI].toFixed(3)} and ${TS_CURVES.te[tsI].toFixed(3)})`;
 }
 function stopTest() { clearInterval(tsTimer); tsTimer = null; $("tsPlay").textContent = "Play training"; }
 $("tsNext").addEventListener("click", () => { stopTest(); tsI = Math.min(tsI + 1, ROUNDS); renderTest(); });
@@ -1670,8 +1670,8 @@ function renderT() {
   c += `<line x1="${X(ti)}" y1="${T}" x2="${X(ti)}" y2="${B}" stroke="${orange}" stroke-width="1.3" stroke-dasharray="4 3"/>`;
   c += `<circle cx="${X(ti)}" cy="${Y(CUR4.tr[ti])}" r="4.5" fill="${green}" stroke="var(--panel)" stroke-width="1.5"/><circle cx="${X(ti)}" cy="${Y(CUR4.dev[ti])}" r="4.5" fill="${neg}" stroke="var(--panel)" stroke-width="1.5"/>`;
   $(PFX + "Curve").innerHTML = c;
-  { const [ds, dt] = IHAD.data[HELD4]; $(PFX + "Avg").innerHTML = avgRows(dt, correctP(sn, ds, dt), CUR4.tr[ti], `the ${TRAIN4.length} training sentences`); fitRows($(PFX + "Avg")); }
-  $(PFX + "CurveNote").innerHTML = (held ? `<span class="ok">green</span>: the 23 training sentences, average of their translations' probabilities · <span class="bad">red</span>: the development sentence, <i>unha tía miña cantaba</i>` : `<span class="ok">green</span>: the 24 training sentences, average of their translations' probabilities · <span class="bad">red</span>: <i>unha tía miña cantaba</i>, one of them`) + ` · curves smoothed over 5 recorded steps, the dots are the values now (${CUR4.tr[ti].toFixed(3)} and ${CUR4.dev[ti].toFixed(3)}) · ` + FACT;
+  { const [ds, dt] = IHAD.data[HELD4]; $(PFX + "Avg").innerHTML = avgRows(dt, correctP(sn, ds, dt), TRAIN4.map(i => correctP(sn, ...IHAD.data[i]).reduce((x, y) => x * y, 1)), TRAIN4.map(i => IHAD.data[i][0].join(" "))); fitRows($(PFX + "Avg")); }
+  $(PFX + "CurveNote").innerHTML = (held ? `<span class="ok">green</span>: the probabilities of the 23 training translations, averaged · <span class="bad">red</span>: the probability of the development translation, for <i>unha tía miña cantaba</i>` : `<span class="ok">green</span>: the probabilities of the 24 training translations, averaged · <span class="bad">red</span>: <i>unha tía miña cantaba</i>, one of them`) + ` · curves smoothed over 5 recorded steps, the dots are the values now (${CUR4.tr[ti].toFixed(3)} and ${CUR4.dev[ti].toFixed(3)}) · ` + FACT;
   // why: at the first output that differs from the gold output (or, if none does, the closest call), the numbers that decide it
   const ds = decode(sn, src), r2 = x => x.toFixed(2).replace("-", "−"), r2p = x => x < 0 ? `(${r2(x)})` : r2(x);
   let wk = ds.findIndex((s, k) => EN[s.j] !== tgt[k]), close = false;
