@@ -2088,31 +2088,8 @@ print("they match" if count == expected else "they do not match: check the loop 
   </div>
 </section>
 
-<section class="screen" id="encdec" data-step="3">
-  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Neural translation: an encoder and a decoder</h2></header>
-  <div class="body">
-    <ul class="points">
-      <li>Every word is a vector, learned from translated examples, like skip-gram's embeddings</li>
-      <li><b>Encoder</b>: reads the Galician words in order into <b>one vector</b>, the summary</li>
-      <li><b>Decoder</b>: starts from the summary and writes English one word at a time; each word is chosen the way skip-gram chose neighbors</li>
-    </ul>
-    <div class="flow">
-      <div style="display:grid;gap:6px;justify-items:center"><div class="flow"><div class="box">unha</div><span class="arr">→</span><div class="box">tía</div><span class="arr">→</span><div class="box">miña</div></div><span class="label">encoder</span></div>
-      <span class="arr">→</span><div class="box o round">one<br>vector</div><span class="arr">→</span>
-      <div style="display:grid;gap:6px;justify-items:center"><div class="flow"><div class="box g">an</div><span class="arr">→</span><div class="box g">aunt</div><span class="arr">→</span><div class="box g">of</div><span class="arr">→</span><div class="box g">mine</div></div><span class="label">decoder</span></div>
-    </div>
-    <p class="src">Sutskever, Vinyals &amp; Le, NeurIPS 2014 (arXiv:1409.3215)</p>
-  </div>
-  <div class="notes">
-    <p>This is the first neural translation design, from around 2014. It has two parts.</p>
-    <p>First, every word is a vector, like the embeddings from skip-gram. These vectors are learned from examples of translated sentences.</p>
-    <p>The encoder is the part that reads the source sentence. It reads the Galician words in order. It keeps one vector, called the summary, and updates it after every word. At the end, the whole sentence is in that one vector.</p>
-    <p>The decoder is the part that writes the translation. It starts from the summary. It writes the English words one at a time. Each word is chosen the way skip-gram chose neighbors: a score for every English word, then softmax, then the most probable word.</p>
-  </div>
-</section>
-
 <section class="screen" id="encdec2" data-step="3">
-  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Encoder and decoder, for any task</h2></header>
+  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Neural translation: an encoder and a decoder</h2></header>
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1400 630" role="img" aria-label="Possible inputs a, b, c, …; an input is a sequence of them, here c, a, e. The encoder reads the inputs one by one and updates a vector after each; that vector, the summary, is the input as numbers. The decoder keeps its own vector, the state, which starts as the encoder's vector. Possible outputs A, B, C, D, …, ‹end›: at each step the decoder gives each a probability and writes one, here D, then B, then ‹end›, which means finished; each output is mixed into the state. Both parts are trained together on pairs of an input and its gold output, the right output made by a person. The possible inputs and outputs depend on the task: translation, Galician words to English words; summarization, words to words; speech recognition, slices of a recording to written words; image captioning, patches of an image to words.">
@@ -2203,12 +2180,13 @@ print("they match" if count == expected else "they do not match: check the loop 
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
+    <p class="src">The first neural translation models: Sutskever, Vinyals &amp; Le, NeurIPS 2014 (arXiv:1409.3215)</p>
   </div>
   <div class="notes">
-    <p>Before we look at translation in detail: what are an encoder and a decoder in general? They are two parts of one model, and the idea is not specific to translation.</p>
+    <p>The first neural translation design, from around 2014, has two parts: an encoder and a decoder. They are two parts of one model, and the idea is not specific to translation, so the board shows it in general.</p>
     <p>First, the possible inputs: a fixed set of things the input can be made of. For translation from Galician, the Galician words; for speech, short slices of a recording; for an image, small patches of it. One input is a sequence of them: here input 1 is c, input 2 is a, input 3 is e.</p>
-    <p>The encoder reads the inputs one by one and updates a vector after each one. At the end, that vector stands for the whole input, as numbers; it is often called the summary.</p>
-    <p>The decoder has a fixed set of possible outputs too: for translation into English, the English words, plus ‹end›, a special output that means “finished”. The decoder keeps a vector of its own, its state, which starts as the encoder's vector. At each step it gives every possible output a probability, writes one, and mixes the output it wrote into its state: that is the dashed arrow back. Then the next step, until it writes ‹end›.</p>
+    <p>The encoder reads the inputs one by one and updates a vector after each one. At the end, that vector stands for the whole input, as numbers; it is often called the summary. In translation, each Galician word is a vector, learned from translated examples like skip-gram's embeddings.</p>
+    <p>The decoder has a fixed set of possible outputs too: for translation into English, the English words, plus ‹end›, a special output that means “finished”. The decoder keeps a vector of its own, its state, which starts as the encoder's vector. At each step it gives every possible output a probability, writes one, and mixes the output it wrote into its state: that is the dashed arrow back. Then the next step, until it writes ‹end›. In translation, the probabilities come the way skip-gram chose neighbors: a score for every English word, then softmax.</p>
     <p>Both parts are trained together, on pairs: an input and its gold output: the right output for it, made by a person. From here on, the gold output. Training compares the model's output with the gold output and passes the difference back through the decoder and the encoder, to every vector in the model. That is backpropagation. It needs three ideas, on the next screens: the loss and its gradient, the chain rule, and backpropagation itself.</p>
     <p>The table: many tasks are built this way. What changes is only the set of possible inputs and the set of possible outputs. Next, how the two parts are trained; then translation, with a trained model.</p>
   </div>
@@ -2488,9 +2466,10 @@ print("they match" if count == expected else "they do not match: check the loop 
       <button data-go="train" aria-pressed="true">1 Training</button>
       <button data-go="enc" aria-pressed="false">2 The summary</button>
       <button data-go="bound" aria-pressed="false">3 The decoder writes</button>
+      <button data-go="ihad" aria-pressed="false">4 A model trained on “I had an aunt”</button>
       <a class="open" href="../artifacts/mt.html#train" target="_blank" rel="noopener">Open the full page</a>
     </div>
-    <iframe class="frame" title="Neural translation, step by step" data-src="../artifacts/mt.html?embed=train,enc,bound"></iframe>
+    <iframe class="frame" title="Neural translation, step by step" data-src="../artifacts/mt.html?embed=train,enc,bound,ihad"></iframe>
   </div>
   <div class="notes">
     <p>Section 1 shows where the vectors come from: training. The data are 16 pairs, each an input, a Galician phrase, and its gold output, its English translation by a person. The model is three tables of 2-D vectors (the Galician inputs; the possible outputs, with the vector used for the score; and their second vectors, the ones mixed into the state), and all of them start random. Training here takes the pairs one at a time, in a fixed order, round after round: after every pair, one small update of the tables.</p>
@@ -2498,6 +2477,57 @@ print("they match" if count == expected else "they do not match: check the loop 
     <p>Part B is the whole training, round by round, with Play, and a switch between two procedures. One pair at a time is what part A walks: each pair is followed by its own update, 16 per round (stochastic gradient descent, in use since the 1950s). All 16 at once is the usual procedure today (mini-batch gradient descent): the pushes of all 16 pairs are computed from the same tables, added up, and applied as one update per round; the rule is the same, and on a GPU the 16 pushes are computed in parallel, which is why it is the usual way. The curve of inputs translated right shows both, with its count switch: counted in rounds (passes over the data), the small frequent updates win (all right from round 252 against 1612); counted in updates, the added-up one does (1612 updates against 4032). Which is faster depends on what you count; on a GPU the 16 pushes of one added-up update run in parallel, so time follows updates more than rounds. Neither procedure needed anything beyond gradient descent; what made neural translation possible was training whole networks by backpropagation, data and GPUs. Block 1 lists the 16 pairs with each gold output filled by the probability the model gives it after this many rounds, the same probabilities part A computes; a click follows that pair in part A with these tables. Block 2 is the plane with every vector, the Galician inputs as squares and the English possible outputs as rings; a click on a word traces its path from the random start to the current round. Part C is the same training again, from the same random start, with one pair held out: unha tía miña. The other 15 are the training data; the held-out pair is development data, never seen in training and used to check the model while we build it. Part C shows that training the way part B does: the pairs with their probability fills beside what the model writes (the development pair greyed and tagged), the plane with path tracing, and a curve of the development pair's gold translation against the translation the model writes for it; at the end the model rates its own “an aunt ‹end›” (0.456) above the gold “an aunt of mine ‹end›” (0.359). Part D continues the same training to 6000 rounds; the rest of the page keeps the models of 3000. Three marks on its curve: from round 313 all 15 training pairs are right, so judged on the training data alone, training is done; round 3000 is where part C stopped, the development pair still “an aunt ‹end›”; from round 4217 the development pair comes out right. Only the development data shows that training longer helps: that is what it is for, choosing how long to train by checking pairs the model never trains on. In section 4 the same check shows the opposite: there the development sentence comes closest around step 1200. Section 3 then walks the development phrase output by output with either model: the model of 16 writes it right; the model of 15 writes “an aunt ‹end›”, where at output 3 the state points a little farther toward ‹end› than toward “of”, a close call. This is not the summary losing words (in three words tía is still a quarter of it); it is a combination the model never saw. Sections 2 and 3 are then inference: a trained model translating, with no gold output and no update. Section 3 has a model switch, trained on all 16 or on 15, and three kinds of phrase: training pairs, the development pair (unha tía miña: a training pair for the model of 16, held out for the model of 15), and two test phrases that neither model ever saw, unha tía (an aunt) and unha veciña (a neighbor). The model of 16 writes the development pair right; the model of 15 writes “an aunt ‹end›”; both get the test phrases wrong (“my aunt”, “your neighbor”): every pair they were trained on has three words. Block 3 is what the model writes now for each input, right for N of 16, and the curve of that count over the rounds.</p>
     <p>Press the tab The summary. This shows the encoder with simple made-up numbers. Choose tía miña and press Next word. Each new word moves the summary halfway toward that word's point. The bar shows how much of each word is left in the summary. Now choose the whole sentence and read it to the end. Almost nothing of tía is left. This is the problem with one vector.</p>
     <p>Press the tab The decoder writes. This is the trained model at work. Press Next, step by step. First the encoder reads the phrase. Then the decoder writes. At each step, each English word gets a score: the dot product of its vector with the decoder's state. The highest score wins. Then the state is updated with the word just written.</p>
+    <p>Press the tab A model trained on “I had an aunt”. Same kind of model as sections 1–3, different training data. Part A shows the data in two groups: kept as English books have it (“a friend of mine sang”) and rebuilt as a translator would (“I had an aunt who sang”); the words I, had and who have no Galician counterpart, and the model writes them because its training data has them. A card sets this model's data next to that of sections 1–3, for the same unha tía miña.</p><p>Parts B and C are two training runs from the same random start, seen as in section 1's part B (Play, a verb switch for the 8 sentences shown, the curve of the chosen sentence's gold and written translations, the plane with the chosen sentence labeled). Both train on all their pairs at once, with Adam. Part B trains on all 24 and ends up writing all 24 right, “I had an aunt who sang” included: the pattern can be learned. Part C holds out the lesson's sentence, unha tía miña cantaba, as development data, while its bailaba and ría versions and un irmán meu cantaba stay in training. All 23 training sentences end up right, but the held-out one comes out “a colleague of mine sang”; it comes closest at steps 1000 to 1200 (“I had an aunt who danced”). So learning this is possible, but not trivial: the other 23 do not carry the pattern over to it by themselves.</p><p>Under each list, “why” shows the numbers: for the chosen sentence, the first output that differs from the gold output, with the state there and each word's score worked out (state · vector) and its probability; the plane shows that state as an arrow. For the development sentence at the end of part C it is output 1: “I” scores 144.48, “a” 145.27, probabilities 0.31 and 0.69, a close call that decides the whole translation. When a sentence comes out right, the block shows its closest call instead.</p>
+  <p>The curve under each list follows the chosen sentence and shows two whole-translation probabilities: green for its gold translation, red for the translation the model writes. A whole translation's probability is its words' probabilities multiplied; the rows under the curve show the multiplication. For the development sentence at the end of part C, the gold translation gets 0.015: most of its words are near 1, but I gets 0.31, an 0.24 and sang 0.21. What the model writes, "a colleague of mine sang", gets 0.536, because "a" wins at output 1 (0.69) and the rest follows a pattern the model knows well. When the model writes the gold translation, the two curves are one.</p>
+  </div>
+</section>
+
+<section class="screen" id="realwhy" data-step="3">
+  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Why a real model still writes “an aunt of mine”</h2></header>
+  <div class="body">
+    <div class="board">
+      <svg viewBox="0 0 1400 670" role="img" aria-label="The real model translates our sentence as An aunt of mine. Its probabilities for four openings, log scale: An aunt of mine 0.33, My aunt 0.015, I had an aunt 7.5 in a million, One of my aunts 5.5 in ten billion. Word by word, I had an aunt loses at its first words. Likely reasons: it learned translations; a … of mine is common; rebuilding is a big step; Galician is low-resource.">
+<text class="note" x="40" y="40" font-size="19.2" style="fill:var(--muted)" text-anchor="start" data-s="1" data-d="0">Helsinki-NLP/opus-mt-gl-en, a real Galician–English model, translates our sentence as</text>
+<text x="40" y="76" font-size="30" style="fill:var(--orange)" text-anchor="start" data-s="1" data-d="0.3">“An aunt of mine, who …”</text>
+<text x="40" y="128" font-size="22" style="fill:var(--muted)" text-anchor="start" data-s="2" data-d="0">its probability for each opening, given the Galician sentence (log scale)</text>
+<text x="300" y="176" font-size="24" style="fill:currentColor" text-anchor="end" data-s="2" data-d="0.0">An aunt of mine</text>
+<rect x="320" y="156" width="591.2" height="28" rx="4" fill="var(--orange)" fill-opacity="0.85" data-s="2" data-d="0.05" data-a="fade" data-t="0.4"/>
+<text x="921.2236655956291" y="178" font-size="22" style="fill:currentColor" text-anchor="start" data-s="2" data-d="0.25">0.33</text>
+<text x="300" y="220" font-size="24" style="fill:currentColor" text-anchor="end" data-s="2" data-d="0.15">My aunt</text>
+<rect x="320" y="200" width="511.9" height="28" rx="4" fill="var(--blue)" fill-opacity="0.85" data-s="2" data-d="0.2" data-a="fade" data-t="0.4"/>
+<text x="841.8636660098529" y="222" font-size="22" style="fill:currentColor" text-anchor="start" data-s="2" data-d="0.4">0.015</text>
+<text x="300" y="264" font-size="24" style="fill:currentColor" text-anchor="end" data-s="2" data-d="0.3">I had an aunt</text>
+<rect x="320" y="244" width="317.4" height="28" rx="4" fill="var(--green)" fill-opacity="0.85" data-s="2" data-d="0.35" data-a="fade" data-t="0.4"/>
+<text x="647.3792836368325" y="266" font-size="22" style="fill:currentColor" text-anchor="start" data-s="2" data-d="0.55">7.5 × 10<tspan dy='-8' font-size='15'>-6</tspan></text>
+<text x="300" y="308" font-size="24" style="fill:currentColor" text-anchor="end" data-s="2" data-d="0.44999999999999996">One of my aunts</text>
+<rect x="320" y="288" width="73.3" height="28" rx="4" fill="var(--muted)" fill-opacity="0.85" data-s="2" data-d="0.49999999999999994" data-a="fade" data-t="0.4"/>
+<text x="403.3183495505275" y="310" font-size="22" style="fill:currentColor" text-anchor="start" data-s="2" data-d="0.7">5.5 × 10<tspan dy='-8' font-size='15'>-10</tspan></text>
+<text class="note" x="40" y="352" font-size="17.6" style="fill:var(--muted)" text-anchor="start" data-s="3" data-d="0">word by word: the first words decide</text>
+<text x="300" y="388" font-size="22" style="fill:var(--orange)" text-anchor="end" data-s="3" data-d="0.2">An aunt of mine</text>
+<text x="320" y="388" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.30000000000000004">An 0.53</text>
+<text x="430.70000000000005" y="388" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.30000000000000004">aunt 0.95</text>
+<text x="565.6" y="388" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.30000000000000004">of 0.65</text>
+<text x="676.3000000000001" y="388" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.30000000000000004">mine 1.00</text>
+<text x="300" y="422" font-size="22" style="fill:var(--green)" text-anchor="end" data-s="3" data-d="0.5">I had an aunt</text>
+<text x="320" y="422" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.6">I 0.006</text>
+<text x="430.70000000000005" y="422" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.6">had 0.03</text>
+<text x="553.5" y="422" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.6">an 0.04</text>
+<text x="664.2" y="422" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.6">aunt 0.90</text>
+<text class="note" x="40" y="476" font-size="17.6" style="fill:var(--muted)" text-anchor="start" data-s="4" data-d="0">likely reasons</text>
+<text class="note" x="60" y="510" font-size="17.6" style="fill:currentColor" text-anchor="start" data-s="4" data-d="0.0">1. it learned translations, not English in general: “unha X miña” is usually rendered “a X of mine”</text>
+<text class="note" x="60" y="542" font-size="17.6" style="fill:currentColor" text-anchor="start" data-s="4" data-d="0.3">2. rare is not absent: “a … of mine” is a common pattern, so it comes out fluently</text>
+<text class="note" x="60" y="574" font-size="17.6" style="fill:currentColor" text-anchor="start" data-s="5" data-d="0.0">3. rebuilding is a big step: “I had …” needs a new subject and verb, chosen one word at a time</text>
+<text class="note" x="60" y="606" font-size="17.6" style="fill:currentColor" text-anchor="start" data-s="5" data-d="0.3">4. Galician is low-resource: little translated text, much of it fairly literal</text>
+<text class="note" x="40" y="650" font-size="16.0" style="fill:var(--green)" text-anchor="start" data-s="6" data-d="0">likely, not measured · section 4 of the translation page shows reason 1 directly: what the training data says, the model writes</text>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
+    </div>
+  </div>
+  <div class="notes">
+    <p>The real Galician–English model, Helsinki-NLP/opus-mt-gl-en, translates our sentence as “An aunt of mine, who…”, even though English books rarely say it (part d of section 3 of the translation page). This is a real model, trained on many translated sentences; it comes back on the attention screens. We can ask the model how likely it finds other openings: give it the Galician sentence and an English opening, and read off its probability for each word.</p>
+    <p>“An aunt of mine” is its favorite by far; “I had an aunt” is tens of thousands of times less likely. Word by word, the alternatives lose at their first words: “I” has a probability of about 0.006 as the first word, “had” about 0.03 after it; “An” starts at 0.53, and after that each word of “an aunt of mine” is likely.</p>
+    <p>Likely reasons. It learned translations, not English in general: book counts show how often English writers choose a phrasing, while a translation model learns how translators rendered similar Galician phrases, and unha X miña is usually rendered “a X of mine”, right for friends and colleagues, applied to tía too. Rare is not absent: “an aunt of mine” is unusual, but “a … of mine” is very common, so the model writes it fluently. Rebuilding a sentence is a big step: “I had an aunt who…” needs a new subject and verb, the model chooses one word at a time given the Galician, and staying close to the Galician wins at each step. Galician is low-resource: there is relatively little translated text to learn from, and much of it is fairly literal.</p>
+    <p>These are likely explanations, not measured ones. Section 4 of the translation page shows the first directly: a toy model trained on English that follows the book counts writes “I had an aunt who sang”. The numbers come from mt_score_alternatives.py.</p>
   </div>
 </section>
 
@@ -2510,6 +2540,7 @@ print("they match" if count == expected else "they do not match: check the loop 
       <ul class="points">
         <li>The bottleneck: the whole sentence squeezed into <b>one vector</b></li>
         <li>Bahdanau, Cho &amp; Bengio (2015): the decoder <b>looks back</b> at every source word and chooses new weights for every word it writes: <b>attention</b></li>
+        <li>Which source word goes with which word written (<b>alignment</b>) comes out of the weights, learned from translated sentences, with no hand-written rule</li>
         <li>Invented for translation, years before today's LLMs</li>
       </ul>
       <!--LOOKBACK-->
@@ -2813,8 +2844,57 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="notes">
     <p>We saw the problem: the encoder squeezes the whole sentence into one vector. The longer the sentence, the more of the early words is lost. Translation quality got worse as sentences got longer.</p>
     <p>Bahdanau, Cho and Bengio fixed this in 2015. The decoder no longer gets only the last summary. It may look back at the encoder's vector for every source word. For every English word it writes, it decides how much to use each source word. These amounts are called attention weights. The idea is called attention.</p>
-    <p>Both pictures use the weights of their trained model, translating an English sentence into French. On the left, the decoder is about to write zone. It looks back at every English word, and the line width is the weight: most of it on Area, some on Economic. On the right, the same weights for every French word at once: each row is a French word being written, each column an English word, and the stronger the orange, the more weight. Mostly the orange runs along a diagonal: the words come in the same order. The blue box is where the order flips: European Economic Area becomes zone économique européenne, and the weights follow the words, not the positions. The green box: two English words, was signed, become three French ones, a été signé. One more detail: la puts some of its weight on Area, because the French noun there, zone, decides between la and le. Nobody told the model where to look: it learned these weights from translated sentences. The next screens take apart how such weights are computed, by hand.</p>
-    <p>Attention was invented for machine translation, years before it became the core of every modern large language model.</p>
+    <p>Both pictures use the weights of their trained model, translating an English sentence into French. On the left, the decoder is about to write zone. It looks back at every English word, and the line width is the weight: most of it on Area, some on Economic. On the right, the same weights for every French word at once: each row is a French word being written, each column an English word, and the stronger the orange, the more weight. Mostly the orange runs along a diagonal: the words come in the same order. The blue box is where the order flips: European Economic Area becomes zone économique européenne, and the weights follow the words, not the positions. The green box: two English words, was signed, become three French ones, a été signé. One more detail: la puts some of its weight on Area, because the French noun there, zone, decides between la and le.</p>
+    <p>Finding which source word goes with which word of the translation is called alignment, one of the oldest problems in translation. The words do not match one to one, and the order can change. In our story, unha tía miña, three Galician words, becomes an aunt of mine, four English words: miña becomes of mine. Rule-based systems needed hand-written rules for alignment, for every language pair. Nobody told this model where to look: it learned these weights from translated sentences, with no separate alignment step.</p>
+    <p>Attention was invented for machine translation, years before it became the core of every modern large language model. The next screens take apart how such weights are computed, by hand.</p>
+  </div>
+</section>
+
+<section class="screen" id="qkv" data-step="4">
+  <header><span class="kind">Step 4 · Attention</span><h2>Query, key and value</h2></header>
+  <div class="body cols">
+    <div class="col">
+      <ul class="points">
+        <li><b>Query</b> <i>q</i>: what the decoder looks for, before the word it is about to write</li>
+        <li><b>Key</b> <i>k</i>: what each source word offers to be found by</li>
+        <li><b>Score</b> = <i>q</i> · <i>k</i>, the dot product; <b>softmax</b> turns the scores into weights that add up to 1</li>
+        <li><b>Value</b> <i>v</i>: what each source word contributes; the mix is the sum of the values, each times its weight</li>
+        <li>On the next screen's page, the keys and the values are the same vectors: the encoder's, after each word</li>
+      </ul>
+    </div>
+    <div class="col">
+      <svg class="svgfig" viewBox="-140 0 740 326" role="img" aria-label="The query, from the decoder about to write the next English word, is compared with the key of each source word, unha, tía, miña: score q · k, then softmax gives weights that add up to 1. The mix is the weighted sum of the source words' values, w1 v1 + w2 v2 + w3 v3, and goes into the decoder's state. Line width shows the weight; here most of it on tía." style="max-width:700px">
+  <rect x="210" y="14" width="180" height="40" rx="6" fill="var(--orange-soft)" stroke="var(--orange)" stroke-width="1.5"/>
+  <text x="300" y="40" text-anchor="middle" font-size="17">query <tspan font-style="italic">q</tspan></text>
+  <text x="400" y="30" font-size="13" class="muted">the decoder, about to</text><text x="400" y="47" font-size="13" class="muted">write the next English word</text>
+  <line x1="300" y1="54" x2="150" y2="112" stroke="var(--orange)" stroke-width="1.5" stroke-linecap="round"/>
+  <rect x="105" y="114" width="90" height="30" rx="5" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5"/><text x="150" y="135" text-anchor="middle" font-size="16">key <tspan font-style="italic">k</tspan><tspan font-size="11" dy="4">1</tspan></text>
+  <rect x="105" y="150" width="90" height="34" rx="5" fill="none" stroke="var(--muted)" stroke-width="1"/><text x="150" y="173" text-anchor="middle" font-size="17" font-style="italic">unha</text>
+  <rect x="105" y="190" width="90" height="30" rx="5" fill="var(--green-soft)" stroke="var(--green)" stroke-width="1.5"/><text x="150" y="211" text-anchor="middle" font-size="16">value <tspan font-style="italic">v</tspan><tspan font-size="11" dy="4">1</tspan></text>
+  <line x1="150" y1="220" x2="300" y2="262" stroke="var(--green)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="300" y1="54" x2="300" y2="112" stroke="var(--orange)" stroke-width="6" stroke-linecap="round"/>
+  <rect x="255" y="114" width="90" height="30" rx="5" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5"/><text x="300" y="135" text-anchor="middle" font-size="16">key <tspan font-style="italic">k</tspan><tspan font-size="11" dy="4">2</tspan></text>
+  <rect x="255" y="150" width="90" height="34" rx="5" fill="none" stroke="var(--muted)" stroke-width="1"/><text x="300" y="173" text-anchor="middle" font-size="17" font-style="italic">tía</text>
+  <rect x="255" y="190" width="90" height="30" rx="5" fill="var(--green-soft)" stroke="var(--green)" stroke-width="1.5"/><text x="300" y="211" text-anchor="middle" font-size="16">value <tspan font-style="italic">v</tspan><tspan font-size="11" dy="4">2</tspan></text>
+  <line x1="300" y1="220" x2="300" y2="262" stroke="var(--green)" stroke-width="6" stroke-linecap="round"/>
+  <line x1="300" y1="54" x2="450" y2="112" stroke="var(--orange)" stroke-width="3" stroke-linecap="round"/>
+  <rect x="405" y="114" width="90" height="30" rx="5" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5"/><text x="450" y="135" text-anchor="middle" font-size="16">key <tspan font-style="italic">k</tspan><tspan font-size="11" dy="4">3</tspan></text>
+  <rect x="405" y="150" width="90" height="34" rx="5" fill="none" stroke="var(--muted)" stroke-width="1"/><text x="450" y="173" text-anchor="middle" font-size="17" font-style="italic">miña</text>
+  <rect x="405" y="190" width="90" height="30" rx="5" fill="var(--green-soft)" stroke="var(--green)" stroke-width="1.5"/><text x="450" y="211" text-anchor="middle" font-size="16">value <tspan font-style="italic">v</tspan><tspan font-size="11" dy="4">3</tspan></text>
+  <line x1="450" y1="220" x2="300" y2="262" stroke="var(--green)" stroke-width="3" stroke-linecap="round"/>
+  <text x="-130" y="72" font-size="13" class="muted">score of each key: q · k;</text><text x="-130" y="89" font-size="13" class="muted">softmax: weights that</text><text x="-130" y="106" font-size="13" class="muted">add up to 1</text>
+  <text x="-130" y="173" font-size="13" class="muted">each source word →</text><text x="-130" y="248" font-size="13" class="muted">values, times the weights</text>
+  <rect x="190" y="264" width="220" height="34" rx="6" fill="var(--green-soft)" stroke="var(--green)" stroke-width="1.5"/>
+  <text x="300" y="287" text-anchor="middle" font-size="16">the mix: w<tspan font-size="11" dy="4">1</tspan><tspan dy="-4">v</tspan><tspan font-size="11" dy="4">1</tspan><tspan dy="-4"> + w</tspan><tspan font-size="11" dy="4">2</tspan><tspan dy="-4">v</tspan><tspan font-size="11" dy="4">2</tspan><tspan dy="-4"> + w</tspan><tspan font-size="11" dy="4">3</tspan><tspan dy="-4">v</tspan><tspan font-size="11" dy="4">3</tspan></text>
+  <text x="420" y="286" font-size="13" class="muted">→ the decoder's state</text>
+  <text x="300" y="318" text-anchor="middle" font-size="12" class="muted">line width: the weight (an illustration)</text>
+</svg>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Before we compute attention by hand, the three names you will meet everywhere. Think of a search. The query is what you are searching for: here, what the decoder needs before the word it is about to write. Each source word has a key, a short descriptor the query is compared against, and a value, the content you get back from it.</p>
+    <p>The comparison is the dot product of the query with each key: the score. Softmax, as in skip-gram, turns the scores into weights that are all positive and add up to 1. The mix is the sum of the values, each multiplied by its weight, and it goes into the decoder's state. In the picture, the width of each line stands for the weight: here most of it goes to tía.</p>
+    <p>On the next page the model is small enough to compute by hand, and there the keys and the values are the same vectors: the encoder's vector after each Galician word. In transformers they are computed separately from each word, and the query too; we come back to that with self-attention.</p>
   </div>
 </section>
 
@@ -2847,103 +2927,6 @@ print("they match" if count == expected else "they do not match: check the loop 
   </div>
 </section>
 
-<section class="screen" id="alignment" data-step="4">
-  <header><span class="kind">Step 4 · Attention</span><h2>The alignment problem in translation</h2></header>
-  <div class="body">
-    <p class="sent small"><span class="hl">Unha tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”.</p>
-    <svg class="svgfig" viewBox="0 0 260 175" role="img" aria-label="unha connects to an, tía to aunt, miña to both of and mine" style="max-width:360px">
-      <g font-size="16" text-anchor="middle">
-        <text x="50" y="35" font-style="italic">unha</text><text x="50" y="80" font-style="italic">tía</text><text x="50" y="125" font-style="italic">miña</text>
-        <text x="210" y="25">an</text><text x="210" y="60">aunt</text><text x="210" y="95">of</text><text x="210" y="130">mine</text>
-        <line x1="78" y1="30" x2="190" y2="20" stroke="var(--blue)" stroke-width="2"/>
-        <line x1="72" y1="75" x2="184" y2="55" stroke="var(--green)" stroke-width="2"/>
-        <line x1="78" y1="120" x2="194" y2="90" stroke="var(--neg)" stroke-width="2"/>
-        <line x1="78" y1="120" x2="184" y2="125" stroke="var(--neg)" stroke-width="2"/>
-        <text x="50" y="165" font-size="11" class="muted">Galician</text><text x="210" y="165" font-size="11" class="muted">English</text>
-      </g>
-    </svg>
-    <ul class="points">
-      <li>The aunt is introduced as “<i>unha tía miña</i>”: three Galician words, four English words</li>
-      <li>One Galician word, <i>miña</i>, becomes two English words: “of mine”</li>
-      <li>Attention learns which Galician word to look at for each English word, with no separate alignment step</li>
-    </ul>
-  </div>
-  <div class="notes">
-    <p>Look at the first three words of the sentence: "unha tía miña". This is how the story introduces the aunt. The English translation is "an aunt of mine". Three Galician words become four English words. "Unha" becomes "an". "Tía" becomes "aunt". "Miña" becomes two words, "of mine".</p>
-    <p>So the words do not match one to one. In other sentences, the order changes too. Finding which source word goes with which target word is called alignment. It is one of the oldest problems in translation. Rule-based systems needed hand-written rules for it, for every language pair. Attention learns it from translated example sentences. There is no separate alignment step and no hand-written rule.</p>
-  </div>
-</section>
-
-<section class="screen" id="qkv" data-step="4">
-  <header><span class="kind">Step 4 · Attention</span><h2>Attention scores: how much should I look here?</h2></header>
-  <div class="body">
-    <ul class="points">
-      <li><b>Query</b>: what am I looking for? &nbsp; <b>Key</b>: what do I offer?</li>
-      <li>Score = q · k, then <b>softmax</b>: weights that sum to 1</li>
-      <li><b>Value</b>: the actual content; the output is their weighted average, using those weights</li>
-    </ul>
-  </div>
-  <div class="notes">
-    <p>This is what you usually see when attention gets explained — attention scores. An analogy that tends to land well: think of this like a search. Query: what you're currently searching for. Key: a short descriptor attached to each candidate item, that your query gets compared against. Value: the actual content of each candidate, which you eventually retrieve. The score is the dot product of the query with each key — literally, how well does this key match what I'm looking for — and then softmax, a function that takes raw scores and converts them into weights that are all positive and sum to exactly 1, like a probability distribution, turns those scores into attention weights. Attention was the next revolutionary idea that really propelled NLP forward, and it's the core of the architectures behind modern LLMs.</p>
-  </div>
-</section>
-
-<section class="screen" id="workedattn" data-step="4">
-  <header><span class="kind">Step 4 · Attention</span><h2>Worked example: aligning “unha tía miña” → “an aunt of mine”</h2></header>
-  <div class="body">
-    <p class="sent small"><span class="hl">Unha tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”.</p>
-    <div class="board">
-      <svg viewBox="0 0 1000 540" role="img" aria-label="Keys: the encoder&#x27;s vectors after unha (0.5, 0, 0), after tía (0.25, 0.5, 0), after miña (0.125, 0.25, 0.5). To write aunt, the query (0, 6, 0) gives scores 0, 3 and 1.5; softmax gives e³ / (e⁰ + e³ + e¹·⁵) = 20.09 / 25.57 ≈ 0.79 for the key after tía, 0.04 for the key after unha and 0.18 for the key after miña. To write an, the decoder uses the same query, the query before the first two words; to write of, the query (0, 0, 6) gives 0.05, 0.05, 0.91">
-<text x="30.0" y="40.0" font-size="19" style="fill:var(--muted)" data-s="1" data-d="0">keys: the encoder's vectors</text>
-<text x="30.0" y="90.0" font-size="23" style="fill:currentColor" data-s="2" data-d="0">k<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan> = after unha = (0.5, 0, 0)</text>
-<text x="30.0" y="136.0" font-size="23" style="fill:currentColor" data-s="3" data-d="0">k<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan> = after tía = (0.25, 0.5, 0)</text>
-<text x="30.0" y="182.0" font-size="23" style="fill:currentColor" data-s="4" data-d="0">k<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan> = after miña = (0.125, 0.25, 0.5)</text>
-<text x="30.0" y="260.0" font-size="23" style="fill:var(--orange)" data-s="5" data-d="0">to write “aunt”:</text>
-<text x="30.0" y="300.0" font-size="23" style="fill:var(--orange)" data-s="5" data-d="0.4">q = (0, 6, 0)</text>
-<text y="90" font-size="23" style="fill:currentColor" data-s="6" data-d="0" data-line="A1" data-x0="520">q · k<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan> =</text>
-<text y="90" font-size="23" style="fill:currentColor" data-s="7" data-d="0" data-line="A1">0 × 0.5</text>
-<text y="90" font-size="23" style="fill:currentColor" data-s="8" data-d="0" data-line="A1">+ 6 × 0</text>
-<text y="90" font-size="23" style="fill:currentColor" data-s="9" data-d="0" data-line="A1">+ 0 × 0</text>
-<text y="90" font-size="23" style="fill:var(--orange)" data-s="10" data-d="0" data-line="A1">= 0</text>
-<text y="136" font-size="23" style="fill:currentColor" data-s="11" data-d="0" data-line="A2" data-x0="520">q · k<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan> =</text>
-<text y="136" font-size="23" style="fill:currentColor" data-s="12" data-d="0" data-line="A2">0 × 0.25</text>
-<text y="136" font-size="23" style="fill:currentColor" data-s="13" data-d="0" data-line="A2">+ 6 × 0.5</text>
-<text y="136" font-size="23" style="fill:currentColor" data-s="14" data-d="0" data-line="A2">+ 0 × 0</text>
-<text y="136" font-size="23" style="fill:var(--orange)" data-s="15" data-d="0" data-line="A2">= 3</text>
-<text y="182" font-size="23" style="fill:currentColor" data-s="16" data-d="0" data-line="A3" data-x0="520">q · k<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan> =</text>
-<text y="182" font-size="23" style="fill:currentColor" data-s="17" data-d="0" data-line="A3">0 × 0.125</text>
-<text y="182" font-size="23" style="fill:currentColor" data-s="18" data-d="0" data-line="A3">+ 6 × 0.25</text>
-<text y="182" font-size="23" style="fill:currentColor" data-s="19" data-d="0" data-line="A3">+ 0 × 0.5</text>
-<text y="182" font-size="23" style="fill:var(--orange)" data-s="20" data-d="0" data-line="A3">= 1.5</text>
-<text y="380" font-size="23" style="fill:currentColor" data-s="21" data-d="0" data-line="S1" data-x0="30">weight of k<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan> =</text>
-<g class="bfrac" data-line="S1"><text class="num" y="362" font-size="23" style="fill:currentColor" data-s="21" data-d="0">e<tspan dy="-11" font-size="0.68em">3</tspan><tspan dy="11">​</tspan></text><line class="bar" y1="374" y2="374" stroke="currentColor" stroke-width="2" data-s="21" data-d="0"/><text class="den" y="401" font-size="23" style="fill:currentColor" data-s="22" data-d="0">e<tspan dy="-11" font-size="0.68em">0</tspan><tspan dy="11">​</tspan></text><text class="den" y="401" font-size="23" style="fill:currentColor" data-s="22" data-d="0">+ e<tspan dy="-11" font-size="0.68em">3</tspan><tspan dy="11">​</tspan></text><text class="den" y="401" font-size="23" style="fill:currentColor" data-s="22" data-d="0">+ e<tspan dy="-11" font-size="0.68em">1.5</tspan><tspan dy="11">​</tspan></text></g>
-<text y="380" font-size="23" style="fill:currentColor" data-s="23" data-d="0" data-line="S1">=</text>
-<g class="bfrac" data-line="S1"><text class="num" y="366" font-size="23" style="fill:currentColor" data-s="23" data-d="0">20.09</text><line class="bar" y1="374" y2="374" stroke="currentColor" stroke-width="2" data-s="23" data-d="0"/><text class="den" y="397" font-size="23" style="fill:currentColor" data-s="23" data-d="0">1 + 20.09 + 4.48</text></g>
-<text y="380" font-size="23" style="fill:var(--orange)" data-s="24" data-d="0" data-line="S1">≈ 0.79</text>
-<text y="446" font-size="23" style="fill:currentColor" data-s="25" data-d="0" data-line="S2" data-x0="30">weight of k<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan> = 1 / 25.57 ≈ 0.04;   weight of k<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan> = 4.48 / 25.57 ≈ 0.18</text>
-<text y="496" font-size="23" style="fill:var(--orange)" data-s="26" data-d="0" data-line="M1" data-x0="30">to write “an”:</text>
-<text y="496" font-size="23" style="fill:var(--orange)" data-s="26" data-d="0.4" data-line="M1">the same q = (0, 6, 0) as for “aunt”</text>
-<text y="496" font-size="23" style="fill:currentColor" data-s="27" data-d="0" data-line="M1">→ weights 0.04, 0.79, 0.18</text>
-<text y="532" font-size="23" style="fill:var(--orange)" data-s="28" data-d="0" data-line="M2" data-x0="30">to write “of”:</text>
-<text y="532" font-size="23" style="fill:var(--orange)" data-s="28" data-d="0.4" data-line="M2">q = (0, 0, 6)</text>
-<text y="532" font-size="23" style="fill:currentColor" data-s="29" data-d="0" data-line="M2">→ weights 0.05, 0.05, 0.91</text>
-      </svg>
-      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
-    </div>
-    <ul class="points"><li>79% of the attention on the key after <i>tía</i> for <i>aunt</i>, and for <i>an</i> too: “a” or “an” depends on the noun. 91% on the key after <i>miña</i> for <i>of</i>. Here the numbers are set by hand; a trained model learns its own, as in the skip-gram lesson</li></ul>
-  </div>
-  <div class="notes">
-    <p>This is the search from the previous screen, done with tiny numbers. It is the small model from the attention page, sections 1 and 2. We set its numbers by hand, to show how the calculations work in principle. In a real model, these numbers are learned in training, as in the skip-gram lesson. Every vector has three numbers, one for each Galician word: unha, tía, miña.</p>
-    <p>The keys are the encoder's vectors. The encoder takes half of the previous vector and half of the new word. So the key after unha is (0.5, 0, 0). The key after tía is (0.25, 0.5, 0). The key after miña is (0.125, 0.25, 0.5). Each key holds the words read so far, and the last word most.</p>
-    <p>To write "aunt", the decoder makes a query. The query for aunt is (0, 6, 0). It looks for tía.</p>
-    <p>Now the scores. A score is a dot product: multiply the first numbers, then the second numbers, then the third, and add. The query times the key after unha: 0 times 0.5, plus 6 times 0, plus 0 times 0. That is 0. The query times the key after tía: 6 times 0.5. That is 3. The query times the key after miña: 6 times 0.25. That is 1.5. The key after miña also holds some tía, so it gets a score too.</p>
-    <p>Now softmax. Take e to the power of each score: e to the 0 is 1, e to the 3 is 20.09, e to the 1.5 is 4.48. Add them up: 25.57. The weight of the key after tía is 20.09 divided by 25.57. That is 0.79. The key after unha gets 0.04. The key after miña gets 0.18.</p>
-    <p>So while writing "aunt", 79 percent of the attention is on the key after tía.</p>
-    <p>The other words work the same way. To write "an", the decoder uses the same query as for "aunt". English writes "an" or "a" depending on the noun, so the article also looks at tía. The query for "of" is (0, 0, 6). It looks for miña, and the key after miña gets 0.91.</p>
-    <p>Here the numbers are set by hand. Real models learn their keys and queries from data. They have hundreds of dimensions. But the arithmetic is exactly the one on this screen.</p>
-  </div>
-</section>
-
 <section class="screen fill" id="qk-i" data-step="4">
   <header><span class="kind">Interactive</span><h2>Query and key: what the query's numbers mean</h2></header>
   <div class="body">
@@ -2951,7 +2934,7 @@ print("they match" if count == expected else "they do not match: check the loop 
     <iframe class="frame" title="Query and key: what the query's numbers mean" data-src="../artifacts/attention.html?embed=qk"></iframe>
   </div>
   <div class="notes">
-    <p>The model of the worked example, in eight steps: press Next step. The frame throughout: the decoder is about to write one word of "an aunt of mine", and the query the students set decides the mix, and through the mix the word. A query's three numbers are rewards: a key's score is the query's number times what the key holds, added over the three dimensions. The page names queries by their rewards: "tía × 6" is (0, 6, 0).</p>
+    <p>The model of section 1, in eight steps: press Next step. The frame throughout: the decoder is about to write one word of "an aunt of mine", and the query the students set decides the mix, and through the mix the word. A query's three numbers are rewards: a key's score is the query's number times what the key holds, added over the three dimensions. The page names queries by their rewards: "tía × 6" is (0, 6, 0).</p>
     <p>Steps 1 to 4: word 1, "an", which needs more than 0.35 of tía in the mix. The keys are the encoder's three vectors; tía × 6 ranks them by their tía; softmax turns gaps between scores into ratios between weights; the mix holds 0.44 of tía, and the box under it shows the decoder writing "an". Step 5: miña × 6 reads the key after miña instead, and the decoder writes "a". Step 6: tía × 2 still ranks the keys right, but the weights are even and the mix is close to the average: "a" again. tía × 10 gives "an" clearly.</p>
     <p>Step 7: the same tía × 6 at word 3, "of", which needs miña: the decoder writes ‹end›. miña × 6 writes "of". So each word needs its own query, which is what section 2's rule and section 4's trained models provide. Step 8: the students choose the word (buttons 1 to 5) and the query. tía × 6, miña × 3 gets all five words right, by small margins.</p>
   </div>
@@ -3031,83 +3014,6 @@ print("they match" if count == expected else "they do not match: check the loop 
   </div>
 </section>
 
-<section class="screen fill" id="ihad-i" data-step="4">
-  <header><span class="kind">Interactive</span><h2>“I had an aunt who…”</h2></header>
-  <div class="body">
-    <div class="tabs" role="group" aria-label="Go to a section">
-      <button data-go="ihad" aria-pressed="true">4 A model trained on “I had an aunt”</button>
-      <a class="open" href="../artifacts/mt.html#ihad" target="_blank" rel="noopener">Open the full page</a>
-    </div>
-    <iframe class="frame" title="I had an aunt who" data-src="../artifacts/mt.html?embed=ihad"></iframe>
-  </div>
-  <div class="notes">
-    <p>Same kind of model as before, different training data. Part A shows the data in two groups: kept as English books have it (“a friend of mine sang”) and rebuilt as a translator would (“I had an aunt who sang”); the words I, had and who have no Galician counterpart, and the model writes them because its training data has them. A card sets this model's data next to that of sections 1–3, for the same unha tía miña.</p><p>Parts B and C are two training runs from the same random start, seen as in section 1's part B (Play, a verb switch for the 8 sentences shown, the curve of the chosen sentence's gold and written translations, the plane with the chosen sentence labeled). Both train on all their pairs at once, with Adam. Part B trains on all 24 and ends up writing all 24 right, “I had an aunt who sang” included: the pattern can be learned. Part C holds out the lesson's sentence, unha tía miña cantaba, as development data, while its bailaba and ría versions and un irmán meu cantaba stay in training. All 23 training sentences end up right, but the held-out one comes out “a colleague of mine sang”; it comes closest at steps 1000 to 1200 (“I had an aunt who danced”). So learning this is possible, but not trivial: the other 23 do not carry the pattern over to it by themselves.</p><p>Under each list, “why” shows the numbers: for the chosen sentence, the first output that differs from the gold output, with the state there and each word's score worked out (state · vector) and its probability; the plane shows that state as an arrow. For the development sentence at the end of part C it is output 1: “I” scores 144.48, “a” 145.27, probabilities 0.31 and 0.69, a close call that decides the whole translation. When a sentence comes out right, the block shows its closest call instead.</p>
-  <p>The curve under each list follows the chosen sentence and shows two whole-translation probabilities: green for its gold translation, red for the translation the model writes. A whole translation's probability is its words' probabilities multiplied; the rows under the curve show the multiplication. For the development sentence at the end of part C, the gold translation gets 0.015: most of its words are near 1, but I gets 0.31, an 0.24 and sang 0.21. What the model writes, "a colleague of mine sang", gets 0.536, because "a" wins at output 1 (0.69) and the rest follows a pattern the model knows well. When the model writes the gold translation, the two curves are one.</p></div>
-</section>
-
-<section class="screen fill" id="ofmine" data-step="4">
-  <header><span class="kind">Step 4 · Attention</span><h2>How natural is “an aunt of mine”?</h2></header>
-  <div class="body">
-    <div class="tabs"><span class="muted">For every 100 “my …”, how often do English books write “a … of mine”?</span><a class="open" href="../artifacts/ngram.html#ofmine" target="_blank" rel="noopener">Open the full page</a></div>
-    <iframe class="frame" title="How natural is an aunt of mine?" data-src="../artifacts/ngram.html?embed=ofmine"></iframe>
-  </div>
-  <div class="notes">
-    <p>Here is a question this example raises. "An aunt of mine" is correct English. So why would a translator still prefer "I had an aunt who..."? We can answer it by counting, like on the n-gram page.</p>
-    <p>The chart uses Google Books, English books from 1990 to 2019. For each noun, it compares two phrases. One is "a friend of mine", "an aunt of mine", and so on. The other is "my friend", "my aunt". The bar says how often the first phrase appears for every 100 uses of the second.</p>
-    <p>For "friend", the answer is about 12. Writers say "a friend of mine" about once for every 8 times they say "my friend". For "aunt", it is about 0.4: once in 275. For "brother", it is less than 0.1: once in 1,300.</p>
-    <p>Why? "A friend of mine" picks one friend out of several. Most people have many friends, so this is natural. Close family is different. When you say "my brother", the listener usually assumes there is one specific brother. So "a brother of mine" or "an aunt of mine" sounds marked.</p>
-    <p>This is why "an aunt of mine" is correct but unusual. Galician "unha tía miña" is ordinary. English expresses the same idea differently: "I had an aunt who...". The counts are from books, and our sentence is from a novel, so the comparison fits.</p>
-  </div>
-</section>
-<section class="screen" id="realwhy" data-step="4">
-  <header><span class="kind">Step 4 · Attention</span><h2>Why a real model still writes “an aunt of mine”</h2></header>
-  <div class="body">
-    <div class="board">
-      <svg viewBox="0 0 1400 670" role="img" aria-label="The real model translates our sentence as An aunt of mine. Its probabilities for four openings, log scale: An aunt of mine 0.33, My aunt 0.015, I had an aunt 7.5 in a million, One of my aunts 5.5 in ten billion. Word by word, I had an aunt loses at its first words. Likely reasons: it learned translations; a … of mine is common; rebuilding is a big step; Galician is low-resource.">
-<text class="note" x="40" y="40" font-size="19.2" style="fill:var(--muted)" text-anchor="start" data-s="1" data-d="0">Helsinki-NLP/opus-mt-gl-en, a real Galician–English model, translates our sentence as</text>
-<text x="40" y="76" font-size="30" style="fill:var(--orange)" text-anchor="start" data-s="1" data-d="0.3">“An aunt of mine, who …”</text>
-<text x="40" y="128" font-size="22" style="fill:var(--muted)" text-anchor="start" data-s="2" data-d="0">its probability for each opening, given the Galician sentence (log scale)</text>
-<text x="300" y="176" font-size="24" style="fill:currentColor" text-anchor="end" data-s="2" data-d="0.0">An aunt of mine</text>
-<rect x="320" y="156" width="591.2" height="28" rx="4" fill="var(--orange)" fill-opacity="0.85" data-s="2" data-d="0.05" data-a="fade" data-t="0.4"/>
-<text x="921.2236655956291" y="178" font-size="22" style="fill:currentColor" text-anchor="start" data-s="2" data-d="0.25">0.33</text>
-<text x="300" y="220" font-size="24" style="fill:currentColor" text-anchor="end" data-s="2" data-d="0.15">My aunt</text>
-<rect x="320" y="200" width="511.9" height="28" rx="4" fill="var(--blue)" fill-opacity="0.85" data-s="2" data-d="0.2" data-a="fade" data-t="0.4"/>
-<text x="841.8636660098529" y="222" font-size="22" style="fill:currentColor" text-anchor="start" data-s="2" data-d="0.4">0.015</text>
-<text x="300" y="264" font-size="24" style="fill:currentColor" text-anchor="end" data-s="2" data-d="0.3">I had an aunt</text>
-<rect x="320" y="244" width="317.4" height="28" rx="4" fill="var(--green)" fill-opacity="0.85" data-s="2" data-d="0.35" data-a="fade" data-t="0.4"/>
-<text x="647.3792836368325" y="266" font-size="22" style="fill:currentColor" text-anchor="start" data-s="2" data-d="0.55">7.5 × 10<tspan dy='-8' font-size='15'>-6</tspan></text>
-<text x="300" y="308" font-size="24" style="fill:currentColor" text-anchor="end" data-s="2" data-d="0.44999999999999996">One of my aunts</text>
-<rect x="320" y="288" width="73.3" height="28" rx="4" fill="var(--muted)" fill-opacity="0.85" data-s="2" data-d="0.49999999999999994" data-a="fade" data-t="0.4"/>
-<text x="403.3183495505275" y="310" font-size="22" style="fill:currentColor" text-anchor="start" data-s="2" data-d="0.7">5.5 × 10<tspan dy='-8' font-size='15'>-10</tspan></text>
-<text class="note" x="40" y="352" font-size="17.6" style="fill:var(--muted)" text-anchor="start" data-s="3" data-d="0">word by word: the first words decide</text>
-<text x="300" y="388" font-size="22" style="fill:var(--orange)" text-anchor="end" data-s="3" data-d="0.2">An aunt of mine</text>
-<text x="320" y="388" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.30000000000000004">An 0.53</text>
-<text x="430.70000000000005" y="388" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.30000000000000004">aunt 0.95</text>
-<text x="565.6" y="388" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.30000000000000004">of 0.65</text>
-<text x="676.3000000000001" y="388" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.30000000000000004">mine 1.00</text>
-<text x="300" y="422" font-size="22" style="fill:var(--green)" text-anchor="end" data-s="3" data-d="0.5">I had an aunt</text>
-<text x="320" y="422" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.6">I 0.006</text>
-<text x="430.70000000000005" y="422" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.6">had 0.03</text>
-<text x="553.5" y="422" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.6">an 0.04</text>
-<text x="664.2" y="422" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.6">aunt 0.90</text>
-<text class="note" x="40" y="476" font-size="17.6" style="fill:var(--muted)" text-anchor="start" data-s="4" data-d="0">likely reasons</text>
-<text class="note" x="60" y="510" font-size="17.6" style="fill:currentColor" text-anchor="start" data-s="4" data-d="0.0">1. it learned translations, not English in general: “unha X miña” is usually rendered “a X of mine”</text>
-<text class="note" x="60" y="542" font-size="17.6" style="fill:currentColor" text-anchor="start" data-s="4" data-d="0.3">2. rare is not absent: “a … of mine” is a common pattern, so it comes out fluently</text>
-<text class="note" x="60" y="574" font-size="17.6" style="fill:currentColor" text-anchor="start" data-s="5" data-d="0.0">3. rebuilding is a big step: “I had …” needs a new subject and verb, chosen one word at a time</text>
-<text class="note" x="60" y="606" font-size="17.6" style="fill:currentColor" text-anchor="start" data-s="5" data-d="0.3">4. Galician is low-resource: little translated text, much of it fairly literal</text>
-<text class="note" x="40" y="650" font-size="16.0" style="fill:var(--green)" text-anchor="start" data-s="6" data-d="0">likely, not measured · section 4 of the translation page shows reason 1 directly: what the training data says, the model writes</text>
-      </svg>
-      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
-    </div>
-  </div>
-  <div class="notes">
-    <p>The real Galician–English model, Helsinki-NLP/opus-mt-gl-en, translates our sentence as “An aunt of mine, who…”, even though English books rarely say it (previous slide). We can ask the model how likely it finds other openings: give it the Galician sentence and an English opening, and read off its probability for each word.</p>
-    <p>“An aunt of mine” is its favorite by far; “I had an aunt” is tens of thousands of times less likely. Word by word, the alternatives lose at their first words: “I” has a probability of about 0.006 as the first word, “had” about 0.03 after it; “An” starts at 0.53, and after that each word of “an aunt of mine” is likely.</p>
-    <p>Likely reasons. It learned translations, not English in general: book counts show how often English writers choose a phrasing, while a translation model learns how translators rendered similar Galician phrases, and unha X miña is usually rendered “a X of mine”, right for friends and colleagues, applied to tía too. Rare is not absent: “an aunt of mine” is unusual, but “a … of mine” is very common, so the model writes it fluently. Rebuilding a sentence is a big step: “I had an aunt who…” needs a new subject and verb, the model chooses one word at a time given the Galician, and staying close to the Galician wins at each step. Galician is low-resource: there is relatively little translated text to learn from, and much of it is fairly literal.</p>
-    <p>These are likely explanations, not measured ones. Section 4 of the translation page shows the first directly: a toy model trained on English that follows the book counts writes “I had an aunt who sang”. The numbers come from mt_score_alternatives.py.</p>
-  </div>
-</section>
-
 
 <div class="part" id="part-step5"><h1>Step 5 · Self-attention</h1></div>
 
@@ -3134,7 +3040,6 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="body">
     <ul class="points">
       <li>Several attention patterns in parallel, in different “heads”, combined into one output per word</li>
-      <li>Nobody assigns a head its job: every head starts random, and training shapes it</li>
     </ul>
     <div class="flow">
       <div class="box">input</div><span class="arr">⇉</span>
@@ -3143,8 +3048,7 @@ print("they match" if count == expected else "they do not match: check the loop 
     </div>
   </div>
   <div class="notes">
-    <p>One attention pattern captures one kind of relation between words. Real sentences have several at once: which word goes with which noun, which verb agrees with which subject, what a pronoun refers to. So transformers run several attention computations in parallel. Each one is called a head. Each head has its own queries, keys and values. The outputs of all heads are combined into one vector per word.</p>
-    <p>Who decides what each head does? Nobody. The people who build the model choose how many heads there are. They do not give the heads jobs. Every head starts as random numbers, and training changes all of them at once. Researchers find out afterwards what each head does, by looking.</p>
+    <p>One attention pattern captures one kind of relation between words. Real sentences have several at once: which word goes with which noun, which verb agrees with which subject, what a pronoun refers to. So transformers run several attention computations in parallel. Each one is called a head. Each head has its own queries and keys, and its own values: the vectors it mixes, computed from each word. The outputs of all heads are combined into one vector per word.</p>
     <p>More heads also means more computation for every word. So the number of heads is a cost lever too.</p>
   </div>
 </section>
