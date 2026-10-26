@@ -216,7 +216,8 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .tables3 tr.now th { box-shadow: inset 3px 0 0 var(--orange); }
 .acols { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.35fr); }
 .actl { position: sticky; top: 0; z-index: 3; background: var(--panel); padding: 6px 0; display: grid; gap: 8px; box-shadow: 0 6px 8px -8px rgba(0,0,0,0.25); }
-.ltop { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 10px; align-items: start; }
+.ltop { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 10px; align-items: start; justify-items: start; }
+.asticky { gap: 8px; }
 @media (max-width: 600px) { .ltop { grid-template-columns: minmax(0, 1fr); } }
 .legendrow.compact { gap: 3px 10px; font-size: 0.74rem; }
 .tables3.two.one { grid-template-columns: max-content; }
@@ -309,13 +310,11 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
             <p class="label" id="trTabLbl"></p>
             <div class="ltop">
               <div class="tables3 two one" id="trTabG"></div>
-              <div class="col" style="gap:4px">
-                <svg id="trWhySvg" viewBox="0 0 400 400" role="img" aria-label="The vectors on the plane" style="max-width:300px"></svg>
-                <div class="legendrow compact" id="trLeg"><span class="note" style="margin:0;font-size:inherit">colours, in the tables and on the plane:</span><span><span class="sw" style="background:var(--blue)"></span>this pair's inputs</span><span><span class="sw" style="background:var(--green)"></span>its gold outputs</span><span><span class="sw" style="background:var(--orange)"></span><span id="trLegWin">the highest probability now</span></span><span><span class="sw" style="background:var(--hi);border:1px solid var(--line)"></span>second vectors mixed into the state</span><span><span class="sw" style="background:var(--orange);width:22px;height:4px"></span>the summary, then the state (- - - its direction: farther along = higher score)</span><span>faint or small: before the update</span></div>
-              </div>
+              <svg id="trWhySvg" viewBox="0 0 400 400" role="img" aria-label="The vectors on the plane" style="max-width:270px;width:100%"></svg>
             </div>
             <div class="tables3 two" id="trTab"></div>
             <p class="note" id="trTabNote" style="margin:0"></p>
+            <div class="legendrow compact" id="trLeg"><span class="note" style="margin:0;font-size:inherit">colours, in the tables and on the plane:</span><span><span class="sw" style="background:var(--blue)"></span>this pair's inputs</span><span><span class="sw" style="background:var(--green)"></span>its gold outputs</span><span><span class="sw" style="background:var(--orange)"></span><span id="trLegWin">the highest probability now</span></span><span><span class="sw" style="background:var(--hi);border:1px solid var(--line)"></span>second vectors mixed into the state</span><span><span class="sw" style="background:var(--orange);width:22px;height:4px"></span>the summary, then the state (- - - its direction: farther along = higher score)</span><span>faint or small: before the update</span></div>
           </div>
           <div class="col">
             <p class="label" id="trEncLbl">Encoding: the inputs are mixed, one by one, into one vector, the summary (new = ½ × old + ½ × vector of the input; section 2 shows the rule)</p>
