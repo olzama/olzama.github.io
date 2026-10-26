@@ -3653,8 +3653,15 @@ document.querySelectorAll("[data-squares]").forEach(el => {
 });
 document.querySelectorAll("[data-reveal]").forEach(b => b.onclick = () => { $(b.dataset.reveal).hidden = false; b.hidden = true; });
 
-/* ---- embedded pages load only when their screen comes near (data-src), then stay loaded ---- */
-const loadFrames = el => el && el.querySelectorAll("iframe[data-src]").forEach(f => { if (!f.getAttribute("src")) f.src = f.dataset.src; });
+/* ---- embedded pages load only when their screen comes near (data-src); only the three screens with
+   frames visited last stay loaded (each page is large, and many running at once slow the browser down) ---- */
+const liveFrames = [];
+const loadFrames = el => {
+  if (!el || !el.querySelector("iframe[data-src]")) return;
+  el.querySelectorAll("iframe[data-src]").forEach(f => { const src = f.getAttribute("src"); if (!src || src === "about:blank") f.src = f.dataset.src; });
+  const k = liveFrames.indexOf(el); if (k >= 0) liveFrames.splice(k, 1); liveFrames.unshift(el);
+  liveFrames.splice(3).forEach(old => old.querySelectorAll("iframe[data-src]").forEach(f => { f.src = "about:blank"; }));
+};
 if ("IntersectionObserver" in window) {
   const fo = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && !presenting()) loadFrames(e.target); }), { rootMargin: "800px 0px" });
   screens.forEach(s => { if (s.querySelector("iframe[data-src]")) fo.observe(s); });
