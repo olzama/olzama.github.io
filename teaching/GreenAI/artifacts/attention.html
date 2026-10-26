@@ -144,6 +144,8 @@ svg.v3 .cv { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; } svg
 svg.v3 .pt.faint { opacity: 0.3; }
 svg.v3 .pl { font-size: 12px; fill: var(--fg); } svg.v3 .pl.mix, svg.v3 .pl.sum { fill: var(--orange); } svg.v3 .pl.enc { fill: var(--blue); }
 .pbars { min-height: 118px; }
+/* inside a lesson screen, the panel starts with its pictures: the opening paragraphs and the recap are on the full page */
+html.embed section.panel > .lead, html.embed .review.recap { display: none; }
 .choose:has(.flow:empty) > .op { visibility: hidden; }
 table.cmp7 td:first-child { color: var(--muted); white-space: nowrap; } table.cmp7 td { vertical-align: top; }
 /* section 6: from section 2's weights to the real model's grids */
@@ -515,7 +517,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="look">
     <h2><span class="n">1</span>Without attention, computed by hand</h2>
-    <div class="review"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page</a>: a translation model has two parts. The <b>encoder</b> reads the Galician words and turns them into one vector, the <b>summary</b>. The <b>decoder</b> then writes the English words one at a time. From the <a href="skipgram.html">skip-gram lesson</a>: a <b>vector</b> is a list of values, and each position in the list is a <b>dimension</b>; the <b>dot product</b> of two vectors multiplies them dimension by dimension and adds up the results.</p></div>
+    <div class="review recap"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page</a>: a translation model has two parts. The <b>encoder</b> reads the Galician words and turns them into one vector, the <b>summary</b>. The <b>decoder</b> then writes the English words one at a time. From the <a href="skipgram.html">skip-gram lesson</a>: a <b>vector</b> is a list of values, and each position in the list is a <b>dimension</b>; the <b>dot product</b> of two vectors multiplies them dimension by dimension and adds up the results.</p></div>
     <div class="review"><span class="rtag">Review</span><p>The example translations: the 16 phrases, translated by people, that the model on the <a href="mt.html#train">translation page</a> was trained on. Every “in the example translations” below refers to this table.</p>
       <div class="heatwrap"><table class="ty corpus"><tbody><tr><td><i>a miña tía</i></td><td>my aunt</td><td class="cpm"><i>unha tía miña</i></td><td class="cpm">an aunt of mine <span class="cpt">our phrase</span></td></tr><tr><td><i>a túa tía</i></td><td>your aunt</td><td><i>unha tía túa</i></td><td>an aunt of yours</td></tr><tr><td><i>o meu amigo</i></td><td>my friend</td><td><i>un amigo meu</i></td><td>a friend of mine</td></tr><tr><td><i>o teu amigo</i></td><td>your friend</td><td><i>un amigo teu</i></td><td>a friend of yours</td></tr><tr><td><i>o meu irmán</i></td><td>my brother</td><td><i>un irmán meu</i></td><td>a brother of mine</td></tr><tr><td><i>o teu irmán</i></td><td>your brother</td><td><i>un irmán teu</i></td><td>a brother of yours</td></tr><tr><td><i>a miña veciña</i></td><td>my neighbor</td><td class="cpm"><i>unha veciña miña</i></td><td class="cpm">a neighbor of mine <span class="cpt">2nd phrase (steps 5–6)</span></td></tr><tr><td><i>a túa veciña</i></td><td>your neighbor</td><td><i>unha veciña túa</i></td><td>a neighbor of yours</td></tr></tbody></table></div>
       <p class="label" style="margin-top:10px">Which model writes what for <i>unha tía miña</i></p>
@@ -647,7 +649,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="real">
     <h2><span class="n">6</span>A real model on our sentence</h2>
-    <p class="lead">Sections 4 and 5 used two small models that we trained ourselves. This section looks inside a real translation model, Helsinki-NLP/opus-mt-gl-en, trained by others on a large amount of Galician–English text. We let it translate our whole sentence and recorded every attention weight it used.</p>
+    <p class="lead">From the weights computed by hand in section 2 to the grids of a real translation model, <i>opus-mt-gl-en</i>, trained by others on a large amount of Galician–English text: first on our short phrase, step by step, then on the whole sentence.</p>
     <div class="hb" id="hb">
       <div class="controls stick"><button id="hbBack">Back</button><button class="primary" id="hbNext">Next step</button><span class="pathstrip" id="hbSteps"></span></div>
       <h3 class="wkh" id="hbTitle"></h3>
@@ -2210,6 +2212,7 @@ function drawQ() {
   [["qkKeys", "keys"], ["qkScores", "scores"], ["qkSm", "sm"], ["qkMix", "mix"], ["qkOut", "out"], ["qkWordsBox", "words"]].forEach(([id, part]) => { $(id).hidden = !show.has(part); });
   // the rows above the picture never come and go (the picture would move): they show the current query and word, greyed out in steps that do not use them
   [["qkCtl", "ctl"], ["qkPosRow", "pos"]].forEach(([id, part]) => { const on = show.has(part); $(id).hidden = false; $(id).classList.toggle("inert", !on); $(id).querySelectorAll("input, button").forEach(e => { e.disabled = !on; }); });
+  $("qkTip").style.visibility = show.has("ctl") ? "" : "hidden";   // the hint would give away what the step explains
   $("qkFig").hidden = false;
   $("qkBoard").parentElement.classList.remove("one");   // always two columns, the picture always shown: it never moves
   $("qkPre").querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(sameQ(PRESETS[i][1], q))));

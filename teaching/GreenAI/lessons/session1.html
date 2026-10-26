@@ -3256,11 +3256,19 @@ print("they match" if count == expected else "they do not match: check the loop 
 <section class="screen" id="size" data-step="6">
   <header><span class="kind">Step 6 · Transformers</span><h2>Why does model size cost so much?</h2></header>
   <div class="body cols">
-    <div class="col"><div class="fig"><img src="img/rnn-transformers.png" alt="Recurrent networks compared with transformers"></div></div>
+    <div class="col">
+      <p class="label">What doubling each one does to the computation of one use</p>
+      <table class="plain">
+        <tr><th>double…</th><th>and the computation</th></tr>
+        <tr><td>the parameters (more heads, more blocks)</td><td>doubles for every word read or written</td></tr>
+        <tr><td>the input (the text read)</td><td>doubles in the feed-forward parts; <b>quadruples</b> in attention: every word compared with every word</td></tr>
+        <tr><td>the output (the text written)</td><td>doubles the steps, one word at a time, each with a bigger cache</td></tr>
+      </table>
+    </div>
     <div class="col">
       <ul class="points">
-        <li>More parameters, more heads, more blocks → more compute per query</li>
-        <li>Longer input → quadratically more attention cost</li>
+        <li>More parameters, more heads, more blocks → more computation per query</li>
+        <li>Longer input → quadratically more attention computation</li>
         <li><b>Size and context length are levers with a real, computable energy cost</b></li>
       </ul>
     </div>
