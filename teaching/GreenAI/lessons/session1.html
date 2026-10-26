@@ -2858,7 +2858,7 @@ print("they match" if count == expected else "they do not match: check the loop 
         <li><b>Key</b> <i>k</i>: what each source word offers to be found by</li>
         <li><b>Score</b> = <i>q</i> · <i>k</i>, the dot product; <b>softmax</b> turns the scores into weights that add up to 1</li>
         <li><b>Value</b> <i>v</i>: what each source word contributes; the mix is the sum of the values, each times its weight</li>
-        <li>On the next screen's page, the keys and the values are the same vectors: the encoder's, after each word</li>
+        <li>On the attention page (next screen), the keys and the values are the same vectors: the encoder's, after each word</li>
       </ul>
     </div>
     <div class="col">
@@ -2911,7 +2911,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="notes">
     <p>What to take from this screen: without attention, the decoder gets one summary in which tía has only 0.25, and this model needs more than 0.35 of tía to write “an”; with attention, the decoder builds a new mix of all the encoder's vectors before every English word, and the mix for “an” has 0.44 of tía.</p>
     <p>First, the table in the review box of the full page (Open the full page; the frame here leaves it out): which model writes what for unha tía miña. The translation page's model gets this short phrase right; the model here is made up, small enough to compute by hand, and built to fail the way a model without attention fails on our long sentence, where 29 more words and marks follow tía. Section 4 shows that real failure.</p>
-    <p>Section 1. Step 1: one dimension per Galician word, so each word vector is a 1 on its own axis (blue squares in the picture). Step 2: the encoder, as on the translation page, half the old vector plus half the word's vector; the summary is 0.125 unha, 0.25 tía, 0.5 miña (the bar under it shows these shares). Step 3: the decoder state has eleven dimensions; the first three are the summary, the last eight record the English words written so far. Step 4: each English word's score is the dot product of its vector (a ring in the picture) with the state. Steps 5 and 6: where such values come from, a made-up training run on two example translations; the bias of “a” is 5.6 because “a” is right six times out of eight. Step 7: the whole phrase, “a friend of mine”. Good English, wrong translation.</p>
+    <p>Section 1. Step 1: one dimension per Galician word, so each word vector is a 1 on its own axis (blue squares in the picture). Step 2: the encoder, as on the translation page, half the old vector plus half the word's vector; the summary is 0.125 unha, 0.25 tía, 0.5 miña (the bar under it shows these shares). Step 3: the decoder state has eleven dimensions; the first three are the summary, the last eight record the English words written so far. Step 4: each English word's score is the dot product of its vector (a ring in the picture) with the state. Step 5: where such values come from, a made-up training run on two example translations. Step 6: the bias, one extra value per word, added to its score whatever the state; the bias of “a” is 5.6 because “a” is right six times out of eight in the example translations, and it is why the decoder writes “a” when the state holds too little tía. Step 7: the whole phrase, “a friend of mine”. Good English, wrong translation.</p>
     <p>Section 2: only the first three dimensions of the state change. Step 1: the query, (0, 6, 0) for the first two words, scores each encoder vector (here called a key); softmax turns the scores into weights. Step 2: the mix, the keys added up with those weights: 0.44 along tía. Step 3: the mix goes into the state, and “an” wins. Step 4: the rest of the phrase; after “aunt” the query shifts toward miña. The result: “an aunt of mine”.</p>
   </div>
 </section>
@@ -2929,7 +2929,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="notes">
     <p>What to take from this screen: a query's numbers are rewards, one per dimension, and setting them chooses which key is read, so indirectly which word is written; each word needs its own query. And on the long sentence, two trained models that differ only in attention: the one without it loses tía and writes “A friend of mine”.</p>
     <p>Section 3, in eight steps (Next step). The frame throughout: the decoder is about to write one word of “an aunt of mine”, and the query decides the mix, and through the mix the word. The page names queries by their rewards: “tía × 6” is (0, 6, 0). Steps 1 to 4: word 1, “an”, which needs more than 0.35 of tía in the mix; tía × 6 gives 0.44. Step 5: miña × 6 reads the key after miña, and the decoder writes “a”. Step 6: tía × 2 ranks the keys right but the weights spread out (0.19, 0.51, 0.31): the mix drifts toward the average, and the decoder writes “a” again. Step 7: the same tía × 6 at word 3, “of”, writes ‹end›: each word needs its own query. Step 8: students choose the word and the query.</p>
-    <p>Section 4 (the second tab). Two small models translate our whole sentence: same training data, same number of updates, same size; one difference, attention. Step 1: the translations, and the probability of each whole translation: without attention, what it writes gets 0.00093 and the gold translation 0.000010; with attention, it writes the gold translation, 0.27. Here, unlike the translation page's held-out phrase, the difference is attention's. Step 3: the first word without attention, “a” 0.77: tía is the second of the sentence's 31 words and marks, and 29 more changed the vector before the summary was made. Step 4: with attention, the biggest weight, 0.47, is on tía, and “an” gets 0.95; this model has no rule for the query, its decoder state plays that part, shaped by training. Step 5: each model goes on from its own word. Step 6: the saying loses “says and master of what one” without attention; in 500 test sentences the last verb comes first 370 times without attention, 41 with.</p>
+    <p>Section 4 (the second tab). Two small models translate our whole sentence: same training data, same number of updates, same size; one difference, attention. Step 1: the translations, and the probability of each whole translation: without attention, what it writes gets 0.00093 and the gold translation 0.000010; with attention, it writes the gold translation, 0.27. On the translation page, the held-out phrase failed for lack of training examples; here both models had the same data, so the difference is due to attention. Step 3: the first word without attention, “a” 0.77: tía is the second of the sentence's 31 words and marks, and 29 more changed the vector before the summary was made. Step 4: with attention, the biggest weight, 0.47, is on tía, and “an” gets 0.95; this model has no rule for the query, its decoder state plays that part, shaped by training. Step 5: each model goes on from its own word. Step 6: the saying loses “says and master of what one” without attention; in 500 test sentences the last verb comes first 370 times without attention, 41 with.</p>
   </div>
 </section>
 
@@ -2942,7 +2942,7 @@ print("they match" if count == expected else "they do not match: check the loop 
         <ul class="points">
           <li>A small model with attention has written “an aunt of mine, who solved everything”. Next: “with”.</li>
           <li class="frag">Largest weight before “with”: the <b>full stop</b>, not <i>con</i> (“with”)</li>
-          <li class="frag"><b>Test:</b> replace what the model reads. It still writes “with”: the full stop does not matter here.</li>
+          <li class="frag"><b>Test:</b> replace the mix the model reads (table, right). It still writes “with”: the full stop does not matter here.</li>
           <li class="frag"><b>Why:</b> in all 5,000 training sentences, “everything” is followed by “with”. The English already written decides the next word.</li>
           <li class="frag">A weight shows where the model looked, not what it needed.</li>
         </ul>
@@ -3039,8 +3039,8 @@ print("they match" if count == expected else "they do not match: check the loop 
     <iframe class="frame" title="Self-attention heads" data-src="../artifacts/attention.html?embed=self,who"></iframe>
   </div>
   <div class="notes">
-    <p>This is the encoder of the real model, reading our Galician sentence. Each small square is one head. Choose encoder layer 6 and head 7, then click miña: it looks back at tía, with weight 0.94. This head looks at the previous word. Choose layer 3, head 4: this head looks at the next word.</p>
-    <p>Press the tab Who decides what a head does. A tiny model with 2 layers of 2 heads learns the sentence “The animal didn't cross the street because it was tired”. It has to find what “it” refers to. Choose start A, B or C and press Train. The three runs differ only in their random start. In one run, one head does the job. In another, the job is split between two heads. In the third, no head of layer 2 looks at the nouns much, yet every answer is right.</p>
+    <p>This is the encoder of the real model, reading our Galician sentence. Each small square grid is one head's grid: rows are the words that look, columns the words looked at. Choose encoder layer 6 and head 7, then click miña: it looks back at tía, with weight 0.94. This head looks at the previous word. Choose layer 3, head 4: this head looks at the next word.</p>
+    <p>Press the tab Who decides what a head does. A tiny model with 2 layers of 2 heads learns the sentence “The animal didn't cross the street because it was tired”. It has to find what “it” refers to. Choose start A, B or C and press Train. The three runs differ only in their random start. In one run, one head does the job. In another, the job is split between two heads. In the third, no head of layer 2 looks at the nouns much, yet every answer is right: the information reaches “it” through the other words, in layer 1. A model does not have to solve a task the way a person would describe it.</p>
   </div>
 </section>
 
@@ -3219,7 +3219,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="body">
     <div class="activity"><h3>Notebook 01d, in Colab (CPU only, no GPU needed)</h3><div>
       <ul class="points">
-        <li>Part A: score all 48 heads of the real translation model, on a sentence you choose, and find what each one does</li>
+        <li>Part A: score all 48 heads of the real model's encoder (its self-attention), on a sentence you choose, and find what each one does</li>
         <li>Part B: count the attention scores, then time the whole encoder as the text gets longer. Does the time grow like n²?</li>
       </ul>
       <div class="links">
