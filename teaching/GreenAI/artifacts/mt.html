@@ -303,12 +303,13 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
               <p class="label" id="trDecLbl"></p>
               <svg class="chain" id="trWhyChain" data-compact="1" viewBox="0 0 720 430" role="img" aria-label="How one output is chosen: the state, the scores, the probabilities, and how the next state is made"></svg>
               <p class="note" id="trWhyStripKey" style="margin:0"></p>
+              <p class="note" id="trPending" style="margin:0;max-width:none;color:var(--fg)"></p>
             </div>
             <div id="trUpdPane" style="display:grid;gap:10px">
               <p class="label" id="trUpdLbl"></p>
               <p class="note" id="trUpdRule" style="margin:0;max-width:none"></p>
-              <p class="label">This pair's gold outputs: their probability before → after the update</p>
-              <div class="tf" id="trUpdProbs" style="grid-template-columns: auto auto minmax(0, 1fr) 3.6em 3.6em"></div>
+              <p class="label">The arrows collected at the outputs, and what the update did: probability before → after</p>
+              <div class="tf" id="trUpdProbs" style="grid-template-columns: auto auto 4em 1em 4em 1.5em minmax(0, 1fr)"></div>
               <p class="note" id="trUpdNote" style="color:var(--fg)"></p>
             </div>
             <div class="cols" style="grid-template-columns: 320px minmax(0, 1fr); gap: 14px">
@@ -942,6 +943,12 @@ function renderPlaneEnc(sn, src, upTo, Z) {
   $("trWhySvg").innerHTML = g;
 }
 // the update stage: the rule, the gold probabilities before → after; the plane shows every ring's move and the states that pushed it
+// at each output: the gold output (↑) and the highest other (↓); what the update will do, and then did
+function promises(snB, snA, q) {
+  const [src, tgt] = S2S.data[q], pB = gradOf(snB, q).ps, pA = snA ? gradOf(snA, q).ps : null;
+  return tgt.map((w, k) => { const gj = EN.indexOf(w), oj = [...pB[k].keys()].filter(j => j !== gj).sort((a, b) => pB[k][b] - pB[k][a])[0];
+    return { k, gold: { w, b: pB[k][gj], a: pA && pA[k][gj] }, other: { w: EN[oj], b: pB[k][oj], a: pA && pA[k][oj] } }; });
+}
 function renderUpdate(snB, snA, q, Z) {
   const [src, tgt] = S2S.data[q], g = gradOf(snB, q), green = css("--green"), orange = css("--orange"), fg = css("--fg"), muted = css("--muted");
   $("trUpdLbl").textContent = `The update after this pair: the tables on the left change, cell by cell`;
@@ -956,11 +963,11 @@ function renderUpdate(snB, snA, q, Z) {
   g.sts.forEach((st, k) => { const [x, y, an] = put(200 + (P(st[0]) - 200) * 0.6, 200 + (Q(st[1]) - 200) * 0.6 + 4, 52, 8); s += `<text x="${x}" y="${y}" text-anchor="${an}" font-size="11" fill="${orange}">state ${k + 1}</text>`; });
   EN.forEach((w, j) => { const a = snA.O[j], gold = tgt.includes(w), [x, y, an] = put(P(a[0]), Q(a[1]) + 4, 7.5 * w.length, gold ? 10 : 8); s += `<text x="${x}" y="${y}" text-anchor="${an}" font-size="12" fill="${gold ? green : muted}">${w}</text>`; });
   $("trWhySvg").innerHTML = s;
-  const pB = correctProbs(snB, src, tgt), pA = correctProbs(snA, src, tgt);
-  $("trUpdProbs").innerHTML = `<span class="h">output</span><span class="h">gold output</span><span class="h">probability</span><span class="h">before</span><span class="h">after</span>` + tgt.map((w, m) =>
-    `<span class="pos">${m + 1}</span><span class="want">${w}</span><span class="track" style="position:relative"><span class="fill" style="width:${(pA[m] * 100).toFixed(1)}%"></span><span class="gh" style="left:${(pB[m] * 100).toFixed(1)}%"></span></span><span class="v">${pB[m].toFixed(3)}</span><span class="v" style="color:var(${pA[m] >= pB[m] ? "--green" : "--neg"})">${pA[m].toFixed(3)}</span>`).join("");
-  const up = tgt.filter((w, m) => pA[m] > pB[m]).length;
-  $("trUpdNote").textContent = `${up} of ${tgt.length} went up (thin mark: before). Each update is a small move; the same pair comes back every round, and the rounds add up (the curves below).`;
+  const pr = promises(snB, snA, q), row = (k, x, dir) => { const kept = dir === "↑" ? x.a > x.b : x.a < x.b;
+    return `<span class="pos">${k === null ? "" : k + 1}</span><span class="${dir === "↑" ? "want" : "want bad"}" style="${dir === "↑" ? "" : "color:var(--neg)"}">${x.w}</span><span class="v">${x.b.toFixed(3)}</span><span class="v" style="color:var(--muted)">→</span><span class="v" style="color:var(${kept ? dir === "↑" ? "--green" : "--neg" : "--muted"})">${x.a.toFixed(3)}</span><span class="${dir === "↑" ? "ok" : "bad"}">${dir}</span><span class="note" style="margin:0">${kept ? "as promised" : "not this time: the other outputs' pushes outweighed it"}</span>`; };
+  $("trUpdProbs").innerHTML = `<span class="h">output</span><span class="h">possible output</span><span class="h">before</span><span class="h"></span><span class="h">after</span><span class="h"></span><span class="h"></span>` + pr.map(x => row(x.k, x.gold, "↑") + row(null, x.other, "↓")).join("");
+  const kept = pr.filter(x => x.gold.a > x.gold.b).length;
+  $("trUpdNote").textContent = `${kept} of ${tgt.length} gold outputs went up. Each update is a small move; the same pair comes back every round, and the rounds add up (the curves below).`;
 }
 function renderA() {
   const q = uA % NP, r = Math.floor(uA / NP), snB = snapAt(uA), snA = snapAt(uA + 1), snP = uA > 0 ? snapAt(uA - 1) : null, [src, tgt] = S2S.data[q], n = src.length;
@@ -982,11 +989,14 @@ function renderA() {
   $("trWhyNote").style.display = sg.kind === "out" || sg.kind === "done" ? "" : "none";
   if (sg.kind === "tables" || sg.kind === "in") renderPlaneEnc(snB, src, sg.kind === "in" ? sg.i : 0, Z);
   if (sg.kind === "update") renderUpdate(snB, snA, q, Z);
+  if (sg.kind === "out" && trMode === "train") { const pr = promises(snB, null, q).slice(0, sg.k + 1);
+    $("trPending").innerHTML = `collected for the update, which comes after output ${tgt.length}: ` + pr.map(x => `output ${x.k + 1}: <span class="ok">${x.gold.w} ${x.gold.b.toFixed(2)} ↑</span> <span class="bad">${x.other.w} ${x.other.b.toFixed(2)} ↓</span>`).join(" · ") + (sg.k < tgt.length - 1 ? " · …" : " · that is all: next, the update"); }
+  else $("trPending").innerHTML = sg.kind === "out" ? "translating: no gold output, so nothing is collected and there is no update" : "";
   $("trPlaneLbl").textContent = sg.kind === "update" ? "The output table on the plane: before → after, and the states that pushed it" : sg.kind === "out" || sg.kind === "done" ? "The output table on the plane, and the state" : "Both tables on the plane";
   const nextQ = (q + 1) % NP;
   $("trStageNote").innerHTML = sg.kind === "tables" ? `Next: the encoder reads input 1, <i>${src[0]}</i> (its row is highlighted).` :
     sg.kind === "in" ? (sg.i < n ? `Input ${sg.i} read: summary = ½ × old + ½ × row <i>${src[sg.i - 1]}</i>. Next: input ${sg.i + 1}, <i>${src[sg.i]}</i>.` : `All inputs read: the summary is the decoder's state 1. Next: output 1.`) :
-    sg.kind === "out" ? (sg.k < steps.length - 1 ? `Next: output ${sg.k + 2}.` : trMode === "train" ? `Next: the update of the tables, from what this pair showed.` : `Next: done (no update when translating).`) :
+    sg.kind === "out" ? (sg.k < steps.length - 1 ? `Next: output ${sg.k + 2}${trMode === "train" ? " (the tables do not change yet: the update comes after the last output)" : ""}.` : trMode === "train" ? `Next: the update of the tables, from everything this pair showed.` : `Next: done (no update when translating).`) :
     sg.kind === "update" ? `Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with these updated tables${nextQ === 0 ? " (a new round begins)" : ""}.` :
     `Translating changes nothing in the tables. Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with the same tables.`;
   $("trainCurveLbl").innerHTML = `<i>${src.join(" ")}</i> over the rounds: the probability of the gold output at each output`;
