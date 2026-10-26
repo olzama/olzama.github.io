@@ -2347,41 +2347,14 @@ print("they match" if count == expected else "they do not match: check the loop 
       </ul>
     </div>
     <div class="col">
-      <svg class="svgfig" viewBox="0 0 400 312" role="img" aria-label="The usual picture of attention: each Galician word's vector h goes with a weight alpha into a weighted sum, which feeds the decoder's state s as it writes aunt" style="max-width:440px">
-        <defs><marker id="bornArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
-        <g font-size="14" text-anchor="middle">
-          <rect x="44" y="24" width="72" height="28" rx="4" fill="var(--green-soft)" stroke="var(--green)"/><text x="80" y="43">s before</text>
-          <rect x="178" y="24" width="44" height="28" rx="4" fill="var(--green-soft)" stroke="var(--green)"/><text x="200" y="43" font-style="italic">s</text>
-          <rect x="284" y="24" width="72" height="28" rx="4" fill="var(--green-soft)" stroke="var(--green)"/><text x="320" y="43">aunt</text>
-          <line x1="116" y1="38" x2="176" y2="38" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#bornArrow)"/>
-          <line x1="222" y1="38" x2="282" y2="38" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#bornArrow)"/>
-          <circle cx="200" cy="110" r="13" fill="var(--orange-soft)" stroke="var(--orange)"/><text x="200" y="115" font-size="18">+</text>
-          <line x1="200" y1="97" x2="200" y2="54" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#bornArrow)"/>
-          <line x1="90" y1="168" x2="189" y2="118" stroke="var(--orange)" stroke-width="1.5" marker-end="url(#bornArrow)"/>
-          <line x1="200" y1="168" x2="200" y2="125" stroke="var(--orange)" stroke-width="1.5" marker-end="url(#bornArrow)"/>
-          <line x1="310" y1="168" x2="211" y2="118" stroke="var(--orange)" stroke-width="1.5" marker-end="url(#bornArrow)"/>
-          <text x="128" y="134" font-style="italic" fill="var(--orange)">α₁</text>
-          <text x="214" y="150" font-style="italic" fill="var(--orange)">α₂</text>
-          <text x="272" y="134" font-style="italic" fill="var(--orange)">α₃</text>
-          <rect x="68" y="168" width="44" height="28" rx="4" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="90" y="187" font-style="italic">h₁</text>
-          <rect x="178" y="168" width="44" height="28" rx="4" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="200" y="187" font-style="italic">h₂</text>
-          <rect x="288" y="168" width="44" height="28" rx="4" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="310" y="187" font-style="italic">h₃</text>
-          <line x1="90" y1="222" x2="90" y2="198" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#bornArrow)"/>
-          <line x1="200" y1="222" x2="200" y2="198" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#bornArrow)"/>
-          <line x1="310" y1="222" x2="310" y2="198" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#bornArrow)"/>
-          <text x="90" y="240">Unha</text><text x="200" y="240">tía</text><text x="310" y="240">miña</text>
-          <text x="200" y="268" font-size="11" class="muted"><tspan font-style="italic">h</tspan>: each Galician word's vector · <tspan font-style="italic">α</tspan>: its weight</text>
-          <text x="200" y="284" font-size="11" class="muted">+: weighted sum · <tspan font-style="italic">s</tspan>: the decoder's state</text>
-          <text x="200" y="304" font-size="11" class="muted">how attention is usually drawn · next screens: where the weights come from</text>
-        </g>
-      </svg>
+      <div class="fig"><img src="img/bahdanau-fig3a.png" alt="Attention weights of Bahdanau, Cho and Bengio's model translating The agreement on the European Economic Area was signed in August 1992 into French: a bright diagonal, reversed for zone économique européenne" style="max-height:60vh"><span class="cap">Their trained model, English → French. Row: French word being written · column: English word · brighter = more weight. Next screens: where these weights come from.</span></div>
     </div>
   </div>
-  <p class="src">Source: Bahdanau, Cho &amp; Bengio, ICLR 2015 (arXiv:1409.0473); picture after their Figure 1</p>
+  <p class="src">Source: Bahdanau, Cho &amp; Bengio, ICLR 2015 (arXiv:1409.0473), Figure 3(a)</p>
   <div class="notes">
     <p>We just saw the problem. The encoder squeezes the whole sentence into one vector. The longer the sentence, the more of the early words is lost. Translation quality got worse as sentences got longer.</p>
     <p>Bahdanau, Cho and Bengio fixed this in 2015. The decoder no longer gets only the last summary. It may look back at the encoder's vector for every source word. For every English word it writes, it decides how much to use each source word. These amounts are called attention weights. The idea is called attention.</p>
-    <p>The picture is how attention is usually drawn: in their paper, in textbooks and in blog posts. At the bottom are the Galician words. Above each one is its vector from the encoder, called h. The decoder, at the top, is about to write aunt. Every Galician word's vector goes into one sum, each with its own weight, called alpha. The weighted sum goes into the decoder's state, s, and the state writes aunt. A trained model puts most of the weight on tía here. The picture does not say where the weights come from. That is what the next screens take apart, computed by hand.</p>
+    <p>The picture is from their paper: their trained model translating an English sentence into French. Each row is a French word being written, each column an English word, and the brighter the square, the more weight. Mostly the bright squares run along a diagonal: the words come in the same order. But look at European Economic Area. In French it is zone économique européenne, in the opposite order, and the bright squares follow the words, not the positions. And a été signé spreads its weight over was signed. Nobody told the model where to look: it learned these weights from translated sentences. The next screens take apart how such weights are computed, by hand.</p>
     <p>Attention was invented for machine translation, years before it became the core of every modern large language model.</p>
   </div>
 </section>
