@@ -2940,25 +2940,6 @@ print("they match" if count == expected else "they do not match: check the loop 
   </div>
 </section>
 
-<section class="screen" id="gives" data-step="4">
-  <header><span class="kind">Step 4 · Attention</span><h2>What alignment actually gives you</h2></header>
-  <div class="body">
-    <p class="sent small"><span class="hl">Unha tía miña</span>, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”.</p>
-    <ul class="points">
-      <li><b>Word for word:</b> “my aunt”: fluent, but it assumes an aunt the reader already knows; <i>unha</i> introduces a new one</li>
-      <li class="frag"><b>What the model writes:</b> “An aunt of mine”: attention keeps all three words: <i>unha</i> → an, <i>tía</i> → aunt, <i>miña</i> → of mine. Logical and faithful</li>
-      <li class="frag"><b>What a translator writes:</b> “I had an aunt who…”: the sentence is rebuilt around introducing her; no word alignment can produce “I had”</li>
-    </ul>
-    <p class="src">Model output: Helsinki-NLP/opus-mt-gl-en, the model from Notebooks 01d and 01e</p>
-  </div>
-  <div class="notes">
-    <p>This screen has three steps. Each click shows one more translation of the same three words.</p>
-    <p>Step one: word for word. "Tía" is aunt, "miña" is my. Put in English order, that gives "my aunt". It is fluent English. But "my aunt" assumes the reader already knows which aunt. In the Galician, the aunt is new: "unha" is the indefinite article, "an aunt".</p>
-    <p>Step two: what the real translation model writes. The model from the notebook, opus-mt for Galician to English, writes "An aunt of mine". Attention keeps all three words: "unha" becomes "an", "tía" becomes "aunt", and "miña" becomes "of mine". This is a good translation. It is logical and faithful, and it introduces a new character, like the Galician does.</p>
-    <p>Step three: what a translator writes. Something like "I had an aunt who...". The sentence is rebuilt around introducing the aunt. This is how English usually brings a new person into a story. No word in the Galician corresponds to "I had". So no word-to-word alignment can produce it. Choosing it needs a view of the whole sentence and of the story.</p>
-  </div>
-</section>
-
 <section class="screen" id="bigweight" data-step="4">
   <header><span class="kind">Step 4 · Attention</span><h2>A large attention weight does not mean an important word</h2></header>
   <div class="body">
