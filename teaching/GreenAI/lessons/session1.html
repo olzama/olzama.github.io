@@ -2887,13 +2887,14 @@ print("they match" if count == expected else "they do not match: check the loop 
   <rect x="190" y="264" width="220" height="34" rx="6" fill="var(--green-soft)" stroke="var(--green)" stroke-width="1.5"/>
   <text x="300" y="287" text-anchor="middle" font-size="16">the mix: w<tspan font-size="11" dy="4">1</tspan><tspan dy="-4">v</tspan><tspan font-size="11" dy="4">1</tspan><tspan dy="-4"> + w</tspan><tspan font-size="11" dy="4">2</tspan><tspan dy="-4">v</tspan><tspan font-size="11" dy="4">2</tspan><tspan dy="-4"> + w</tspan><tspan font-size="11" dy="4">3</tspan><tspan dy="-4">v</tspan><tspan font-size="11" dy="4">3</tspan></text>
   <text x="420" y="286" font-size="13" class="muted">→ the decoder's state</text>
-  <text x="300" y="318" text-anchor="middle" font-size="12" class="muted">line width: the weight (an illustration)</text>
+  <text x="300" y="318" text-anchor="middle" font-size="12" class="muted">thicker line: larger weight (weights made up for the picture)</text>
 </svg>
     </div>
+  <p style="grid-column:1/-1;margin:4px 0 0;padding:10px 16px;border-left:4px solid var(--orange);background:var(--orange-soft);border-radius:4px;line-height:1.45">Like a search in a library. You come with a question: the <b>query</b>. Every book has a label on its spine: its <b>key</b>. You compare your question with each label, and the better the match, the more of that book you read: the <b>weight</b>. What you take away is a blend of the books' contents, the <b>values</b>, mostly from the best matches. The decoder does this before every word it writes, each time with a new question.</p>
   </div>
   <div class="notes">
     <p>Before we compute attention by hand, the three names you will meet everywhere. Think of a search. The query is what you are searching for: here, what the decoder needs before the word it is about to write. Each source word has a key, a short descriptor the query is compared against, and a value, the content you get back from it.</p>
-    <p>The comparison is the dot product of the query with each key: the score. Softmax, as in skip-gram, turns the scores into weights that are all positive and add up to 1. The mix is the sum of the values, each multiplied by its weight, and it goes into the decoder's state. In the picture, the width of each line stands for the weight: here most of it goes to tía.</p>
+    <p>The comparison is the dot product of the query with each key: the score. Softmax, as in skip-gram, turns the scores into weights that are all positive and add up to 1. The mix is the sum of the values, each multiplied by its weight, and it goes into the decoder's state. In the picture, a thicker line means a larger weight; the weights are made up for the picture, with most of the weight on tía.</p>
     <p>On the next page the model is small enough to compute by hand, and there the keys and the values are the same vectors: the encoder's vector after each Galician word. In transformers they are computed separately from each word, and the query too; we come back to that with self-attention.</p>
   </div>
 </section>
