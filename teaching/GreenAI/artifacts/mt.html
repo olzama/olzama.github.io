@@ -898,7 +898,7 @@ const zFor = sn => 1.15 * Math.max(...[...sn.G, ...sn.O, ...S2S.data.flatMap((d,
 // the model as two tables, highlighted for the stage; at the update, the new numbers with the change in each cell
 function renderTables(sn, prev, after, q, sg, steps) {
   const [src, tgt] = S2S.data[q], k = sg.kind === "out" ? sg.k : -1, up = sg.kind === "update";
-  const dl = (v, pv, strong) => pv !== undefined && Math.abs(v - pv) >= 0.005 ? `<small class="d${strong ? " s" : ""}">${sg_(v - pv)}</small>` : "";
+  const dl = (v, pv, strong) => pv != null && Math.abs(v - pv) >= 0.005 ? `<small class="d${strong ? " s" : ""}">${sg_(v - pv)}</small>` : "";
   const cells = (v, pv, strong, cls = "") => `<td class="${cls}${strong && pv && Math.abs(v[0] - pv[0]) >= 0.005 ? " a" : ""}">${r2(v[0])}${dl(v[0], pv && pv[0], strong)}</td><td class="${cls}${strong && pv && Math.abs(v[1] - pv[1]) >= 0.005 ? " a" : ""}">${r2(v[1])}${dl(v[1], pv && pv[1], strong)}</td>`;
   const base = up ? after : sn, ref = up ? sn : prev;   // at the update: new numbers, change from before; otherwise: the numbers, what the previous update changed
   const fed = steps.slice(0, Math.max(k, 0)).map(x => x.fed);   // mixed in before the current output
@@ -913,8 +913,9 @@ function renderTables(sn, prev, after, q, sg, steps) {
   const tbl = (cap, rows, cls = "") => `<table class="${cls}"><caption>${cap}</caption><tbody>${rows.join("")}</tbody></table>`;
   $("trTab").innerHTML = tbl("Galician inputs: vector", gRows, "full") + tbl(up ? "possible outputs: vector for the score (→ state k: moves toward state k)" : "possible outputs: vector for the score (gold k: gold output k)", oRows) + tbl("possible outputs: second vector (mixed into the state)", iRows);
   $("trTabLbl").textContent = up ? "The three tables after the update: what changed, cell by cell" : uA === 0 && !ref ? "The three tables at the random start: every number in all three is random" : "The three tables as they are now (all three started random)";
+  const parts = [`<span style="color:var(--blue)">this pair's inputs</span>`, trMode === "train" ? `<span class="ok">its gold outputs</span>` : "", k >= 0 ? `<span style="color:var(--orange)">orange: the most probable output now</span>` : "", k > 0 ? "second vectors already mixed into the state" : ""].filter(Boolean);
   $("trTabNote").innerHTML = up ? `bold: a changed cell, with the change · rows this pair does not touch stay as they are` :
-    `highlighted: what this pair uses (<span style="color:var(--blue)">inputs</span>, <span class="ok">gold outputs</span>, <span style="color:var(--orange)">orange: most probable now</span>, second vectors already mixed into the state)${ref ? " · small numbers: what the previous update changed" : ""}`;
+    `highlighted: ${parts.join(", ")}${k < 0 && trMode === "train" ? " (the most probable output appears in orange once decoding starts)" : ""}${ref ? " · small numbers: what the previous update changed" : ""}`;
 }
 const sg_ = x => (x >= 0 ? "+" : "−") + Math.abs(x).toFixed(2);
 // the plane before decoding: both tables, and the summary building up input by input
