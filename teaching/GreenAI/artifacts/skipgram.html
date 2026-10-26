@@ -83,17 +83,31 @@ html.embed canvas#plane { max-width: min(100%, calc(100vh - 190px)); min-width: 
 .corpus { font-family: var(--font-mono); font-size: 0.98rem; display: grid; gap: 2px; }
 .corpus .w { padding: 1px 4px; border-radius: 4px; }
 .corpus .in { background: var(--hi); outline: 2px solid var(--accent); }
-.pairlist { display: grid; grid-template-rows: repeat(8, auto); grid-auto-flow: column; gap: 2px 14px; margin-top: 8px; font-family: var(--font-mono); font-size: 0.86rem; }
-.pairlist span { padding: 1px 6px; border-radius: 4px; border: 1px solid transparent; }
-.pairlist .done { color: var(--muted); }
-.pairlist span::before { content: "✓ "; visibility: hidden; }
-.pairlist .done::before, .pairlist .just::before { visibility: visible; }
-.pairkey { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: 0.8rem; color: var(--muted); }
-.pairkey span { font-family: var(--font-mono); padding: 1px 6px; border-radius: 4px; border: 1px solid transparent; }
-.pairlist .next { border-color: var(--accent); }
-.pairlist .just { background: var(--hi); border-color: var(--accent); }
+.trainwrap { display: grid; gap: 18px; }
+.tbar { position: sticky; top: 0; z-index: 5; display: grid; gap: 6px; padding: 10px 16px; box-shadow: 0 6px 10px -8px rgba(0,0,0,0.3); }
+.tbar .strip { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; white-space: nowrap; scrollbar-width: thin; }
+.tbar .strip > * { flex: 0 0 auto; }
+.tbar #scrub { flex: 1 1 140px; min-width: 120px; accent-color: var(--accent); }
+.tbar .pairinfo { flex: 1 1 auto; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; height: 1.6em; line-height: 1.6em; }
+.tbar .chapters { margin: 0; flex-wrap: nowrap; }
+.pairgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px 10px; }
+@media (max-width: 700px) { .pairgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.pc { display: inline-flex; align-items: center; gap: 2px; font-family: var(--font-mono); font-size: 0.86rem; padding: 2px 6px; border-radius: 5px; border: 1.5px solid transparent; white-space: nowrap; overflow: hidden; height: 1.9em; }
+.pc .ck { color: var(--green); width: 1.1em; visibility: hidden; }
+.pc.done .ck, .pc.just .ck { visibility: visible; }
+.pc .w { padding: 0 3px; border-radius: 3px; }
+.pc .w.in { outline: 1.5px solid currentColor; outline-offset: -1px; font-weight: 600; }
+.pc .w.nb { font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.pc .w.x { color: var(--muted); opacity: 0.45; }
+.pc.just { background: var(--hi); border-color: var(--accent); }
+.pc.next { border-color: var(--accent); border-style: dashed; }
+.pairkey { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 8px; font-size: 0.8rem; color: var(--muted); }
+.pairkey > span:nth-child(2n) { margin-right: 12px; }
+.fwhead #fwpair { margin: 0; flex: 1 1 200px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.embed #watch { display: none; }
+#similar > .growhead { position: sticky; top: 0; z-index: 4; background: var(--panel); margin: -6px -16px 0; padding: 8px 16px; border-radius: 10px 10px 0 0; box-shadow: 0 6px 10px -8px rgba(0,0,0,0.3); }
 .corpus .out { background: var(--hi); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
-.pairinfo { margin-top: 8px; font-size: 0.95rem; }
+.pairinfo { font-size: 0.95rem; }
 .pairinfo b { font-family: var(--font-mono); font-weight: 500; }
 .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 button {
@@ -112,7 +126,7 @@ select { font: inherit; font-size: 0.9rem; padding: 6px 8px; border-radius: 7px;
 .chapters button { font-size: 0.82rem; padding: 4px 10px; }
 .toggles { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 0.88rem; color: var(--muted); }
 .toggles label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
-.narr { font-size: 1rem; min-height: 7.5em; }
+.narr { font-size: 1rem; }
 .narr p { margin: 0 0 8px; }
 .narr .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 canvas#bars { width: 100%; height: 190px; display: block; }
@@ -123,7 +137,7 @@ table.emb td:first-child, table.emb th:first-child { text-align: left; }
 table.emb tr.cur td, table.emb td.cur, table.emb th.cur { background: var(--hi); }
 .mats { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
 .mats table.emb { width: auto; }
-canvas#fw { width: 100%; min-width: 540px; height: 620px; display: block; }
+canvas#fw { width: 100%; min-width: 580px; height: 620px; display: block; }
 .mcap { margin: 0 0 6px; font-size: 0.86rem; color: var(--muted); }
 .mcap b { color: var(--fg); font-family: var(--font-mono); }
 .score { margin: 12px 0 0; font-size: 0.92rem; }
@@ -183,87 +197,95 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <p>The model only ever tries to predict a word's neighbors. Watch the embedding table change while it does: words with the same neighbors end up pointing the same way.</p>
   </header>
 
-  <div class="main" id="train">
-    <section class="panel">
-      <div class="growhead" style="gap:8px 14px"><p class="label" style="margin:0">Inside skip-gram: what gets multiplied</p><span class="chapters" style="margin:0" id="fwmode"><button data-m="one" class="on" style="font-size:0.82rem;padding:4px 10px">one pair</button><button data-m="all" style="font-size:0.82rem;padding:4px 10px">all words at once</button></span><button id="fwplay" style="font-size:0.82rem;padding:4px 10px">Play the multiplication</button><span class="note" id="fwpair" style="margin:0"></span></div>
-      <p class="mcap"><b>p</b>: the embedding table, one row per input word (the dots in the plot). <b>p′</b>: the second table, one column per word as a neighbor to predict (the rings).</p>
-      <div style="overflow-x:auto"><canvas id="fw" aria-label="One-hot vector times p gives h; h times p-prime gives scores; scores become probabilities"></canvas></div>
-    </section>
-    <section class="panel" aria-label="Training data">
-        <p class="label">Corpus, window = 1</p>
-        <div class="corpus" id="corpus"></div>
-        <p class="label" style="margin-top:12px">The 16 training pairs: input → neighbor to predict</p>
-        <div class="pairlist" id="pairlist"></div>
-        <div class="pairkey"><span style="color:var(--muted)">✓ trained on in this pass</span><span style="background:var(--hi);border-color:var(--accent);color:var(--fg)">✓ just trained on</span><span style="border-color:var(--accent);color:var(--fg)">next</span></div>
-        <p class="note" style="margin-top:8px">Training goes through these 16 pairs in this order, again and again. Once through all 16 is one <b>pass</b>. <b>Step</b> trains on the next pair. <b>One pass</b> trains on the rest of the current pass. <b>Play</b> keeps going, pass after pass, at the speed chosen next to it.</p>
-    </section>
-    <section class="panel stage" aria-label="Training controls and vector plane">
-      <div class="pairinfo" id="pairinfo"></div>
-      <div class="controls" style="margin-top:0">
+  <div class="trainwrap" id="train">
+    <section class="panel tbar" aria-label="Training controls">
+      <div class="controls strip">
         <button id="back">Back</button>
         <button id="step" class="primary">Step: next pair</button>
-        <button id="pass">One pass (16 pairs)</button>
-        <button id="play">Play</button>
+        <button id="pass" style="min-width:14.5em">One pass (16 pairs)</button>
+        <button id="play" style="min-width:5.2em">Play</button>
         <select id="speed" aria-label="Playback speed">
           <option value="slow">1 pair per second</option>
           <option value="mid">1 pass per second</option>
           <option value="fast" selected>30 passes per second</option>
         </select>
         <button id="reset">Reset</button>
-      </div>
-      <div class="scrub">
         <span class="counter">pass</span>
         <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="Jump to pass">
-        <span class="counter" id="passnum">0</span>
+        <span class="counter" id="passnum" style="min-width:3.2em">0</span>
       </div>
-      <canvas id="plane" aria-label="Plot of word vectors"></canvas>
-      <p class="note" style="margin:0">Each word's vector, drawn as a point. The axes zoom out as the values grow.</p>
-      <div class="chapters" id="chapters" style="margin-top:0"></div>
-      <div class="legend">
-        <span><i class="sw fill"></i>a word's row in the embedding table</span>
-        <span><b style="font-family:var(--font-mono)">×</b> where that point started</span>
-        <span id="lg-ring" hidden><i class="sw ring"></i>→word: that word's vector in p′, the second table (the word as a neighbor to predict)</span>
-        <span id="lg-trail" hidden>line: the path the point took during training (jump ahead or play a few passes to see it)</span>
-      </div>
-      <div class="legend">
-        <span><i class="sw" style="background:var(--blue)"></i>cats, dogs</span>
-        <span><i class="sw" style="background:var(--gray)"></i>chase, eat</span>
-        <span><i class="sw" style="background:var(--orange)"></i>mice, balls</span>
-        <span><i class="sw" style="background:var(--green)"></i>fish, meat</span>
-      </div>
-      <div class="toggles">
-        <label><input type="checkbox" id="showC" checked> show the second table (p′)</label>
-        <label><input type="checkbox" id="showTrail"> paths</label>
-        <label><input type="checkbox" id="showArrows" checked> vectors from the origin</label>
-      </div>
-      <div class="chapters">
-        <span class="counter" style="align-self:center">starting points:</span>
-        <button id="slidestart">the slides' run</button>
-        <button id="newstart">new random start</button>
+      <div class="controls strip">
+        <div class="pairinfo" id="pairinfo"></div>
+        <div class="chapters" id="chapters"></div>
       </div>
     </section>
-    <div class="side">
-      <section class="panel narr" aria-live="polite" id="narr"></section>
 
-      <section class="panel">
-        <div class="controls" style="margin-bottom:8px"><p class="label" id="barslabel" style="margin:0">Model's prediction</p><select id="barsword" aria-label="Input word whose prediction is shown"></select></div>
-        <canvas id="bars" aria-label="Bar chart of predicted probabilities"></canvas>
-      </section>
-    </div>
-  </div>
+    <section class="panel" aria-label="Training data">
+      <p class="label">The training data: each sentence of the corpus gives 4 pairs, an input word and one neighbor to predict (window = 1: the word just left or just right of the input)</p>
+      <div class="pairgrid" id="pairgrid"></div>
+      <div class="pairkey">
+        <span class="pc"><span class="w in" style="color:var(--fg)">word</span></span><span>input</span>
+        <span class="pc"><span class="w nb" style="color:var(--fg)">word</span></span><span>neighbor to predict</span>
+        <span class="pc"><span class="w x">word</span></span><span>not in this pair</span>
+        <span class="pc" style="padding:1px 4px"><span class="ck" style="visibility:visible">✓</span></span><span>trained on in this pass</span>
+        <span class="pc just" style="width:2.2em;height:1.4em"></span><span>just trained on</span>
+        <span class="pc next" style="width:2.2em;height:1.4em"></span><span>next</span>
+      </div>
+      <p class="note" style="margin:6px 0 0">Training goes through the 16 pairs in this order, again and again; once through all 16 is one <b>pass</b>.</p>
+    </section>
 
-  <div>
     <section class="panel">
-      <p class="label">What to watch</p>
-      <ul class="watch">
-        <li><b style="color:var(--blue)">cats</b> and <b style="color:var(--blue)">dogs</b> both predict chase and eat. They get the same kind of nudges and end up pointing the same way.</li>
-        <li><b style="color:var(--orange)">mice</b> and <b style="color:var(--orange)">balls</b> both predict only chase. <b style="color:var(--green)">fish</b> and <b style="color:var(--green)">meat</b> both predict only eat.</li>
-        <li>Press <b>new random start</b> a few times and jump to 3000. The starting points change every time; the grouping by color comes back every time.</li>
-        <li>Press <b>Step</b> with <b>show the second table</b> on: the green arrow adds a little of the →chase vector to cats, the red arrow subtracts a little of the average guess. Their sum, the black arrow, is the step.</li>
-        <li>With <b>paths</b> on, jump to 100: about two thirds of the movement up to pass 100 happens in the first 20 passes. Cats and dogs end up on the same line from the origin.</li>
-        <li>The model never sees the colors.</li>
-      </ul>
+      <div class="growhead fwhead"><p class="label" style="margin:0">Inside skip-gram: what gets multiplied</p><span class="chapters" style="margin:0" id="fwmode"><button data-m="one" class="on" style="font-size:0.82rem;padding:4px 10px">one pair</button><button data-m="all" style="font-size:0.82rem;padding:4px 10px">all words at once</button></span><button id="fwplay" style="font-size:0.82rem;padding:4px 10px">Play the multiplication</button><span class="note" id="fwpair"></span></div>
+      <p class="mcap"><b>p</b>: the embedding table, one row per input word (the dots in the plot). <b>p′</b>: the second table, one column per word as a neighbor to predict (the rings).</p>
+      <div style="overflow-x:auto"><canvas id="fw" aria-label="One-hot vector times p gives h; h times p-prime gives scores; scores become probabilities"></canvas></div>
     </section>
+
+    <div class="main">
+      <section class="panel stage" aria-label="Vector plane">
+        <canvas id="plane" aria-label="Plot of word vectors"></canvas>
+        <p class="note" style="margin:0">Each word's vector, drawn as a point. The axes zoom out as the values grow.</p>
+        <div class="legend">
+          <span><i class="sw fill"></i>a word's row in the embedding table</span>
+          <span><b style="font-family:var(--font-mono)">×</b> where that point started</span>
+          <span id="lg-ring"><i class="sw ring"></i>→word: that word's vector in p′, the second table (the word as a neighbor to predict)</span>
+          <span id="lg-trail">line: the path the point took during training (jump ahead or play a few passes to see it)</span>
+        </div>
+        <div class="legend">
+          <span><i class="sw" style="background:var(--blue)"></i>cats, dogs</span>
+          <span><i class="sw" style="background:var(--gray)"></i>chase, eat</span>
+          <span><i class="sw" style="background:var(--orange)"></i>mice, balls</span>
+          <span><i class="sw" style="background:var(--green)"></i>fish, meat</span>
+        </div>
+        <div class="toggles">
+          <label><input type="checkbox" id="showC" checked> show the second table (p′)</label>
+          <label><input type="checkbox" id="showTrail"> paths</label>
+          <label><input type="checkbox" id="showArrows" checked> vectors from the origin</label>
+        </div>
+        <div class="chapters">
+          <span class="counter" style="align-self:center">starting points:</span>
+          <button id="slidestart">the slides' run</button>
+          <button id="newstart">new random start</button>
+        </div>
+      </section>
+      <div class="side">
+        <section class="panel narr" aria-live="polite" id="narr"></section>
+        <section class="panel">
+          <div class="controls" style="margin-bottom:8px;flex-wrap:nowrap"><p class="label" id="barslabel" style="margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Model's prediction</p><select id="barsword" aria-label="Input word whose prediction is shown"></select></div>
+          <canvas id="bars" aria-label="Bar chart of predicted probabilities"></canvas>
+        </section>
+        <section class="panel" id="watch">
+          <p class="label">What to watch</p>
+          <ul class="watch">
+            <li><b style="color:var(--blue)">cats</b> and <b style="color:var(--blue)">dogs</b> both predict chase and eat. They get the same kind of nudges and end up pointing the same way.</li>
+            <li><b style="color:var(--orange)">mice</b> and <b style="color:var(--orange)">balls</b> both predict only chase. <b style="color:var(--green)">fish</b> and <b style="color:var(--green)">meat</b> both predict only eat.</li>
+            <li>Press <b>new random start</b> a few times and jump to 3000. The starting points change every time; the grouping by color comes back every time.</li>
+            <li>Press <b>Step</b> with <b>show the second table</b> on: the green arrow adds a little of the →chase vector to cats, the red arrow subtracts a little of the average guess. Their sum, the black arrow, is the step.</li>
+            <li>With <b>paths</b> on, jump to 100: about two thirds of the movement up to pass 100 happens in the first 20 passes. Cats and dogs end up on the same line from the origin.</li>
+            <li>The model never sees the colors.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
   </div>
 
   <section class="panel grow" id="similar" aria-label="Word similarity with more words">
@@ -616,7 +638,7 @@ function drawBars() {
   const a = L ? L.pr.a : +pick.value, b = L ? L.pr.b : -1;
   const p = L ? L.before : probs(st.W, st.C, a);
   const after = L ? L.after : null;
-  pick.hidden = !!L;
+  pick.style.visibility = L ? "hidden" : "";
   document.getElementById("barslabel").textContent = L ? `Model's prediction: P( · | ${VOCAB[a]} ), before the step` : "Model's prediction now, for the input word";
   const col = { blue: css("--blue"), gray: css("--gray"), orange: css("--orange"), green: css("--green") };
   const top = Math.max(0.25, Math.ceil(Math.max(...p, ...(after || [0])) * 10) / 10);
@@ -651,6 +673,8 @@ function drawBars() {
 // one-hot(a) × p = h (row a of p); h × p′ = 8 scores; scores → probabilities.
 // Drawn for the step just taken (values before it) or for the next pair. Each Step replays it.
 const FW = { t0: null, dur: 8000, mode: "one" };
+// wide: the two halves of the drawing side by side (400 px tall); otherwise one above the other
+function fwWide() { const c = document.getElementById("fw"), wide = c.parentElement.clientWidth >= 1180, h = wide ? "400px" : "620px"; if (c.style.height !== h) c.style.height = h; return wide; }
 function fwStart() { FW.t0 = reduceMotion ? null : performance.now(); }
 // while Play trains whole passes, every word is an input, so the panel shows all of them at once
 const fwAll = () => FW.mode === "all" || (st.playing && st.mode === "pass");
@@ -664,7 +688,7 @@ function drawForward(now) {
   // 4000–5800 e^score one word at a time; 5800–6400 their sum; 6400–7600 divide: the bars grow
   const s1 = T >= 0, s2 = Math.min(1, Math.max(0, (T - 900) / 600)), cols = Math.min(8, Math.max(0, Math.floor((T - 1500) / 300)));
   const exps = Math.min(8, Math.max(0, Math.floor((T - 4000) / 220))), sumOn = T >= 5800 || t >= 1, bars = Math.min(1, Math.max(0, (T - 6400) / 1200));
-  const ex = sc.map(Math.exp), exSum = ex.reduce((x, y) => x + y, 0);
+  const ex = sc.map(Math.exp), exSum = ex.reduce((x, y) => x + y, 0), wide = fwWide();
   const { ctx, w, h: H } = fitCanvas(document.getElementById("fw"));
   const col = { blue: css("--blue"), gray: css("--gray"), orange: css("--orange"), green: css("--green") };
   const mono = `11px ${css("--font-mono")}`, body = `12px ${css("--font-body")}`, fg = css("--fg"), mu = css("--muted"), hi = css("--hi"), line = css("--line");
@@ -705,7 +729,7 @@ function drawForward(now) {
   }
 
   // row B: h (1×2) × p′ (2×8) = scores (1×8), with probabilities under the scores
-  const by = top + 8 * rh + 52, cw = 52, hx2 = 6, cx0 = hx2 + 2 * pw + 40;
+  const by = wide ? top : top + 8 * rh + 52, cw = 52, hx2 = wide ? 600 : 6, cx0 = hx2 + 2 * pw + 40;
   title(hx2, by - 26, "h"); title(cx0, by - 26, "p′"); ctx.fillStyle = mu; ctx.font = body; ctx.textAlign = "left"; ctx.fillText(`2 × 8; neighbor to predict: →${VOCAB[b]}`, cx0 + 22, by - 26);
   for (let d = 0; d < 2; d++) cell(hx2 + d * pw, by + 22, pw, rh, s2 >= 1 ? n2(h[d]) : "", s2 >= 1 && cols < 8 && T > 1500, fg);
   sym(hx2 + 2 * pw + 18, by + 37, "×");
@@ -762,7 +786,7 @@ const TARGET = VOCAB.map((_, a) => { const n = PAIRS.filter(q => q.a === a).leng
   return VOCAB.map((_, b) => PAIRS.filter(q => q.a === a && q.b === b).length / n); });
 function drawForwardAll() {
   const L = lastPair(), pr = L ? L.pr : PAIRS[st.k];
-  const mark = !(st.playing && st.mode === "pass");  // while Play trains whole passes, no single pair is marked
+  const mark = !(st.playing && st.mode === "pass"), wide = fwWide();  // while Play trains whole passes, no single pair is marked
   const { ctx, w, h: H } = fitCanvas(document.getElementById("fw"));
   const col = { blue: css("--blue"), gray: css("--gray"), orange: css("--orange"), green: css("--green") };
   const fg = css("--fg"), mu = css("--muted"), line = css("--line"), hi = css("--hi");
@@ -796,24 +820,24 @@ function drawForwardAll() {
   ctx.fillText("H is p itself: each row is one word's h.", hx, top + 8 * rh + 16);
 
   // row 2: probabilities from H × p′, next to the corpus
-  const top2 = top + 8 * rh + 92, cw = Math.min(30, (w - x0 - 40) / 16), gx = x0 + 8 * cw + 40;
-  title(6, top2 - 44, "softmax(H × p′)", "the predictions");
+  const top2 = wide ? top + 20 : top + 8 * rh + 92, x2 = wide ? 640 : x0, cw = Math.min(30, (w - x0 - 40) / 16), gx = x2 + 8 * cw + 40;
+  title(x2 - 46, top2 - 44, "softmax(H × p′)", "the predictions");
   title(gx, top2 - 44, "the corpus");
-  colLabels(x0, top2, cw, true); colLabels(gx, top2, cw, true); rowLabels(x0, top2, rh);
+  colLabels(x2, top2, cw, true); colLabels(gx, top2, cw, true); rowLabels(x2, top2, rh);
   const blue = hexRGB(css("--blue")), bg = hexRGB(css("--bg"));
   const shade = v => `rgb(${bg.map((c, k) => Math.round(c + (blue[k] - c) * Math.min(1, v * 1.6))).join(",")})`;
   const fmt = v => v >= 0.995 ? "1" : v < 0.005 ? "" : v.toFixed(2).slice(1);
   for (let i = 0; i < 8; i++) {
     const p8 = probs(st.W, st.C, i);
     for (let j = 0; j < 8; j++) {
-      cell(x0 + j * cw, top2 + i * rh, cw, rh, fmt(p8[j]), shade(p8[j]), p8[j] > 0.45 ? css("--panel") : fg, small);
+      cell(x2 + j * cw, top2 + i * rh, cw, rh, fmt(p8[j]), shade(p8[j]), p8[j] > 0.45 ? css("--panel") : fg, small);
       cell(gx + j * cw, top2 + i * rh, cw, rh, fmt(TARGET[i][j]), shade(TARGET[i][j]), TARGET[i][j] > 0.45 ? css("--panel") : fg, small);
     }
   }
   // the pair being trained
   ctx.strokeStyle = fg; ctx.lineWidth = 2;
   if (mark) {
-    ctx.strokeRect(x0 + pr.b * cw + 1, top2 + pr.a * rh + 1, cw - 1, rh - 1);
+    ctx.strokeRect(x2 + pr.b * cw + 1, top2 + pr.a * rh + 1, cw - 1, rh - 1);
     ctx.strokeRect(gx + pr.b * cw + 1, top2 + pr.a * rh + 1, cw - 1, rh - 1);
   }
   ctx.fillStyle = fg; ctx.font = `13px ${css("--font-body")}`; ctx.textAlign = "left";
@@ -829,61 +853,62 @@ const f3 = v => v.toFixed(3), f2 = v => v.toFixed(2);
 const cosine = (u, v) => (u[0] * v[0] + u[1] * v[1]) / (Math.hypot(...u) * Math.hypot(...v));
 
 function renderCorpus() {
-  document.getElementById("fwplay").hidden = fwAll();
+  document.getElementById("fwplay").style.visibility = fwAll() ? "hidden" : "";
   const L = lastPair(), pr = L ? L.pr : PAIRS[st.k];
-  document.getElementById("corpus").innerHTML = CORPUS.map((s, si) => "<div>" + s.split(" ").map((w, i) => {
-    let c = "w";
-    if (!fwAll() || FW.mode === "all") {
-      if (si === pr.s && i === pr.i) c += " in";
-      if (si === pr.s && i === pr.j) c += " out";
-    }
-    return `<span class="${c}">${w}</span>`;
-  }).join(" ") + "</div>").join("");
-  const idx = PAIRS.indexOf(pr) + 1, justK = L ? PAIRS.indexOf(L.pr) : -1;
-  document.getElementById("pairlist").innerHTML = PAIRS.map((p, k) => {
-    const passDone = !L && st.k === 0 && st.pass > 0;
-    const c = k === justK ? "just" : passDone || k < st.k ? "done" : k === st.k ? "next" : "";
-    return `<span class="${c}">${VOCAB[p.a]} → ${VOCAB[p.b]}</span>`;
+  const justK = L ? PAIRS.indexOf(L.pr) : -1, passDone = !L && st.k === 0 && st.pass > 0;
+  // each pair drawn as its sentence: the input boxed, the neighbor to predict underlined, the third word faded
+  document.getElementById("pairgrid").innerHTML = PAIRS.map((p, k) => {
+    const c = k === justK ? "just" : passDone || k < st.k ? "done" : k === st.k && !st.playing ? "next" : "";
+    const ws = CORPUS[p.s].split(" ").map((w, i) => `<span class="w ${i === p.i ? "in" : i === p.j ? "nb" : "x"}"${i === p.i || i === p.j ? ` style="color:var(--${GROUP[VOCAB.indexOf(w)]})"` : ""}>${w}</span>`).join(" ");
+    return `<span class="pc ${c}" title="input ${VOCAB[p.a]}, neighbor to predict ${VOCAB[p.b]}"><span class="ck">✓</span>${ws}</span>`;
   }).join("");
+  const idx = PAIRS.indexOf(pr) + 1;
+  const pn = q => `input <b>${VOCAB[q.a]}</b>, neighbor to predict <b>${VOCAB[q.b]}</b>`;
   document.getElementById("pairinfo").innerHTML = L
-    ? `Just trained on pair ${idx} of 16: <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`
+    ? `Just trained on pair ${idx} of 16: ${pn(pr)}`
     : st.playing ? `Playing: every pass trains on all 16 pairs. Pass ${st.pass.toLocaleString()} done.`
-    : st.k === 0 && st.pass > 0 ? `Pass ${st.pass.toLocaleString()} done: all 16 pairs trained. Next: pair 1, <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`
-    : `Next pair, ${idx} of 16: <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`;
+    : st.k === 0 && st.pass > 0 ? `Pass ${st.pass.toLocaleString()} done: all 16 pairs trained. Next: pair 1, ${pn(pr)}`
+    : `Next: pair ${idx} of 16, ${pn(pr)}`;
   document.getElementById("fwpair").innerHTML = st.playing && st.mode === "pass" && FW.mode !== "all"
-    ? "Play trains on all 16 pairs in every pass, every word as an input, so while it runs this panel shows all words at once. Pause to go back to one pair, or choose 1 pair per second to follow the pairs."
-    : L ? `drawn for the pair just trained: <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>`
-    : `drawn for the next pair: <b>${VOCAB[pr.a]} → ${VOCAB[pr.b]}</b>.` + (st.k === 0 ? " Every pass starts with this pair; press Step to follow the pairs one by one." : "");
+    ? "while Play trains whole passes: all words at once"
+    : L ? `drawn for the pair just trained: ${pn(pr)}`
+    : `drawn for the next pair: ${pn(pr)}`;
 }
 
-function renderNarr() {
-  const L = st.last, el = document.getElementById("narr");
-  const W = st.W, C = st.C;
-  const pc = probs(W, C, 0);
-  const showC = document.getElementById("showC").checked;
-  const runNote = slidesRun ? "" : `<p class="num" style="font-size:0.85rem;color:var(--muted)">New random start: these numbers differ from the slides.</p>`;
-  if (L && st.mode === "slow") {
-    const a = VOCAB[L.pr.a], b = VOCAB[L.pr.b];
-    el.innerHTML = showC
-      ? `<p class="label">What this step did</p>
-      <p>Input <b>${a}</b>, correct neighbor <b>${b}</b>. P(${b} | ${a}) was <span class="num">${f3(L.before[L.pr.b])}</span>. The bigger a ring, the more probability the model gave that word.</p>
+// the box's text for each kind of state; o holds the words and numbers it names
+function narrHtml(kind, o) {
+  const runNote = o.newRun ? `<p class="num" style="font-size:0.85rem;color:var(--muted)">New random start: these numbers differ from the slides.</p>` : "";
+  const { a, b } = o;
+  if (kind === "stepC") return `<p class="label">What this step did</p>
+      <p>Input <b>${a}</b>, correct neighbor <b>${b}</b>. P(${b} | ${a}) was <span class="num">${o.before}</span>. The bigger a ring, the more probability the model gave that word.</p>
       <p><span class="key" style="border-color:var(--neg)"></span><b>average guess</b>: the rings averaged with those probabilities. It is where the prediction points.</p>
       <p><span class="key" style="border-color:var(--green)"></span>add a little of the →${b} vector to ${a}: ${a} points more like →${b}, so the score for ${b} goes up.</p>
       <p><span class="key" style="border-color:var(--neg)"></span>subtract a little of the average guess: the scores of the words the model over-predicted go down.</p>
-      <p><span class="key" style="border-color:var(--fg)"></span>the sum is the step: 0.1 × (→${b} − average guess). Now P(${b} | ${a}) = <span class="num">${f3(L.after[L.pr.b])}</span>.</p>`
-      : `<p class="label">What this step did</p>
-      <p>Input <b>${a}</b>, correct neighbor <b>${b}</b>. The model gave ${b} a probability of <span class="num">${f3(L.before[L.pr.b])}</span>.</p>
-      <p>Training nudged the values in the ${a} row (and in the second table) so that this probability grows. Now P(${b} | ${a}) = <span class="num">${f3(L.after[L.pr.b])}</span>. The ${a} point moved a little: see the black arrow.</p>
+      <p><span class="key" style="border-color:var(--fg)"></span>the sum is the step: 0.1 × (→${b} − average guess). Now P(${b} | ${a}) = <span class="num">${o.after}</span>.</p>`;
+  if (kind === "step") return `<p class="label">What this step did</p>
+      <p>Input <b>${a}</b>, correct neighbor <b>${b}</b>. The model gave ${b} a probability of <span class="num">${o.before}</span>.</p>
+      <p>Training nudged the values in the ${a} row (and in the second table) so that this probability grows. Now P(${b} | ${a}) = <span class="num">${o.after}</span>. The ${a} point moved a little: see the black arrow.</p>
       <p style="color:var(--muted)">To see why it moved in that direction, turn on <b>show the second table (p′)</b>.</p>`;
-  } else if (st.pass === 0 && st.k === 0) {
-    el.innerHTML = `<p class="label">Start</p>
+  if (kind === "start") return `<p class="label">Start</p>
       <p>Each word's vector starts at a random point: in both dimensions, its value is drawn between −0.5 and 0.5. That is why all points sit inside the square from −0.5 to 0.5, scattered with no pattern. The colors are ours; the model never sees them.</p>
-      <p>Press <b>Step</b> to train on the first pair, cats → chase. The model gives chase a probability of <span class="num">${f3(probs(W, C, 0)[2])}</span>.</p>` + runNote;
-  } else {
-    el.innerHTML = `<p class="label">After ${st.pass.toLocaleString()} pass${st.pass === 1 ? "" : "es"}</p>
-      <p>cos(cats, dogs) = <span class="num">${f2(cosine(W[0], W[1]))}</span>, cos(cats, fish) = <span class="num">${f2(cosine(W[0], W[6]))}</span>.</p>
-      <p>P(chase | cats) = <span class="num">${f2(pc[2])}</span>, P(eat | cats) = <span class="num">${f2(pc[3])}</span>. The best the model can do is 0.50 each, since cats is followed by chase and by eat equally often.</p>` + runNote;
-  }
+      <p>Press <b>Step</b> to train on the first pair: input cats, neighbor to predict chase. The model gives chase a probability of <span class="num">${o.before}</span>.</p>` + runNote;
+  return `<p class="label">After ${o.pass} pass${o.pass === "1" ? "" : "es"}</p>
+      <p>cos(cats, dogs) = <span class="num">${o.cd}</span>, cos(cats, fish) = <span class="num">${o.cf}</span>.</p>
+      <p>P(chase | cats) = <span class="num">${o.pc}</span>, P(eat | cats) = <span class="num">${o.pe}</span>. The best the model can do is 0.50 each, since cats is followed by chase and by eat equally often.</p>` + runNote;
+}
+// the box keeps the height of its longest text at this width, so nothing below it moves
+function sizeNarr() {
+  const el = document.getElementById("narr"), keep = el.innerHTML; el.style.minHeight = "";
+  const o = { a: "chase", b: "balls", before: "0.000", after: "0.000", pass: "3,000", cd: "−0.00", cf: "−0.00", pc: "0.00", pe: "0.00", newRun: true };
+  let m = 0; for (const k of ["stepC", "step", "start", "after"]) { el.innerHTML = narrHtml(k, o); m = Math.max(m, Math.ceil(el.getBoundingClientRect().height)); }
+  el.innerHTML = keep; el.style.minHeight = m + "px";
+}
+function renderNarr() {
+  const L = st.last, el = document.getElementById("narr"), W = st.W, C = st.C, pc = probs(W, C, 0);
+  const showC = document.getElementById("showC").checked, newRun = !slidesRun;
+  if (L && st.mode === "slow") el.innerHTML = narrHtml(showC ? "stepC" : "step", { a: VOCAB[L.pr.a], b: VOCAB[L.pr.b], before: f3(L.before[L.pr.b]), after: f3(L.after[L.pr.b]) });
+  else if (st.pass === 0 && st.k === 0) el.innerHTML = narrHtml("start", { before: f3(probs(W, C, 0)[2]), newRun });
+  else el.innerHTML = narrHtml("after", { pass: st.pass.toLocaleString(), cd: f2(cosine(W[0], W[1])), cf: f2(cosine(W[0], W[6])), pc: f2(pc[2]), pe: f2(pc[3]), newRun });
 }
 
 function render() {
@@ -937,15 +962,15 @@ document.getElementById("fwplay").onclick = () => { setPlaying(false); fwStart()
 document.querySelectorAll("#fwmode button").forEach(bt => bt.onclick = () => {
   FW.mode = bt.dataset.m;
   document.querySelectorAll("#fwmode button").forEach(x => x.classList.toggle("on", x === bt));
-  document.getElementById("fwplay").hidden = FW.mode === "all"; document.getElementById("fwpair").hidden = FW.mode === "all";
+  document.getElementById("fwplay").style.visibility = FW.mode === "all" ? "hidden" : ""; document.getElementById("fwpair").style.visibility = FW.mode === "all" ? "hidden" : "";
 });
 document.getElementById("pass").onclick = () => { setPlaying(false); if (st.pass < PASSES) { remember(); st.mode = "pass"; runPass(); render(); } };
 document.getElementById("play").onclick = () => setPlaying(!st.playing);
 document.getElementById("reset").onclick = () => { setPlaying(false); st.mode = "slow"; seek(0); };
 document.getElementById("scrub").oninput = e => { setPlaying(false); st.mode = "pass"; seek(sliderToPass(+e.target.value)); };
 function syncLegend() {
-  document.getElementById("lg-ring").hidden = !document.getElementById("showC").checked;
-  document.getElementById("lg-trail").hidden = !document.getElementById("showTrail").checked;
+  document.getElementById("lg-ring").style.visibility = document.getElementById("showC").checked ? "" : "hidden";
+  document.getElementById("lg-trail").style.visibility = document.getElementById("showTrail").checked ? "" : "hidden";
 }
 ["showC", "showTrail", "showArrows"].forEach(id => document.getElementById(id).onchange = () => {
   // paths run along the arrows from the origin, so turning paths on turns the arrows off (both can be ticked again)
@@ -960,10 +985,10 @@ document.addEventListener("keydown", e => {
   if (e.code === "ArrowRight") { e.preventDefault(); document.getElementById("step").click(); }
 });
 const CHAPTERS = [[0, "start"], [1, "1 pass"], [10, "10"], [100, "100"], [1000, "1000"], [3000, "3000"]];
-document.getElementById("chapters").innerHTML = '<span class="counter" style="align-self:center">jump to:</span>' +
+document.getElementById("chapters").innerHTML = '<span class="counter" style="align-self:center">jump to pass:</span>' +
   CHAPTERS.map(([n, l]) => `<button data-n="${n}">${l}</button>`).join("");
 document.querySelectorAll("#chapters button").forEach(b => b.onclick = () => { setPlaying(false); st.mode = "pass"; seek(+b.dataset.n); });
-window.addEventListener("resize", () => { render(); gr.drawn = -1; drawAllSims(); });
+window.addEventListener("resize", () => { sizeNarr(); render(); gr.drawn = -1; drawAllSims(); });
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { render(); gr.drawn = -1; drawAllSims(); });
 
 
@@ -1158,6 +1183,7 @@ startGrow(30);
 
 st.mode = "slow";
 syncLegend();
+sizeNarr();
 seek(0);
 
 // ---------------------------------------------------------------- ask Claude

@@ -219,7 +219,7 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 #tsDevStrip button { flex: 0 0 auto; }
 /* section 4: the same rule (footprints measured over all training steps, phrases and outputs) */
 #ihad .cols, #ihad .cols > .col, #ihad .why, #ihad .controls { min-width: 0; }
-#ihad .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+#ihad .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } #ihad .cols > .col { grid-template-columns: minmax(0, 1fr); }
 #ihad .callout .col > p.note { min-height: 3.4em; }
 #ihad #ihbVal, #ihad #ihcVal { min-height: 40px; } #ihad #ihbAll, #ihad #ihcAll { min-height: 240px; }
 
@@ -234,6 +234,12 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 #bound #bFormula { min-height: 120px; } #bound #bNote { min-height: 112px; } #bound #bUpdF { min-height: 120px; } #bound #bMixTxt { min-height: 64px; }
 #bVerdict .ok { color: var(--green); font-weight: 600; } #bVerdict .bad { color: var(--neg); font-weight: 600; }
 #trTest .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } #trTest .cols > .col, #trTest .controls { min-width: 0; } .testcard { width: 100%; }
+#ihbWhy .wl, #ihcWhy .wl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#ihbWhy .wt, #ihcWhy .wt { overflow: hidden; height: 3.75rem; margin: 2px 0 4px; }
+#ihbWhy table, #ihcWhy table { border-collapse: collapse; font-size: 0.78rem; line-height: 1.5; white-space: nowrap; }
+#ihbWhy th, #ihcWhy th { font-family: var(--font-body); font-weight: 400; color: var(--muted); text-align: left; padding: 0 8px 0 0; }
+#ihbWhy td, #ihcWhy td { padding: 0 8px 0 0; }
+#ihbWhy td:nth-child(n+4), #ihcWhy td:nth-child(n+4) { text-align: right; }
 .ogrid.one.avgrows .row { font-size: 0.8rem; overflow-x: auto; scrollbar-width: none; } .avgrows .row .cell { cursor: default; padding: 1px 3px; font-size: 0.72rem; flex-shrink: 0; } .avgrows .row .eq { margin-left: 4px; font-family: var(--font-mono); font-weight: 600; }
 .ogrid.one .row { flex-wrap: nowrap; height: 1.9em; overflow: hidden; white-space: nowrap; }
 #pathAll { grid-template-columns: minmax(0, 1fr); }
@@ -1667,11 +1673,15 @@ function renderT() {
   let wk = ds.findIndex((s, k) => EN[s.j] !== tgt[k]), close = false;
   if (wk < 0) { close = true; wk = 0; let best = Infinity; ds.forEach((s, k) => { const gj = EN.indexOf(tgt[k]), o = s.sc.map((v, j) => j === gj ? -Infinity : v), m = s.sc[gj] - Math.max(...o); if (m < best) { best = m; wk = k; } }); }
   const sw = ds[wk], gj = tgt[wk] ? EN.indexOf(tgt[wk]) : -1, wj = close ? sw.sc.map((v, j) => j === gj ? -Infinity : v).reduce((a, v, j, A) => v > A[a] ? j : a, 0) : sw.j;
-  const line = (j, cls, tag) => `<span class="${cls}">${tag} “${EN[j]}”: ${r2p(sw.st[0])}×${r2p(sn.O[j][0])} + ${r2p(sw.st[1])}×${r2p(sn.O[j][1])} = <b>${r2(sw.sc[j])}</b> → probability ${sw.p[j].toFixed(2)}</span>`;
+  const line = (j, cls, tag) => `<tr class="${cls}"><td>${tag}</td><td>“${EN[j]}”</td><td>${r2p(sw.st[0])}×${r2p(sn.O[j][0])} + ${r2p(sw.st[1])}×${r2p(sn.O[j][1])}</td><td><b>${r2(sw.sc[j])}</b></td><td>${sw.p[j].toFixed(2)}</td></tr>`;
   $(PFX + "WhyLbl").textContent = close ? `Why it is right: output ${wk + 1}, the closest call` : `Why it goes wrong: output ${wk + 1}, the first that differs from the gold output`;
-  $(PFX + "Why").innerHTML = `state ${wk + 1} = (${r2(sw.st[0])}, ${r2(sw.st[1])})${wk === 0 ? ", the summary" : `, after “${ds.slice(0, wk).map(s => EN[s.j]).join(" ")}”`}<br>` +
-    (gj >= 0 ? line(gj, "ok", close ? "gold, written:" : "gold:") + "<br>" : "") + line(wj, close ? "" : "bad", close ? "highest other:" : "written:") +
-    `<br><span class="note" style="font-family:var(--font-body)">score = state · vector of the word (x₁·v₁ + x₂·v₂); on the plane: the state at output ${wk + 1} (arrow) and its direction (dashed): the word farther along it scores higher</span>`;
+  // the state on one line (cut with … if needed), the two words in a table: the block keeps its height in every state
+  const stTxt = `state ${wk + 1} = (${r2(sw.st[0])}, ${r2(sw.st[1])})${wk === 0 ? ", the summary" : `, after “${ds.slice(0, wk).map(s => EN[s.j]).join(" ")}”`}`;
+  $(PFX + "Why").innerHTML = `<div class="wl" title="${stTxt}">${stTxt}</div><div class="wt"><table><tr><th></th><th>word</th><th>state · vector of the word</th><th>score</th><th>probability</th></tr>` +
+    (gj >= 0 ? line(gj, "ok", close ? "gold, written" : "gold") : `<tr class="ok"><td>gold</td><td colspan="4">the gold output has already ended</td></tr>`) + line(wj, close ? "" : "bad", close ? "highest other" : "written") + `</table></div>` +
+    `<span class="note" style="font-family:var(--font-body)">score = state · vector of the word (x₁·v₁ + x₂·v₂); on the plane: the state at output ${wk + 1} (arrow) and its direction (dashed): the word farther along it scores higher</span>`;
+  { const wt = $(PFX + "Why").querySelector(".wt"), tb = wt.querySelector("table"); let fs = 0.78; tb.style.fontSize = fs + "rem";
+    while (tb.scrollWidth > wt.clientWidth && fs > 0.5) { fs -= 0.02; tb.style.fontSize = fs + "rem"; } }   // the table shrinks to fit the column, at one fixed height
   // the plane, zoomed to this step, with the chosen sentence's words labeled
   const rr = runAt(sn, src), Z = 1.15 * Math.max(...[...sn.G, ...sn.O, ...rr.path].flat().map(Math.abs)) / PZ.get(PFX + "Svg");
   const P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z, tick = +(Z / 1.15).toPrecision(2);
