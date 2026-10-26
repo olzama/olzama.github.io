@@ -493,6 +493,13 @@ footer a { color: var(--blue); }
 .refs { margin: 0 0 10px; padding-left: 1.1em; display: grid; gap: 4px; }
 footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
 @media (prefers-reduced-motion: reduce) { .bar .fill, svg * { transition: none !important; } }
+
+/* what the page teaches, at the top: the same box on every course page */
+.learn { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--blue); border-radius: 10px; padding: 12px 18px; }
+.learn > p { font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+.learn ol { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
+.learn li { font-size: 0.95rem; line-height: 1.45; }
+.learn li a { color: var(--blue); font-size: 0.85rem; white-space: nowrap; text-decoration: none; margin-left: 4px; }
 </style>
 
 <div class="wrap">
@@ -500,6 +507,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <h1>Attention, Step by Step</h1>
     <p>How a translation model decides which source words to look at while it writes each output word. The running example is the start of our sentence: <span class="gl">Unha <b>tía miña</b>, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»</span>. It continues the <a href="mt.html">neural translation page</a>, which shows how an encoder and a decoder translate without attention.</p>
   </header>
+  <section class="learn" id="learn" aria-label="What you will learn"><p>What you will learn on this page</p><ol><li>Without attention, the decoder gets one summary of the whole sentence, and a word read long ago has faded from it. <a href="#look">→ sections 1, 4</a></li><li>With attention, before each English word the decoder builds a new mix of all the encoder's vectors: query · each key → scores → softmax: weights → the weighted sum. <a href="#lookatt">→ section 2</a></li><li>The query's numbers decide which key is read, and so which word is written; each word needs its own query. <a href="#qk">→ section 3</a></li><li>The evidence: two models with the same data, steps and size; only attention differs, and only the model with attention translates the long sentence. <a href="#walk">→ sections 4, 5</a></li><li>A row of an attention grid is one word's weights; a head is one attention with its own learned tables; a real model has many heads in many layers. The weights show where the model looks, not whether what it writes is right. <a href="#real">→ section 6</a></li><li>Self-attention: every piece looks at every piece. Heads get their habits from training; nobody assigns them. <a href="#self">→ sections 7, 8</a></li></ol></section>
+
 
   <!-- 4 -->
   <section class="panel" id="look">

@@ -193,6 +193,13 @@ footer p { margin: 0 0 8px; }
 footer a { color: var(--accent); }
 .refs { margin: 0 0 10px; padding-left: 1.1em; display: grid; gap: 4px; }
 footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+
+/* what the page teaches, at the top: the same box on every course page */
+.learn { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--blue); border-radius: 10px; padding: 12px 18px; }
+.learn > p { font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+.learn ol { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
+.learn li { font-size: 0.95rem; line-height: 1.45; }
+.learn li a { color: var(--blue); font-size: 0.85rem; white-space: nowrap; text-decoration: none; margin-left: 4px; }
 </style>
 
 <div class="wrap">
@@ -200,6 +207,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <h1>Skip-gram, Step by Step</h1>
     <p>The model only ever tries to predict a word's neighbors. Watch the embedding table change while it does: words with the same neighbors end up pointing the same way.</p>
   </header>
+  <section class="learn" id="learn" aria-label="What you will learn"><p>What you will learn on this page</p><ol><li>Skip-gram learns one vector per word by predicting its neighbors: the input word's vector, times the second table, gives a score and then a probability for every word as a neighbor. <a href="#train">→ the multiplication</a></li><li>Training takes one pair at a time (16 pairs = one round): the input's vector moves a little toward its gold neighbor's vector and away from the average guess. <a href="#train">→ the plane</a></li><li>Words with the same neighbors get the same nudges, so they end up pointing the same way (cats and dogs), although the model never sees our colors. <a href="#train">→ the plane</a></li><li>The cosine reads similarity off the direction. One-hot vectors are all at right angles, so they have no similarity; trained vectors do. <a href="#similar">→ section 2</a></li><li>With fewer dimensions, the similarity shows sooner: fewer random starting values to overwrite. <a href="#similar">→ section 2</a></li></ol></section>
+
 
   <div class="trainwrap" id="train">
     <section class="panel tbar" aria-label="Training controls">

@@ -313,6 +313,13 @@ footer a { color: var(--blue); }
 .refs { margin: 0 0 10px; padding-left: 1.1em; display: grid; gap: 4px; }
 footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
 @media (prefers-reduced-motion: reduce) { .bar .fill, .bar .seg, .massbar span, .tok { transition: none; } }
+
+/* what the page teaches, at the top: the same box on every course page */
+.learn { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--blue); border-radius: 10px; padding: 12px 18px; }
+.learn > p { font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+.learn ol { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
+.learn li { font-size: 0.95rem; line-height: 1.45; }
+.learn li a { color: var(--blue); font-size: 0.85rem; white-space: nowrap; text-decoration: none; margin-left: 4px; }
 </style>
 
 <div class="wrap">
@@ -320,6 +327,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <h1>N-grams, Step by Step</h1>
     <p>A language model predicts the next word as a probability for every word in the vocabulary. An n-gram model gets those probabilities by counting sequences of words in a corpus and dividing. We start with Shakespeare: first single words counted play by play, then word sequences across all his works. Then we take the counting apart on three tiny sentences.</p>
   </header>
+  <section class="learn" id="learn" aria-label="What you will learn"><p>What you will learn on this page</p><ol><li>Words and texts can be counted into vectors, and the cosine compares their directions: how similar two plays, or two words, are. <a href="#td">→ section 1</a></li><li>An n-gram model predicts the next word from the last n−1 words by counting and dividing: P(next | context) = Count(context, next) / Count(context). <a href="#count">→ sections 2, 4</a></li><li>A longer context sounds more like the text, and copies more of it: long word sequences are rare, so their counts are sparse. <a href="#shk">→ sections 2, 3</a></li><li>Greedy writing takes the most probable next word; sampling draws one by its probability. <a href="#gen">→ section 5</a></li><li>One unseen pair makes a whole sentence's probability 0; smoothing moves some probability to unseen pairs. <a href="#score">→ sections 4, 6</a></li><li>Real counts from books: “an aunt of mine” is rare in English, which matters for translation. <a href="#ofmine">→ section 7</a></li></ol></section>
+
 
   <!-- S0 -->
   <section class="panel" id="td">
