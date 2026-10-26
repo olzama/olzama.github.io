@@ -228,8 +228,8 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 #ihad .tf > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
 /* section 3: every changing part keeps the footprint of its tallest content (measured over all phrases, steps and both models) */
-#bound #bRulerLbl { min-height: 18px; } #bound #bEncNote { min-height: 50px; } #bound #bBars { min-height: 132px; }
-#bound #bFormula { min-height: 122px; } #bound #bUpdNote { min-height: 104px; } #bound #bNote { min-height: 124px; } #bound #bUpdF { min-height: 122px; } #bound #bMixTxt { min-height: 66px; }
+#bound #bRulerLbl { min-height: 18px; } #bound #bEncNote { min-height: 46px; } #bound #bBars { min-height: 128px; }
+#bound #bFormula { min-height: 120px; } #bound #bNote { min-height: 112px; } #bound #bUpdF { min-height: 120px; } #bound #bMixTxt { min-height: 64px; }
 #bVerdict .ok { color: var(--green); font-weight: 600; } #bVerdict .bad { color: var(--neg); font-weight: 600; }
 #trTest .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } #trTest .cols > .col, #trTest .controls { min-width: 0; } .testcard { width: 100%; }
 .ogrid.one .row { flex-wrap: nowrap; height: 1.9em; overflow: hidden; white-space: nowrap; }
@@ -516,9 +516,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 2 -->
   <section class="panel" id="bound">
     <h2><span class="n">3</span>Inference, part 2: the decoder writes English, word by word</h2>
-    <p class="label">Still inference: a model trained in section 1 (after its 3000 rounds), translating. Nothing changes in its tables here. Choose the model (trained on all 16, or on 15 with <i>unha tía miña</i> held out) and the phrase: a training pair, the development pair, or a test phrase that neither model ever saw.</p>
-    <p class="note" style="max-width:none;margin:0">The model trained on all 16 short phrases translates all of them right: in 3 words, the first word still makes up an eighth of the summary and the second a quarter. It can fail in two ways: on a phrase it never saw (section 1, part C: “an aunt ‹end›”), and on long sentences, where early words fade from the summary to almost nothing (section 2). The <a href="attention.html">next page</a> shows the second with <b>other models</b>, not this one: two models with 8-dimensional vectors, trained on thousands of variants of our whole sentence. One works like this page's model and writes “A friend of mine, …”; the other adds the remedy that page introduces, attention, and gets it right.</p>
-    <p class="lead">A model trained in section 1, at work. The encoder reads the phrase into a summary, and Galician and English words share one plane. The <b>decoder</b> then writes English one word at a time. It keeps a <b>state</b>, a vector, and its first state is the summary. At every step it chooses a word the way skip-gram predicted neighbors, then folds that word into its state with the same ½ + ½ rule the encoder used.</p>
+    <p class="label" style="max-width:none">Still inference: a model from section 1 translates, word by word, as in section 1 part A's “when translating”. Choose the model and the phrase: a training pair, the development pair, or a test phrase neither model ever saw.</p>
+    <p class="note" style="max-width:none;margin:0">The model of 16 writes all its training phrases right; it fails on phrases it never saw (the test phrases; for the model of 15, also the development pair) and on long sentences, where early words fade from the summary (section 2; the <a href="attention.html">next page</a> shows this with <b>other models</b>, and the remedy, attention).</p>
 <div class="actl">
     <div class="controls">
       <span class="note">model:</span><div class="seg" role="group" aria-label="Which trained model"><button id="bM16" aria-pressed="true">trained on all 16 (parts A, B)</button><button id="bM15" aria-pressed="false">trained on 15 (part C)</button></div>
@@ -539,15 +538,15 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <p class="label" id="bRulerLbl">Every word's score, on one line</p>
         <svg id="bRuler" viewBox="0 0 400 124" role="img" aria-label="All scores on a line" style="max-width:420px"></svg>
         <p class="note" id="bEncNote"></p>
-        <p class="note">Galician words (squares) and English words (rings) are all 2-D vectors in the same plane: the Galician ones are bright while the encoder reads, the English ones while the decoder writes. The encoder's summary of the phrase (dashed path) is where the decoder's state starts (orange arrow). Each English word's score is the dot product with the state: how far the word lies along the state's direction (dashed line), times the state's length. Click any ring, or any word on the line, to see its score worked out.</p>
+        <div class="legendrow"><span><span class="sq" style="background:var(--blue)"></span>Galician word</span><span><span class="ring"></span>English word</span><span><span class="sw" style="background:var(--orange)"></span>the state (- - - the summary's path)</span><span>click a ring or a word on the line: its score worked out</span></div>
       </div>
       <div class="col">
         <div class="bars" id="bBars"></div>
         <div class="formula" id="bFormula"></div>
         <p class="label" style="margin-top:6px" id="bUpdLbl">b. How the state was recomputed</p>
-        <svg id="bUpd" viewBox="0 0 400 230" role="img" aria-label="New state as half the old state plus half the written word's vector" style="max-width:420px"></svg>
+        <svg id="bUpd" viewBox="0 0 400 230" style="display:none"></svg>
         <div class="formula" id="bUpdF"></div>
-        <p class="note" id="bUpdNote">The vector used here is a second learned vector for each English word, separate from its ring in (a): like skip-gram, which also keeps two tables, p and p′. Drawn at its own scale.</p>
+        <p class="note" id="bUpdNote" style="display:none">The vector used here is a second learned vector for each English word, separate from its ring in (a): like skip-gram, which also keeps two tables, p and p′. Drawn at its own scale.</p>
         <p class="label" style="margin-top:6px" id="bMixLbl">What is in the state now</p>
         <div class="mix" id="bMix"></div>
         <div class="weights" id="bMixTxt"></div>
@@ -590,7 +589,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <div class="testcard" style="grid-template-columns:max-content minmax(0,1fr)"><span class="k">sections 1–3, their training data</span><span class="v"><i style="font-family:var(--font-body)">unha tía miña</i> → an aunt of mine</span><span class="k">this model's training data</span><span class="v"><i style="font-family:var(--font-body)">unha tía miña cantaba</i> → <span style="color:var(--orange)">I had</span> an aunt <span style="color:var(--orange)">who</span> sang</span></div>
     <div class="why" id="ihTrain">
       <p class="label">B. Training</p>
-      <p class="note" style="max-width:none;margin:0">This model was trained on all 24 pairs at once, the procedure part B of section 1 can switch to, with a refinement of gradient descent that adapts the size of each step (Adam); 2000 steps, every 25th recorded. All its vectors start random. Section 1 showed how one pair is decoded and how an update moves the vectors; here only the outcome.</p>
+      <p class="note" style="max-width:none;margin:0">This model was trained on all 24 pairs at once, with a refinement of gradient descent that adapts the size of each step (Adam); 2000 steps, every 25th recorded. All its vectors start random. Section 1 showed how one pair is decoded and how an update moves the vectors; here only the outcome.</p>
       <div class="actl"><div class="controls"><span class="label" style="margin-right:4px">Training</span><button id="ihtBack" aria-label="25 training steps back">← 25 steps</button><button class="primary" id="ihtNext" aria-label="25 more training steps">Train 25 steps →</button><button id="ihtPlay">Play training</button><button id="ihtReset" title="Back to the random start">↺ start</button><input type="range" id="ihtStep" min="0" max="1" step="1" value="0" aria-label="Training step" style="flex:1 1 140px; accent-color: var(--blue)"><span class="mono" id="ihtVal" style="white-space:nowrap"></span></div>
         <div class="controls"><span class="note">verb shown:</span><div class="seg" role="group" aria-label="Which verb's 8 sentences are shown"><button data-v="cantaba" aria-pressed="true">cantaba</button><button data-v="bailaba" aria-pressed="false">bailaba</button><button data-v="ría" aria-pressed="false">ría</button></div><span class="note">(training always uses all 24)</span></div></div>
       <div class="cols">
