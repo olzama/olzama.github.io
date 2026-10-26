@@ -311,7 +311,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
               <div class="tables3 two one" id="trTabG"></div>
               <div class="col" style="gap:4px">
                 <svg id="trWhySvg" viewBox="0 0 400 400" role="img" aria-label="The vectors on the plane" style="max-width:300px"></svg>
-                <div class="legendrow compact" id="trLeg"><span><span class="sq" style="background:var(--blue)"></span>Galician input</span><span><span class="ring"></span>possible output</span><span><span class="ring" style="color:var(--orange)"></span><span id="trLegWin">highest probability now</span></span><span><span class="ring" style="color:var(--green)"></span>the gold output</span><span><span class="sw" style="background:var(--orange)"></span>the summary, then the state (- - - its direction: farther along = higher score)</span><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— before the update</span></div>
+                <div class="legendrow compact" id="trLeg"><span class="note" style="margin:0;font-size:inherit">colours, in the tables and on the plane:</span><span><span class="sw" style="background:var(--blue)"></span>this pair's inputs</span><span><span class="sw" style="background:var(--green)"></span>its gold outputs</span><span><span class="sw" style="background:var(--orange)"></span><span id="trLegWin">the highest probability now</span></span><span><span class="sw" style="background:var(--hi);border:1px solid var(--line)"></span>second vectors mixed into the state</span><span><span class="sw" style="background:var(--orange);width:22px;height:4px"></span>the summary, then the state (- - - its direction: farther along = higher score)</span><span>faint or small: before the update</span></div>
               </div>
             </div>
             <div class="tables3 two" id="trTab"></div>
@@ -693,7 +693,7 @@ window.mtWhy = function (o) {
     $(pre + "WhyTable").querySelectorAll("[data-m]").forEach(e => e.addEventListener("click", () => o.pick(+e.dataset.m)));
   }
   if ($(pre + "WhyStripKey")) $(pre + "WhyStripKey").innerHTML = (mode === "train" ? `<span class="ok">green</span>: has the highest probability now · <span class="bad">red</span>: not yet` : `<span class="ok">green</span>: the gold output · <span class="bad">red</span>: a different one`) + (o.prevLabel ? ` · thin mark: ${o.prevLabel}` : o.thin ? ` · thin mark: ${o.thin} training step${o.thin === 1 ? "" : "s"} earlier` : "");
-  if ($(pre + "LegWin")) $(pre + "LegWin").textContent = mode === "train" ? "highest probability now" : "the output written";
+  if ($(pre + "LegWin")) $(pre + "LegWin").textContent = mode === "train" ? "the highest probability now" : "the highest probability: the output written";
   if ($(pre + "LegGhost")) $(pre + "LegGhost").textContent = o.prev ? `where the vector was ${o.prevLabel || `${o.thin || 25} training step${(o.thin || 25) === 1 ? "" : "s"} earlier`} (the vectors move only at an update)` : o.prevLabel === "" ? "at the random start there is no earlier position" : "at training step 0 there is no earlier step";
   if ($(pre + "WhyStrip")) $(pre + "WhyStrip").querySelectorAll("button").forEach(b => b.addEventListener("click", () => o.pick(+b.dataset.m)));
   // the plane: the English words, the state and its direction; labels only where they help
@@ -932,9 +932,7 @@ function renderTables(sn, prev, after, q, sg, steps, flash, activeK = -1) {
   $("trTabG").innerHTML = tbl("Galician inputs: vector", gRows);
   $("trTab").innerHTML = tbl(up ? "possible outputs: vector for the score · the arrows collected at the outputs, now carried out (↑ₖ: toward state k; ↓ₖ: away from it)" : pk ? `possible outputs: vector for the score · probability at output ${k + 1}${trMode === "train" ? " · ↑ ↓: what the update will do (↑₁: promised at output 1, …)" : ""}` : "possible outputs: vector for the score (gold k: gold output k)", oRows) + tbl("possible outputs: second vector (mixed into the state)", iRows);
   $("trTabLbl").textContent = up ? "The three tables after the update: what changed, cell by cell" : uA === 0 && !ref ? "The three tables at the random start: every number in all three is random" : "The three tables as they are now (all three started random)";
-  const parts = [`<span style="color:var(--blue)">this pair's inputs</span>`, trMode === "train" ? `<span class="ok">its gold outputs</span>` : "", k >= 0 ? `<span style="color:var(--orange)">orange: the most probable output now</span>` : "", k > 0 ? "second vectors already mixed into the state" : ""].filter(Boolean);
-  $("trTabNote").innerHTML = up ? `bold: a changed cell, with the change · rows this pair does not touch stay as they are` :
-    `highlighted: ${parts.join(", ")}${k < 0 && trMode === "train" ? " (the most probable output appears in orange once decoding starts)" : ""}${ref ? " · small numbers: what the previous update changed" : ""}`;
+  $("trTabNote").innerHTML = up ? `bold: a changed cell, with the change · rows this pair does not touch stay as they are` : ref ? `small numbers: what the previous update changed` : "";
 }
 const sg_ = x => (x >= 0 ? "+" : "−") + Math.abs(x).toFixed(2);
 // the plane before decoding: both tables, and the summary building up input by input
