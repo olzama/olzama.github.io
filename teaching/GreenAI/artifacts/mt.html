@@ -1157,15 +1157,17 @@ function renderRightCurve() {
   g += `<line class="axis" x1="${L}" y1="${B}" x2="${Rr}" y2="${B}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${B}"/>`;
   g += `<text x="${L}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">round 0</text><text x="${L - 6}" y="${Y(0) + 4}" text-anchor="end" font-size="10" fill="${muted}">0</text><text x="${L - 6}" y="${Y(8) + 4}" text-anchor="end" font-size="10" fill="${muted}">8</text><text x="${L - 6}" y="${Y(16) + 4}" text-anchor="end" font-size="10" fill="${muted}">16</text>`;
   g += `<text x="${L - 30}" y="${T - 8}" font-size="10" fill="${muted}">inputs right</text>`;
-  g += `<polyline points="${other.map((n, i) => `${X(i).toFixed(1)},${Y(n).toFixed(1)}`).join(" ")}" fill="none" stroke="${muted}" stroke-opacity="0.55" stroke-width="1.6"/>`;
-  g += `<polyline points="${mine.map((n, i) => `${X(i).toFixed(1)},${Y(n).toFixed(1)}`).join(" ")}" fill="none" stroke="${green}" stroke-width="2.6" stroke-linejoin="round"/>`;
+  // the count is a whole number, so its curve is a staircase: drawn smoothed (a centred average over 31 rounds); the dot shows the exact count now
+  const W = 15, smooth = arr => arr.map((n, i) => { const a = Math.max(0, i - W), b = Math.min(arr.length - 1, i + W); let s = 0; for (let k = a; k <= b; k++) s += arr[k]; return s / (b - a + 1); });
+  g += `<polyline points="${smooth(other).map((n, i) => `${X(i).toFixed(1)},${Y(n).toFixed(1)}`).join(" ")}" fill="none" stroke="${muted}" stroke-opacity="0.55" stroke-width="1.6" stroke-linejoin="round"/>`;
+  g += `<polyline points="${smooth(mine).map((n, i) => `${X(i).toFixed(1)},${Y(n).toFixed(1)}`).join(" ")}" fill="none" stroke="${green}" stroke-width="2.6" stroke-linejoin="round"/>`;
   const mx = X(ti), my = Y(mine[ti]);
   g += `<line x1="${mx}" y1="${T}" x2="${mx}" y2="${B}" stroke="${orange}" stroke-width="1.3" stroke-dasharray="4 3"/><circle cx="${mx}" cy="${my}" r="5" fill="${orange}" stroke="var(--panel)" stroke-width="1.5"/>`;
   const lx = mx + 9 + 60 > Rr ? mx - 9 : mx + 9, an = mx + 9 + 60 > Rr ? "end" : "start";
   g += `<text x="${lx}" y="${Math.max(T + 12, my - 9)}" text-anchor="${an}" font-size="11" fill="${orange}">${mine[ti]} of 16 · round ${ti}</text>`;
   $("trRightCurve").innerHTML = g;
   const firstAll = arr => arr.findIndex((n, k) => n === 16 && arr.slice(k).every(x => x === 16)), f1 = firstAll(rightsOf("one")), fA = firstAll(rightsOf("all"));
-  $("trRightNote").innerHTML = `<span class="ok">green</span>: this procedure · grey: the other · all 16 right for good from round ${f1} one pair at a time (${f1 * NP} updates), from round ${fA} all at once (${fA} updates)`;
+  $("trRightNote").innerHTML = `<span class="ok">green</span>: this procedure · grey: the other · curves averaged over 31 rounds, the dot is the exact count now · all 16 right for good from round ${f1} one pair at a time (${f1 * NP} updates), from round ${fA} all at once (${fA} updates)`;
 }
 function renderWhole() {
   const RR = procRun(), NR = procRounds(); ti = Math.min(ti, NR); const sn = RR[ti], one = trProc === "one";
