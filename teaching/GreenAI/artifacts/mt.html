@@ -222,7 +222,11 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .legendrow.compact { gap: 3px 10px; font-size: 0.74rem; }
 .tables3.two.one { grid-template-columns: max-content; }
 .actl .pathstrip button { font-size: 0.72rem; padding: 2px 5px; }
-.actl .pathstrip { gap: 2px; }
+.actl .pathstrip { gap: 2px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; white-space: nowrap; height: 2.1em; align-items: center; scrollbar-width: thin; max-width: 100%; }
+.actl .pathstrip button, .actl .pathstrip .ar { flex: 0 0 auto; }
+.actl .pairrow { flex-wrap: nowrap; overflow: hidden; height: 2.3em; }
+.actl .pairrow .mono { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.actl .pairrow #trWhyPair { flex: 0 0 auto; }
 .actl .controls { gap: 6px; }
 .actl .mono { font-size: 0.8rem; }
 .pairchip { font-size: 1rem; font-weight: 600; padding: 3px 10px; border-radius: 6px; background: var(--hi); border: 1.5px solid var(--orange); color: var(--fg); }
@@ -306,8 +310,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <p class="label" id="trWhyHead"></p>
         <div class="actl" id="trCtl">
         <div class="controls"><button id="aBack">← back</button><button class="primary" id="aNext">next →</button><button id="aPairPrev">← previous pair</button><button id="aPairNext">next pair →</button><button id="aRoundBack" title="16 pairs back">← 1 round</button><button id="aRoundNext" title="16 pairs on">1 round →</button><button id="aReset" title="The random start">↺ start</button><input type="range" id="aStep" min="0" max="1" step="1" value="0" aria-label="Pairs seen so far" style="flex:1 1 70px; accent-color: var(--blue)"></div>
-        <div class="controls"><span id="trWhyPair"></span><span class="mono" id="aStepVal"></span></div>
-        <div class="controls"><div class="pathstrip" id="trStages"></div></div>
+        <div class="controls pairrow"><span id="trWhyPair"></span><span class="mono" id="aStepVal"></span></div>
+        <div class="controls" style="flex-wrap:nowrap"><div class="pathstrip" id="trStages"></div></div>
         </div>
         <div class="controls"><span class="note">after each output, what is mixed into the state:</span><div class="seg" role="group" aria-label="Decoding in training or when translating"><button id="trModeTrain" aria-pressed="true">in training: the gold output</button><button id="trModeFree" aria-pressed="false">when translating: the output written</button></div></div>
         <div class="cols acols">
@@ -1067,6 +1071,7 @@ function renderA() {
   $("aStepVal").textContent = `· round ${r + 1} of ${ROUNDS} · ${uA} pair${uA === 1 ? "" : "s"} seen so far${uA === 0 ? " (the random start)" : ""} · 16 pairs = 1 round`;
   $("trStages").innerHTML = st.map((x, i) => `<button class="${i < stIdx ? "done" : i === stIdx ? "on" : "todo"}" data-i="${i}">${x.lbl}</button>`).join(`<span class="ar">→</span>`) + `<span class="ar">→ next pair</span>`;
   $("trStages").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { stIdx = +b.dataset.i; subIdx = 0; renderA(); }));
+  { const strip = $("trStages"), on = strip.querySelector("button.on"); if (on && strip.scrollWidth > strip.clientWidth) strip.scrollLeft = Math.max(0, on.offsetLeft - strip.clientWidth / 2 + on.offsetWidth / 2); }
   const k = sg.kind === "out" ? sg.k : sg.kind === "push" || sg.kind === "done" ? 99 : 0, prevQ = (uA + NP - 1) % NP, Z = zFor(snB) / planeZoom, K = tgt.length;
   $("zVal").textContent = `×${planeZoom}`; $("zOut").disabled = planeZoom <= 1; $("zIn").disabled = planeZoom >= 8;
   window.mtWhy({ sn: snB, prev: snP, prevLabel: snP ? `before the previous update (pair ${prevQ + 1}, ${S2S.data[prevQ][0].join(" ")})` : "", GL, EN, src, tgt, pre: "tr", pos: k, mode: trMode, Z, inputs: true, encUpTo: sg.kind === "tables" ? 0 : sg.kind === "in" ? sg.i : n, updateRef: "the update after this pair (one stage per output)",
