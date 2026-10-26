@@ -322,7 +322,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
             </div>
             <div class="tables3 two" id="trTab"></div>
             <p class="note" id="trTabNote" style="margin:0"></p>
-            <div class="legendrow compact" id="trLeg"><span class="note" style="margin:0;font-size:inherit">colours, in the tables and on the plane:</span><span><span class="sw" style="background:var(--blue)"></span>this pair's inputs</span><span><span class="sw" style="background:var(--green)"></span>its gold outputs</span><span><span class="sw" style="background:var(--orange)"></span><span id="trLegWin">the highest probability now</span></span><span><span class="sw" style="background:var(--hi);border:1px solid var(--line)"></span>second vectors mixed into the state</span><span><span class="sw" style="background:var(--orange);width:22px;height:4px"></span>the summary, then the state (- - - its direction: farther along = higher score)</span><span>faint: before the update</span><span>gold k: gold output k · ↑ₖ ↓ₖ: output k's arrows: the gold output up, the highest other down</span></div>
+            <div class="legendrow compact" id="trLeg"><span class="note" style="margin:0;font-size:inherit">colours, in the tables and on the plane:</span><span><span class="sw" style="background:var(--blue)"></span>this pair's inputs</span><span><span class="sw" style="background:var(--green)"></span>its gold outputs</span><span><span class="sw" style="background:var(--orange)"></span><span id="trLegWin">the highest probability now</span></span><span><span class="sw" style="background:var(--hi);border:1px solid var(--line)"></span>second vectors mixed into the state</span><span><span class="sw" style="background:var(--orange);width:22px;height:4px"></span>the summary, then the state (- - - its direction: farther along = higher score)</span><span>faint: before the update · short dash: the direction of a move too small to see (zoom in; the rows pushed away move by η × p, about a tenth of the gold row's move)</span><span>gold k: gold output k · ↑ₖ ↓ₖ: output k's arrows: the gold output up, the highest other down</span></div>
           </div>
           <div class="col">
             <p class="label" id="trEncLbl">Encoding: the inputs are mixed, one by one, into one vector, the summary (new = ½ × old + ½ × vector of the input; section 2 shows the rule)</p>
@@ -717,6 +717,9 @@ window.mtWhy = function (o) {
   if (o.prev) EN.forEach((e, j) => { const v = sn.O[j], pv = o.prev.O[j];
     g += `<line x1="${P(pv[0])}" y1="${Q(pv[1])}" x2="${P(v[0])}" y2="${Q(v[1])}" stroke="${fg}" stroke-opacity="0.35" stroke-width="1.2"/><circle cx="${P(pv[0])}" cy="${Q(pv[1])}" r="3" fill="none" stroke="${fg}" stroke-opacity="0.35"/>`; });
   const placed = [];
+  if (o.inputs) { const blue = css("--blue");
+    if (o.prev) GL.forEach((w2, j) => { const v = sn.G[j], pv = o.prev.G[j]; g += `<line x1="${P(pv[0])}" y1="${Q(pv[1])}" x2="${P(v[0])}" y2="${Q(v[1])}" stroke="${blue}" stroke-opacity="0.35" stroke-width="1.2"/>`; });
+    GL.forEach((w2, j) => { const v = sn.G[j], on = src.includes(w2); g += `<rect x="${P(v[0]) - 4}" y="${Q(v[1]) - 4}" width="8" height="8" rx="2" fill="${blue}" fill-opacity="${on ? 0.9 : 0.3}"/>`; }); }
   EN.forEach((e, j) => { const v = sn.O[j], win = j === s.j, gold = j === wj, c = gold ? green : win ? orange : labeled.has(j) ? fg : muted;
     g += `<circle cx="${P(v[0])}" cy="${Q(v[1])}" r="${win || gold ? 8 : 5}" fill="none" stroke="${c}" stroke-width="${win || gold ? 3 : 1.3}"/>`;
     if (win && gold) g += `<circle cx="${P(v[0])}" cy="${Q(v[1])}" r="12" fill="none" stroke="${orange}" stroke-width="2.5"/>`; });
@@ -729,6 +732,7 @@ window.mtWhy = function (o) {
   // every word labeled, so that a ring can be followed from step to step; the less probable ones in gray
   [s.j, ...(wj >= 0 && wj !== s.j ? [wj] : []), ...order.filter(j => j !== s.j && j !== wj)].forEach(j => { const v = sn.O[j], win = j === s.j, gold = j === wj;
     put(P(v[0]), Q(v[1]) + 4, 7.5 * EN[j].length, gold ? green : win ? orange : labeled.has(j) ? fg : muted, EN[j], win && gold ? 15 : win || gold ? 11 : 8); });
+  if (o.inputs) { const blue = css("--blue"); GL.forEach((w2, j) => { const v = sn.G[j], on = src.includes(w2); g += `<text x="${P(v[0]) + 7}" y="${Q(v[1]) + 4}" font-size="11" font-style="italic" fill="${blue}" fill-opacity="${on ? 1 : 0.4}">${w2}</text>`; }); }
   $(pre + "WhySvg").innerHTML = g;
   // every word's probability at this position
   if ($(pre + "WhyLbl")) $(pre + "WhyLbl").textContent = `Output ${k + 1}: the probability of each possible output`;
@@ -1002,10 +1006,16 @@ function drawUpdatePlane(snB, snA, q, Z, activeK) {
   s += `<line class="axis" x1="10" y1="200" x2="390" y2="200"/><line class="axis" x1="200" y1="10" x2="200" y2="390"/>`;
   { const tick = +(Z / 1.15).toPrecision(2); s += `<text x="${P(tick)}" y="214" text-anchor="middle" font-size="10">${tick}</text><text x="${P(-tick)}" y="214" text-anchor="middle" font-size="10">${-tick}</text><text x="206" y="${Q(tick) + 4}" font-size="10">${tick}</text>`; }
   g.sts.forEach((st, k) => { if (activeK >= 0 && k !== activeK) return; s += `<line x1="200" y1="200" x2="${P(st[0])}" y2="${Q(st[1])}" stroke="${orange}" stroke-width="3" marker-end="url(#trua)"/>`; });
+  const blue = css("--blue"), neg = css("--neg");
+  // a move too small to see at this zoom: a short dash in its direction
+  const dash = (b, a, c) => { const dx = P(a[0]) - P(b[0]), dy = Q(a[1]) - Q(b[1]), L = Math.hypot(dx, dy); if (L < 0.05 || L >= 6) return ""; return `<line x1="${P(a[0])}" y1="${Q(a[1])}" x2="${P(a[0]) + dx / L * 12}" y2="${Q(a[1]) + dy / L * 12}" stroke="${c}" stroke-width="1.5" stroke-dasharray="3 2"/>`; };
+  GL.forEach((w, j) => { const b = snB.G[j], a = snA.G[j], on = src.includes(w);
+    s += `<line x1="${P(b[0])}" y1="${Q(b[1])}" x2="${P(a[0])}" y2="${Q(a[1])}" stroke="${blue}" stroke-opacity="0.6" stroke-width="1.4"/>` + (on ? dash(b, a, blue) : "") + `<rect x="${P(a[0]) - 4}" y="${Q(a[1]) - 4}" width="8" height="8" rx="2" fill="${blue}" fill-opacity="${on ? 0.9 : 0.3}"/>`; });
   EN.forEach((w, j) => { const b = snB.O[j], a = snA.O[j], gold = tgt.includes(w), c = gold ? green : fg;
-    s += `<line x1="${P(b[0])}" y1="${Q(b[1])}" x2="${P(a[0])}" y2="${Q(a[1])}" stroke="${c}" stroke-opacity="0.6" stroke-width="1.4"/><circle cx="${P(b[0])}" cy="${Q(b[1])}" r="3" fill="none" stroke="${c}" stroke-opacity="0.45"/><circle cx="${P(a[0])}" cy="${Q(a[1])}" r="${gold ? 7 : 5}" fill="none" stroke="${c}" stroke-width="${gold ? 2.6 : 1.4}"/>`; });
+    s += `<line x1="${P(b[0])}" y1="${Q(b[1])}" x2="${P(a[0])}" y2="${Q(a[1])}" stroke="${c}" stroke-opacity="0.6" stroke-width="1.4"/>` + dash(b, a, gold ? green : neg) + `<circle cx="${P(b[0])}" cy="${Q(b[1])}" r="3" fill="none" stroke="${c}" stroke-opacity="0.45"/><circle cx="${P(a[0])}" cy="${Q(a[1])}" r="${gold ? 7 : 5}" fill="none" stroke="${c}" stroke-width="${gold ? 2.6 : 1.4}"/>`; });
   g.sts.forEach((st, k) => { if (activeK >= 0 && k !== activeK) return; const [x, y, an] = put(200 + (P(st[0]) - 200) * 0.6, 200 + (Q(st[1]) - 200) * 0.6 + 4, 52, 8); s += `<text x="${x}" y="${y}" text-anchor="${an}" font-size="11" fill="${orange}">state ${k + 1}</text>`; });
   EN.forEach((w, j) => { const a = snA.O[j], gold = tgt.includes(w), [x, y, an] = put(P(a[0]), Q(a[1]) + 4, 7.5 * w.length, gold ? 10 : 8); s += `<text x="${x}" y="${y}" text-anchor="${an}" font-size="12" fill="${gold ? green : muted}">${w}</text>`; });
+  GL.forEach((w, j) => { const a = snA.G[j], on = src.includes(w), [x, y, an] = put(P(a[0]), Q(a[1]) + 4, 7 * w.length, 7); s += `<text x="${x}" y="${y}" text-anchor="${an}" font-size="11" font-style="italic" fill="${blue}" fill-opacity="${on ? 1 : 0.4}">${w}</text>`; });
   $("trWhySvg").innerHTML = s;
 }
 let animTok = 0, lastStageKey = "", planeZoom = 1;
@@ -1033,7 +1043,7 @@ function renderA() {
   $("trStages").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { stIdx = +b.dataset.i; renderA(); }));
   const k = sg.kind === "out" ? sg.k : sg.kind === "push" || sg.kind === "done" ? 99 : 0, prevQ = (uA + NP - 1) % NP, Z = zFor(snB) / planeZoom, K = tgt.length;
   $("zVal").textContent = `×${planeZoom}`; $("zOut").disabled = planeZoom <= 1; $("zIn").disabled = planeZoom >= 8;
-  window.mtWhy({ sn: snB, prev: snP, prevLabel: snP ? `before the previous update (pair ${prevQ + 1}, ${S2S.data[prevQ][0].join(" ")})` : "", GL, EN, src, tgt, pre: "tr", pos: k, mode: trMode, Z, encUpTo: sg.kind === "tables" ? 0 : sg.kind === "in" ? sg.i : n, updateRef: "the update after this pair (one stage per output)",
+  window.mtWhy({ sn: snB, prev: snP, prevLabel: snP ? `before the previous update (pair ${prevQ + 1}, ${S2S.data[prevQ][0].join(" ")})` : "", GL, EN, src, tgt, pre: "tr", pos: k, mode: trMode, Z, inputs: true, encUpTo: sg.kind === "tables" ? 0 : sg.kind === "in" ? sg.i : n, updateRef: "the update after this pair (one stage per output)",
     head: `A. The training cycle, one pair at a time: round ${r + 1}, pair ${q + 1} of 16${trMode === "train" ? "" : " · translating with these tables: no gold output, no update"}`,
     pairHtml: `<span class="pairchip">pair ${q + 1} of 16: <i>${src.join(" ")}</i> → ${tgt.filter(x => x !== "‹end›").join(" ")}</span>${src.join(" ") === "unha tía miña" ? `<span class="note" style="margin:0 0 0 8px">(the lesson's example)</span>` : ""}`,
     allPairs: S2S.data, pick: m => { stIdx = 1 + n + m; renderA(); }, setMode: m => { trMode = m; stIdx = Math.min(stIdx, 1 + n); renderA(); } });
