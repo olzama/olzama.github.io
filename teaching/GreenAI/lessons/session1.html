@@ -2111,7 +2111,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="encdec2" data-step="3">
-  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Encoder and decoder: what they are</h2></header>
+  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Encoder and decoder, for any task</h2></header>
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1400 630" role="img" aria-label="Possible inputs a, b, c, …; an input is a sequence of them, here c, a, e. The encoder reads the inputs one by one and updates a vector after each; that vector, the summary, is the input as numbers. The decoder keeps its own vector, the state, which starts as the encoder's vector. Possible outputs A, B, C, D, …, ‹end›: at each step the decoder gives each a probability and writes one, here D, then B, then ‹end›, which means finished; each output is mixed into the state. Both parts are trained together on pairs of an input and its gold output, the right output made by a person. The possible inputs and outputs depend on the task: translation, Galician words to English words; summarization, words to words; speech recognition, slices of a recording to written words; image captioning, patches of an image to words.">
@@ -2860,7 +2860,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="notes">
     <p>This is the real model, opus-mt, on our sentence. Press Play the translation. Then click the English word aunt.</p>
     <p>With the average of all heads, about a third of the weight is on tía. Choose layer 6, head 2: 0.99 of the weight is on tía. Choose layer 1: almost none. Different heads look in different places.</p>
-    <p>Then the three buttons “Three places where the translation goes wrong”: worked, saying saying it, they'll refute. Under the English pieces, each one now shows the five pieces the model could have written there; pieces written with a probability below 0.3 have a dashed outline. In all three places, layer 6, head 2 looks at the right Galician word, and the model still writes something wrong. The point: attention weights show where the model looks, not whether the translation is right.</p>
+    <p>Then the three buttons “Three places where the translation goes wrong”: worked, saying saying it, they'll refute. Under the English pieces, each one shows the five pieces the model could have written there; pieces written with a probability below 0.3 have a dashed outline. In all three places, layer 6, head 2 looks at the right Galician word, and the model still writes something wrong. The point: attention weights show where the model looks, not whether the translation is right.</p>
   </div>
 </section>
 
