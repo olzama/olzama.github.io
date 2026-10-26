@@ -142,7 +142,7 @@ svg.v3 .gl3 { fill: var(--fg); font-size: 12px; font-family: var(--font-mono); }
 svg.v3 .pt.word { fill: var(--blue); } svg.v3 .pt.enc { fill: var(--panel); stroke: var(--blue); stroke-width: 2; } svg.v3 .pt.enc.sum { fill: var(--orange); stroke: var(--orange); } svg.v3 .pt.mix { fill: var(--orange); }
 svg.v3 .cv { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; } svg.v3 .ring { fill: var(--panel); stroke: var(--fg); stroke-width: 2; }
 svg.v3 .pt.faint { opacity: 0.3; }
-svg.v3 .pl { font-size: 12px; fill: var(--fg); } svg.v3 .pl.mix, svg.v3 .pl.sum { fill: var(--orange); } svg.v3 .pl.enc { fill: var(--blue); }
+svg.v3 .pl { font-size: 12px; fill: var(--fg); } svg.v3 .pl.mix, svg.v3 .pl.sum { fill: var(--orange); } svg.v3 .pl.enc { fill: var(--blue); } svg.v3 .pl.enc.sum { fill: var(--orange); }
 .pbars { min-height: 118px; }
 /* inside a lesson screen, the panel starts with its pictures: the opening paragraphs and the recap are on the full page */
 html.embed section.panel > .lead, html.embed .review.recap { display: none; }
@@ -1670,7 +1670,7 @@ function ruler(x, att) {
 const CARROWS = [{ a: ZERO, b: [0.25, 0.5, 0], cls: "ca", label: "“an”", dx: 6, dy: 18, anchor: "start" }, { a: ZERO, b: [0, 0.5, 0], cls: "ca", label: "“aunt”", dx: 6, dy: -8, anchor: "start" }, { a: ZERO, b: [0.25, -0.5, 0], cls: "ca", label: "“a”", dx: 0, dy: 20, anchor: "start" }, { a: ZERO, b: [0, -0.5, 0], cls: "ca", label: "“friend”", dx: 0, dy: -10, anchor: "start" }, { a: ZERO, b: [0, 0, 0.5], at: [0, 0, 0.16], cls: "ca", label: "“of”, “mine”", dx: 7, dy: 4, anchor: "start" }];
 const ENC_PATH = ENC.map((e, j) => ({ a: j ? ENC[j - 1] : ZERO, b: e, cls: "gd" }));
 function decScene(x, att, { arrows = false, drops = [], mark = false, path = false, mixes = [], xLabel, cap }) {
-  const xPt = att ? { p: x, cls: "mix", label: xLabel || `the mix ${vecTxt(x)}`, dx: -10, dy: -12, anchor: "end" } : { p: x, cls: "enc sum", label: xLabel || `the summary ${vecTxt(x)}`, dx: -10, dy: 20, anchor: "end" };
+  const xPt = att ? { p: x, cls: "mix", label: xLabel || `the mix ${vecTxt(x)}`, dx: -10, dy: -12, anchor: "end" } : { p: x, cls: "enc sum", label: xLabel || `the summary ${vecTxt(x)}`, dx: 12, dy: 4, anchor: "start" };   // to the right: on the left it would cross the miña axis
   const s = { ...DEC_VIEW, pts: [xPt], segs: [], notes: [], arrows: arrows ? CARROWS : [], marks: mark ? [markAn] : [], cap };
   if (path) { s.segs.push(...ENC_PATH); s.pts.unshift(...encPts(null, "enc faint").slice(0, 2)); }
   if (att) { s.tri = ENC; s.pts.unshift(...encPts(null, "enc faint"), ...mixes.map(m => ({ p: m, cls: "mix faint" }))); }
@@ -2181,7 +2181,7 @@ function drawQ() {
     `<p class="note">The correct word ${pos + 1} is “${PHR[pos]}”. It needs ${nd.txt}.</p>`;
   // the 3-D picture: the keys always; the query's line and the mix when the step has reached them
   const pts = [...encPts(ENC.map((e, j) => show.has("q3") ? `${encPlain(j)}: weight ${f(a.sm.p[j])}` : encPlain(j)))];
-  if (show.has("m3")) pts.push({ p: a.mix, cls: "mix", label: `the mix ${vecTxt(a.mix)}`, dx: -10, dy: -10, anchor: "end" });
+  if (show.has("m3")) pts.push({ p: a.mix, cls: "mix", label: `the mix ${vecTxt(a.mix)}`, dx: -10, dy: -26, anchor: "end" });   // higher: clear of the key labels below
   v2.set({ ...(show.has("q3") ? queryScene(a) : { arrows: [], segs: [], notes: [] }), range: 0.5, noTicks: true, tri: ENC, pts });
   $("qkCap").textContent = show.has("m3") ? `The mix ${vecTxt(a.mix)} lies inside the triangle of the three keys, pulled toward the one with the largest weight. It reaches ${f(a.mix[TIA])} along tía and ${f(a.mix[MINA])} along miña.`
     : show.has("q3") ? `The three keys as points, and the query's line.` : `The three keys as points: one axis per Galician word.`;
