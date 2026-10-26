@@ -2345,16 +2345,308 @@ print("they match" if count == expected else "they do not match: check the loop 
         <li>Bahdanau, Cho &amp; Bengio (2015): the decoder <b>looks back</b> at every source word and chooses new weights for every word it writes: <b>attention</b></li>
         <li>Invented for translation, years before today's LLMs</li>
       </ul>
+      <!--LOOKBACK-->
+<svg class="svgfig" viewBox="0 0 617.1999999999999 176" role="img" aria-label="Writing zone, the decoder looks back at every English word; the line to Area is the thickest" style="max-width:560px">
+  <g font-size="13" text-anchor="middle">
+    <rect x="10" y="16" width="47.0" height="26" rx="4" fill="var(--green-soft)" stroke="var(--green)" stroke-width="1"/><text x="33.5" y="34">L'</text>
+    <rect x="63.0" y="16" width="81.0" height="26" rx="4" fill="var(--green-soft)" stroke="var(--green)" stroke-width="1"/><text x="103.5" y="34">accord</text>
+    <rect x="150.0" y="16" width="55.5" height="26" rx="4" fill="var(--green-soft)" stroke="var(--green)" stroke-width="1"/><text x="177.75" y="34">sur</text>
+    <rect x="211.5" y="16" width="47.0" height="26" rx="4" fill="var(--green-soft)" stroke="var(--green)" stroke-width="1"/><text x="235.0" y="34">la</text>
+    <rect x="264.5" y="16" width="64.0" height="26" rx="4" fill="var(--green-soft)" stroke="var(--orange)" stroke-width="2.5"/><text x="296.5" y="34">zone</text>
+    <text x="336.5" y="34" text-anchor="start" font-size="12" fill="var(--orange)" font-weight="600">← being written</text>
+    <line x1="156.3" y1="114" x2="296.5" y2="44" stroke="var(--orange)" stroke-width="0.8" stroke-opacity="0.37" stroke-linecap="round"/>
+    <line x1="206.6" y1="114" x2="296.5" y2="44" stroke="var(--orange)" stroke-width="0.7" stroke-opacity="0.36" stroke-linecap="round"/>
+    <line x1="273.4" y1="114" x2="296.5" y2="44" stroke="var(--orange)" stroke-width="3.6" stroke-opacity="0.60" stroke-linecap="round"/>
+    <line x1="327.0" y1="114" x2="296.5" y2="44" stroke="var(--orange)" stroke-width="9.1" stroke-opacity="1.00" stroke-linecap="round"/>
+    <line x1="407.8" y1="114" x2="296.5" y2="44" stroke="var(--orange)" stroke-width="0.7" stroke-opacity="0.36" stroke-linecap="round"/>
+    <text x="21.9" y="128" font-size="12">The</text>
+    <text x="75.5" y="128" font-size="12">agreement</text>
+    <text x="125.8" y="128" font-size="12">on</text>
+    <text x="156.3" y="128" font-size="12">the</text>
+    <text x="206.6" y="128" font-size="12">European</text>
+    <text x="273.4" y="128" font-size="12" font-weight="700">Economic</text>
+    <text x="273.4" y="144" font-size="11" fill="var(--orange)">0.25</text>
+    <text x="327.0" y="128" font-size="12" font-weight="700">Area</text>
+    <text x="327.0" y="144" font-size="11" fill="var(--orange)">0.71</text>
+    <text x="364.09999999999997" y="128" font-size="12">was</text>
+    <text x="407.8" y="128" font-size="12">signed</text>
+    <text x="448.20000000000005" y="128" font-size="12">in</text>
+    <text x="488.6" y="128" font-size="12">August</text>
+    <text x="535.6" y="128" font-size="12">1992</text>
+    <text x="566.0999999999999" y="128" font-size="12">.</text>
+    <text x="593.3" y="128" font-size="12">&lt;end&gt;</text>
+    <text x="308.59999999999997" y="172" font-size="11" class="muted">one row of the grid: writing zone, the decoder looks back at every English word · line width = weight</text>
+  </g>
+</svg>
+<!--/LOOKBACK-->
     </div>
     <div class="col">
-      <div class="fig"><img src="img/bahdanau-fig3a.png" alt="Attention weights of Bahdanau, Cho and Bengio's model translating The agreement on the European Economic Area was signed in August 1992 into French: a bright diagonal, reversed for zone économique européenne" style="max-height:60vh"><span class="cap">Their trained model, English → French. Row: French word being written · column: English word · brighter = more weight. Next screens: where these weights come from.</span></div>
+      <!--FIG3A-->
+<svg class="svgfig" viewBox="0 0 682 468" role="img" aria-label="Attention weights of Bahdanau, Cho and Bengio's model, English to French: a diagonal, reversed where European Economic Area becomes zone économique européenne; was signed becomes a été signé" style="max-width:640px">
+  <g font-size="13">
+    <text x="114.0" y="86" transform="rotate(-60 114.0 86)">The</text>
+    <text x="142.0" y="86" transform="rotate(-60 142.0 86)">agreement</text>
+    <text x="170.0" y="86" transform="rotate(-60 170.0 86)">on</text>
+    <text x="198.0" y="86" transform="rotate(-60 198.0 86)">the</text>
+    <text x="226.0" y="86" transform="rotate(-60 226.0 86)" fill="var(--blue)" font-weight="600">European</text>
+    <text x="254.0" y="86" transform="rotate(-60 254.0 86)" fill="var(--blue)" font-weight="600">Economic</text>
+    <text x="282.0" y="86" transform="rotate(-60 282.0 86)" fill="var(--blue)" font-weight="600">Area</text>
+    <text x="310.0" y="86" transform="rotate(-60 310.0 86)" fill="var(--green)" font-weight="600">was</text>
+    <text x="338.0" y="86" transform="rotate(-60 338.0 86)" fill="var(--green)" font-weight="600">signed</text>
+    <text x="366.0" y="86" transform="rotate(-60 366.0 86)">in</text>
+    <text x="394.0" y="86" transform="rotate(-60 394.0 86)">August</text>
+    <text x="422.0" y="86" transform="rotate(-60 422.0 86)">1992</text>
+    <text x="450.0" y="86" transform="rotate(-60 450.0 86)">.</text>
+    <text x="478.0" y="86" transform="rotate(-60 478.0 86)">&lt;end&gt;</text>
+    <text x="88" y="107.0" text-anchor="end">L'</text>
+    <rect x="96" y="92" width="28" height="22" fill="var(--orange)" fill-opacity="0.50" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="124" y="92" width="28" height="22" fill="var(--orange)" fill-opacity="0.14" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="152" y="92" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="180" y="92" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="92" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="236" y="92" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="264" y="92" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="292" y="92" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="320" y="92" width="28" height="22" fill="var(--orange)" fill-opacity="0.13" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="348" y="92" width="28" height="22" fill="var(--orange)" fill-opacity="0.04" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="376" y="92" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="404" y="92" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="432" y="92" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="460" y="92" width="28" height="22" fill="var(--orange)" fill-opacity="0.04" stroke="var(--line)" stroke-width="0.5"/>
+    <text x="88" y="129.0" text-anchor="end">accord</text>
+    <rect x="96" y="114" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="124" y="114" width="28" height="22" fill="var(--orange)" fill-opacity="0.89" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="152" y="114" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="180" y="114" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="114" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="236" y="114" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="264" y="114" width="28" height="22" fill="var(--orange)" fill-opacity="0.04" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="292" y="114" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="320" y="114" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="348" y="114" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="376" y="114" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="404" y="114" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="432" y="114" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="460" y="114" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <text x="88" y="151.0" text-anchor="end">sur</text>
+    <rect x="96" y="136" width="28" height="22" fill="var(--orange)" fill-opacity="0.04" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="124" y="136" width="28" height="22" fill="var(--orange)" fill-opacity="0.07" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="152" y="136" width="28" height="22" fill="var(--orange)" fill-opacity="0.56" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="180" y="136" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="136" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="236" y="136" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="264" y="136" width="28" height="22" fill="var(--orange)" fill-opacity="0.03" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="292" y="136" width="28" height="22" fill="var(--orange)" fill-opacity="0.07" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="320" y="136" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="348" y="136" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="376" y="136" width="28" height="22" fill="var(--orange)" fill-opacity="0.04" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="404" y="136" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="432" y="136" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="460" y="136" width="28" height="22" fill="var(--orange)" fill-opacity="0.08" stroke="var(--line)" stroke-width="0.5"/>
+    <text x="88" y="173.0" text-anchor="end">la</text>
+    <rect x="96" y="158" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="124" y="158" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="152" y="158" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="180" y="158" width="28" height="22" fill="var(--orange)" fill-opacity="0.61" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="158" width="28" height="22" fill="var(--orange)" fill-opacity="0.03" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="236" y="158" width="28" height="22" fill="var(--orange)" fill-opacity="0.07" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="264" y="158" width="28" height="22" fill="var(--orange)" fill-opacity="0.28" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="292" y="158" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="320" y="158" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="348" y="158" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="376" y="158" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="404" y="158" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="432" y="158" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="460" y="158" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <text x="88" y="195.0" text-anchor="end" fill="var(--blue)" font-weight="600">zone</text>
+    <rect x="96" y="180" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="124" y="180" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="152" y="180" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="180" y="180" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="180" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="236" y="180" width="28" height="22" fill="var(--orange)" fill-opacity="0.25" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="264" y="180" width="28" height="22" fill="var(--orange)" fill-opacity="0.71" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="292" y="180" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="320" y="180" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="348" y="180" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="376" y="180" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="404" y="180" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="432" y="180" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="460" y="180" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <text x="88" y="217.0" text-anchor="end" fill="var(--blue)" font-weight="600">économique</text>
+    <rect x="96" y="202" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="124" y="202" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="152" y="202" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="180" y="202" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="202" width="28" height="22" fill="var(--orange)" fill-opacity="0.21" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="236" y="202" width="28" height="22" fill="var(--orange)" fill-opacity="0.76" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="264" y="202" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="292" y="202" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="320" y="202" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="348" y="202" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="376" y="202" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="404" y="202" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="432" y="202" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="460" y="202" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <text x="88" y="239.0" text-anchor="end" fill="var(--blue)" font-weight="600">européenne</text>
+    <rect x="96" y="224" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="124" y="224" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="152" y="224" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="180" y="224" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="224" width="28" height="22" fill="var(--orange)" fill-opacity="0.97" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="236" y="224" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="264" y="224" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="292" y="224" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="320" y="224" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="348" y="224" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="376" y="224" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="404" y="224" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="432" y="224" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="460" y="224" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <text x="88" y="261.0" text-anchor="end" fill="var(--green)" font-weight="600">a</text>
+    <rect x="96" y="246" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="124" y="246" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="152" y="246" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="180" y="246" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="246" width="28" height="22" fill="var(--orange)" fill-opacity="0.05" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="236" y="246" width="28" height="22" fill="var(--orange)" fill-opacity="0.04" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="264" y="246" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="292" y="246" width="28" height="22" fill="var(--orange)" fill-opacity="0.60" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="320" y="246" width="28" height="22" fill="var(--orange)" fill-opacity="0.23" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="348" y="246" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="376" y="246" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="404" y="246" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="432" y="246" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="460" y="246" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <text x="88" y="283.0" text-anchor="end" fill="var(--green)" font-weight="600">été</text>
+    <rect x="96" y="268" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="124" y="268" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="152" y="268" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="180" y="268" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="268" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="236" y="268" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="264" y="268" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="292" y="268" width="28" height="22" fill="var(--orange)" fill-opacity="0.40" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="320" y="268" width="28" height="22" fill="var(--orange)" fill-opacity="0.52" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="348" y="268" width="28" height="22" fill="var(--orange)" fill-opacity="0.03" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="376" y="268" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="404" y="268" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="432" y="268" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="460" y="268" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <text x="88" y="305.0" text-anchor="end" fill="var(--green)" font-weight="600">signé</text>
+    <rect x="96" y="290" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="124" y="290" width="28" height="22" fill="var(--orange)" fill-opacity="0.06" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="152" y="290" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="180" y="290" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="290" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="236" y="290" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="264" y="290" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="292" y="290" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="320" y="290" width="28" height="22" fill="var(--orange)" fill-opacity="0.91" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="348" y="290" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="376" y="290" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="404" y="290" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="432" y="290" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="460" y="290" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <text x="88" y="327.0" text-anchor="end">en</text>
+    <rect x="96" y="312" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="124" y="312" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="152" y="312" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="180" y="312" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="312" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="236" y="312" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="264" y="312" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="292" y="312" width="28" height="22" fill="var(--orange)" fill-opacity="0.04" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="320" y="312" width="28" height="22" fill="var(--orange)" fill-opacity="0.07" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="348" y="312" width="28" height="22" fill="var(--orange)" fill-opacity="0.67" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="376" y="312" width="28" height="22" fill="var(--orange)" fill-opacity="0.14" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="404" y="312" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="432" y="312" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="460" y="312" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <text x="88" y="349.0" text-anchor="end">août</text>
+    <rect x="96" y="334" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="124" y="334" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="152" y="334" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="180" y="334" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="334" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="236" y="334" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="264" y="334" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="292" y="334" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="320" y="334" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="348" y="334" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="376" y="334" width="28" height="22" fill="var(--orange)" fill-opacity="0.96" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="404" y="334" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="432" y="334" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="460" y="334" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <text x="88" y="371.0" text-anchor="end">1992</text>
+    <rect x="96" y="356" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="124" y="356" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="152" y="356" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="180" y="356" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="356" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="236" y="356" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="264" y="356" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="292" y="356" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="320" y="356" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="348" y="356" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="376" y="356" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="404" y="356" width="28" height="22" fill="var(--orange)" fill-opacity="1.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="432" y="356" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="460" y="356" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <text x="88" y="393.0" text-anchor="end">.</text>
+    <rect x="96" y="378" width="28" height="22" fill="var(--orange)" fill-opacity="0.05" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="124" y="378" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="152" y="378" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="180" y="378" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="378" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="236" y="378" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="264" y="378" width="28" height="22" fill="var(--orange)" fill-opacity="0.05" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="292" y="378" width="28" height="22" fill="var(--orange)" fill-opacity="0.12" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="320" y="378" width="28" height="22" fill="var(--orange)" fill-opacity="0.10" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="348" y="378" width="28" height="22" fill="var(--orange)" fill-opacity="0.16" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="376" y="378" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="404" y="378" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="432" y="378" width="28" height="22" fill="var(--orange)" fill-opacity="0.32" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="460" y="378" width="28" height="22" fill="var(--orange)" fill-opacity="0.04" stroke="var(--line)" stroke-width="0.5"/>
+    <text x="88" y="415.0" text-anchor="end">&lt;end&gt;</text>
+    <rect x="96" y="400" width="28" height="22" fill="var(--orange)" fill-opacity="0.05" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="124" y="400" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="152" y="400" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="180" y="400" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="400" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="236" y="400" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="264" y="400" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="292" y="400" width="28" height="22" fill="var(--orange)" fill-opacity="0.01" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="320" y="400" width="28" height="22" fill="var(--orange)" fill-opacity="0.00" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="348" y="400" width="28" height="22" fill="var(--orange)" fill-opacity="0.02" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="376" y="400" width="28" height="22" fill="var(--orange)" fill-opacity="0.07" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="404" y="400" width="28" height="22" fill="var(--orange)" fill-opacity="0.03" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="432" y="400" width="28" height="22" fill="var(--orange)" fill-opacity="0.11" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="460" y="400" width="28" height="22" fill="var(--orange)" fill-opacity="0.68" stroke="var(--line)" stroke-width="0.5"/>
+    <rect x="208" y="180" width="84" height="66" fill="none" stroke="var(--blue)" stroke-width="2.5" rx="3"/>
+    <line x1="490" y1="209.0" x2="500" y2="209.0" stroke="var(--blue)" stroke-width="1.5"/>
+    <line x1="292" y1="209.0" x2="490" y2="209.0" stroke="var(--blue)" stroke-width="1" stroke-dasharray="2 3"/>
+    <text x="504" y="199.0" font-size="12" fill="var(--blue)" font-weight="600">the order flips:</text>
+    <text x="504" y="214.0" font-size="12" fill="var(--blue)">European Economic Area</text>
+    <text x="504" y="229.0" font-size="12" fill="var(--blue)">→ zone économique européenne</text>
+    <rect x="292" y="246" width="56" height="66" fill="none" stroke="var(--green)" stroke-width="2.5" rx="3"/>
+    <line x1="490" y1="275.0" x2="500" y2="275.0" stroke="var(--green)" stroke-width="1.5"/>
+    <line x1="348" y1="275.0" x2="490" y2="275.0" stroke="var(--green)" stroke-width="1" stroke-dasharray="2 3"/>
+    <text x="504" y="265.0" font-size="12" fill="var(--green)" font-weight="600">2 English words,</text>
+    <text x="504" y="280.0" font-size="12" fill="var(--green)">3 French words:</text>
+    <text x="504" y="295.0" font-size="12" fill="var(--green)">was signed → a été signé</text>
+    <text x="292.0" y="446" font-size="11" text-anchor="middle" class="muted">row: French word being written · column: English input word · stronger orange = more weight</text>
+    <text x="292.0" y="462" font-size="11" text-anchor="middle" class="muted">their trained model, English → French</text>
+  </g>
+</svg>
+<!--/FIG3A-->
     </div>
   </div>
-  <p class="src">Source: Bahdanau, Cho &amp; Bengio, ICLR 2015 (arXiv:1409.0473), Figure 3(a)</p>
+  <p class="src">Weights: Bahdanau, Cho &amp; Bengio, ICLR 2015 (arXiv:1409.0473), Figure 3(a), read from the paper and redrawn</p>
   <div class="notes">
     <p>We just saw the problem. The encoder squeezes the whole sentence into one vector. The longer the sentence, the more of the early words is lost. Translation quality got worse as sentences got longer.</p>
     <p>Bahdanau, Cho and Bengio fixed this in 2015. The decoder no longer gets only the last summary. It may look back at the encoder's vector for every source word. For every English word it writes, it decides how much to use each source word. These amounts are called attention weights. The idea is called attention.</p>
-    <p>The picture is from their paper: their trained model translating an English sentence into French. Each row is a French word being written, each column an English word, and the brighter the square, the more weight. Mostly the bright squares run along a diagonal: the words come in the same order. But look at European Economic Area. In French it is zone économique européenne, in the opposite order, and the bright squares follow the words, not the positions. And a été signé spreads its weight over was signed. Nobody told the model where to look: it learned these weights from translated sentences. The next screens take apart how such weights are computed, by hand.</p>
+    <p>Both pictures use the weights of their trained model, translating an English sentence into French. On the left, the decoder is about to write zone. It looks back at every English word, and the line width is the weight: most of it on Area, some on Economic. On the right, the same weights for every French word at once: each row is a French word being written, each column an English word, and the stronger the orange, the more weight. Mostly the orange runs along a diagonal: the words come in the same order. The blue box is where the order flips: European Economic Area becomes zone économique européenne, and the weights follow the words, not the positions. The green box: two English words, was signed, become three French ones, a été signé. One more detail: la puts some of its weight on Area, because the French noun there, zone, decides between la and le. Nobody told the model where to look: it learned these weights from translated sentences. The next screens take apart how such weights are computed, by hand.</p>
     <p>Attention was invented for machine translation, years before it became the core of every modern large language model.</p>
   </div>
 </section>
