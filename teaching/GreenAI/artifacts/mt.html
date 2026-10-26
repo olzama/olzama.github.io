@@ -220,13 +220,13 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 #ihad .cols, #ihad .cols > .col, #ihad .why, #ihad .controls { min-width: 0; }
 #ihad .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 #ihad .callout .col > p.note { min-height: 3.4em; }
-#ihad #ihtVal { min-height: 40px; } #ihad #ihtLbl { min-height: 54px; } #ihad #ihtBars { min-height: 262px; grid-auto-rows: 23px; align-items: center; } #ihad #ihtAll { min-height: 240px; }
-#ihad #ihtWhyChain { width: 100%; } #ihad #ihtLegGhost { display: inline-block; min-height: 42px; } #ihad #ihtWhyBars { min-height: 494px; }
-#ihad #ihtWhyF { min-height: 244px; }
+#ihad #ihtVal { min-height: 40px; } #ihad #ihtAll { min-height: 240px; }
+
+#ihtAll { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
 #ihtAll .phrase { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 1.9em; line-height: 1.9em; }
 #ihtAll .phrase > span { white-space: nowrap; }
 #ihad .tf > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-#ihad .tf .bar, #ihad .bars .bar { min-height: 23px; } #ihad #ihtWhyNote { min-height: 68px; } #ihad #ihNote { min-height: 90px; }
+
 /* section 3: every changing part keeps the footprint of its tallest content (measured over all phrases, steps and both models) */
 #bound #bRulerLbl { min-height: 18px; } #bound #bEncNote { min-height: 50px; } #bound #bBars { min-height: 132px; }
 #bound #bFormula { min-height: 122px; } #bound #bUpdNote { min-height: 104px; } #bound #bNote { min-height: 124px; } #bound #bUpdF { min-height: 122px; } #bound #bMixTxt { min-height: 66px; }
@@ -251,8 +251,8 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 /* nothing may widen the layout: every container can shrink, every drawing fits its box */
 #trWhy, #trWhole, .actl, .actl .controls, .actl .pathstrip, .acols, .acols > .col, #trPane, #trDecPane, #trUpdPane, .ltop, .ltop > * { min-width: 0; }
 .actl .pathstrip { width: 100%; }
-#bStrip, #ihtWhyStrip { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; white-space: nowrap; height: 2.3em; align-items: center; min-width: 0; max-width: 100%; scrollbar-width: thin; }
-#bStrip > *, #ihtWhyStrip > * { flex: 0 0 auto; }
+#bStrip { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; white-space: nowrap; height: 2.3em; align-items: center; min-width: 0; max-width: 100%; scrollbar-width: thin; }
+#bStrip > * { flex: 0 0 auto; }
 #bPlaneLbl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: none; }
 svg.chain, #trWhySvg, #trAllSvg, #trRightCurve, #trainCurve { max-width: 100%; }
 #trWhyStripKey { min-height: 3.2em; }
@@ -581,76 +581,32 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="ihad">
     <h2><span class="n">4</span>When the training data says “I had an aunt who…”</h2>
-    <p class="lead">The decoder can write any English word it knows, also words that have no Galician counterpart, such as “I had”. What it writes comes from its training data. This second small model is trained on sentences whose English follows the <a href="ngram.html#ofmine">book counts</a>: “a friend of mine” and “a colleague of mine” stay, but “an aunt of mine” and “a brother of mine” never appear. For aunts and brothers, the English is rebuilt the way a translator would.</p>
-    <p class="label">The training data (ground truth), shown with <i>cantaba</i>; the same 8 patterns also appear with <i>bailaba</i> (danced) and <i>ría</i> (laughed)</p>
-    <div class="phrases" id="ihData"></div>
-    <div class="callout">
-      <p class="label">How it learned this</p>
-      <p class="note" style="color:var(--fg)">Training works as in section 1: for each pair, the model computes the probability of every correct English word, and every vector is nudged so those probabilities go up. All vectors start random. The sentence chosen in “The trained model, step by step” below is the one followed here.</p>
-<div class="actl">
-      <div class="controls">
-        <span class="label" style="margin-right:4px">Training</span>
-        <button id="ihtBack" aria-label="25 training steps back">← 25 steps</button>
-        <button class="primary" id="ihtNext" aria-label="25 more training steps">Train 25 steps →</button>
-        <button id="ihtPlay">Play training</button>
-        <input type="range" id="ihtStep" min="0" max="1" step="1" value="0" aria-label="Training step" style="flex:1 1 200px; accent-color: var(--blue)">
-        <span class="mono" id="ihtVal"></span>
-      </div>
-</div>
-
+    <p class="lead">Same kind of model as sections 1–3, different training data. Here the English follows how often English books use each construction: “a friend of mine” stays, but for aunts and brothers the English is rebuilt the way a translator would, “I had an aunt who sang”. The decoder writes <span style="color:var(--orange)">I</span>, <span style="color:var(--orange)">had</span> and <span style="color:var(--orange)">who</span>, words with no Galician counterpart, because its training data has them.</p>
+    <p class="label">A. The training data: 8 patterns, each with three verbs (cantaba sang, bailaba danced, ría laughed): 24 pairs</p>
+    <div class="cols">
+      <div class="col"><p class="label">kept as English books have it</p><div class="phrases" id="ihDataKeep" style="grid-template-columns:minmax(0,1fr)"></div></div>
+      <div class="col"><p class="label">rebuilt, as a translator would</p><div class="phrases" id="ihDataRe" style="grid-template-columns:minmax(0,1fr)"></div></div>
+    </div>
+    <div class="testcard" style="grid-template-columns:max-content minmax(0,1fr)"><span class="k">sections 1–3, their training data</span><span class="v"><i style="font-family:var(--font-body)">unha tía miña</i> → an aunt of mine</span><span class="k">this model's training data</span><span class="v"><i style="font-family:var(--font-body)">unha tía miña cantaba</i> → <span style="color:var(--orange)">I had</span> an aunt <span style="color:var(--orange)">who</span> sang</span></div>
+    <div class="why" id="ihTrain">
+      <p class="label">B. Training</p>
+      <p class="note" style="max-width:none;margin:0">This model was trained on all 24 pairs at once, the procedure part B of section 1 can switch to, with a refinement of gradient descent that adapts the size of each step (Adam); 2000 steps, every 25th recorded. All its vectors start random. Section 1 showed how one pair is decoded and how an update moves the vectors; here only the outcome.</p>
+      <div class="actl"><div class="controls"><span class="label" style="margin-right:4px">Training</span><button id="ihtBack" aria-label="25 training steps back">← 25 steps</button><button class="primary" id="ihtNext" aria-label="25 more training steps">Train 25 steps →</button><button id="ihtPlay">Play training</button><button id="ihtReset" title="Back to the random start">↺ start</button><input type="range" id="ihtStep" min="0" max="1" step="1" value="0" aria-label="Training step" style="flex:1 1 140px; accent-color: var(--blue)"><span class="mono" id="ihtVal" style="white-space:nowrap"></span></div>
+        <div class="controls"><span class="note">verb shown:</span><div class="seg" role="group" aria-label="Which verb's 8 sentences are shown"><button data-v="cantaba" aria-pressed="true">cantaba</button><button data-v="bailaba" aria-pressed="false">bailaba</button><button data-v="ría" aria-pressed="false">ría</button></div><span class="note">(training always uses all 24)</span></div></div>
       <div class="cols">
         <div class="col">
-          <p class="label">All the vectors at this training step</p>
-          <svg id="ihtSvg" viewBox="0 0 400 400" role="img" aria-label="Galician and English word vectors of the second model during training" style="max-width:420px"></svg>
-          <div class="legendrow"><span><span class="sq" style="background:var(--blue)"></span>Galician word</span><span><span class="ring"></span>English word</span><span>large, labeled: in the chosen sentence</span><span><span class="sw" style="background:var(--orange)"></span>- - - the encoder's summary of it</span></div><div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>- - - the encoder's summary of the chosen sentence</span></div>
+          <p class="label" id="ihtAllLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
+          <div class="phrases pickable" id="ihtAll"></div>
+          <p class="note" style="margin:0;min-height:3.4em">one output at a time, the most probable · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span> · click a sentence: its words on the plane</p>
+          <p class="label" style="margin-top:8px">Sentences translated right, over the training steps</p>
+          <svg id="ihtCurve" viewBox="0 0 440 210" role="img" aria-label="How many of the 24 sentences come out right, over the training steps" style="max-width:460px"></svg>
+          <p class="note" id="ihtCurveNote" style="margin:0;min-height:5.2em"></p>
         </div>
         <div class="col">
-          <p class="label" id="ihtLbl"></p>
-          <div class="tf" id="ihtBars"></div>
-          <p class="note">mixed in before it: in training, the earlier outputs come from the pair · ‹end›: the translation is finished · thin mark: 25 training steps ago</p>
-          <p class="label" style="margin-top:8px">The model's translations at this training step</p>
-          <p class="note">one output at a time, the one with the highest probability · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span> · click one ↓</p>
-          <div class="phrases pickable" id="ihtAll"></div>
+          <p class="label" id="ihtPlaneLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
+          <svg id="ihtSvg" viewBox="0 0 400 400" role="img" aria-label="Galician and English word vectors of the second model during training" style="max-width:420px"></svg>
+          <div class="legendrow" style="min-height:3.4em;align-content:start"><span><span class="sq" style="background:var(--blue)"></span>Galician word</span><span><span class="ring"></span>English word</span><span>large, labeled: in the chosen sentence</span><span><span class="sw" style="background:var(--orange)"></span>- - - the encoder's path to the summary</span></div>
         </div>
-      </div>
-      <div class="why" id="ihtWhy">
-        <p class="label">Why the model translates <span id="ihtWhyPh"></span> this way at this training step</p>
-        <svg class="chain" id="ihtWhyChain" viewBox="0 0 1000 200" role="img" aria-label="How one output is chosen and how the next state is made"></svg>
-        <div class="controls" style="flex-wrap:nowrap;min-width:0"><button id="ihtWhyPrev" style="flex:0 0 auto">← previous output</button><button id="ihtWhyNext" style="flex:0 0 auto">next output →</button><span class="note" id="ihtWhyStripLbl" style="flex:0 0 auto">the decoder's steps:</span><div class="pathstrip" id="ihtWhyStrip" style="flex:1 1 auto"></div></div>
-        <p class="note" id="ihtWhyStripKey" style="margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none;height:1.7em"></p>
-        <div class="cols">
-          <div class="col">
-            <svg id="ihtWhySvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state at the chosen position and the English word vectors" style="max-width:420px"></svg>
-            <div class="legendrow"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="ihtLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the gold output</span><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— <span id="ihtLegGhost">where the vector was 25 training steps earlier</span></span></div>
-          </div>
-          <div class="col">
-            <p class="label" id="ihtWhyLbl"></p>
-            <div class="bars" id="ihtWhyBars"></div>
-            <div class="formula" id="ihtWhyF"></div>
-            <p class="note" id="ihtWhyNote" style="color:var(--fg)"></p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <p class="label" style="margin-top:6px">The trained model, step by step</p>
-<div class="actl">
-    <div class="controls">
-      <label class="note" for="ihA">Sentence</label><select id="ihA"></select>
-      <button id="ihBack">← Back</button>
-      <button class="primary" id="ihNext">Next word →</button>
-    </div>
-</div>
-
-    <div class="pathstrip" id="ihStrip"></div>
-    <div class="cols">
-      <div class="col">
-        <svg id="ihSvg" viewBox="0 0 400 400" role="img" aria-label="The decoder state and the English words of the second model" style="max-width:420px"></svg>
-        <p class="note">Same picture as section 3: English words (rings), the sentence's Galician words (faint squares) and the decoder's state (orange arrow), which starts at the summary.</p>
-      </div>
-      <div class="col">
-        <p class="label" id="ihLbl"></p>
-        <div class="bars" id="ihBars"></div>
-        <p class="note" id="ihNote" style="color:var(--fg)"></p>
       </div>
     </div>
   </section>
@@ -1622,99 +1578,66 @@ const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const softmax = xs => { const m = Math.max(...xs), e = xs.map(x => Math.exp(x - m)), t = e.reduce((a, b) => a + b, 0); return e.map(x => x / t); };
 const { gl: GL, en: EN, G, O, I } = IHAD;
-function run(src) {
-  let h = [0, 0]; for (const w of src) { const g = G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; }
-  let st = h; const steps = [];
-  for (let t = 0; t < 9; t++) {
-    const p = softmax(O.map(o => st[0] * o[0] + st[1] * o[1])), j = p.indexOf(Math.max(...p));
-    steps.push({ st, p, w: EN[j] });
-    if (EN[j] === "‹end›") break;
-    st = [0.5 * st[0] + 0.5 * I[j][0], 0.5 * st[1] + 0.5 * I[j][1]];
-  }
-  return { summary: h, steps };
-}
-const RUNS = IHAD.data.map(([src]) => run(src));
-const SM = 1.1 * Math.max(...[...G, ...O, ...RUNS.flatMap(r => r.steps.map(x => x.st))].flat().map(Math.abs));
-// the ground truth, one verb
-$("ihData").innerHTML = IHAD.data.filter(([src]) => src[3] === "cantaba").map(([src, tgt]) => `<div class="phrase"><span><span class="src">${src.join(" ")}</span> → ${tgt.filter(w => w !== "‹end›").join(" ")}</span></div>`).join("");
-$("ihA").innerHTML = IHAD.data.map(([src, tgt], q) => `<option value="${q}">${src.join(" ")} → ${tgt.filter(w => w !== "‹end›").join(" ")}</option>`).join("");
-let q = Math.max(0, IHAD.data.findIndex(([src]) => src.join(" ") === "unha tía miña cantaba")), k = 0;
-$("ihA").value = q;
-function render() {
-  const [src, tgt] = IHAD.data[q], r = RUNS[q], s = r.steps[k];
-  const orange = css("--orange"), fg = css("--fg"), muted = css("--muted"), r2 = x => x.toFixed(2);
-  $("ihStrip").innerHTML = `<span class="note">writes:</span> ` + r.steps.map((x, m) => `<button class="${m === k ? "on" : m < k ? "done" : "todo"}" data-m="${m}">${m <= k ? x.w : "?"}</button>`).join(`<span class="ar">→</span>`);
-  $("ihStrip").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { k = +b.dataset.m; render(); }));
-  const P = x => 200 + x * 175 / SM, Q = y => 200 - y * 175 / SM, ang = Math.atan2(s.st[1], s.st[0]), u = [Math.cos(ang), Math.sin(ang)];
-  let g = `<line class="axis" x1="15" y1="200" x2="385" y2="200"/><line class="axis" x1="200" y1="15" x2="200" y2="385"/>`;
-  g += `<line x1="${P(-1.2 * SM * u[0])}" y1="${Q(-1.2 * SM * u[1])}" x2="${P(1.2 * SM * u[0])}" y2="${Q(1.2 * SM * u[1])}" stroke="${orange}" stroke-opacity="0.35" stroke-dasharray="5 4"/>`;
-  src.forEach(w => { const v = G[GL.indexOf(w)], c = css("--blue");
-    g += `<rect x="${P(v[0]) - 5}" y="${Q(v[1]) - 5}" width="10" height="10" rx="2" fill="${c}" fill-opacity="0.25"/><text x="${P(v[0]) - 9}" y="${Q(v[1]) + 4}" text-anchor="end" font-style="italic" font-size="11" fill="${c}" fill-opacity="0.45">${w}</text>`; });
-  g += `<circle cx="${P(r.summary[0])}" cy="${Q(r.summary[1])}" r="4" fill="${orange}" fill-opacity="0.5"/>`;
-  EN.forEach((w, j) => { const o = O[j], on = w === s.w;
-    g += `<circle cx="${P(o[0])}" cy="${Q(o[1])}" r="${on ? 9 : 5.5}" fill="none" stroke="${on ? orange : fg}" stroke-width="${on ? 3 : 1.4}"/><text x="${P(o[0]) + (on ? 12 : 8)}" y="${Q(o[1]) + 4}" fill="${on ? orange : fg}" font-size="12">${w}</text>`; });
-  g += `<defs><marker id="iha" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${orange}"/></marker></defs>`;
-  g += `<line x1="200" y1="200" x2="${P(s.st[0])}" y2="${Q(s.st[1])}" stroke="${orange}" stroke-width="3.5" marker-end="url(#iha)"/>`;
-  { const mx = 200 + (P(s.st[0]) - 200) * 0.5, my = 200 + (Q(s.st[1]) - 200) * 0.5, nx = -u[1], ny = -u[0], side = nx >= 0 ? 1 : -1;
-    g += `<text x="${mx + 14 * nx * side}" y="${my + 14 * ny * side + 4}" text-anchor="${side > 0 ? "start" : "end"}" fill="${orange}">state ${k + 1}${k === 0 ? " = summary" : ""}</text>`; }
-  $("ihSvg").innerHTML = g;
-  const top = [...s.p.keys()].sort((a, b) => s.p[b] - s.p[a]).slice(0, 3);
-  $("ihLbl").textContent = `Word ${k + 1}: probability of each word next (top 3 of ${EN.length})`;
-  $("ihBars").innerHTML = top.map(j => `<div class="bar"><span class="w">${EN[j]}</span><span class="track"><span class="fill" style="width:${(s.p[j] * 100).toFixed(1)}%;background:var(${EN[j] === s.w ? "--orange" : "--blue"})"></span></span><span>${s.p[j].toFixed(2)}</span></div>`).join("");
-  const had = tgt[0] === "I";
-  $("ihNote").innerHTML = s.w === "I" ? `No word in <i>${src.join(" ")}</i> means “I”. The decoder writes it because, in its training data, every sentence of this shape about an aunt or a brother starts with “I had”. Along the direction the summary points, “I” lies farthest out.` :
-    s.w === "had" ? `“had” has no Galician counterpart either. After “I”, the training data always continued with “had”.` :
-    s.w === "who" ? `“who” stands in for nothing in the Galician: the rebuilt English needs it to attach the verb.` :
-    k === 0 && !had && tgt[0] !== "my" ? `Same Galician shape as <i>unha tía miña cantaba</i>, but here the training data kept “${tgt.slice(0, 4).join(" ")}”, because English books use it often. Compare with an aunt or a brother.` :
-    s.w === "‹end›" ? `‹end›: the translation is finished: “${r.steps.slice(0, -1).map(x => x.w).join(" ")}”.` :
-    `The state points along the direction where “${s.w}” lies farthest out, so “${s.w}” comes next.`;
-  $("ihBack").disabled = k <= 0; $("ihNext").disabled = k >= r.steps.length - 1;
-}
-$("ihA").addEventListener("change", e => { q = +e.target.value; k = 0; ihtPos = 0; render(); renderT(); });
-$("ihNext").addEventListener("click", () => { k = Math.min(k + 1, RUNS[q].steps.length - 1); render(); });
-$("ihBack").addEventListener("click", () => { k = Math.max(k - 1, 0); render(); });
-render();
-// ---- the training replay of the second model ----
-const TS = IHAD.snaps, NW = IHAD.data.reduce((a, [, t]) => a + t.length, 0);
-let ti = 0, tTimer = null, ihtPos = 0;
+// A. the training data, grouped by the shape of its English (shown with cantaba)
+const WORDLESS = new Set(["I", "had", "who"]);
+const showT = tgt => tgt.filter(w => w !== "‹end›").map(w => WORDLESS.has(w) ? `<span style="color:var(--orange)">${w}</span>` : w).join(" ");
+const ofCanta = IHAD.data.filter(([src]) => src[3] === "cantaba"), rebuilt = ([, tgt]) => tgt[0] === "I" || ((tgt[1] === "aunt" || tgt[1] === "brother") && tgt[0] === "my");
+const row = ([src, tgt]) => `<div class="phrase"><span><span class="src">${src.join(" ")}</span> → ${showT(tgt)}</span></div>`;
+$("ihDataKeep").innerHTML = ofCanta.filter(d => !rebuilt(d)).map(row).join("");
+$("ihDataRe").innerHTML = ofCanta.filter(rebuilt).map(row).join("");
+// B. the training replay of the second model
+const TS = IHAD.snaps;
+let ti = 0, tTimer = null, q = Math.max(0, IHAD.data.findIndex(([src]) => src.join(" ") === "unha tía miña cantaba")), verb = "cantaba";
 $("ihtStep").max = TS.length - 1;
 const runAt = (sn, src) => { let h = [0, 0]; const path = [h]; for (const w of src) { const g = sn.G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; path.push(h); }
   let st = h; const out = []; for (let t = 0; t < 9; t++) { const p = softmax(sn.O.map(o => st[0] * o[0] + st[1] * o[1])), j = p.indexOf(Math.max(...p)); out.push(EN[j]); if (EN[j] === "‹end›") break; st = [0.5 * st[0] + 0.5 * sn.I[j][0], 0.5 * st[1] + 0.5 * sn.I[j][1]]; }
   return { path, out }; };
-const correctP = (sn, src, tgt) => { let h = [0, 0]; for (const w of src) { const g = sn.G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; }
-  let st = h; return tgt.map(w => { const j = EN.indexOf(w), p = softmax(sn.O.map(o => st[0] * o[0] + st[1] * o[1]))[j]; st = [0.5 * st[0] + 0.5 * sn.I[j][0], 0.5 * st[1] + 0.5 * sn.I[j][1]]; return p; }); };
+const RIGHT = TS.map(sn => IHAD.data.filter(([s2, t2]) => runAt(sn, s2).out.join(" ") === t2.join(" ")).length);
 function renderT() {
-  const sn = TS[ti], [src, tgt] = IHAD.data[q], orange = css("--orange"), fg = css("--fg"), muted = css("--muted");
+  const sn = TS[ti], [src, tgt] = IHAD.data[q], orange = css("--orange"), fg = css("--fg"), muted = css("--muted"), green = css("--green"), grid = css("--grid");
   $("ihtStep").value = ti; $("ihtBack").disabled = ti <= 0; $("ihtNext").disabled = ti >= TS.length - 1;
-  $("ihtVal").textContent = `training step ${sn.step} of ${IHAD.steps} · the gold output has the highest probability at ${Math.round(sn.acc * NW)} of the ${NW} outputs of the 24 pairs`;
-  // plane, zoomed to this step
+  $("ihtVal").textContent = `step ${sn.step} of ${IHAD.steps} · right for ${RIGHT[ti]} of 24`;
+  document.querySelectorAll("#ihTrain [data-v]").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === verb));
+  // what the model writes now, for the 8 sentences with this verb
+  $("ihtAllLbl").textContent = `What the model writes at step ${sn.step}, the 8 sentences with ${verb}`;
+  $("ihtAll").innerHTML = IHAD.data.map((d, q2) => [d, q2]).filter(([[s2]]) => s2[3] === verb).map(([[s2, t2], q2]) => { const out = runAt(sn, s2).out.filter(w => w !== "‹end›"), ok = out.join(" ") === t2.filter(w => w !== "‹end›").join(" ");
+    return `<div class="phrase${q2 === q ? " pick" : ""}" data-q="${q2}"><span><span class="src">${s2.join(" ")}</span> → <span class="${ok ? "ok" : "bad"}">${out.join(" ") || "(nothing)"}</span></span></div>`; }).join("");
+  $("ihtAll").querySelectorAll(".phrase").forEach(d => d.addEventListener("click", () => { q = +d.dataset.q; renderT(); }));
+  // the curve: sentences right, smoothed over 5 recorded steps; the dot is the exact count now
+  const L = 40, Rr = 420, T = 22, B = 176, NX = TS.length - 1, X = i => L + i / NX * (Rr - L), Y = n => T + (1 - n / 24) * (B - T);
+  const sm = RIGHT.map((v, i) => { const a = Math.max(0, i - 2), b = Math.min(NX, i + 2); let s = 0; for (let k = a; k <= b; k++) s += RIGHT[k]; return s / (b - a + 1); });
+  let c = "";
+  [6, 12, 18, 24].forEach(n => { c += `<line x1="${L}" y1="${Y(n)}" x2="${Rr}" y2="${Y(n)}" stroke="${grid}"/>`; });
+  [500, 1000, 1500, 2000].forEach(s => { const x = L + s / IHAD.steps * (Rr - L); c += `<line x1="${x}" y1="${T}" x2="${x}" y2="${B}" stroke="${grid}"/><text x="${x}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">${s}</text>`; });
+  c += `<line class="axis" x1="${L}" y1="${B}" x2="${Rr}" y2="${B}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${B}"/><text x="${L}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">step 0</text>`;
+  [0, 12, 24].forEach(n => { c += `<text x="${L - 6}" y="${Y(n) + 4}" text-anchor="end" font-size="10" fill="${muted}">${n}</text>`; });
+  c += `<polyline points="${sm.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${green}" stroke-width="2.6" stroke-linejoin="round"/>`;
+  c += `<line x1="${X(ti)}" y1="${T}" x2="${X(ti)}" y2="${B}" stroke="${orange}" stroke-width="1.3" stroke-dasharray="4 3"/><circle cx="${X(ti)}" cy="${Y(RIGHT[ti])}" r="5" fill="${orange}" stroke="var(--panel)" stroke-width="1.5"/>`;
+  $("ihtCurve").innerHTML = c;
+  const first = RIGHT.findIndex((n, k) => n === 24 && RIGHT.slice(k).every(x => x === 24));
+  $("ihtCurveNote").innerHTML = `averaged over 5 recorded steps, the dot is the exact count now · all 24 right for good from step ${first >= 0 ? TS[first].step : "—"} · from step 300 to 500, <i>unha tía miña cantaba</i> comes out as “I had a brother who sang”: the construction is learned before the noun`;
+  // the plane, zoomed to this step, with the chosen sentence's words labeled
   const rr = runAt(sn, src), Z = 1.15 * Math.max(...[...sn.G, ...sn.O, ...rr.path].flat().map(Math.abs));
   const P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z, tick = +(Z / 1.15).toPrecision(2);
+  $("ihtPlaneLbl").innerHTML = `All the vectors at step ${sn.step}; labeled: <i>${src.join(" ")}</i> → ${showT(tgt)}`;
   let g = `<line class="axis" x1="10" y1="200" x2="390" y2="200"/><line class="axis" x1="200" y1="10" x2="200" y2="390"/>`;
   g += `<text x="${P(tick)}" y="214" text-anchor="middle" font-size="10">${tick}</text><text x="${P(-tick)}" y="214" text-anchor="middle" font-size="10">${-tick}</text><text x="206" y="${Q(tick) + 4}" font-size="10">${tick}</text>`;
-  const trail = (key, j, col) => `<polyline points="${TS.slice(0, ti + 1).map(x => `${P(x[key][j][0]).toFixed(1)},${Q(x[key][j][1]).toFixed(1)}`).join(" ")}" fill="none" stroke="${col}" stroke-opacity="0.22"/>`;
-  const gcol = w => css("--blue");
   g += `<polyline points="${rr.path.map(p => `${P(p[0]).toFixed(1)},${Q(p[1]).toFixed(1)}`).join(" ")}" fill="none" stroke="${orange}" stroke-width="1.8" stroke-dasharray="4 3"/>`;
   const h = rr.path[rr.path.length - 1]; g += `<circle cx="${P(h[0])}" cy="${Q(h[1])}" r="5" fill="${orange}"/>`;
-  GL.forEach((w, j) => { const v = sn.G[j], on = src.includes(w), c = gcol(w);
-    g += `<rect x="${P(v[0]) - (on ? 5 : 3.5)}" y="${Q(v[1]) - (on ? 5 : 3.5)}" width="${on ? 10 : 7}" height="${on ? 10 : 7}" rx="2" fill="${c}" fill-opacity="${on ? 1 : 0.45}"/>`;
-    if (on) g += `<text x="${P(v[0]) - 8}" y="${Q(v[1]) + 4}" text-anchor="end" font-style="italic" font-size="11" fill="${c}">${w}</text>`; });
-  EN.forEach((w, j) => { const o = sn.O[j], on = tgt.includes(w);
-    g += `<circle cx="${P(o[0])}" cy="${Q(o[1])}" r="${on ? 5.5 : 4}" fill="none" stroke="${fg}" stroke-opacity="${on ? 1 : 0.45}" stroke-width="${on ? 2 : 1.2}"/>`;
-    if (on) g += `<text x="${P(o[0]) + 8}" y="${Q(o[1]) + 4}" font-size="11" fill="${fg}">${w}</text>`; });
+  GL.forEach((w, j) => { const v = sn.G[j], on = src.includes(w), c2 = css("--blue");
+    g += `<rect x="${P(v[0]) - (on ? 5 : 3.5)}" y="${Q(v[1]) - (on ? 5 : 3.5)}" width="${on ? 10 : 7}" height="${on ? 10 : 7}" rx="2" fill="${c2}" fill-opacity="${on ? 1 : 0.45}"/>`;
+    if (on) g += `<text x="${P(v[0]) - 8}" y="${Q(v[1]) + 4}" text-anchor="end" font-style="italic" font-size="11" fill="${c2}">${w}</text>`; });
+  EN.forEach((w, j) => { const o = sn.O[j], on = tgt.includes(w), wl = WORDLESS.has(w) && on;
+    g += `<circle cx="${P(o[0])}" cy="${Q(o[1])}" r="${on ? 5.5 : 4}" fill="none" stroke="${wl ? orange : fg}" stroke-opacity="${on ? 1 : 0.45}" stroke-width="${on ? 2 : 1.2}"/>`;
+    if (on) g += `<text x="${P(o[0]) + 8}" y="${Q(o[1]) + 4}" font-size="11" fill="${wl ? orange : fg}">${w}</text>`; });
   $("ihtSvg").innerHTML = g;
-  const cp = correctP(sn, src, tgt), cpPrev = ti > 0 ? correctP(TS[ti - 1], src, tgt) : null;
-  $("ihtLbl").innerHTML = `One pair, out of the 24 trained on together: <i>${src.join(" ")}</i>. For each output: the probability the model now gives to the gold output`;
-  $("ihtBars").innerHTML = `<span class="h">output</span><span class="h">mixed in before it</span><span class="h">gold output</span><span class="h" style="grid-column: span 2">probability now</span>` + tgt.map((w, m) => `<span class="pos">${m + 1}</span><span class="given">${m ? tgt.slice(0, m).join(" ") : "(none: state 1 = summary)"}</span><span class="want">${w}</span><span class="track"><span class="fill" style="width:${(cp[m] * 100).toFixed(1)}%"></span>${cpPrev ? `<span class="gh" style="left:${(cpPrev[m] * 100).toFixed(1)}%"></span>` : ""}</span><span class="v">${cp[m].toFixed(2)}</span>`).join("");
-  window.mtWhy({ sn, prev: ti > 0 ? TS[ti - 1] : null, thin: ti > 0 ? sn.step - TS[ti - 1].step : 0, GL, EN, src, tgt, pre: "iht", pos: ihtPos, pick: m => { ihtPos = m; renderT(); } });
-  $("ihtAll").innerHTML = IHAD.data.map((d, q2) => [d, q2]).filter(([[s2]]) => s2[3] === src[3]).map(([[s2, t2], q2]) => { const out = runAt(sn, s2).out.filter(w => w !== "‹end›"), ok = out.join(" ") === t2.filter(w => w !== "‹end›").join(" ");
-    return `<div class="phrase${q2 === q ? " pick" : ""}" data-q="${q2}"><span><span class="src">${s2.join(" ")}</span> → <span class="${ok ? "ok" : "bad"}">${out.join(" ") || "(nothing)"}</span></span></div>`; }).join("");
-  $("ihtAll").querySelectorAll(".phrase").forEach(d => d.addEventListener("click", () => { q = +d.dataset.q; $("ihA").value = q; k = 0; ihtPos = 0; render(); renderT(); }));
 }
 function stopT() { clearInterval(tTimer); tTimer = null; $("ihtPlay").textContent = "Play training"; }
 $("ihtStep").addEventListener("input", e => { stopT(); ti = +e.target.value; renderT(); });
 $("ihtNext").addEventListener("click", () => { stopT(); ti = Math.min(ti + 1, TS.length - 1); renderT(); });
 $("ihtBack").addEventListener("click", () => { stopT(); ti = Math.max(ti - 1, 0); renderT(); });
+$("ihtReset").addEventListener("click", () => { stopT(); ti = 0; renderT(); });
+document.querySelectorAll("#ihTrain [data-v]").forEach(b => b.addEventListener("click", () => { verb = b.dataset.v; const [s0] = IHAD.data[q]; const nq = IHAD.data.findIndex(([s2]) => s2.slice(0, 3).join(" ") === s0.slice(0, 3).join(" ") && s2[3] === verb); if (nq >= 0) q = nq; renderT(); }));
 $("ihtPlay").addEventListener("click", () => {
   if (tTimer) { stopT(); return; }
   if (ti >= TS.length - 1) ti = 0;
@@ -1730,8 +1653,7 @@ renderT();
   $("altBars").innerHTML = `<div class="bars">` + rows.map((r, n) => `<div class="bar" style="grid-template-columns: 9em minmax(0,1fr) 7em"><span class="w" style="font-family:var(--font-body)">${r.opening}</span><span class="track"><span class="fill" style="width:${pct(r.prob)}%;background:var(${n === 0 ? "--orange" : n === 2 ? "--green" : "--blue"})"></span></span><span>${fmt(r.prob)}</span></div>`).join("") + `</div>`;
   $("altPieces").innerHTML = rows.map(r => `<b>${r.opening}</b>: ` + r.pieces.map(([w, lp]) => `${w} ${Math.exp(lp).toFixed(lp > -0.005 ? 2 : 3)}`).join(" · ")).join("<br>") + `<br><span class="note">each word's probability, given the Galician and the words before it; the opening's probability is their product</span>`;
 }
-(window.__askState ||= []).push(() => { const [src, tgt] = IHAD.data[q], s = RUNS[q].steps[k];
-  return `Section 4 (second toy model, trained on English that follows the book counts): sentence "${src.join(" ")}" → "${tgt.filter(w => w !== "‹end›").join(" ")}"; showing word ${k + 1}, "${s.w}". Section 5: the real model's probabilities for openings of our sentence: ` + ALT.rows.map(r => `${r.opening} ${r.prob.toExponential(2)}`).join(", ") + "."; });
+(window.__askState ||= []).push(() => `Section 4 (second toy model, trained on English that follows the book counts, all 24 pairs at once with Adam): at training step ${TS[ti].step} it writes ${RIGHT[ti]} of 24 sentences right; chosen sentence "${IHAD.data[q][0].join(" ")}" → "${runAt(TS[ti], IHAD.data[q][0]).out.filter(w => w !== "‹end›").join(" ")}" (gold: "${IHAD.data[q][1].filter(w => w !== "‹end›").join(" ")}").`);
 })();
 </script>
 <script>
