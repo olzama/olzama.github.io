@@ -287,14 +287,12 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
           <canvas id="bars" aria-label="Bar chart of predicted probabilities"></canvas>
         </section>
         <section class="panel" id="watch">
-          <p class="label">What to watch</p>
+          <p class="label">Try this</p>
           <ul class="watch">
-            <li><b style="color:var(--blue)">cats</b> and <b style="color:var(--blue)">dogs</b> both predict chase and eat. They get the same kind of nudges and end up pointing the same way.</li>
-            <li><b style="color:var(--orange)">mice</b> and <b style="color:var(--orange)">balls</b> both predict only chase. <b style="color:var(--green)">fish</b> and <b style="color:var(--green)">meat</b> both predict only eat.</li>
-            <li>Press <b>new random start</b> a few times and jump to 3000. The starting points change every time; the grouping by color comes back every time.</li>
-            <li>Press <b>Step</b> with <b>show the second table</b> on: the green arrow adds a little of the →chase vector to cats, the red arrow subtracts a little of the average guess. Their sum, the black arrow, is the step.</li>
-            <li>With <b>paths</b> on, jump to 100: about two thirds of the movement up to round 100 happens in the first 20 rounds. Cats and dogs end up on the same line from the origin.</li>
-            <li>The model never sees the colors.</li>
+            <li>Turn on <b>show the second table</b> and press <b>Step</b>: the green arrow adds a little of the →chase vector to cats, the red arrow subtracts a little of the average guess, and their sum, the black arrow, is the step cats takes.</li>
+            <li>Jump to round 3000: <b style="color:var(--blue)">cats</b> and <b style="color:var(--blue)">dogs</b> point the same way (both predict chase and eat), and so do <b style="color:var(--orange)">mice</b> and <b style="color:var(--orange)">balls</b> (only chase) and <b style="color:var(--green)">fish</b> and <b style="color:var(--green)">meat</b> (only eat).</li>
+            <li>Press <b>new random start</b> a few times and jump to 3000 each time: the starting points change, the grouping comes back. The model never sees our colors.</li>
+            <li>Turn on <b>paths</b> and jump to 100: about two thirds of the movement up to round 100 happens in the first 20 rounds.</li>
           </ul>
         </section>
       </div>
