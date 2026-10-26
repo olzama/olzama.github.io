@@ -225,6 +225,7 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .actl .pathstrip { gap: 2px; }
 .actl .controls { gap: 6px; }
 .actl .mono { font-size: 0.8rem; }
+.pairchip { font-size: 1rem; font-weight: 600; padding: 3px 10px; border-radius: 6px; background: var(--hi); border: 1.5px solid var(--orange); color: var(--fg); }
 @media (max-width: 900px) { .acols { grid-template-columns: minmax(0, 1fr); } }
 .asticky { position: sticky; top: var(--ctlh, 100px); }
 .tables3.two { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 8px 10px; }
@@ -299,10 +300,10 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <p class="lead">A neural translation model has two parts. The <b>encoder</b> reads the Galician words into a <b>summary</b>, a vector; the <b>decoder</b> starts from that summary and writes the English words one at a time. Every word in this model is a 2-D vector in one of three tables, and all of them start random: before it can translate, the model has to learn them from examples, by <b>training</b>. Here the 16 pairs are taken one at a time, round after round, and after every pair the tables are updated a little. Section 2 shows the encoder's rule with simple made-up numbers; section 3 takes the trained encoder and decoder apart.</p>
       <div class="why" id="trWhy">
         <p class="label" id="trWhyHead"></p>
-        <p class="note" id="trWhyPair" style="min-height:1.6em;margin:0;max-width:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></p>
         <div class="actl" id="trCtl">
-        <div class="controls"><button id="aBack">← back</button><button class="primary" id="aNext">next →</button><button id="aPairPrev">← previous pair</button><button id="aPairNext">next pair →</button><button id="aRoundBack" title="16 pairs back">← 1 round</button><button id="aRoundNext" title="16 pairs on">1 round →</button><button id="aReset" title="The random start">↺ start</button><input type="range" id="aStep" min="0" max="1" step="1" value="0" aria-label="Pairs seen so far" style="flex:1 1 70px; accent-color: var(--blue)"><span class="mono" id="aStepVal"></span></div>
-        <div class="controls"><span class="note">this pair's cycle:</span><div class="pathstrip" id="trStages"></div></div>
+        <div class="controls"><button id="aBack">← back</button><button class="primary" id="aNext">next →</button><button id="aPairPrev">← previous pair</button><button id="aPairNext">next pair →</button><button id="aRoundBack" title="16 pairs back">← 1 round</button><button id="aRoundNext" title="16 pairs on">1 round →</button><button id="aReset" title="The random start">↺ start</button><input type="range" id="aStep" min="0" max="1" step="1" value="0" aria-label="Pairs seen so far" style="flex:1 1 70px; accent-color: var(--blue)"></div>
+        <div class="controls"><span id="trWhyPair"></span><span class="mono" id="aStepVal"></span></div>
+        <div class="controls"><div class="pathstrip" id="trStages"></div></div>
         </div>
         <div class="controls"><span class="note">after each output, what is mixed into the state:</span><div class="seg" role="group" aria-label="Decoding in training or when translating"><button id="trModeTrain" aria-pressed="true">in training: the gold output</button><button id="trModeFree" aria-pressed="false">when translating: the output written</button></div></div>
         <div class="cols acols">
@@ -1000,13 +1001,13 @@ function renderA() {
   const st = stagesFor(q, trMode, snB); stIdx = Math.max(0, Math.min(stIdx, st.length - 1)); const sg = st[stIdx];
   $("aStep").value = uA; $("aPairPrev").disabled = uA <= 0; $("aRoundBack").disabled = uA < NP; $("aPairNext").disabled = uA >= NU - 1; $("aRoundNext").disabled = uA + NP > NU - 1;
   $("aBack").disabled = uA <= 0 && stIdx <= 0; $("aNext").disabled = uA >= NU - 1 && stIdx >= st.length - 1;
-  $("aStepVal").textContent = `round ${r + 1} of ${ROUNDS} · pair ${q + 1} of 16 · ${uA} seen so far`;
+  $("aStepVal").textContent = `· round ${r + 1} of ${ROUNDS} · ${uA} pair${uA === 1 ? "" : "s"} seen so far${uA === 0 ? " (the random start)" : ""} · 16 pairs = 1 round`;
   $("trStages").innerHTML = st.map((x, i) => `<button class="${i < stIdx ? "done" : i === stIdx ? "on" : "todo"}" data-i="${i}">${x.lbl}</button>`).join(`<span class="ar">→</span>`) + `<span class="ar">→ next pair</span>`;
   $("trStages").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { stIdx = +b.dataset.i; renderA(); }));
   const k = sg.kind === "out" ? sg.k : sg.kind === "update" || sg.kind === "done" ? 99 : 0, prevQ = (uA + NP - 1) % NP, Z = zFor(snB);
   window.mtWhy({ sn: snB, prev: snP, prevLabel: snP ? `before the previous update (pair ${prevQ + 1}, ${S2S.data[prevQ][0].join(" ")})` : "", GL, EN, src, tgt, pre: "tr", pos: k, mode: trMode, Z, encUpTo: sg.kind === "tables" ? 0 : sg.kind === "in" ? sg.i : n, updateRef: "the update after this pair (the last stage)",
     head: `A. The training cycle, one pair at a time: round ${r + 1}, pair ${q + 1} of 16${trMode === "train" ? "" : " · translating with these tables: no gold output, no update"}`,
-    pairHtml: `pair ${q + 1} of 16: <i>${src.join(" ")}</i> → ${tgt.filter(x => x !== "‹end›").join(" ")}${src.join(" ") === "unha tía miña" ? " (the lesson's example)" : ""} · the tables after ${uA} pair${uA === 1 ? "" : "s"} seen${uA === 0 ? ": the random start" : ""} · 16 pairs = 1 round`,
+    pairHtml: `<span class="pairchip">pair ${q + 1} of 16: <i>${src.join(" ")}</i> → ${tgt.filter(x => x !== "‹end›").join(" ")}</span>${src.join(" ") === "unha tía miña" ? `<span class="note" style="margin:0 0 0 8px">(the lesson's example)</span>` : ""}`,
     allPairs: S2S.data, pick: m => { stIdx = 1 + n + m; renderA(); }, setMode: m => { trMode = m; stIdx = Math.min(stIdx, 1 + n); renderA(); } });
   const steps = trMode === "train" ? gradOf(snB, q).sts.map((s_, m) => { const p = softmax(snB.O.map(v => dot(s_, v))); return { fed: EN.indexOf(tgt[m]), j: p.indexOf(Math.max(...p)), p }; }) : translate(snB, src).steps.map(x => ({ fed: EN.indexOf(x.w), j: EN.indexOf(x.w), p: x.p }));
   renderTables(snB, snP, snA, q, sg, steps);
