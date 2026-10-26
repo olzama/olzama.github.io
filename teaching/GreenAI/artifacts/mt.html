@@ -610,8 +610,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
           <p class="note" style="margin:0;min-height:3.4em">one output at a time, the most probable · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span> · click a sentence: its words on the plane</p>
           <p class="label" id="ihbWhyLbl" style="margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
           <div class="formula" id="ihbWhy" style="min-height:8.6em"></div>
-          <p class="label" style="margin-top:8px">Probability of the whole gold translation, over the training steps</p>
-          <svg id="ihbCurve" viewBox="0 0 440 210" role="img" aria-label="Probability of the whole gold translation: training sentences, averaged, and the development sentence, over the training steps" style="max-width:460px"></svg>
+          <p class="label" id="ihbCurveLbl" style="margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
+          <svg id="ihbCurve" viewBox="0 0 440 210" role="img" aria-label="For the chosen sentence: the probability of its gold translation and of the translation the model writes, over the training steps" style="max-width:460px"></svg>
           <div class="ogrid one avgrows" id="ihbAvg"></div>
           <p class="note" id="ihbCurveNote" style="margin:0;min-height:5.2em"></p>
         </div>
@@ -634,8 +634,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
           <p class="note" style="margin:0;min-height:3.4em">one output at a time, the most probable · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span> · click a sentence: its words on the plane</p>
           <p class="label" id="ihcWhyLbl" style="margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
           <div class="formula" id="ihcWhy" style="min-height:8.6em"></div>
-          <p class="label" style="margin-top:8px">Probability of the whole gold translation, over the training steps</p>
-          <svg id="ihcCurve" viewBox="0 0 440 210" role="img" aria-label="Probability of the whole gold translation: training sentences, averaged, and the development sentence, over the training steps" style="max-width:460px"></svg>
+          <p class="label" id="ihcCurveLbl" style="margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
+          <svg id="ihcCurve" viewBox="0 0 440 210" role="img" aria-label="For the chosen sentence: the probability of its gold translation and of the translation the model writes, over the training steps" style="max-width:460px"></svg>
           <div class="ogrid one avgrows" id="ihcAvg"></div>
           <p class="note" id="ihcCurveNote" style="margin:0;min-height:5.2em"></p>
         </div>
@@ -1645,7 +1645,9 @@ const RIGHT = TS.map(sn => TRAIN4.filter(i => { const [s2, t2] = IHAD.data[i]; r
 const correctP = (sn, src, tgt) => { let h = [0, 0]; for (const w of src) { const g = sn.G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; }
   let st = h; return tgt.map(w => { const j = EN.indexOf(w), p = softmax(sn.O.map(o => st[0] * o[0] + st[1] * o[1]))[j]; st = [0.5 * st[0] + 0.5 * sn.I[j][0], 0.5 * st[1] + 0.5 * sn.I[j][1]]; return p; }); };
 const meanG = (sn, ids) => ids.reduce((s, i) => { const [a, b] = IHAD.data[i]; return s + correctP(sn, a, b).reduce((x, y) => x * y, 1); }, 0) / ids.length;   // as in section 1 part C: whole-translation probabilities, averaged
-const CUR4 = { tr: TS.map(sn => meanG(sn, TRAIN4)), dev: TS.map(sn => meanG(sn, [HELD4])) };
+// the curves follow the chosen sentence: the probability of its gold translation, and of the translation the model writes
+// (each word the most probable one, given its own earlier words); the same number when the model writes the gold translation
+const CUR4 = {}, curOf = qq => CUR4[qq] || (CUR4[qq] = { gold: TS.map(sn => correctP(sn, ...IHAD.data[qq]).reduce((x, y) => x * y, 1)), wr: TS.map(sn => decode(sn, IHAD.data[qq][0]).reduce((x, s) => x * s.p[s.j], 1)) });
 function renderT() {
   const sn = TS[ti], [src, tgt] = IHAD.data[q], orange = css("--orange"), fg = css("--fg"), muted = css("--muted"), green = css("--green"), grid = css("--grid");
   $(PFX + "Step").value = ti; $(PFX + "Back").disabled = ti <= 0; $(PFX + "Next").disabled = ti >= TS.length - 1;
@@ -1663,15 +1665,19 @@ function renderT() {
   [0.25, 0.5, 0.75, 1].forEach(v => { c += `<line x1="${L}" y1="${Y(v)}" x2="${Rr}" y2="${Y(v)}" stroke="${grid}"/>`; });
   [500, 1000, 1500, 2000].forEach(s => { const x = L + s / IHAD.steps * (Rr - L); c += `<line x1="${x}" y1="${T}" x2="${x}" y2="${B}" stroke="${grid}"/><text x="${x}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">${s}</text>`; });
   c += `<line class="axis" x1="${L}" y1="${B}" x2="${Rr}" y2="${B}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${B}"/><text x="${L}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">step 0</text>`;
-  c += `<text x="${L - 30}" y="${T - 11}" font-size="10" fill="${muted}">probability of the whole gold translation</text>`;
+  c += `<text x="${L - 30}" y="${T - 11}" font-size="10" fill="${muted}">probability of a whole translation</text>`;
   [[0, "0"], [0.5, "0.5"], [1, "1"]].forEach(([v, s]) => { c += `<text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="10" fill="${muted}">${s}</text>`; });
-  c += `<polyline points="${sm(CUR4.tr).map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${green}" stroke-width="2.6" stroke-linejoin="round"/>`;
-  c += `<polyline points="${sm(CUR4.dev).map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${neg}" stroke-width="2.6" stroke-linejoin="round"/>`;
+  const CV = curOf(q);
+  c += `<polyline points="${sm(CV.wr).map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${neg}" stroke-width="2.6" stroke-linejoin="round"/>`;
+  c += `<polyline points="${sm(CV.gold).map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${green}" stroke-width="2.6" stroke-linejoin="round"/>`;
   c += `<line x1="${X(ti)}" y1="${T}" x2="${X(ti)}" y2="${B}" stroke="${orange}" stroke-width="1.3" stroke-dasharray="4 3"/>`;
-  c += `<circle cx="${X(ti)}" cy="${Y(CUR4.tr[ti])}" r="4.5" fill="${green}" stroke="var(--panel)" stroke-width="1.5"/><circle cx="${X(ti)}" cy="${Y(CUR4.dev[ti])}" r="4.5" fill="${neg}" stroke="var(--panel)" stroke-width="1.5"/>`;
+  c += `<circle cx="${X(ti)}" cy="${Y(CV.wr[ti])}" r="5.5" fill="${neg}" stroke="var(--panel)" stroke-width="1.5"/><circle cx="${X(ti)}" cy="${Y(CV.gold[ti])}" r="4" fill="${green}" stroke="var(--panel)" stroke-width="1.5"/>`;
   $(PFX + "Curve").innerHTML = c;
-  { const [ds, dt] = IHAD.data[HELD4]; $(PFX + "Avg").innerHTML = avgRows(dt, correctP(sn, ds, dt), TRAIN4.map(i => correctP(sn, ...IHAD.data[i]).reduce((x, y) => x * y, 1)), TRAIN4.map(i => IHAD.data[i][0].join(" "))); fitRows($(PFX + "Avg")); }
-  $(PFX + "CurveNote").innerHTML = (held ? `<span class="ok">green</span>: the probabilities of the 23 training translations, averaged · <span class="bad">red</span>: the probability of the development translation, for <i>unha tía miña cantaba</i>` : `<span class="ok">green</span>: the probabilities of the 24 training translations, averaged · <span class="bad">red</span>: <i>unha tía miña cantaba</i>, one of them`) + ` · curves smoothed over 5 recorded steps, the dots are the values now (${CUR4.tr[ti].toFixed(3)} and ${CUR4.dev[ti].toFixed(3)}) · ` + FACT;
+  { const ds4 = decode(sn, src), wr = ds4.map(s => EN[s.j]), ok = wr.join(" ") === tgt.join(" ");
+    const row = (who, color, ws, ps) => `<div class="row"><span class="who" style="color:${color}">${who}</span>${ws.map((w, m) => `${m ? `<span class="x">×</span>` : ""}<span class="cell"><span class="fl" style="width:${(ps[m] * 100).toFixed(1)}%;background:${color}"></span><span class="t">${w} ${ps[m].toFixed(2)}</span></span>`).join("")}<span class="eq" style="color:${color}">= ${ps.reduce((x, y) => x * y, 1).toFixed(3)}</span></div>`;
+    $(PFX + "Avg").innerHTML = row("gold:", green, tgt, correctP(sn, src, tgt)) + (ok ? `<div class="row"><span class="who" style="color:${neg}">written:</span><span>the gold translation: the two curves are one</span></div>` : row("written:", neg, wr, ds4.map(s => s.p[s.j]))); fitRows($(PFX + "Avg")); }
+  $(PFX + "CurveLbl").innerHTML = `<i>${src.join(" ")}</i>${held && q === HELD4 ? " (development)" : ""}: gold vs written translation`;
+  $(PFX + "CurveNote").innerHTML = `<span class="ok">green</span>: the probability of its gold translation (each gold word given the gold words before it) · <span class="bad">red</span>: the probability of the translation the model writes (each word the most probable one, given its own words before it) · curves smoothed over 5 recorded steps, the dots are the values now (${CV.gold[ti].toFixed(3)} and ${CV.wr[ti].toFixed(3)}) · ` + FACT;
   // why: at the first output that differs from the gold output (or, if none does, the closest call), the numbers that decide it
   const ds = decode(sn, src), r2 = x => x.toFixed(2).replace("-", "−"), r2p = x => x < 0 ? `(${r2(x)})` : r2(x);
   let wk = ds.findIndex((s, k) => EN[s.j] !== tgt[k]), close = false;
