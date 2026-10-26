@@ -8,6 +8,8 @@
 <title>Attention, Step by Step</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <script>
+// weight labels on neighbouring columns: each one 12px lower than its neighbour on the left, so the numbers never overlap
+function stagger(xs) { const o = xs.map((x, i) => i).sort((a, b) => xs[a] - xs[b]), dy = []; o.forEach((i, k) => { const p = o[k - 1]; dy[i] = k && xs[i] - xs[p] < 30 ? dy[p] + 12 : 0; }); return dy; }
 // ?embed=count,gen shows only those sections, for use inside a lesson page
 (() => {
   let ids = [];
@@ -113,8 +115,10 @@ svg .gridl { stroke: var(--grid); }
 .parth { margin: 8px 0 0; font-size: 1.1rem; font-weight: 500; border-top: 1px solid var(--line); padding-top: 12px; }
 .tyboard { display: grid; gap: 14px; min-width: 0; align-content: start; }
 .tycols { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.planes .tycols { grid-template-columns: 664px minmax(0, 1fr); }   /* sections 1 and 2: the grid of numbers is 660px wide */
 .tycols.one { grid-template-columns: minmax(0, 1fr); }
 @media (max-width: 860px) { .tycols { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 1140px) { .planes .tycols { grid-template-columns: minmax(0, 1fr); } }   /* below this width the picture goes under the grid */
 .v3fig { margin: 0; display: grid; gap: 6px; min-width: 0; }
 .v3fig figcaption { font-size: 0.86rem; }
 svg.v3 { width: 100%; max-width: 460px; height: auto; aspect-ratio: 470 / 410; touch-action: none; cursor: grab; user-select: none; display: block; }
@@ -145,7 +149,7 @@ svg.v3 .pt.faint { opacity: 0.3; }
 svg.v3 .pl { font-size: 12px; fill: var(--fg); } svg.v3 .pl.mix, svg.v3 .pl.sum { fill: var(--orange); } svg.v3 .pl.enc { fill: var(--blue); } svg.v3 .pl.enc.sum { fill: var(--orange); }
 .pbars { min-height: 118px; }
 /* inside a lesson screen, the panel starts with its pictures: the opening paragraphs and the recap are on the full page */
-html.embed section.panel > .lead:not(.keep), html.embed .review.recap { display: none; }
+html.embed section.panel > .lead:not(.keep), html.embed .review.recap, html.embed .noembed { display: none; }
 .choose:has(.flow:empty) > .op { visibility: hidden; }
 table.cmp7 td:first-child { color: var(--muted); white-space: nowrap; } table.cmp7 td { vertical-align: top; }
 /* section 6: from section 2's weights to the real model's grids */
@@ -246,10 +250,11 @@ svg.smst .st { fill: var(--muted); font-size: 11px; } svg.smst .sw { fill: var(-
 svg.smst .k1 { fill: rgba(var(--heat), 0.3); } svg.smst .k2 { fill: rgba(var(--heat), 1); } svg.smst .k3 { fill: rgba(var(--heat), 0.6); } svg.smst .kwin { fill: var(--orange); } svg.smst .hid { visibility: hidden; }
 .g11 { display: grid; grid-template-columns: 96px repeat(3, 30px) 8px repeat(8, 30px) 36px 36px 34px 104px; column-gap: 1px; row-gap: 2px; align-items: center; width: max-content; }
 .g11 .rl { font-size: 0.8rem; line-height: 1.15; height: 28px; display: flex; align-items: center; overflow: hidden; }
-.g11 .rl.subrow, .g11 .gs, .g11 .subrow { height: 15px; } .g11 .rl small { display: block; font-size: 0.66rem; color: var(--orange); } .g11 .rl:has(small) { line-height: 1.05; }
+.g11 .rl.subrow, .g11 .gs, .g11 .subrow { height: 15px; } .g11 .rl small { display: block; font-size: 0.66rem; color: var(--orange); } .g11 .rl:has(small) { line-height: 1.05; overflow: visible; }
 .g11 .gsl { font-size: 0.64rem; color: var(--muted); white-space: nowrap; }
-.g11 .gh { font-size: 0.66rem; color: var(--muted); white-space: nowrap; writing-mode: vertical-rl; transform: rotate(180deg); height: 52px; justify-self: center; text-align: left; }
+.g11 .gh { font-size: 0.66rem; color: var(--muted); white-space: nowrap; writing-mode: vertical-rl; transform: rotate(180deg); height: 58px; justify-self: center; text-align: left; }
 .g11 .gc { height: 28px; border-radius: 4px; display: grid; place-items: center; font-family: var(--font-mono); font-size: 0.62rem; margin: 0 1px; }
+.g11 .lg { font-size: 0.54rem; letter-spacing: -0.02em; }
 .g11 .gc.q { background: var(--bg); border: 1.5px dashed var(--muted); color: var(--muted); }
 .g11 .gc.cur { box-shadow: 0 0 0 2px var(--orange); }
 .g11 .gs { font-family: var(--font-mono); font-size: 0.64rem; color: var(--orange); text-align: center; line-height: 15px; }
@@ -520,8 +525,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <div class="review recap"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page</a>: a translation model has two parts. The <b>encoder</b> reads the Galician words and turns them into one vector, the <b>summary</b>. The <b>decoder</b> then writes the English words one at a time. From the <a href="skipgram.html">skip-gram lesson</a>: a <b>vector</b> is a list of values, and each position in the list is a <b>dimension</b>; the <b>dot product</b> of two vectors multiplies them dimension by dimension and adds up the results.</p></div>
     <div class="review"><span class="rtag">Review</span><p>The example translations: the 16 phrases, translated by people, that the model on the <a href="mt.html#train">translation page</a> was trained on. Every “in the example translations” below refers to this table.</p>
       <div class="heatwrap"><table class="ty corpus"><tbody><tr><td><i>a miña tía</i></td><td>my aunt</td><td class="cpm"><i>unha tía miña</i></td><td class="cpm">an aunt of mine <span class="cpt">our phrase</span></td></tr><tr><td><i>a túa tía</i></td><td>your aunt</td><td><i>unha tía túa</i></td><td>an aunt of yours</td></tr><tr><td><i>o meu amigo</i></td><td>my friend</td><td><i>un amigo meu</i></td><td>a friend of mine</td></tr><tr><td><i>o teu amigo</i></td><td>your friend</td><td><i>un amigo teu</i></td><td>a friend of yours</td></tr><tr><td><i>o meu irmán</i></td><td>my brother</td><td><i>un irmán meu</i></td><td>a brother of mine</td></tr><tr><td><i>o teu irmán</i></td><td>your brother</td><td><i>un irmán teu</i></td><td>a brother of yours</td></tr><tr><td><i>a miña veciña</i></td><td>my neighbor</td><td class="cpm"><i>unha veciña miña</i></td><td class="cpm">a neighbor of mine <span class="cpt">2nd phrase (steps 5–6)</span></td></tr><tr><td><i>a túa veciña</i></td><td>your neighbor</td><td><i>unha veciña túa</i></td><td>a neighbor of yours</td></tr></tbody></table></div>
-      <p class="label" style="margin-top:10px">Which model writes what for <i>unha tía miña</i></p>
-      <div class="heatwrap"><table class="ty models"><thead><tr><th>model</th><th>trained on</th><th>writes</th><th>why</th></tr></thead><tbody>
+      <p class="label noembed" style="margin-top:10px">Which model writes what for <i>unha tía miña</i></p>
+      <div class="heatwrap noembed"><table class="ty models"><thead><tr><th>model</th><th>trained on</th><th>writes</th><th>why</th></tr></thead><tbody>
       <tr><td><a href="mt.html#train">translation page</a>, sections 1–3</td><td>the 16 phrases above</td><td>an aunt of mine</td><td>in 3 words, tía is still a quarter of the summary</td></tr>
       <tr><td>translation page, section 1 part C</td><td>15 of them, without <i>unha tía miña</i>, 3000 rounds</td><td class="bad">an aunt ‹end›</td><td>a combination it never saw: a matter of the training data, not of the summary</td></tr>
       <tr><td>translation page, section 1 part D</td><td>the same 15, trained longer</td><td>an aunt of mine</td><td>from round 4217 on</td></tr>
@@ -529,7 +534,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <tr><td>sections 4 and 5 here</td><td>5,000 template sentences; ours held out</td><td><span class="bad">A friend of mine, …</span>; with attention, An aunt of mine, …</td><td>same data, same number of updates, same size: the difference is attention's</td></tr>
       </tbody></table></div>
       <p>Step 5 shows, on a made-up training run, how training on the example translations would produce values like those of sections 1 and 2.</p></div>
-    <p class="lead">A translation model small enough to run by hand, on the phrase <i>unha tía miña</i>. Its vectors have three dimensions, one per Galician word, and its decoder knows eight English words. Every value is on the page. Without attention, this made-up model writes “a friend of mine”, and the steps show exactly why. Section 2 adds attention to the same model, and it writes “an aunt of mine”. We set the values by hand so that the arithmetic stays simple; a real model learns them from examples, as the skip-gram lesson showed.</p>
+    <p class="lead keep">A translation model small enough to run by hand, on the phrase <i>unha tía miña</i>. Its vectors have three dimensions, one per Galician word, and its decoder knows eight English words. Every value is on the page. Without attention, this made-up model writes “a friend of mine”, and the steps show exactly why. Section 2 adds attention to the same model, and it writes “an aunt of mine”. We set the values by hand so that the arithmetic stays simple; a real model learns them from examples, as the skip-gram lesson showed.</p>
     <div class="planes" id="tyPlanes"></div>
   </section>
 
@@ -672,7 +677,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <select id="realHead"></select>
     </div>
     <div class="controls" id="realWalk"><span class="note">Three places where the translation goes wrong:</span><button data-w="0">1 · worked</button><button data-w="1">2 · saying saying it</button><button data-w="2">3 · they'll refute</button></div>
-    <div id="realWalkWrap"></div>
+    <div id="realWalkWrap"><p class="note">Click one of the three places above: its explanation appears here.</p></div>
     <div class="cols">
       <div class="col">
         <p class="label">Galician pieces, shaded by their weight for the English piece chosen below</p>
@@ -691,7 +696,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       </div>
     </div>
     <p class="label">All 48 grids at once, for the whole sentence: one row per layer, one column per head (as in step 5 above)</p>
-    <p class="note">Each thumbnail is one head's grid, drawn like the large grid above: rows are the English pieces, columns the Galician pieces. Click one to show it above. In layer 1 most heads spread their weight; in the last layers many heads draw a sharp line from each English piece to the Galician piece it translates.</p>
+    <p class="note">Each thumbnail is one head's grid, drawn like the large grid above: rows are the English pieces, columns the Galician pieces. Click one to show it above; an orange frame marks the heads the grid above shows (all 48 for the average). In layer 1 most heads spread their weight; in the last layers many heads draw a sharp line from each English piece to the Galician piece it translates.</p>
     <div class="xheads" id="realHeads"></div>
     <p class="label">What the layers do: the weight on the right Galician word, averaged over the 8 heads of each layer</p>
     <div class="heatwrap"><table class="grid" id="realLayers"></table></div>
@@ -702,7 +707,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="self">
     <h2><span class="n">7</span>Self-attention, and many heads at once</h2>
-    <p class="lead">Section 6 looked at the decoder's attention: each English piece looks at the Galician pieces. The same model's encoder uses attention inside the Galician sentence: every Galician piece looks at every Galician piece, itself included. This is <b>self-attention</b>, and it takes the place of the chain of sections 1 to 5.</p>
+    <p class="lead keep">Section 6 looked at the decoder's attention: each English piece looks at the Galician pieces. The same model's encoder uses attention inside the Galician sentence: every Galician piece looks at every Galician piece, itself included. This is <b>self-attention</b>, and it takes the place of the chain of sections 1 to 5.</p>
     <div class="heatwrap"><svg class="selfdg" viewBox="0 0 560 210" role="img" aria-label="Above, a chain: each vector is computed from the one before it. Below, every piece is linked to every other piece."><defs><marker id="selfA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="0" y="22" class="sh">sections 1 to 5: a chain</text><text x="60" y="58" text-anchor="middle" class="sw">Unha</text><text x="144" y="58" text-anchor="middle" class="sw">tía</text><path d="M84,53 H120" class="ch" marker-end="url(#selfA)"/><text x="228" y="58" text-anchor="middle" class="sw">miña</text><path d="M168,53 H204" class="ch" marker-end="url(#selfA)"/><text x="312" y="58" text-anchor="middle" class="sw">,</text><path d="M252,53 H288" class="ch" marker-end="url(#selfA)"/><text x="396" y="58" text-anchor="middle" class="sw">que</text><path d="M336,53 H372" class="ch" marker-end="url(#selfA)"/><text x="480" y="58" text-anchor="middle" class="sw">todo</text><path d="M420,53 H456" class="ch" marker-end="url(#selfA)"/><text x="516" y="58" class="sh">…</text><text x="0" y="96" class="sh">this model: every piece looks at every piece, in every layer</text><path d="M60,184 Q102.0,140 144,184" class="arc"/><path d="M60,184 Q144.0,120 228,184" class="arc hl"/><path d="M60,184 Q186.0,100 312,184" class="arc"/><path d="M60,184 Q228.0,80 396,184" class="arc"/><path d="M60,184 Q270.0,60 480,184" class="arc"/><path d="M144,184 Q186.0,140 228,184" class="arc hl"/><path d="M144,184 Q228.0,120 312,184" class="arc"/><path d="M144,184 Q270.0,100 396,184" class="arc"/><path d="M144,184 Q312.0,80 480,184" class="arc"/><path d="M228,184 Q270.0,140 312,184" class="arc hl"/><path d="M228,184 Q312.0,120 396,184" class="arc hl"/><path d="M228,184 Q354.0,100 480,184" class="arc hl"/><path d="M312,184 Q354.0,140 396,184" class="arc"/><path d="M312,184 Q396.0,120 480,184" class="arc"/><path d="M396,184 Q438.0,140 480,184" class="arc"/><text x="60" y="200" text-anchor="middle" class="sw">Unha</text><text x="144" y="200" text-anchor="middle" class="sw">tía</text><text x="228" y="200" text-anchor="middle" class="sw hl">miña</text><text x="312" y="200" text-anchor="middle" class="sw">,</text><text x="396" y="200" text-anchor="middle" class="sw">que</text><text x="480" y="200" text-anchor="middle" class="sw">todo</text><text x="516" y="200" class="sh">…</text></svg></div>
     <p class="note">Above, each vector waits for the one before it. Below, no vector waits: in every layer, each piece takes what it needs from all the others at once. The orange arcs are the links of <i>miña</i>; each carries a weight, as in section 6. Order is kept: at the start, each piece's vector gets its position added to it.</p>
     <p class="label">Section 6's attention and self-attention, side by side</p>
@@ -970,7 +975,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (o.sel !== undefined) g += `<rect x="${x0}" y="${y0 + o.sel * c}" width="${tw}" height="${c}" fill="none" style="stroke:var(--orange)" stroke-width="1.5"/>`;
         const f0 = l === FL && h === FH; g += `<rect x="${x0 - 1.5}" y="${y0 - 1.5}" width="${tw + 3}" height="${th + 3}" fill="none" style="stroke:${f0 ? "var(--fg)" : "var(--line)"}" stroke-width="${f0 ? 2.5 : 1}"/>`; } });
     const W = (o.big ? 4 : lx) + per * (tw + gx), Ht = ty + layers.length * bandH;
-    return `<svg viewBox="0 0 ${W} ${Ht}" style="max-width:${W}px" role="img" aria-label="one small grid per head">${g}</svg>`;
+    const key = (o.sel !== undefined ? `<span style="color:var(--orange)">orange outline</span>: the row of “${String(TGT_R[o.sel]).replace(/&/g, "&amp;").replace(/</g, "&lt;")}” · ` : "") + `<b>dark frame</b>: layer ${FL + 1}, head ${FH + 1}, the grid of step 3`;
+    return `<svg viewBox="0 0 ${W} ${Ht}" style="max-width:${W}px" role="img" aria-label="one small grid per head">${g}</svg><p class="note" style="margin:4px 0 0">${key}</p>`;
   }
   const headFlow = `<div class="hbflow"><span class="word">decoder's vector × <b>query table</b> → query</span><span class="word">encoder's vectors × <b>key table</b> → keys</span><span class="op">→</span><span class="word">query · each key → softmax → <b>weights: one row</b></span><span class="op">→</span><span class="word">encoder's vectors × <b>value table</b>, mixed with the weights → this head's mix</span></div>`;
   const POINTS = [
@@ -1311,7 +1317,8 @@ function unroll(m, x, i, done) {
     if (att) {
       const top = w.map((v, j) => j).sort((a, b) => w[b] - w[a]).filter((j, k) => k === 0 || w[j] >= 0.1).slice(0, 3);
       w.forEach((v, j) => { if (v > 0.01) g += `<line class="lk" x1="${ex(j) + SW / 2}" y1="${TOP + SH + 4}" x2="${tx}" y2="${D - 5}" style="stroke-width:${(0.6 + 7 * v).toFixed(1)};opacity:${(0.25 + 0.75 * v).toFixed(2)}"/>`; });
-      top.forEach(j => g += `<text class="wt" x="${ex(j) + SW / 2}" y="${TOP + SH + (j === ns - 1 ? 30 : 16)}" text-anchor="middle">${w[j].toFixed(2)}</text>`);
+      const dy = stagger(top.map(j => ex(j)));
+      top.forEach((j, i) => g += `<text class="wt" x="${ex(j) + SW / 2}" y="${TOP + SH + (j === ns - 1 ? 30 : 16) + dy[i]}" text-anchor="middle">${w[j].toFixed(2)}</text>`);
     }
   }
   const W = ex(Math.max(ns, out.length)) + 40;
@@ -1617,7 +1624,8 @@ const SMALL = { range: 0.5, noTicks: true };
 const TIA = 1, MINA = 2;
 const TIA_VIEW = [4.55, 0.5], TIA_ORIGIN = [210, 250];  // turned so that the tía axis runs left to right
 const DEC_VIEW = { ...SMALL, view: TIA_VIEW, origin: TIA_ORIGIN };
-const markAn = { axis: TIA, v: MARK, label: `“an” beats “a” past ${f(MARK)}`, dx: 0, dy: 44, anchor: "middle" };
+const markAn = { axis: TIA, v: MARK, label: `“an” beats “a” past ${f(MARK)}`, dx: 4, dy: 58, anchor: "end" };
+const markAunt = { ...markAn, label: `“aunt” beats “friend” past ${f(MARK)}` };
 const pm = v => v < 0 ? `− ${f(-v)}` : `+ ${f(v)}`;
 const top3 = sc => [...sc.rows].sort((p, q) => q.s - p.s).slice(0, 3).map(r => `${r.w}: ${f(r.gp)} ${pm(r.ep)} ${pm(r.b)} = <b>${f(r.s)}</b>`).join("<br>");
 const PART = { g: "first three dimensions", e: "last eight dimensions", b: "bias" };
@@ -1670,13 +1678,13 @@ function ruler(x, att) {
 const CARROWS = [{ a: ZERO, b: [0.25, 0.5, 0], cls: "ca", label: "“an”", dx: 6, dy: 18, anchor: "start" }, { a: ZERO, b: [0, 0.5, 0], cls: "ca", label: "“aunt”", dx: 6, dy: -8, anchor: "start" }, { a: ZERO, b: [0.25, -0.5, 0], cls: "ca", label: "“a”", dx: 0, dy: 20, anchor: "start" }, { a: ZERO, b: [0, -0.5, 0], cls: "ca", label: "“friend”", dx: 0, dy: -10, anchor: "start" }, { a: ZERO, b: [0, 0, 0.5], at: [0, 0, 0.16], cls: "ca", label: "“of”, “mine”", dx: 7, dy: 4, anchor: "start" }];
 const ENC_PATH = ENC.map((e, j) => ({ a: j ? ENC[j - 1] : ZERO, b: e, cls: "gd" }));
 function decScene(x, att, { arrows = false, drops = [], mark = false, path = false, mixes = [], xLabel, cap }) {
-  const xPt = att ? { p: x, cls: "mix", label: xLabel || `the mix ${vecTxt(x)}`, dx: -10, dy: -12, anchor: "end" } : { p: x, cls: "enc sum", label: xLabel || `the summary ${vecTxt(x)}`, dx: 12, dy: 4, anchor: "start" };   // to the right: on the left it would cross the miña axis
-  const s = { ...DEC_VIEW, pts: [xPt], segs: [], notes: [], arrows: arrows ? CARROWS : [], marks: mark ? [markAn] : [], cap };
+  const xPt = att ? { p: x, cls: "mix", label: xLabel || `the mix ${vecTxt(x)}`, dx: -12, dy: 18, anchor: "end" } : { p: x, cls: "enc sum", label: xLabel || `the summary ${vecTxt(x)}`, dx: 12, dy: 4, anchor: "start" };   // to the right: on the left it would cross the miña axis
+  const s = { ...DEC_VIEW, pts: [xPt], segs: [], notes: [], arrows: arrows ? CARROWS : [], marks: mark ? [mark === true ? markAn : mark] : [], cap };
   if (path) { s.segs.push(...ENC_PATH); s.pts.unshift(...encPts(null, "enc faint").slice(0, 2)); }
   if (att) { s.tri = ENC; s.pts.unshift(...encPts(null, "enc faint"), ...mixes.map(m => ({ p: m, cls: "mix faint" }))); }
   drops.forEach(d => {
     const foot = [0, 0, 0]; foot[d] = x[d]; s.segs.push(...guide(x, d));
-    s.notes.push({ p: foot, t: d === TIA ? `± 8 × ${f(x[d])} = ± ${f(r2(8 * x[d]))}` : d === 0 ? `4 × ${f(x[d])} = ${f(r2(4 * x[d]))}` : `8 × ${f(x[d])} = ${f(r2(8 * x[d]))}`, cls: att ? "ql" : "gl3", dx: d === TIA ? 0 : d === 0 ? -8 : 8, dy: d === TIA ? 22 : d === 0 ? 16 : -14, anchor: d === TIA ? "middle" : d === 0 ? "end" : "start" });
+    s.notes.push({ p: foot, t: d === TIA ? `8 × ${f(x[d])} = ${f(r2(8 * x[d]))}` : d === 0 ? `4 × ${f(x[d])} = ${f(r2(4 * x[d]))}` : `8 × ${f(x[d])} = ${f(r2(8 * x[d]))}`, cls: att ? "ql" : "gl3", dx: d === TIA && !att ? 0 : -8, dy: d === TIA && !att ? 22 : d === 0 ? 16 : -10, anchor: d === TIA && !att ? "middle" : "end" });
   });
   return s;
 }
@@ -1709,11 +1717,12 @@ const wordChips = `<div class="flow">${EN.map(w => `<span class="word">${w}</spa
 // every frame; a frame only fills cells, highlights them, or leaves them invisible.
 const gShade = v => v ? "background:var(--grid);color:var(--fg)" : "color:var(--muted)";   // plain numbers, as in the translation page's tables
 // v: a number; null: not decided yet (?); undefined: invisible
-const gCell = (v, cls = "") => v === undefined ? `<div class="gc hid"></div>` : v === null ? `<div class="gc q ${cls}">?</div>` : `<div class="gc ${cls}" style="${gShade(v)}">${f(v)}</div>`;
+const gLong = v => v != null && String(f(v)).length > 4 ? " lg" : "";   // five characters (0.125) need a smaller font to stay apart in a 30px cell
+const gCell = (v, cls = "") => v === undefined ? `<div class="gc hid"></div>` : v === null ? `<div class="gc q ${cls}">?</div>` : `<div class="gc ${cls}${gLong(v)}" style="${gShade(v)}">${f(v)}</div>`;
 // a cell whose value changes: the old value fades out, then the new one is written in, after d seconds
 // lines written one after another on the board beside the grid
 const sideLines = (ls, d0 = 0) => ls.map((t, i) => `<span style="animation-delay:${(d0 + i) * 0.35}s">${t}</span>`).join("");
-const gCellCh = (o, v, cls, d) => `<div class="gc ch ${cls}" style="--d:${d}s"><span class="o" style="${gShade(o)}">${f(o)}</span><span class="n" style="${gShade(v)}">${f(v)}</span></div>`;
+const gCellCh = (o, v, cls, d) => `<div class="gc ch ${cls}" style="--d:${d}s"><span class="o${gLong(o)}" style="${gShade(o)}">${f(o)}</span><span class="n${gLong(v)}" style="${gShade(v)}">${f(v)}</span></div>`;
 const gSub = (v, cls = "") => `<div class="gs ${cls}">${v === undefined || v === 0 ? "" : f(v)}</div>`;
 // the score of one row on this row's own scale (−4 to 12, ticks every 4): one piece per part, each piece starting
 // where the one above it ended (blue: Σ first 3, green: Σ last 8, grey: bias); the mark and the number are the total
@@ -1742,7 +1751,7 @@ function g11(o) {
   const st = o.st || {};
   // when the state's first three values are the summary (or the mix) itself, one row shows both: no duplicate row
   const same = !!(sum.v && st.v && [0, 1, 2].every(i => sum.v[i] === st.v[i]));
-  const stLabel = same ? `<span>${st.label || "decoder state"}</span><span class="gsl">1–3 = <span class="${sum.cls || ""}">${(sum.label || "the summary").replace(/<br>.*$/, "")}</span></span>` : (st.label || "decoder state");
+  const stLabel = same ? `<span>${st.label || "decoder state"}</span><span class="gsl">1–3 = <span class="${sum.cls || ""}">${(sum.label || "the summary").replace(/<br>.*$|<small>.*$/, "")}</span></span>` : (st.label || "decoder state");
   const stRow = line(stLabel, DS.map((d, i) => { const c = (st.hi || []).includes(i) || (same && (sum.hi || []).includes(i)) ? "cur" : "";
       const from = st.from || (same && i < 3 ? sum.from : undefined), delay = st.from ? st.delay : sum.delay;
       return from && st.v && from[i] !== st.v[i] ? gCellCh(from[i], st.v[i], c, delay || 0) : gCell(st.v ? st.v[i] : undefined, c); }),
@@ -1903,7 +1912,7 @@ const STEPS = [
       const L2 = (r, ph) => `<span>${r}<small>${ph}</small></span>`, OURS = "our phrase", AMIP = "2nd phrase";
       const ENCL = ["½ × (0, 0, 0) + ½ × (1, 0, 0) = (0.5, 0, 0)", "½ × (0.5, 0, 0) + ½ × (0, 0, 0) = (0.25, 0, 0). This small model has no dimension for veciña, so its word vector is all zeros: reading it adds nothing and halves what was there.", "½ × (0.25, 0, 0) + ½ × (0, 0, 1) = (0.125, 0, 0.5). No tía ever entered this summary."];
       // the encoder's reading of the 2nd phrase in one frame (the rule is step 2's); the nudges themselves are the translation page's section 1
-      const encAll = { board: g11({ cap: "the 2nd example translation, <i>unha veciña miña</i>, “a neighbor of mine”: its summary", sum: { label: L2("encoder", AMIP), v: AMI[2], hi: [0, 1, 2] }, st: { label: L2("state", AMIP) }, dim: others }) +
+      const encAll = { board: g11({ cap: "the 2nd example translation, <i>unha veciña miña</i>, “a neighbor of mine”: its summary", sum: { label: L2("summary", AMIP), v: AMI[2], hi: [0, 1, 2] }, st: { label: L2("state", AMIP) }, dim: others }) +
           work(["To train, we need a second example translation, the 2nd phrase. The encoder reads it as in step 2:"].concat(ENCL.map((t, n) => `reading <i>${AMI_W[n]}</i>: ${t}`))),
         scene: tScene(0, "The encoder's path for unha veciña miña. It starts along unha, like our phrase, and never moves along tía.", { segs: amiSeg }) };
       return [encAll,
@@ -2040,7 +2049,7 @@ const STEPS = [
                   smStage(s.a, 3, "the new query") + work([wLine(s)]),
                 scene: decScene(s.a.mix, true, { arrows: true, mixes: ATT.slice(0, i + 1).map(t => t.a.mix), xLabel: `mix for word ${i + 2}`, cap: `Word ${i + 2}: the new mix ${vecTxt(s.a.mix)}; the faint points are the earlier mixes.` }) },
           { board: g11({ cap: `word ${i + 2}: every word's score with the new state`, sum: { ...ML, v: s.a.mix }, st: { v: now }, bias: true, sums: true, resHead: "score", win: s.w, words: allBars(s.a.mix, s.st, ALL) }) + work([caps[i]]),
-            scene: decScene(s.a.mix, true, { arrows: true, drops: [TIA, MINA], mark: true, mixes: ATT.slice(0, i + 1).map(t => t.a.mix), xLabel: `mix for word ${i + 2}`, cap: `Word ${i + 2}. ${caps[i]}` }) }];
+            scene: decScene(s.a.mix, true, { arrows: true, drops: [TIA, MINA], mark: i === 0 && markAunt, mixes: ATT.slice(0, i + 1).map(t => t.a.mix), xLabel: `mix for word ${i + 2}`, cap: `Word ${i + 2}. ${caps[i]}` }) }];
       });
     } }],
 ];
@@ -2298,8 +2307,8 @@ function bars(P, right) {
 }
 // the encoder's vectors, one column per Galician word; with weights, the attention on each
 function srcSvg(mode, w) {
-  const n = x.src.length, CW = 26, x0 = 20, ch = 9, H8 = 8 * ch, yTop = 70, yW = 60;
-  const W = x0 + n * CW + 130, Hh = yTop + H8 + (w ? 64 : 30);
+  const n = x.src.length, CW = 26, x0 = 20, ch = 9, H8 = 8 * ch, yTop = 82, yW = 72;   // room above for the longest word, rotated (solucionaba)
+  const W = x0 + n * CW + 130, Hh = yTop + H8 + (w ? 84 : 30);
   let g = "";
   x.src.forEach((t, j) => {
     const cx = x0 + j * CW, used = mode === "one" ? j === n - 1 : mode === "att" ? true : true;
@@ -2312,7 +2321,8 @@ function srcSvg(mode, w) {
     }
   });
   if (w) {
-    [...w.keys()].sort((a, b) => w[b] - w[a]).slice(0, 3).forEach(j => { g += `<text x="${x0 + j * CW + 6}" y="${yTop + H8 + 58}" text-anchor="middle" style="fill:var(--orange);font-size:11px">${w[j].toFixed(2)}</text>`; });
+    const top = [...w.keys()].sort((a, b) => w[b] - w[a]).slice(0, 3), dy = stagger(top.map(j => x0 + j * CW));   // each number just under its bar
+    top.forEach((j, i) => { g += `<text x="${x0 + j * CW + 6}" y="${yTop + H8 + 6 + 40 * w[j] + 12 + dy[i]}" text-anchor="middle" style="fill:var(--orange);font-size:11px">${w[j].toFixed(2)}</text>`; });
     g += `<text x="${x0 + n * CW + 6}" y="${yTop + H8 + 20}" style="fill:var(--orange);font-size:11px">attention weights</text>`;
   }
   // in step 2, arrows from each vector to the next: each is computed from the one before it
@@ -2325,7 +2335,7 @@ function srcSvg(mode, w) {
 function panel(model, i) {
   const att = model === "att", out = att ? x.att : x.one, P = (att ? x.pAtt : x.pOne)[i], st = (att ? x.decAtt : x.decOne)[i];
   const got = att ? `the mix it used for word ${i}` : "the summary";
-  const prev = i === 0 ? "started from the summary; no English word yet" : `computed from its state for word ${i}, the word it wrote (“${out[i - 1]}”) and ${got}`;
+  const prev = i === 0 ? "computed from the summary by one learned step; no English word yet" : `computed from its state for word ${i}, the word it wrote (“${out[i - 1]}”) and ${got}`;
   const right = x.ref[i] === P[0][0] || out.slice(0, i).every((v, k) => v === x.ref[k]) ? x.ref[i] : null;
   const last = (n, from) => `<p class="label">${n}the next word: the decoder state and ${from} → a probability for each English word (section 1, steps 4 and 6)</p>
     <div class="wkrow">${strip(st, `decoder state for word ${i + 1}`)}<span class="op">+</span>${strip(att ? x.ctxAtt[i] : x.sumOne, from)}<span class="op">→</span>${bars(P, right)}</div><p class="note">The decoder state for word ${i + 1}: ${prev}.</p>`;
@@ -2335,10 +2345,10 @@ function panel(model, i) {
   const rows = t3.map(j => `<div class="wkrow">${strip(st, "query: the decoder state")}<span class="op">·</span>${strip(x.encAtt[j], `key: the vector at <span class="gw">${esc(x.src[j])}</span>`)}<span class="op">=</span><span class="w">score ${sc[j].toFixed(2)}</span><span class="op">→</span><span class="w">weight ${w[j].toFixed(2)}</span></div>`).join("");
   const mix = `<div class="wkrow">${t3.map((j, k) => `${k ? '<span class="op">+</span>' : ""}<span class="w">${w[j].toFixed(2)} ×</span>${strip(x.encAtt[j], `<span class="gw">${esc(x.src[j])}</span>`)}`).join("")}<span class="op">+</span><span class="w">the other ${n - 3} vectors, each × its own weight</span><span class="op">=</span>${strip(x.ctxAtt[i], "the mix")}</div>`;
   return `<div class="wkpanel"><p class="label"><b>With attention</b>, word ${i + 1}, in three stages</p>
-    <p class="label">1 · scores and weights (section 2, step 1): the query is the decoder state itself; one score per Galician piece, ${n} in all. The three largest:</p>${rows}
+    <p class="label">1 · scores and weights (section 2, step 1): the query is the decoder state itself; one score per Galician word or mark, ${n} in all. The three largest:</p>${rows}
     <p class="note">Each score multiplies the two vectors square by square and adds up the 8 products. Softmax over all ${n} scores gives ${n} weights that add up to 1; the orange bars above show all of them.</p>
     <p class="label">2 · the mix (section 2, step 2): all ${n} vectors, each times its weight, added up</p>${mix}
-    <p class="note">The three largest weights add up to ${(1 - rest).toFixed(2)}. The other ${n - 3} pieces share the remaining ${rest.toFixed(2)}; the largest of them is ${restMax.toFixed(2)}, on <i>${esc(x.src[top[3]])}</i>.</p>
+    <p class="note">The three largest weights add up to ${(1 - rest).toFixed(2)}. The other ${n - 3} words and marks share the remaining ${rest.toFixed(2)}; the largest of them is ${restMax.toFixed(2)}, on <i>${esc(x.src[top[3]])}</i>.</p>
     ${last("3 · ", "the mix")}</div>`;
 }
 // step 6: where the model without attention loses part of the saying.
