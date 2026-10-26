@@ -214,13 +214,22 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .tables3 tr.mixed th, .tables3 tr.mixed td { background: var(--hi); }
 .tables3 tr.now th, .tables3 tr.now td { font-weight: 600; color: var(--fg); }
 .tables3 tr.now th { box-shadow: inset 3px 0 0 var(--orange); }
-.acols { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.45fr); }
+.acols { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.35fr); }
+.actl { position: sticky; top: 0; z-index: 3; background: var(--panel); padding: 6px 0; display: grid; gap: 8px; box-shadow: 0 6px 8px -8px rgba(0,0,0,0.25); }
+.ltop { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 10px; align-items: start; }
+@media (max-width: 600px) { .ltop { grid-template-columns: minmax(0, 1fr); } }
+.legendrow.compact { gap: 3px 10px; font-size: 0.74rem; }
+.tables3.two.one { grid-template-columns: max-content; }
+.actl .pathstrip button { font-size: 0.76rem; padding: 2px 6px; }
+.actl .pathstrip { gap: 2px; }
+.actl .controls { gap: 6px; }
+.actl .mono { font-size: 0.8rem; }
 @media (max-width: 900px) { .acols { grid-template-columns: minmax(0, 1fr); } }
-.asticky { position: sticky; top: 8px; }
+.asticky { position: sticky; top: var(--ctlh, 100px); }
 .tables3.two { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 8px 10px; }
 .tables3.two table.full { grid-column: 1 / -1; }
 .tables3 tr.mixed th, .tables3 tr.mixed td { background: var(--hi); }
-.tables3.two table { width: auto; font-size: 0.72rem; }
+.tables3.two table { width: auto; font-size: 0.72rem; justify-self: start; }
 .tables3.two th, .tables3.two td { padding: 1px 4px; }
 .tables3.two td.tag { font-size: 0.68rem; padding-left: 3px; }
 .tables3.two td.p { color: var(--fg); padding-left: 10px; }
@@ -290,22 +299,32 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <div class="why" id="trWhy">
         <p class="label" id="trWhyHead"></p>
         <p class="note" id="trWhyPair" style="min-height:1.6em;margin:0;max-width:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></p>
-        <div class="controls"><button id="aBack">← back</button><button class="primary" id="aNext">next →</button><span class="note" style="margin-right:6px">one stage at a time ·</span><button id="aPairPrev">← previous pair</button><button id="aPairNext">next pair →</button><button id="aRoundBack" title="16 pairs back">← 1 round</button><button id="aRoundNext" title="16 pairs on">1 round →</button><button id="aReset" title="The random start">↺ start</button><input type="range" id="aStep" min="0" max="1" step="1" value="0" aria-label="Pairs seen so far" style="flex:1 1 120px; accent-color: var(--blue)"><span class="mono" id="aStepVal"></span></div>
-        <div class="controls"><span class="note">the cycle for this pair:</span><div class="pathstrip" id="trStages"></div></div>
+        <div class="actl" id="trCtl">
+        <div class="controls"><button id="aBack">← back</button><button class="primary" id="aNext">next →</button><button id="aPairPrev">← previous pair</button><button id="aPairNext">next pair →</button><button id="aRoundBack" title="16 pairs back">← 1 round</button><button id="aRoundNext" title="16 pairs on">1 round →</button><button id="aReset" title="The random start">↺ start</button><input type="range" id="aStep" min="0" max="1" step="1" value="0" aria-label="Pairs seen so far" style="flex:1 1 70px; accent-color: var(--blue)"><span class="mono" id="aStepVal"></span></div>
+        <div class="controls"><span class="note">this pair's cycle:</span><div class="pathstrip" id="trStages"></div></div>
+        </div>
         <div class="controls"><span class="note">after each output, what is mixed into the state:</span><div class="seg" role="group" aria-label="Decoding in training or when translating"><button id="trModeTrain" aria-pressed="true">in training: the gold output</button><button id="trModeFree" aria-pressed="false">when translating: the output written</button></div></div>
         <div class="cols acols">
           <div class="col asticky">
             <p class="label" id="trTabLbl"></p>
+            <div class="ltop">
+              <div class="tables3 two one" id="trTabG"></div>
+              <div class="col" style="gap:4px">
+                <svg id="trWhySvg" viewBox="0 0 400 400" role="img" aria-label="The vectors on the plane" style="max-width:300px"></svg>
+                <div class="legendrow compact" id="trLeg"><span><span class="sq" style="background:var(--blue)"></span>Galician input</span><span><span class="ring"></span>possible output</span><span><span class="ring" style="color:var(--orange)"></span><span id="trLegWin">highest probability now</span></span><span><span class="ring" style="color:var(--green)"></span>the gold output</span><span><span class="sw" style="background:var(--orange)"></span>the summary, then the state (- - - its direction: farther along = higher score)</span><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— before the update</span></div>
+              </div>
+            </div>
             <div class="tables3 two" id="trTab"></div>
             <p class="note" id="trTabNote" style="margin:0"></p>
           </div>
           <div class="col">
             <p class="label" id="trEncLbl">Encoding: the inputs are mixed, one by one, into one vector, the summary (new = ½ × old + ½ × vector of the input; section 2 shows the rule)</p>
-            <svg class="chain" id="trEncChain" viewBox="0 0 1000 118" role="img" aria-label="The encoder mixes the inputs one by one into the summary"></svg>
+            <svg class="chain" id="trEncChain" viewBox="0 0 780 118" role="img" aria-label="The encoder mixes the inputs one by one into the summary"></svg>
             <div id="trDecPane" style="display:grid;gap:10px">
               <p class="label" id="trDecLbl"></p>
               <svg class="chain" id="trWhyChain" data-compact="1" viewBox="0 0 720 430" role="img" aria-label="How one output is chosen: the state, the scores, the probabilities, and how the next state is made"></svg>
               <p class="note" id="trWhyStripKey" style="margin:0"></p>
+              <p class="note" id="trWhyNote" style="color:var(--fg);margin:0;max-width:none"></p>
             </div>
             <div id="trUpdPane" style="display:grid;gap:10px">
               <p class="label" id="trUpdLbl"></p>
@@ -313,19 +332,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
               <div class="controls"><button id="aReplay">▶ play the update again, slowly</button><span class="note">the update is one step; it is played output by output, each output's push in turn (they add up)</span></div>
               <p class="note" id="trUpdNote" style="color:var(--fg)"></p>
             </div>
-            <div class="cols" style="grid-template-columns: 320px minmax(0, 1fr); gap: 14px">
-              <div class="col">
-            <p class="label" id="trPlaneLbl"></p>
-            <svg id="trWhySvg" viewBox="0 0 400 400" role="img" aria-label="The vectors on the plane" style="max-width:320px"></svg>
-              </div>
-              <div class="col">
-            <div class="legendrow" id="trLegEnc"><span><span class="sq" style="background:var(--blue)"></span>Galician input</span><span><span class="ring"></span>possible output</span><span><span class="sw" style="background:var(--orange)"></span>the summary so far, a vector (an arrow from the origin)</span><span><span class="sw" style="background:var(--orange);opacity:0.5;width:8px;border-radius:50%"></span>· · · where it was after the earlier inputs</span></div>
-            <div class="legendrow" id="trLegDec"><span><span class="sw" style="background:var(--orange)"></span>state</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span><span id="trLegWin">the output written</span></span><span><span class="ring" style="color:var(--green)"></span>the gold output (both rings on one word when they coincide)</span><span><span class="ring"></span>other possible outputs (the 4 most probable in black, the rest gray)</span><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— <span id="trLegGhost">where the vector was before the previous update</span></span></div>
-            <div class="legendrow" id="trLegUpd"><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— before the update</span><span><span class="ring"></span>after</span><span><span class="ring" style="color:var(--green)"></span>a gold output of this pair: pulled toward its state</span><span><span class="sw" style="background:var(--orange);opacity:0.5"></span>the states of this pair</span></div>
-            <p class="note" id="trWhyNote" style="color:var(--fg)"></p>
-                <p class="note" id="trStageNote" style="color:var(--fg);max-width:none"></p>
-              </div>
-            </div>
+            <p class="note" id="trStageNote" style="color:var(--fg);max-width:none"></p>
           </div>
         </div>
         <p class="label" id="trainCurveLbl"></p>
@@ -663,7 +670,7 @@ window.mtWhy = function (o) {
   if ($(pre + "EncChain")) {
     const box = (x, y, wd, ht, col, op) => `<rect x="${x}" y="${y}" width="${wd}" height="${ht}" rx="9" fill="${col}" fill-opacity="${op}" stroke="${col}" stroke-width="1.8"/>`;
     const txt = (x, y, s_, cls = "", anchor = "middle", fill = "") => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}"${fill ? ` style="fill:${fill}"` : ""}>${s_}</text>`;
-    const blue = css("--blue"), orange = css("--orange"), n = src.length, W = 150, gap = (1000 - 20 - W * (n + 1)) / n, upTo = o.encUpTo === undefined ? n : o.encUpTo;
+    const VW = +($(pre + "EncChain").getAttribute("viewBox").split(" ")[2]) || 1000, blue = css("--blue"), orange = css("--orange"), n = src.length, W = VW >= 1000 ? 150 : 125, gap = (VW - 20 - W * (n + 1)) / n, upTo = o.encUpTo === undefined ? n : o.encUpTo;
     let hs = [[0, 0]]; for (const w of src) { const g = sn.G[GL.indexOf(w)], h = hs[hs.length - 1]; hs.push([0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]); }
     let e = `<defs><marker id="${pre}ea" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="${blue}"/></marker></defs>`;
     hs.forEach((h, i) => { const x = 10 + i * (W + gap), lastb = i === n, cur = i === upTo;
@@ -922,7 +929,8 @@ function renderTables(sn, prev, after, q, sg, steps, flash, activeK = -1) {
   const iRows = EN.map((w, j) => { const mi = tgt.indexOf(w), mixed = fed.includes(j) || (up && trMode === "train" && mi >= 0 && mi < tgt.length - 1), on = k > 0 && j === steps[k - 1].fed;
     return `<tr class="${mixed ? "mixed" : ""}${on ? " now" : ""}${fl("I", j)}"><th>${w}</th>${cells(base.I[j], ref && ref.I[j], up)}</tr>`; });
   const tbl = (cap, rows, cls = "") => `<table class="${cls}"><caption>${cap}</caption><tbody>${rows.join("")}</tbody></table>`;
-  $("trTab").innerHTML = tbl("Galician inputs: vector", gRows, "full") + tbl(up ? "possible outputs: vector for the score · the arrows collected at the outputs, now carried out (↑ₖ: toward state k; ↓ₖ: away from it)" : pk ? `possible outputs: vector for the score · probability at output ${k + 1}${trMode === "train" ? " · ↑ ↓: what the update will do (↑₁: promised at output 1, …)" : ""}` : "possible outputs: vector for the score (gold k: gold output k)", oRows) + tbl("possible outputs: second vector (mixed into the state)", iRows);
+  $("trTabG").innerHTML = tbl("Galician inputs: vector", gRows);
+  $("trTab").innerHTML = tbl(up ? "possible outputs: vector for the score · the arrows collected at the outputs, now carried out (↑ₖ: toward state k; ↓ₖ: away from it)" : pk ? `possible outputs: vector for the score · probability at output ${k + 1}${trMode === "train" ? " · ↑ ↓: what the update will do (↑₁: promised at output 1, …)" : ""}` : "possible outputs: vector for the score (gold k: gold output k)", oRows) + tbl("possible outputs: second vector (mixed into the state)", iRows);
   $("trTabLbl").textContent = up ? "The three tables after the update: what changed, cell by cell" : uA === 0 && !ref ? "The three tables at the random start: every number in all three is random" : "The three tables as they are now (all three started random)";
   const parts = [`<span style="color:var(--blue)">this pair's inputs</span>`, trMode === "train" ? `<span class="ok">its gold outputs</span>` : "", k >= 0 ? `<span style="color:var(--orange)">orange: the most probable output now</span>` : "", k > 0 ? "second vectors already mixed into the state" : ""].filter(Boolean);
   $("trTabNote").innerHTML = up ? `bold: a changed cell, with the change · rows this pair does not touch stay as they are` :
@@ -995,7 +1003,7 @@ function renderA() {
   const st = stagesFor(q, trMode, snB); stIdx = Math.max(0, Math.min(stIdx, st.length - 1)); const sg = st[stIdx];
   $("aStep").value = uA; $("aPairPrev").disabled = uA <= 0; $("aRoundBack").disabled = uA < NP; $("aPairNext").disabled = uA >= NU - 1; $("aRoundNext").disabled = uA + NP > NU - 1;
   $("aBack").disabled = uA <= 0 && stIdx <= 0; $("aNext").disabled = uA >= NU - 1 && stIdx >= st.length - 1;
-  $("aStepVal").textContent = `round ${r + 1} of ${ROUNDS} · pair ${q + 1} of 16 · ${uA} pair${uA === 1 ? "" : "s"} seen so far`;
+  $("aStepVal").textContent = `round ${r + 1} of ${ROUNDS} · pair ${q + 1} of 16 · ${uA} seen so far`;
   $("trStages").innerHTML = st.map((x, i) => `<button class="${i < stIdx ? "done" : i === stIdx ? "on" : "todo"}" data-i="${i}">${x.lbl}</button>`).join(`<span class="ar">→</span>`) + `<span class="ar">→ next pair</span>`;
   $("trStages").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { stIdx = +b.dataset.i; renderA(); }));
   const k = sg.kind === "out" ? sg.k : sg.kind === "update" || sg.kind === "done" ? 99 : 0, prevQ = (uA + NP - 1) % NP, Z = zFor(snB);
@@ -1006,13 +1014,12 @@ function renderA() {
   const steps = trMode === "train" ? gradOf(snB, q).sts.map((s_, m) => { const p = softmax(snB.O.map(v => dot(s_, v))); return { fed: EN.indexOf(tgt[m]), j: p.indexOf(Math.max(...p)), p }; }) : translate(snB, src).steps.map(x => ({ fed: EN.indexOf(x.w), j: EN.indexOf(x.w), p: x.p }));
   renderTables(snB, snP, snA, q, sg, steps);
   $("trDecPane").style.display = sg.kind === "out" ? "" : "none"; $("trUpdPane").style.display = sg.kind === "update" ? "" : "none";
-  $("trLegEnc").style.display = sg.kind === "tables" || sg.kind === "in" ? "" : "none"; $("trLegDec").style.display = sg.kind === "out" || sg.kind === "done" ? "" : "none"; $("trLegUpd").style.display = sg.kind === "update" ? "" : "none";
   $("trWhyNote").style.display = sg.kind === "out" || sg.kind === "done" ? "" : "none";
   if (sg.kind === "tables" || sg.kind === "in") renderPlaneEnc(snB, src, sg.kind === "in" ? sg.i : 0, Z);
   if (sg.kind === "update") { renderUpdate(snB, snA, q, Z); const key = uA + ":" + stIdx; if (key !== lastStageKey && !reduce) animateUpdate(snB, snA, q, Z, steps); }
   lastStageKey = uA + ":" + stIdx;
   $("aReplay").style.display = sg.kind === "update" ? "" : "none"; $("aReplay").onclick = () => animateUpdate(snB, snA, q, Z, steps);
-  $("trPlaneLbl").textContent = sg.kind === "update" ? "The output table on the plane: before → after, and the states that pushed it" : sg.kind === "out" || sg.kind === "done" ? "The output table on the plane, and the state" : "Both tables on the plane";
+  document.documentElement.style.setProperty("--ctlh", ($("trCtl").offsetHeight + 6) + "px");
   const nextQ = (q + 1) % NP;
   $("trStageNote").innerHTML = sg.kind === "tables" ? `Next: the encoder reads input 1, <i>${src[0]}</i> (its row is highlighted).` :
     sg.kind === "in" ? (sg.i < n ? `Input ${sg.i} read: summary = ½ × old + ½ × row <i>${src[sg.i - 1]}</i>. Next: input ${sg.i + 1}, <i>${src[sg.i]}</i>.` : `All inputs read: the summary is the decoder's state 1. Next: output 1.`) :
