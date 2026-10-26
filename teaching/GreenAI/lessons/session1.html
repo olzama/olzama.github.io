@@ -3004,7 +3004,8 @@ print("they match" if count == expected else "they do not match: check the loop 
     </div>
   </div>
   <div class="notes">
-    <p>Everything so far was attention across two languages — the decoder generating English, attending back to the Galician source. Vaswani et al. showed in 2017 that the identical mechanism also works within a single sentence: each word attends to every other word in the same sentence, including itself. The classic illustration is a sentence like "The animal didn't cross the street because it was too tired" — resolving what "it" refers to, the animal and not the street, is exactly a self-attention pattern, no hand-written coreference rule needed, just the same query/key/value arithmetic as before, applied within one sentence instead of across two. The same mechanism is quietly at work inside the English translation of our own story too, wherever a pronoun needs to connect back to the aunt it refers to.</p>
+    <p>Everything so far was attention across two languages: the decoder, writing English, looks back at the Galician. Vaswani and colleagues showed in 2017 that the same mechanism also works inside one sentence: every word looks at every word of the same sentence, itself included. That is self-attention.</p>
+    <p>The classic example: in “The animal didn't cross the street because it was tired”, which noun does “it” refer to? No hand-written rule decides; the same query, key and weights arithmetic as before, inside one sentence. The next interactive screen shows both: the real model's encoder looking inside our Galician sentence (attention page, section 7), and a tiny model learning this very “it” sentence (section 8).</p>
   </div>
 </section>
 
@@ -3050,14 +3051,15 @@ print("they match" if count == expected else "they do not match: check the loop 
     <div class="col">
       <ul class="points">
         <li>The same kind of block (attention + feed-forward), repeated many times</li>
-        <li>This picture is the classic translation shape: <b>encoders</b> on the left read the source sentence, <b>decoders</b> on the right write the output</li>
+        <li>This picture is the classic translation shape: <b>encoders</b> on the left read the source sentence, <b>decoders</b> on the right write the output. The real model of the attention page has 6 blocks on each side: its 6 layers</li>
         <li>GPT-3 and most general-purpose LLMs use only the decoder side: 96 blocks deep, with no separate encoder</li>
       </ul>
     </div>
     <div class="col"><div class="fig"><img src="img/encoder-decoder-stack.png" alt="A stack of encoders feeding a stack of decoders"><span class="cap">Credit: jalammar.github.io/illustrated-transformer</span></div></div>
   </div>
   <div class="notes">
-    <p>A transformer isn't one attention computation — it's the same block, multi-head self-attention followed by a small feed-forward network, plus some stabilizing machinery we won't go into, repeated many times in sequence. GPT-3 stacks 96 of these. Think of each block as one editing pass: the representation of each word gets refined a little more, picking up a bit more context and nuance, each time it passes through another block. Every word of our sentence passes through every block in sequence, so block count multiplies directly into total computation per word — so there is a direct cost/quality tradeoff: fewer blocks, less compute, likely somewhat lower quality.</p>
+    <p>A transformer is not one attention computation: it is the same block, multi-head self-attention followed by a small feed-forward network, repeated many times. The real translation model on the attention page has 6 blocks in its encoder and 6 in its decoder: the 6 layers of its 48 grids. GPT-3 stacks 96.</p>
+    <p>Each block refines every word's vector a little more. Every word passes through every block, so the number of blocks multiplies the computation for every word: fewer blocks, less computation, and usually somewhat lower quality.</p>
   </div>
 </section>
 
@@ -3068,17 +3070,14 @@ print("they match" if count == expected else "they do not match: check the loop 
       <ul class="points">
         <li>Two sublayers, always in this order: <b>self-attention</b>, then a <b>feed-forward network</b></li>
         <li>Self-attention mixes information across positions; the feed-forward layer does not: it runs on each word's vector separately</li>
-        <li>This shape is an <b>encoder</b> block. <b>Decoder</b> blocks add one more piece: <b>cross-attention</b> into the encoder's output</li>
+        <li>This shape is an <b>encoder</b> block. <b>Decoder</b> blocks add one more piece: <b>cross-attention</b> into the encoder's output: the decoder's attention of the attention page, section 6</li>
       </ul>
     </div>
     <div class="col"><div class="fig"><img src="img/encoder-block.png" alt="One encoder block: self-attention, then feed-forward"><span class="cap">Credit: jalammar.github.io/illustrated-transformer</span></div></div>
   </div>
   <div class="notes">
-    <p>This is what one "Block" from the previous screen actually contains. Two sublayers, always in this order.</p>
-    <p>First, self-attention, the mechanism we talked about: each word's vector gets updated by looking at every other word's vector, weighted by relevance. This is the only place in the whole architecture where information actually moves between positions — worth pausing on that, it's easy to miss.</p>
-    <p>Second, a feed-forward network — really just a small two-layer network, applied identically and independently to every position's vector. No mixing across words here; it's the same small network run once per word, in parallel.</p>
-    <p>Attention decides what to look at; the feed-forward layer is where most of the actual parameters live and most of the per-word computation happens — that's a big part of the answer to "why does model size cost so much". It runs on every position, every block, so its cost multiplies by both sentence length and depth.</p>
-    <p>I'm simplifying on purpose here: the real architecture also has a residual connection and layer normalization around each sublayer, which I'm skipping unless someone asks — but it's worth knowing that's why very deep stacks of these blocks stay trainable at all instead of degrading. Stack N of these, GPT-3 uses 96, and you get the diagram from the previous screen.</p>
+    <p>What one block contains: two parts, always in this order. First, self-attention: each word's vector is updated with a mix of every word's vector, as on the attention page. This is the only place where information moves between words. Second, a feed-forward network: a small network run on each word's vector separately, with no mixing across words. Most of the parameters, and most of the computation for each word, are here.</p>
+    <p>Decoder blocks have one more part between the two: cross-attention, the decoder looking at the encoder's output. That is the attention of the attention page's section 6, where each English piece looked at the Galician pieces. (The real architecture also adds each part's input to its output and normalizes the vectors; that is what keeps deep stacks trainable. We skip the details.)</p>
   </div>
 </section>
 
@@ -3267,7 +3266,8 @@ print("they match" if count == expected else "they do not match: check the loop 
     </div>
   </div>
   <div class="notes">
-    <p>So, regarding model size: more parameters means more attention heads, more stacked blocks — all of it means more computation, more FLOPs, per single query. Separately, longer input text means quadratically more attention computation, and longer generated output means more sequential steps with an ever-growing cache. So, a big model is costly not because it should be trained and stored somewhere; inference is crucial because it is complex and attention is expensive.</p>
+    <p>Three things set the cost of using a model, at every query. Its size: more parameters, more heads and more blocks mean more computation for every word. The length of the input: attention compares every word with every word, so twice the text means four times the comparisons. And the length of the output: one word at a time, each step with a bigger cache.</p>
+    <p>So a big model costs not only to train and to store: every use of it costs, and that cost grows with the size of the model and the length of the text. Both are levers you can measure, as the notebooks do.</p>
   </div>
 </section>
 
