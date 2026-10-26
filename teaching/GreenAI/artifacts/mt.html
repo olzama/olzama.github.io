@@ -216,6 +216,7 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 #tsAll .phrase { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 1.9em; line-height: 1.9em; }
 #tsDevStrip { overflow-x: auto; white-space: nowrap; height: 2.1em; align-items: center; min-width: 0; }
 #tsDevStrip button { flex: 0 0 auto; }
+#bVerdict .ok { color: var(--green); font-weight: 600; } #bVerdict .bad { color: var(--neg); font-weight: 600; }
 #trTest .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } #trTest .cols > .col, #trTest .controls { min-width: 0; } .testcard { width: 100%; }
 .ogrid.one .row { flex-wrap: nowrap; height: 1.9em; overflow: hidden; white-space: nowrap; }
 #pathAll { grid-template-columns: minmax(0, 1fr); }
@@ -512,13 +513,15 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 2 -->
   <section class="panel" id="bound">
     <h2><span class="n">3</span>Inference, part 2: the decoder writes English, word by word</h2>
-    <p class="label">Still inference: the model trained in section 1 (after its 3000 rounds), translating. Nothing changes in its tables here.</p>
-    <p class="note" style="max-width:none;margin:0">This model, trained on all 16 short phrases, translates all of them right: in 3 words, the first word still makes up an eighth of the summary and the second a quarter. It can fail in two ways: on a phrase it never saw (section 1, part C: “an aunt ‹end›”), and on long sentences, where early words fade from the summary to almost nothing (section 2). The <a href="attention.html">next page</a> shows the second with <b>other models</b>, not this one: two models with 8-dimensional vectors, trained on thousands of variants of our whole sentence. One works like this page's model and writes “A friend of mine, …”; the other adds the remedy that page introduces, attention, and gets it right.</p>
-    <p class="lead">The model trained in section 1, at work. The encoder reads the phrase into a summary, and Galician and English words share one plane. The <b>decoder</b> then writes English one word at a time. It keeps a <b>state</b>, a vector, and its first state is the summary. At every step it chooses a word the way skip-gram predicted neighbors, then folds that word into its state with the same ½ + ½ rule the encoder used.</p>
+    <p class="label">Still inference: a model trained in section 1 (after its 3000 rounds), translating. Nothing changes in its tables here. Choose the model (trained on all 16, or on 15 with <i>unha tía miña</i> held out) and the phrase: a training pair, the development pair, or a test phrase that neither model ever saw.</p>
+    <p class="note" style="max-width:none;margin:0">The model trained on all 16 short phrases translates all of them right: in 3 words, the first word still makes up an eighth of the summary and the second a quarter. It can fail in two ways: on a phrase it never saw (section 1, part C: “an aunt ‹end›”), and on long sentences, where early words fade from the summary to almost nothing (section 2). The <a href="attention.html">next page</a> shows the second with <b>other models</b>, not this one: two models with 8-dimensional vectors, trained on thousands of variants of our whole sentence. One works like this page's model and writes “A friend of mine, …”; the other adds the remedy that page introduces, attention, and gets it right.</p>
+    <p class="lead">A model trained in section 1, at work. The encoder reads the phrase into a summary, and Galician and English words share one plane. The <b>decoder</b> then writes English one word at a time. It keeps a <b>state</b>, a vector, and its first state is the summary. At every step it chooses a word the way skip-gram predicted neighbors, then folds that word into its state with the same ½ + ½ rule the encoder used.</p>
 <div class="actl">
     <div class="controls">
-      <label class="note" for="bA">Phrase</label><select id="bA"></select>
+      <span class="note">model:</span><div class="seg" role="group" aria-label="Which trained model"><button id="bM16" aria-pressed="true">trained on all 16 (parts A, B)</button><button id="bM15" aria-pressed="false">trained on 15 (part C)</button></div>
+      <label class="note" for="bA">Phrase</label><select id="bA" style="min-width:0;max-width:100%"></select>
     </div>
+    <div class="controls" style="flex-wrap:nowrap;height:2.2em;overflow:hidden"><span class="mono" id="bVerdict" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0"></span></div>
     <div class="controls">
       <button id="bBack">← Back</button>
       <button class="primary" id="bNext">Next →</button>
@@ -1321,14 +1324,20 @@ $("pathPlay").addEventListener("click", () => {
 });
 
 // ---------- section 3: the decoder, one step at a time ----------
-const LAST = S[S.length - 1];
-const TRS = S2S.data.map(([src]) => translate(LAST, src));
+// the phrases: the 16 pairs, and test phrases that neither model ever saw (real Galician, words the model knows)
+const PH = [...S2S.data.map(([src, tgt], q) => ({ src, tgt, dev: q === S2S.held })), { src: ["unha", "tía"], tgt: ["an", "aunt", "‹end›"], test: true }, { src: ["unha", "veciña"], tgt: ["a", "neighbor", "‹end›"], test: true }];
+let bModel = 16, LAST = S[S.length - 1], TRS = PH.map(p => translate(LAST, p.src));
+const kindOf = p => p.test ? "test: never seen by either model" : p.dev && bModel === 15 ? "development: held out of this model's training" : "training pair";
+function fillPicker() { $("bA").innerHTML = PH.map((p, q) => `<option value="${q}">${p.src.join(" ")} → ${p.tgt.filter(w => w !== "‹end›").join(" ")}  (${kindOf(p)})</option>`).join(""); $("bA").value = bA; }
 let bA = Math.max(0, S2S.data.findIndex(([x]) => x.join(" ") === "unha tía miña")), bStep = 0, bStage = 0, bSel = -1;   // bStage: reading the Galician words, then writing the English ones   // bSel: the word whose score is shown (-1 = the winner)
-$("bA").innerHTML = S2S.data.map(([src, tgt], q) => `<option value="${q}">${src.join(" ")} → ${tgt.filter(w => w !== "‹end›").join(" ")}</option>`).join("");
-$("bA").value = bA;
-const OMAX = Math.max(...LAST.O.flat().map(Math.abs));
+fillPicker();
+let OMAX = Math.max(...LAST.O.flat().map(Math.abs));
 const ENCOL = ["#c96f1f", "#d98b45", "#e3a66d", "#ebc095", "#f1d6bb"];   // English words in the state, newest first
-const GMAX = Math.max(1, ...LAST.G.flat().map(Math.abs)), SMAX = Math.max(OMAX, GMAX);
+let GMAX = Math.max(1, ...LAST.G.flat().map(Math.abs)), SMAX = Math.max(OMAX, GMAX);
+function setModel(m) {   // 16: the model of section 1, parts A and B; 15: the model of part C (unha tía miña held out)
+  bModel = m; LAST = m === 16 ? S[S.length - 1] : testRun()[ROUNDS]; TRS = PH.map(p => translate(LAST, p.src));
+  OMAX = Math.max(...LAST.O.flat().map(Math.abs)); GMAX = Math.max(1, ...LAST.G.flat().map(Math.abs)); SMAX = Math.max(OMAX, GMAX);
+  fillPicker(); bStage = 0; bSel = -1; renderB(); }
 // new = ½ old + ½ vec, drawn as arrows on its own scale
 function addSVG(old, vec, neu, oldLab, vecLab, newLab) {
   const orange = css("--orange"), green = css("--green"), muted = css("--muted");
@@ -1356,7 +1365,7 @@ function addSVG(old, vec, neu, oldLab, vecLab, newLab) {
 }
 // the reading phase: the encoder builds the summary on the same plane
 function renderRead(r) {
-  const src = S2S.data[bA][0], nR = src.length, path = translate(LAST, src).path;
+  const src = PH[bA].src, nR = src.length, path = translate(LAST, src).path;
   const orange = css("--orange"), fg = css("--fg"), muted = css("--muted"), r2 = x => x.toFixed(2);
   const P = x => 200 + x * 175 / SMAX, Q = y => 200 - y * 175 / SMAX;
   let g = `<line class="axis" x1="15" y1="200" x2="385" y2="200"/><line class="axis" x1="200" y1="15" x2="200" y2="385"/>`;
@@ -1386,7 +1395,10 @@ function renderRead(r) {
     `The encoder has read the whole phrase. This summary, (${r2(h[0])}, ${r2(h[1])}), is all the decoder will get. Next, the decoder starts writing from here.`;
 }
 function renderB() {
-  const src = S2S.data[bA][0], t = TRS[bA], n = t.steps.length, nR = src.length;
+  const src = PH[bA].src, t = TRS[bA], n = t.steps.length, nR = src.length;
+  { const p = PH[bA], w = t.steps.map(x => x.w), ok = w.join(" ") === p.tgt.join(" ");
+    $("bM16").setAttribute("aria-pressed", bModel === 16); $("bM15").setAttribute("aria-pressed", bModel === 15);
+    $("bVerdict").innerHTML = `<span class="devtag" style="margin:0 8px 0 0">${kindOf(p)}</span>gold: ${p.tgt.join(" ")} · written by this model: ${w.map((x, i) => `<span class="${x === p.tgt[i] ? "ok" : "bad"}">${x}</span>`).join(" ")} <b class="${ok ? "ok" : "bad"}">${ok ? "✓" : "✗"}</b>`; }
   bStage = Math.min(bStage, nR + n - 1);
   $("bStrip").innerHTML = `<span class="note">reads:</span> ` + src.map((w, j) => `<button class="src ${j === bStage ? "on" : j < bStage ? "done" : "todo"}" data-g="${j}">${w}</button>`).join(`<span class="ar">→</span>`) +
     `<span class="ar" style="margin:0 6px">|</span><span class="note">writes:</span> ` + t.steps.map((x, m) => `<button class="${nR + m === bStage ? "on" : nR + m < bStage ? "done" : "todo"}" data-g="${nR + m}">${nR + m <= bStage ? x.w : "?"}</button>`).join(`<span class="ar">→</span>`);
@@ -1481,6 +1493,8 @@ function renderB() {
 }
 (window.__askState ||= []).push(() => { const q = uA % NP, [src, tgt] = S2S.data[q], cp = correctProbs(snapAt(uA), src, tgt); return `Section 1 (training, one pair per update): part A is at round ${Math.floor(uA / NP) + 1}, pair ${q + 1} ("${src.join(" ")}"), ${uA} pairs seen; the probability of each gold output there: ${tgt.map((w, m) => `${w} ${cp[m].toFixed(2)}`).join(", ")}. Part B (${trProc === "one" ? "one pair per update" : "all 16 at once, one update per round"}) shows the tables after ${ti} rounds: ${rightsOf(trProc)[ti] ?? "?"} of 16 inputs translated right.`; });
 $("bA").addEventListener("change", e => { bA = +e.target.value; bStage = 0; bSel = -1; renderB(); });
+$("bM16").addEventListener("click", () => setModel(16));
+$("bM15").addEventListener("click", () => setModel(15));
 $("bNext").addEventListener("click", () => { bStage++; bSel = -1; renderB(); });
 $("bBack").addEventListener("click", () => { bStage = Math.max(bStage - 1, 0); bSel = -1; renderB(); });
 renderB();
@@ -1568,8 +1582,8 @@ $("tsSetB").addEventListener("click", () => { tsSet = 1; renderTest(); });
 $("tsPlay").addEventListener("click", () => { if (tsTimer) { stopTest(); return; } if (tsI >= ROUNDS) tsI = 0; $("tsPlay").textContent = "Pause";
   tsTimer = setInterval(() => { tsI = Math.min(ROUNDS, tsI + (tsI < 20 ? 1 : 50)); renderTest(); if (tsI >= ROUNDS) stopTest(); }, reduce ? 30 : 110); });
 renderTest();
-(window.__askState ||= []).push(() => { const t = TRS[bA], nR0 = S2S.data[bA][0].length; if (bStage < nR0) return `Section 3 (from Galician to English, word by word): reading phase, the encoder has read ${bStage + 1} of ${nR0} words of "${S2S.data[bA][0].join(" ")}" (Galician words drawn as bright squares, English words faded); summary = ½ old summary + ½ word vector.`; const k = Math.min(bStep, t.steps.length - 1), s = t.steps[k];
-  return `Section 3 (from Galician to English, word by word: encoder plane of the phrase, then the decoder): phrase "${S2S.data[bA][0].join(" ")}" → ${t.steps.map(x => x.w).join(" ")}; showing word ${k + 1} ("${s.w}"). (a) The word is chosen like skip-gram: score of each English word = dot product of the decoder state with that word's learned 2-D vector; softmax; top probabilities ${[...s.p.keys()].sort((a, b) => s.p[b] - s.p[a]).slice(0, 3).map(j => `${EN[j]} ${s.p[j].toFixed(2)}`).join(", ")}. (b) The state = ½ old state + ½ the written word's vector, so the summary makes up 1/${Math.pow(2, k)} of the state now and the written English words fill the rest (newest ½, previous ¼, ...). (c) Why the first word is right although the summary is mostly the end of the phrase: in 3-word phrases the first word's ⅛ share is still enough after training; in long sentences it fades, which is why Sutskever et al. (2014) fed the source sentence in reverse (BLEU 25.9 → 30.6), and why attention was invented (section 4).`; });
+(window.__askState ||= []).push(() => { const t = TRS[bA], nR0 = PH[bA].src.length; if (bStage < nR0) return `Section 3 (from Galician to English, word by word): reading phase, the encoder has read ${bStage + 1} of ${nR0} words of "${PH[bA].src.join(" ")}" (Galician words drawn as bright squares, English words faded); summary = ½ old summary + ½ word vector.`; const k = Math.min(bStep, t.steps.length - 1), s = t.steps[k];
+  return `Section 3 (from Galician to English, word by word: encoder plane of the phrase, then the decoder): phrase "${PH[bA].src.join(" ")}" → ${t.steps.map(x => x.w).join(" ")}; showing word ${k + 1} ("${s.w}"). (a) The word is chosen like skip-gram: score of each English word = dot product of the decoder state with that word's learned 2-D vector; softmax; top probabilities ${[...s.p.keys()].sort((a, b) => s.p[b] - s.p[a]).slice(0, 3).map(j => `${EN[j]} ${s.p[j].toFixed(2)}`).join(", ")}. (b) The state = ½ old state + ½ the written word's vector, so the summary makes up 1/${Math.pow(2, k)} of the state now and the written English words fill the rest (newest ½, previous ¼, ...). (c) Why the first word is right although the summary is mostly the end of the phrase: in 3-word phrases the first word's ⅛ share is still enough after training; in long sentences it fades, which is why Sutskever et al. (2014) fed the source sentence in reverse (BLEU 25.9 → 30.6), and why attention was invented (section 4).`; });
 
 })();
 </script>
