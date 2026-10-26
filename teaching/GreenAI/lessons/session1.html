@@ -2238,18 +2238,18 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Backpropagation</h2></header>
   <div class="body">
     <div class="board">
-      <svg viewBox="0 0 1400 740" role="img" aria-label="Backpropagation in the toy translation model. Forward: unha, tía, miña are mixed into the summary, which is the state for output 1; the output table gives an a probability of 0.08, which should be 1. Backward: the output table&#x27;s update, then the gradient passed back to the state, halved at each step back: the vector of miña moves 0.033, of tía 0.017, of unha 0.008.">
+      <svg viewBox="0 0 1400 750" role="img" aria-label="Backpropagation in the toy translation model. Forward: unha, tía, miña are mixed into the summary, which is the state for output 1; the output table gives an a probability of 0.08, which should be 1. Backward: the output table&#x27;s update, then the gradient passed back to the state, halved at each step back: the vector of miña moves 0.033, of tía 0.017, of unha 0.008. With the updated vectors and output table, the probability of an is 0.082.">
 <text x="40.0" y="34.0" font-size="21" style="fill:var(--muted)" data-s="1" data-d="0">one training pair: unha tía miña → an aunt of mine · output 1, gold output: an</text>
 <rect x="80.0" y="80.0" width="140.0" height="42.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.0" data-a="fade"/>
 <text x="150.0" y="108.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.05">unha</text>
-<text x="150.0" y="146.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.1">(−0.36, 0.04)</text>
+<text x="150.0" y="146.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.1">(−0.362, 0.043)</text>
 <line x1="150.0" y1="156.0" x2="150.0" y2="213.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.3"/>
 <path d="M144.9 201.0 L150.0 213.0 L155.1 201.0" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="0.9" data-a="fade" data-t="0.2"/>
 <rect x="65.0" y="219.0" width="170.0" height="46.0" rx="4" fill="var(--panel)" stroke="currentColor" stroke-width="1.5" data-s="1" data-d="0.4" data-a="fade"/>
 <text x="150.0" y="249.0" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.45">(−0.18, 0.02)</text>
 <rect x="350.0" y="80.0" width="140.0" height="42.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.1" data-a="fade"/>
 <text x="420.0" y="108.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.15">tía</text>
-<text x="420.0" y="146.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.2">(0.27, −0.43)</text>
+<text x="420.0" y="146.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.2">(0.275, −0.433)</text>
 <line x1="420.0" y1="156.0" x2="420.0" y2="213.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.4"/>
 <path d="M414.9 201.0 L420.0 213.0 L425.1 201.0" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.0" data-a="fade" data-t="0.2"/>
 <rect x="335.0" y="219.0" width="170.0" height="46.0" rx="4" fill="var(--panel)" stroke="currentColor" stroke-width="1.5" data-s="1" data-d="0.5" data-a="fade"/>
@@ -2258,7 +2258,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 <path d="M320.0 247.1 L332.0 242.0 L320.0 236.9" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.2" data-a="fade" data-t="0.2"/>
 <rect x="620.0" y="80.0" width="140.0" height="42.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.2" data-a="fade"/>
 <text x="690.0" y="108.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.25">miña</text>
-<text x="690.0" y="146.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.3">(0.13, 0.39)</text>
+<text x="690.0" y="146.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.3">(0.127, 0.389)</text>
 <line x1="690.0" y1="156.0" x2="690.0" y2="213.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.5"/>
 <path d="M684.9 201.0 L690.0 213.0 L695.1 201.0" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.1" data-a="fade" data-t="0.2"/>
 <rect x="605.0" y="219.0" width="170.0" height="46.0" rx="4" fill="var(--panel)" stroke="currentColor" stroke-width="1.5" data-s="1" data-d="0.6" data-a="fade"/>
@@ -2300,12 +2300,19 @@ print("they match" if count == expected else "they do not match: check the loop 
 <path d="M144.9 371.0 L150.0 383.0 L155.1 371.0" fill="none" stroke="var(--orange)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" data-s="5" data-d="1.45" data-a="fade" data-t="0.2"/>
 <text x="150.0" y="413.0" font-size="20" style="fill:var(--orange)" text-anchor="middle" data-s="5" data-d="0.95">vector of unha moves 0.008</text>
 <text x="150.0" y="439.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="5" data-d="1.0">⅛ of the state's gradient</text>
-<text x="40.0" y="500.0" font-size="23" style="fill:currentColor" data-s="6" data-d="0">backpropagation: the gradient at the output is passed back, step by step (the chain rule), to every parameter</text>
-<text x="40.0" y="532.0" font-size="20" style="fill:var(--muted)" data-s="6" data-d="0.3">each parameter then moves by the learning rate × its gradient · every neural network today is trained this way (Rumelhart, Hinton & Williams, 1986)</text>
-<text x="40.0" y="590.0" font-size="22" style="fill:var(--blue)" data-s="7" data-d="0">the further back a word, the smaller its vector's gradient: in a long sentence, the first vectors barely change (the vanishing gradient)</text>
-<text x="40.0" y="622.0" font-size="19" style="fill:var(--muted)" data-s="7" data-d="0.3">one update moves the probability of an from 0.08 to 0.082: training repeats this thousands of times</text>
-<text x="40.0" y="682.0" font-size="19" style="fill:currentColor" data-s="8" data-d="0">in our materials: the toy models of the MT and skip-gram pages are trained this way: it moves the Galician vectors in the MT page's plane;</text>
-<text x="40.0" y="710.0" font-size="19" style="fill:currentColor" data-s="8" data-d="0.3">so are the attention page's models and the notebooks' models, inside PyTorch or gensim. Only this screen shows backpropagation step by step.</text>
+<text x="150.0" y="467.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="6" data-d="0.0">(−0.362, 0.043) → (−0.361, 0.035)</text>
+<text x="420.0" y="467.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="6" data-d="0.15">(0.275, −0.433) → (0.275, −0.449)</text>
+<text x="690.0" y="467.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="6" data-d="0.3">(0.127, 0.389) → (0.128, 0.356)</text>
+<text x="1000.0" y="435.0" font-size="17" style="fill:var(--orange)" text-anchor="middle" data-s="6" data-d="0.3">an's row updated too</text>
+<text x="1250.0" y="339.0" font-size="17" style="fill:var(--muted)" text-anchor="middle" data-s="7" data-d="0">after the update</text>
+<text x="1250.0" y="369.0" font-size="28" style="fill:var(--green)" text-anchor="middle" data-s="7" data-d="0.2">0.082</text>
+<text x="1250.0" y="395.0" font-size="15" style="fill:var(--muted)" text-anchor="middle" data-s="7" data-d="0.3">(summary (0.09, 0.07))</text>
+<text x="40.0" y="532.0" font-size="23" style="fill:currentColor" data-s="8" data-d="0">backpropagation: the gradient at the output is passed back, step by step (the chain rule), to every parameter;</text>
+<text x="40.0" y="562.0" font-size="20" style="fill:var(--muted)" data-s="8" data-d="0.3">each parameter then moves by the learning rate × its gradient, and training repeats this over all pairs, thousands of times</text>
+<text x="40.0" y="616.0" font-size="21" style="fill:var(--blue)" data-s="9" data-d="0">in this model the gradient halves at every word back: in a 20-word sentence, the first word's vector would get (½)<tspan dy="-11" font-size="0.68em">20</tspan><tspan dy="11">,</tspan></text>
+<text x="40.0" y="644.0" font-size="21" style="fill:var(--blue)" data-s="9" data-d="0.3">about a millionth of the state's gradient, and would hardly be updated at all (the vanishing gradient)</text>
+<text x="40.0" y="696.0" font-size="19" style="fill:currentColor" data-s="10" data-d="0">in our materials: the toy models of the MT and skip-gram pages are trained this way: it moves the Galician vectors in the MT page's plane;</text>
+<text x="40.0" y="724.0" font-size="19" style="fill:currentColor" data-s="10" data-d="0.3">so are the attention page's models and the notebooks' models, inside PyTorch or gensim. Only this screen shows backpropagation step by step.</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
@@ -2314,8 +2321,9 @@ print("they match" if count == expected else "they do not match: check the loop 
     <p>The MT page showed the update of the output table: after each output, the gold output's row moves toward the state, and every other row moves away. But the Galician words' vectors are trained too, although only the output is compared with the gold output. Backpropagation is how.</p>
     <p>One pair from the MT page, unha tía miña, at the moment training first sees it, and only its first output, an. Forward: the three vectors are mixed into the summary, half old and half new, three times. For the first output the summary is the state. The output table gives an a probability of 0.08. It should be 1.</p>
     <p>The output table's update follows the rule from the MT page. Then one step back: the gradient for the state, the change in the state that would make an more probable. The state is not a parameter; it was computed from the input vectors. The summary is half the old summary plus half the new vector, so by the chain rule the gradient passes back through each half: miña gets half of the state's gradient, tía a quarter, unha an eighth. With the learning rate, their vectors move by 0.033, 0.017 and 0.008.</p>
+    <p>Those moves are the update: each vector is replaced by its new value, and the output table's rows are updated too. Read the same pair again with the updated parameters, and the probability of an is 0.082 instead of 0.08. One update is a small step; training repeats it over all the pairs, thousands of times.</p>
     <p>That is backpropagation: the gradient at the output, passed back step by step to every parameter that contributed. For the later outputs it also passes back through the decoder's steps, to the English words' vectors. Every neural network today is trained this way, transformers included. The method was popularized by Rumelhart, Hinton and Williams in 1986.</p>
-    <p>The halving shows a problem. The further back a word, the smaller the gradient for its vector: in a long sentence, the vectors of the first words barely change. This is called the vanishing gradient. Attention, next, gives every input a direct path to every output.</p>
+    <p>The halving shows a problem. In this model the gradient halves at every word back. In a 20-word sentence, the first word's vector would get one half to the power 20, about a millionth, of the state's gradient, and would hardly be updated at all. This is called the vanishing gradient. Attention, next, gives every input a direct path to every output.</p>
     <p>Where backpropagation is in our materials: the toy model of the MT page is trained exactly this way; it moves the Galician vectors in the page's plane during training. The skip-gram toy is trained by gradient descent, and the gradient of its input-word table passes through the context table, one step of backpropagation. The models of the attention page were trained with backpropagation in PyTorch, the notebooks' word2vec in gensim, and the pretrained models by their authors. No page or notebook steps through backpropagation itself; this screen is the only place it is shown.</p>
   </div>
 </section>
