@@ -2912,7 +2912,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   </div>
   <div class="notes">
     <p>What to take from this screen: without attention, the decoder gets one summary in which tía has only 0.25, and this model needs more than 0.35 of tía to write “an”; with attention, the decoder builds a new mix of all the encoder's vectors before every English word, and the mix for “an” has 0.44 of tía.</p>
-    <p>First, the table in the review box of the full page (Open the full page; the frame here leaves it out): which model writes what for unha tía miña. The translation page's model gets this short phrase right; the model here is made up, small enough to compute by hand, and built to fail the way a model without attention fails on our long sentence, where 29 more words and marks follow tía. Section 4 shows that real failure.</p>
+    <p>First, say why this model fails where the translation page's model succeeded. The translation page's model gets this short phrase right; the model here is made up, small enough to compute by hand, and built to fail the way a model without attention fails on our long sentence, where 29 more words and marks follow tía. Section 4 shows that real failure.</p>
     <p>Section 1. Step 1: one dimension per Galician word, so each word vector is a 1 on its own axis (blue squares in the picture). Step 2: the encoder, as on the translation page, half the old vector plus half the word's vector; the summary is 0.125 unha, 0.25 tía, 0.5 miña (the bar under it shows these shares). Step 3: the decoder state has eleven dimensions; the first three are the summary, the last eight record the English words written so far. Step 4: each English word's score is the dot product of its vector (a ring in the picture) with the state. Step 5: where such values come from, a made-up training run on two example translations. Step 6: the bias, one extra value per word, added to its score whatever the state; the bias of “a” is 5.6 because “a” is right six times out of eight in the example translations, and it is why the decoder writes “a” when the state holds too little tía. Step 7: the whole phrase, “a friend of mine”. Good English, wrong translation.</p>
     <p>Section 2: only the first three dimensions of the state change. Step 1: the query, (0, 6, 0) for the first two words, scores each encoder vector (here called a key); softmax turns the scores into weights. Step 2: the mix, the keys added up with those weights: 0.44 along tía. Step 3: the mix goes into the state, and “an” wins. Step 4: the rest of the phrase; after “aunt” the query shifts toward miña. The result: “an aunt of mine”.</p>
   </div>
@@ -2994,16 +2994,16 @@ print("they match" if count == expected else "they do not match: check the loop 
 <div class="part" id="part-step5"><h1>Step 5 · Self-attention</h1></div>
 
 <section class="screen" id="selfattn" data-step="5">
-  <header><span class="kind">Step 5 · Self-attention</span><h2>Self-attention: aligning a sentence to itself</h2></header>
+  <header><span class="kind">Step 5 · Self-attention</span><h2>Self-attention: every word looks at every word of its own sentence</h2></header>
   <div class="body cols">
     <div class="col">
       <ul class="points">
-        <li>Vaswani et al. (2017): the same mechanism <i>within</i> one sentence: every word attends to every word, itself included, all at once</li>
+        <li>Vaswani et al. (2017): the same mechanism <i>within</i> one sentence: every word looks at every word, itself included, all at once</li>
         <li>“it” → “the animal”, with no hand-written rule</li>
       </ul>
     </div>
     <div class="col">
-      <div class="fig"><img src="img/self-attention.png" alt="Self-attention from it to the animal"><span class="cap">Illustration: jalammar.github.io/illustrated-transformer · Source: Vaswani et al., NeurIPS 2017 (arXiv:1706.03762)</span></div>
+      <div class="fig"><img src="img/self-attention.png" alt="Self-attention from it to the animal"><span class="cap">Encoder layer 5 of a trained model; the coloured squares at the top are its 8 heads (orange: the one drawn); right, the word that looks (“it”), left, the words it looks at, darker = more weight; the sentence ends “too tired”, split into pieces as on the attention page (tire·d; _ ends a word). Illustration: jalammar.github.io/illustrated-transformer · Source: Vaswani et al., NeurIPS 2017 (arXiv:1706.03762)</span></div>
     </div>
   </div>
   <div class="notes">
@@ -3016,12 +3016,12 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">Step 5 · Self-attention</span><h2>Multiple alignments at once: multi-head attention</h2></header>
   <div class="body">
     <ul class="points">
-      <li>Several attention patterns in parallel, in different “heads”, combined into one output per word</li>
+      <li>Several heads side by side, each with its own grid of weights and its own mix; the mixes are combined into one new vector per word</li>
     </ul>
     <div class="flow">
-      <div class="box">input</div><span class="arr">⇉</span>
+      <div class="box">a vector per word</div><span class="arr">⇉</span>
       <div style="display:grid;gap:6px"><div class="box g">head 1</div><div class="box g">head 2</div><div class="box g">head 3</div><div class="box g">head 4</div></div>
-      <span class="arr">⇉</span><div class="box">combine</div>
+      <span class="arr">⇉</span><div class="box">combined: one new vector per word</div>
     </div>
   </div>
   <div class="notes">
@@ -3072,7 +3072,7 @@ print("they match" if count == expected else "they do not match: check the loop 
     <div class="col">
       <ul class="points">
         <li>Two sublayers, always in this order: <b>self-attention</b>, then a <b>feed-forward network</b></li>
-        <li>Self-attention mixes information across positions; the feed-forward layer does not: it runs on each word's vector separately</li>
+        <li>Self-attention mixes information across words; the feed-forward network does not: it is the “one more learned step” of the attention page (sections 6 and 7), run on each word's vector separately</li>
         <li>This shape is an <b>encoder</b> block. <b>Decoder</b> blocks add one more part: <b>cross-attention</b> into the encoder's output: the decoder's attention of the attention page, section 6</li>
       </ul>
     </div>
@@ -3248,7 +3248,7 @@ print("they match" if count == expected else "they do not match: check the loop 
       <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i><i class="kvc" style="background:color-mix(in srgb, var(--blue) 45%, var(--panel))"></i><i class="kvc" style="background:var(--blue)"></i></div><span>word 3<br>(cache: 3)</span></div>
     </div>
     <ul class="points">
-      <li>One word at a time: the <b>KV cache</b> grows with every word generated</li>
+      <li>One word at a time. Each word written gets its own key and value (the decoder's self-attention looks at the words written so far); the <b>KV cache</b> keeps them, so it grows with every word</li>
       <li>Translating the rest of our story this way: the cache keeps growing the whole time</li>
     </ul>
   </div>

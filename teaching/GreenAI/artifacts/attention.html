@@ -151,7 +151,9 @@ svg.v3 .pl { font-size: 12px; fill: var(--fg); } svg.v3 .pl.mix, svg.v3 .pl.sum 
 .pbars { min-height: 118px; }
 /* inside a lesson screen, the panel starts with its pictures: the opening paragraphs and the recap are on the full page */
 html.embed section.panel > .lead:not(.keep), html.embed .review.recap, html.embed .noembed { display: none; }
-html.embed .steptext, html.embed .lead, html.embed .note { max-width: 115ch; }   /* in a lesson frame the height is short: wider lines leave room for the pictures */
+html.embed .steptext, html.embed .lead, html.embed .note { max-width: 115ch; }
+/* section 3 in a lesson frame: the picture right after the step text; the controls (inactive until step 5) below it */
+html.embed #qkBody { display: flex; flex-direction: column; } html.embed #qkBody > .tycols { order: 1; } html.embed #qkPosRow, html.embed #qkCtl { order: 2; } html.embed #qkWordsBox { order: 3; }   /* in a lesson frame the height is short: wider lines leave room for the pictures */
 .choose:has(.flow:empty) > .op { visibility: hidden; }
 table.cmp7 td:first-child { color: var(--muted); white-space: nowrap; } table.cmp7 td { vertical-align: top; }
 /* section 6: from section 2's weights to the real model's grids */
@@ -186,7 +188,7 @@ table.corpus td { padding: 2px 10px 2px 0; font-size: 0.86rem; } table.corpus td
 .work .muted, .muted { color: var(--muted); }
 .g11 .gsum:has(.gside) { position: relative; overflow: visible; place-items: start; }
 .g11 .gside { position: absolute; left: 4px; top: -1px; width: max-content; z-index: 2; display: grid; font-family: "Caveat", "Comic Sans MS", cursive; font-size: 15px; line-height: 14.5px; color: var(--fg); text-align: left; white-space: nowrap; }
-.g11 .gside.wrap { width: 200px; white-space: normal; row-gap: 2px; }
+.g11 .gside.gwrap { width: 200px; white-space: normal; row-gap: 2px; }
 .g11 .gside.head { color: var(--muted); top: 6px; border: 0; background: none; box-shadow: none; }
 .g11 .gside span { animation: write 0.5s ease-out both; }
 .g11 .gc.ch { position: relative; overflow: hidden; background: none; }
@@ -536,7 +538,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <tr><td>sections 4 and 5 here</td><td>5,000 template sentences; ours held out</td><td><span class="bad">A friend of mine, …</span>; with attention, An aunt of mine, …</td><td>same data, same number of updates, same size: the difference is attention's</td></tr>
       </tbody></table></div>
       <p>Step 5 shows, on a made-up training run, how training on the example translations would produce values like those of sections 1 and 2.</p></div>
-    <p class="lead keep">A translation model small enough to run by hand, on the phrase <i>unha tía miña</i>. Its vectors have three dimensions, one per Galician word, and its decoder knows eight English words. Every value is on the page. Without attention, this made-up model writes “a friend of mine”, and the steps show exactly why. Section 2 adds attention to the same model, and it writes “an aunt of mine”. We set the values by hand so that the arithmetic stays simple; a real model learns them from examples, as the skip-gram lesson showed.</p>
+    <p class="lead keep">A translation model small enough to run by hand, on the phrase <i>unha tía miña</i>. Its vectors have three dimensions, one per Galician word, and its decoder knows eight English words. Every value is on the page. Without attention, this made-up model writes “a friend of mine”: its values are made up so that it fails the way a model without attention fails on a long sentence (the translation page's model gets this short phrase right). The steps show exactly why. Section 2 adds attention to the same model, and it writes “an aunt of mine”. We set the values by hand so that the arithmetic stays simple; a real model learns them from examples, as the skip-gram lesson showed.</p>
     <div class="planes" id="tyPlanes"></div>
   </section>
 
@@ -586,8 +588,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="walk">
     <h2><span class="n">4</span>The same steps in two trained models</h2>
     <p class="lead">Two small models translate our whole sentence. They are new models, neither the translation page's model (2 dimensions, 16 short phrases) nor the made-up one of sections 1 and 2. We trained them on the same data, and they are identical except for one thing: <b>without attention</b>, the decoder gets the summary for every English word; <b>with attention</b>, it gets a new mix of all the encoder's vectors for every English word, as in section 2. Their vectors have 8 dimensions, and their values were learned in training: every number below is the models' own. Each step links to the step of section 1 or 2 that does the same thing by hand.</p>
-    <div class="legend"><span class="lab">−1</span><span class="wkstrip h" id="wkLegend"></span><span class="lab">+1</span><span class="note">one square = one dimension of a vector. Every number is between −1 and +1: each new vector of these models is partly the previous vector and partly a new candidate, kept in that range, starting from zeros.</span></div>
-    <div class="controls stick"><button id="wkBack">Back</button><button class="primary" id="wkNext">Next step</button><span class="pathstrip" id="wkSteps"></span></div>
+    <div class="legend"><span class="note">one square = one dimension of a vector. Every number is between −1 and +1: each new vector of these models is partly the previous vector and partly a new candidate, kept in that range, starting from zeros.</span></div>
+    <div class="controls stick"><button id="wkBack">Back</button><button class="primary" id="wkNext">Next step</button><span class="pathstrip" id="wkSteps"></span><span class="legend" style="margin-left:auto">  <!-- in the sticky strip: the colour key stays in view at every step --><span class="lab">−1</span><span class="wkstrip h" id="wkLegend"></span><span class="lab">+1</span></span></div>
     <div id="wkBody">
     <h3 class="wkh" id="wkTitle"></h3>
     <div class="cmprows" id="wkOut"></div>
@@ -981,7 +983,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return `<svg viewBox="0 0 ${W} ${Ht}" style="max-width:${W}px" role="img" aria-label="one small grid per head">${g}</svg><p class="note" style="margin:4px 0 0">${key}</p>`;
   }
   const layerFlow = `<div class="hbflow"><span class="note">one layer:</span><span class="word">a vector per English word</span><span class="op">→</span><span class="word">8 heads: 8 grids, 8 mixes</span><span class="op">→</span><span class="word">combined, one more learned step</span><span class="op">→</span><span class="word">a new vector per English word</span><span class="op">→ next layer … after layer 6:</span><span class="word">a probability for each English word</span></div>`;
-  const headFlow = `<div class="hbflow"><span class="note">one head:</span><span class="word">decoder's vector × <b>query table</b> → query</span><span class="word">encoder's vectors × <b>key table</b> → keys</span><span class="op">→</span><span class="word">query · each key → softmax → <b>weights: one row</b></span><span class="op">→</span><span class="word">encoder's vectors × <b>value table</b>, mixed with the weights → this head's mix</span></div>`;
+  const headFlow = `<div class="hbflow"><span class="note">one head:</span><span class="word">decoder state × <b>query table</b> → query</span><span class="word">encoder's vectors × <b>key table</b> → keys</span><span class="op">→</span><span class="word">query · each key → softmax → <b>weights: one row</b></span><span class="op">→</span><span class="word">encoder's vectors × <b>value table</b>, mixed with the weights → this head's mix</span></div>`;
   const POINTS = [
     "A row of a grid: one English word's weights over the Galician words. They add up to 1. Section 2 computed one by hand.",
     "The grid: all the rows, one per English word written. Darker means more weight.",
@@ -997,7 +999,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ["A real model's grid reads the same way",
       `A real translation model, opus-mt-gl-en, trained by others on a large amount of Galician–English text, on the same phrase. One of its grids, on the right (the model has 48; steps 4 and 5 show what “layer 5, head 3” means): rows are the English words it wrote, columns the Galician words it read, and ‹end› is the end marker it reads after them. “Aunt” looks at tía, as in our grid. But it writes “${TGT_R.slice(0, -1).join(" ")}”, not “An aunt of mine”. Choosing between “A” and “An” depends on the next word, aunt, so it needs tía, as for the hand-set model in sections 1 to 3. The row of “A” puts ${C[FL][FH][0][1].toFixed(2)} on tía in this head, and ${avgTiaA.toFixed(2)} on average over all ${NL * NH} of the model's grids: when it chose the article, the model looked at tía very little. (The capital in “Aunt” is a second slip of this model.)`],
     ["What a head is",
-      "In section 2 the decoder did the whole computation once before each English word: one query, a score for each key, softmax, weights, mix. So one grid of weights. A head is one such computation with its own three learned tables: one turns the decoder's vector into the query, one turns the encoder's vectors into keys, one into the values that are mixed (the flow on the right). This model has 8 heads side by side, each with its own tables, so 8 different grids and 8 mixes, which it combines into one vector. Each small grid on the right is one head's grid, read like the grid of step 3 (outlined): one row per English word, one column per Galician word, ‹end› included."],
+      "In section 2 the decoder did the whole computation once before each English word: one query, a score for each key, softmax, weights, mix. So one grid of weights. A head is one such computation with its own three learned tables of numbers. Here a table is not looked up by row: a vector is multiplied by it (the lesson's refresher on multiplying matrices), which gives a new vector. One table turns the decoder state into the query, one turns the encoder's vectors into keys, one into the values that are mixed (the flow on the right). This model has 8 heads side by side, each with its own tables, so 8 different grids and 8 mixes, which it combines into one vector. Each small grid on the right is one head's grid, read like the grid of step 3 (outlined): one row per English word, one column per Galician word, ‹end› included."],
     ["6 layers × 8 heads = 48 grids",
       "A layer (the lesson's transformer screens call it a block) is one round of step 4's computation: the 8 heads run on the same vectors, and their 8 mixes are combined, with one more learned step, into one new vector per English word. The next layer starts from these new vectors (the flow on the right). The decoder has 6 layers, each with its own 8 heads: 48 grids for the same phrase. (Each decoder layer also has heads that look at the English words already written; section 7 shows heads of that kind in the encoder.) In layer 1 most heads spread their weight or rest it on ‹end›; in layer 5 most heads, and in layer 6 several, point each English word at the Galician word it translates. Nobody assigned these patterns: section 8 shows how heads get them."],
     ["The whole sentence",
@@ -1118,7 +1120,7 @@ function render() {
   l += `<line x1="${lx(s.step)}" y1="12" x2="${lx(s.step)}" y2="110" stroke="${css("--orange")}" stroke-width="2"/>`;
   $("whoLoss").innerHTML = l;
   const f = x => x.toFixed(2);
-  $("whoJobs").innerHTML = `<thead><tr><th>head</th><th>looks at the animal (tired, scared, lazy)</th><th>looks at the place (wide, busy, wet)</th><th>right answers if switched off</th></tr></thead><tbody>` + run.heads.map(h =>
+  $("whoJobs").innerHTML = `<thead><tr><th>head</th><th>looks at the animal (tired, scared, lazy)</th><th>looks at the place (wide, busy, wet)</th><th>right answers if switched off (guessing: about 48)</th></tr></thead><tbody>` + run.heads.map(h =>
     `<tr><td class="mono" style="white-space:nowrap">layer ${h.layer}, head ${h.head}</td><td class="mono" style="background:rgba(${heat},${(h.animal_when_animal * 0.7).toFixed(2)})">${f(h.animal_when_animal)}</td><td class="mono" style="background:rgba(${heat},${(h.place_when_place * 0.7).toFixed(2)})">${f(h.place_when_place)}</td><td class="mono">${Math.round(h.acc_without * 96)}/96</td></tr>`).join("") + "</tbody>";
   const L2 = run.heads.filter(h => h.layer === 2);
   const bothHead = L2.find(h => h.animal_when_animal > 0.6 && h.place_when_place > 0.5);
@@ -1135,7 +1137,7 @@ function render() {
     : story + " Compare the three starts: same model, same sentences, different jobs. Switching off one head costs many answers, so each head carries part of the work.";
 }
 $("whoRuns").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
-  stop(); r = +b.dataset.r; i = IT.runs[r].snaps.length - 1;
+  stop(); r = +b.dataset.r; i = 0;
   $("whoRuns").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); render();
 }));
 $("whoStep").addEventListener("input", e => { stop(); i = +e.target.value; render(); });
@@ -1145,7 +1147,7 @@ $("whoPlay").addEventListener("click", () => {
   $("whoPlay").textContent = "Pause";
   timer = setInterval(() => { i++; render(); if (i >= IT.runs[r].snaps.length - 1) stop(); }, reduce ? 20 : 60);
 });
-i = IT.runs[0].snaps.length - 1;
+i = 0;   // every run starts untrained: Train shows how the jobs appear
 render();
 (window.__askState ||= []).push(() => {
   const run = IT.runs[r], snap = run.snaps[i];
@@ -1758,7 +1760,7 @@ function g11(o) {
   const stRow = line(stLabel, DS.map((d, i) => { const c = (st.hi || []).includes(i) || (same && (sum.hi || []).includes(i)) ? "cur" : "";
       const from = st.from || (same && i < 3 ? sum.from : undefined), delay = st.from ? st.delay : sum.delay;
       return from && st.v && from[i] !== st.v[i] ? gCellCh(from[i], st.v[i], c, delay || 0) : gCell(st.v ? st.v[i] : undefined, c); }),
-    o.stSide ? `<div class="gside wrap">${o.stSide}</div>` : same && o.sideHead ? `<div class="gside head">${o.sideHead}</div>` : "", "", "", "", "strow");
+    o.stSide ? `<div class="gside gwrap">${o.stSide}</div>`   /* not "wrap": the lesson-frame rule hides every .wrap child */ : same && o.sideHead ? `<div class="gside head">${o.sideHead}</div>` : "", "", "", "", "strow");
   const words = EN.map(w => {
     const r = (o.words || {})[w] || {}, dim = (o.dim || []).includes(w) ? " gdim" : "", win = o.win === w ? " win" : "";
     const vec = r.v === undefined ? DS.map(() => undefined) : r.v;
@@ -1817,7 +1819,7 @@ function smCore(o, n) {
 // section 2, steps 1 and 2 share one board: the query rule, the query · key rows, the softmax board, then the mix
 function qkParts(a) {
   const qrule = work([`The query is computed from the decoder state. A real model learns how, in training. Here the query is made up, like the word vectors: we chose it because we know the result we want, “an aunt of mine”.`,
-        `Before the first two English words, the query is ${vecTxt(Q0)}: it points along tía. After that, each word written shifts it by its value in the state × (0, −12, 12), away from tía and toward miña (step 4).`,
+        `Before the first two English words, the query is ${vecTxt(Q0)}: it points along tía. After that, each of “aunt”, “friend”, “of”, “mine” and “yours” shifts it by its value in the state × (0, −12, 12), away from tía and toward miña; the other words do not (step 4).`,
         `Nothing is written yet, so the query is ${vecTxt(a.q)}.`]);
   const rowsHtml = n => ENC.slice(0, n).map((e, j) => eq(col(a.q, "the query"), op("·"), col(e, `key ${j + 1}: encoder vector ${encName(j)}`), op("="), `<div class="res">${dotTxt(a.q, e)} = <b>${f(a.sc[j])}</b></div>`)).join("");
   return { qrule, rowsHtml, LBL: `<p class="label">the score of each key: the dot product of the query and the key</p>` };
@@ -2164,7 +2166,7 @@ const QSTEPS = [
     "Move the 6 from tía to miña. Now the key after miña scores highest and the mix is mostly that key. It holds a quarter of tía, less than 0.35, and the decoder writes “a”: wrong. Nothing else changed: same sentence, same keys, same decoder. Which dimension the query rewards decides which key is read, and that decides the word. The buttons try the other cases: unha × 6 reads mostly the key after unha, which no word of our phrase needs; equal rewards for tía and miña favour the key after miña, which holds both; all × 0 reads the plain average.",
     [0, 0, 6], 0, ["ctl", "scores", "sm", "mix", "out", "3d", "q3", "m3"]],
   ["Reward it more or less: how sharply attention focuses",
-    "Keep rewarding tía only, but 2 points per unit instead of 6. The keys are ranked as before, but the gaps between the scores shrink, softmax spreads the weight more evenly, and the mix drifts toward the average of the three keys. Its tía drops below 0.35 and the decoder writes “a”, although the query rewarded the right dimension. With 10 points per unit nearly all the weight goes to the key after tía and “an” wins clearly. So the size of the numbers sets how sharply attention focuses. A weak query reads a blur of all three keys, close to the summary that failed in section 1. The real model of section 6 has heads of both kinds, sharp and spread (section 6, step 4, says what a head is).",
+    "Keep rewarding tía only, but 2 points per unit instead of 6. The keys are ranked as before, but the gaps between the scores shrink, softmax spreads the weight more evenly, and the mix drifts toward the average of the three keys. Its tía drops below 0.35 and the decoder writes “a”, although the query rewarded the right dimension. With 10 points per unit nearly all the weight goes to the key after tía and “an” wins clearly. So the size of the numbers sets how sharply attention focuses. A weak query reads a blur of all three keys, close to the summary that failed in section 1. The real model of section 6 has both: some of its rows of weights are sharp, some spread.",
     [0, 2, 0], 0, ["ctl", "scores", "sm", "mix", "out", "3d", "q3", "m3"]],
   ["The same query at a later word: why each word needs its own query",
     "Move to the third word. “an aunt” is written, and the correct next word is “of”. By section 2, step 4's arithmetic (‹end› has a bias of 1.6, so “of” needs 8 × miña > 1.6), it needs more than 0.2 of miña in the mix; with less, ‹end› wins and the translation stops at “an aunt”. The query that served the first word, tía × 6, fetches a mix with little miña, and the decoder writes ‹end›: wrong. Reward miña instead and “of” comes out. The right query depends on the word being written. That is why the decoder computes a new query before every word, from its state: by a made-up rule in section 2, and from learned values in the trained models of section 4, where the state itself is the query. The table shows the same query at all five words.",
