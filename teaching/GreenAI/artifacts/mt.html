@@ -268,8 +268,8 @@ svg.chain, #trWhySvg, #trAllSvg, #trRightCurve, #trainCurve { max-width: 100%; }
 /* part B: protected dimensions, whatever the round or the procedure */
 #procNote { min-height: 5.8em; }
 #trWhole .legendrow { min-height: 3.4em; align-content: start; }
-#pathAll { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 14px; }
-#pathAll .phrase { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 1.8em; line-height: 1.8em; }
+#pathAll { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
+#pathAll .phrase { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 1.9em; line-height: 1.9em; }
 #pathStepVal { white-space: nowrap; }
 #trSupplyLbl, #trAllLbl, #pathAllLbl, #trRightLbl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: none; }
 #trRightNote { min-height: 3.6em; }
@@ -1213,7 +1213,7 @@ function renderWhole() {
   // 1. the 16 pairs, with the probability of each gold output
   const shown = S2S.data.map((d, q) => q).filter(q => Math.floor(q / 8) === pairSet), lo = pairSet * 8 + 1, hi = pairSet * 8 + 8;
   $("setA").setAttribute("aria-pressed", pairSet === 0); $("setB").setAttribute("aria-pressed", pairSet === 1);
-  $("trSupplyLbl").textContent = `1. Pairs ${lo}–${hi} ${ti === 0 ? "at the random start" : `after round ${ti}`}: each gold output, filled by the probability the model gives it`;
+  $("trSupplyLbl").textContent = `1. Pairs ${lo}–${hi} ${ti === 0 ? "at the random start" : `after round ${ti}`}: each gold output filled by its probability now`;
   $("trSupply").innerHTML = shown.map(q => { const [s2, t2] = S2S.data[q], cp = correctProbs(sn, s2, t2);
     return `<div class="row"><span class="src">${s2.join(" ")}</span>→ ${t2.map((w, m) => `<span class="cell" data-q="${q}" data-m="${m}" title="probability ${cp[m].toFixed(2)}"><span class="fl" style="width:${(cp[m] * 100).toFixed(1)}%"></span><span class="t">${w}</span></span>`).join("")}</div>`; }).join("");
   if (one) $("trSupply").querySelectorAll(".cell").forEach(e => e.addEventListener("click", () => goA(+e.dataset.q, +e.dataset.m, "train")));
