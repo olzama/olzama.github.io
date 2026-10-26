@@ -223,6 +223,8 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .tables3.two table { width: auto; font-size: 0.72rem; }
 .tables3.two th, .tables3.two td { padding: 1px 4px; }
 .tables3.two td.tag { font-size: 0.68rem; padding-left: 3px; }
+.tables3.two td.p { color: var(--fg); padding-left: 10px; }
+.tables3.two td.arr { text-align: left; padding-left: 2px; font-family: var(--font-body); font-size: 0.7rem; }
 .tables3 small.d.s { color: var(--fg); font-weight: 600; }
 .tables3 td.mixed { background: var(--hi); }
 .tables3.upd { overflow-x: auto; }
@@ -900,18 +902,20 @@ function renderTables(sn, prev, after, q, sg, steps) {
   const [src, tgt] = S2S.data[q], k = sg.kind === "out" ? sg.k : -1, up = sg.kind === "update";
   const dl = (v, pv, strong) => pv != null && Math.abs(v - pv) >= 0.005 ? `<small class="d${strong ? " s" : ""}">${sg_(v - pv)}</small>` : "";
   const cells = (v, pv, strong, cls = "") => `<td class="${cls}${strong && pv && Math.abs(v[0] - pv[0]) >= 0.005 ? " a" : ""}">${r2(v[0])}${dl(v[0], pv && pv[0], strong)}</td><td class="${cls}${strong && pv && Math.abs(v[1] - pv[1]) >= 0.005 ? " a" : ""}">${r2(v[1])}${dl(v[1], pv && pv[1], strong)}</td>`;
-  const base = up ? after : sn, ref = up ? sn : prev;   // at the update: new numbers, change from before; otherwise: the numbers, what the previous update changed
+  const base = up ? after : sn, ref = up ? sn : k < 0 ? prev : null;   // at the update: new numbers, change from before; at the first stages: what the previous update changed; at the outputs: the probabilities instead
+  const pk = k >= 0 ? steps[k].p : null, other = pk && trMode === "train" ? [...pk.keys()].filter(j => j !== EN.indexOf(tgt[k])).sort((a, b) => pk[b] - pk[a])[0] : -1;
   const fed = steps.slice(0, Math.max(k, 0)).map(x => x.fed);   // mixed in before the current output
   const gRows = GL.map((w, j) => { const i = src.indexOf(w), on = sg.kind === "in" && i === sg.i - 1, cls = (i >= 0 ? "in" : "") + (on ? " now" : "");
     return `<tr class="${cls}"><th>${w}</th>${cells(base.G[j], ref && ref.G[j], up)}<td class="tag">${i >= 0 ? `input ${i + 1}` : ""}</td></tr>`; });
   const oRows = EN.map((w, j) => { const gi = tgt.indexOf(w), gold = gi >= 0 && trMode === "train", top = k >= 0 && j === steps[k].j;
     const cls = (gold ? "gold" : top ? "top" : "") + ((gold && gi === k) || (!gold && top) ? " now" : "");
     const tag = gold ? (up ? `→ state ${gi + 1}` : `gold ${gi + 1}`) : "";   // the most probable output: orange row and word (the note under the tables says so)
-    return `<tr class="${cls}"><th${top ? ' style="color:var(--orange)"' : ""}>${w}</th>${cells(base.O[j], ref && ref.O[j], up)}<td class="tag">${tag}</td></tr>`; });
+    const prob = pk ? `<td class="p">${pk[j].toFixed(2)}</td><td class="arr">${trMode === "train" && gi === k ? `<span class="ok">↑</span>` : trMode === "train" && j === other ? `<span class="bad">↓</span>` : top && trMode !== "train" ? `<span style="color:var(--orange)">written</span>` : ""}</td>` : "";
+    return `<tr class="${cls}"><th${top ? ' style="color:var(--orange)"' : ""}>${w}</th>${cells(base.O[j], ref && ref.O[j], up)}${prob}<td class="tag">${tag}</td></tr>`; });
   const iRows = EN.map((w, j) => { const mi = tgt.indexOf(w), mixed = fed.includes(j) || (up && trMode === "train" && mi >= 0 && mi < tgt.length - 1), on = k > 0 && j === steps[k - 1].fed;
     return `<tr class="${mixed ? "mixed" : ""}${on ? " now" : ""}"><th>${w}</th>${cells(base.I[j], ref && ref.I[j], up)}</tr>`; });
   const tbl = (cap, rows, cls = "") => `<table class="${cls}"><caption>${cap}</caption><tbody>${rows.join("")}</tbody></table>`;
-  $("trTab").innerHTML = tbl("Galician inputs: vector", gRows, "full") + tbl(up ? "possible outputs: vector for the score (→ state k: moves toward state k)" : "possible outputs: vector for the score (gold k: gold output k)", oRows) + tbl("possible outputs: second vector (mixed into the state)", iRows);
+  $("trTab").innerHTML = tbl("Galician inputs: vector", gRows, "full") + tbl(up ? "possible outputs: vector for the score (→ state k: moves toward state k)" : pk ? `possible outputs: vector for the score · probability at output ${k + 1}${trMode === "train" ? " (↑ ↓: what the update will do)" : ""}` : "possible outputs: vector for the score (gold k: gold output k)", oRows) + tbl("possible outputs: second vector (mixed into the state)", iRows);
   $("trTabLbl").textContent = up ? "The three tables after the update: what changed, cell by cell" : uA === 0 && !ref ? "The three tables at the random start: every number in all three is random" : "The three tables as they are now (all three started random)";
   const parts = [`<span style="color:var(--blue)">this pair's inputs</span>`, trMode === "train" ? `<span class="ok">its gold outputs</span>` : "", k >= 0 ? `<span style="color:var(--orange)">orange: the most probable output now</span>` : "", k > 0 ? "second vectors already mixed into the state" : ""].filter(Boolean);
   $("trTabNote").innerHTML = up ? `bold: a changed cell, with the change · rows this pair does not touch stay as they are` :
@@ -968,7 +972,7 @@ function renderA() {
     head: `A. The training cycle, one pair at a time: round ${r + 1}, pair ${q + 1} of 16${trMode === "train" ? "" : " · translating with these tables: no gold output, no update"}`,
     pairHtml: `pair ${q + 1} of 16: <i>${src.join(" ")}</i> → ${tgt.filter(x => x !== "‹end›").join(" ")}${src.join(" ") === "unha tía miña" ? " (the lesson's example)" : ""} · the tables after ${uA} pair${uA === 1 ? "" : "s"} seen${uA === 0 ? ": the random start" : ""} · 16 pairs = 1 round`,
     allPairs: S2S.data, pick: m => { stIdx = 1 + n + m; renderA(); }, setMode: m => { trMode = m; stIdx = Math.min(stIdx, 1 + n); renderA(); } });
-  const steps = trMode === "train" ? gradOf(snB, q).sts.map((s_, m) => ({ fed: EN.indexOf(tgt[m]), j: softmax(snB.O.map(v => dot(s_, v))).indexOf(Math.max(...softmax(snB.O.map(v => dot(s_, v))))) })) : translate(snB, src).steps.map(x => ({ fed: EN.indexOf(x.w), j: EN.indexOf(x.w) }));
+  const steps = trMode === "train" ? gradOf(snB, q).sts.map((s_, m) => { const p = softmax(snB.O.map(v => dot(s_, v))); return { fed: EN.indexOf(tgt[m]), j: p.indexOf(Math.max(...p)), p }; }) : translate(snB, src).steps.map(x => ({ fed: EN.indexOf(x.w), j: EN.indexOf(x.w), p: x.p }));
   renderTables(snB, snP, snA, q, sg, steps);
   $("trDecPane").style.display = sg.kind === "out" ? "" : "none"; $("trUpdPane").style.display = sg.kind === "update" ? "" : "none";
   $("trLegEnc").style.display = sg.kind === "tables" || sg.kind === "in" ? "" : "none"; $("trLegDec").style.display = sg.kind === "out" || sg.kind === "done" ? "" : "none"; $("trLegUpd").style.display = sg.kind === "update" ? "" : "none";
