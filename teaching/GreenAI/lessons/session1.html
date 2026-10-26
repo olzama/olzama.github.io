@@ -2234,105 +2234,86 @@ print("they match" if count == expected else "they do not match: check the loop 
 
 <div class="part" id="part-step4"><h1>Step 4 · Attention</h1></div>
 
-<section class="screen" id="train2ways" data-step="3">
-  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Training: one rule, two ways of using the pairs</h2></header>
+<section class="screen" id="backprop" data-step="3">
+  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Backpropagation: how the earlier tables learn</h2></header>
   <div class="body">
     <div class="board">
-      <svg viewBox="0 0 1400 630" role="img" aria-label="The 16 training pairs. One pair at a time: pair, update, pair, update, 16 small updates per round (stochastic gradient descent). All 16 at once: the pushes of all pairs added up, one update per round (mini-batch gradient descent, the usual way today, in parallel on a GPU). The rule is the same in both. The toy model: all 16 right from round 252 one at a time, from round 1612 all at once. What made neural translation possible: backpropagation, data, GPUs.">
-<defs><marker id="twArr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--fg)"/></marker><marker id="twArrG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--green)"/></marker></defs>
-<text x="40" y="36" font-size="24" style="fill:var(--muted)" text-anchor="start" data-s="1" data-d="0">the training pairs (an input and its gold output), 16 of them</text>
-<rect x="40" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.0" data-a="fade" data-t="0.3"/>
-<text x="75" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.05">pair 1</text>
-<rect x="122" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.03" data-a="fade" data-t="0.3"/>
-<text x="157" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.08">pair 2</text>
-<rect x="204" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.06" data-a="fade" data-t="0.3"/>
-<text x="239" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.11">pair 3</text>
-<rect x="286" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.09" data-a="fade" data-t="0.3"/>
-<text x="321" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.14">pair 4</text>
-<rect x="368" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.12" data-a="fade" data-t="0.3"/>
-<text x="403" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.16999999999999998">pair 5</text>
-<rect x="450" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.15" data-a="fade" data-t="0.3"/>
-<text x="485" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.2">pair 6</text>
-<rect x="532" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.18" data-a="fade" data-t="0.3"/>
-<text x="567" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.22999999999999998">pair 7</text>
-<rect x="614" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.21" data-a="fade" data-t="0.3"/>
-<text x="649" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.26">pair 8</text>
-<rect x="696" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.24" data-a="fade" data-t="0.3"/>
-<text x="731" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.29">pair 9</text>
-<rect x="778" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.27" data-a="fade" data-t="0.3"/>
-<text x="813" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.32">pair 10</text>
-<rect x="860" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.3" data-a="fade" data-t="0.3"/>
-<text x="895" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.35">pair 11</text>
-<rect x="942" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.32999999999999996" data-a="fade" data-t="0.3"/>
-<text x="977" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.37999999999999995">pair 12</text>
-<rect x="1024" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.36" data-a="fade" data-t="0.3"/>
-<text x="1059" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.41">pair 13</text>
-<rect x="1106" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.39" data-a="fade" data-t="0.3"/>
-<text x="1141" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.44">pair 14</text>
-<rect x="1188" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.42" data-a="fade" data-t="0.3"/>
-<text x="1223" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.47">pair 15</text>
-<rect x="1270" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.44999999999999996" data-a="fade" data-t="0.3"/>
-<text x="1305" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.49999999999999994">pair 16</text>
-<text x="40" y="140" font-size="28" style="fill:var(--blue)" text-anchor="start" data-s="2" data-d="0">one pair at a time</text>
-<text x="40" y="170" font-size="20" style="fill:var(--muted)" text-anchor="start" data-s="2" data-d="0.2">(what the interactive walks)</text>
-<rect x="40" y="192" width="82" height="40" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="2" data-d="0.1" data-a="fade" data-t="0.3"/>
-<text x="81.0" y="219" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.12">pair 1</text>
-<path d="M124 212 L136 212" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="2" data-d="0.14" data-t="0.35"/>
-<rect x="140" y="192" width="92" height="40" rx="7" fill="var(--orange)" fill-opacity="0.18" stroke="var(--orange)" stroke-width="1.6" data-s="2" data-d="0.18" data-a="fade" data-t="0.3"/>
-<text x="186.0" y="219" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.2">update</text>
-<path d="M234 212 L246 212" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="2" data-d="0.22000000000000003" data-t="0.35"/>
-<rect x="250" y="192" width="82" height="40" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="2" data-d="0.26" data-a="fade" data-t="0.3"/>
-<text x="291.0" y="219" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.28">pair 2</text>
-<path d="M334 212 L346 212" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="2" data-d="0.30000000000000004" data-t="0.35"/>
-<rect x="350" y="192" width="92" height="40" rx="7" fill="var(--orange)" fill-opacity="0.18" stroke="var(--orange)" stroke-width="1.6" data-s="2" data-d="0.33999999999999997" data-a="fade" data-t="0.3"/>
-<text x="396.0" y="219" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.36">update</text>
-<path d="M444 212 L456 212" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="2" data-d="0.38" data-t="0.35"/>
-<text x="475.0" y="219" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.44">…</text>
-<path d="M492 212 L504 212" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="2" data-d="0.46" data-t="0.35"/>
-<rect x="508" y="192" width="82" height="40" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="2" data-d="0.5" data-a="fade" data-t="0.3"/>
-<text x="549.0" y="219" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.52">pair 16</text>
-<path d="M592 212 L604 212" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="2" data-d="0.54" data-t="0.35"/>
-<rect x="608" y="192" width="92" height="40" rx="7" fill="var(--orange)" fill-opacity="0.18" stroke="var(--orange)" stroke-width="1.6" data-s="2" data-d="0.58" data-a="fade" data-t="0.3"/>
-<text x="654.0" y="219" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.6">update</text>
-<text x="40" y="268" font-size="22" style="fill:currentColor" text-anchor="start" data-s="2" data-d="0.9">16 small updates per round (one pass over the pairs)</text>
-<text x="40" y="296" font-size="20" style="fill:var(--muted)" text-anchor="start" data-s="2" data-d="1.0">stochastic gradient descent · in use since the 1950s, still the basis</text>
-<text x="800" y="140" font-size="28" style="fill:var(--blue)" text-anchor="start" data-s="3" data-d="0">all 16 at once</text>
-<text x="800" y="170" font-size="20" style="fill:var(--muted)" text-anchor="start" data-s="3" data-d="0.2">(the usual way today)</text>
-<rect x="800" y="170" width="82" height="26" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="3" data-d="0.1" data-a="fade" data-t="0.3"/>
-<text x="841" y="188" font-size="18" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.12">pair 1</text>
-<path d="M886 183 L950 248" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="3" data-d="0.15" data-t="0.35"/>
-<rect x="800" y="200" width="82" height="26" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="3" data-d="0.2" data-a="fade" data-t="0.3"/>
-<text x="841" y="218" font-size="18" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.22">pair 2</text>
-<path d="M886 213 L950 248" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="3" data-d="0.25" data-t="0.35"/>
-<text x="841" y="248" font-size="18" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.32">…</text>
-<rect x="800" y="260" width="82" height="26" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="3" data-d="0.4" data-a="fade" data-t="0.3"/>
-<text x="841" y="278" font-size="18" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.42000000000000004">pair 16</text>
-<path d="M886 273 L950 248" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="3" data-d="0.45000000000000007" data-t="0.35"/>
-<rect x="954" y="228" width="130" height="40" rx="7" fill="var(--fg)" fill-opacity="0.06" stroke="var(--fg)" stroke-width="1.6" data-s="3" data-d="0.5" data-a="fade" data-t="0.3"/>
-<text x="1019" y="255" font-size="18" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.55">pushes added up</text>
-<path d="M1088 248 L1118 248" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="3" data-d="0.65" data-t="0.35"/>
-<rect x="1122" y="228" width="92" height="40" rx="7" fill="var(--orange)" fill-opacity="0.18" stroke="var(--orange)" stroke-width="1.6" data-s="3" data-d="0.7" data-a="fade" data-t="0.3"/>
-<text x="1168" y="255" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.75">update</text>
-<text x="800" y="296" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.9">1 bigger update per round · mini-batch gradient descent</text>
-<text x="800" y="324" font-size="20" style="fill:var(--muted)" text-anchor="start" data-s="3" data-d="1.0">the 16 pushes are computed from the same tables, in parallel on a GPU</text>
-<line x1="40" y1="360" x2="1360" y2="360" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0" data-t="0.4"/>
-<text x="40" y="400" font-size="24" style="fill:currentColor" text-anchor="start" data-s="4" data-d="0.1">the rule is the same in both:</text>
-<text x="360" y="400" font-size="22" style="fill:currentColor" text-anchor="start" data-s="4" data-d="0.3">the gold output's row moves toward the state, by η × (1 − p); every other row away from it, by η × p</text>
-<text x="40" y="448" font-size="22" style="fill:var(--muted)" text-anchor="start" data-s="5" data-d="0">the toy model, all 16 pairs right for good:</text>
-<text x="40" y="480" font-size="22" style="fill:var(--blue)" text-anchor="start" data-s="5" data-d="0.3">one at a time: from round 252 (≈ 4,000 updates)</text>
-<text x="800" y="480" font-size="22" style="fill:var(--blue)" text-anchor="start" data-s="5" data-d="0.6">all at once: from round 1,612 (1,612 updates)</text>
-<text x="40" y="510" font-size="20" style="fill:var(--muted)" text-anchor="start" data-s="5" data-d="0.9">per pass over the data the small frequent updates win; per update the added-up one does, and on a GPU it costs about the time of one</text>
-<text x="40" y="566" font-size="22" style="fill:currentColor" text-anchor="start" data-s="6" data-d="0">neither needs anything beyond this rule. What made neural translation possible was not the procedure:</text>
-<text x="40" y="600" font-size="24" style="fill:var(--green)" text-anchor="start" data-s="6" data-d="0.5">backpropagation through whole networks (1986), enough translated text, and GPUs</text>
+      <svg viewBox="0 0 1400 660" role="img" aria-label="Backpropagation in the toy translation model. Forward: unha, tía, miña are mixed into the summary, which is the state for output 1; the output table gives an a probability of 0.08, which should be 1. Backward: the output table&#x27;s update, then a push back to the state, halved at each step back: miña moves 0.033, tía 0.017, unha 0.008.">
+<text x="40.0" y="34.0" font-size="21" style="fill:var(--muted)" data-s="1" data-d="0">one training pair: unha tía miña → an aunt of mine · output 1, gold output: an</text>
+<rect x="80.0" y="80.0" width="140.0" height="42.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.0" data-a="fade"/>
+<text x="150.0" y="108.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.05">unha</text>
+<text x="150.0" y="146.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.1">(−0.36, 0.04)</text>
+<line x1="150.0" y1="156.0" x2="150.0" y2="213.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.3"/>
+<path d="M144.9 201.0 L150.0 213.0 L155.1 201.0" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="0.9" data-a="fade" data-t="0.2"/>
+<rect x="65.0" y="219.0" width="170.0" height="46.0" rx="4" fill="var(--panel)" stroke="currentColor" stroke-width="1.5" data-s="1" data-d="0.4" data-a="fade"/>
+<text x="150.0" y="249.0" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.45">(−0.18, 0.02)</text>
+<rect x="350.0" y="80.0" width="140.0" height="42.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.1" data-a="fade"/>
+<text x="420.0" y="108.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.15">tía</text>
+<text x="420.0" y="146.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.2">(0.27, −0.43)</text>
+<line x1="420.0" y1="156.0" x2="420.0" y2="213.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.4"/>
+<path d="M414.9 201.0 L420.0 213.0 L425.1 201.0" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.0" data-a="fade" data-t="0.2"/>
+<rect x="335.0" y="219.0" width="170.0" height="46.0" rx="4" fill="var(--panel)" stroke="currentColor" stroke-width="1.5" data-s="1" data-d="0.5" data-a="fade"/>
+<text x="420.0" y="249.0" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.55">(0.05, −0.21)</text>
+<line x1="238.0" y1="242.0" x2="332.0" y2="242.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.6"/>
+<path d="M320.0 247.1 L332.0 242.0 L320.0 236.9" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.2" data-a="fade" data-t="0.2"/>
+<rect x="620.0" y="80.0" width="140.0" height="42.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.2" data-a="fade"/>
+<text x="690.0" y="108.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.25">miña</text>
+<text x="690.0" y="146.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.3">(0.13, 0.39)</text>
+<line x1="690.0" y1="156.0" x2="690.0" y2="213.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.5"/>
+<path d="M684.9 201.0 L690.0 213.0 L695.1 201.0" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.1" data-a="fade" data-t="0.2"/>
+<rect x="605.0" y="219.0" width="170.0" height="46.0" rx="4" fill="var(--panel)" stroke="currentColor" stroke-width="1.5" data-s="1" data-d="0.6" data-a="fade"/>
+<text x="690.0" y="249.0" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.65">(0.09, 0.09)</text>
+<line x1="508.0" y1="242.0" x2="602.0" y2="242.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.7"/>
+<path d="M590.0 247.1 L602.0 242.0 L590.0 236.9" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.3" data-a="fade" data-t="0.2"/>
+<text x="162.0" y="205.0" font-size="18" style="fill:var(--muted)" text-anchor="start" data-s="1" data-d="0.4">summary</text>
+<text x="285.0" y="181.0" font-size="16" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.7">each: ½ × old + ½ × input vector</text>
+<text x="702.0" y="205.0" font-size="18" style="fill:var(--green)" text-anchor="start" data-s="1" data-d="0.75">= the state</text>
+<line x1="778.0" y1="242.0" x2="888.0" y2="242.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.8"/>
+<path d="M876.0 247.1 L888.0 242.0 L876.0 236.9" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.4" data-a="fade" data-t="0.2"/>
+<rect x="890.0" y="215.0" width="220.0" height="54.0" rx="4" fill="var(--orange-soft)" stroke="var(--orange)" stroke-width="1.5" data-s="1" data-d="0.85" data-a="fade"/>
+<text x="1000.0" y="249.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.9">output table</text>
+<line x1="1112.0" y1="242.0" x2="1158.0" y2="242.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.95"/>
+<path d="M1146.0 247.1 L1158.0 242.0 L1146.0 236.9" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.55" data-a="fade" data-t="0.2"/>
+<text x="1250.0" y="233.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="1.0">probability of an</text>
+<text x="1250.0" y="263.0" font-size="30" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.05">0.08</text>
+<text x="1250.0" y="299.0" font-size="20" style="fill:var(--orange)" text-anchor="middle" data-s="2" data-d="0">should be 1</text>
+<text x="1000.0" y="355.0" font-size="18" style="fill:var(--orange)" text-anchor="middle" data-s="3" data-d="0">an's row: toward the state</text>
+<text x="1000.0" y="379.0" font-size="18" style="fill:var(--orange)" text-anchor="middle" data-s="3" data-d="0.2">moves 0.023; other rows away, ≤ 0.002</text>
+<text x="1000.0" y="405.0" font-size="16" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.4">(the update you saw on the MT page)</text>
+<line x1="888.0" y1="257.0" x2="780.0" y2="257.0" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" data-s="4" data-d="0"/>
+<path d="M792.0 251.9 L780.0 257.0 L792.0 262.1" fill="none" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="4" data-d="0.6" data-a="fade" data-t="0.2"/>
+<text x="845.0" y="287.0" font-size="18" style="fill:var(--orange)" text-anchor="middle" data-s="4" data-d="0.4">which way should the state</text>
+<text x="845.0" y="309.0" font-size="18" style="fill:var(--orange)" text-anchor="middle" data-s="4" data-d="0.5">have been, to make an likelier?</text>
+<line x1="690.0" y1="271.0" x2="690.0" y2="383.0" stroke="var(--orange)" stroke-width="7.2" stroke-linecap="round" data-s="5" data-d="0.15"/>
+<path d="M684.9 371.0 L690.0 383.0 L695.1 371.0" fill="none" stroke="var(--orange)" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round" data-s="5" data-d="0.75" data-a="fade" data-t="0.2"/>
+<text x="690.0" y="413.0" font-size="20" style="fill:var(--orange)" text-anchor="middle" data-s="5" data-d="0.25">miña moves 0.033</text>
+<text x="690.0" y="439.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="5" data-d="0.3">½ of the push</text>
+<line x1="602.0" y1="257.0" x2="508.0" y2="257.0" stroke="var(--orange)" stroke-width="3.2" stroke-linecap="round" data-s="5" data-d="0.35"/>
+<path d="M520.0 251.9 L508.0 257.0 L520.0 262.1" fill="none" stroke="var(--orange)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" data-s="5" data-d="0.95" data-a="fade" data-t="0.2"/>
+<line x1="420.0" y1="271.0" x2="420.0" y2="383.0" stroke="var(--orange)" stroke-width="4.2" stroke-linecap="round" data-s="5" data-d="0.5"/>
+<path d="M414.9 371.0 L420.0 383.0 L425.1 371.0" fill="none" stroke="var(--orange)" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" data-s="5" data-d="1.1" data-a="fade" data-t="0.2"/>
+<text x="420.0" y="413.0" font-size="20" style="fill:var(--orange)" text-anchor="middle" data-s="5" data-d="0.6">tía moves 0.017</text>
+<text x="420.0" y="439.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="5" data-d="0.65">¼ of the push</text>
+<line x1="332.0" y1="257.0" x2="238.0" y2="257.0" stroke="var(--orange)" stroke-width="2.2" stroke-linecap="round" data-s="5" data-d="0.7"/>
+<path d="M250.0 251.9 L238.0 257.0 L250.0 262.1" fill="none" stroke="var(--orange)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" data-s="5" data-d="1.3" data-a="fade" data-t="0.2"/>
+<line x1="150.0" y1="271.0" x2="150.0" y2="383.0" stroke="var(--orange)" stroke-width="2.7" stroke-linecap="round" data-s="5" data-d="0.85"/>
+<path d="M144.9 371.0 L150.0 383.0 L155.1 371.0" fill="none" stroke="var(--orange)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" data-s="5" data-d="1.45" data-a="fade" data-t="0.2"/>
+<text x="150.0" y="413.0" font-size="20" style="fill:var(--orange)" text-anchor="middle" data-s="5" data-d="0.95">unha moves 0.008</text>
+<text x="150.0" y="439.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="5" data-d="1.0">⅛ of the push</text>
+<text x="40.0" y="500.0" font-size="23" style="fill:currentColor" data-s="6" data-d="0">backpropagation: the push at the output is passed back, step by step, to every table that contributed</text>
+<text x="40.0" y="532.0" font-size="20" style="fill:var(--muted)" data-s="6" data-d="0.3">every neural network today learns this way, transformers included (Rumelhart, Hinton & Williams, 1986)</text>
+<text x="40.0" y="590.0" font-size="22" style="fill:var(--blue)" data-s="7" data-d="0">the further back a word, the smaller its push: in a long sentence, the first words barely learn from the outputs</text>
+<text x="40.0" y="622.0" font-size="19" style="fill:var(--muted)" data-s="7" data-d="0.3">one update moves the probability of an from 0.08 to 0.082: training repeats this thousands of times</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
   <div class="notes">
-    <p>The interactive trained one pair at a time: each pair is followed by its own small update, sixteen per round. That is stochastic gradient descent, in use since the 1950s and still the basis of everything.</p>
-    <p>The usual way today is to take all sixteen pairs at once: compute each pair's push from the same tables, add the pushes up, and apply one update per round, mini-batch gradient descent. The rule inside is exactly the same (the gold output's row toward the state, every other row away, by the learning rate times the probability); what differs is only when the update is applied. On a GPU the sixteen pushes are computed in parallel, so one such update costs about as much time as one pair's, which is why it won.</p>
-    <p>On the toy model both learn everything: one at a time from round 252, about four thousand small updates; all at once from round 1,612, that many bigger updates. Per pass over the data the frequent small updates win; per update the added-up one does. Part B of the interactive has a switch between the two.</p>
-    <p>So the training procedure is not what was missing before neural translation worked. What was missing: backpropagation through whole networks (1986), enough translated text, and the GPUs to compute the pushes in parallel.</p>
+    <p>The MT page showed how the output table learns: after each output, the gold output's row moves toward the state, and every other row moves away. But the Galician words' vectors learned too. How, when only the output is compared with the gold output?</p>
+    <p>One pair from the MT page, unha tía miña, at the moment training first sees it, and only its first output, an. Forward: the three vectors are mixed into the summary, half old and half new, three times. For the first output the summary is the state. The output table gives an a probability of 0.08. It should be 1.</p>
+    <p>The output table's update is the one we saw. Then one step back: which way should the state have been, to make an more likely? The state cannot change by itself, but it was made from the inputs. The summary is half the old summary plus half the new vector, so the push passes back through each half: miña gets half of it, tía a quarter, unha an eighth. Their rows move by 0.033, 0.017 and 0.008.</p>
+    <p>That is backpropagation: the push at the output, passed back step by step to every table that contributed. For the later outputs it also passes back through the decoder's steps, to the English words' vectors. Every neural network today is trained this way, transformers included. The method was popularized by Rumelhart, Hinton and Williams in 1986.</p>
+    <p>The halving shows a problem. The further back a word, the smaller its push: in a long sentence, the first words barely learn from the outputs. Attention, next, gives every input a direct line to every output.</p>
   </div>
 </section>
 
