@@ -240,7 +240,7 @@ svg.smst { width: 600px; max-width: none; height: auto; display: block; }
 svg.smst text { font-size: 13px; fill: var(--fg); } svg.smst .sh { fill: var(--muted); font-size: 12px; } svg.smst .sv, svg.smst .st { font-family: var(--font-mono); }
 svg.smst .st { fill: var(--muted); font-size: 11px; } svg.smst .sw { fill: var(--orange); font-weight: 600; } svg.smst .ax { stroke: var(--muted); }
 svg.smst .k1 { fill: rgba(var(--heat), 0.3); } svg.smst .k2 { fill: rgba(var(--heat), 1); } svg.smst .k3 { fill: rgba(var(--heat), 0.6); } svg.smst .kwin { fill: var(--orange); } svg.smst .hid { visibility: hidden; }
-.g11 { display: grid; grid-template-columns: 70px repeat(3, 30px) 8px repeat(8, 30px) 36px 36px 34px 104px; column-gap: 1px; row-gap: 2px; align-items: center; width: max-content; }
+.g11 { display: grid; grid-template-columns: 96px repeat(3, 30px) 8px repeat(8, 30px) 36px 36px 34px 104px; column-gap: 1px; row-gap: 2px; align-items: center; width: max-content; }
 .g11 .rl { font-size: 0.8rem; line-height: 1.15; height: 28px; display: flex; align-items: center; overflow: hidden; }
 .g11 .rl.subrow, .g11 .gs, .g11 .subrow { height: 15px; } .g11 .rl small { display: block; font-size: 0.66rem; color: var(--orange); } .g11 .rl:has(small) { line-height: 1.05; }
 .g11 .gsl { font-size: 0.64rem; color: var(--muted); white-space: nowrap; }
@@ -257,6 +257,7 @@ svg.smst .k1 { fill: rgba(var(--heat), 0.3); } svg.smst .k2 { fill: rgba(var(--h
 .g11 .gdim { opacity: 0.3; }
 .g11 .win { background: var(--hi); }
 .g11 .rl.strow, .g11 .rl.sumrow { color: var(--muted); }
+.g11 .rl.strow:has(.gsl) { flex-direction: column; align-items: flex-start; justify-content: center; }
 .g11 .mixl { color: var(--orange); }
 svg.gbar { width: 104px; height: 26px; display: block; max-width: none; }
 svg.gbar .ax, svg.gbar .tk { stroke: var(--line); } svg.gbar .z { stroke: var(--muted); }
@@ -929,6 +930,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let FL = 0, FH = 0, best = -1;
   for (let l = 0; l < NL; l++) for (let h = 0; h < NH; h++) { const g = C[l][h], v = g[0][0] + g[1][1] + g[3][2]; if (v > best) { best = v; FL = l; FH = h; } }
   const heatOf = v => `rgba(var(--heat),${(0.06 + 0.94 * v).toFixed(3)})`;
+  const avgTiaA = C.reduce((a, L) => a + L.reduce((b, G) => b + G[0][1], 0), 0) / (NL * NH);   // the weight of "A" on tía, averaged over all heads
   // a grid: one row per English word, one column per Galician word; darker = more weight; the chosen row outlined
   function grid(rows, cols, M, o = {}) {
     const cw = o.cw || 58, ch = o.ch || 30, lx = o.lx || 64, ty = 34, n = o.n ?? rows.length;
@@ -965,23 +967,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const POINTS = [
     "A row of a grid: one English word's weights over the Galician words. They add up to 1. Section 2 computed one by hand.",
     "The grid: all the rows, one per English word written. Darker means more weight.",
-    "A real model's grid reads the same way: “Aunt” looks at tía.",
+    "A real model's grid reads the same way: “Aunt” looks at tía. It can also show a mistake: “A Aunt of mine”. Choosing “An” needs tía, and the row of “A” puts no weight on it.",
     "A head is one attention with its own learned tables for queries, keys and values, so it makes one grid. A layer runs several heads side by side, each with its own pattern.",
     "A real model stacks layers of heads: 6 layers × 8 heads = 48 grids. Early layers spread their weight; late layers point each English word at the word it translates.",
-    "The weights show where the model looks, not whether what it writes is right."];
+    "The weights show where the model looks. Sometimes that explains a mistake (“A”: no weight on tía); sometimes it does not (below: the right word looked at, a wrong output)."];
   const STEPS6 = [
     ["One row: the weights for one English word",
       "In section 2, before writing “an”, the decoder scored the three encoder vectors (one after each Galician word), and softmax turned the scores into three weights that add up to 1: the bars. Write the same three numbers in a row of cells, darker for more weight. That row is one row of an attention grid."],
     ["All the rows: the grid",
       "The decoder does the same before every English word it writes: new weights each time, one row each. Stacked, the rows make the grid: one row per English word, one column per Galician word. Click a row to see its weights as bars."],
     ["A real model's grid reads the same way",
-      `A real translation model, opus-mt-gl-en, trained by others on a large amount of Galician–English text, on the same phrase. It writes “${TGT_R.slice(0, -1).join(" ")}”. One of its grids, on the right: rows are the English words it wrote, columns the Galician words it read, and ‹end› is the end marker it reads after them. The rows are clickable on both sides.`],
+      `A real translation model, opus-mt-gl-en, trained by others on a large amount of Galician–English text, on the same phrase. One of its grids, on the right: rows are the English words it wrote, columns the Galician words it read, and ‹end› is the end marker it reads after them. “Aunt” looks at tía, as in our grid. But it writes “${TGT_R.slice(0, -1).join(" ")}”, not “An aunt of mine”. Choosing between “A” and “An” depends on the next word, aunt, so it needs tía, as for the hand-set model in sections 1 to 3. The row of “A” puts ${C[FL][FH][0][1].toFixed(2)} on tía in this head, and ${avgTiaA.toFixed(2)} on average over all ${NL * NH} grids: when it chose the article, the model looked at tía very little. (The capital in “Aunt” is a second slip of this model.)`],
     ["What a head is",
       "In section 2 there was one way to make the query and the keys, so one grid. A head is one such attention with its own three learned tables: one turns the decoder's vector into a query, one turns the encoder's vectors into keys, one into the values that are mixed. This model runs 8 heads side by side, each with its own tables: 8 grids, 8 mixes, which it then combines into one vector. The outlined one is the grid of step 3."],
     ["6 layers × 8 heads = 48 grids",
       "The decoder repeats its computation 6 times, one layer on top of the other, and each layer has its own 8 heads: 48 grids for the same phrase. In layer 1 most heads spread their weight or rest it on ‹end›; in layers 5 and 6 most point each English word at the Galician word it translates. Nobody assigned these patterns: section 8 shows how heads get them."],
     ["The whole sentence",
-      "Below, the same grids for our whole sentence: pick a layer and a head, or their average; play the translation; and see three places where it goes wrong. In all three, attention points at the right Galician word and the output is still wrong."]];
+      "Below, the same grids for our whole sentence: pick a layer and a head, or their average; play the translation; and see three places where it goes wrong. In “A Aunt”, the weights explained the mistake: no weight on tía. In those three places they do not: attention points at the right Galician word, and the output is still wrong."]];
   let k = 0, sel = 0;
   STEPS6.forEach(([t], i) => { const b = document.createElement("button"); b.textContent = i + 1; b.title = t; b.addEventListener("click", () => { k = i; draw6(); }); $("hbSteps").appendChild(b); });
   function draw6() {
@@ -1729,8 +1731,13 @@ function g11(o) {
   const sum = o.sum || {};
   const sumRow = line(`<span class="${sum.cls || ""}">${sum.label || "summary"}</span>`, [...[0, 1, 2].map(i => { const c = (sum.hi || []).includes(i) ? "cur" : ""; return sum.from && sum.v && sum.from[i] !== sum.v[i] ? gCellCh(sum.from[i], sum.v[i], c, sum.delay || 0) : gCell(sum.v ? sum.v[i] : undefined, c); }), ...ST.map(() => gCell(undefined))], o.sideHead ? `<div class="gside head">${o.sideHead}</div>` : "", "", "", "", "sumrow");
   const st = o.st || {};
-  const stRow = line(st.label || "decoder state", DS.map((d, i) => { const c = (st.hi || []).includes(i) ? "cur" : ""; return st.from && st.v && st.from[i] !== st.v[i] ? gCellCh(st.from[i], st.v[i], c, st.delay || 0) : gCell(st.v ? st.v[i] : undefined, c); }),
-    o.stSide ? `<div class="gside wrap">${o.stSide}</div>` : "", "", "", "", "strow");
+  // when the state's first three values are the summary (or the mix) itself, one row shows both: no duplicate row
+  const same = !!(sum.v && st.v && [0, 1, 2].every(i => sum.v[i] === st.v[i]));
+  const stLabel = same ? `<span>${st.label || "decoder state"}</span><span class="gsl">1–3 = <span class="${sum.cls || ""}">${(sum.label || "the summary").replace(/<br>.*$/, "")}</span></span>` : (st.label || "decoder state");
+  const stRow = line(stLabel, DS.map((d, i) => { const c = (st.hi || []).includes(i) || (same && (sum.hi || []).includes(i)) ? "cur" : "";
+      const from = st.from || (same && i < 3 ? sum.from : undefined), delay = st.from ? st.delay : sum.delay;
+      return from && st.v && from[i] !== st.v[i] ? gCellCh(from[i], st.v[i], c, delay || 0) : gCell(st.v ? st.v[i] : undefined, c); }),
+    o.stSide ? `<div class="gside wrap">${o.stSide}</div>` : same && o.sideHead ? `<div class="gside head">${o.sideHead}</div>` : "", "", "", "", "strow");
   const words = EN.map(w => {
     const r = (o.words || {})[w] || {}, dim = (o.dim || []).includes(w) ? " gdim" : "", win = o.win === w ? " win" : "";
     const vec = r.v === undefined ? DS.map(() => undefined) : r.v;
@@ -1738,7 +1745,7 @@ function g11(o) {
     const B = line(`<span class="gsl">${r.subLabel || ""}</span>`, DS.map((d, i) => gSub(r.sub ? r.sub[i] : undefined)), "", "", "", "", "subrow" + dim);
     return A + B;
   }).join("");
-  return `<p class="gcap">${o.cap || "&nbsp;"}</p><div class="gwrap"><div class="g11">${head}${sumRow}${stRow}<div class="gsep"></div>${words}</div></div>`;
+  return `<p class="gcap">${o.cap || "&nbsp;"}</p><div class="gwrap"><div class="g11">${head}${same ? "" : sumRow}${stRow}<div class="gsep"></div>${words}</div></div>`;
 }
 const vecOf = w => [...CAND[w].g, ...CAND[w].e];
 const prodOf = (w, st) => vecOf(w).map((x, i) => r2(x * st[i]));
