@@ -2234,6 +2234,108 @@ print("they match" if count == expected else "they do not match: check the loop 
 
 <div class="part" id="part-step4"><h1>Step 4 · Attention</h1></div>
 
+<section class="screen" id="train2ways" data-step="3">
+  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Training: one rule, two ways of using the pairs</h2></header>
+  <div class="body">
+    <div class="board">
+      <svg viewBox="0 0 1400 630" role="img" aria-label="The 16 training pairs. One pair at a time: pair, update, pair, update, 16 small updates per round (stochastic gradient descent). All 16 at once: the pushes of all pairs added up, one update per round (mini-batch gradient descent, the usual way today, in parallel on a GPU). The rule is the same in both. The toy model: all 16 right from round 252 one at a time, from round 1612 all at once. What made neural translation possible: backpropagation, data, GPUs.">
+<defs><marker id="twArr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--fg)"/></marker><marker id="twArrG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--green)"/></marker></defs>
+<text x="40" y="36" font-size="24" style="fill:var(--muted)" text-anchor="start" data-s="1" data-d="0">the training pairs (an input and its gold output), 16 of them</text>
+<rect x="40" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.0" data-a="fade" data-t="0.3"/>
+<text x="75" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.05">pair 1</text>
+<rect x="122" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.03" data-a="fade" data-t="0.3"/>
+<text x="157" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.08">pair 2</text>
+<rect x="204" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.06" data-a="fade" data-t="0.3"/>
+<text x="239" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.11">pair 3</text>
+<rect x="286" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.09" data-a="fade" data-t="0.3"/>
+<text x="321" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.14">pair 4</text>
+<rect x="368" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.12" data-a="fade" data-t="0.3"/>
+<text x="403" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.16999999999999998">pair 5</text>
+<rect x="450" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.15" data-a="fade" data-t="0.3"/>
+<text x="485" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.2">pair 6</text>
+<rect x="532" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.18" data-a="fade" data-t="0.3"/>
+<text x="567" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.22999999999999998">pair 7</text>
+<rect x="614" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.21" data-a="fade" data-t="0.3"/>
+<text x="649" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.26">pair 8</text>
+<rect x="696" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.24" data-a="fade" data-t="0.3"/>
+<text x="731" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.29">pair 9</text>
+<rect x="778" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.27" data-a="fade" data-t="0.3"/>
+<text x="813" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.32">pair 10</text>
+<rect x="860" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.3" data-a="fade" data-t="0.3"/>
+<text x="895" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.35">pair 11</text>
+<rect x="942" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.32999999999999996" data-a="fade" data-t="0.3"/>
+<text x="977" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.37999999999999995">pair 12</text>
+<rect x="1024" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.36" data-a="fade" data-t="0.3"/>
+<text x="1059" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.41">pair 13</text>
+<rect x="1106" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.39" data-a="fade" data-t="0.3"/>
+<text x="1141" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.44">pair 14</text>
+<rect x="1188" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.42" data-a="fade" data-t="0.3"/>
+<text x="1223" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.47">pair 15</text>
+<rect x="1270" y="50" width="70" height="34" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="1" data-d="0.44999999999999996" data-a="fade" data-t="0.3"/>
+<text x="1305" y="74" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.49999999999999994">pair 16</text>
+<text x="40" y="140" font-size="28" style="fill:var(--blue)" text-anchor="start" data-s="2" data-d="0">one pair at a time</text>
+<text x="40" y="170" font-size="20" style="fill:var(--muted)" text-anchor="start" data-s="2" data-d="0.2">(what the interactive walks)</text>
+<rect x="40" y="192" width="82" height="40" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="2" data-d="0.1" data-a="fade" data-t="0.3"/>
+<text x="81.0" y="219" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.12">pair 1</text>
+<path d="M124 212 L136 212" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="2" data-d="0.14" data-t="0.35"/>
+<rect x="140" y="192" width="92" height="40" rx="7" fill="var(--orange)" fill-opacity="0.18" stroke="var(--orange)" stroke-width="1.6" data-s="2" data-d="0.18" data-a="fade" data-t="0.3"/>
+<text x="186.0" y="219" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.2">update</text>
+<path d="M234 212 L246 212" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="2" data-d="0.22000000000000003" data-t="0.35"/>
+<rect x="250" y="192" width="82" height="40" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="2" data-d="0.26" data-a="fade" data-t="0.3"/>
+<text x="291.0" y="219" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.28">pair 2</text>
+<path d="M334 212 L346 212" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="2" data-d="0.30000000000000004" data-t="0.35"/>
+<rect x="350" y="192" width="92" height="40" rx="7" fill="var(--orange)" fill-opacity="0.18" stroke="var(--orange)" stroke-width="1.6" data-s="2" data-d="0.33999999999999997" data-a="fade" data-t="0.3"/>
+<text x="396.0" y="219" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.36">update</text>
+<path d="M444 212 L456 212" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="2" data-d="0.38" data-t="0.35"/>
+<text x="475.0" y="219" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.44">…</text>
+<path d="M492 212 L504 212" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="2" data-d="0.46" data-t="0.35"/>
+<rect x="508" y="192" width="82" height="40" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="2" data-d="0.5" data-a="fade" data-t="0.3"/>
+<text x="549.0" y="219" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.52">pair 16</text>
+<path d="M592 212 L604 212" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="2" data-d="0.54" data-t="0.35"/>
+<rect x="608" y="192" width="92" height="40" rx="7" fill="var(--orange)" fill-opacity="0.18" stroke="var(--orange)" stroke-width="1.6" data-s="2" data-d="0.58" data-a="fade" data-t="0.3"/>
+<text x="654.0" y="219" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.6">update</text>
+<text x="40" y="268" font-size="22" style="fill:currentColor" text-anchor="start" data-s="2" data-d="0.9">16 small updates per round (one pass over the pairs)</text>
+<text x="40" y="296" font-size="20" style="fill:var(--muted)" text-anchor="start" data-s="2" data-d="1.0">stochastic gradient descent · in use since the 1950s, still the basis</text>
+<text x="800" y="140" font-size="28" style="fill:var(--blue)" text-anchor="start" data-s="3" data-d="0">all 16 at once</text>
+<text x="800" y="170" font-size="20" style="fill:var(--muted)" text-anchor="start" data-s="3" data-d="0.2">(the usual way today)</text>
+<rect x="800" y="170" width="82" height="26" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="3" data-d="0.1" data-a="fade" data-t="0.3"/>
+<text x="841" y="188" font-size="18" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.12">pair 1</text>
+<path d="M886 183 L950 248" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="3" data-d="0.15" data-t="0.35"/>
+<rect x="800" y="200" width="82" height="26" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="3" data-d="0.2" data-a="fade" data-t="0.3"/>
+<text x="841" y="218" font-size="18" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.22">pair 2</text>
+<path d="M886 213 L950 248" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="3" data-d="0.25" data-t="0.35"/>
+<text x="841" y="248" font-size="18" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.32">…</text>
+<rect x="800" y="260" width="82" height="26" rx="7" fill="var(--green)" fill-opacity="0.18" stroke="var(--green)" stroke-width="1.6" data-s="3" data-d="0.4" data-a="fade" data-t="0.3"/>
+<text x="841" y="278" font-size="18" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.42000000000000004">pair 16</text>
+<path d="M886 273 L950 248" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="3" data-d="0.45000000000000007" data-t="0.35"/>
+<rect x="954" y="228" width="130" height="40" rx="7" fill="var(--fg)" fill-opacity="0.06" stroke="var(--fg)" stroke-width="1.6" data-s="3" data-d="0.5" data-a="fade" data-t="0.3"/>
+<text x="1019" y="255" font-size="18" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.55">pushes added up</text>
+<path d="M1088 248 L1118 248" fill="none" stroke="var(--fg)" stroke-width="2.2" marker-end="url(#twArr)" data-s="3" data-d="0.65" data-t="0.35"/>
+<rect x="1122" y="228" width="92" height="40" rx="7" fill="var(--orange)" fill-opacity="0.18" stroke="var(--orange)" stroke-width="1.6" data-s="3" data-d="0.7" data-a="fade" data-t="0.3"/>
+<text x="1168" y="255" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.75">update</text>
+<text x="800" y="296" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.9">1 bigger update per round · mini-batch gradient descent</text>
+<text x="800" y="324" font-size="20" style="fill:var(--muted)" text-anchor="start" data-s="3" data-d="1.0">the 16 pushes are computed from the same tables, in parallel on a GPU</text>
+<line x1="40" y1="360" x2="1360" y2="360" stroke="var(--line)" stroke-width="1.5" data-s="4" data-d="0" data-t="0.4"/>
+<text x="40" y="400" font-size="24" style="fill:currentColor" text-anchor="start" data-s="4" data-d="0.1">the rule is the same in both:</text>
+<text x="360" y="400" font-size="22" style="fill:currentColor" text-anchor="start" data-s="4" data-d="0.3">the gold output's row moves toward the state, by η × (1 − p); every other row away from it, by η × p</text>
+<text x="40" y="448" font-size="22" style="fill:var(--muted)" text-anchor="start" data-s="5" data-d="0">the toy model, all 16 pairs right for good:</text>
+<text x="40" y="480" font-size="22" style="fill:var(--blue)" text-anchor="start" data-s="5" data-d="0.3">one at a time: from round 252 (≈ 4,000 updates)</text>
+<text x="800" y="480" font-size="22" style="fill:var(--blue)" text-anchor="start" data-s="5" data-d="0.6">all at once: from round 1,612 (1,612 updates)</text>
+<text x="40" y="510" font-size="20" style="fill:var(--muted)" text-anchor="start" data-s="5" data-d="0.9">per pass over the data the small frequent updates win; per update the added-up one does, and on a GPU it costs about the time of one</text>
+<text x="40" y="566" font-size="22" style="fill:currentColor" text-anchor="start" data-s="6" data-d="0">neither needs anything beyond this rule. What made neural translation possible was not the procedure:</text>
+<text x="40" y="600" font-size="24" style="fill:var(--green)" text-anchor="start" data-s="6" data-d="0.5">backpropagation through whole networks (1986), enough translated text, and GPUs</text>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
+    </div>
+  </div>
+  <div class="notes">
+    <p>The interactive trained one pair at a time: each pair is followed by its own small update, sixteen per round. That is stochastic gradient descent, in use since the 1950s and still the basis of everything.</p>
+    <p>The usual way today is to take all sixteen pairs at once: compute each pair's push from the same tables, add the pushes up, and apply one update per round, mini-batch gradient descent. The rule inside is exactly the same (the gold output's row toward the state, every other row away, by the learning rate times the probability); what differs is only when the update is applied. On a GPU the sixteen pushes are computed in parallel, so one such update costs about as much time as one pair's, which is why it won.</p>
+    <p>On the toy model both learn everything: one at a time from round 252, about four thousand small updates; all at once from round 1,612, that many bigger updates. Per pass over the data the frequent small updates win; per update the added-up one does. Part B of the interactive has a switch between the two.</p>
+    <p>So the training procedure is not what was missing before neural translation worked. What was missing: backpropagation through whole networks (1986), enough translated text, and the GPUs to compute the pushes in parallel.</p>
+  </div>
+</section>
+
 <section class="screen" id="born" data-step="4">
   <header><span class="kind">Step 4 · Attention</span><h2>Attention was born in machine translation</h2></header>
   <div class="body cols">

@@ -346,7 +346,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <p class="note">Orange: where the cycle is now. The curves climb because every update of this pair moves the tables a little toward its gold outputs; the other 15 pairs' updates share words with it and mostly help too.</p>
       </div>
       <div class="why" id="trWhole">
-        <p class="label">B. The whole training, round after round (1 round = one pass over the 16 pairs), with either of two procedures</p>
+        <p class="label">B. The whole training: the same procedure as part A, seen a round at a time (1 round = one pass over the 16 pairs); and, for comparison, the other procedure</p>
         <div class="controls"><div class="seg" role="group" aria-label="Training procedure"><button id="procOne" aria-pressed="true">one pair at a time: 16 updates per round (part A)</button><button id="procAll" aria-pressed="false">all 16 at once: the 16 pushes added up, one update per round</button></div></div>
         <p class="note" style="max-width:none;margin:0" id="procNote"></p>
         <div class="controls"><span class="label" style="margin-right:4px">Training</span><button id="trBack" aria-label="One round back">← 1 round</button><button class="primary" id="trNext" aria-label="One round on">Train 1 round →</button><button id="pathPlay">Play training</button><button id="trReset" title="Back to the random start">↺ start</button><input type="range" id="pathStep" min="0" max="1" step="1" value="0" aria-label="Rounds of training" style="flex:1 1 200px; accent-color: var(--blue)"><span class="mono" id="pathStepVal"></span></div>
@@ -1133,7 +1133,7 @@ const goA = (q, m, mode) => { uA = Math.min(ti * NP + q, NU - 1); trMode = mode;
 function renderWhole() {
   const RR = procRun(), NR = procRounds(); ti = Math.min(ti, NR); const sn = RR[ti], one = trProc === "one";
   $("procOne").setAttribute("aria-pressed", one); $("procAll").setAttribute("aria-pressed", !one); $("pathStep").max = NR;
-  $("procNote").innerHTML = one ? `the procedure part A walks: pair after pair, each followed by its own update (stochastic gradient descent, in use since the 1950s and still the basis) · ${NP} updates per round, learning rate ${LR}`
+  $("procNote").innerHTML = one ? `exactly what part A walks, nothing different: pair after pair, each followed by its own update; here one click = one round = ${NP} of those updates (stochastic gradient descent, in use since the 1950s and still the basis; learning rate ${LR})`
     : `the usual procedure today (mini-batch gradient descent): the pushes of all 16 pairs are computed from the same tables and added up, then one update · the same rule, 1 update per round, learning rate ${LR_B} · on a GPU the 16 pushes are computed in parallel, which is why this is the usual way · part A does not walk this one`;
   $("pathStep").value = ti; $("trBack").disabled = ti <= 0; $("trNext").disabled = ti >= NR;
   $("pathStepVal").textContent = `after ${ti} round${ti === 1 ? "" : "s"} of ${NR} (${one ? ti * NP : ti} update${(one ? ti * NP : ti) === 1 ? "" : "s"})`;
