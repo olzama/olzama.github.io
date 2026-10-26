@@ -201,6 +201,9 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .ogrid .cell .fl { position: absolute; left: 0; top: 0; bottom: 0; background: var(--green); opacity: 0.4; }
 .ogrid .cell .t { position: relative; }
 .ogrid .cell.on { border-color: var(--orange); }
+.ogrid.one { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.ogrid.one .row { flex-wrap: nowrap; height: 1.9em; overflow: hidden; white-space: nowrap; }
+#pathAll { grid-template-columns: minmax(0, 1fr); }
 .tables3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 16px; align-items: start; }
 @media (max-width: 720px) { .tables3 { grid-template-columns: minmax(0, 1fr); } }
 .tables3 table { border-collapse: collapse; font-family: var(--font-mono); font-size: 0.78rem; font-variant-numeric: tabular-nums; width: 100%; }
@@ -215,8 +218,19 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .tables3 tr.now th, .tables3 tr.now td { font-weight: 600; color: var(--fg); }
 .tables3 tr.now th { box-shadow: inset 3px 0 0 var(--orange); }
 .acols { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.35fr); }
+/* nothing may widen the layout: every container can shrink, every drawing fits its box */
+#trWhy, #trWhole, .actl, .actl .controls, .actl .pathstrip, .acols, .acols > .col, #trPane, #trDecPane, #trUpdPane, .ltop, .ltop > * { min-width: 0; }
+.actl .pathstrip { width: 100%; }
+#bStrip, #ihtWhyStrip { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; white-space: nowrap; height: 2.3em; align-items: center; min-width: 0; max-width: 100%; scrollbar-width: thin; }
+#bStrip > *, #ihtWhyStrip > * { flex: 0 0 auto; }
+#bPlaneLbl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: none; }
+svg.chain, #trWhySvg, #trAllSvg, #trRightCurve, #trainCurve { max-width: 100%; }
+#trWhyStripKey { min-height: 3.2em; }
+#trWhyNote { min-height: 4.8em; }
+#trUpdNote { min-height: 8.6em; }
+#trDecLbl, #trUpdLbl { min-height: 1.3em; }
 .actl { position: sticky; top: 0; z-index: 3; background: var(--panel); padding: 6px 0; display: grid; gap: 8px; box-shadow: 0 6px 8px -8px rgba(0,0,0,0.25); }
-.ltop { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 10px; align-items: start; justify-items: start; }
+.ltop { display: grid; grid-template-columns: minmax(0, 1fr) clamp(170px, 46%, 270px); gap: 4px 10px; align-items: start; justify-items: start; }
 .asticky { gap: 8px; }
 @media (max-width: 600px) { .ltop { grid-template-columns: minmax(0, 1fr); } }
 .legendrow.compact { gap: 3px 10px; font-size: 0.74rem; }
@@ -237,6 +251,7 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .tables3 tr.mixed th, .tables3 tr.mixed td { background: var(--hi); }
 .tables3.two table { width: auto; font-size: 0.72rem; justify-self: start; }
 .tables3.two th, .tables3.two td { padding: 1px 4px; }
+.tables3.two th { min-width: 5.4em; }
 .tables3.two td.tag { font-size: 0.68rem; padding-left: 3px; }
 .tables3.two td.p { color: var(--fg); padding-left: 10px; }
 .tables3.two td.arr { text-align: left; padding-left: 2px; font-family: var(--font-body); font-size: 0.72rem; white-space: nowrap; min-width: 3.6em; }
@@ -252,7 +267,7 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .tables3.upd { overflow-x: auto; }
 /* part B: protected dimensions, whatever the round or the procedure */
 #procNote { min-height: 5.8em; }
-#trWhole .legendrow { min-height: 3.8em; align-content: start; }
+#trWhole .legendrow { min-height: 3.4em; align-content: start; }
 #pathAll { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 14px; }
 #pathAll .phrase { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 1.8em; line-height: 1.8em; }
 #pathStepVal { white-space: nowrap; }
@@ -327,7 +342,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
             <p class="label" id="trTabLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
             <div class="ltop">
               <div class="tables3 two one" id="trTabG"></div>
-              <div style="position:relative;max-width:270px;width:100%">
+              <div style="position:relative;width:100%">
                 <svg id="trWhySvg" viewBox="0 0 400 400" role="img" aria-label="The vectors on the plane" style="width:100%;display:block"></svg>
                 <div class="controls" style="gap:3px;position:absolute;right:0;top:0"><button id="zOut" title="Zoom out" style="padding:0 7px;font-size:0.8rem">−</button><span class="note" id="zVal" style="margin:0;font-size:0.7rem">×1</span><button id="zIn" title="Zoom in" style="padding:0 7px;font-size:0.8rem">+</button></div>
               </div>
@@ -339,6 +354,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
           <div class="col">
             <p class="label" id="trEncLbl">Encoding: the inputs are mixed, one by one, into one vector, the summary (new = ½ × old + ½ × vector of the input; section 2 shows the rule)</p>
             <svg class="chain" id="trEncChain" viewBox="0 0 780 118" role="img" aria-label="The encoder mixes the inputs one by one into the summary"></svg>
+            <div id="trPane" style="display:grid;gap:10px;align-content:start">
             <div id="trDecPane" style="display:grid;gap:10px">
               <p class="label" id="trDecLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
               <svg class="chain" id="trWhyChain" data-compact="1" viewBox="0 0 720 430" role="img" aria-label="How one output is chosen: the state, the scores, the probabilities, and how the next state is made"></svg>
@@ -350,7 +366,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
               <svg class="chain" id="trUpdChain" viewBox="0 0 720 430" role="img" aria-label="Gradient descent for one output: how each row of the output table moves along the state"></svg>
               <p class="note" id="trUpdNote" style="margin:0;max-width:none"></p>
             </div>
-            <p class="note" id="trStageNote" style="color:var(--fg);max-width:none"></p>
+            </div>
+            <p class="note" id="trStageNote" style="color:var(--fg);max-width:none;min-height:4.9em;margin:0"></p>
           </div>
         </div>
         <p class="label" id="trainCurveLbl"></p>
@@ -365,20 +382,28 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 </div>
         <p class="note" style="max-width:none;margin:0" id="procNote"></p>
 
-        <p class="label" id="trSupplyLbl"></p>
-        <div class="ogrid" id="trSupply"></div>
-        <p class="note">the training data: an input (a Galician phrase) → its gold output (the right output: its English translation, by a person) · click a cell to follow that pair in part A, with the tables as they are after this round</p>
+        <div class="controls"><span class="note">pairs shown:</span><div class="seg" role="group" aria-label="Which 8 pairs are shown"><button id="setA" aria-pressed="true">pairs 1–8</button><button id="setB" aria-pressed="false">pairs 9–16</button></div><span class="note">(training always uses all 16)</span></div>
+        <div class="cols">
+          <div class="col">
+            <p class="label" id="trSupplyLbl"></p>
+            <div class="ogrid one" id="trSupply"></div>
+            <p class="note" style="margin:0;min-height:3.4em">the training data: an input (a Galician phrase) → its gold output (the right output: its English translation, by a person) · click a cell to follow that pair in part A, with the tables as they are after this round</p>
+          </div>
+          <div class="col">
+            <p class="label" id="pathAllLbl"></p>
+            <div class="phrases pickable" id="pathAll"></div>
+            <p class="note" style="margin:0;min-height:3.4em">one output at a time, the one with the highest probability, mixed into the state before the next · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span> · click one to follow it in part A, translating with these tables</p>
+          </div>
+        </div>
         <div class="cols">
           <div class="col">
             <p class="label" id="trAllLbl"></p>
             <svg id="trAllSvg" viewBox="0 0 400 400" role="img" aria-label="All Galician input vectors and English output vectors after this round" style="max-width:420px"></svg>
-            <div class="legendrow"><span><span class="sq" style="background:var(--blue)"></span>Galician input</span><span><span class="ring"></span>English possible output</span><span>axes: the plane zooms out as the vectors grow</span><span><span class="sw" style="background:var(--orange);width:18px;height:3px"></span><span id="trAllGhost">click a word: its path from the random start to this round</span></span></div>
+            <div class="legendrow"><span><span class="sq" style="background:var(--blue)"></span>Galician input</span><span><span class="ring"></span>English possible output</span><span>axes: the plane zooms out as the vectors grow</span></div>
+            <p class="note" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none;margin:0;height:1.7em;line-height:1.7em"><span class="sw" style="background:var(--orange);width:18px;height:3px;display:inline-block;vertical-align:middle;margin-right:6px"></span><span id="trAllGhost">click a word: its path from the random start to this round</span></p>
             <p class="note" style="margin:0;max-width:none">training changes only the numbers in the three tables; how they are used (summary, score, probability, what is mixed in) never changes</p>
           </div>
           <div class="col">
-            <p class="label" id="pathAllLbl"></p>
-            <p class="note">one output at a time, the one with the highest probability, mixed into the state before the next · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span> · click one to follow it in part A, translating with these tables</p>
-            <div class="phrases pickable" id="pathAll"></div>
             <p class="label" id="trRightLbl">Inputs translated right, over the rounds</p>
             <svg id="trRightCurve" viewBox="0 0 440 210" role="img" aria-label="How many of the 16 inputs come out right, over the rounds, with both procedures" style="max-width:460px"></svg>
             <p class="note" id="trRightNote" style="margin:0"></p>
@@ -910,7 +935,7 @@ function translate(sn, src) {
 }
 let ti = 0, uA = 0, stIdx = 0, subIdx = 0, trTimer = null, trMode = "train";   // stIdx: the stage of the cycle in part A   // ti: the round of part B; uA: pairs seen so far in part A (the cycle's position)
 const CURVES = {}, RIGHTS = [], RIGHTS_ALL = [];
-let trProc = "one";   // part B: "one" pair per update, or "all" 16 at once
+let trProc = "one", pairSet = 0;   // part B: "one" pair per update, or "all" 16 at once; which 8 pairs are listed
 const LR_B = 0.1, ROUNDS_B = 3000; let RB = null;
 function batchRun() {   // the 16 pushes computed from the same tables, added up, one update per round
   if (RB) return RB; let sn = R[0]; RB = [sn];
@@ -1120,11 +1145,12 @@ function renderA() {
   if (sg.kind === "tables" || sg.kind === "in") renderPlaneEnc(snB, src, sg.kind === "in" ? sg.i : 0, Z);
   lastStageKey = uA + ":" + stIdx + ":" + subIdx;
   document.documentElement.style.setProperty("--ctlh", ($("trCtl").offsetHeight + 6) + "px");
+  { const w = $("trPane").getBoundingClientRect().width || 600; $("trPane").style.minHeight = Math.ceil(w * 430 / 720 + 16 * 15) + "px"; }   // chain + label + key + note, whatever the stage
   const nextQ = (q + 1) % NP;
   $("trStageNote").innerHTML = sg.kind === "tables" ? `Next: the encoder reads input 1, <i>${src[0]}</i> (its row is highlighted).` :
     sg.kind === "in" ? (sg.i < n ? `Input ${sg.i} read: summary = ½ × old + ½ × row <i>${src[sg.i - 1]}</i>. Next: input ${sg.i + 1}, <i>${src[sg.i]}</i>.` : `All inputs read: the summary is the decoder's state 1. Next: output 1.`) :
     sg.kind === "out" ? (sg.k < steps.length - 1 ? `Next: output ${sg.k + 2}${trMode === "train" ? " (the tables do not change yet: the update comes after the last output)" : ""}.` : trMode === "train" ? `Next: the update of the tables, one output at a time.` : `Next: done (no update when translating).`) :
-    sg.kind === "push" ? (() => { const gs2 = groupsFor(q, sg.k, pushesOf(snB, q).pr); return subIdx < gs2.length - 1 ? `Next: ${gs2[subIdx + 1].name}.` : sg.k < K - 1 ? `Next: the update from output ${sg.k + 2}.` : `The update is complete. Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with these updated tables${nextQ === 0 ? " (a new round begins)" : ""}.`; })() :
+    sg.kind === "push" ? (() => { const gs2 = groupsFor(q, sg.k, pushesOf(snB, q).pr); return subIdx < gs2.length - 1 ? `Next: part ${subIdx + 2} of ${gs2.length}, ${gs2[subIdx + 1].name.split(":")[0]}.` : sg.k < K - 1 ? `Next: the update from output ${sg.k + 2}.` : `The update is complete. Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with these updated tables${nextQ === 0 ? " (a new round begins)" : ""}.`; })() :
     `Translating changes nothing in the tables. Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with the same tables.`;
   $("trainCurveLbl").innerHTML = `<i>${src.join(" ")}</i> over the rounds: the probability of the gold output at each output`;
   renderCurve(q, src, tgt, sg.kind === "out" && trMode === "train" ? sg.k : -1);
@@ -1151,7 +1177,7 @@ function renderAllPlane(RR, r) {
   $("trAllSvg").innerHTML = g;
   $("trAllSvg").querySelectorAll("[data-k]").forEach(e => e.addEventListener("click", () => { traceSel = traceSel === e.dataset.k ? null : e.dataset.k; renderWhole(); }));
   const name = traceSel ? (traceSel[0] === "G" ? GL : EN)[+traceSel.slice(1)] : null;
-  $("trAllGhost").innerHTML = name ? `the path of “${name}” from the random start (○ round 0, a dot every ${r > 1500 ? 500 : r > 300 ? 100 : r > 60 ? 20 : 5} rounds) to round ${r} · click it again to clear` : "click a word: its path from the random start to this round";
+  $("trAllGhost").innerHTML = name ? `path of “${name}”: ○ round 0 → round ${r}, a dot every ${r > 1500 ? 500 : r > 300 ? 100 : r > 60 ? 20 : 5} rounds · click again to clear` : "click a word: its path from the random start to this round";
 }
 const rightNow = sn => S2S.data.filter(([s2, t2]) => translate(sn, s2).steps.map(x => x.w).filter(w => w !== "‹end›").join(" ") === t2.filter(w => w !== "‹end›").join(" ")).length;
 function renderRightCurve() {
@@ -1185,8 +1211,10 @@ function renderWhole() {
   $("pathStep").value = ti; $("trBack").disabled = ti <= 0; $("trNext").disabled = ti >= NR;
   $("pathStepVal").textContent = `after ${ti} round${ti === 1 ? "" : "s"} of ${NR} (${one ? ti * NP : ti} update${(one ? ti * NP : ti) === 1 ? "" : "s"})`;
   // 1. the 16 pairs, with the probability of each gold output
-  $("trSupplyLbl").textContent = ti === 0 ? "1. The 16 pairs at the random start: each gold output, filled by the probability the model gives it (part A shows how it is computed)" : `1. The 16 pairs after round ${ti}: each gold output, filled by the probability the model now gives it (part A shows how it is computed)`;
-  $("trSupply").innerHTML = S2S.data.map(([s2, t2], q) => { const cp = correctProbs(sn, s2, t2);
+  const shown = S2S.data.map((d, q) => q).filter(q => Math.floor(q / 8) === pairSet), lo = pairSet * 8 + 1, hi = pairSet * 8 + 8;
+  $("setA").setAttribute("aria-pressed", pairSet === 0); $("setB").setAttribute("aria-pressed", pairSet === 1);
+  $("trSupplyLbl").textContent = `1. Pairs ${lo}–${hi} ${ti === 0 ? "at the random start" : `after round ${ti}`}: each gold output, filled by the probability the model gives it`;
+  $("trSupply").innerHTML = shown.map(q => { const [s2, t2] = S2S.data[q], cp = correctProbs(sn, s2, t2);
     return `<div class="row"><span class="src">${s2.join(" ")}</span>→ ${t2.map((w, m) => `<span class="cell" data-q="${q}" data-m="${m}" title="probability ${cp[m].toFixed(2)}"><span class="fl" style="width:${(cp[m] * 100).toFixed(1)}%"></span><span class="t">${w}</span></span>`).join("")}</div>`; }).join("");
   if (one) $("trSupply").querySelectorAll(".cell").forEach(e => e.addEventListener("click", () => goA(+e.dataset.q, +e.dataset.m, "train")));
   $("trSupply").style.cursor = one ? "" : "default";
@@ -1194,12 +1222,10 @@ function renderWhole() {
   $("trAllLbl").textContent = ti === 0 ? "2. All the vectors at the random start" : `2. All the vectors after round ${ti}`;
   renderAllPlane(RR, ti);
   let nRight = 0;
-  $("pathAll").innerHTML = S2S.data.map(([s2, t2], q2) => {
-    const out = translate(sn, s2).steps.map(t => t.w).filter(w => w !== "‹end›");
-    const ok = out.join(" ") === t2.filter(w => w !== "‹end›").join(" "); nRight += ok;
-    return `<div class="phrase" data-q="${q2}"><span><span class="src">${s2.join(" ")}</span> → <span class="${ok ? "ok" : "bad"}">${out.join(" ") || "(nothing)"}</span></span></div>`;
-  }).join("");
-  $("pathAllLbl").textContent = `3. The result: what the model writes now, for each of the 16 inputs: right for ${nRight} of 16`;
+  const outs = S2S.data.map(([s2, t2]) => { const out = translate(sn, s2).steps.map(x => x.w).filter(w => w !== "‹end›"); const ok = out.join(" ") === t2.filter(w => w !== "‹end›").join(" "); nRight += ok; return { out, ok }; });
+  $("pathAll").innerHTML = shown.map(q2 => { const [s2] = S2S.data[q2], { out, ok } = outs[q2];
+    return `<div class="phrase" data-q="${q2}"><span><span class="src">${s2.join(" ")}</span> → <span class="${ok ? "ok" : "bad"}">${out.join(" ") || "(nothing)"}</span></span></div>`; }).join("");
+  $("pathAllLbl").textContent = `3. What the model writes now, pairs ${lo}–${hi}: right for ${nRight} of all 16`;
   if (one) $("pathAll").querySelectorAll(".phrase").forEach(d => d.addEventListener("click", () => goA(+d.dataset.q, 0, "free")));
   renderRightCurve();
 }
@@ -1221,6 +1247,8 @@ $("aStep").addEventListener("input", e => setU(+e.target.value));
 $("trNext").addEventListener("click", () => { stopTrain(); ti = Math.min(ti + 1, procRounds()); renderWhole(); });
 $("procOne").addEventListener("click", () => { stopTrain(); trProc = "one"; renderWhole(); });
 $("procAll").addEventListener("click", () => { stopTrain(); trProc = "all"; renderWhole(); });
+$("setA").addEventListener("click", () => { pairSet = 0; renderWhole(); });
+$("setB").addEventListener("click", () => { pairSet = 1; renderWhole(); });
 $("trBack").addEventListener("click", () => { stopTrain(); ti = Math.max(ti - 1, 0); renderWhole(); });
 $("trReset").addEventListener("click", () => { stopTrain(); ti = 0; renderWhole(); });
 $("pathStep").addEventListener("input", e => { stopTrain(); ti = +e.target.value; renderWhole(); });
