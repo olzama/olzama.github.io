@@ -351,9 +351,12 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       </div>
       <div class="why" id="trWhole">
         <p class="label">B. The whole training: the same procedure as part A, seen a round at a time (1 round = one pass over the 16 pairs); and, for comparison, the other procedure</p>
-        <div class="controls"><div class="seg" role="group" aria-label="Training procedure"><button id="procOne" aria-pressed="true">one pair at a time: 16 updates per round (part A)</button><button id="procAll" aria-pressed="false">all 16 at once: the 16 pushes added up, one update per round</button></div></div>
-        <p class="note" style="max-width:none;margin:0" id="procNote"></p>
+<div class="actl">
         <div class="controls"><span class="label" style="margin-right:4px">Training</span><button id="trBack" aria-label="One round back">← 1 round</button><button class="primary" id="trNext" aria-label="One round on">Train 1 round →</button><button id="pathPlay">Play training</button><button id="trReset" title="Back to the random start">↺ start</button><input type="range" id="pathStep" min="0" max="1" step="1" value="0" aria-label="Rounds of training" style="flex:1 1 200px; accent-color: var(--blue)"><span class="mono" id="pathStepVal"></span></div>
+        <div class="controls"><div class="seg" role="group" aria-label="Training procedure"><button id="procOne" aria-pressed="true">one pair at a time: 16 updates per round (part A)</button><button id="procAll" aria-pressed="false">all 16 at once: the 16 pushes added up, one update per round</button></div></div>
+</div>
+        <p class="note" style="max-width:none;margin:0" id="procNote"></p>
+
         <p class="label" id="trSupplyLbl"></p>
         <div class="ogrid" id="trSupply"></div>
         <p class="note">the training data: an input (a Galician phrase) → its gold output (the right output: its English translation, by a person) · click a cell to follow that pair in part A, with the tables as they are after this round</p>
@@ -381,6 +384,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="enc">
     <h2><span class="n">2</span>Without attention: the encoder reads a sentence into one vector</h2>
     <p class="lead">A translation model starts by reading the Galician sentence. Each word has an embedding, a row in a table like p on the skip-gram page; here it has 2 dimensions, so every word is a point. The <b>encoder</b> reads the words in order and keeps a <b>summary</b>: one more vector, updated after every word. In this simplified encoder, each new word moves the summary halfway toward that word's point.</p>
+<div class="actl">
     <div class="controls">
       <div class="seg" role="group" aria-label="Input">
         <button id="eShort" aria-pressed="true">tía miña</button>
@@ -390,6 +394,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <button id="encBack">Back</button>
       <button id="encStep">Next word</button>
     </div>
+</div>
+
     <div class="cols">
       <div class="col">
         <svg id="encSvg" viewBox="0 0 400 400" role="img" aria-label="Word points and the summary moving between them" style="max-width:440px"></svg>
@@ -414,6 +420,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="bound">
     <h2><span class="n">3</span>Without attention: from Galician to English, word by word</h2>
     <p class="lead">The model trained in section 1, at work. The encoder reads the phrase into a summary, and Galician and English words share one plane. The <b>decoder</b> then writes English one word at a time. It keeps a <b>state</b>, a vector, and its first state is the summary. At every step it chooses a word the way skip-gram predicted neighbors, then folds that word into its state with the same ½ + ½ rule the encoder used.</p>
+<div class="actl">
     <div class="controls">
       <label class="note" for="bA">Phrase</label><select id="bA"></select>
     </div>
@@ -421,6 +428,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <button id="bBack">← Back</button>
       <button class="primary" id="bNext">Next →</button>
     </div>
+</div>
+
     <div class="pathstrip" id="bStrip"></div>
     <div class="cols">
       <div class="col">
@@ -468,6 +477,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <div class="callout">
       <p class="label">How it learned this</p>
       <p class="note" style="color:var(--fg)">Training works as in section 1: for each pair, the model computes the probability of every correct English word, and every vector is nudged so those probabilities go up. All vectors start random. The sentence chosen in “The trained model, step by step” below is the one followed here.</p>
+<div class="actl">
       <div class="controls">
         <span class="label" style="margin-right:4px">Training</span>
         <button id="ihtBack" aria-label="25 training steps back">← 25 steps</button>
@@ -476,6 +486,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <input type="range" id="ihtStep" min="0" max="1" step="1" value="0" aria-label="Training step" style="flex:1 1 200px; accent-color: var(--blue)">
         <span class="mono" id="ihtVal"></span>
       </div>
+</div>
+
       <div class="cols">
         <div class="col">
           <p class="label">All the vectors at this training step</p>
@@ -510,11 +522,14 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       </div>
     </div>
     <p class="label" style="margin-top:6px">The trained model, step by step</p>
+<div class="actl">
     <div class="controls">
       <label class="note" for="ihA">Sentence</label><select id="ihA"></select>
       <button id="ihBack">← Back</button>
       <button class="primary" id="ihNext">Next word →</button>
     </div>
+</div>
+
     <div class="pathstrip" id="ihStrip"></div>
     <div class="cols">
       <div class="col">
