@@ -450,7 +450,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
             <p class="note" style="margin:0;max-width:none">training changes only the numbers in the three tables; how they are used (summary, score, probability, what is mixed in) never changes</p>
           </div>
           <div class="col">
-            <p class="label" id="trRightLbl">Inputs translated right, over the rounds</p>
+            <div class="controls" style="flex-wrap:nowrap;gap:8px;min-width:0"><p class="label" id="trRightLbl" style="margin:0;flex:1 1 auto;min-width:0">Inputs translated right, over the rounds</p><span class="note" style="margin:0;white-space:nowrap">count:</span><div class="seg" role="group" aria-label="What the curve counts along"><button id="cntRounds" aria-pressed="true">rounds</button><button id="cntUpdates" aria-pressed="false">updates</button></div></div>
             <svg id="trRightCurve" viewBox="0 0 440 210" role="img" aria-label="How many of the 16 inputs come out right, over the rounds, with both procedures" style="max-width:460px"></svg>
             <p class="note" id="trRightNote" style="margin:0"></p>
           </div>
@@ -1277,29 +1277,37 @@ function renderAllPlane(RR, r, o = { svg: "trAllSvg", ghost: "trAllGhost", get: 
   $(o.ghost).innerHTML = name ? `path of “${name}”: ○ round 0 → round ${r}, a dot every ${r > 1500 ? 500 : r > 300 ? 100 : r > 60 ? 20 : 5} rounds · click again to clear` : "click a word: its path from the random start to this round";
 }
 const rightNow = sn => S2S.data.filter(([s2, t2]) => translate(sn, s2).steps.map(x => x.w).filter(w => w !== "‹end›").join(" ") === t2.filter(w => w !== "‹end›").join(" ")).length;
+let cntBy = "rounds";   // part B's curve: along rounds (passes over the 16 pairs) or along updates (changes of the tables)
 function renderRightCurve() {
-  // both procedures on one axis of rounds (one pass over the 16 pairs each): the chosen one solid green, the other grey
-  const mine = rightsOf(trProc), other = rightsOf(trProc === "one" ? "all" : "one"), NX = Math.max(ROUNDS, ROUNDS_B);
+  // both procedures on one axis: the chosen one solid green, the other grey. One pair at a time makes 16 updates per round, all at once 1
+  const other_ = trProc === "one" ? "all" : "one", mine = rightsOf(trProc), other = rightsOf(other_), NX = cntBy === "rounds" ? Math.max(ROUNDS, ROUNDS_B) : 5000;
+  const upr = pr => cntBy === "rounds" ? 1 : pr === "one" ? NP : 1;   // how far one round moves along the axis
   const green = css("--green"), orange = css("--orange"), muted = css("--muted"), grid = css("--grid");
-  const L = 40, Rr = 420, T = 22, B = 176, X = i => L + i / NX * (Rr - L), Y = n => T + (1 - n / 16) * (B - T);
+  const L = 40, Rr = 420, T = 22, B = 176, X = c => L + Math.min(c, NX) / NX * (Rr - L), Y = n => T + (1 - n / 16) * (B - T);
+  $("cntRounds").setAttribute("aria-pressed", cntBy === "rounds"); $("cntUpdates").setAttribute("aria-pressed", cntBy === "updates");
+  $("trRightLbl").textContent = `Inputs translated right, over the ${cntBy}`;
   let g = "";
   [4, 8, 12, 16].forEach(n => { g += `<line x1="${L}" y1="${Y(n)}" x2="${Rr}" y2="${Y(n)}" stroke="${grid}" stroke-width="1"/>`; });
-  [1000, 2000, 3000].filter(r => r <= NX).forEach(r => { g += `<line x1="${X(r)}" y1="${T}" x2="${X(r)}" y2="${B}" stroke="${grid}" stroke-width="1"/><text x="${X(r)}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">${r}</text>`; });
+  (cntBy === "rounds" ? [1000, 2000, 3000] : [1000, 2000, 3000, 4000, 5000]).filter(r => r <= NX).forEach(r => { g += `<line x1="${X(r)}" y1="${T}" x2="${X(r)}" y2="${B}" stroke="${grid}" stroke-width="1"/><text x="${X(r)}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">${r}</text>`; });
   g += `<line class="axis" x1="${L}" y1="${B}" x2="${Rr}" y2="${B}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${B}"/>`;
-  g += `<text x="${L}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">round 0</text><text x="${L - 6}" y="${Y(0) + 4}" text-anchor="end" font-size="10" fill="${muted}">0</text><text x="${L - 6}" y="${Y(8) + 4}" text-anchor="end" font-size="10" fill="${muted}">8</text><text x="${L - 6}" y="${Y(16) + 4}" text-anchor="end" font-size="10" fill="${muted}">16</text>`;
+  g += `<text x="${L}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">${cntBy === "rounds" ? "round" : "update"} 0</text><text x="${L - 6}" y="${Y(0) + 4}" text-anchor="end" font-size="10" fill="${muted}">0</text><text x="${L - 6}" y="${Y(8) + 4}" text-anchor="end" font-size="10" fill="${muted}">8</text><text x="${L - 6}" y="${Y(16) + 4}" text-anchor="end" font-size="10" fill="${muted}">16</text>`;
   g += `<text x="${L - 30}" y="${T - 8}" font-size="10" fill="${muted}">inputs right</text>`;
   // the count is a whole number, so its curve is a staircase: drawn smoothed (a centred average over 31 rounds); the dot shows the exact count now
   const W = 15, smooth = arr => arr.map((n, i) => { const a = Math.max(0, i - W), b = Math.min(arr.length - 1, i + W); let s = 0; for (let k = a; k <= b; k++) s += arr[k]; return s / (b - a + 1); });
-  g += `<polyline points="${smooth(other).map((n, i) => `${X(i).toFixed(1)},${Y(n).toFixed(1)}`).join(" ")}" fill="none" stroke="${muted}" stroke-opacity="0.55" stroke-width="1.6" stroke-linejoin="round"/>`;
-  g += `<polyline points="${smooth(mine).map((n, i) => `${X(i).toFixed(1)},${Y(n).toFixed(1)}`).join(" ")}" fill="none" stroke="${green}" stroke-width="2.6" stroke-linejoin="round"/>`;
-  const mx = X(ti), my = Y(mine[ti]);
-  g += `<line x1="${mx}" y1="${T}" x2="${mx}" y2="${B}" stroke="${orange}" stroke-width="1.3" stroke-dasharray="4 3"/><circle cx="${mx}" cy="${my}" r="5" fill="${orange}" stroke="var(--panel)" stroke-width="1.5"/>`;
-  const lx = mx + 9 + 60 > Rr ? mx - 9 : mx + 9, an = mx + 9 + 60 > Rr ? "end" : "start";
-  g += `<text x="${lx}" y="${Math.max(T + 12, my - 9)}" text-anchor="${an}" font-size="11" fill="${orange}">${mine[ti]} of 16 · round ${ti}</text>`;
+  const line = (arr, pr) => smooth(arr).map((n, i) => [i * upr(pr), n]).filter(([c]) => c <= NX).map(([c, n]) => `${X(c).toFixed(1)},${Y(n).toFixed(1)}`).join(" ");
+  g += `<polyline points="${line(other, other_)}" fill="none" stroke="${muted}" stroke-opacity="0.55" stroke-width="1.6" stroke-linejoin="round"/>`;
+  g += `<polyline points="${line(mine, trProc)}" fill="none" stroke="${green}" stroke-width="2.6" stroke-linejoin="round"/>`;
+  // where each procedure gets all 16 right for good, in the unit counted
+  const firstAll = arr => arr.findIndex((n, k) => n === 16 && arr.slice(k).every(x => x === 16));
+  [[trProc, green], [other_, muted]].forEach(([pr, c], k) => { const f = firstAll(rightsOf(pr)), at = f * upr(pr); if (f < 0 || at > NX) return;
+    const rt = X(at) + 8 + 80 > Rr; g += `<circle cx="${X(at)}" cy="${Y(16)}" r="4.5" fill="var(--panel)" stroke="${c}" stroke-width="2"/><text x="${rt ? X(at) - 8 : X(at) + 8}" y="${Y(16) + 16 + 13 * k}" text-anchor="${rt ? "end" : "start"}" font-size="10.5" fill="${c}">all right from ${at}</text>`; });
+  const now = ti * upr(trProc), mx = X(now), my = Y(mine[ti]), off = now > NX;
+  if (!off) g += `<line x1="${mx}" y1="${T}" x2="${mx}" y2="${B}" stroke="${orange}" stroke-width="1.3" stroke-dasharray="4 3"/><circle cx="${mx}" cy="${my}" r="5" fill="${orange}" stroke="var(--panel)" stroke-width="1.5"/>`;
+  const lbl = `${mine[ti]} of 16 · round ${ti}${cntBy === "updates" ? ` = update ${now}${off ? ", off this axis" : ""}` : ""}`;
+  g += `<text x="${Rr}" y="${B - 8}" text-anchor="end" font-size="11" fill="${orange}">${lbl}</text>`;   // one fixed corner: the colour ties it to the orange line
   $("trRightCurve").innerHTML = g;
-  const firstAll = arr => arr.findIndex((n, k) => n === 16 && arr.slice(k).every(x => x === 16)), f1 = firstAll(rightsOf("one")), fA = firstAll(rightsOf("all"));
-  const name = pr => pr === "one" ? "one pair at a time" : "all 16 at once";
-  $("trRightNote").innerHTML = `<span class="ok">green: ${name(trProc)}</span> (chosen above) · grey: ${name(trProc === "one" ? "all" : "one")} · each curve: the number of inputs translated right, averaged over 31 rounds; the dot: the exact number at this round · all 16 right for good: one pair at a time from round ${f1} (${f1 * NP} updates), all at once from round ${fA} (${fA} updates)`;
+  const f1 = firstAll(rightsOf("one")), fA = firstAll(rightsOf("all")), name = pr => pr === "one" ? "one pair at a time" : "all 16 at once";
+  $("trRightNote").innerHTML = `<span class="ok">green: ${name(trProc)}</span> (chosen above) · grey: ${name(other_)} · each curve: the number of inputs translated right, averaged over 31 rounds; the dot: the exact number now · a round is one pass over the 16 pairs: ${NP} updates one pair at a time, 1 update all at once · all 16 right for good: one pair at a time from round ${f1} (${f1 * NP} updates), all at once from round ${fA} (${fA} updates). Which is faster depends on what you count; on a GPU the 16 pushes of one update run in parallel, so time follows updates more than rounds`;
 }
 function renderWhole() {
   const RR = procRun(), NR = procRounds(); ti = Math.min(ti, NR); const sn = RR[ti], one = trProc === "one";
@@ -1344,6 +1352,8 @@ $("aStep").addEventListener("input", e => setU(+e.target.value));
 $("trNext").addEventListener("click", () => { stopTrain(); ti = Math.min(ti + 1, procRounds()); renderWhole(); });
 $("procOne").addEventListener("click", () => { stopTrain(); trProc = "one"; renderWhole(); });
 $("procAll").addEventListener("click", () => { stopTrain(); trProc = "all"; renderWhole(); });
+$("cntRounds").addEventListener("click", () => { cntBy = "rounds"; renderRightCurve(); });
+$("cntUpdates").addEventListener("click", () => { cntBy = "updates"; renderRightCurve(); });
 $("setA").addEventListener("click", () => { pairSet = 0; renderWhole(); });
 $("setB").addEventListener("click", () => { pairSet = 1; renderWhole(); });
 $("trBack").addEventListener("click", () => { stopTrain(); ti = Math.max(ti - 1, 0); renderWhole(); });
