@@ -413,9 +413,10 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
             <p class="note" id="trStageNote" style="color:var(--fg);max-width:none;min-height:4.9em;margin:0"></p>
           </div>
         </div>
-        <p class="label" id="trainCurveLbl"></p>
-        <svg id="trainCurve" viewBox="0 0 440 190" role="img" aria-label="The probability of the gold output at each output position, over the rounds" style="max-width:460px"></svg>
-        <p class="note">Orange: where the cycle is now. The curves climb because every update of this pair moves the tables a little toward its gold outputs; the other 15 pairs' updates share words with it and mostly help too.</p>
+        <p class="label" id="trainCurveLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
+        <svg id="trainCurve" viewBox="0 0 440 190" role="img" aria-label="For this pair: the probability of its gold translation and of the translation the model writes, over the rounds" style="max-width:460px"></svg>
+        <div class="ogrid one avgrows" id="trSeqRows" style="max-width:640px"></div>
+        <p class="note"><span class="ok">green</span>: the probability of this pair's gold translation · <span class="bad">red</span>: of the translation the model writes · orange line: where the cycle is now. Green climbs because every update of this pair moves the tables toward its gold translation; the other 15 pairs' updates share words with it and mostly help too.</p>
       </div>
       <div class="why" id="trWhole">
         <p class="label">B. The whole training: the same procedure as part A, seen a round at a time (1 round = one pass over the 16 pairs); and, for comparison, the other procedure</p>
@@ -478,8 +479,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
             <p class="note" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none;margin:0;height:1.7em;line-height:1.7em"><span class="sw" style="background:var(--orange);width:18px;height:3px;display:inline-block;vertical-align:middle;margin-right:6px"></span><span id="tsAllGhost">click a word: its path from the random start to this round</span></p>
           </div>
           <div class="col">
-            <p class="label">Probability of the whole gold translation, over the rounds</p>
-            <svg id="tsCurve" viewBox="0 0 440 210" role="img" aria-label="Probability of the whole gold translation: the 15 training pairs, averaged, and the development pair, over the rounds" style="max-width:460px"></svg>
+            <p class="label"><i>unha tía miña</i> (development): gold vs written translation, over the rounds</p>
+            <svg id="tsCurve" viewBox="0 0 440 210" role="img" aria-label="For the development pair: the probability of its gold translation and of the translation the model writes, over the rounds" style="max-width:460px"></svg>
             <div class="ogrid one avgrows" id="tsAvg"></div>
           <p class="note" id="tsNote" style="margin:0;min-height:3.4em"></p>
           </div>
@@ -986,6 +987,18 @@ function snapAt(u) {   // the tables after u pairs seen
 // the replay agrees with the training script's checkpoints
 window.__s2sCheck = () => Math.max(...S2S.checks.map(c => Math.max(...["G", "O", "I"].flatMap(T => c[T].flatMap((v, j) => [Math.abs(v[0] - R[c.round][T][j][0]), Math.abs(v[1] - R[c.round][T][j][1])])))));
 if (window.__s2sCheck() > 1e-3) console.warn("mt: the replayed training differs from the recorded checkpoints by", window.__s2sCheck());
+// every probability curve on the page is in one unit: the probability of a whole translation, its words' probabilities multiplied.
+// The rows under a curve show the multiplication: the gold translation (each gold word given the gold words before it) and
+// the translation the model writes (each word the most probable one, given its own words before it).
+window.seqRows = (tgt, goldP, wr, wrP) => {
+  const green = css("--green"), neg = css("--neg"), ok = wr.join(" ") === tgt.join(" ");
+  const row = (who, color, ws, ps) => `<div class="row"><span class="who" style="color:${color}">${who}</span>${ws.map((w, m) => `${m ? `<span class="x">×</span>` : ""}<span class="cell"><span class="fl" style="width:${(ps[m] * 100).toFixed(1)}%;background:${color}"></span><span class="t">${w} ${ps[m].toFixed(2)}</span></span>`).join("")}<span class="eq" style="color:${color}">= ${ps.reduce((x, y) => x * y, 1).toFixed(3)}</span></div>`;
+  return row("gold:", green, tgt, goldP) + (ok ? `<div class="row"><span class="who" style="color:${neg}">written:</span><span>the gold translation: the two curves are one</span></div>` : row("written:", neg, wr, wrP)); };
+// rows that are too wide for the column get a smaller font, at the same height
+window.fitRows = box => box.querySelectorAll(".row").forEach(r => { let fs = 0.8; r.style.fontSize = fs + "rem"; while (r.scrollWidth > r.clientWidth && fs > 0.5) { fs -= 0.02; r.style.fontSize = fs + "rem"; } });
+const prodOf = ps => ps.reduce((x, y) => x * y, 1);
+// the translation the model writes, and each written word's probability
+const writtenOf = (sn, src) => { const st = translate(sn, src).steps; return { w: st.map(x => x.w), p: st.map(x => x.p[EN.indexOf(x.w)]) }; };
 function translate(sn, src) {
   let h = [0, 0]; const path = [h];
   for (const w of src) { const g = sn.G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; path.push(h); }
@@ -1024,21 +1037,21 @@ function placer() {
   return (cx, cy, w, gap) => { const tries = [[cx + gap, cy, "start"], [cx - gap - w, cy, "end"], [cx + gap, cy + 12, "start"], [cx - gap - w, cy + 12, "end"], [cx + gap, cy - 12, "start"], [cx - gap - w, cy - 12, "end"], [cx + gap, cy + 24, "start"], [cx - gap - w, cy + 24, "end"]];
     const [x, y, an] = tries.find(([x, y]) => free(x, y, w)) || tries[0]; placed.push({ x, y, w }); return [an === "end" ? x + w : x, y, an]; };
 }
-// part A: the curves of this pair over the rounds, marker where the cycle is now
-function renderCurve(q, src, tgt, k) {
-  if (!CURVES[q]) CURVES[q] = R.map(sn => correctProbs(sn, src, tgt));
-  const C = CURVES[q], green = css("--green"), orange = css("--orange");
-  const X = r => 34 + r / ROUNDS * 330, Y = p => 12 + (1 - p) * 150, rNow = uA / NP, pNow = correctProbs(snapAt(uA), src, tgt);
-  let g = `<line class="axis" x1="34" y1="162" x2="364" y2="162"/><line class="axis" x1="34" y1="12" x2="34" y2="162"/>`;
-  g += `<text x="34" y="178" text-anchor="middle" font-size="10">round 0</text><text x="364" y="178" text-anchor="middle" font-size="10">${ROUNDS}</text><text x="28" y="166" text-anchor="end" font-size="10">0</text><text x="28" y="16" text-anchor="end" font-size="10">1</text>`;
-  g += `<line x1="${X(rNow)}" y1="12" x2="${X(rNow)}" y2="162" stroke="${orange}" stroke-width="1.5" stroke-dasharray="4 3"/>`;
-  tgt.forEach((w, m) => { const sel = m === k;
-    g += `<polyline points="${C.map((row, i) => `${X(i).toFixed(1)},${Y(row[m]).toFixed(1)}`).join(" ")}" fill="none" stroke="${green}" stroke-width="${sel ? 3 : 1.4}" stroke-opacity="${sel || k < 0 ? 1 : 0.4}"/>`;
-    g += `<circle cx="${X(rNow)}" cy="${Y(pNow[m])}" r="${sel ? 5 : 3.5}" fill="${orange}"/>`; });
-  let last = -99;
-  tgt.map((w, m) => ({ w, m, y: Y(C[C.length - 1][m]) + 4 })).sort((a, b) => a.y - b.y).forEach(l => { const y = Math.max(l.y, last + 12); last = y;
-    g += `<text x="370" y="${y}" font-size="11" fill="${green}" fill-opacity="${l.m === k || k < 0 ? 1 : 0.5}">${l.m + 1}: ${l.w}</text>`; });
+// part A: this pair's two whole-translation probabilities over the rounds (gold, written); the orange line is where the cycle is now
+function renderCurve(q, src, tgt) {
+  if (!CURVES[q]) CURVES[q] = { gold: R.map(sn => prodOf(correctProbs(sn, src, tgt))), wr: R.map(sn => prodOf(writtenOf(sn, src).p)) };
+  const C = CURVES[q], green = css("--green"), neg = css("--neg"), orange = css("--orange"), muted = css("--muted");
+  const X = r => 34 + r / ROUNDS * 330, Y = p => 22 + (1 - p) * 140, rNow = uA / NP, snN = snapAt(uA), gp = correctProbs(snN, src, tgt), wn = writtenOf(snN, src);
+  let g = `<line class="axis" x1="34" y1="162" x2="364" y2="162"/><line class="axis" x1="34" y1="22" x2="34" y2="162"/>`;
+  g += `<text x="34" y="178" text-anchor="middle" font-size="10">round 0</text><text x="364" y="178" text-anchor="middle" font-size="10">${ROUNDS}</text><text x="28" y="166" text-anchor="end" font-size="10">0</text><text x="28" y="26" text-anchor="end" font-size="10">1</text><text x="4" y="12" font-size="10" fill="${muted}">probability of a whole translation</text>`;
+  g += `<line x1="${X(rNow)}" y1="22" x2="${X(rNow)}" y2="162" stroke="${orange}" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+  g += `<polyline points="${C.wr.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${neg}" stroke-width="2.4"/>`;
+  g += `<polyline points="${C.gold.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${green}" stroke-width="2.4"/>`;
+  g += `<circle cx="${X(rNow)}" cy="${Y(prodOf(wn.p))}" r="5.5" fill="${neg}" stroke="var(--panel)" stroke-width="1.5"/><circle cx="${X(rNow)}" cy="${Y(prodOf(gp))}" r="4" fill="${green}" stroke="var(--panel)" stroke-width="1.5"/>`;
+  const yg = Y(C.gold[C.gold.length - 1]) + 4, yw = Y(C.wr[C.wr.length - 1]) + 4, sep = Math.abs(yg - yw) < 12;
+  g += `<text x="370" y="${sep ? Math.min(yg, yw) : yg}" font-size="11" fill="${green}">gold</text><text x="370" y="${sep ? Math.min(yg, yw) + 12 : yw}" font-size="11" fill="${neg}">written</text>`;
   $("trainCurve").innerHTML = g;
+  $("trSeqRows").innerHTML = seqRows(tgt, gp, wn.w, wn.p); fitRows($("trSeqRows"));
 }
 // ---- part A: the cycle for one pair, one stage at a time: the tables → input 1, 2, 3 → output 1 … K → the update → the next pair
 function stagesFor(q, mode, snB) {
@@ -1216,8 +1229,8 @@ function renderA() {
     sg.kind === "out" ? (sg.k < steps.length - 1 ? `Next: output ${sg.k + 2}${trMode === "train" ? " (the tables do not change yet: the update comes after the last output)" : ""}.` : trMode === "train" ? `Next: the update of the tables, one output at a time.` : `Next: done (no update when translating).`) :
     sg.kind === "push" ? (() => { const gs2 = groupsFor(q, sg.k, pushesOf(snB, q).pr); return subIdx < gs2.length - 1 ? `Next: part ${subIdx + 2} of ${gs2.length}, ${gs2[subIdx + 1].name.split(":")[0]}.` : sg.k < K - 1 ? `Next: the update from output ${sg.k + 2}.` : `The update is complete. Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with these updated tables${nextQ === 0 ? " (a new round begins)" : ""}.`; })() :
     `Translating changes nothing in the tables. Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with the same tables.`;
-  $("trainCurveLbl").innerHTML = `<i>${src.join(" ")}</i> over the rounds: the probability of the gold output at each output`;
-  renderCurve(q, src, tgt, sg.kind === "out" && trMode === "train" ? sg.k : -1);
+  $("trainCurveLbl").innerHTML = `<i>${src.join(" ")}</i>: gold vs written translation, over the rounds`;
+  renderCurve(q, src, tgt);
 }
 // part B: every vector, and where it was before this round
 let traceSel = null, traceSelC = null;   // parts B and C: the word whose path is traced on the plane ("G3" / "O5")
@@ -1546,20 +1559,10 @@ PZ.attach("trAllSvg", () => renderWhole());
 
 // ---------- part C: training data and development data (the same training on 15 pairs, unha tía miña held out) ----------
 $("trainData").innerHTML = S2S.data.map(([s2, t2], q) => `<div class="phrase"><span><span class="mono" style="color:var(--muted);display:inline-block;min-width:2.2em">${q + 1}.</span><span class="src">${s2.join(" ")}</span> → ${t2.map(w => w === "‹end›" ? `<span style="color:var(--muted)">${w}</span>` : w).join(" ")}</span></div>`).join("");
-// how one point of a curve is made: the development pair's word probabilities (each given the gold words before it)
-// multiplied: the probability of the whole gold translation; for the training pairs, the same per pair, then averaged
-window.avgRows = (devTgt, devP, trP, trNames) => {
-  const neg = css("--neg"), green = css("--green"), prod = devP.reduce((a, b) => a * b, 1), avg = trP.reduce((a, b) => a + b, 0) / trP.length;
-  return `<div class="row"><span class="who" style="color:${neg}">development:</span>${devTgt.map((w, m) => `${m ? `<span class="x">×</span>` : ""}<span class="cell"><span class="fl" style="width:${(devP[m] * 100).toFixed(1)}%;background:${neg}"></span><span class="t">${w} ${devP[m].toFixed(2)}</span></span>`).join("")}<span class="eq" style="color:${neg}">= ${prod.toFixed(3)}</span></div>`
-    + `<div class="row"><span class="who" style="color:${green}">training, one bar each:</span><span class="tbars">${trP.map((p, i) => `<span title="${trNames[i]}: ${p.toFixed(3)}" style="height:${(p * 100).toFixed(1)}%;background:${green}"></span>`).join("")}</span><span class="eq" style="color:${green}">average = ${avg.toFixed(3)}</span></div>`; };
-// rows that are too wide for the column get a smaller font, at the same height
-window.fitRows = box => box.querySelectorAll(".row").forEach(r => { let fs = 0.8; r.style.fontSize = fs + "rem"; while (r.scrollWidth > r.clientWidth && fs > 0.5) { fs -= 0.02; r.style.fontSize = fs + "rem"; } });
 const HQ = S2S.held, TRAIN15 = S2S.data.map((d, q) => q).filter(q => q !== HQ);
 let RT = null, tsI = 0, tsTimer = null, tsSet = 0, devK = 0;
 function testRun() { if (RT) return RT; let sn = R[0]; RT = [sn]; for (let r = 1; r <= ROUNDS; r++) { for (const q of TRAIN15) sn = upd(sn, q); sn.step = r; RT.push(sn); } return RT; }
 window.__s2sCheck15 = () => Math.max(...S2S.checks15.map(c => Math.max(...["G", "O", "I"].flatMap(T => c[T].flatMap((v, j) => [Math.abs(v[0] - testRun()[c.round][T][j][0]), Math.abs(v[1] - testRun()[c.round][T][j][1])])))));
-// the probability of the whole gold translation (its words' probabilities multiplied), averaged over the pairs
-const meanGold = (sn, qs) => qs.reduce((s, q) => { const [a, b] = S2S.data[q]; return s + correctProbs(sn, a, b).reduce((x, y) => x * y, 1); }, 0) / qs.length;
 let TS_CURVES = null;
 const devTag = `<span class="devtag">development: held out</span>`;
 function renderTest() {
@@ -1577,8 +1580,8 @@ function renderTest() {
     return `<div class="phrase${q === HQ ? " dev" : ""}"><span><span class="src">${s2.join(" ")}</span> → <span class="${ok ? "ok" : "bad"}">${out.join(" ") || "(nothing)"}</span>${q === HQ ? devTag : ""}</span></div>`; }).join("");
   $("tsPlaneLbl").textContent = tsI === 0 ? "3. All the vectors at the random start" : `3. All the vectors after round ${tsI} of training on 15`;
   renderAllPlane(RTT, tsI, { svg: "tsAllSvg", ghost: "tsAllGhost", get: () => traceSelC, set: v => { traceSelC = v; }, redraw: () => renderTest() });
-  // the curve: the probability of the whole gold translation, training pairs (averaged) vs the development pair, smoothed over 31 rounds
-  if (!TS_CURVES) TS_CURVES = { tr: RTT.map(s => meanGold(s, TRAIN15)), te: RTT.map(s => meanGold(s, [HQ])) };
+  // the curve: the development pair's gold translation and the translation the model writes, smoothed over 31 rounds
+  if (!TS_CURVES) TS_CURVES = { gold: RTT.map(s => prodOf(correctProbs(s, src, tgt))), wr: RTT.map(s => prodOf(writtenOf(s, src).p)) };
   const green = css("--green"), neg = css("--neg"), orange = css("--orange"), muted = css("--muted"), grid = css("--grid");
   const L = 40, Rr = 420, T = 22, B = 176, X = i => L + i / ROUNDS * (Rr - L), Y = v => T + (1 - v) * (B - T);
   const W = 15, smooth = arr => arr.map((v, i) => { const a = Math.max(0, i - W), b = Math.min(arr.length - 1, i + W); let s = 0; for (let k = a; k <= b; k++) s += arr[k]; return s / (b - a + 1); });
@@ -1586,14 +1589,14 @@ function renderTest() {
   [0.25, 0.5, 0.75, 1].forEach(v => { g += `<line x1="${L}" y1="${Y(v)}" x2="${Rr}" y2="${Y(v)}" stroke="${grid}"/>`; });
   [1000, 2000, 3000].forEach(r => { g += `<line x1="${X(r)}" y1="${T}" x2="${X(r)}" y2="${B}" stroke="${grid}"/><text x="${X(r)}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">${r}</text>`; });
   g += `<line class="axis" x1="${L}" y1="${B}" x2="${Rr}" y2="${B}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${B}"/>`;
-  g += `<text x="${L}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">round 0</text><text x="${L - 6}" y="${Y(0) + 4}" text-anchor="end" font-size="10" fill="${muted}">0</text><text x="${L - 6}" y="${Y(0.5) + 4}" text-anchor="end" font-size="10" fill="${muted}">0.5</text><text x="${L - 6}" y="${Y(1) + 4}" text-anchor="end" font-size="10" fill="${muted}">1</text><text x="${L - 30}" y="${T - 11}" font-size="10" fill="${muted}">probability of the whole gold translation</text>`;
-  g += `<polyline points="${smooth(TS_CURVES.tr).map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${green}" stroke-width="2.6" stroke-linejoin="round"/>`;
-  g += `<polyline points="${smooth(TS_CURVES.te).map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${neg}" stroke-width="2.6" stroke-linejoin="round"/>`;
+  g += `<text x="${L}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">round 0</text><text x="${L - 6}" y="${Y(0) + 4}" text-anchor="end" font-size="10" fill="${muted}">0</text><text x="${L - 6}" y="${Y(0.5) + 4}" text-anchor="end" font-size="10" fill="${muted}">0.5</text><text x="${L - 6}" y="${Y(1) + 4}" text-anchor="end" font-size="10" fill="${muted}">1</text><text x="${L - 30}" y="${T - 11}" font-size="10" fill="${muted}">probability of a whole translation</text>`;
+  g += `<polyline points="${smooth(TS_CURVES.wr).map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${neg}" stroke-width="2.6" stroke-linejoin="round"/>`;
+  g += `<polyline points="${smooth(TS_CURVES.gold).map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${green}" stroke-width="2.6" stroke-linejoin="round"/>`;
   g += `<line x1="${X(tsI)}" y1="${T}" x2="${X(tsI)}" y2="${B}" stroke="${orange}" stroke-width="1.3" stroke-dasharray="4 3"/>`;
-  g += `<circle cx="${X(tsI)}" cy="${Y(TS_CURVES.tr[tsI])}" r="4.5" fill="${green}" stroke="var(--panel)" stroke-width="1.5"/><circle cx="${X(tsI)}" cy="${Y(TS_CURVES.te[tsI])}" r="4.5" fill="${neg}" stroke="var(--panel)" stroke-width="1.5"/>`;
+  g += `<circle cx="${X(tsI)}" cy="${Y(TS_CURVES.wr[tsI])}" r="5.5" fill="${neg}" stroke="var(--panel)" stroke-width="1.5"/><circle cx="${X(tsI)}" cy="${Y(TS_CURVES.gold[tsI])}" r="4" fill="${green}" stroke="var(--panel)" stroke-width="1.5"/>`;
   $("tsCurve").innerHTML = g;
-  $("tsAvg").innerHTML = avgRows(tgt, correctProbs(sn, src, tgt), TRAIN15.map(q => correctProbs(sn, ...S2S.data[q]).reduce((x, y) => x * y, 1)), TRAIN15.map(q => S2S.data[q][0].join(" "))); fitRows($("tsAvg"));
-  $("tsNote").innerHTML = `<span class="ok">green</span>: the probabilities of the 15 training translations, averaged · <span class="bad">red</span>: the probability of the development translation · curves smoothed over 31 rounds, the dots are the values now (${TS_CURVES.tr[tsI].toFixed(3)} and ${TS_CURVES.te[tsI].toFixed(3)})`;
+  { const wn = writtenOf(sn, src); $("tsAvg").innerHTML = seqRows(tgt, correctProbs(sn, src, tgt), wn.w, wn.p); fitRows($("tsAvg")); }
+  $("tsNote").innerHTML = `<span class="ok">green</span>: the probability of the development pair's gold translation · <span class="bad">red</span>: of the translation the model writes for it · curves smoothed over 31 rounds, the dots are the values now (${TS_CURVES.gold[tsI].toFixed(3)} and ${TS_CURVES.wr[tsI].toFixed(3)})`;
 }
 function stopTest() { clearInterval(tsTimer); tsTimer = null; $("tsPlay").textContent = "Play training"; }
 $("tsNext").addEventListener("click", () => { stopTest(); tsI = Math.min(tsI + 1, ROUNDS); renderTest(); });
@@ -1644,7 +1647,6 @@ const decode = (sn, src) => { let h = [0, 0]; for (const w of src) { const g = s
 const RIGHT = TS.map(sn => TRAIN4.filter(i => { const [s2, t2] = IHAD.data[i]; return runAt(sn, s2).out.join(" ") === t2.join(" "); }).length);
 const correctP = (sn, src, tgt) => { let h = [0, 0]; for (const w of src) { const g = sn.G[GL.indexOf(w)]; h = [0.5 * h[0] + 0.5 * g[0], 0.5 * h[1] + 0.5 * g[1]]; }
   let st = h; return tgt.map(w => { const j = EN.indexOf(w), p = softmax(sn.O.map(o => st[0] * o[0] + st[1] * o[1]))[j]; st = [0.5 * st[0] + 0.5 * sn.I[j][0], 0.5 * st[1] + 0.5 * sn.I[j][1]]; return p; }); };
-const meanG = (sn, ids) => ids.reduce((s, i) => { const [a, b] = IHAD.data[i]; return s + correctP(sn, a, b).reduce((x, y) => x * y, 1); }, 0) / ids.length;   // as in section 1 part C: whole-translation probabilities, averaged
 // the curves follow the chosen sentence: the probability of its gold translation, and of the translation the model writes
 // (each word the most probable one, given its own earlier words); the same number when the model writes the gold translation
 const CUR4 = {}, curOf = qq => CUR4[qq] || (CUR4[qq] = { gold: TS.map(sn => correctP(sn, ...IHAD.data[qq]).reduce((x, y) => x * y, 1)), wr: TS.map(sn => decode(sn, IHAD.data[qq][0]).reduce((x, s) => x * s.p[s.j], 1)) });
@@ -1673,9 +1675,7 @@ function renderT() {
   c += `<line x1="${X(ti)}" y1="${T}" x2="${X(ti)}" y2="${B}" stroke="${orange}" stroke-width="1.3" stroke-dasharray="4 3"/>`;
   c += `<circle cx="${X(ti)}" cy="${Y(CV.wr[ti])}" r="5.5" fill="${neg}" stroke="var(--panel)" stroke-width="1.5"/><circle cx="${X(ti)}" cy="${Y(CV.gold[ti])}" r="4" fill="${green}" stroke="var(--panel)" stroke-width="1.5"/>`;
   $(PFX + "Curve").innerHTML = c;
-  { const ds4 = decode(sn, src), wr = ds4.map(s => EN[s.j]), ok = wr.join(" ") === tgt.join(" ");
-    const row = (who, color, ws, ps) => `<div class="row"><span class="who" style="color:${color}">${who}</span>${ws.map((w, m) => `${m ? `<span class="x">×</span>` : ""}<span class="cell"><span class="fl" style="width:${(ps[m] * 100).toFixed(1)}%;background:${color}"></span><span class="t">${w} ${ps[m].toFixed(2)}</span></span>`).join("")}<span class="eq" style="color:${color}">= ${ps.reduce((x, y) => x * y, 1).toFixed(3)}</span></div>`;
-    $(PFX + "Avg").innerHTML = row("gold:", green, tgt, correctP(sn, src, tgt)) + (ok ? `<div class="row"><span class="who" style="color:${neg}">written:</span><span>the gold translation: the two curves are one</span></div>` : row("written:", neg, wr, ds4.map(s => s.p[s.j]))); fitRows($(PFX + "Avg")); }
+  { const ds4 = decode(sn, src); $(PFX + "Avg").innerHTML = seqRows(tgt, correctP(sn, src, tgt), ds4.map(s => EN[s.j]), ds4.map(s => s.p[s.j])); fitRows($(PFX + "Avg")); }
   $(PFX + "CurveLbl").innerHTML = `<i>${src.join(" ")}</i>${held && q === HELD4 ? " (development)" : ""}: gold vs written translation`;
   $(PFX + "CurveNote").innerHTML = `<span class="ok">green</span>: the probability of its gold translation (each gold word given the gold words before it) · <span class="bad">red</span>: the probability of the translation the model writes (each word the most probable one, given its own words before it) · curves smoothed over 5 recorded steps, the dots are the values now (${CV.gold[ti].toFixed(3)} and ${CV.wr[ti].toFixed(3)}) · ` + FACT;
   // why: at the first output that differs from the gold output (or, if none does, the closest call), the numbers that decide it
@@ -1730,7 +1730,7 @@ PZ.attach(PFX + "Svg", () => renderT());
 return { state: () => ({ ti, q, TS, RIGHT, TRAIN4, runAt }) };
 }
 const TRB = setupTrainer("ihb", "ihTrainB", IHAD.snaps24, false, "the model ends up writing all 24 right, “I had an aunt who sang” included: the pattern can be learned");
-const TRC = setupTrainer("ihc", "ihTrainC", IHAD.snaps, true, "the development sentence comes closest at steps 1000–1200 (“I had an aunt who danced”) and ends as “a colleague of mine sang”: learned from the other 23, the pattern does not carry over");
+const TRC = setupTrainer("ihc", "ihTrainC", IHAD.snaps, true, "the development sentence comes closest at steps 1000–1200 (“I had an aunt who danced”) and ends as “a colleague of mine sang”, which the model rates far above the gold translation: no other way of choosing the words would write the gold one. Learned from the other 23, the pattern does not carry over to a new input; that is a matter of the training data. Words fading from a long summary (section 2) are a different problem, the next page's");
 (window.__askState ||= []).push(() => { const b = TRB.state(), c = TRC.state(), [s] = IHAD.data[IHAD.held];
   return `Section 4 (second toy model, English following the book counts; two runs from the same start, all 24 pairs at once with Adam): part B trains on all 24, at step ${b.TS[b.ti].step} ${b.RIGHT[b.ti]} of 24 right; part C holds out "${s.join(" ")}" (development data), at step ${c.TS[c.ti].step} ${c.RIGHT[c.ti]} of 23 right, and it writes "${c.runAt(c.TS[c.ti], s).out.filter(w => w !== "‹end›").join(" ")}" for the held-out sentence (gold: "I had an aunt who sang").`; });
 })();
