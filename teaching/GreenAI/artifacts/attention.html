@@ -527,7 +527,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <tr><td>sections 4 and 5 here</td><td>5,000 template sentences; ours held out</td><td><span class="bad">A friend of mine, …</span>; with attention, An aunt of mine, …</td><td>same data, same steps, same size: the difference is attention's</td></tr>
       </tbody></table></div>
       <p>Step 5 shows, on a made-up training run, how training on the example translations would produce values like those of sections 1 and 2.</p></div>
-    <p class="lead">A translation model small enough to run by hand, on the phrase <i>unha tía miña</i>. Its vectors have three dimensions, one per Galician word, and its decoder knows eight English words. Every value is on the page. Without attention, this made-up model writes “a friend of mine” (the table above says why a made-up model), and the steps show exactly why. Section 2 adds attention to the same model, and it writes “an aunt of mine”. We set the values by hand so that the arithmetic stays simple; a real model learns them from examples, as the skip-gram lesson showed.</p>
+    <p class="lead">A translation model small enough to run by hand, on the phrase <i>unha tía miña</i>. Its vectors have three dimensions, one per Galician word, and its decoder knows eight English words. Every value is on the page. Without attention, this made-up model writes “a friend of mine”, and the steps show exactly why. Section 2 adds attention to the same model, and it writes “an aunt of mine”. We set the values by hand so that the arithmetic stays simple; a real model learns them from examples, as the skip-gram lesson showed.</p>
     <div class="planes" id="tyPlanes"></div>
   </section>
 
@@ -1927,7 +1927,7 @@ const STEPS = [
       return [
         { board: g11({ ...am, cap: "the 2nd phrase, <i>unha veciña miña</i>: scores without a bias", words: allBars(VEC, ST0, ["g", "e"]) }) +
             work([`Take the 2nd phrase, <i>unha veciña miña</i>, again. Its state holds nothing of tía, so “a” and “an” get the same score, ${f(r2(sv0.rows[0].gp + sv0.rows[0].ep))}. The state gives no reason to prefer either.`,
-              "Yet in the translation page's example translations, “a” is the right first word 6 times out of 8. The model needs a way to prefer “a” when the state says nothing either way."]),
+              "Yet among the 8 example translations that start with “a” or “an”, 6 start with “a”. The model needs a way to prefer “a” when the state says nothing either way."]),
           scene: vScene("This state reaches 0 along tía: nothing in it speaks for “an” or for “a”.") },
         { board: g11({ ...am, bias: true, cap: "the 2nd phrase, <i>unha veciña miña</i>: the bias is added", words: allBars(VEC, ST0, ALL, { anim: "b" }) }) +
             work([`That is the bias. Training raises the bias of a word that is right more often than its dot product says: “a” gets ${f(CAND.a.b)}. Now “a” scores ${f(sv.rows[0].s)} and “an” ${f(sv.rows[1].s)}.`,
