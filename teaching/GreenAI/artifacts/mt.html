@@ -312,7 +312,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="controls"><span class="note">after each output, what is mixed into the state:</span><div class="seg" role="group" aria-label="Decoding in training or when translating"><button id="trModeTrain" aria-pressed="true">in training: the gold output</button><button id="trModeFree" aria-pressed="false">when translating: the output written</button></div></div>
         <div class="cols acols">
           <div class="col asticky">
-            <p class="label" id="trTabLbl"></p>
+            <p class="label" id="trTabLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
             <div class="ltop">
               <div class="tables3 two one" id="trTabG"></div>
               <div style="position:relative;max-width:270px;width:100%">
@@ -322,19 +322,19 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
             </div>
             <div class="tables3 two" id="trTab"></div>
             <p class="note" id="trTabNote" style="margin:0"></p>
-            <div class="legendrow compact" id="trLeg"><span class="note" style="margin:0;font-size:inherit">colours, in the tables and on the plane:</span><span><span class="sw" style="background:var(--blue)"></span>this pair's inputs</span><span><span class="sw" style="background:var(--green)"></span>its gold outputs</span><span><span class="sw" style="background:var(--orange)"></span><span id="trLegWin">the highest probability now</span></span><span><span class="sw" style="background:var(--hi);border:1px solid var(--line)"></span>second vectors mixed into the state</span><span><span class="sw" style="background:var(--orange);width:22px;height:4px"></span>the summary, then the state (- - - its direction: farther along = higher score)</span><span>faint or small: before the update</span></div>
+            <div class="legendrow compact" id="trLeg"><span class="note" style="margin:0;font-size:inherit">colours, in the tables and on the plane:</span><span><span class="sw" style="background:var(--blue)"></span>this pair's inputs</span><span><span class="sw" style="background:var(--green)"></span>its gold outputs</span><span><span class="sw" style="background:var(--orange)"></span><span id="trLegWin">the highest probability now</span></span><span><span class="sw" style="background:var(--hi);border:1px solid var(--line)"></span>second vectors mixed into the state</span><span><span class="sw" style="background:var(--orange);width:22px;height:4px"></span>the summary, then the state (- - - its direction: farther along = higher score)</span><span>faint: before the update</span><span>gold k: gold output k · ↑ₖ ↓ₖ: output k's arrows: the gold output up, the highest other down</span></div>
           </div>
           <div class="col">
             <p class="label" id="trEncLbl">Encoding: the inputs are mixed, one by one, into one vector, the summary (new = ½ × old + ½ × vector of the input; section 2 shows the rule)</p>
             <svg class="chain" id="trEncChain" viewBox="0 0 780 118" role="img" aria-label="The encoder mixes the inputs one by one into the summary"></svg>
             <div id="trDecPane" style="display:grid;gap:10px">
-              <p class="label" id="trDecLbl"></p>
+              <p class="label" id="trDecLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
               <svg class="chain" id="trWhyChain" data-compact="1" viewBox="0 0 720 430" role="img" aria-label="How one output is chosen: the state, the scores, the probabilities, and how the next state is made"></svg>
               <p class="note" id="trWhyStripKey" style="margin:0"></p>
               <p class="note" id="trWhyNote" style="color:var(--fg);margin:0;max-width:none"></p>
             </div>
             <div id="trUpdPane" style="display:grid;gap:10px">
-              <p class="label" id="trUpdLbl"></p>
+              <p class="label" id="trUpdLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
               <svg class="chain" id="trUpdChain" viewBox="0 0 720 430" role="img" aria-label="Gradient descent for one output: how each row of the output table moves along the state"></svg>
               <p class="note" id="trUpdNote" style="margin:0;max-width:none"></p>
             </div>
@@ -907,7 +907,7 @@ function renderCurve(q, src, tgt, k) {
 function stagesFor(q, mode, snB) {
   const [src, tgt] = S2S.data[q], st = [{ kind: "tables", lbl: "tables" }];
   src.forEach((w, i) => st.push({ kind: "in", i: i + 1, lbl: `input ${i + 1}: ${w}` }));
-  if (mode === "train") { tgt.forEach((w, k) => st.push({ kind: "out", k, lbl: `output ${k + 1}: ${w}` })); tgt.forEach((w, k) => st.push({ kind: "push", k, lbl: `update: output ${k + 1}` })); }
+  if (mode === "train") { tgt.forEach((w, k) => st.push({ kind: "out", k, lbl: `output ${k + 1}: ${w}` })); tgt.forEach((w, k) => st.push({ kind: "push", k, lbl: `update ${k + 1}` })); }
   else { translate(snB, src).steps.forEach((x, k) => st.push({ kind: "out", k, lbl: `output ${k + 1}: ${x.w}` })); st.push({ kind: "done", lbl: "done" }); }
   return st;
 }
@@ -936,8 +936,8 @@ function renderTables(sn, prev, after, q, sg, steps, flash, activeK = -1) {
     return `<tr class="${mixed ? "mixed" : ""}${on ? " now" : ""}${fl("I", j)}"><th>${w}</th>${cells(base.I[j], ref && ref.I[j], up)}</tr>`; });
   const tbl = (cap, rows, cls = "") => `<table class="${cls}"><caption>${cap}</caption><tbody>${rows.join("")}</tbody></table>`;
   $("trTabG").innerHTML = tbl("Galician inputs: vector", gRows);
-  $("trTab").innerHTML = tbl(up ? "possible outputs: vector for the score · ↑ₖ ↓ₖ: the arrows of output k (bold: this step)" : pk ? `possible outputs: vector for the score · probability at output ${k + 1}${trMode === "train" ? " · ↑ ↓: what the update will do (↑₁: promised at output 1, …)" : ""}` : "possible outputs: vector for the score (gold k: gold output k)", oRows) + tbl("possible outputs: second vector (mixed into the state)", iRows);
-  $("trTabLbl").textContent = up ? `The three tables, being updated: outputs 1–${activeK + 1} of ${tgt.length} carried out` : uA === 0 && !ref ? "The three tables at the random start: every number in all three is random" : "The three tables as they are now (all three started random)";
+  $("trTab").innerHTML = tbl("possible outputs: vector for the score · probability now · ↑ₖ ↓ₖ: the arrows of output k", oRows) + tbl("possible outputs: second vector (mixed into the state)", iRows);
+  $("trTabLbl").textContent = up ? `The three tables, being updated: outputs 1–${activeK + 1} of ${tgt.length} carried out` : uA === 0 && !ref ? "The three tables: every number in all three is random at the start" : "The three tables as they are now";
   $("trTabNote").innerHTML = up ? "bold: changed in this update so far" : ref ? `dotted: changed by the previous update` : "";
 }
 const sg_ = x => (x >= 0 ? "+" : "−") + Math.abs(x).toFixed(2);
