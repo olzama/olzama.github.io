@@ -740,7 +740,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 5 -->
   <section class="panel" id="who">
     <h2><span class="n">8</span>Who decides what a head does?</h2>
-    <p class="lead">Section 7 showed heads with habits: in layer 6 of the real encoder, head 7 makes each piece look at the piece before it. Who gave it that job? Nobody. The people who build a model choose its size and what it predicts. Every head starts with random values, and training nudges all of them at once, as in section 1, step 5. A head ends up with a job because, from its random start, that job was the quickest way to fewer mistakes.</p>
+    <p class="lead">Section 7 showed heads with habits: in layer 6 of the real encoder, head 7 makes each piece look at the piece before it. Who gave it that job? Nobody. The people who build a model choose its size and what it predicts. Every head starts with random values, and training nudges all of them at once, as on the <a href="mt.html#train">translation page, section 1</a>. A head ends up with a job because, from its random start, that job was the quickest way to fewer mistakes.</p>
     <p class="lead">Below, a tiny model with 2 layers of 2 heads learns the classic sentence <i>The animal didn't cross the street because it was tired</i>: it must say what “it” refers to. <i>Tired</i> means the animal, <i>wide</i> means the street. It trains on 96 such sentences; the three runs differ only in their random start.</p>
     <details class="how">
       <summary>How to read the pictures</summary>
@@ -770,7 +770,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <p class="note" id="whoNote"></p>
       </div>
     </div>
-    <p class="note">Training details: keys and queries have 2 dimensions; the training method is Adam, a common refinement of the nudges of section 1, step 5, with a learning rate (step size) of 0.03, for 500 steps. Some heads put much of their weight on words such as <i>because</i> or <i>didn't</i>: models often use such positions to store or park information, as the real model parked weight on ‹/s› in section 6.</p>
+    <p class="note">Training details: keys and queries have 2 dimensions; the training method is Adam, a common refinement of the nudges on the <a href="mt.html#train">translation page, section 1</a>, with a learning rate (step size) of 0.03, for 500 steps. Some heads put much of their weight on words such as <i>because</i> or <i>didn't</i>: models often use such positions to store or park information, as the real model parked weight on ‹/s› in section 6.</p>
   </section>
 
   <button id="askbtn" hidden>Ask Claude</button>
@@ -1885,7 +1885,7 @@ const STEPS = [
           scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], cap: "Every word's dot product with the state." }) }];
     } }],
   ["Training (made up): where the values in the word vectors come from", {
-    text: "Step 4 gave the word vectors made-up values. A real model finds its values by training on example translations. Training shows the model an example and moves the vector of the right word a little toward the decoder state, so that its dot product grows; the vectors of the wrong words move a little away. Below is a made-up training run for “an” and “a” on two of the example translations, with the step size chosen so that the run lands on the values of step 4. Here we train the vectors of “an” and “a” by hand, on two examples, starting from zeros.",
+    text: "Step 4 gave the word vectors made-up values. A real model finds its values by training on example translations. Training shows the model an example and moves the vector of the right word a little toward the decoder state, so that its dot product grows; the vectors of the wrong words move a little away. The translation page, section 1, shows that training step by step. Here, only for “an” and “a”, on two of the example translations: what the two examples look like to the decoder, and where training takes the two vectors.",
     frames: () => {
       const S1 = stateOf(SUMMARY, ST0), S2 = stateOf(VEC, ST0), STEP = 16;
       const EX = [["unha tía miña", S1, "an", SUMMARY], ["unha veciña miña", S2, "a", VEC]], seq = [0, 1, 0, 1];
@@ -1919,16 +1919,19 @@ const STEPS = [
         return { board: g11({ cap: `round ${Math.ceil(k / 2)}, ${sum === VEC ? "the 2nd phrase" : "our phrase"}, <i>${ph}</i>: the right first word is “${right}”`, sum: { label: L2("summary", sum === VEC ? AMIP : OURS), v: sum }, st: { label: L2("state", sum === VEC ? AMIP : OURS), v: s }, dim: others, words: { an: row("an", vAn), a: row("a", vA) }, sideHead: "in unha, tía, miña, ‹start›:" }) +
             work([plan(k)].concat(k === 1 ? [`For the right word: + 16 × the state; for the wrong word: − 16 × the state. The result is where the next nudge starts.`] : []).concat(k === 1 ? [`How far a vector moves each time is the step size (in the skip-gram lesson, the learning rate). Real training takes many small steps, and the step size is a setting people choose. We chose ${STEP} so that the result matches step 4: in our phrase, tía is 0.25 in the state, so each round adds ${STEP} × 0.25 = 4 to the tía value of “an”, and two rounds give 8, the value set by hand in step 4. A smaller step size would need more rounds to get there.`] : [])),
           scene: tScene(k, `${capN[k - 1]} The dashed lines are the paths of the tips of “an” and “a”: one line per nudge, the latest one darker, a small dot where a tip was before. The lines below the floor belong to “a”: its first nudge gives it negative values. (Vectors drawn at 1/${STEP} of their length; first three dimensions only.)`) }; };
-      return [enc(0), enc(1), enc(2),
+      // the encoder's reading of the 2nd phrase in one frame (the rule is step 2's); the nudges themselves are the translation page's section 1
+      const encAll = { board: g11({ cap: "the 2nd example translation, <i>unha veciña miña</i>, “a neighbor of mine”: its summary", sum: { label: L2("encoder", AMIP), v: AMI[2], hi: [0, 1, 2] }, st: { label: L2("state", AMIP) }, dim: others }) +
+          work(["To train, we need a second example translation, the 2nd phrase. The encoder reads it as in step 2:"].concat(ENCL.map((t, n) => `reading <i>${AMI_W[n]}</i>: ${t}`))),
+        scene: tScene(0, "The encoder's path for unha veciña miña. It starts along unha, like our phrase, and never moves along tía.", { segs: amiSeg }) };
+      return [encAll,
         { board: g11({ cap: "the decoder state before word 1, for the 2nd phrase, <i>unha veciña miña</i>", sum: { label: L2("summary", AMIP), v: VEC }, st: { label: L2("state", AMIP), v: S2, hi: [0, 1, 2, 3] }, dim: others }) +
             work([`For our phrase, <i>unha tía miña</i>, the state before word 1 was ${vecTxt(S1.slice(0, 4))}, then zeros (step 3). For the 2nd phrase it is ${vecTxt(S2.slice(0, 4))}, then zeros: tía is 0, because the 2nd phrase has no tía. The two states differ only in tía.`]),
           scene: tScene(0, "The first three dimensions of the two states: unha tía miña reaches 0.25 along tía, unha veciña miña reaches 0.") },
         { board: g11({ cap: "before training: the vectors of “an” and “a” are all zeros", sum: { label: L2("summary", AMIP), v: VEC }, st: { label: L2("state", AMIP), v: S2 }, dim: others, words: { an: { v: vAn[0], cur: true }, a: { v: vA[0], cur: true } } }) +
             work(["With zeros, both get the dot product 0 from any state, so the model has no reason to prefer either."]),
           scene: tScene(0, "The vectors of “an” and “a” start at zero, at the corner where the axes meet.") },
-        nudge(1), nudge(2), nudge(3), nudge(4),
         { board: g11({ cap: "after training on the two examples", sum: { label: L2("summary", AMIP), v: VEC }, st: { label: L2("state", AMIP), v: S2 }, dim: others, words: { an: { v: vAn[4] }, a: { v: vA[4] } } }) +
-            work(["This made-up run gives “an” 8 and “a” −8 in tía, the values of step 4. unha and ‹start› end at 0 here, because both phrases have the same values there, so their pushes cancel. The 4 in unha and the 12 in ‹start› of step 4 would come from more examples: the other example translations, and the later words of each phrase. We did not run those; we set those values, and the vectors of the other six words, directly."]),
+            work(["Training, as on the translation page: for each example, the right first word's vector moves toward the decoder state, the wrong one's away (here by 16 × the state, two rounds over the two examples). The two states agree in unha, miña and ‹start›, so those pushes cancel; only tía is left.", "This made-up run gives “an” 8 and “a” −8 in tía, the values of step 4. unha and ‹start› end at 0 here, because both phrases have the same values there, so their pushes cancel. The 4 in unha and the 12 in ‹start› of step 4 would come from more examples: the other example translations, and the later words of each phrase. We did not run those; we set those values, and the vectors of the other six words, directly."]),
           scene: tScene(4, "Where the vectors of “an” and “a” end up: on the tía axis, pointing opposite ways.") }];
     } }],
   ["The bias, and why the decoder writes “a”", {
@@ -2130,9 +2133,9 @@ const v2 = view3d($("qk3d"), null);
 const PHR = ATT.map(t => t.w);
 // what the correct word at each position needs from the mix: the dimension, the amount, and the sentence that says so
 const NEED = [
-  { d: TIA, min: MARK, txt: `more than ${f(MARK)} of tía in the mix; then “an” beats “a” (section 2, step 10)` },
+  { d: TIA, min: MARK, txt: `more than ${f(MARK)} of tía in the mix; then “an” beats “a” (section 2, step 3)` },
   { d: TIA, min: MARK, txt: `more than ${f(MARK)} of tía in the mix; then “aunt” beats “friend”, by the same arithmetic as “an” against “a”` },
-  { d: MINA, min: 0.2, txt: `more than 0.2 of miña in the mix; then “of” beats ‹end› (section 2, step 11)` },
+  { d: MINA, min: 0.2, txt: `more than 0.2 of miña in the mix; then “of” beats ‹end› (section 2, step 4)` },
   { d: MINA, min: 0, txt: `some miña in the mix; then “mine” beats “yours”` },
   { d: null, txt: `nothing from the mix: with “mine” just written, ‹end› wins whatever the mix holds` }];
 // a query named by its rewards: (0, 6, 0) is "tía × 6"
@@ -2151,16 +2154,16 @@ const PRESETS = [
 // the steps: title, text, the query it sets (or null to keep the current one), the word it moves to (or null), the parts it shows
 const QSTEPS = [
   ["The task: make the decoder write “an”",
-    "Fix the moment. Nothing is written yet, and the correct first word is “an”. Section 2, step 10, showed what decides between “an” and “a”: the amount of tía in the first three dimensions of the decoder state, which the mix fills. More than 0.35 of tía and “an” wins; less and “a” wins. So the task for the query is to produce a mix with enough tía. What it can read is below: the three keys, the encoder's vectors, each holding a share of the Galician words read so far. The key after tía holds the most tía, half; the key after miña a quarter; the key after unha none. The decoder's word vectors, biases and last eight dimensions stay as in sections 1 and 2.",
+    "Fix the moment. Nothing is written yet, and the correct first word is “an”. Section 2, step 3, showed what decides between “an” and “a”: the amount of tía in the first three dimensions of the decoder state, which the mix fills. More than 0.35 of tía and “an” wins; less and “a” wins. So the task for the query is to produce a mix with enough tía. What it can read is below: the three keys, the encoder's vectors, each holding a share of the Galician words read so far. The key after tía holds the most tía, half; the key after miña a quarter; the key after unha none. The decoder's word vectors, biases and last eight dimensions stay as in sections 1 and 2.",
     [0, 6, 0], 0, ["keys", "3d"]],
   ["What the query's numbers mean",
     "A query has the same three dimensions as the keys. Each of its numbers is a reward: a key's score adds up, over the three dimensions, the query's number times what the key holds there. That sum is the dot product. We write tía × 6 for the query (0, 6, 0): each unit of tía in a key earns 6 points, unha and miña earn nothing, so the keys are ranked purely by their tía, and the key after tía scores highest. Notice what the query does not say. It does not say “the second word”: it says what to reward, and the keys are ranked by how much of it they hold. In the picture, each key's score is where it lands on the query's line.",
     [0, 6, 0], 0, ["scores", "3d", "q3"]],
   ["From scores to weights",
-    "Softmax turns the scores into weights, as in section 2, step 8: shares that are positive and add up to 1. Only the gaps between the scores matter, and each point of gap multiplies the share by about 2.7. The key after tía is 1.5 points above the key after miña, so its share is about 4.5 times larger. Softmax does not pick one key: it divides the reading among all three, most of it to the highest score.",
+    "Softmax turns the scores into weights, as in section 2, step 1: shares that are positive and add up to 1. Only the gaps between the scores matter, and each point of gap multiplies the share by about 2.7. The key after tía is 1.5 points above the key after miña, so its share is about 4.5 times larger. Softmax does not pick one key: it divides the reading among all three, most of it to the highest score.",
     [0, 6, 0], 0, ["scores", "sm"]],
   ["The mix, and the word it produces",
-    "The keys added up with those weights are the mix: mostly the key after tía, with a little of the other two. The mix fills the first three dimensions of the decoder state, and the decoder scores its eight words as in section 2, step 10. The mix holds more than 0.35 of tía, so “an” wins: the task is done. This is the whole chain, query → scores → weights → mix → word. The box under the mix shows the last link, with the three best-scoring words and their margins.",
+    "The keys added up with those weights are the mix: mostly the key after tía, with a little of the other two. The mix fills the first three dimensions of the decoder state, and the decoder scores its eight words as in section 2, step 3. The mix holds more than 0.35 of tía, so “an” wins: the task is done. This is the whole chain, query → scores → weights → mix → word. The box under the mix shows the last link, with the three best-scoring words and their margins.",
     [0, 6, 0], 0, ["sm", "mix", "out", "3d", "q3", "m3"]],
   ["Reward another dimension: another key is read, another word comes out",
     "Move the 6 from tía to miña. Now the key after miña scores highest and the mix is mostly that key. It holds a quarter of tía, less than 0.35, and the decoder writes “a”: wrong. Nothing else changed: same sentence, same keys, same decoder. Which dimension the query rewards decides which key is read, and that decides the word. The buttons try the other cases: unha × 6 reads mostly the key after unha, which no word of our phrase needs; equal rewards for tía and miña favour the key after miña, which holds both; all × 0 reads the plain average.",
@@ -2169,7 +2172,7 @@ const QSTEPS = [
     "Keep rewarding tía only, but 2 points per unit instead of 6. The keys are ranked as before, but the gaps between the scores shrink, softmax spreads the weight more evenly, and the mix drifts toward the average of the three keys. Its tía drops below 0.35 and the decoder writes “a”, although the query rewarded the right dimension. With 10 points per unit nearly all the weight goes to the key after tía and “an” wins clearly. So the size of the numbers sets how sharply attention focuses. A weak query reads a blur of all three keys, close to the summary that failed in section 1. The real model of section 6 has heads of both kinds, sharp and spread.",
     [0, 2, 0], 0, ["ctl", "scores", "sm", "mix", "out", "3d", "q3", "m3"]],
   ["The same query at a later word: why each word needs its own query",
-    "Move to the third word. “an aunt” is written, and the correct next word is “of”. Section 2, step 11, showed what it needs: more than 0.2 of miña in the mix; with less, ‹end› wins and the translation stops at “an aunt”. The query that served the first word, tía × 6, fetches a mix with little miña, and the decoder writes ‹end›: wrong. Reward miña instead and “of” comes out. The right query depends on the word being written. That is why the decoder computes a new query before every word, from its state: by a made-up rule in section 2, and from learned values in the trained models of section 4, where the state itself is the query. The table shows the same query at all five words.",
+    "Move to the third word. “an aunt” is written, and the correct next word is “of”. Section 2, step 4, showed what it needs: more than 0.2 of miña in the mix; with less, ‹end› wins and the translation stops at “an aunt”. The query that served the first word, tía × 6, fetches a mix with little miña, and the decoder writes ‹end›: wrong. Reward miña instead and “of” comes out. The right query depends on the word being written. That is why the decoder computes a new query before every word, from its state: by a made-up rule in section 2, and from learned values in the trained models of section 4, where the state itself is the query. The table shows the same query at all five words.",
     [0, 6, 0], 2, ["ctl", "pos", "mix", "out", "words"]],
   ["Your turn",
     "Choose the word the decoder is about to write, set the query with the sliders or the buttons, and follow the chain to the word. Things to try: a negative number punishes a dimension, so keys that hold it score lower (section 2 used tía × −3, miña × 9 before “mine”). And is there one query that gets all five words right? There is, by small margins: tía × 6, miña × 3. Check the margins in the box and in the table.",
