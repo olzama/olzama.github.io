@@ -310,13 +310,11 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <span>Each table below holds every word's vector: one row per word, one column per dimension. Rows in order: animals, chase/eat, things chased, food (the colors at the left).</span>
     </div>
     <div class="cosrow">
-      <figure><canvas id="cosA" aria-label="cats and dogs vectors, 2 dimensions"></canvas><figcaption>cats and dogs, 2 dimensions</figcaption></figure>
-      <figure><canvas id="cosB" aria-label="cats and fish vectors, 2 dimensions"></canvas><figcaption>cats and fish, 2 dimensions</figcaption></figure>
-      <figure><canvas id="cosC" aria-label="cats and dogs one-hot vectors"></canvas><figcaption>cats and dogs, one-hot: (1, 0, 0, …) and (0, 1, 0, …)</figcaption></figure>
+      <figure><canvas id="cosA" aria-label="cats and dogs vectors, 2 dimensions"></canvas><figcaption>cats and dogs, 2 dimensions: the same neighbors, the same direction</figcaption></figure>
+      <figure><canvas id="cosB" aria-label="cats and fish vectors, 2 dimensions"></canvas><figcaption>cats and fish, 2 dimensions: different neighbors, a wider angle</figcaption></figure>
+      <figure><canvas id="cosC" aria-label="cats and dogs one-hot vectors"></canvas><figcaption>cats and dogs, one-hot: (1, 0, 0, …) and (0, 1, 0, …): always a right angle, so no similarity</figcaption></figure>
       <div class="costext">
-        <p><b>Cosine</b> compares two vectors by their direction only: 1 = same direction, 0 = at a right angle, −1 = opposite. How long the vectors are does not count, so the pictures draw them at the same length.</p>
-        <p>Words with the same neighbors get the same nudges, so they end up pointing the same way: high cosine. That is how we read similarity off the table.</p>
-        <p>One-hot vectors never have a 1 in the same place, so any two of them are at a right angle. Cosine 0 for every pair: one-hot vectors cannot say that cats are more like dogs than like fish.</p>
+        <p><b>Cosine</b> compares two vectors by their direction only: <span class="mono">1</span> same direction · <span class="mono">0</span> a right angle · <span class="mono">−1</span> opposite. Length does not count, so the pictures draw both vectors at the same length.</p>
       </div>
     </div>
     <p class="label" style="margin:4px 0 -6px">cos(cats, dogs) after each round</p>
