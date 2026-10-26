@@ -201,6 +201,19 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .ogrid .cell .fl { position: absolute; left: 0; top: 0; bottom: 0; background: var(--green); opacity: 0.4; }
 .ogrid .cell .t { position: relative; }
 .ogrid .cell.on { border-color: var(--orange); }
+.tables3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 16px; align-items: start; }
+@media (max-width: 720px) { .tables3 { grid-template-columns: minmax(0, 1fr); } }
+.tables3 table { border-collapse: collapse; font-family: var(--font-mono); font-size: 0.78rem; font-variant-numeric: tabular-nums; width: 100%; }
+.tables3 caption { font-family: var(--font-body); font-size: 0.82rem; color: var(--fg); text-align: left; padding: 0 0 4px; caption-side: top; }
+.tables3 th, .tables3 td { padding: 1px 6px; text-align: right; white-space: nowrap; }
+.tables3 th { text-align: left; font-weight: 400; }
+.tables3 td.tag { font-family: var(--font-body); font-size: 0.72rem; color: var(--muted); text-align: left; width: 1%; }
+.tables3 tr.in th, .tables3 tr.in td { background: color-mix(in srgb, var(--blue) 16%, transparent); }
+.tables3 tr.gold th, .tables3 tr.gold td { background: color-mix(in srgb, var(--green) 16%, transparent); }
+.tables3 tr.top th, .tables3 tr.top td { background: color-mix(in srgb, var(--orange) 18%, transparent); }
+.tables3 tr.mixed th, .tables3 tr.mixed td { background: var(--hi); }
+.tables3 tr.now th, .tables3 tr.now td { font-weight: 600; color: var(--fg); }
+.tables3 tr.now td:first-of-type { box-shadow: inset 2px 0 0 var(--orange); }
 .why { display: grid; gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
 .whogrid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 10px; align-items: center; }
 .whogrid .hd { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
@@ -250,6 +263,9 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <p class="note" id="trWhyPair" style="min-height:1.6em;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></p>
         <p class="note" style="margin:0">all 16 pairs are supplied together at every training step (part B); here one at a time · stepping through a pair changes nothing in the model: it only computes the probabilities; the model changes only at a training step</p>
         <div class="controls"><button id="aPairPrev">← previous pair</button><button id="aPairNext">next pair →</button><span class="note">after each output, what is mixed into the state:</span><div class="seg" role="group" aria-label="Decoding in training or when translating"><button id="trModeTrain" aria-pressed="true">in training: the gold output</button><button id="trModeFree" aria-pressed="false">when translating: the output written</button></div></div>
+        <p class="label" id="trTablesLbl"></p>
+        <div class="tables3" id="trTables"></div>
+        <p class="note" style="margin:0">the same three tables for all 16 pairs: a pair only picks rows from them (highlighted: <span style="color:var(--blue)">its inputs</span>, <span class="ok">its gold outputs</span>, the <span style="color:var(--orange)">most probable output</span>, and what is mixed into the state) · the numbers change only at a training step (part B)</p>
         <p class="label">Encoding: the inputs are mixed, one by one, into one vector, the summary (new = ½ × old + ½ × vector of the input; section 2 shows the rule)</p>
         <svg class="chain" id="trEncChain" viewBox="0 0 1000 118" role="img" aria-label="The encoder mixes the inputs one by one into the summary"></svg>
         <div class="controls"><p class="label" id="trDecLbl" style="margin-right:auto"></p><button id="trWhyPrev">← previous output</button><button id="trWhyNext">next output →</button></div>
@@ -586,6 +602,18 @@ window.mtWhy = function (o) {
     $(pre + "ModeTrain").onclick = () => o.setMode("train"); $(pre + "ModeFree").onclick = () => o.setMode("free"); }
   if ($(pre + "DecLbl")) $(pre + "DecLbl").textContent = `Decoding, output ${k + 1}: how it is chosen, and how the next state is made`;
   if ($(pre + "WhyGiven")) $(pre + "WhyGiven").innerHTML = k ? `mixed into the state so far: “${given.join(" ")}” (${mode === "train" ? "from the gold output" : "the outputs written"})` : "nothing mixed in yet: state 1 is the summary";
+  // the model as three tables; the rows this pair picks are highlighted
+  if ($(pre + "Tables")) {
+    const n2 = v => `<td>${r2(v[0])}</td><td>${r2(v[1])}</td>`, tbl = (cap, rows) => `<table><caption>${cap}</caption><tbody>${rows.join("")}</tbody></table>`;
+    const inRows = GL.map((w2, j) => { const i = src.indexOf(w2), cls = i >= 0 ? "in" : "";
+      return `<tr class="${cls}"><th>${w2}</th>${n2(sn.G[j])}<td class="tag">${i >= 0 ? `input ${i + 1}` : ""}</td></tr>`; });
+    const outRows = EN.map((w2, j) => { const gi = tgt.indexOf(w2), gold = gi >= 0, top = j === s.j, cls = [gold ? "gold" : top ? "top" : "", (gold && gi === k) || (!gold && top) ? "now" : ""].join(" ");
+      return `<tr class="${cls}"><th>${w2}</th>${n2(sn.O[j])}<td class="tag">${[gold ? `gold output ${gi + 1}` : "", top ? "most probable now" : ""].filter(Boolean).join(" · ")}</td></tr>`; });
+    const mixRows = EN.map((w2, j) => { const mi = steps.slice(0, k).findIndex(x => x.fed === j), cls = mi >= 0 ? `mixed${mi === k - 1 ? " now" : ""}` : "";
+      return `<tr class="${cls}"><th>${w2}</th>${n2(sn.I[j])}<td class="tag">${mi >= 0 ? `mixed in after output ${mi + 1}` : ""}</td></tr>`; });
+    $(pre + "Tables").innerHTML = tbl("Galician inputs: vector (read by the encoder)", inRows) + tbl("possible outputs: vector (for the score)", outRows) + tbl("possible outputs: second vector (mixed into the state)", mixRows);
+    if ($(pre + "TablesLbl")) $(pre + "TablesLbl").textContent = `The model: three tables of vectors, 2 numbers per word`;
+  }
   // the encoding, drawn with the numbers: the summary builds up input by input
   if ($(pre + "EncChain")) {
     const box = (x, y, wd, ht, col, op) => `<rect x="${x}" y="${y}" width="${wd}" height="${ht}" rx="9" fill="${col}" fill-opacity="${op}" stroke="${col}" stroke-width="1.8"/>`;
