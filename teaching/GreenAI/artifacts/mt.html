@@ -210,6 +210,13 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .testcard .v .cell .fl { position: absolute; left: 0; top: 0; bottom: 0; background: var(--green); opacity: 0.4; }
 .testcard .v .cell .t { position: relative; }
 .testcard .ok { color: var(--green); font-weight: 600; } .testcard .bad { color: var(--neg); font-weight: 600; }
+.devtag { font-family: var(--font-body); font-size: 0.7rem; color: var(--orange); border: 1px solid var(--orange); border-radius: 999px; padding: 0 7px; margin-left: 8px; white-space: nowrap; }
+.ogrid .row.dev, .phrases .phrase.dev { opacity: 0.75; background: var(--hi); border-radius: 4px; }
+#tsAll { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
+#tsAll .phrase { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 1.9em; line-height: 1.9em; }
+#tsDevStrip { overflow-x: auto; white-space: nowrap; height: 2.1em; align-items: center; min-width: 0; }
+#tsDevStrip button { flex: 0 0 auto; }
+#trTest .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } #trTest .cols > .col, #trTest .controls { min-width: 0; } .testcard { width: 100%; }
 .ogrid.one .row { flex-wrap: nowrap; height: 1.9em; overflow: hidden; white-space: nowrap; }
 #pathAll { grid-template-columns: minmax(0, 1fr); }
 .tables3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 16px; align-items: start; }
@@ -419,19 +426,46 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         </div>
       </div>
       <div class="why" id="trTest">
-        <p class="label">C. Training data and test data: the same training again, with one pair held out</p>
-        <p class="note" style="max-width:none;margin:0">Same random start, same rule, same 3000 rounds; only <i>unha tía miña → an aunt of mine</i> is left out. The 15 pairs trained on are the <b>training data</b>. The held-out pair is <b>test data</b>: the model never sees it in training, and we ask it afterwards. Parts A and B trained on all 16, this pair included. A failure here is not the summary losing words: in 3 words, tía is still a quarter of it. It is a model that learned the pairs it was shown, not how to combine familiar words anew. The other weakness, words fading from the summary of a long sentence, is section 2's; the next page takes it up.</p>
-        <div class="actl"><div class="controls"><span class="label" style="margin-right:4px">Training on 15</span><button id="tsBack">← 1 round</button><button class="primary" id="tsNext">Train 1 round →</button><button id="tsPlay">Play training</button><button id="tsReset" title="Back to the random start">↺ start</button><input type="range" id="tsStep" min="0" max="3000" step="1" value="0" aria-label="Rounds of training on 15 pairs" style="flex:1 1 140px; accent-color: var(--blue)"><span class="mono" id="tsVal" style="white-space:nowrap"></span></div></div>
+        <p class="label">C. Training data and development data: the same training again, with one pair held out</p>
+        <p class="note" style="max-width:none;margin:0">Same random start, same rule, same 3000 rounds as part B; only <i>unha tía miña → an aunt of mine</i> is left out. The 15 pairs trained on are the <b>training data</b>. The held-out pair is <b>development data</b>: the model never sees it in training, and we use it to check the model while we build it. A failure here is not the summary losing words: in 3 words, tía is still a quarter of it. It is a model that learned the pairs it was shown, not how to combine familiar words anew. The other weakness, words fading from the summary of a long sentence, is section 2's; the next page takes it up.</p>
+        <div class="actl"><div class="controls"><span class="label" style="margin-right:4px">Training on 15</span><button id="tsBack">← 1 round</button><button class="primary" id="tsNext">Train 1 round →</button><button id="tsPlay">Play training</button><button id="tsReset" title="Back to the random start">↺ start</button><input type="range" id="tsStep" min="0" max="3000" step="1" value="0" aria-label="Rounds of training on 15 pairs" style="flex:1 1 140px; accent-color: var(--blue)"><span class="mono" id="tsVal" style="white-space:nowrap"></span></div>
+          <div class="controls"><span class="note">pairs shown:</span><div class="seg" role="group" aria-label="Which pairs are shown"><button id="tsSetA" aria-pressed="true">pairs 1–8</button><button id="tsSetB" aria-pressed="false">pairs 9–16</button></div><span class="note">(the development pair is never trained on)</span></div></div>
         <div class="cols">
           <div class="col">
-            <p class="label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none" id="tsCardLbl"></p>
-            <div class="testcard" id="tsCard"></div>
-            <p class="note" style="margin:0;min-height:3.4em">gold output: each word filled by the probability the model gives it · written: what the model writes when translating, one output at a time, the most probable · <span class="ok">green</span>: as the gold output, <span class="bad">red</span>: different</p>
+            <p class="label" id="tsSupplyLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
+            <div class="ogrid one" id="tsSupply"></div>
+            <p class="note" style="margin:0;min-height:3.4em">each gold output filled by the probability the model gives it · <span style="color:var(--muted)">greyed, with a tag</span>: the development pair, held out of training</p>
+          </div>
+          <div class="col">
+            <p class="label" id="tsAllLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
+            <div class="phrases" id="tsAll"></div>
+            <p class="note" style="margin:0;min-height:3.4em">one output at a time, the most probable, mixed into the state before the next · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span></p>
+          </div>
+        </div>
+        <div class="cols">
+          <div class="col">
+            <p class="label" id="tsPlaneLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
+            <svg id="tsAllSvg" viewBox="0 0 400 400" role="img" aria-label="All vectors of the model trained on 15 pairs" style="max-width:420px"></svg>
+            <div class="legendrow" style="min-height:3.4em;align-content:start"><span><span class="sq" style="background:var(--blue)"></span>Galician input</span><span><span class="ring"></span>English possible output</span><span>axes: the plane zooms out as the vectors grow</span></div>
+            <p class="note" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none;margin:0;height:1.7em;line-height:1.7em"><span class="sw" style="background:var(--orange);width:18px;height:3px;display:inline-block;vertical-align:middle;margin-right:6px"></span><span id="tsAllGhost">click a word: its path from the random start to this round</span></p>
           </div>
           <div class="col">
             <p class="label">The probability of the gold outputs, over the rounds</p>
-            <svg id="tsCurve" viewBox="0 0 440 210" role="img" aria-label="Average probability of the gold outputs: the 15 training pairs and the test pair, over the rounds" style="max-width:460px"></svg>
+            <svg id="tsCurve" viewBox="0 0 440 210" role="img" aria-label="Average probability of the gold outputs: the 15 training pairs and the development pair, over the rounds" style="max-width:460px"></svg>
             <p class="note" id="tsNote" style="margin:0;min-height:3.4em"></p>
+          </div>
+        </div>
+        <p class="label" style="margin-top:6px">The development phrase: what the model trained on 15 writes for it, and why</p>
+        <div class="cols">
+          <div class="col">
+            <p class="label" id="tsCardLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
+            <div class="testcard" id="tsCard"></div>
+            <div class="controls" style="flex-wrap:nowrap"><span class="note">output:</span><div class="pathstrip" id="tsDevStrip" style="flex-wrap:nowrap"></div></div>
+            <p class="note" id="tsDevNote" style="color:var(--fg);margin:0;min-height:5em;max-width:none"></p>
+          </div>
+          <div class="col">
+            <svg id="tsDevSvg" viewBox="0 0 400 400" role="img" aria-label="The development phrase, decoded by the model trained on 15: the state at one output and the English vectors" style="max-width:420px"></svg>
+            <div class="legendrow" style="min-height:3.4em;align-content:start"><span><span class="sw" style="background:var(--orange)"></span>the state at this output</span><span>- - - its direction: farther along = higher score</span><span><span class="ring" style="color:var(--orange)"></span>written (highest probability)</span><span><span class="ring" style="color:var(--green)"></span>the gold output</span><span><span class="sq" style="background:var(--blue)"></span>its inputs</span></div>
           </div>
         </div>
       </div>
@@ -1182,8 +1216,9 @@ function renderA() {
   renderCurve(q, src, tgt, sg.kind === "out" && trMode === "train" ? sg.k : -1);
 }
 // part B: every vector, and where it was before this round
-let traceSel = null;   // part B: the word whose path is traced on the plane ("G3" / "O5")
-function renderAllPlane(RR, r) {
+let traceSel = null, traceSelC = null;   // parts B and C: the word whose path is traced on the plane ("G3" / "O5")
+function renderAllPlane(RR, r, o = { svg: "trAllSvg", ghost: "trAllGhost", get: () => traceSel, set: v => { traceSel = v; }, redraw: () => renderWhole() }) {
+  const traceSel = o.get();
   const sn = RR[r], Z = 1.15 * Math.max(...[...sn.G, ...sn.O].flat().map(Math.abs)), P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z;
   const blue = css("--blue"), fg = css("--fg"), orange = css("--orange"), muted = css("--muted"), tick = +(Z / 1.15).toPrecision(2), put = placer();
   let g = `<line class="axis" x1="10" y1="200" x2="390" y2="200"/><line class="axis" x1="200" y1="10" x2="200" y2="390"/>`;
@@ -1200,10 +1235,10 @@ function renderAllPlane(RR, r) {
   EN.forEach((w, j) => { const v = sn.O[j], on = traceSel === "O" + j; g += `<circle data-k="O${j}" cx="${P(v[0])}" cy="${Q(v[1])}" r="${on ? 7 : 5}" fill="none" stroke="${on ? orange : fg}" stroke-width="${on ? 2.6 : 1.4}" style="cursor:pointer"/>`; });
   GL.forEach((w, j) => { const v = sn.G[j], [x, y, an] = put(P(v[0]), Q(v[1]) + 4, 7 * w.length, 8); g += `<text data-k="G${j}" x="${x}" y="${y}" text-anchor="${an}" font-style="italic" font-size="11" fill="${traceSel === "G" + j ? orange : blue}" style="cursor:pointer">${w}</text>`; });
   EN.forEach((w, j) => { const v = sn.O[j], [x, y, an] = put(P(v[0]), Q(v[1]) + 4, 7 * w.length, 8); g += `<text data-k="O${j}" x="${x}" y="${y}" text-anchor="${an}" font-size="11" fill="${traceSel === "O" + j ? orange : fg}" style="cursor:pointer">${w}</text>`; });
-  $("trAllSvg").innerHTML = g;
-  $("trAllSvg").querySelectorAll("[data-k]").forEach(e => e.addEventListener("click", () => { traceSel = traceSel === e.dataset.k ? null : e.dataset.k; renderWhole(); }));
+  $(o.svg).innerHTML = g;
+  $(o.svg).querySelectorAll("[data-k]").forEach(e => e.addEventListener("click", () => { o.set(traceSel === e.dataset.k ? null : e.dataset.k); o.redraw(); }));
   const name = traceSel ? (traceSel[0] === "G" ? GL : EN)[+traceSel.slice(1)] : null;
-  $("trAllGhost").innerHTML = name ? `path of “${name}”: ○ round 0 → round ${r}, a dot every ${r > 1500 ? 500 : r > 300 ? 100 : r > 60 ? 20 : 5} rounds · click again to clear` : "click a word: its path from the random start to this round";
+  $(o.ghost).innerHTML = name ? `path of “${name}”: ○ round 0 → round ${r}, a dot every ${r > 1500 ? 500 : r > 300 ? 100 : r > 60 ? 20 : 5} rounds · click again to clear` : "click a word: its path from the random start to this round";
 }
 const rightNow = sn => S2S.data.filter(([s2, t2]) => translate(sn, s2).steps.map(x => x.w).filter(w => w !== "‹end›").join(" ") === t2.filter(w => w !== "‹end›").join(" ")).length;
 function renderRightCurve() {
@@ -1451,26 +1486,62 @@ $("bBack").addEventListener("click", () => { bStage = Math.max(bStage - 1, 0); b
 renderB();
 renderTrain();
 
-// ---------- part C: training data and test data (the same training on 15 pairs, unha tía miña held out) ----------
+// ---------- part C: training data and development data (the same training on 15 pairs, unha tía miña held out) ----------
 const HQ = S2S.held, TRAIN15 = S2S.data.map((d, q) => q).filter(q => q !== HQ);
-let RT = null, tsI = 0, tsTimer = null;
+let RT = null, tsI = 0, tsTimer = null, tsSet = 0, devK = 0;
 function testRun() { if (RT) return RT; let sn = R[0]; RT = [sn]; for (let r = 1; r <= ROUNDS; r++) { for (const q of TRAIN15) sn = upd(sn, q); sn.step = r; RT.push(sn); } return RT; }
 window.__s2sCheck15 = () => Math.max(...S2S.checks15.map(c => Math.max(...["G", "O", "I"].flatMap(T => c[T].flatMap((v, j) => [Math.abs(v[0] - testRun()[c.round][T][j][0]), Math.abs(v[1] - testRun()[c.round][T][j][1])])))));
 const meanGold = (sn, qs) => { let s = 0, n = 0; qs.forEach(q => { const [a, b] = S2S.data[q]; correctProbs(sn, a, b).forEach(p => { s += p; n++; }); }); return s / n; };
 let TS_CURVES = null;
+const devTag = `<span class="devtag">development: held out</span>`;
+function renderDevPlane(sn) {
+  const [src, tgt] = S2S.data[HQ], tr = translate(sn, src), steps = tr.steps, K = Math.max(steps.length, tgt.length);
+  devK = Math.min(devK, steps.length - 1);
+  $("tsDevStrip").innerHTML = steps.map((x, k) => `<button class="${k === devK ? "on" : ""}" data-k="${k}">${k + 1}: <span class="${x.w === tgt[k] ? "ok" : "bad"}">${x.w}</span></button>`).join("");
+  $("tsDevStrip").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { devK = +b.dataset.k; renderTest(); }));
+  const s = steps[devK], st = s.st, wj = EN.indexOf(s.w), gj = tgt[devK] ? EN.indexOf(tgt[devK]) : -1;
+  const Z = 1.15 * Math.max(...[...sn.O, ...src.map(w => sn.G[GL.indexOf(w)]), ...steps.map(x => x.st)].flat().map(Math.abs)), P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z;
+  const orange = css("--orange"), green = css("--green"), fg = css("--fg"), muted = css("--muted"), blue = css("--blue"), put = placer(), tick = +(Z / 1.15).toPrecision(2);
+  const L = Math.hypot(...st) || 1, u = [st[0] / L, st[1] / L];
+  let g = `<defs><marker id="tsdA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${orange}"/></marker></defs>`;
+  g += `<line class="axis" x1="10" y1="200" x2="390" y2="200"/><line class="axis" x1="200" y1="10" x2="200" y2="390"/><text x="${P(tick)}" y="214" text-anchor="middle" font-size="10">${tick}</text><text x="206" y="${Q(tick) + 4}" font-size="10">${tick}</text>`;
+  g += `<line x1="${P(-1.3 * Z * u[0])}" y1="${Q(-1.3 * Z * u[1])}" x2="${P(1.3 * Z * u[0])}" y2="${Q(1.3 * Z * u[1])}" stroke="${orange}" stroke-opacity="0.45" stroke-dasharray="5 4"/>`;
+  src.forEach(w => { const v = sn.G[GL.indexOf(w)]; g += `<rect x="${P(v[0]) - 4}" y="${Q(v[1]) - 4}" width="8" height="8" rx="2" fill="${blue}"/>`; });
+  EN.forEach((w, j) => { const v = sn.O[j], win = j === wj, gold = j === gj, c = gold ? green : win ? orange : muted;
+    g += `<circle cx="${P(v[0])}" cy="${Q(v[1])}" r="${win || gold ? 8 : 5}" fill="none" stroke="${c}" stroke-width="${win || gold ? 3 : 1.3}"/>`; if (win && gold) g += `<circle cx="${P(v[0])}" cy="${Q(v[1])}" r="12" fill="none" stroke="${orange}" stroke-width="2.5"/>`; });
+  g += `<line x1="200" y1="200" x2="${P(st[0])}" y2="${Q(st[1])}" stroke="${orange}" stroke-width="3.5" marker-end="url(#tsdA)"/>`;
+  { const [x, y, an] = put(200 + (P(st[0]) - 200) * 0.55, 200 + (Q(st[1]) - 200) * 0.55 + 4, 52, 10); g += `<text x="${x}" y="${y}" text-anchor="${an}" font-size="12" fill="${orange}">state ${devK + 1}</text>`; }
+  [wj, gj, ...EN.map((w, j) => j).filter(j => j !== wj && j !== gj)].filter(j => j >= 0).forEach(j => { const v = sn.O[j], [x, y, an] = put(P(v[0]), Q(v[1]) + 4, 7.5 * EN[j].length, j === wj || j === gj ? 11 : 8);
+    g += `<text x="${x}" y="${y}" text-anchor="${an}" font-size="12" fill="${j === gj ? green : j === wj ? orange : muted}">${EN[j]}</text>`; });
+  src.forEach(w => { const v = sn.G[GL.indexOf(w)], [x, y, an] = put(P(v[0]), Q(v[1]) + 4, 7 * w.length, 7); g += `<text x="${x}" y="${y}" text-anchor="${an}" font-size="11" font-style="italic" fill="${blue}">${w}</text>`; });
+  $("tsDevSvg").innerHTML = g;
+  const sc = j => st[0] * sn.O[j][0] + st[1] * sn.O[j][1];
+  $("tsDevNote").innerHTML = gj < 0 ? `output ${devK + 1}: the gold output has ended; the model goes on, writing “${s.w}”` : wj === gj ? `output ${devK + 1}: written <span class="ok">“${s.w}”</span>, the gold output: it lies farthest along the state's direction (score ${sc(wj).toFixed(2)}, probability ${s.p[wj].toFixed(2)})`
+    : `output ${devK + 1}: written <span class="bad">“${s.w}”</span> (score ${sc(wj).toFixed(2)}, probability ${s.p[wj].toFixed(2)}), not the gold <span class="ok">“${tgt[devK]}”</span> (score ${sc(gj).toFixed(2)}, probability ${s.p[gj].toFixed(2)}): “${s.w}” lies farther along the state's direction${Math.abs(s.p[wj] - s.p[gj]) < 0.15 ? ", a close call" : ""}. For comparison, in the training data “aunt” is followed by ‹end› twice (my aunt, your aunt) and by “of” once (an aunt of yours).`;
+}
 function renderTest() {
   const RTT = testRun(), sn = RTT[tsI], [src, tgt] = S2S.data[HQ];
   $("tsStep").value = tsI; $("tsBack").disabled = tsI <= 0; $("tsNext").disabled = tsI >= ROUNDS;
-  $("tsVal").textContent = `after ${tsI} round${tsI === 1 ? "" : "s"} of ${ROUNDS}`;
-  const cp = correctProbs(sn, src, tgt), gold = tgt.filter(w => w !== "‹end›").join(" ");
-  const wr = s => translate(s, src).steps.map(x => x.w), mark = ws => ws.map((w, i) => `<span class="${w === tgt[i] ? "ok" : "bad"}">${w}</span>`).join(" ");
+  $("tsVal").textContent = `after ${tsI} round${tsI === 1 ? "" : "s"} of ${ROUNDS} (${tsI * 15} updates)`;
+  $("tsSetA").setAttribute("aria-pressed", tsSet === 0); $("tsSetB").setAttribute("aria-pressed", tsSet === 1);
+  const shown = S2S.data.map((d, q) => q).filter(q => Math.floor(q / 8) === tsSet), lo = tsSet * 8 + 1, hi = tsSet * 8 + 8;
   const nRight = TRAIN15.filter(q => { const [a, b] = S2S.data[q]; return translate(sn, a).steps.map(x => x.w).join(" ") === b.join(" "); }).length;
-  $("tsCardLbl").textContent = `Test pair, after ${tsI} rounds of training on the other 15`;
-  $("tsCard").innerHTML = `<span class="k">test pair</span><span class="v"><i style="font-family:var(--font-body)">${src.join(" ")}</i> → ${tgt.map((w, m) => `<span class="cell"><span class="fl" style="width:${(cp[m] * 100).toFixed(1)}%"></span><span class="t">${w}</span></span>`).join("")}</span>` +
+  $("tsSupplyLbl").textContent = `1. Pairs ${lo}–${hi} ${tsI === 0 ? "at the random start" : `after round ${tsI}`}: each gold output filled by its probability now`;
+  $("tsSupply").innerHTML = shown.map(q => { const [s2, t2] = S2S.data[q], cp = correctProbs(sn, s2, t2), dev = q === HQ;
+    return `<div class="row${dev ? " dev" : ""}"><span class="src">${s2.join(" ")}</span>→ ${t2.map((w, m) => `<span class="cell"><span class="fl" style="width:${(cp[m] * 100).toFixed(1)}%"></span><span class="t">${w}</span></span>`).join("")}${dev ? devTag : ""}</div>`; }).join("");
+  $("tsAllLbl").textContent = `2. What the model writes now, pairs ${lo}–${hi}: right for ${nRight} of the 15 training pairs`;
+  $("tsAll").innerHTML = shown.map(q => { const [s2, t2] = S2S.data[q], out = translate(sn, s2).steps.map(x => x.w).filter(w => w !== "‹end›"), ok = out.join(" ") === t2.filter(w => w !== "‹end›").join(" ");
+    return `<div class="phrase${q === HQ ? " dev" : ""}"><span><span class="src">${s2.join(" ")}</span> → <span class="${ok ? "ok" : "bad"}">${out.join(" ") || "(nothing)"}</span>${q === HQ ? devTag : ""}</span></div>`; }).join("");
+  $("tsPlaneLbl").textContent = tsI === 0 ? "3. All the vectors at the random start" : `3. All the vectors after round ${tsI} of training on 15`;
+  renderAllPlane(RTT, tsI, { svg: "tsAllSvg", ghost: "tsAllGhost", get: () => traceSelC, set: v => { traceSelC = v; }, redraw: () => renderTest() });
+  // the development card: both models side by side
+  const cp = correctProbs(sn, src, tgt), wr = s => translate(s, src).steps.map(x => x.w), mark = ws => ws.map((w, i) => `<span class="${w === tgt[i] ? "ok" : "bad"}">${w}</span>`).join(" ");
+  $("tsCardLbl").textContent = `Development pair, after ${tsI} rounds of training on the other 15`;
+  $("tsCard").innerHTML = `<span class="k">development pair</span><span class="v"><i style="font-family:var(--font-body)">${src.join(" ")}</i> → ${tgt.map((w, m) => `<span class="cell"><span class="fl" style="width:${(cp[m] * 100).toFixed(1)}%"></span><span class="t">${w}</span></span>`).join("")}</span>` +
     `<span class="k">written, trained on 15</span><span class="v">${mark(wr(sn))}</span>` +
-    `<span class="k">written, trained on all 16</span><span class="v">${mark(wr(R[tsI]))}<span class="note" style="margin-left:6px;font-family:var(--font-body)">(parts A, B)</span></span>` +
-    `<span class="k">training pairs</span><span class="v" style="font-family:var(--font-body)">written right: ${nRight} of 15</span>`;
-  // the curve: average probability of the gold outputs, training pairs vs the test pair, smoothed over 31 rounds
+    `<span class="k">written, trained on all 16</span><span class="v">${mark(wr(R[tsI]))}<span class="note" style="margin-left:6px;font-family:var(--font-body)">(parts A, B)</span></span>`;
+  renderDevPlane(sn);
+  // the curve: average probability of the gold outputs, training pairs vs the development pair, smoothed over 31 rounds
   if (!TS_CURVES) TS_CURVES = { tr: RTT.map(s => meanGold(s, TRAIN15)), te: RTT.map(s => meanGold(s, [HQ])) };
   const green = css("--green"), neg = css("--neg"), orange = css("--orange"), muted = css("--muted"), grid = css("--grid");
   const L = 40, Rr = 420, T = 22, B = 176, X = i => L + i / ROUNDS * (Rr - L), Y = v => T + (1 - v) * (B - T);
@@ -1485,13 +1556,15 @@ function renderTest() {
   g += `<line x1="${X(tsI)}" y1="${T}" x2="${X(tsI)}" y2="${B}" stroke="${orange}" stroke-width="1.3" stroke-dasharray="4 3"/>`;
   g += `<circle cx="${X(tsI)}" cy="${Y(TS_CURVES.tr[tsI])}" r="4.5" fill="${green}" stroke="var(--panel)" stroke-width="1.5"/><circle cx="${X(tsI)}" cy="${Y(TS_CURVES.te[tsI])}" r="4.5" fill="${neg}" stroke="var(--panel)" stroke-width="1.5"/>`;
   $("tsCurve").innerHTML = g;
-  $("tsNote").innerHTML = `<span class="ok">green</span>: the 15 training pairs, averaged · <span class="bad">red</span>: the test pair · curves averaged over 31 rounds, the dots are the values now (${TS_CURVES.tr[tsI].toFixed(2)} and ${TS_CURVES.te[tsI].toFixed(2)})`;
+  $("tsNote").innerHTML = `<span class="ok">green</span>: the 15 training pairs, averaged · <span class="bad">red</span>: the development pair · curves averaged over 31 rounds, the dots are the values now (${TS_CURVES.tr[tsI].toFixed(2)} and ${TS_CURVES.te[tsI].toFixed(2)})`;
 }
 function stopTest() { clearInterval(tsTimer); tsTimer = null; $("tsPlay").textContent = "Play training"; }
 $("tsNext").addEventListener("click", () => { stopTest(); tsI = Math.min(tsI + 1, ROUNDS); renderTest(); });
 $("tsBack").addEventListener("click", () => { stopTest(); tsI = Math.max(tsI - 1, 0); renderTest(); });
 $("tsReset").addEventListener("click", () => { stopTest(); tsI = 0; renderTest(); });
 $("tsStep").addEventListener("input", e => { stopTest(); tsI = +e.target.value; renderTest(); });
+$("tsSetA").addEventListener("click", () => { tsSet = 0; renderTest(); });
+$("tsSetB").addEventListener("click", () => { tsSet = 1; renderTest(); });
 $("tsPlay").addEventListener("click", () => { if (tsTimer) { stopTest(); return; } if (tsI >= ROUNDS) tsI = 0; $("tsPlay").textContent = "Pause";
   tsTimer = setInterval(() => { tsI = Math.min(ROUNDS, tsI + (tsI < 20 ? 1 : 50)); renderTest(); if (tsI >= ROUNDS) stopTest(); }, reduce ? 30 : 110); });
 renderTest();
