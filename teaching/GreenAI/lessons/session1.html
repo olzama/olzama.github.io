@@ -2182,7 +2182,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 <path d="M1274 138 C 1330 138, 1330 300, 1200 300 L 990 300 C 960 300, 952 288, 952 258" fill="none" stroke="var(--green)" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#edArrG)" data-s="4" data-d="1.7" data-t="0.8"/>
 <text x="1110" y="328" font-size="20" style="fill:var(--green)" text-anchor="middle" data-s="4" data-d="2">each output is mixed into the state; then the next step, until ‹end› (= finished)</text>
 <text x="700" y="392" font-size="25" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0">Both parts are trained together, on pairs: an input and its gold output (the right output, made by a person).</text>
-<text x="700" y="422" font-size="20" style="fill:var(--muted)" text-anchor="middle" data-s="5" data-d="0.6">the gradient of the gold output's probability is passed back through the decoder and the encoder: backpropagation (next screen)</text>
+<text x="700" y="422" font-size="20" style="fill:var(--muted)" text-anchor="middle" data-s="5" data-d="0.6">training passes the gradient of the gold output's probability back through the decoder and the encoder: backpropagation (next screens)</text>
 <text x="20" y="446" font-size="20" style="fill:var(--muted)" data-s="6" data-d="0" data-a="fade">task</text>
 <text x="330" y="446" font-size="20" style="fill:var(--blue)" data-s="6" data-d="0" data-a="fade">possible inputs</text>
 <text x="800" y="446" font-size="20" style="fill:var(--green)" data-s="6" data-d="0" data-a="fade">possible outputs</text>
@@ -2208,106 +2208,142 @@ print("they match" if count == expected else "they do not match: check the loop 
     <p>First, the possible inputs: a fixed set of things the input can be made of. For translation from Galician, the Galician words; for speech, short slices of a recording; for an image, small patches of it. One input is a sequence of them: here input 1 is c, input 2 is a, input 3 is e.</p>
     <p>The encoder reads the inputs one by one and updates a vector after each one. At the end, that vector stands for the whole input, as numbers; it is often called the summary.</p>
     <p>The decoder has a fixed set of possible outputs too: for translation into English, the English words, plus ‹end›, a special output that means “finished”. The decoder keeps a vector of its own, its state, which starts as the encoder's vector. At each step it gives every possible output a probability, writes one, and mixes the output it wrote into its state: that is the dashed arrow back. Then the next step, until it writes ‹end›.</p>
-    <p>Both parts are trained together, on pairs: an input and its gold output: the right output for it, made by a person. From here on, the gold output. Training compares the model's output with the gold output and passes the difference back through the decoder and the encoder, to every vector in the model. That is backpropagation, the next screen.</p>
+    <p>Both parts are trained together, on pairs: an input and its gold output: the right output for it, made by a person. From here on, the gold output. Training compares the model's output with the gold output and passes the difference back through the decoder and the encoder, to every vector in the model. That is backpropagation; it rests on the chain rule. Both come next.</p>
     <p>The table: many tasks are built this way. What changes is only the set of possible inputs and the set of possible outputs. Next, how the two parts are trained; then translation, with a trained model.</p>
   </div>
 </section>
-<section class="screen" id="backprop" data-step="3">
-  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Backpropagation</h2></header>
+<section class="screen" id="chainrule" data-step="3">
+  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>The chain rule</h2></header>
   <div class="body">
     <div class="board">
-      <svg viewBox="0 0 1400 760" role="img" aria-label="Backpropagation in the toy translation model. The encoder mixes unha, tía, miña into the summary, half old and half new, so the summary is ½ miña + ¼ tía + ⅛ unha. For output 1 the summary is the state; the output table gives an a probability of 0.08, which should be 1. The gradient for the state is passed back by the chain rule: miña&#x27;s vector gets ½ of it, tía&#x27;s ¼, unha&#x27;s ⅛; they move by 0.033, 0.017 and 0.008. With the updated parameters the probability of an is 0.082.">
-<text x="40.0" y="34.0" font-size="21" style="fill:var(--muted)" data-s="1" data-d="0">the toy translation model of the next screen · one training pair: unha tía miña → an aunt of mine</text>
-<rect x="80.0" y="80.0" width="140.0" height="42.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.0" data-a="fade"/>
-<text x="150.0" y="108.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.05">unha</text>
-<text x="150.0" y="146.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.1" data-until="8">(−0.362, 0.043)</text>
-<line x1="150.0" y1="156.0" x2="150.0" y2="213.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.3"/>
-<path d="M144.9 201.0 L150.0 213.0 L155.1 201.0" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="0.9" data-a="fade" data-t="0.2"/>
-<rect x="53.0" y="219.0" width="194.0" height="46.0" rx="4" fill="var(--panel)" stroke="currentColor" stroke-width="1.5" data-s="1" data-d="0.4" data-a="fade"/>
-<text x="150.0" y="249.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.45" data-until="9">(−0.181, 0.022)</text>
-<rect x="350.0" y="80.0" width="140.0" height="42.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.1" data-a="fade"/>
-<text x="420.0" y="108.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.15">tía</text>
-<text x="420.0" y="146.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.2" data-until="8">(0.275, −0.433)</text>
-<line x1="420.0" y1="156.0" x2="420.0" y2="213.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.4"/>
-<path d="M414.9 201.0 L420.0 213.0 L425.1 201.0" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.0" data-a="fade" data-t="0.2"/>
-<rect x="323.0" y="219.0" width="194.0" height="46.0" rx="4" fill="var(--panel)" stroke="currentColor" stroke-width="1.5" data-s="1" data-d="0.5" data-a="fade"/>
-<text x="420.0" y="249.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.55" data-until="9">(0.047, −0.206)</text>
-<line x1="249.0" y1="242.0" x2="321.0" y2="242.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.6"/>
-<path d="M309.0 247.1 L321.0 242.0 L309.0 236.9" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.2" data-a="fade" data-t="0.2"/>
-<rect x="620.0" y="80.0" width="140.0" height="42.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.2" data-a="fade"/>
-<text x="690.0" y="108.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.25">miña</text>
-<text x="690.0" y="146.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.3" data-until="8">(0.127, 0.389)</text>
-<line x1="690.0" y1="156.0" x2="690.0" y2="213.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.5"/>
-<path d="M684.9 201.0 L690.0 213.0 L695.1 201.0" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.1" data-a="fade" data-t="0.2"/>
-<rect x="593.0" y="219.0" width="194.0" height="46.0" rx="4" fill="var(--panel)" stroke="currentColor" stroke-width="1.5" data-s="1" data-d="0.6" data-a="fade"/>
-<text x="690.0" y="249.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.65" data-until="9">(0.087, 0.091)</text>
-<line x1="519.0" y1="242.0" x2="591.0" y2="242.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.7"/>
-<path d="M579.0 247.1 L591.0 242.0 L579.0 236.9" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.3" data-a="fade" data-t="0.2"/>
-<text x="162.0" y="205.0" font-size="18" style="fill:var(--muted)" text-anchor="start" data-s="1" data-d="0.4">summary</text>
-<text x="285.0" y="181.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.7">each step: new = ½ × old + ½ × input vector</text>
-<text x="1180.0" y="120.0" font-size="19" style="fill:var(--muted)" text-anchor="middle" data-s="2" data-d="0">so the last summary is</text>
-<text x="1180.0" y="156.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.3">½ × miña + ¼ × tía + ⅛ × unha</text>
-<text x="1180.0" y="184.0" font-size="17" style="fill:var(--muted)" text-anchor="middle" data-s="2" data-d="0.6">each step back halves a word's share</text>
-<text x="702.0" y="205.0" font-size="18" style="fill:var(--green)" text-anchor="start" data-s="3" data-d="0">= the state</text>
-<line x1="789.0" y1="242.0" x2="888.0" y2="242.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="3" data-d="0.1"/>
-<path d="M876.0 247.1 L888.0 242.0 L876.0 236.9" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="0.7" data-a="fade" data-t="0.2"/>
-<rect x="890.0" y="215.0" width="220.0" height="54.0" rx="4" fill="var(--orange-soft)" stroke="var(--orange)" stroke-width="1.5" data-s="3" data-d="0.2" data-a="fade"/>
-<text x="1000.0" y="249.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.25">output table</text>
-<line x1="1112.0" y1="242.0" x2="1158.0" y2="242.0" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" data-s="3" data-d="0.3"/>
-<path d="M1146.0 247.1 L1158.0 242.0 L1146.0 236.9" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="0.9" data-a="fade" data-t="0.2"/>
-<text x="1250.0" y="233.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.35">probability of an</text>
-<text x="1250.0" y="263.0" font-size="30" style="fill:currentColor" text-anchor="middle" data-s="3" data-d="0.4" data-until="9">0.08</text>
-<text x="1250.0" y="299.0" font-size="20" style="fill:var(--orange)" text-anchor="middle" data-s="4" data-d="0">should be 1</text>
-<line x1="888.0" y1="257.0" x2="791.0" y2="257.0" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" data-s="5" data-d="0"/>
-<path d="M803.0 251.9 L791.0 257.0 L803.0 262.1" fill="none" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="5" data-d="0.6" data-a="fade" data-t="0.2"/>
-<text x="865.0" y="287.0" font-size="18" style="fill:var(--orange)" text-anchor="middle" data-s="5" data-d="0.4">the gradient for the state: the change</text>
-<text x="865.0" y="309.0" font-size="18" style="fill:var(--orange)" text-anchor="middle" data-s="5" data-d="0.5">that would make an more probable</text>
-<text x="40.0" y="492.0" font-size="21" style="fill:currentColor" data-s="6" data-d="0">the chain rule: when a value is computed in steps, a change at the start reaches the end multiplied by the effect of each step</text>
-<text x="40.0" y="522.0" font-size="21" style="fill:currentColor" data-s="6" data-d="0.4">a change in miña moves the summary by ½ of it; in tía, by ½ × ½ = ¼; in unha, by ½ × ½ × ½ = ⅛</text>
-<line x1="690.0" y1="271.0" x2="690.0" y2="383.0" stroke="var(--orange)" stroke-width="7.2" stroke-linecap="round" data-s="7" data-d="0.15"/>
-<path d="M684.9 371.0 L690.0 383.0 L695.1 371.0" fill="none" stroke="var(--orange)" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round" data-s="7" data-d="0.75" data-a="fade" data-t="0.2"/>
-<text x="690.0" y="413.0" font-size="19" style="fill:var(--orange)" text-anchor="middle" data-s="7" data-d="0.25">½ of the state's gradient</text>
-<text x="690.0" y="439.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="7" data-d="0.3">vector of miña moves 0.033</text>
-<line x1="591.0" y1="257.0" x2="519.0" y2="257.0" stroke="var(--orange)" stroke-width="3.2" stroke-linecap="round" data-s="7" data-d="0.35"/>
-<path d="M531.0 251.9 L519.0 257.0 L531.0 262.1" fill="none" stroke="var(--orange)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" data-s="7" data-d="0.95" data-a="fade" data-t="0.2"/>
-<line x1="420.0" y1="271.0" x2="420.0" y2="383.0" stroke="var(--orange)" stroke-width="4.2" stroke-linecap="round" data-s="7" data-d="0.5"/>
-<path d="M414.9 371.0 L420.0 383.0 L425.1 371.0" fill="none" stroke="var(--orange)" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" data-s="7" data-d="1.1" data-a="fade" data-t="0.2"/>
-<text x="420.0" y="413.0" font-size="19" style="fill:var(--orange)" text-anchor="middle" data-s="7" data-d="0.6">¼ of the state's gradient</text>
-<text x="420.0" y="439.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="7" data-d="0.65">vector of tía moves 0.017</text>
-<line x1="321.0" y1="257.0" x2="249.0" y2="257.0" stroke="var(--orange)" stroke-width="2.2" stroke-linecap="round" data-s="7" data-d="0.7"/>
-<path d="M261.0 251.9 L249.0 257.0 L261.0 262.1" fill="none" stroke="var(--orange)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" data-s="7" data-d="1.3" data-a="fade" data-t="0.2"/>
-<line x1="150.0" y1="271.0" x2="150.0" y2="383.0" stroke="var(--orange)" stroke-width="2.7" stroke-linecap="round" data-s="7" data-d="0.85"/>
-<path d="M144.9 371.0 L150.0 383.0 L155.1 371.0" fill="none" stroke="var(--orange)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" data-s="7" data-d="1.45" data-a="fade" data-t="0.2"/>
-<text x="150.0" y="413.0" font-size="19" style="fill:var(--orange)" text-anchor="middle" data-s="7" data-d="0.95">⅛ of the state's gradient</text>
-<text x="150.0" y="439.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="7" data-d="1.0">vector of unha moves 0.008</text>
-<text x="150.0" y="146.0" font-size="18" style="fill:var(--orange)" text-anchor="middle" data-s="8" data-d="0.0">(−0.361, 0.035)</text>
-<text x="420.0" y="146.0" font-size="18" style="fill:var(--orange)" text-anchor="middle" data-s="8" data-d="0.15">(0.275, −0.449)</text>
-<text x="690.0" y="146.0" font-size="18" style="fill:var(--orange)" text-anchor="middle" data-s="8" data-d="0.3">(0.128, 0.356)</text>
-<text x="420.0" y="467.0" font-size="18" style="fill:var(--orange)" text-anchor="middle" data-s="8" data-d="0.2">updated: each vector moved by the learning rate × its gradient</text>
-<text x="1000.0" y="413.0" font-size="17" style="fill:var(--orange)" text-anchor="middle" data-s="8" data-d="0.3">the output table is updated too</text>
-<text x="150.0" y="249.0" font-size="19" style="fill:var(--green)" text-anchor="middle" data-s="9" data-d="0.0">(−0.181, 0.017)</text>
-<text x="420.0" y="249.0" font-size="19" style="fill:var(--green)" text-anchor="middle" data-s="9" data-d="0.15">(0.047, −0.216)</text>
-<text x="690.0" y="249.0" font-size="19" style="fill:var(--green)" text-anchor="middle" data-s="9" data-d="0.3">(0.087, 0.070)</text>
-<text x="1250.0" y="263.0" font-size="30" style="fill:var(--green)" text-anchor="middle" data-s="9" data-d="0.5">0.082</text>
-<text x="1250.0" y="339.0" font-size="17" style="fill:var(--green)" text-anchor="middle" data-s="9" data-d="0.6">read again with the</text>
-<text x="1250.0" y="361.0" font-size="17" style="fill:var(--green)" text-anchor="middle" data-s="9" data-d="0.6">updated parameters</text>
-<text x="40.0" y="590.0" font-size="22" style="fill:currentColor" data-s="10" data-d="0">backpropagation: the gradient at the output is passed back, step by step by the chain rule, to every parameter, the decoder's too</text>
-<text x="40.0" y="618.0" font-size="19" style="fill:var(--muted)" data-s="10" data-d="0.3">one update is a small step; training repeats it over all the pairs, thousands of times (Rumelhart, Hinton & Williams, 1986)</text>
-<text x="40.0" y="668.0" font-size="21" style="fill:var(--blue)" data-s="11" data-d="0">in a 20-word sentence, the first word's vector would get (½)<tspan dy="-11" font-size="0.68em">20</tspan><tspan dy="11">, about a millionth of the state's gradient: the vanishing gradient</tspan></text>
-<text x="40.0" y="718.0" font-size="20" style="fill:var(--orange)" data-s="12" data-d="0">the cost: each update is a forward pass plus a backward pass (about twice the forward), keeping every summary and state:</text>
-<text x="40.0" y="744.0" font-size="20" style="fill:var(--orange)" data-s="12" data-d="0.3">one training update costs about three times one use of the model</text>
+      <svg viewBox="0 0 1400 640" role="img" aria-label="The chain rule. A car is 2 times as fast as a bicycle, a bicycle 4 times as fast as a walker, so the car is 8 times as fast as the walker: along a chain, the rates multiply. If y is computed from u and u from x, the change of y per change of x is the change of y per change of u times the change of u per change of x: dy/dx = dy/du · du/dx. A model is a long chain of steps, from its vectors to the probability of the gold output; the chain rule gives each vector&#x27;s gradient.">
+<text y="44" font-size="24" style="fill:var(--muted)" data-s="1" data-d="0" data-line="Q" data-x0="40">a value computed in steps: if the start changes, how much does the end change?</text>
+<rect x="110.0" y="118.0" width="180.0" height="50.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5" data-s="2" data-d="0.0" data-a="fade"/>
+<text x="200.0" y="150.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.05">walker</text>
+<text x="200.0" y="104.0" font-size="24" style="fill:var(--muted)" text-anchor="middle" data-s="2" data-d="0.1" font-style="italic">x</text>
+<rect x="530.0" y="118.0" width="180.0" height="50.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5" data-s="2" data-d="0.15" data-a="fade"/>
+<text x="620.0" y="150.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.2">bicycle</text>
+<text x="620.0" y="104.0" font-size="24" style="fill:var(--muted)" text-anchor="middle" data-s="2" data-d="0.25" font-style="italic">u</text>
+<rect x="950.0" y="118.0" width="180.0" height="50.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.5" data-s="2" data-d="0.3" data-a="fade"/>
+<text x="1040.0" y="150.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.35">car</text>
+<text x="1040.0" y="104.0" font-size="24" style="fill:var(--muted)" text-anchor="middle" data-s="2" data-d="0.4" font-style="italic">y</text>
+<line x1="294.0" y1="143.0" x2="526.0" y2="143.0" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round" data-s="2" data-d="0.5"/>
+<path d="M514.0 148.1 L526.0 143.0 L514.0 137.9" fill="none" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="1.1" data-a="fade" data-t="0.2"/>
+<text x="410.0" y="128.0" font-size="26" style="fill:var(--orange)" text-anchor="middle" data-s="2" data-d="0.6">× 4</text>
+<line x1="714.0" y1="143.0" x2="946.0" y2="143.0" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round" data-s="2" data-d="0.8"/>
+<path d="M934.0 148.1 L946.0 143.0 L934.0 137.9" fill="none" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="1.4" data-a="fade" data-t="0.2"/>
+<text x="830.0" y="128.0" font-size="26" style="fill:var(--orange)" text-anchor="middle" data-s="2" data-d="0.9">× 2</text>
+<text x="410.0" y="180.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="2" data-d="0.7">4 times as fast</text>
+<text x="830.0" y="180.0" font-size="18" style="fill:var(--muted)" text-anchor="middle" data-s="2" data-d="1.0">2 times as fast</text>
+<path d="M200 200 C 200 260, 1040 260, 1040 200" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="3" data-d="0"/>
+<text x="620.0" y="278.0" font-size="24" style="fill:var(--orange)" text-anchor="middle" data-s="3" data-d="0.5">the car is 4 × 2 = 8 times as fast as the walker: if the walker speeds up by 1 km/h,</text>
+<text x="620.0" y="310.0" font-size="24" style="fill:var(--orange)" text-anchor="middle" data-s="3" data-d="0.8">the bicycle speeds up by 4 and the car by 8 · along a chain, the rates multiply</text>
+<text y="400" font-size="22" style="fill:var(--muted)" data-s="4" data-d="0" data-line="R1" data-x0="40">in general, y is computed from u, and u from x (above: the car's speed from the bicycle's, the bicycle's from the walker's):</text>
+<text y="456" font-size="26" style="fill:currentColor" data-s="4" data-d="0.2" data-line="R2" data-x0="40">change of y per change of x</text>
+<text y="456" font-size="26" style="fill:currentColor" data-s="4" data-d="0.4" data-line="R2">=</text>
+<text y="456" font-size="26" style="fill:currentColor" data-s="4" data-d="0.5" data-line="R2">(change of y per change of u)</text>
+<text y="456" font-size="26" style="fill:currentColor" data-s="4" data-d="0.7" data-line="R2">×</text>
+<text y="456" font-size="26" style="fill:currentColor" data-s="4" data-d="0.8" data-line="R2">(change of u per change of x)</text>
+<text y="516" font-size="22" style="fill:var(--muted)" data-s="5" data-d="0" data-line="R3" data-x0="40">in symbols, the chain rule:</text>
+<g class="bfrac" data-line="R3"><text class="num" y="500" font-size="26" style="fill:currentColor" data-s="5" data-d="0.3">dy</text><line class="bar" y1="509" y2="509" stroke="currentColor" stroke-width="2" data-s="5" data-d="0.3"/><text class="den" y="535" font-size="26" style="fill:currentColor" data-s="5" data-d="0.3">dx</text></g>
+<text y="516" font-size="26" style="fill:currentColor" data-s="5" data-d="0.4" data-line="R3">=</text>
+<g class="bfrac" data-line="R3"><text class="num" y="500" font-size="26" style="fill:var(--orange)" data-s="5" data-d="0.5">dy</text><line class="bar" y1="509" y2="509" stroke="currentColor" stroke-width="2" data-s="5" data-d="0.5"/><text class="den" y="535" font-size="26" style="fill:var(--orange)" data-s="5" data-d="0.5">du</text></g>
+<text y="516" font-size="26" style="fill:currentColor" data-s="5" data-d="0.6" data-line="R3">·</text>
+<g class="bfrac" data-line="R3"><text class="num" y="500" font-size="26" style="fill:var(--orange)" data-s="5" data-d="0.7">du</text><line class="bar" y1="509" y2="509" stroke="currentColor" stroke-width="2" data-s="5" data-d="0.7"/><text class="den" y="535" font-size="26" style="fill:var(--orange)" data-s="5" data-d="0.7">dx</text></g>
+<text y="516" font-size="22" style="fill:var(--muted)" data-s="5" data-d="0.9" data-line="R3">· here: 8 = 2 · 4 · for a longer chain, multiply the rate of every step</text>
+<text y="590" font-size="22" style="fill:var(--blue)" data-s="6" data-d="0" data-line="M" data-x0="40">a model is a long chain of steps, from each of its vectors to the probability of the gold output; the chain rule gives,</text>
+<text x="40.0" y="622.0" font-size="22" style="fill:var(--blue)" data-s="6" data-d="0.4">for every vector, how that probability changes with it: its gradient, computed from the output back (next screen)</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
   <div class="notes">
-    <p>Both parts are trained together, on pairs. But the model is compared with the gold output only at the very end, after the decoder; and every vector in it, the encoder's too, has to change. This screen shows how, on the toy translation model of the next screen.</p>
-    <p>The encoder reads unha, tía, miña and mixes each into the summary: new summary = half the old one plus half the input vector. Unrolled, the last summary is one half of miña, plus a quarter of tía, plus an eighth of unha: each step back halves a word's share.</p>
-    <p>For the first output, the summary is the decoder's state. The output table gives the gold output, an, a probability of 0.08. It should be 1. The gradient for the state is the change in the state that would make an more probable.</p>
-    <p>The state is not a parameter: it was computed from the input vectors. To change it, we change them, and the chain rule says by how much. When a value is computed in steps, a change at the start reaches the end multiplied by the effect of each step. A change in miña's vector moves the summary by a half of it; a change in tía's, by a half of a half, a quarter; in unha's, by an eighth. So miña's vector gets half of the state's gradient, tía's a quarter, unha's an eighth. With the learning rate, they move by 0.033, 0.017 and 0.008.</p>
-    <p>That is the update: the three vectors are replaced by their new values, and the output table is updated too. Read the same pair again with the updated parameters, and the probability of an is 0.082 instead of 0.08: a small step.</p>
-    <p>This is backpropagation: the gradient at the output, passed back step by step by the chain rule, to every parameter, the decoder's too. Training repeats it over all the pairs, thousands of times. The method was popularized by Rumelhart, Hinton and Williams in 1986, and every neural network today is trained this way. The next screen does exactly this, one pair at a time, and you will see the vectors move.</p>
-    <p>The halving has a consequence. In a 20-word sentence, the first word's vector would get one half to the power 20, about a millionth, of the state's gradient, and would hardly be updated at all. This is called the vanishing gradient.</p>
+    <p>Training has to change every vector in the model, the encoder's too, but the model is only compared with the gold output at the very end. To know which way to change a vector at the start, we need to know how a change there reaches the end. The tool is the chain rule, one of the most general ideas in mathematics.</p>
+    <p>An everyday chain first. A car goes twice as fast as a bicycle, and a bicycle four times as fast as someone walking. Then the car goes four times two, eight times as fast as the walker. Along a chain, the rates multiply. (The example is George Simmons's, from his calculus textbook.)</p>
+    <p>In general: y is computed from u, and u is computed from x. How much y changes per change of x is how much y changes per change of u, times how much u changes per change of x. In symbols, dy over dx equals dy over du times du over dx. Each of these is a rate: how much the output of a step changes per unit change of its input. A longer chain just has more factors.</p>
+    <p>Why we need it: a model is a long chain of steps, from each of its vectors to the probability of the gold output. Training needs to know, for every vector, how that probability changes when the vector changes. That is the vector's gradient. The chain rule gives it, step by step, starting from the output and going back. The next screen does this on the toy translation model.</p>
+  </div>
+</section>
+
+<section class="screen" id="backprop" data-step="3">
+  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Backpropagation</h2></header>
+  <div class="body">
+    <div class="board">
+      <svg viewBox="0 0 1400 700" role="img" aria-label="Backpropagation in the toy translation model. The encoder&#x27;s rule, s_k = ½ s_(k−1) + ½ x_k, gives s₃ = ⅛ x_unha + ¼ x_tía + ½ x_miña. The decoder, with s₃ as its state, gives the gold output an a probability of 0.08, which training wants higher; g is the gradient for s₃. By the chain rule, ds₃/dx_miña = ½, ds₃/dx_tía = ¼, ds₃/dx_unha = ⅛, the same numbers as in s₃, so the vectors&#x27; gradients are ½ g, ¼ g, ⅛ g; they move by 0.033, 0.017, 0.008. Read again, the probability of an is 0.082.">
+<text y="50" font-size="21" style="fill:var(--muted)" data-s="1" data-d="0" data-line="L0" data-x0="40">encoder, each step:</text>
+<text y="50" font-size="24" style="fill:currentColor" data-s="1" data-d="0.3" data-line="L0">s<tspan dy="6" font-size="0.68em">k</tspan><tspan dy="-6">​</tspan> = ½ s<tspan dy="6" font-size="0.68em">k−1</tspan><tspan dy="-6">​</tspan> + ½ x<tspan dy="6" font-size="0.68em">k</tspan><tspan dy="-6">​</tspan></text>
+<text y="50" font-size="20" style="fill:var(--muted)" data-s="1" data-d="0.6" data-line="L0">(s: summary, x: input vector, s<tspan dy="6" font-size="0.68em">0</tspan><tspan dy="-6">​</tspan> = 0)</text>
+<text x="990.0" y="50.0" font-size="18" style="fill:var(--muted)" data-s="1" data-d="0.8">one training pair: unha tía miña → an aunt of mine</text>
+<text x="1010.0" y="104.0" font-size="21" style="fill:var(--muted)" data-s="1" data-d="0.9">x<tspan dy="6" font-size="0.68em">unha</tspan><tspan dy="-6">​</tspan> =</text>
+<text x="1150.0" y="104.0" font-size="21" style="fill:var(--muted)" data-s="1" data-d="0.95" data-until="9">(−0.362, 0.043)</text>
+<text x="1010.0" y="152.0" font-size="21" style="fill:var(--muted)" data-s="1" data-d="1.0">x<tspan dy="6" font-size="0.68em">tía</tspan><tspan dy="-6">​</tspan> =</text>
+<text x="1150.0" y="152.0" font-size="21" style="fill:var(--muted)" data-s="1" data-d="1.05" data-until="9">(0.275, −0.433)</text>
+<text x="1010.0" y="200.0" font-size="21" style="fill:var(--muted)" data-s="1" data-d="1.1">x<tspan dy="6" font-size="0.68em">miña</tspan><tspan dy="-6">​</tspan> =</text>
+<text x="1150.0" y="200.0" font-size="21" style="fill:var(--muted)" data-s="1" data-d="1.15" data-until="9">(0.127, 0.389)</text>
+<text y="104" font-size="24" style="fill:currentColor" data-s="2" data-d="0" data-line="L1" data-x0="40">s<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan> = ½ x<tspan dy="6" font-size="0.68em">unha</tspan><tspan dy="-6">​</tspan></text>
+<text y="152" font-size="24" style="fill:currentColor" data-s="3" data-d="0" data-line="L2" data-x0="40">s<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan> = ½ s<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan> + ½ x<tspan dy="6" font-size="0.68em">tía</tspan><tspan dy="-6">​</tspan></text>
+<text y="152" font-size="24" style="fill:var(--blue)" data-s="3" data-d="0.6" data-line="L2">= ¼ x<tspan dy="6" font-size="0.68em">unha</tspan><tspan dy="-6">​</tspan> + ½ x<tspan dy="6" font-size="0.68em">tía</tspan><tspan dy="-6">​</tspan></text>
+<text y="200" font-size="24" style="fill:currentColor" data-s="4" data-d="0" data-line="L3" data-x0="40">s<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan> = ½ s<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan> + ½ x<tspan dy="6" font-size="0.68em">miña</tspan><tspan dy="-6">​</tspan></text>
+<text y="200" font-size="24" style="fill:var(--blue)" data-s="4" data-d="0.6" data-line="L3">=</text>
+<text y="200" font-size="24" style="fill:var(--blue)" data-s="4" data-d="0.7" data-line="L3" id="cu" data-gap="14">⅛</text>
+<text y="200" font-size="24" style="fill:var(--blue)" data-s="4" data-d="0.75" data-line="L3" data-gap="10">x<tspan dy="6" font-size="0.68em">unha</tspan><tspan dy="-6">​</tspan> +</text>
+<text y="200" font-size="24" style="fill:var(--blue)" data-s="4" data-d="0.8" data-line="L3" id="ct" data-gap="14">¼</text>
+<text y="200" font-size="24" style="fill:var(--blue)" data-s="4" data-d="0.85" data-line="L3" data-gap="10">x<tspan dy="6" font-size="0.68em">tía</tspan><tspan dy="-6">​</tspan> +</text>
+<text y="200" font-size="24" style="fill:var(--blue)" data-s="4" data-d="0.9" data-line="L3" id="cm" data-gap="14">½</text>
+<text y="200" font-size="24" style="fill:var(--blue)" data-s="4" data-d="0.95" data-line="L3" data-gap="10">x<tspan dy="6" font-size="0.68em">miña</tspan><tspan dy="-6">​</tspan></text>
+<text x="1010.0" y="248.0" font-size="21" style="fill:var(--muted)" data-s="4" data-d="1.0">s<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan> =</text>
+<text x="1150.0" y="248.0" font-size="21" style="fill:var(--muted)" data-s="4" data-d="1.05" data-until="10">(0.087, 0.091)</text>
+<text y="266" font-size="24" style="fill:currentColor" data-s="5" data-d="0" data-line="L4" data-x0="40">decoder, with s<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan> as its state: the probability of the gold output an</text>
+<text x="1010.0" y="316.0" font-size="21" style="fill:var(--muted)" data-s="5" data-d="0.3">probability of an =</text>
+<text x="1230.0" y="316.0" font-size="28" style="fill:currentColor" data-s="5" data-d="0.4" data-until="10">0.08</text>
+<text y="312" font-size="24" style="fill:var(--orange)" data-s="6" data-d="0" data-line="L5" data-x0="40">training wants this probability higher</text>
+<text y="312" font-size="24" style="fill:var(--orange)" data-s="6" data-d="0.4" data-line="L5">· gradient for s<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan>: g, the change in s<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan> that would raise it</text>
+<text y="376" font-size="21" style="fill:var(--muted)" data-s="7" data-d="0" data-line="L6" data-x0="40">chain rule:</text>
+<g class="bfrac" data-line="L6"><text class="num" y="360" font-size="24" style="fill:currentColor" data-s="7" data-d="0.3">ds<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan></text><line class="bar" y1="369" y2="369" stroke="currentColor" stroke-width="2" data-s="7" data-d="0.3"/><text class="den" y="393" font-size="24" style="fill:currentColor" data-s="7" data-d="0.3">dx<tspan dy="6" font-size="0.68em">miña</tspan><tspan dy="-6">​</tspan></text></g>
+<text y="376" font-size="24" style="fill:currentColor" data-s="7" data-d="0.4" data-line="L6">= </text>
+<text y="376" font-size="24" style="fill:var(--blue)" data-s="7" data-d="0.5" data-line="L6" id="rm">½</text>
+<text y="376" font-size="24" style="fill:currentColor" data-s="7" data-d="0.55" data-line="L6">,</text>
+<g class="bfrac" data-line="L6"><text class="num" y="360" font-size="24" style="fill:currentColor" data-s="7" data-d="0.8">ds<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan></text><line class="bar" y1="369" y2="369" stroke="currentColor" stroke-width="2" data-s="7" data-d="0.8"/><text class="den" y="393" font-size="24" style="fill:currentColor" data-s="7" data-d="0.8">dx<tspan dy="6" font-size="0.68em">tía</tspan><tspan dy="-6">​</tspan></text></g>
+<text y="376" font-size="24" style="fill:currentColor" data-s="7" data-d="0.9" data-line="L6">= ½ · ½ = </text>
+<text y="376" font-size="24" style="fill:var(--blue)" data-s="7" data-d="1.0" data-line="L6" id="rt">¼</text>
+<text y="376" font-size="24" style="fill:currentColor" data-s="7" data-d="1.05" data-line="L6">,</text>
+<g class="bfrac" data-line="L6"><text class="num" y="360" font-size="24" style="fill:currentColor" data-s="7" data-d="1.3">ds<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan></text><line class="bar" y1="369" y2="369" stroke="currentColor" stroke-width="2" data-s="7" data-d="1.3"/><text class="den" y="393" font-size="24" style="fill:currentColor" data-s="7" data-d="1.3">dx<tspan dy="6" font-size="0.68em">unha</tspan><tspan dy="-6">​</tspan></text></g>
+<text y="376" font-size="24" style="fill:currentColor" data-s="7" data-d="1.4" data-line="L6">= ½ · ½ · ½ = </text>
+<text y="376" font-size="24" style="fill:var(--blue)" data-s="7" data-d="1.5" data-line="L6" id="ru">⅛</text>
+<rect data-box="#cm" data-pad="5" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--blue)" stroke-width="2" data-s="8" data-d="0" data-t="0.9"/>
+<rect data-box="#rm" data-pad="5" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--blue)" stroke-width="2" data-s="8" data-d="0.3" data-t="0.9"/>
+<rect data-box="#ct" data-pad="5" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--blue)" stroke-width="2" data-s="8" data-d="0" data-t="0.9"/>
+<rect data-box="#rt" data-pad="5" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--blue)" stroke-width="2" data-s="8" data-d="0.3" data-t="0.9"/>
+<rect data-box="#cu" data-pad="5" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--blue)" stroke-width="2" data-s="8" data-d="0" data-t="0.9"/>
+<rect data-box="#ru" data-pad="5" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--blue)" stroke-width="2" data-s="8" data-d="0.3" data-t="0.9"/>
+<text y="376" font-size="20" style="fill:var(--blue)" data-s="8" data-d="0.6" data-line="L6">the same numbers as in s<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan></text>
+<text y="438" font-size="21" style="fill:var(--muted)" data-s="9" data-d="0" data-line="L7" data-x0="40">gradients:</text>
+<text y="438" font-size="24" style="fill:var(--orange)" data-s="9" data-d="0.2" data-line="L7">½ g for x<tspan dy="6" font-size="0.68em">miña</tspan><tspan dy="-6">​</tspan>, ¼ g for x<tspan dy="6" font-size="0.68em">tía</tspan><tspan dy="-6">​</tspan>, ⅛ g for x<tspan dy="6" font-size="0.68em">unha</tspan><tspan dy="-6">​</tspan></text>
+<text y="438" font-size="20" style="fill:var(--muted)" data-s="9" data-d="0.5" data-line="L7">· each vector moves by the learning rate × its gradient: 0.033, 0.017, 0.008</text>
+<text x="1150.0" y="104.0" font-size="21" style="fill:var(--orange)" data-s="9" data-d="0.6">(−0.361, 0.035)</text>
+<text x="1150.0" y="152.0" font-size="21" style="fill:var(--orange)" data-s="9" data-d="0.7">(0.275, −0.449)</text>
+<text x="1150.0" y="200.0" font-size="21" style="fill:var(--orange)" data-s="9" data-d="0.8">(0.128, 0.356)</text>
+<text x="1320.0" y="152.0" font-size="17" style="fill:var(--orange)" data-s="9" data-d="0.9">updated</text>
+<text x="1150.0" y="248.0" font-size="21" style="fill:var(--green)" data-s="10" data-d="0">(0.087, 0.070)</text>
+<text x="1230.0" y="316.0" font-size="28" style="fill:var(--green)" data-s="10" data-d="0.3">0.082</text>
+<text x="1010.0" y="350.0" font-size="17" style="fill:var(--green)" data-s="10" data-d="0.5">read again: a little higher</text>
+<text y="508" font-size="22" style="fill:currentColor" data-s="11" data-d="0" data-line="N1" data-x0="40">backpropagation: the gradient at the output is passed back, step by step by the chain rule, to every parameter, the decoder's too</text>
+<text x="40.0" y="536.0" font-size="19" style="fill:var(--muted)" data-s="11" data-d="0.3">training repeats such updates over all the pairs, thousands of times (Rumelhart, Hinton & Williams, 1986)</text>
+<text y="584" font-size="21" style="fill:var(--blue)" data-s="12" data-d="0" data-line="V" data-x0="40">in a 20-word sentence, the first word's vector would get (½)<tspan dy="-11" font-size="0.68em">20</tspan><tspan dy="11">, about a millionth of g: the vanishing gradient</tspan></text>
+<text y="636" font-size="20" style="fill:var(--orange)" data-s="13" data-d="0" data-line="C1" data-x0="40">the cost: each update is a forward pass plus a backward pass (about twice the forward), keeping every summary and state:</text>
+<text x="40.0" y="664.0" font-size="20" style="fill:var(--orange)" data-s="13" data-d="0.3">one training update costs about three times one use of the model</text>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
+    </div>
+  </div>
+  <div class="notes">
+    <p>Now the chain rule at work, on the toy translation model of the next screen and one training pair: unha tía miña, translated as an aunt of mine.</p>
+    <p>The encoder's rule: each new summary is half the old summary plus half the input vector, starting from zero. Written out step by step: s1 is half of unha's vector. s2 is half of s1 plus half of tía's vector, which is a quarter of unha plus a half of tía. s3, the last summary, is an eighth of unha, a quarter of tía and a half of miña. Each step back halves a word's share.</p>
+    <p>The decoder takes s3 as its state and gives the gold output, an, a probability: 0.08 at this point of training. Training wants this probability higher. The gradient for s3, g, is the change in s3 that would raise it.</p>
+    <p>But s3 is not a parameter: it was computed from the input vectors. The chain rule says how a change in each of them reaches s3: one factor of a half per step. For miña, one step: a half. For tía, two steps: a half times a half, a quarter. For unha, three steps: an eighth. These are exactly the numbers in front of each vector in s3. So the gradients for the three vectors are half of g, a quarter of g and an eighth of g.</p>
+    <p>Each vector moves by the learning rate times its gradient: miña's by 0.033, tía's by 0.017, unha's by 0.008. On the right, the numbers are replaced by the updated ones. Read the pair again with the updated parameters, and the probability of an is 0.082: a little higher.</p>
+    <p>This is backpropagation: the gradient at the output, passed back step by step by the chain rule, to every parameter, the decoder's too. Training repeats such updates over all the pairs, thousands of times. The method was popularized by Rumelhart, Hinton and Williams in 1986, and every neural network today is trained this way. The next screen trains this toy model, one pair at a time, and you will see the vectors move.</p>
+    <p>The halving has a consequence. In a 20-word sentence, the first word's vector would get one half to the power 20, about a millionth, of g, and would hardly be updated at all. This is called the vanishing gradient.</p>
     <p>And the cost, the subject of this course. Each training update is a forward pass, like using the model, plus a backward pass that costs about twice as much; and every summary and state must be kept in memory for the way back. So one training update costs about three times one use of the model. This is the training side of “training once, inference every time” from the start of the session.</p>
     <p>Where backpropagation is in our materials: the toy model of the next screen is trained exactly this way; it moves the Galician vectors in the page's plane. The skip-gram toy is trained by gradient descent, and the gradient of its input-word table passes through the context table, one step of backpropagation. The models of the attention page were trained with backpropagation in PyTorch, the notebooks' word2vec in gensim, and the pretrained models by their authors. This screen is the only place where it is shown step by step.</p>
   </div>
