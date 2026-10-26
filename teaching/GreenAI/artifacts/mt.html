@@ -250,6 +250,14 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .tables3 tr.flash th, .tables3 tr.flash td { box-shadow: inset 0 0 0 1.5px var(--orange); }
 .tf .prow.lit > span { background: var(--hi); }
 .tables3.upd { overflow-x: auto; }
+/* part B: protected dimensions, whatever the round or the procedure */
+#procNote { min-height: 5.8em; }
+#trWhole .legendrow { min-height: 3.8em; align-content: start; }
+#pathAll { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 14px; }
+#pathAll .phrase { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 1.8em; line-height: 1.8em; }
+#pathStepVal { white-space: nowrap; }
+#trSupplyLbl, #trAllLbl, #pathAllLbl, #trRightLbl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: none; }
+#trRightNote { min-height: 3.6em; }
 .tables3.upd table { width: auto; font-size: 0.7rem; }
 .tables3.upd th, .tables3.upd td { padding: 1px 3px; }
 .tables3.upd small.d { font-size: 0.62rem; margin-left: 2px; }
@@ -1172,8 +1180,8 @@ function renderRightCurve() {
 function renderWhole() {
   const RR = procRun(), NR = procRounds(); ti = Math.min(ti, NR); const sn = RR[ti], one = trProc === "one";
   $("procOne").setAttribute("aria-pressed", one); $("procAll").setAttribute("aria-pressed", !one); $("pathStep").max = NR;
-  $("procNote").innerHTML = one ? `exactly what part A walks, nothing different: pair after pair, each followed by its own update; here one click = one round = ${NP} of those updates (stochastic gradient descent, in use since the 1950s and still the basis; learning rate ${LR})`
-    : `the usual procedure today (mini-batch gradient descent): the pushes of all 16 pairs are computed from the same tables and added up, then one update · the same rule, 1 update per round, learning rate ${LR_B} · per pass over the data the small frequent updates win, per update the added-up one does, and on a GPU the 16 pushes are computed in parallel, so it costs about the time of one: that is why this is the usual way · part A does not walk this one`;
+  $("procNote").innerHTML = one ? `exactly what part A walks, nothing different: pair after pair, each followed by its own update; one click here = one round = ${NP} of those updates (stochastic gradient descent, in use since the 1950s; learning rate ${LR})`
+    : `the usual way today (mini-batch gradient descent): the 16 pushes, computed from the same tables, are added up into one update per round (learning rate ${LR_B}); the same rule · per pass over the data the frequent small updates win, per update this one does, and on a GPU the 16 pushes run in parallel, so it costs about the time of one · part A does not walk this one`;
   $("pathStep").value = ti; $("trBack").disabled = ti <= 0; $("trNext").disabled = ti >= NR;
   $("pathStepVal").textContent = `after ${ti} round${ti === 1 ? "" : "s"} of ${NR} (${one ? ti * NP : ti} update${(one ? ti * NP : ti) === 1 ? "" : "s"})`;
   // 1. the 16 pairs, with the probability of each gold output
