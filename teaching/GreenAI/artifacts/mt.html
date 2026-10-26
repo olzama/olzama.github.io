@@ -454,6 +454,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="bound">
     <h2><span class="n">3</span>Inference, part 2: the decoder writes English, word by word</h2>
     <p class="label">Still inference: the model trained in section 1 (after its 3000 rounds), translating. Nothing changes in its tables here.</p>
+    <p class="note" style="max-width:none;margin:0">This model translates all 16 short phrases right: in 3 words, the first word still makes up an eighth of the summary and the second a quarter. A single summary fails on long sentences, where early words fade to almost nothing (section 2); the <a href="attention.html">attention page</a> shows a model without attention writing “A friend of mine” for our whole sentence, and how attention fixes it.</p>
     <p class="lead">The model trained in section 1, at work. The encoder reads the phrase into a summary, and Galician and English words share one plane. The <b>decoder</b> then writes English one word at a time. It keeps a <b>state</b>, a vector, and its first state is the summary. At every step it chooses a word the way skip-gram predicted neighbors, then folds that word into its state with the same ½ + ½ rule the encoder used.</p>
 <div class="actl">
     <div class="controls">
