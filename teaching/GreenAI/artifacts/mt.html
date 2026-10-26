@@ -364,7 +364,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
           <div class="col">
             <p class="label" id="trAllLbl"></p>
             <svg id="trAllSvg" viewBox="0 0 400 400" role="img" aria-label="All Galician input vectors and English output vectors after this round" style="max-width:420px"></svg>
-            <div class="legendrow"><span><span class="sq" style="background:var(--blue)"></span>Galician input</span><span><span class="ring"></span>English possible output</span><span><span class="ring" style="width:8px;height:8px;opacity:0.5"></span>— <span id="trAllGhost">where the vector was before this round</span></span><span>axes: the plane zooms out as the vectors grow</span></div>
+            <div class="legendrow"><span><span class="sq" style="background:var(--blue)"></span>Galician input</span><span><span class="ring"></span>English possible output</span><span>axes: the plane zooms out as the vectors grow</span><span><span class="sw" style="background:var(--orange);width:18px;height:3px"></span><span id="trAllGhost">click a word: its path from the random start to this round</span></span></div>
             <p class="note" style="margin:0;max-width:none">training changes only the numbers in the three tables; how they are used (summary, score, probability, what is mixed in) never changes</p>
           </div>
           <div class="col">
@@ -382,7 +382,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <!-- 1 -->
   <section class="panel" id="enc">
-    <h2><span class="n">2</span>Without attention: the encoder reads a sentence into one vector</h2>
+    <h2><span class="n">2</span>Inference, part 1: the encoder reads a sentence into one vector</h2>
+    <p class="label">From here on, inference: a trained model translating. No gold output, no update; the tables stay as they are (section 1's "when translating" switch showed this inside training).</p>
     <p class="lead">A translation model starts by reading the Galician sentence. Each word has an embedding, a row in a table like p on the skip-gram page; here it has 2 dimensions, so every word is a point. The <b>encoder</b> reads the words in order and keeps a <b>summary</b>: one more vector, updated after every word. In this simplified encoder, each new word moves the summary halfway toward that word's point.</p>
 <div class="actl">
     <div class="controls">
@@ -418,7 +419,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <!-- 2 -->
   <section class="panel" id="bound">
-    <h2><span class="n">3</span>Without attention: from Galician to English, word by word</h2>
+    <h2><span class="n">3</span>Inference, part 2: the decoder writes English, word by word</h2>
+    <p class="label">Still inference: the model trained in section 1 (after its 3000 rounds), translating. Nothing changes in its tables here.</p>
     <p class="lead">The model trained in section 1, at work. The encoder reads the phrase into a summary, and Galician and English words share one plane. The <b>decoder</b> then writes English one word at a time. It keeps a <b>state</b>, a vector, and its first state is the summary. At every step it chooses a word the way skip-gram predicted neighbors, then folds that word into its state with the same ½ + ½ rule the encoder used.</p>
 <div class="actl">
     <div class="controls">
@@ -1120,18 +1122,28 @@ function renderA() {
   renderCurve(q, src, tgt, sg.kind === "out" && trMode === "train" ? sg.k : -1);
 }
 // part B: every vector, and where it was before this round
-function renderAllPlane(sn, prev) {
-  const Z = 1.15 * Math.max(...[...sn.G, ...sn.O].flat().map(Math.abs)), P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z;
-  const blue = css("--blue"), fg = css("--fg"), tick = +(Z / 1.15).toPrecision(2), put = placer();
+let traceSel = null;   // part B: the word whose path is traced on the plane ("G3" / "O5")
+function renderAllPlane(RR, r) {
+  const sn = RR[r], Z = 1.15 * Math.max(...[...sn.G, ...sn.O].flat().map(Math.abs)), P = x => 200 + x * 180 / Z, Q = y => 200 - y * 180 / Z;
+  const blue = css("--blue"), fg = css("--fg"), orange = css("--orange"), muted = css("--muted"), tick = +(Z / 1.15).toPrecision(2), put = placer();
   let g = `<line class="axis" x1="10" y1="200" x2="390" y2="200"/><line class="axis" x1="200" y1="10" x2="200" y2="390"/>`;
   g += `<text x="${P(tick)}" y="214" text-anchor="middle" font-size="10">${tick}</text><text x="${P(-tick)}" y="214" text-anchor="middle" font-size="10">${-tick}</text><text x="206" y="${Q(tick) + 4}" font-size="10">${tick}</text>`;
-  if (prev) { GL.forEach((w, j) => { const v = sn.G[j], pv = prev.G[j]; g += `<line x1="${P(pv[0])}" y1="${Q(pv[1])}" x2="${P(v[0])}" y2="${Q(v[1])}" stroke="${blue}" stroke-opacity="0.35" stroke-width="1.2"/><rect x="${P(pv[0]) - 2.5}" y="${Q(pv[1]) - 2.5}" width="5" height="5" fill="none" stroke="${blue}" stroke-opacity="0.35"/>`; });
-    EN.forEach((w, j) => { const v = sn.O[j], pv = prev.O[j]; g += `<line x1="${P(pv[0])}" y1="${Q(pv[1])}" x2="${P(v[0])}" y2="${Q(v[1])}" stroke="${fg}" stroke-opacity="0.35" stroke-width="1.2"/><circle cx="${P(pv[0])}" cy="${Q(pv[1])}" r="3" fill="none" stroke="${fg}" stroke-opacity="0.35"/>`; }); }
-  GL.forEach((w, j) => { const v = sn.G[j]; g += `<rect x="${P(v[0]) - 4.5}" y="${Q(v[1]) - 4.5}" width="9" height="9" rx="2" fill="${blue}"/>`; });
-  EN.forEach((w, j) => { const v = sn.O[j]; g += `<circle cx="${P(v[0])}" cy="${Q(v[1])}" r="5" fill="none" stroke="${fg}" stroke-width="1.4"/>`; });
-  GL.forEach((w, j) => { const v = sn.G[j], [x, y, an] = put(P(v[0]), Q(v[1]) + 4, 7 * w.length, 8); g += `<text x="${x}" y="${y}" text-anchor="${an}" font-style="italic" font-size="11" fill="${blue}">${w}</text>`; });
-  EN.forEach((w, j) => { const v = sn.O[j], [x, y, an] = put(P(v[0]), Q(v[1]) + 4, 7 * w.length, 8); g += `<text x="${x}" y="${y}" text-anchor="${an}" font-size="11" fill="${fg}">${w}</text>`; });
+  // the traced word: its path from the random start to this round, a mark at round 0 and a dot every few hundred rounds
+  if (traceSel) { const T = traceSel[0], j = +traceSel.slice(1), col = T === "G" ? blue : fg, pts = [];
+    for (let k = 0; k <= r; k++) pts.push(RR[k][T][j]);
+    g += `<polyline points="${pts.map(v => `${P(v[0]).toFixed(1)},${Q(v[1]).toFixed(1)}`).join(" ")}" fill="none" stroke="${orange}" stroke-width="2" stroke-opacity="0.8" stroke-linejoin="round"/>`;
+    const every = r > 1500 ? 500 : r > 300 ? 100 : r > 60 ? 20 : 5;
+    for (let k = every; k < r; k += every) { const v = RR[k][T][j]; g += `<circle cx="${P(v[0])}" cy="${Q(v[1])}" r="2.5" fill="${orange}"/>`; }
+    const v0 = RR[0][T][j]; g += `<circle cx="${P(v0[0])}" cy="${Q(v0[1])}" r="5" fill="var(--panel)" stroke="${orange}" stroke-width="2"/>`;
+    const [x0, y0, a0] = put(P(v0[0]), Q(v0[1]) + 4, 44, 9); g += `<text x="${x0}" y="${y0}" text-anchor="${a0}" font-size="10" fill="${orange}">round 0</text>`; }
+  GL.forEach((w, j) => { const v = sn.G[j], on = traceSel === "G" + j; g += `<rect data-k="G${j}" x="${P(v[0]) - 4.5}" y="${Q(v[1]) - 4.5}" width="9" height="9" rx="2" fill="${blue}" stroke="${on ? orange : "none"}" stroke-width="2.5" style="cursor:pointer"/>`; });
+  EN.forEach((w, j) => { const v = sn.O[j], on = traceSel === "O" + j; g += `<circle data-k="O${j}" cx="${P(v[0])}" cy="${Q(v[1])}" r="${on ? 7 : 5}" fill="none" stroke="${on ? orange : fg}" stroke-width="${on ? 2.6 : 1.4}" style="cursor:pointer"/>`; });
+  GL.forEach((w, j) => { const v = sn.G[j], [x, y, an] = put(P(v[0]), Q(v[1]) + 4, 7 * w.length, 8); g += `<text data-k="G${j}" x="${x}" y="${y}" text-anchor="${an}" font-style="italic" font-size="11" fill="${traceSel === "G" + j ? orange : blue}" style="cursor:pointer">${w}</text>`; });
+  EN.forEach((w, j) => { const v = sn.O[j], [x, y, an] = put(P(v[0]), Q(v[1]) + 4, 7 * w.length, 8); g += `<text data-k="O${j}" x="${x}" y="${y}" text-anchor="${an}" font-size="11" fill="${traceSel === "O" + j ? orange : fg}" style="cursor:pointer">${w}</text>`; });
   $("trAllSvg").innerHTML = g;
+  $("trAllSvg").querySelectorAll("[data-k]").forEach(e => e.addEventListener("click", () => { traceSel = traceSel === e.dataset.k ? null : e.dataset.k; renderWhole(); }));
+  const name = traceSel ? (traceSel[0] === "G" ? GL : EN)[+traceSel.slice(1)] : null;
+  $("trAllGhost").innerHTML = name ? `the path of “${name}” from the random start (○ round 0, a dot every ${r > 1500 ? 500 : r > 300 ? 100 : r > 60 ? 20 : 5} rounds) to round ${r} · click it again to clear` : "click a word: its path from the random start to this round";
 }
 const rightNow = sn => S2S.data.filter(([s2, t2]) => translate(sn, s2).steps.map(x => x.w).filter(w => w !== "‹end›").join(" ") === t2.filter(w => w !== "‹end›").join(" ")).length;
 function renderRightCurve() {
@@ -1169,9 +1181,8 @@ function renderWhole() {
   if (one) $("trSupply").querySelectorAll(".cell").forEach(e => e.addEventListener("click", () => goA(+e.dataset.q, +e.dataset.m, "train")));
   $("trSupply").style.cursor = one ? "" : "default";
   // 2. the vectors and their move over the round
-  $("trAllLbl").textContent = ti === 0 ? "2. All the vectors at the random start" : one ? `2. The 16 updates of round ${ti}, added up: where every vector was before the round, and where it is now` : `2. The one update of round ${ti}, from the 16 pushes added up: where every vector was before, and where it is now`;
-  renderAllPlane(sn, ti > 0 ? RR[ti - 1] : null);
-  $("trAllGhost").textContent = ti > 0 ? `where the vector was before round ${ti}` : "at the random start there is no earlier position";
+  $("trAllLbl").textContent = ti === 0 ? "2. All the vectors at the random start" : `2. All the vectors after round ${ti}`;
+  renderAllPlane(RR, ti);
   let nRight = 0;
   $("pathAll").innerHTML = S2S.data.map(([s2, t2], q2) => {
     const out = translate(sn, s2).steps.map(t => t.w).filter(w => w !== "‹end›");
