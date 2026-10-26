@@ -1279,7 +1279,8 @@ function renderRightCurve() {
   g += `<text x="${lx}" y="${Math.max(T + 12, my - 9)}" text-anchor="${an}" font-size="11" fill="${orange}">${mine[ti]} of 16 · round ${ti}</text>`;
   $("trRightCurve").innerHTML = g;
   const firstAll = arr => arr.findIndex((n, k) => n === 16 && arr.slice(k).every(x => x === 16)), f1 = firstAll(rightsOf("one")), fA = firstAll(rightsOf("all"));
-  $("trRightNote").innerHTML = `<span class="ok">green</span>: this procedure · grey: the other · curves averaged over 31 rounds, the dot is the exact count now · all 16 right for good from round ${f1} one pair at a time (${f1 * NP} updates), from round ${fA} all at once (${fA} updates)`;
+  const name = pr => pr === "one" ? "one pair at a time" : "all 16 at once";
+  $("trRightNote").innerHTML = `<span class="ok">green: ${name(trProc)}</span> (chosen above) · grey: ${name(trProc === "one" ? "all" : "one")} · each curve: the number of inputs translated right, averaged over 31 rounds; the dot: the exact number at this round · all 16 right for good: one pair at a time from round ${f1} (${f1 * NP} updates), all at once from round ${fA} (${fA} updates)`;
 }
 function renderWhole() {
   const RR = procRun(), NR = procRounds(); ti = Math.min(ti, NR); const sn = RR[ti], one = trProc === "one";
