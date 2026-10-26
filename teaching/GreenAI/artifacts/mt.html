@@ -211,6 +211,8 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .testcard .v .cell .fl { position: absolute; left: 0; top: 0; bottom: 0; background: var(--green); opacity: 0.4; }
 .testcard .v .cell .t { position: relative; }
 .testcard .ok { color: var(--green); font-weight: 600; } .testcard .bad { color: var(--neg); font-weight: 600; }
+.tdpoints { display: grid; gap: 10px; font-size: 0.92rem; } .tdpoints p { margin: 0; } .tdmk { display: inline-flex; align-items: center; justify-content: center; width: 1.45em; height: 1.45em; border: 1.5px solid; border-radius: 50%; font-size: 0.8rem; font-weight: 600; margin-right: 6px; } .tdpoints .tdtake { border-top: 1px solid var(--line); padding-top: 10px; }
+#trLong .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } #trLong .cols > .col { grid-template-columns: minmax(0, 1fr); min-width: 0; }
 .devtag { font-family: var(--font-body); font-size: 0.7rem; color: var(--orange); border: 1px solid var(--orange); border-radius: 999px; padding: 0 7px; margin-left: 8px; white-space: nowrap; }
 .ogrid .row.dev, .phrases .phrase.dev { opacity: 0.75; background: var(--hi); border-radius: 4px; }
 #tsAll { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
@@ -483,6 +485,23 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
             <svg id="tsCurve" viewBox="0 0 440 210" role="img" aria-label="For the development pair: the probability of its gold translation and of the translation the model writes, over the rounds" style="max-width:460px"></svg>
             <div class="ogrid one avgrows" id="tsAvg"></div>
           <p class="note" id="tsNote" style="margin:0;min-height:3.4em"></p>
+          </div>
+        </div>
+      </div>
+      <div class="why" id="trLong">
+        <p class="label">D. Training longer, checked on the development pair</p>
+        <p class="note" style="max-width:none;margin:0">Part C stopped at 3000 rounds. Here the same training on the same 15 pairs goes on to 6000 rounds; <i>unha tía miña</i> is still never trained on. The rest of the page keeps the models of 3000 rounds.</p>
+        <div class="actl"><div class="controls"><span class="label" style="margin-right:4px">Training on 15</span><button id="tdBack">← 100 rounds</button><button class="primary" id="tdNext">Train 100 rounds →</button><button id="tdPlay" style="min-width:8.5em">Play training</button><button id="tdReset" title="Back to round 3000, where part C stopped">↺ round 3000</button><input type="range" id="tdStep" min="0" max="6000" step="10" value="3000" aria-label="Rounds of training on 15 pairs" style="flex:1 1 140px; accent-color: var(--blue)"><span class="mono" id="tdVal" style="white-space:nowrap;min-width:21em"></span></div></div>
+        <div class="cols">
+          <div class="col">
+            <p class="label"><i>unha tía miña</i> (development): gold vs written translation, over 6000 rounds</p>
+            <svg id="tdCurve" viewBox="0 0 440 244" role="img" aria-label="For the development pair, over 6000 rounds: the probability of its gold translation and of the translation the model writes, with three marked rounds" style="max-width:460px"></svg>
+            <div class="ogrid one avgrows" id="tdRows"></div>
+            <p class="note" style="margin:0"><span class="ok">green</span>: the probability of the gold translation · <span class="bad">red</span>: of the translation the model writes · orange line: this round · one curve where the model writes the gold translation</p>
+          </div>
+          <div class="col">
+            <p class="label">What the marks show</p>
+            <div class="tdpoints" id="tdPoints"></div>
           </div>
         </div>
       </div>
@@ -1610,6 +1629,57 @@ $("tsPlay").addEventListener("click", () => { if (tsTimer) { stopTest(); return;
   tsTimer = setInterval(() => { tsI = Math.min(ROUNDS, tsI + (tsI < 20 ? 1 : 50)); renderTest(); if (tsI >= ROUNDS) stopTest(); }, reduce ? 30 : 110); });
 renderTest();
 PZ.attach("tsAllSvg", () => renderTest());
+
+// ---------- part D: the same training on 15 pairs, continued from round 3000 to 6000 (the rest of the page keeps round 3000) ----------
+const ROUNDS_L = 6000;
+let RL = null, tdI = 3000, tdTimer = null, LC = null;
+function longRun() { if (RL) return RL; const RTT = testRun(); RL = RTT.slice(); let sn = RTT[ROUNDS]; for (let r = ROUNDS + 1; r <= ROUNDS_L; r++) { for (const q of TRAIN15) sn = upd(sn, q); sn.step = r; RL.push(sn); } return RL; }
+function longCurves() {
+  if (LC) return LC; const RLL = longRun(), [src, tgt] = S2S.data[HQ];
+  LC = { gold: RLL.map(sn => prodOf(correctProbs(sn, src, tgt))), wr: RLL.map(sn => prodOf(writtenOf(sn, src).p)),
+    devOk: RLL.map(sn => writtenOf(sn, src).w.join(" ") === tgt.join(" ")),
+    right: RLL.map(sn => TRAIN15.filter(q => { const [a, b] = S2S.data[q]; return writtenOf(sn, a).w.join(" ") === b.join(" "); }).length) };
+  const forGood = ok => { let r = ok.length - 1; if (!ok[r]) return -1; while (r > 0 && ok[r - 1]) r--; return r; };   // the first round from which it holds to the end
+  LC.r1 = forGood(LC.right.map(n => n === TRAIN15.length)); LC.r3 = forGood(LC.devOk);
+  return LC; }
+function renderLong() {
+  const C = longCurves(), RLL = longRun(), sn = RLL[tdI], [src, tgt] = S2S.data[HQ];
+  const green = css("--green"), neg = css("--neg"), orange = css("--orange"), muted = css("--muted"), grid = css("--grid"), fg = css("--fg");
+  $("tdStep").value = tdI; $("tdBack").disabled = tdI <= 0; $("tdNext").disabled = tdI >= ROUNDS_L;
+  $("tdVal").textContent = `after ${tdI} rounds of ${ROUNDS_L} · training pairs right: ${C.right[tdI]} of 15`;
+  const L = 40, Rr = 420, T = 58, B = 210, X = i => L + i / ROUNDS_L * (Rr - L), Y = v => T + (1 - v) * (B - T);
+  const W = 15, smooth = arr => arr.map((v, i) => { const a = Math.max(0, i - W), b = Math.min(arr.length - 1, i + W); let s2 = 0; for (let k = a; k <= b; k++) s2 += arr[k]; return s2 / (b - a + 1); });
+  let g = "";
+  [0.25, 0.5, 0.75, 1].forEach(v => { g += `<line x1="${L}" y1="${Y(v)}" x2="${Rr}" y2="${Y(v)}" stroke="${grid}"/>`; });
+  [2000, 4000, 6000].forEach(r => { g += `<text x="${X(r)}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">${r}</text>`; });
+  g += `<line class="axis" x1="${L}" y1="${B}" x2="${Rr}" y2="${B}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${B}"/>`;
+  g += `<text x="${L}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">round 0</text><text x="${L - 6}" y="${Y(0) + 4}" text-anchor="end" font-size="10" fill="${muted}">0</text><text x="${L - 6}" y="${Y(0.5) + 4}" text-anchor="end" font-size="10" fill="${muted}">0.5</text><text x="${L - 6}" y="${Y(1) + 4}" text-anchor="end" font-size="10" fill="${muted}">1</text><text x="${L - 30}" y="12" font-size="10" fill="${muted}">probability of a whole translation</text>`;
+  // the three marks: numbered circles at the top, a dashed line down
+  const marks = [[C.r1, fg], [ROUNDS, muted], [C.r3, green]];
+  marks.forEach(([r, c], k) => { if (r < 0) return; const x = X(r);
+    g += `<line x1="${x}" y1="${T - 10}" x2="${x}" y2="${B}" stroke="${c}" stroke-width="1.2" stroke-dasharray="3 3" stroke-opacity="0.7"/><circle cx="${x}" cy="${T - 19}" r="9" fill="var(--panel)" stroke="${c}" stroke-width="1.5"/><text x="${x}" y="${T - 15}" text-anchor="middle" font-size="11" font-weight="600" fill="${c}">${k + 1}</text>`; });
+  g += `<polyline points="${smooth(C.wr).map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${neg}" stroke-width="2.6" stroke-linejoin="round"/>`;
+  g += `<polyline points="${smooth(C.gold).map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${green}" stroke-width="2.6" stroke-linejoin="round"/>`;
+  g += `<line x1="${X(tdI)}" y1="${T}" x2="${X(tdI)}" y2="${B}" stroke="${orange}" stroke-width="1.5"/>`;
+  g += `<circle cx="${X(tdI)}" cy="${Y(C.wr[tdI])}" r="5.5" fill="${neg}" stroke="var(--panel)" stroke-width="1.5"/><circle cx="${X(tdI)}" cy="${Y(C.gold[tdI])}" r="4" fill="${green}" stroke="var(--panel)" stroke-width="1.5"/>`;
+  $("tdCurve").innerHTML = g;
+  const wn = writtenOf(sn, src); $("tdRows").innerHTML = seqRows(tgt, correctProbs(sn, src, tgt), wn.w, wn.p); fitRows($("tdRows"));
+  const mk = (k, c) => `<span class="tdmk" style="color:${c};border-color:${c}">${k}</span>`, w3000 = writtenOf(RLL[ROUNDS], src).w.join(" ");
+  $("tdPoints").innerHTML =
+    `<p>${mk(1, fg)}<b>Round ${C.r1}:</b> all 15 training pairs come out right, and stay right. Judged on the training data alone, training is done.</p>` +
+    `<p>${mk(2, muted)}<b>Round ${ROUNDS}:</b> part C stops. The development pair still comes out as “${w3000}”.</p>` +
+    `<p>${mk(3, green)}<b>Round ${C.r3}:</b> the development pair comes out right: “${tgt.join(" ")}”. Training kept going after ①: the training pairs' probabilities still rose toward 1 and the vectors kept moving, and the pair never trained on benefited.</p>` +
+    `<p class="tdtake"><b>Only the development data showed that more training helps.</b> That is what it is for: choosing how long to train, and other choices about the model, by checking pairs the model never trains on. It can also show the opposite: in section 4, the development sentence comes closest around step 1200 and then moves away from its gold translation.</p>`;
+}
+function stopLong() { clearInterval(tdTimer); tdTimer = null; $("tdPlay").textContent = "Play training"; }
+$("tdNext").addEventListener("click", () => { stopLong(); tdI = Math.min(tdI + 100, ROUNDS_L); renderLong(); });
+$("tdBack").addEventListener("click", () => { stopLong(); tdI = Math.max(tdI - 100, 0); renderLong(); });
+$("tdReset").addEventListener("click", () => { stopLong(); tdI = ROUNDS; renderLong(); });
+$("tdStep").addEventListener("input", e => { stopLong(); tdI = +e.target.value; renderLong(); });
+$("tdPlay").addEventListener("click", () => { if (tdTimer) { stopLong(); return; } if (tdI >= ROUNDS_L) tdI = ROUNDS; $("tdPlay").textContent = "Pause";
+  tdTimer = setInterval(() => { tdI = Math.min(ROUNDS_L, tdI + 20); renderLong(); if (tdI >= ROUNDS_L) stopLong(); }, matchMedia("(prefers-reduced-motion: reduce)").matches ? 30 : 80); });
+renderLong();
+window.__longCurves = longCurves;   // for checking the replay against mt_s2s_train.py continued (round 5000: 0.414)
 (window.__askState ||= []).push(() => { const t = TRS[bA], nR0 = PH[bA].src.length; if (bStage < nR0) return `Section 3 (from Galician to English, word by word): reading phase, the encoder has read ${bStage + 1} of ${nR0} words of "${PH[bA].src.join(" ")}" (Galician words drawn as bright squares, English words faded); summary = ½ old summary + ½ word vector.`; const k = Math.min(bStep, t.steps.length - 1), s = t.steps[k];
   return `Section 3 (from Galician to English, word by word: encoder plane of the phrase, then the decoder): phrase "${PH[bA].src.join(" ")}" → ${t.steps.map(x => x.w).join(" ")}; showing word ${k + 1} ("${s.w}"). (a) The word is chosen like skip-gram: score of each English word = dot product of the decoder state with that word's learned 2-D vector; softmax; top probabilities ${[...s.p.keys()].sort((a, b) => s.p[b] - s.p[a]).slice(0, 3).map(j => `${EN[j]} ${s.p[j].toFixed(2)}`).join(", ")}. (b) The state = ½ old state + ½ the written word's vector, so the summary makes up 1/${Math.pow(2, k)} of the state now and the written English words fill the rest (newest ½, previous ¼, ...). (c) Why the first word is right although the summary is mostly the end of the phrase: in 3-word phrases the first word's ⅛ share is still enough after training; in long sentences it fades, which is why Sutskever et al. (2014) fed the source sentence in reverse (BLEU 25.9 → 30.6), and why attention was invented (section 4).`; });
 
