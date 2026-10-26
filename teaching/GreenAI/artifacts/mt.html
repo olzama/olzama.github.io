@@ -571,7 +571,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </div>
     <div class="callout">
       <p class="label">d. Is “an aunt of mine” the best translation?</p>
-      <p class="note" style="color:var(--fg)">The toy model learned to write “an aunt of mine” for <i>unha tía miña</i>, and the real model writes the same (section 5). It is correct and faithful: “an” keeps the new character that <i>unha</i> introduces. But English rarely says it. For every 100 “my …”, English books write “a … of mine” this often (log scale):</p>
+      <p class="note" style="color:var(--fg)">The toy model learned to write “an aunt of mine” for <i>unha tía miña</i>, and the real model Helsinki-NLP/opus-mt-gl-en writes the same (a slide in the lesson looks at why). It is correct and faithful: “an” keeps the new character that <i>unha</i> introduces. But English rarely says it. For every 100 “my …”, English books write “a … of mine” this often (log scale):</p>
       <div class="bars" style="max-width:520px"><div class="bar" style="grid-template-columns: 12em minmax(0,1fr) 3.5em"><span class="w">a friend of mine</span><span class="track"><span class="fill" style="width:92.1%;background:var(--green)"></span></span><span>12.47</span></div><div class="bar" style="grid-template-columns: 12em minmax(0,1fr) 3.5em"><span class="w">an aunt of mine</span><span class="track"><span class="fill" style="width:32.9%;background:var(--orange)"></span></span><span>0.36</span></div><div class="bar" style="grid-template-columns: 12em minmax(0,1fr) 3.5em"><span class="w">a brother of mine</span><span class="track"><span class="fill" style="width:7.8%;background:var(--blue)"></span></span><span>0.08</span></div></div>
       <p class="note" style="color:var(--fg)">“A … of mine” picks one out of several, which is natural for friends and marked for close family. A translator would rebuild the sentence: “<b>I had an aunt who…</b>”. No word of the Galician corresponds to “I had”, and our model never saw such a sentence in training, so it cannot write it. Section 4 trains a model that does. Counts from Google Books; the <a href="ngram.html#ofmine">n-gram page, section 7</a>, has the full chart and how it was counted.</p>
     </div>
@@ -611,30 +611,9 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   </section>
 
   <!-- 5 -->
-  <section class="panel" id="real5">
-    <h2><span class="n">5</span>Why do real translation models still write “an aunt of mine”?</h2>
-    <p class="lead">The real Galician–English model, <span class="mono">Helsinki-NLP/opus-mt-gl-en</span>, translates our sentence as “An aunt of mine, who…”, even though English books rarely say it. We can ask the model how likely it finds other openings: give it the Galician sentence and an English opening, and read off its probability for each word.</p>
-    <div class="cols">
-      <div class="col">
-        <p class="label">The model's probability for each opening (log scale)</p>
-        <div id="altBars"></div>
-        <div class="formula" id="altPieces"></div>
-      </div>
-      <div class="col">
-        <p class="note" style="color:var(--fg)">“An aunt of mine” is the model's favorite by far; “I had an aunt” is tens of thousands of times less likely. Likely reasons:</p>
-        <ul class="note reasons">
-          <li><b>It learned translations, not English in general.</b> Book counts show how often English writers choose a phrasing. A translation model learns how translators rendered similar Galician phrases. <i>Unha X miña</i> is usually rendered “a X of mine”, which is right for friends and colleagues, and the model applies the same pattern to <i>tía</i>.</li>
-          <li><b>Rare is not absent.</b> “An aunt of mine” is unusual, but the pattern “a … of mine” is very common, so the model writes it fluently.</li>
-          <li><b>Rebuilding a sentence is a big step.</b> “I had an aunt who…” needs a new subject and verb. The model chooses one word at a time, given the Galician, and staying close to the Galician wins at each step.</li>
-          <li><b>Galician is low-resource.</b> There is relatively little translated Galician text to learn from, and much of it is fairly literal.</li>
-        </ul>
-        <p class="note">These are likely explanations, not measured ones. The toy model of section 4 shows the first point directly: what the training data says is what the model writes.</p>
-      </div>
-    </div>
-  </section>
 
   <footer>
-    <p>Section 2 uses made-up 2-D vectors and the simplified update rule described there. Sections 1 and 3 use a toy model with the same rules, trained by <code>mt_s2s_train.py</code>; section 4 a second one, trained by <code>mt_ihad_train.py</code>. Section 5 scores the openings with <code>Helsinki-NLP/opus-mt-gl-en</code> (<code>mt_score_alternatives.py</code>). The <a href="attention.html">next page</a>, on attention, continues from here.</p>
+    <p>Section 2 uses made-up 2-D vectors and the simplified update rule described there. Sections 1 and 3 use a toy model with the same rules, trained by <code>mt_s2s_train.py</code>; section 4 a second one, trained by <code>mt_ihad_train.py</code>. The <a href="attention.html">next page</a>, on attention, continues from here.</p>
     <p class="label" style="margin-top:14px">References</p>
     <ul class="refs">
       <li>Sutskever, I., Vinyals, O., &amp; Le, Q. V. (2014). Sequence to sequence learning with neural networks. <i>Advances in Neural Information Processing Systems 27</i>. <a href="https://arxiv.org/abs/1409.3215">arxiv.org/abs/1409.3215</a></li>
@@ -1651,14 +1630,6 @@ $("ihtPlay").addEventListener("click", () => {
   tTimer = setInterval(() => { ti++; renderT(); if (ti >= TS.length - 1) stopT(); }, reduce ? 30 : 150);
 });
 renderT();
-// section 5: the real model's probabilities for each opening
-{
-  const rows = ALT.rows, lo = Math.log10(Math.min(...rows.map(r => r.prob))) - 0.5, hi = 0;
-  const pct = v => ((Math.log10(v) - lo) / (hi - lo) * 100).toFixed(1);
-  const fmt = v => v >= 0.001 ? v.toFixed(3) : v.toExponential(1).replace("e-", " × 10⁻").replace(/\d+$/, d => d.split("").map(c => "⁰¹²³⁴⁵⁶⁷⁸⁹"[c]).join(""));
-  $("altBars").innerHTML = `<div class="bars">` + rows.map((r, n) => `<div class="bar" style="grid-template-columns: 9em minmax(0,1fr) 7em"><span class="w" style="font-family:var(--font-body)">${r.opening}</span><span class="track"><span class="fill" style="width:${pct(r.prob)}%;background:var(${n === 0 ? "--orange" : n === 2 ? "--green" : "--blue"})"></span></span><span>${fmt(r.prob)}</span></div>`).join("") + `</div>`;
-  $("altPieces").innerHTML = rows.map(r => `<b>${r.opening}</b>: ` + r.pieces.map(([w, lp]) => `${w} ${Math.exp(lp).toFixed(lp > -0.005 ? 2 : 3)}`).join(" · ")).join("<br>") + `<br><span class="note">each word's probability, given the Galician and the words before it; the opening's probability is their product</span>`;
-}
 (window.__askState ||= []).push(() => `Section 4 (second toy model, trained on English that follows the book counts, 23 pairs at once with Adam; unha tía miña cantaba held out as development data, it ends up written "a colleague of mine sang"): at training step ${TS[ti].step} it writes ${RIGHT[ti]} of 23 training sentences right; chosen sentence "${IHAD.data[q][0].join(" ")}" → "${runAt(TS[ti], IHAD.data[q][0]).out.filter(w => w !== "‹end›").join(" ")}" (gold: "${IHAD.data[q][1].filter(w => w !== "‹end›").join(" ")}").`);
 })();
 </script>
@@ -1676,7 +1647,6 @@ The page:
 - Section 2, the encoder: each Galician word has an embedding (made-up 2-D vectors here; tía = (0.9, 0.2), miña = (0.1, 0.9)). A simplified encoder reads word by word and keeps one summary vector: new summary = ½ old summary + ½ new word, starting from (0, 0). So the last word makes up ½ of the summary, the one before ¼, then ⅛, and so on; after the whole sentence (35 tokens) "tía" makes up 0.5^34, practically nothing. Real encoders (recurrent neural networks) learn their update rule, but still keep one fixed-size vector.
 - Section 3, the decoder: how the English words come out, with one plane for both languages: the chosen phrase's Galician word vectors (filled dots) and the encoder's dashed path to the summary, the English word vectors (rings), and the decoder's state at its true position, starting exactly at the summary (all 2-D vectors in one coordinate system; Galician and English words have separate tables, but the summary's two numbers are used directly as the decoder's state), in a small toy model trained on 16 idiomatic Galician noun phrases ("a miña tía" → "my aunt", "unha tía miña" → "an aunt of mine", likewise amigo/friend, irmán/brother, veciña/neighbor, and túa/teu → your / of yours; 2-D learned vectors). One phrase, word by word, in the trained model: (a) how the next word is chosen: each English word has a learned vector; its score is the dot product with the decoder's state (how far it lies along the state's direction); softmax gives probabilities; the most likely word is written. (b) How the state is recomputed: the first state is the encoder's summary; after each word, state = ½ state + ½ that word's update vector (a second learned vector per English word, separate from its scoring vector, like skip-gram's two tables), drawn as vector addition with the numbers; so the summary's share halves at every step (all, 1/2, 1/4, ...) while the written words fill the rest, shown as a mix bar like section 2. (d) Is "an aunt of mine" the best translation? Correct and faithful (an keeps the new character introduced by unha), but rare in English: per 100 "my N", English books write "a friend of mine" 12.5 times, "an aunt of mine" 0.36, "a brother of mine" 0.08 (Google Books, 1990-2019; full chart on the n-gram page, section 7). "A ... of mine" picks one out of several. A translator writes "I had an aunt who...", which no word-by-word decoder can produce. (c) Why the first word comes out right although the summary is mostly the end of the phrase: in 3-word phrases the first word's ⅛ is still enough after training; in long sentences it fades; Sutskever, Vinyals & Le (2014) fed the source sentence reversed (BLEU 25.9 → 30.6); attention (section 4) removes the need.
 - Section 4, a second toy model: trained on 24 Galician sentences whose English follows the book counts. A training replay (Back/Next/Play over 2000 steps, every 25th recorded) shows all vectors moving from random starts (the plane zooms out as they grow), the probability of each correct word for the chosen sentence, and the model's translations at that step, each word the highest-probability one, with its own words fed back (at step 0 "had had had…"; around step 400 "unha tía miña cantaba" already gives "I had a brother who sang": the construction is learned before the noun). "o meu amigo cantaba" → "my friend sang", "un amigo meu cantaba" → "a friend of mine sang" (likewise compañeira/colleague), but "a miña tía cantaba" → "my aunt sang" and "unha tía miña cantaba" → "I had an aunt who sang" (likewise irmán/brother); verbs cantaba/sang, bailaba/danced, ría/laughed. Same 2-D model as sections 1-3. The decoder writes "I", "had" and "who", which have no Galician counterpart, because the training data does: what a decoder writes comes from its training data. With 2 dimensions only some random starts learn all 24; 3 dimensions always do.
-- Section 5, why real models still write "an aunt of mine": Helsinki-NLP/opus-mt-gl-en, given our Galician sentence, gives these probabilities to openings: "An aunt of mine" about 0.33, "My aunt" about 0.015, "I had an aunt" about 0.0000076, "One of my aunts" about 6e-10. Likely reasons (not measured): it learned from translations (P(English | Galician)), where "unha X miña" is usually "a X of mine"; "a ... of mine" is a common pattern, so the rare "an aunt of mine" is still fluent; rebuilding the sentence needs a new subject and verb and the model chooses word by word close to the source; Galician is low-resource with fairly literal training data.`;
 (async () => {
   // window.claude exists only inside a Claude viewer; elsewhere the button stays hidden
   const sample = window.claude ? await window.claude.use("sample") : null;
