@@ -142,6 +142,7 @@ svg.v3 .pt.word { fill: var(--muted); } svg.v3 .pt.enc { fill: rgb(var(--heat));
 svg.v3 .pt.faint { opacity: 0.3; }
 svg.v3 .pl { font-size: 12px; fill: var(--fg); } svg.v3 .pl.mix { fill: var(--orange); } svg.v3 .pl.enc { fill: rgb(var(--heat)); }
 .pbars { min-height: 118px; }
+#qk .inert { opacity: 0.45; }
 .seqp { margin: 2px 0 0; height: 1.6em; line-height: 1.6em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 table.models td { vertical-align: top; } table.models td.bad, table.models .bad, table.ty td.bad { color: var(--neg); }
 .controls.stick { position: sticky; top: 0; z-index: 3; background: inherit; padding-block: 6px; }
@@ -513,6 +514,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <h2><span class="n">3</span>Query and key: what the query's numbers mean</h2>
     <p class="lead">Section 2 gave the decoder its query ready-made: (0, 6, 0) before the first two English words, then shifted toward miña. We did not say why those numbers, or what other numbers would have done. This section takes the query apart. A query is three numbers, one per dimension of the encoder's vectors, and each number says how much a key is rewarded for what it holds in that dimension. From the query follow the scores, the weights, the mix, and the English word the decoder writes with that mix. Setting the query is therefore, indirectly, choosing the next word. Here you set it yourself and follow the chain to the word, where it works and where it fails. The same chain runs in the trained models of section 4 and in the real model of section 6. There the model computes its own queries, and training succeeds when each query fetches what the next word needs.</p>
     <div class="controls stick"><button id="qkBack">Back</button><button class="primary" id="qkNext">Next step</button><span class="pathstrip" id="qkSteps"></span></div>
+    <div id="qkBody">
     <h3 class="wkh" id="qkTitle"></h3>
     <p class="steptext" id="qkText"></p>
     <div class="cmpflow" id="qkSit"></div>
@@ -535,6 +537,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <p class="note">One row per English word. Before each, the correct words have been written (so the last eight dimensions of the state are as in section 2), and the first three dimensions hold this query's mix.</p>
       <div class="heatwrap"><table class="ty dec" id="qkWords"></table></div>
       <p class="note" id="qkNote"></p>
+    </div>
     </div>
   </section>
 
@@ -2088,8 +2091,11 @@ function drawQ() {
     " A mix heavy in unha and poor in tía can also let “a” win at a later word, as it did without attention in section 1; the three best scores show when.";
   $("qkTip").textContent = cur === null ? `Your own query: ${qName(q)}.` : PRESETS[cur][2];
   // which parts this step shows
-  [["qkCtl", "ctl"], ["qkPosRow", "pos"], ["qkKeys", "keys"], ["qkScores", "scores"], ["qkSm", "sm"], ["qkMix", "mix"], ["qkOut", "out"], ["qkFig", "3d"], ["qkWordsBox", "words"]].forEach(([id, part]) => { $(id).hidden = !show.has(part); });
-  $("qkBoard").parentElement.classList.toggle("one", !show.has("3d"));
+  [["qkKeys", "keys"], ["qkScores", "scores"], ["qkSm", "sm"], ["qkMix", "mix"], ["qkOut", "out"], ["qkWordsBox", "words"]].forEach(([id, part]) => { $(id).hidden = !show.has(part); });
+  // the rows above the picture never come and go (the picture would move): they show the current query and word, greyed out in steps that do not use them
+  [["qkCtl", "ctl"], ["qkPosRow", "pos"]].forEach(([id, part]) => { const on = show.has(part); $(id).hidden = false; $(id).classList.toggle("inert", !on); $(id).querySelectorAll("input, button").forEach(e => { e.disabled = !on; }); });
+  $("qkFig").hidden = false;
+  $("qkBoard").parentElement.classList.remove("one");   // always two columns, the picture always shown: it never moves
   $("qkPre").querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(sameQ(PRESETS[i][1], q))));
   $("qkPos").querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === pos)));
 }
@@ -2117,6 +2123,14 @@ PRESETS.forEach(([g, v], i) => {
 });
 sliders.forEach((s, i) => s.addEventListener("input", () => { q[i] = +s.value; cur = null; drawQ(); }));
 goQ(0);
+// protected dimensions: the section keeps the height of its tallest state (every step; in the last one, every word and every preset)
+{ let keep; reserveMax(["qkTitle", "qkText", "qkSit", "qkPosRow", "qkCtl", "qkBoard"].map(id => $(id)), () => { keep = [qstep, [...q], pos, cur]; const L = QSTEPS.length - 1;
+    return QSTEPS.map((_, i) => () => goQ(i)).concat(PHR.flatMap((_, p) => PRESETS.map(([, v], j) => () => { goQ(L); pos = p; q = [...v]; cur = j; drawQ(); }))); },
+  () => { goQ(keep[0]); q = keep[1]; pos = keep[2]; cur = keep[3]; drawQ(); }); }
+// then the whole block, with its parts already at their reserved heights
+{ let keep; reserveMax($("qkBody"), () => { keep = [qstep, [...q], pos, cur]; const L = QSTEPS.length - 1;
+    return QSTEPS.map((_, i) => () => goQ(i)).concat(PHR.flatMap((_, p) => PRESETS.map(([, v], j) => () => { goQ(L); pos = p; q = [...v]; cur = j; drawQ(); }))); },
+  () => { goQ(keep[0]); q = keep[1]; pos = keep[2]; cur = keep[3]; drawQ(); }); }
 
 (window.__askState ||= []).push(() => `Section 3 (the query's numbers): step ${qstep + 1} of ${QSTEPS.length}, "${QSTEPS[qstep][0]}"; the decoder is about to write word ${pos + 1} ("${PHR[pos]}"), which needs ${NEED[pos].txt}; query ${vecTxt(q)}, i.e. ${qName(q)}; with it the decoder writes "${scoreAll(attendQ(q).mix, ATT[pos].st).best.w}".`);
 (window.__askState ||= []).push(() => `Section 1 (the small model without attention): step ${S1.k + 1} of 7, "${S1.steps[S1.k][0]}", piece ${S1.fr + 1} of ${S1.FR.length}${S1.FR[S1.fr].scene ? `; caption: "${S1.FR[S1.fr].scene.cap}"` : ""}. Section 2 (the same model with attention): step ${S2.k + 1} of 4, "${S2.steps[S2.k][0]}", piece ${S2.fr + 1} of ${S2.FR.length}${S2.FR[S2.fr].scene ? `; caption: "${S2.FR[S2.fr].scene.cap}"` : ""}. Section 3 numbers for the current query: scores ${attendQ(q).sc.map(f).join(", ")}; weights ${attendQ(q).sm.p.map(f).join(", ")}; mix ${vecTxt(attendQ(q).mix)}; with this mix, at each of the five positions of the correct phrase, the decoder would write ${ATT.map(t => scoreAll(attendQ(q).mix, t.st).best.w).join(", ")}.`);
