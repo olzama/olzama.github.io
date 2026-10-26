@@ -210,16 +210,19 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .tables3 td.tag { font-family: var(--font-body); font-size: 0.72rem; color: var(--muted); text-align: left; width: 1%; }
 .tables3 tr.in th, .tables3 tr.in td { background: color-mix(in srgb, var(--blue) 16%, transparent); }
 .tables3 tr.gold th, .tables3 tr.gold td { background: color-mix(in srgb, var(--green) 16%, transparent); }
-.tables3 tr.top th, .tables3 tr.top td { background: color-mix(in srgb, var(--orange) 18%, transparent); }
+.tables3 tr.top th, .tables3 tr.top td { background: color-mix(in srgb, var(--orange) 26%, transparent); }
 .tables3 tr.mixed th, .tables3 tr.mixed td { background: var(--hi); }
 .tables3 tr.now th, .tables3 tr.now td { font-weight: 600; color: var(--fg); }
 .tables3 tr.now th { box-shadow: inset 3px 0 0 var(--orange); }
-.acols { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); }
+.acols { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.45fr); }
 @media (max-width: 900px) { .acols { grid-template-columns: minmax(0, 1fr); } }
 .asticky { position: sticky; top: 8px; }
-.tables3.two { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.tables3.two { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 8px 10px; }
+.tables3.two table.full { grid-column: 1 / -1; }
+.tables3 tr.mixed th, .tables3 tr.mixed td { background: var(--hi); }
 .tables3.two table { width: auto; font-size: 0.72rem; }
 .tables3.two th, .tables3.two td { padding: 1px 4px; }
+.tables3.two td.tag { font-size: 0.68rem; padding-left: 3px; }
 .tables3 small.d.s { color: var(--fg); font-weight: 600; }
 .tables3 td.mixed { background: var(--hi); }
 .tables3.upd { overflow-x: auto; }
@@ -901,15 +904,17 @@ function renderTables(sn, prev, after, q, sg, steps) {
   const fed = steps.slice(0, Math.max(k, 0)).map(x => x.fed);   // mixed in before the current output
   const gRows = GL.map((w, j) => { const i = src.indexOf(w), on = sg.kind === "in" && i === sg.i - 1, cls = (i >= 0 ? "in" : "") + (on ? " now" : "");
     return `<tr class="${cls}"><th>${w}</th>${cells(base.G[j], ref && ref.G[j], up)}<td class="tag">${i >= 0 ? `input ${i + 1}` : ""}</td></tr>`; });
-  const eRows = EN.map((w, j) => { const gi = tgt.indexOf(w), gold = gi >= 0 && trMode === "train", top = k >= 0 && j === steps[k].j, mixed = fed.includes(j) || (sg.kind === "update" && tgt.slice(0, -1).includes(w) && trMode === "train");
+  const oRows = EN.map((w, j) => { const gi = tgt.indexOf(w), gold = gi >= 0 && trMode === "train", top = k >= 0 && j === steps[k].j;
     const cls = (gold ? "gold" : top ? "top" : "") + ((gold && gi === k) || (!gold && top) ? " now" : "");
-    const tag = [gold ? (up ? `toward state ${gi + 1}` : `gold output ${gi + 1}`) : "", top ? "most probable now" : ""].filter(Boolean).join(" · ");
-    return `<tr class="${cls}"><th>${w}</th>${cells(base.O[j], ref && ref.O[j], up)}${cells(base.I[j], ref && ref.I[j], up, mixed ? "mixed" : "")}<td class="tag">${tag}</td></tr>`; });
-  $("trTab").innerHTML = `<table><caption>Galician inputs: vector</caption><tbody>${gRows.join("")}</tbody></table>` +
-    `<table><caption>possible outputs: <span style="white-space:nowrap">vector for the score</span> · <span style="white-space:nowrap">second vector (mixed into the state)</span></caption><tbody>${eRows.join("")}</tbody></table>`;
-  $("trTabLbl").textContent = up ? "The three tables after the update: what changed, cell by cell" : "The three tables as they are now";
+    const tag = gold ? (up ? `→ state ${gi + 1}` : `gold ${gi + 1}`) : "";   // the most probable output: orange row and word (the note under the tables says so)
+    return `<tr class="${cls}"><th${top ? ' style="color:var(--orange)"' : ""}>${w}</th>${cells(base.O[j], ref && ref.O[j], up)}<td class="tag">${tag}</td></tr>`; });
+  const iRows = EN.map((w, j) => { const mi = tgt.indexOf(w), mixed = fed.includes(j) || (up && trMode === "train" && mi >= 0 && mi < tgt.length - 1), on = k > 0 && j === steps[k - 1].fed;
+    return `<tr class="${mixed ? "mixed" : ""}${on ? " now" : ""}"><th>${w}</th>${cells(base.I[j], ref && ref.I[j], up)}</tr>`; });
+  const tbl = (cap, rows, cls = "") => `<table class="${cls}"><caption>${cap}</caption><tbody>${rows.join("")}</tbody></table>`;
+  $("trTab").innerHTML = tbl("Galician inputs: vector", gRows, "full") + tbl(up ? "possible outputs: vector for the score (→ state k: moves toward state k)" : "possible outputs: vector for the score (gold k: gold output k)", oRows) + tbl("possible outputs: second vector (mixed into the state)", iRows);
+  $("trTabLbl").textContent = up ? "The three tables after the update: what changed, cell by cell" : uA === 0 && !ref ? "The three tables at the random start: every number in all three is random" : "The three tables as they are now (all three started random)";
   $("trTabNote").innerHTML = up ? `bold: a changed cell, with the change · rows this pair does not touch stay as they are` :
-    `highlighted: what this pair uses (<span style="color:var(--blue)">inputs</span>, <span class="ok">gold outputs</span>, <span style="color:var(--orange)">most probable now</span>, mixed into the state)${ref ? " · small numbers: what the previous update changed" : " · the random start"}`;
+    `highlighted: what this pair uses (<span style="color:var(--blue)">inputs</span>, <span class="ok">gold outputs</span>, <span style="color:var(--orange)">orange: most probable now</span>, second vectors already mixed into the state)${ref ? " · small numbers: what the previous update changed" : ""}`;
 }
 const sg_ = x => (x >= 0 ? "+" : "−") + Math.abs(x).toFixed(2);
 // the plane before decoding: both tables, and the summary building up input by input
