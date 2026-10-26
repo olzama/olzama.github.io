@@ -166,6 +166,7 @@ table.grid tr.yours th { color: var(--orange); }
 .sw { width: 14px; height: 10px; border-radius: 2px; display: inline-block; }
 .phrases { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; }
 @media (max-width: 520px) { .phrases { grid-template-columns: minmax(0, 1fr); } }
+@media (min-width: 521px) { #trainData { grid-template-rows: repeat(8, auto); grid-auto-flow: column; } }
 .phrase { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: center; font-size: 0.88rem; }
 .phrase .mini { display: grid; grid-template-columns: repeat(2, 14px); gap: 1px; }
 .phrase .mini span { width: 14px; height: 14px; border-radius: 2px; }
@@ -233,6 +234,7 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 #bound #bFormula { min-height: 120px; } #bound #bNote { min-height: 112px; } #bound #bUpdF { min-height: 120px; } #bound #bMixTxt { min-height: 64px; }
 #bVerdict .ok { color: var(--green); font-weight: 600; } #bVerdict .bad { color: var(--neg); font-weight: 600; }
 #trTest .cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } #trTest .cols > .col, #trTest .controls { min-width: 0; } .testcard { width: 100%; }
+.ogrid.one.avgrows .row { font-size: 0.8rem; overflow-x: auto; scrollbar-width: none; } .avgrows .row .cell { cursor: default; padding: 1px 3px; font-size: 0.72rem; flex-shrink: 0; } .avgrows .row .eq { margin-left: 4px; font-family: var(--font-mono); font-weight: 600; }
 .ogrid.one .row { flex-wrap: nowrap; height: 1.9em; overflow: hidden; white-space: nowrap; }
 #pathAll { grid-template-columns: minmax(0, 1fr); }
 .tables3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 16px; align-items: start; }
@@ -365,6 +367,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="train">
     <h2><span class="n">1</span>Training: where a translation model's vectors come from</h2>
     <p class="lead">A neural translation model has two parts. The <b>encoder</b> reads the Galician words into a <b>summary</b>, a vector; the <b>decoder</b> starts from that summary and writes the English words one at a time. Every word in this model is a 2-D vector in one of three tables, and all of them start random: before it can translate, the model has to learn them from examples, by <b>training</b>. Here the 16 pairs are taken one at a time, round after round, and after every pair the tables are updated a little. Section 2 shows the encoder's rule with simple made-up numbers; section 3 takes the trained encoder and decoder apart.</p>
+      <p class="label">The training data: 16 pairs, each an input (a Galician phrase) → its gold output (the right output: its English translation, by a person)</p>
+      <div class="phrases" id="trainData"></div>
       <div class="why" id="trWhy">
         <p class="label" id="trWhyHead"></p>
         <div class="actl" id="trCtl">
@@ -468,9 +472,10 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
             <p class="note" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none;margin:0;height:1.7em;line-height:1.7em"><span class="sw" style="background:var(--orange);width:18px;height:3px;display:inline-block;vertical-align:middle;margin-right:6px"></span><span id="tsAllGhost">click a word: its path from the random start to this round</span></p>
           </div>
           <div class="col">
-            <p class="label">The probability of the gold outputs, over the rounds</p>
+            <p class="label">Average probability of a gold output, over the rounds</p>
             <svg id="tsCurve" viewBox="0 0 440 210" role="img" aria-label="Average probability of the gold outputs: the 15 training pairs and the development pair, over the rounds" style="max-width:460px"></svg>
-            <p class="note" id="tsNote" style="margin:0;min-height:3.4em"></p>
+            <div class="ogrid one avgrows" id="tsAvg"></div>
+          <p class="note" id="tsNote" style="margin:0;min-height:3.4em"></p>
           </div>
         </div>
       </div>
@@ -599,8 +604,9 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
           <p class="note" style="margin:0;min-height:3.4em">one output at a time, the most probable · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span> · click a sentence: its words on the plane</p>
           <p class="label" id="ihbWhyLbl" style="margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
           <div class="formula" id="ihbWhy" style="min-height:8.6em"></div>
-          <p class="label" style="margin-top:8px">The probability of the gold outputs, over the training steps</p>
+          <p class="label" style="margin-top:8px">Average probability of a gold output, over the training steps</p>
           <svg id="ihbCurve" viewBox="0 0 440 210" role="img" aria-label="Average probability of the gold outputs, training sentences and the development sentence, over the training steps" style="max-width:460px"></svg>
+          <div class="ogrid one avgrows" id="ihbAvg"></div>
           <p class="note" id="ihbCurveNote" style="margin:0;min-height:5.2em"></p>
         </div>
         <div class="col">
@@ -622,8 +628,9 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
           <p class="note" style="margin:0;min-height:3.4em">one output at a time, the most probable · <span style="color:var(--green)">the gold output</span> · <span style="color:var(--neg)">a different one</span> · click a sentence: its words on the plane</p>
           <p class="label" id="ihcWhyLbl" style="margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
           <div class="formula" id="ihcWhy" style="min-height:8.6em"></div>
-          <p class="label" style="margin-top:8px">The probability of the gold outputs, over the training steps</p>
+          <p class="label" style="margin-top:8px">Average probability of a gold output, over the training steps</p>
           <svg id="ihcCurve" viewBox="0 0 440 210" role="img" aria-label="Average probability of the gold outputs, training sentences and the development sentence, over the training steps" style="max-width:460px"></svg>
+          <div class="ogrid one avgrows" id="ihcAvg"></div>
           <p class="note" id="ihcCurveNote" style="margin:0;min-height:5.2em"></p>
         </div>
         <div class="col">
@@ -1532,6 +1539,12 @@ renderTrain();
 PZ.attach("trAllSvg", () => renderWhole());
 
 // ---------- part C: training data and development data (the same training on 15 pairs, unha tía miña held out) ----------
+$("trainData").innerHTML = S2S.data.map(([s2, t2], q) => `<div class="phrase"><span><span class="mono" style="color:var(--muted);display:inline-block;min-width:2.2em">${q + 1}.</span><span class="src">${s2.join(" ")}</span> → ${t2.map(w => w === "‹end›" ? `<span style="color:var(--muted)">${w}</span>` : w).join(" ")}</span></div>`).join("");
+// how one point of a curve is made: the dev pair's single-word probabilities averaged; the training pairs' in the same way
+window.avgRows = (devTgt, devP, devName, trAvg, trN, trName) => {
+  const neg = css("--neg"), green = css("--green"), avg = devP.reduce((a, b) => a + b, 0) / devP.length;
+  return `<div class="row">${devTgt.map((w, m) => `<span class="cell"><span class="fl" style="width:${(devP[m] * 100).toFixed(1)}%;background:${neg}"></span><span class="t">${w} ${devP[m].toFixed(2)}</span></span>`).join("")}<span class="eq" style="color:${neg}">÷ ${devP.length} = ${avg.toFixed(2)}</span></div>`
+    + `<div class="row"><span>the same for all ${trN} gold outputs of ${trName}, ÷ ${trN} =</span><span class="eq" style="color:${green}">${trAvg.toFixed(2)}</span></div>`; };
 const HQ = S2S.held, TRAIN15 = S2S.data.map((d, q) => q).filter(q => q !== HQ);
 let RT = null, tsI = 0, tsTimer = null, tsSet = 0, devK = 0;
 function testRun() { if (RT) return RT; let sn = R[0]; RT = [sn]; for (let r = 1; r <= ROUNDS; r++) { for (const q of TRAIN15) sn = upd(sn, q); sn.step = r; RT.push(sn); } return RT; }
@@ -1563,12 +1576,13 @@ function renderTest() {
   [0.25, 0.5, 0.75, 1].forEach(v => { g += `<line x1="${L}" y1="${Y(v)}" x2="${Rr}" y2="${Y(v)}" stroke="${grid}"/>`; });
   [1000, 2000, 3000].forEach(r => { g += `<line x1="${X(r)}" y1="${T}" x2="${X(r)}" y2="${B}" stroke="${grid}"/><text x="${X(r)}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">${r}</text>`; });
   g += `<line class="axis" x1="${L}" y1="${B}" x2="${Rr}" y2="${B}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${B}"/>`;
-  g += `<text x="${L}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">round 0</text><text x="${L - 6}" y="${Y(0) + 4}" text-anchor="end" font-size="10" fill="${muted}">0</text><text x="${L - 6}" y="${Y(0.5) + 4}" text-anchor="end" font-size="10" fill="${muted}">0.5</text><text x="${L - 6}" y="${Y(1) + 4}" text-anchor="end" font-size="10" fill="${muted}">1</text>`;
+  g += `<text x="${L}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">round 0</text><text x="${L - 6}" y="${Y(0) + 4}" text-anchor="end" font-size="10" fill="${muted}">0</text><text x="${L - 6}" y="${Y(0.5) + 4}" text-anchor="end" font-size="10" fill="${muted}">0.5</text><text x="${L - 6}" y="${Y(1) + 4}" text-anchor="end" font-size="10" fill="${muted}">1</text><text x="${L - 30}" y="${T - 11}" font-size="10" fill="${muted}">average probability of a gold output</text>`;
   g += `<polyline points="${smooth(TS_CURVES.tr).map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${green}" stroke-width="2.6" stroke-linejoin="round"/>`;
   g += `<polyline points="${smooth(TS_CURVES.te).map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${neg}" stroke-width="2.6" stroke-linejoin="round"/>`;
   g += `<line x1="${X(tsI)}" y1="${T}" x2="${X(tsI)}" y2="${B}" stroke="${orange}" stroke-width="1.3" stroke-dasharray="4 3"/>`;
   g += `<circle cx="${X(tsI)}" cy="${Y(TS_CURVES.tr[tsI])}" r="4.5" fill="${green}" stroke="var(--panel)" stroke-width="1.5"/><circle cx="${X(tsI)}" cy="${Y(TS_CURVES.te[tsI])}" r="4.5" fill="${neg}" stroke="var(--panel)" stroke-width="1.5"/>`;
   $("tsCurve").innerHTML = g;
+  $("tsAvg").innerHTML = avgRows(tgt, correctProbs(sn, src, tgt), "", TS_CURVES.tr[tsI], TRAIN15.reduce((n, q) => n + S2S.data[q][1].length, 0), "the 15 training pairs");
   $("tsNote").innerHTML = `<span class="ok">green</span>: the 15 training pairs, averaged · <span class="bad">red</span>: the development pair · curves averaged over 31 rounds, the dots are the values now (${TS_CURVES.tr[tsI].toFixed(2)} and ${TS_CURVES.te[tsI].toFixed(2)})`;
 }
 function stopTest() { clearInterval(tsTimer); tsTimer = null; $("tsPlay").textContent = "Play training"; }
@@ -1639,12 +1653,14 @@ function renderT() {
   [0.25, 0.5, 0.75, 1].forEach(v => { c += `<line x1="${L}" y1="${Y(v)}" x2="${Rr}" y2="${Y(v)}" stroke="${grid}"/>`; });
   [500, 1000, 1500, 2000].forEach(s => { const x = L + s / IHAD.steps * (Rr - L); c += `<line x1="${x}" y1="${T}" x2="${x}" y2="${B}" stroke="${grid}"/><text x="${x}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">${s}</text>`; });
   c += `<line class="axis" x1="${L}" y1="${B}" x2="${Rr}" y2="${B}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${B}"/><text x="${L}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">step 0</text>`;
+  c += `<text x="${L - 30}" y="${T - 11}" font-size="10" fill="${muted}">average probability of a gold output</text>`;
   [[0, "0"], [0.5, "0.5"], [1, "1"]].forEach(([v, s]) => { c += `<text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="10" fill="${muted}">${s}</text>`; });
   c += `<polyline points="${sm(CUR4.tr).map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${green}" stroke-width="2.6" stroke-linejoin="round"/>`;
   c += `<polyline points="${sm(CUR4.dev).map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${neg}" stroke-width="2.6" stroke-linejoin="round"/>`;
   c += `<line x1="${X(ti)}" y1="${T}" x2="${X(ti)}" y2="${B}" stroke="${orange}" stroke-width="1.3" stroke-dasharray="4 3"/>`;
   c += `<circle cx="${X(ti)}" cy="${Y(CUR4.tr[ti])}" r="4.5" fill="${green}" stroke="var(--panel)" stroke-width="1.5"/><circle cx="${X(ti)}" cy="${Y(CUR4.dev[ti])}" r="4.5" fill="${neg}" stroke="var(--panel)" stroke-width="1.5"/>`;
   $(PFX + "Curve").innerHTML = c;
+  { const [ds, dt] = IHAD.data[HELD4]; $(PFX + "Avg").innerHTML = avgRows(dt, correctP(sn, ds, dt), "", CUR4.tr[ti], TRAIN4.reduce((n, i) => n + IHAD.data[i][1].length, 0), `the ${TRAIN4.length} training sentences`); }
   $(PFX + "CurveNote").innerHTML = (held ? `<span class="ok">green</span>: the 23 training sentences, averaged · <span class="bad">red</span>: the development sentence, <i>unha tía miña cantaba</i>` : `<span class="ok">green</span>: the 24 training sentences, averaged · <span class="bad">red</span>: <i>unha tía miña cantaba</i>, one of them`) + ` · averaged over 5 recorded steps, the dots are the values now (${CUR4.tr[ti].toFixed(2)} and ${CUR4.dev[ti].toFixed(2)}) · ` + FACT;
   // why: at the first output that differs from the gold output (or, if none does, the closest call), the numbers that decide it
   const ds = decode(sn, src), r2 = x => x.toFixed(2).replace("-", "−"), r2p = x => x < 0 ? `(${r2(x)})` : r2(x);

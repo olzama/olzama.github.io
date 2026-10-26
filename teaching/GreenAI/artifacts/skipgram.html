@@ -86,7 +86,10 @@ html.embed canvas#plane { max-width: min(100%, calc(100vh - 190px)); min-width: 
 .pairlist { display: grid; grid-template-rows: repeat(8, auto); grid-auto-flow: column; gap: 2px 14px; margin-top: 8px; font-family: var(--font-mono); font-size: 0.86rem; }
 .pairlist span { padding: 1px 6px; border-radius: 4px; border: 1px solid transparent; }
 .pairlist .done { color: var(--muted); }
-.pairlist .done::before { content: "✓ "; }
+.pairlist span::before { content: "✓ "; visibility: hidden; }
+.pairlist .done::before, .pairlist .just::before { visibility: visible; }
+.pairkey { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: 0.8rem; color: var(--muted); }
+.pairkey span { font-family: var(--font-mono); padding: 1px 6px; border-radius: 4px; border: 1px solid transparent; }
 .pairlist .next { border-color: var(--accent); }
 .pairlist .just { background: var(--hi); border-color: var(--accent); }
 .corpus .out { background: var(--hi); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
@@ -191,6 +194,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="corpus" id="corpus"></div>
         <p class="label" style="margin-top:12px">The 16 training pairs: input → neighbor to predict</p>
         <div class="pairlist" id="pairlist"></div>
+        <div class="pairkey"><span style="color:var(--muted)">✓ trained on in this pass</span><span style="background:var(--hi);border-color:var(--accent);color:var(--fg)">✓ just trained on</span><span style="border-color:var(--accent);color:var(--fg)">next</span></div>
         <p class="note" style="margin-top:8px">Training goes through these 16 pairs in this order, again and again. Once through all 16 is one <b>pass</b>. <b>Step</b> trains on the next pair. <b>One pass</b> trains on the rest of the current pass. <b>Play</b> keeps going, pass after pass, at the speed chosen next to it.</p>
     </section>
     <section class="panel stage" aria-label="Training controls and vector plane">
