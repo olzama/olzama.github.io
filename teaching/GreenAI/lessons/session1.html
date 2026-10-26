@@ -3285,9 +3285,12 @@ print("they match" if count == expected else "they do not match: check the loop 
 <section class="screen" id="llmmt" data-step="0">
   <header><span class="kind">Translation today</span><h2>What did LLMs bring to machine translation?</h2></header>
   <div class="body">
+    <p class="label">Dedicated MT: one model per language pair</p>
+    <div class="flow"><div class="box">gl → en</div><div class="box">en → gl</div><div class="box">es → en</div><div class="box">pt → gl</div><span class="arr">…</span></div>
+    <p class="label">One LLM: any pair, steered by an instruction</p>
+    <div class="flow"><div class="box o">“Into English, formally:” + any text</div><span class="arr">→</span><div class="box g">one LLM</div><span class="arr">→</span><div class="box">translation</div></div>
     <ul class="points">
-      <li>One model, 100+ languages: no separate model per pair</li>
-      <li>Zero-shot, and <b>controllable</b> by instruction</li>
+      <li>One model, 100+ languages; <b>controllable</b> by instruction</li>
       <li>But: usually far more expensive per translation than a dedicated MT model</li>
     </ul>
   </div>
@@ -3299,9 +3302,11 @@ print("they match" if count == expected else "they do not match: check the loop 
 <section class="screen" id="galician" data-step="0">
   <header><span class="kind">Translation today</span><h2>How well do LLMs actually serve Galician?</h2></header>
   <div class="body">
+    <div class="flow"><div class="box">a general LLM</div><span class="arr">→</span><div class="box o">Galician, mixed with Spanish and Portuguese</div></div>
+    <div class="flow"><div class="box g">a <b>smaller</b>, dedicated model (1.3B), trained on Galician and Portuguese</div><span class="arr">→</span><div class="box g">correct Galician</div></div>
     <ul class="points">
-      <li>In mainstream LLMs, Galician's presence is “almost residual”: close enough to Spanish and Portuguese that models blur the three together</li>
-      <li>Fix: a <b>smaller</b>, dedicated model (1.3B parameters), trained on real Galician and Portuguese text, that beat the giant general model at producing correct Galician</li>
+      <li>In mainstream LLMs, Galician is “almost residual”</li>
+      <li>The smaller dedicated model beat the giant general one</li>
     </ul>
     <p class="src">Source: Gamallo et al., “A Galician-Portuguese Generative Model,” EPIA 2024; Proxecto Nós (USC)</p>
   </div>
