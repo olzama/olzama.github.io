@@ -236,7 +236,7 @@ svg.chain text.small { font-size: 12.5px; fill: var(--muted); }
 .tables3.two td.tag { font-size: 0.68rem; padding-left: 3px; }
 .tables3.two td.p { color: var(--fg); padding-left: 10px; }
 .tables3.two td.arr { text-align: left; padding-left: 2px; font-family: var(--font-body); font-size: 0.72rem; white-space: nowrap; min-width: 3.6em; }
-.tables3.two td.n { min-width: 3.4em; }
+.tables3.two td.n { min-width: 4em; }
 .tables3.two td.p { min-width: 2.6em; }
 .tables3.two td.tag { min-width: 3.4em; }
 .tables3 td.ch { text-decoration: underline dotted var(--muted); text-underline-offset: 3px; }
@@ -322,7 +322,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
             </div>
             <div class="tables3 two" id="trTab"></div>
             <p class="note" id="trTabNote" style="margin:0"></p>
-            <div class="legendrow compact" id="trLeg"><span class="note" style="margin:0;font-size:inherit">colours, in the tables and on the plane:</span><span><span class="sw" style="background:var(--blue)"></span>this pair's inputs</span><span><span class="sw" style="background:var(--green)"></span>its gold outputs</span><span><span class="sw" style="background:var(--orange)"></span><span id="trLegWin">the highest probability now</span></span><span><span class="sw" style="background:var(--hi);border:1px solid var(--line)"></span>second vectors mixed into the state</span><span><span class="sw" style="background:var(--orange);width:22px;height:4px"></span>the summary, then the state (- - - its direction: farther along = higher score)</span><span>faint: before the update · short dash: the direction of a move too small to see (zoom in; the rows pushed away move by η × p, about a tenth of the gold row's move)</span><span>gold k: gold output k · ↑ₖ ↓ₖ: output k's arrows: the gold output up, the highest other down</span></div>
+            <div class="legendrow compact" id="trLeg"><span class="note" style="margin:0;font-size:inherit">colours, in the tables and on the plane:</span><span><span class="sw" style="background:var(--blue)"></span>this pair's inputs</span><span><span class="sw" style="background:var(--green)"></span>its gold outputs</span><span><span class="sw" style="background:var(--orange)"></span><span id="trLegWin">the highest probability now</span></span><span><span class="sw" style="background:var(--hi);border:1px solid var(--line)"></span>second vectors mixed into the state</span><span><span class="sw" style="background:var(--orange);width:22px;height:4px"></span>the summary, then the state (- - - its direction: farther along = higher score)</span><span>faint: before the update · short dash: the direction of a move too small to see (zoom in; the rows pushed away move by η × p, about a tenth of the gold row's move)</span><span>gold k: gold output k · ↑ₖ ↓ₖ: from output k: its gold output up, the highest other down</span></div>
           </div>
           <div class="col">
             <p class="label" id="trEncLbl">Encoding: the inputs are mixed, one by one, into one vector, the summary (new = ½ × old + ½ × vector of the input; section 2 shows the rule)</p>
@@ -924,8 +924,9 @@ function renderTables(sn, prev, after, q, sg, steps, flash, activeK = -1) {
   const nProm = trMode !== "train" ? 0 : up ? tgt.length : k + 1, prom = nProm ? promises(sn, null, q).slice(0, nProm) : [];
   const arrows = j => prom.map((x, m) => { const dir = EN.indexOf(x.gold.w) === j ? "↑" : EN.indexOf(x.other.w) === j ? "↓" : ""; if (!dir) return "";
     const op = up ? (m === activeK ? 1 : m < activeK ? 0.7 : 0.3) : m === k ? 1 : 0.4; return `<span class="${dir === "↑" ? "ok" : "bad"}" style="opacity:${op}${up && m === activeK ? ";font-weight:700" : ""}">${dir}<sub>${m + 1}</sub></span>`; }).join("");
-  const mark = (x, px) => px == null || Math.abs(x - px) < 0.005 ? "" : up ? " a" : " ch";   // bold: changed in this update; dotted: changed by the previous one
-  const cells = (v, pv, strong, cls = "") => `<td class="n ${cls}${mark(v[0], pv && pv[0])}">${r2(v[0])}</td><td class="n ${cls}${mark(v[1], pv && pv[1])}">${r2(v[1])}</td>`;
+  const mark = (x, px) => px == null || Math.abs(x - px) < 0.0005 ? "" : up ? " a" : " ch";   // bold: changed in this update; dotted: changed by the previous one
+  const r3 = x => x.toFixed(3).replace("-", "−");   // three decimals: the small moves (η × p × state) are visible
+  const cells = (v, pv, strong, cls = "") => `<td class="n ${cls}${mark(v[0], pv && pv[0])}">${r3(v[0])}</td><td class="n ${cls}${mark(v[1], pv && pv[1])}">${r3(v[1])}</td>`;
   const base = up ? after : sn, ref = up ? sn : k < 0 ? prev : null;   // at the update: new numbers, change from before; at the first stages: what the previous update changed; at the outputs: the probabilities instead
   const pk = k >= 0 ? steps[k].p : null, other = pk && trMode === "train" ? [...pk.keys()].filter(j => j !== EN.indexOf(tgt[k])).sort((a, b) => pk[b] - pk[a])[0] : -1;
   const fed = steps.slice(0, Math.max(k, 0)).map(x => x.fed);   // mixed in before the current output
@@ -940,7 +941,7 @@ function renderTables(sn, prev, after, q, sg, steps, flash, activeK = -1) {
     return `<tr class="${mixed ? "mixed" : ""}${on ? " now" : ""}${fl("I", j)}"><th>${w}</th>${cells(base.I[j], ref && ref.I[j], up)}</tr>`; });
   const tbl = (cap, rows, cls = "") => `<table class="${cls}"><caption>${cap}</caption><tbody>${rows.join("")}</tbody></table>`;
   $("trTabG").innerHTML = tbl("Galician inputs: vector", gRows);
-  $("trTab").innerHTML = tbl("possible outputs: vector for the score · probability now · ↑ₖ ↓ₖ: the arrows of output k", oRows) + tbl("possible outputs: second vector (mixed into the state)", iRows);
+  $("trTab").innerHTML = tbl("possible outputs: vector for the score · probability now · ↑ₖ ↓ₖ: from output k", oRows) + tbl("possible outputs: second vector (mixed into the state)", iRows);
   $("trTabLbl").textContent = up ? `The three tables, being updated: outputs 1–${activeK + 1} of ${tgt.length} carried out` : uA === 0 && !ref ? "The three tables: every number in all three is random at the start" : "The three tables as they are now";
   $("trTabNote").innerHTML = up ? "bold: changed in this update so far" : ref ? `dotted: changed by the previous update` : "";
 }
@@ -997,7 +998,7 @@ function renderUpdChain(snB, q, pk, g, pr, part) {
   c += arr("M456 368 L456 384", "var(--blue)", "6 4");
   c += `<g opacity="${!part || part === "rest" ? 1 : 0.3}">` + box(10, 388, 700, 36, "var(--blue)", 0.08) + txt(360, 411, `the input rows (${src.join(", ")})${mixed ? ` and the second vectors mixed in before (${mixed})` : ""} move too: so that state ${pk + 1} itself moves toward “${tgt[pk]}”`, "small") + `</g>`;
   c += arr("M40 386 L40 94", "var(--orange)");
-  c += txt(56, 240, pk < K - 1 ? `next: output ${pk + 2}'s arrows →` : `all ${K} outputs done →`, "small", "start", muted);
+  c += txt(56, 240, pk < K - 1 ? `next: from output ${pk + 2} →` : `all ${K} outputs done →`, "small", "start", muted);
   $("trUpdChain").innerHTML = c;
 }
 function drawUpdatePlane(snB, snA, q, Z, activeK) {
@@ -1078,8 +1079,8 @@ function renderA() {
   const nextQ = (q + 1) % NP;
   $("trStageNote").innerHTML = sg.kind === "tables" ? `Next: the encoder reads input 1, <i>${src[0]}</i> (its row is highlighted).` :
     sg.kind === "in" ? (sg.i < n ? `Input ${sg.i} read: summary = ½ × old + ½ × row <i>${src[sg.i - 1]}</i>. Next: input ${sg.i + 1}, <i>${src[sg.i]}</i>.` : `All inputs read: the summary is the decoder's state 1. Next: output 1.`) :
-    sg.kind === "out" ? (sg.k < steps.length - 1 ? `Next: output ${sg.k + 2}${trMode === "train" ? " (the tables do not change yet: the update comes after the last output)" : ""}.` : trMode === "train" ? `Next: the update of the tables, one output's arrows at a time.` : `Next: done (no update when translating).`) :
-    sg.kind === "push" ? (() => { const gs2 = groupsFor(q, sg.k, pushesOf(snB, q).pr); return subIdx < gs2.length - 1 ? `Next: ${gs2[subIdx + 1].name}.` : sg.k < K - 1 ? `Next: the arrows of output ${sg.k + 2}.` : `The update is complete. Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with these updated tables${nextQ === 0 ? " (a new round begins)" : ""}.`; })() :
+    sg.kind === "out" ? (sg.k < steps.length - 1 ? `Next: output ${sg.k + 2}${trMode === "train" ? " (the tables do not change yet: the update comes after the last output)" : ""}.` : trMode === "train" ? `Next: the update of the tables, one output at a time.` : `Next: done (no update when translating).`) :
+    sg.kind === "push" ? (() => { const gs2 = groupsFor(q, sg.k, pushesOf(snB, q).pr); return subIdx < gs2.length - 1 ? `Next: ${gs2[subIdx + 1].name}.` : sg.k < K - 1 ? `Next: the update from output ${sg.k + 2}.` : `The update is complete. Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with these updated tables${nextQ === 0 ? " (a new round begins)" : ""}.`; })() :
     `Translating changes nothing in the tables. Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with the same tables.`;
   $("trainCurveLbl").innerHTML = `<i>${src.join(" ")}</i> over the rounds: the probability of the gold output at each output`;
   renderCurve(q, src, tgt, sg.kind === "out" && trMode === "train" ? sg.k : -1);
