@@ -144,6 +144,7 @@ svg.v3 .cv { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; } svg
 svg.v3 .pt.faint { opacity: 0.3; }
 svg.v3 .pl { font-size: 12px; fill: var(--fg); } svg.v3 .pl.mix, svg.v3 .pl.sum { fill: var(--orange); } svg.v3 .pl.enc { fill: var(--blue); }
 .pbars { min-height: 118px; }
+table.cmp7 td:first-child { color: var(--muted); white-space: nowrap; } table.cmp7 td { vertical-align: top; }
 /* section 6: from section 2's weights to the real model's grids */
 .hbcols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 8px; }
 @media (max-width: 860px) { .hbcols { grid-template-columns: minmax(0, 1fr); } }
@@ -701,22 +702,18 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <p class="lead">Section 6 looked at the decoder's attention: each English piece looks at the Galician pieces. The same model's encoder uses attention inside the Galician sentence: every Galician piece looks at every Galician piece, itself included. This is <b>self-attention</b>, and it takes the place of the chain of sections 1 to 5.</p>
     <div class="heatwrap"><svg class="selfdg" viewBox="0 0 560 210" role="img" aria-label="Above, a chain: each vector is computed from the one before it. Below, every piece is linked to every other piece."><defs><marker id="selfA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="0" y="22" class="sh">sections 1 to 5: a chain</text><text x="60" y="58" text-anchor="middle" class="sw">Unha</text><text x="144" y="58" text-anchor="middle" class="sw">tía</text><path d="M84,53 H120" class="ch" marker-end="url(#selfA)"/><text x="228" y="58" text-anchor="middle" class="sw">miña</text><path d="M168,53 H204" class="ch" marker-end="url(#selfA)"/><text x="312" y="58" text-anchor="middle" class="sw">,</text><path d="M252,53 H288" class="ch" marker-end="url(#selfA)"/><text x="396" y="58" text-anchor="middle" class="sw">que</text><path d="M336,53 H372" class="ch" marker-end="url(#selfA)"/><text x="480" y="58" text-anchor="middle" class="sw">todo</text><path d="M420,53 H456" class="ch" marker-end="url(#selfA)"/><text x="516" y="58" class="sh">…</text><text x="0" y="96" class="sh">this model: every piece looks at every piece, in every layer</text><path d="M60,184 Q102.0,140 144,184" class="arc"/><path d="M60,184 Q144.0,120 228,184" class="arc hl"/><path d="M60,184 Q186.0,100 312,184" class="arc"/><path d="M60,184 Q228.0,80 396,184" class="arc"/><path d="M60,184 Q270.0,60 480,184" class="arc"/><path d="M144,184 Q186.0,140 228,184" class="arc hl"/><path d="M144,184 Q228.0,120 312,184" class="arc"/><path d="M144,184 Q270.0,100 396,184" class="arc"/><path d="M144,184 Q312.0,80 480,184" class="arc"/><path d="M228,184 Q270.0,140 312,184" class="arc hl"/><path d="M228,184 Q312.0,120 396,184" class="arc hl"/><path d="M228,184 Q354.0,100 480,184" class="arc hl"/><path d="M312,184 Q354.0,140 396,184" class="arc"/><path d="M312,184 Q396.0,120 480,184" class="arc"/><path d="M396,184 Q438.0,140 480,184" class="arc"/><text x="60" y="200" text-anchor="middle" class="sw">Unha</text><text x="144" y="200" text-anchor="middle" class="sw">tía</text><text x="228" y="200" text-anchor="middle" class="sw hl">miña</text><text x="312" y="200" text-anchor="middle" class="sw">,</text><text x="396" y="200" text-anchor="middle" class="sw">que</text><text x="480" y="200" text-anchor="middle" class="sw">todo</text><text x="516" y="200" class="sh">…</text></svg></div>
     <p class="note">Above, each vector waits for the one before it. Below, no vector waits: in every layer, each piece takes what it needs from all the others at once. The orange arcs are the links of <i>miña</i>; each carries a weight, as in section 6. Order is kept: at the start, each piece's vector gets its position added to it.</p>
-    <div class="cmpflow">
-      <p class="label">the same as section 6</p>
-      <div class="flow"><span class="word">query · each key</span><span class="op">→</span><span class="word">softmax: weights</span><span class="op">→</span><span class="word out">the mix</span><span class="word">6 layers × 8 heads</span><span class="word">three learned tables per head</span></div>
-      <p class="label">new here</p>
-      <div class="flow"><span class="word">queries, keys and values all from the Galician pieces</span><span class="word">every piece gets a mix</span><span class="word">the grid is square</span><span class="word">the 8 heads are combined:</span></div>
-    </div>
+    <p class="label">Section 6's attention and self-attention, side by side</p>
+    <div class="heatwrap"><table class="ty cmp7"><thead><tr><th></th><th>the decoder's attention (section 6)</th><th>self-attention (this section)</th></tr></thead><tbody>
+      <tr><td>rows: who looks</td><td>each English piece the decoder writes</td><td>each Galician piece</td></tr>
+      <tr><td>columns: looked at</td><td>the Galician pieces</td><td>the Galician pieces, itself included</td></tr>
+      <tr><td>the grid</td><td>English × Galician</td><td><b>square</b>: Galician × Galician</td></tr>
+      <tr><td>queries come from</td><td>the decoder</td><td>each Galician piece</td></tr>
+      <tr><td>keys and values come from</td><td>the Galician pieces</td><td>the Galician pieces</td></tr>
+      <tr><td>the mix</td><td>one per English piece, used to write it</td><td>one per Galician piece: it changes that piece's own vector</td></tr>
+      <tr><td>heads and layers</td><td>8 heads × 6 layers, each head with its own three learned tables</td><td>the same</td></tr>
+    </tbody></table></div>
+    <p class="label">How one layer combines its 8 heads, for one piece</p>
     <div class="flow"><span class="word">head 1: a mix for <i>miña</i></span><span class="word">head 2: a mix for <i>miña</i></span><span class="op">…</span><span class="word">head 8: a mix for <i>miña</i></span><span class="op">→</span><span class="word">end to end, × one learned table</span><span class="op">→</span><span class="word">+ the vector of <i>miña</i></span><span class="op">→</span><span class="word out">the vector of <i>miña</i> in the next layer</span></div>
-    <details class="how">
-      <summary>What is new, in more words</summary>
-      <ul class="tries">
-        <li><b>Queries, keys and values all come from the Galician pieces.</b> In section 6, the queries came from the decoder's English pieces and the keys from the encoder's Galician pieces. Here each Galician piece's vector gives a query, a key and a value.</li>
-        <li><b>Every Galician piece gets a mix.</b> The decoder made one mix per English piece it wrote; here each Galician piece gets its own mix, and that mix changes the piece's own vector.</li>
-        <li><b>The grid is square.</b> One row per piece that looks, one column per piece looked at, both Galician.</li>
-        <li><b>The heads are combined.</b> Each of the 8 heads gives each piece its own mix. The 8 mixes are put end to end and multiplied by one more table of learned values, which turns them into one vector. That vector is added to the piece's vector, and after one more learned step, the result is the piece's vector for the next layer.</li>
-      </ul>
-    </details>
     <p class="label">The 8 heads of one layer: one square grid each, rows look, columns are looked at</p>
     <p class="note">A dark line just below or above the diagonal: each piece looks at the piece just before it or just after it.</p>
     <div class="controls stick">
