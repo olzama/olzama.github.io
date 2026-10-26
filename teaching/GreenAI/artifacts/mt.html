@@ -64,14 +64,15 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 20px 40px;
 }
-.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 22px; }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 48px; }
 header h1 { font-family: var(--font-display); font-weight: 400; font-size: 1.9rem; margin: 0; text-wrap: balance; }
 header p { margin: 4px 0 0; color: var(--muted); max-width: 72ch; }
 .gl { font-style: italic; color: var(--fg); }
 .gl b { color: var(--blue); font-weight: 400; }
-section.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+section.panel { background: var(--panel); border: 1px solid var(--line); border-top: 5px solid var(--blue); border-radius: 10px; padding: 20px 20px 22px; display: grid; gap: 14px; min-width: 0; box-shadow: 0 3px 14px rgba(0,0,0,0.07); }
 h2 { font-family: var(--font-display); font-weight: 400; font-size: 1.35rem; margin: 0; text-wrap: balance; }
-h2 .n { color: var(--muted); font-family: var(--font-mono); font-size: 0.9rem; margin-right: 10px; }
+h2 .n { display: inline-grid; place-items: center; width: 1.8em; height: 1.8em; border-radius: 50%; background: var(--blue); color: var(--panel); font-family: var(--font-mono); font-size: 0.95rem; margin-right: 12px; vertical-align: 0.15em; }
+section.panel > h2 { font-size: 1.6rem; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
 .lead { margin: 0; max-width: 75ch; }
 .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
 @media (max-width: 860px) { .cols { grid-template-columns: minmax(0, 1fr); } }
@@ -329,12 +330,12 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 <div class="wrap">
   <header>
     <h1>Neural Translation, Step by Step</h1>
-    <p>How a neural model translates without attention: where its vectors come from, how the encoder reads a Galician sentence into one summary, and how the decoder writes English from it. The running example is the start of a sentence from the novel <i>Speechwriter</i>: <span class="gl">Unha <b>tía miña</b>, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»</span>.</p>
+    <p>How a neural model translates: where its vectors come from, how the encoder reads a Galician sentence into one summary, and how the decoder writes English from it. The running example is the start of a sentence from the novel <i>Speechwriter</i>: <span class="gl">Unha <b>tía miña</b>, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»</span>.</p>
   </header>
 
   <!-- 1 -->
   <section class="panel" id="train">
-    <h2><span class="n">1</span>Without attention: where a translation model's vectors come from</h2>
+    <h2><span class="n">1</span>Training: where a translation model's vectors come from</h2>
     <p class="lead">A neural translation model has two parts. The <b>encoder</b> reads the Galician words into a <b>summary</b>, a vector; the <b>decoder</b> starts from that summary and writes the English words one at a time. Every word in this model is a 2-D vector in one of three tables, and all of them start random: before it can translate, the model has to learn them from examples, by <b>training</b>. Here the 16 pairs are taken one at a time, round after round, and after every pair the tables are updated a little. Section 2 shows the encoder's rule with simple made-up numbers; section 3 takes the trained encoder and decoder apart.</p>
       <div class="why" id="trWhy">
         <p class="label" id="trWhyHead"></p>
@@ -419,7 +420,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       </div>
       <div class="why" id="trTest">
         <p class="label">C. Training data and test data: the same training again, with one pair held out</p>
-        <p class="note" style="max-width:none;margin:0">Same random start, same rule, same 3000 rounds; only <i>unha tía miña → an aunt of mine</i> is left out. The 15 pairs trained on are the <b>training data</b>. The held-out pair is <b>test data</b>: the model never sees it in training, and we ask it afterwards. Parts A and B trained on all 16, this pair included. A failure here is not the summary losing words: in 3 words, tía is still a quarter of it. It is a model that learned the pairs it was shown, not how to combine familiar words anew. The other weakness, words fading from the summary of a long sentence, is section 2's, and the one attention fixes (attention page).</p>
+        <p class="note" style="max-width:none;margin:0">Same random start, same rule, same 3000 rounds; only <i>unha tía miña → an aunt of mine</i> is left out. The 15 pairs trained on are the <b>training data</b>. The held-out pair is <b>test data</b>: the model never sees it in training, and we ask it afterwards. Parts A and B trained on all 16, this pair included. A failure here is not the summary losing words: in 3 words, tía is still a quarter of it. It is a model that learned the pairs it was shown, not how to combine familiar words anew. The other weakness, words fading from the summary of a long sentence, is section 2's; the next page takes it up.</p>
         <div class="actl"><div class="controls"><span class="label" style="margin-right:4px">Training on 15</span><button id="tsBack">← 1 round</button><button class="primary" id="tsNext">Train 1 round →</button><button id="tsPlay">Play training</button><button id="tsReset" title="Back to the random start">↺ start</button><input type="range" id="tsStep" min="0" max="3000" step="1" value="0" aria-label="Rounds of training on 15 pairs" style="flex:1 1 140px; accent-color: var(--blue)"><span class="mono" id="tsVal" style="white-space:nowrap"></span></div></div>
         <div class="cols">
           <div class="col">
@@ -478,7 +479,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="bound">
     <h2><span class="n">3</span>Inference, part 2: the decoder writes English, word by word</h2>
     <p class="label">Still inference: the model trained in section 1 (after its 3000 rounds), translating. Nothing changes in its tables here.</p>
-    <p class="note" style="max-width:none;margin:0">This model, trained on all 16 short phrases, translates all of them right: in 3 words, the first word still makes up an eighth of the summary and the second a quarter. It can fail in two ways: on a phrase it never saw (section 1, part C: “an aunt ‹end›”), and on long sentences, where early words fade from the summary to almost nothing (section 2). The <a href="attention.html">attention page</a> shows the second with <b>other models</b>, not this one: two models with 8-dimensional vectors, trained on thousands of variants of our whole sentence, one without attention (it writes “A friend of mine, …”) and one with it (right).</p>
+    <p class="note" style="max-width:none;margin:0">This model, trained on all 16 short phrases, translates all of them right: in 3 words, the first word still makes up an eighth of the summary and the second a quarter. It can fail in two ways: on a phrase it never saw (section 1, part C: “an aunt ‹end›”), and on long sentences, where early words fade from the summary to almost nothing (section 2). The <a href="attention.html">next page</a> shows the second with <b>other models</b>, not this one: two models with 8-dimensional vectors, trained on thousands of variants of our whole sentence. One works like this page's model and writes “A friend of mine, …”; the other adds the remedy that page introduces, attention, and gets it right.</p>
     <p class="lead">The model trained in section 1, at work. The encoder reads the phrase into a summary, and Galician and English words share one plane. The <b>decoder</b> then writes English one word at a time. It keeps a <b>state</b>, a vector, and its first state is the summary. At every step it chooses a word the way skip-gram predicted neighbors, then folds that word into its state with the same ½ + ½ rule the encoder used.</p>
 <div class="actl">
     <div class="controls">
@@ -518,7 +519,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <p class="note" style="color:var(--fg)">summary = ⅛ <i>unha</i> + ¼ <i>tía</i> + ½ <i>miña</i>, so every English word's score at position 1 = the part from ⅛ <i>unha</i> + the part from ¼ <i>tía</i> + ½ <i>miña</i>:</p>
       <table class="grid" style="justify-self:start"><thead><tr><th>English word</th><th>score from ¼ tía + ½ miña</th><th>score from ⅛ unha</th><th>score</th></tr></thead><tbody><tr><th><b>an</b></th><td>30.1</td><td>58.0</td><td><b>88.1</b></td></tr><tr><th>of</th><td>45.2</td><td>36.5</td><td>81.8</td></tr><tr><th>a</th><td>3.7</td><td>73.7</td><td>77.4</td></tr><tr><th>friend</th><td>−5.9</td><td>69.6</td><td>63.7</td></tr><tr><th>‹end›</th><td>49.1</td><td>3.2</td><td>52.3</td></tr><tr><th>mine</th><td>43.1</td><td>−4.8</td><td>38.3</td></tr></tbody></table>
       <p class="note" style="color:var(--fg)">Without the part from <i>unha</i>, ‹end› would score highest: the model would write nothing. With it, “an” wins.</p>
-      <p class="note" style="color:var(--fg)">In long sentences the first words fade much further: in section 2's 35-piece sentence, <i>tía</i> is 0.5<sup>34</sup> of the summary. Sutskever and colleagues (2014) fed the sentence in <b>reverse</b>, so its first words are freshest when the decoder starts; their BLEU score (0–100, overlap with translations by people) rose from 25.9 to 30.6. Attention removes the need for the trick: the decoder looks back at every word (<a href="attention.html">attention page</a>).</p>
+      <p class="note" style="color:var(--fg)">In long sentences the first words fade much further: in section 2's 35-piece sentence, <i>tía</i> is 0.5<sup>34</sup> of the summary. Sutskever and colleagues (2014) fed the sentence in <b>reverse</b>, so its first words are freshest when the decoder starts; their BLEU score (0–100, overlap with translations by people) rose from 25.9 to 30.6. The <a href="attention.html">next page</a> introduces a remedy that removes the need for the trick: the decoder looks back at every word.</p>
     </div>
     <div class="callout">
       <p class="label">d. Is “an aunt of mine” the best translation?</p>
@@ -530,7 +531,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <!-- 4 -->
   <section class="panel" id="ihad">
-    <h2><span class="n">4</span>Without attention: when the training data says “I had an aunt who…”</h2>
+    <h2><span class="n">4</span>When the training data says “I had an aunt who…”</h2>
     <p class="lead">The decoder can write any English word it knows, also words that have no Galician counterpart, such as “I had”. What it writes comes from its training data. This second small model is trained on sentences whose English follows the <a href="ngram.html#ofmine">book counts</a>: “a friend of mine” and “a colleague of mine” stay, but “an aunt of mine” and “a brother of mine” never appear. For aunts and brothers, the English is rebuilt the way a translator would.</p>
     <p class="label">The training data (ground truth), shown with <i>cantaba</i>; the same 8 patterns also appear with <i>bailaba</i> (danced) and <i>ría</i> (laughed)</p>
     <div class="phrases" id="ihData"></div>
@@ -628,7 +629,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   </section>
 
   <footer>
-    <p>Section 2 uses made-up 2-D vectors and the simplified update rule described there. Sections 1 and 3 use a toy model with the same rules, trained by <code>mt_s2s_train.py</code>; section 4 a second one, trained by <code>mt_ihad_train.py</code>. Section 5 scores the openings with <code>Helsinki-NLP/opus-mt-gl-en</code> (<code>mt_score_alternatives.py</code>). The <a href="attention.html">attention page</a> continues from here.</p>
+    <p>Section 2 uses made-up 2-D vectors and the simplified update rule described there. Sections 1 and 3 use a toy model with the same rules, trained by <code>mt_s2s_train.py</code>; section 4 a second one, trained by <code>mt_ihad_train.py</code>. Section 5 scores the openings with <code>Helsinki-NLP/opus-mt-gl-en</code> (<code>mt_score_alternatives.py</code>). The <a href="attention.html">next page</a>, on attention, continues from here.</p>
     <p class="label" style="margin-top:14px">References</p>
     <ul class="refs">
       <li>Sutskever, I., Vinyals, O., &amp; Le, Q. V. (2014). Sequence to sequence learning with neural networks. <i>Advances in Neural Information Processing Systems 27</i>. <a href="https://arxiv.org/abs/1409.3215">arxiv.org/abs/1409.3215</a></li>
