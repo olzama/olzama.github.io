@@ -876,7 +876,7 @@ function translate(sn, src) {
   }
   return { path, summary: h, steps };
 }
-let ti = 0, uA = 0, stIdx = 0, trTimer = null, trMode = "train";   // stIdx: the stage of the cycle in part A   // ti: the round of part B; uA: pairs seen so far in part A (the cycle's position)
+let ti = 0, uA = 0, stIdx = 0, subIdx = 0, trTimer = null, trMode = "train";   // stIdx: the stage of the cycle in part A   // ti: the round of part B; uA: pairs seen so far in part A (the cycle's position)
 const CURVES = {}, RIGHTS = [];
 $("pathStep").max = ROUNDS; $("aStep").max = NU - 1;
 // the probability the model gives each gold output, with the gold outputs before it mixed in (as in training)
@@ -972,7 +972,8 @@ function promises(snB, snA, q) {
     return { k, gold: { w, b: pB[k][gj], a: pA && pA[k][gj] }, other: { w: EN[oj], b: pB[k][oj], a: pA && pA[k][oj] } }; });
 }
 // the update for one output, drawn like the decoding chain: the state, the rule with the two named rows, every row's move as a bar along the state, the other tables' rows
-function renderUpdChain(snB, q, pk, g, pr) {
+function renderUpdChain(snB, q, pk, g, pr, part) {
+  const op = x => `<g opacity="${!part || part === x ? 1 : 0.3}">`;
   const [src, tgt] = S2S.data[q], K = tgt.length, p = g.ps[pk], st = g.sts[pk], gj = EN.indexOf(tgt[pk]), oj = EN.indexOf(pr[pk].other.w);
   const green = css("--green"), neg = css("--neg"), muted = css("--muted"), r2 = x => x.toFixed(2).replace("-", "−"), r3 = x => (x >= 0 ? "+" : "−") + Math.abs(x).toFixed(3);
   const box = (x, y, wd, ht, col, op) => `<rect x="${x}" y="${y}" width="${wd}" height="${ht}" rx="9" fill="${col}" fill-opacity="${op}" stroke="${col}" stroke-width="1.8"/>`;
@@ -984,17 +985,17 @@ function renderUpdChain(snB, q, pk, g, pr) {
   c += box(10, 20, 160, 70, "var(--orange)", 0.12) + txt(90, 50, `state ${pk + 1}`) + txt(90, 76, `(${r2(st[0])}, ${r2(st[1])})`, "mono");
   c += arr("M172 55 L198 55");
   c += box(202, 20, 508, 110, "var(--line)", 0.35) + txt(456, 44, `gradient descent: each output row moves along state ${pk + 1}`) + txt(456, 64, `gold output: toward it, by η × (1 − p) · every other row: away, by η × p · p = its probability, η = ${LR}`, "small");
-  c += txt(456, 90, line(gj), "mono", "middle", green) + txt(456, 112, line(oj), "mono", "middle", neg);
+  c += op("gold") + txt(456, 90, line(gj), "mono", "middle", green) + `</g>` + op("other") + txt(456, 112, line(oj), "mono", "middle", neg) + `</g>`;
   c += arr("M456 132 L456 150");
   c += box(202, 154, 508, 212, "var(--line)", 0.35) + txt(456, 174, `each row's multiple of state ${pk + 1}: toward (green) or away (red), by η × probability`, "small");
   const mid = 440, sc = 150 / LR;
   c += `<line x1="${mid}" y1="184" x2="${mid}" y2="364" stroke="${muted}" stroke-opacity="0.5"/>`;
   EN.forEach((j_, j) => { const y = 192 + 14 * j, cf = coef(j), gold = j === gj, other = j === oj;
-    c += txt(300, y + 4, EN[j], "mono", "end", gold ? green : other ? neg : muted) + `<rect x="${cf >= 0 ? mid : mid + cf * sc}" y="${y - 5}" width="${Math.abs(cf * sc).toFixed(1)}" height="10" rx="2" fill="${cf >= 0 ? green : neg}" fill-opacity="${gold || other ? 0.9 : 0.45}"/>` + txt(600, y + 4, (cf >= 0 ? "+" : "−") + Math.abs(cf).toFixed(3), "mono small", "start", gold ? green : other ? neg : muted);
-    if (gold) c += txt(660, y + 5, `↑${pk + 1}`, "", "middle", green); if (other) c += txt(660, y + 5, `↓${pk + 1}`, "", "middle", neg); });
+    c += op(gold ? "gold" : other ? "other" : "rest") + txt(300, y + 4, EN[j], "mono", "end", gold ? green : other ? neg : muted) + `<rect x="${cf >= 0 ? mid : mid + cf * sc}" y="${y - 5}" width="${Math.abs(cf * sc).toFixed(1)}" height="10" rx="2" fill="${cf >= 0 ? green : neg}" fill-opacity="${gold || other ? 0.9 : 0.45}"/>` + txt(600, y + 4, (cf >= 0 ? "+" : "−") + Math.abs(cf).toFixed(3), "mono small", "start", gold ? green : other ? neg : muted);
+    if (gold) c += txt(660, y + 5, `↑${pk + 1}`, "", "middle", green); if (other) c += txt(660, y + 5, `↓${pk + 1}`, "", "middle", neg); c += `</g>`; });
   const mixed = tgt.slice(0, pk).join(", ");
   c += arr("M456 368 L456 384", "var(--blue)", "6 4");
-  c += box(10, 388, 700, 36, "var(--blue)", 0.08) + txt(360, 411, `the input rows (${src.join(", ")})${mixed ? ` and the second vectors mixed in before (${mixed})` : ""} move too: so that state ${pk + 1} itself moves toward “${tgt[pk]}” (bold in the tables)`, "small");
+  c += `<g opacity="${!part || part === "rest" ? 1 : 0.3}">` + box(10, 388, 700, 36, "var(--blue)", 0.08) + txt(360, 411, `the input rows (${src.join(", ")})${mixed ? ` and the second vectors mixed in before (${mixed})` : ""} move too: so that state ${pk + 1} itself moves toward “${tgt[pk]}”`, "small") + `</g>`;
   c += arr("M40 386 L40 94", "var(--orange)");
   c += txt(56, 240, pk < K - 1 ? `next: output ${pk + 2}'s arrows →` : `all ${K} outputs done →`, "small", "start", muted);
   $("trUpdChain").innerHTML = c;
@@ -1029,6 +1030,16 @@ function pushesOf(snB, q) {
     f.add("O" + EN.indexOf(pr[k].gold.w)); f.add("O" + EN.indexOf(pr[k].other.w)); return f; });
   return { parts, cum, moved, pr };
 }
+// one update step, split into row groups watched one at a time: the gold row, the highest other, the other output rows, the input rows, the second vectors mixed in
+function groupsFor(q, k, pr) {
+  const [src, tgt] = S2S.data[q], gj = EN.indexOf(pr[k].gold.w), oj = EN.indexOf(pr[k].other.w), gs = [];
+  gs.push({ name: `the gold output's row, “${pr[k].gold.w}”, toward state ${k + 1}`, rows: new Set(["O" + gj]), part: "gold" });
+  gs.push({ name: `the highest other's row, “${pr[k].other.w}”, away from state ${k + 1}`, rows: new Set(["O" + oj]), part: "other" });
+  const fed = tgt.slice(0, k), rest = new Set([...EN.map((w, j) => "O" + j).filter(x => x !== "O" + gj && x !== "O" + oj), ...src.map(w => "G" + GL.indexOf(w)), ...fed.map(w => "I" + EN.indexOf(w))]);
+  gs.push({ name: `the rest, together: every other output row a little away from state ${k + 1}, by η × its probability (the probabilities add up to 1: raising “${pr[k].gold.w}” lowers all the others), and the input rows${fed.length ? " and the second vectors mixed in" : ""} so that state ${k + 1} itself moves toward “${pr[k].gold.w}”`, rows: rest, part: "rest" });
+  return gs;
+}
+const applyRows = (from, to, rows) => { const m = (T, A, B) => A.map((v, j) => rows.has(T + j) ? B[j] : v); return { G: m("G", from.G, to.G), O: m("O", from.O, to.O), I: m("I", from.I, to.I) }; };
 // the numbers count from before to after over a moment, so that the change is seen as a move
 function tween(from, to, ms, draw) { const tok = ++animTok, t0 = performance.now();
   const timer = setInterval(() => { if (tok !== animTok) { clearInterval(timer); return; } const f = Math.min(1, (performance.now() - t0) / ms); draw(lerpSn(from, to, f), f); if (f >= 1) clearInterval(timer); }, 40); }
@@ -1040,34 +1051,35 @@ function renderA() {
   $("aBack").disabled = uA <= 0 && stIdx <= 0; $("aNext").disabled = uA >= NU - 1 && stIdx >= st.length - 1;
   $("aStepVal").textContent = `· round ${r + 1} of ${ROUNDS} · ${uA} pair${uA === 1 ? "" : "s"} seen so far${uA === 0 ? " (the random start)" : ""} · 16 pairs = 1 round`;
   $("trStages").innerHTML = st.map((x, i) => `<button class="${i < stIdx ? "done" : i === stIdx ? "on" : "todo"}" data-i="${i}">${x.lbl}</button>`).join(`<span class="ar">→</span>`) + `<span class="ar">→ next pair</span>`;
-  $("trStages").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { stIdx = +b.dataset.i; renderA(); }));
+  $("trStages").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { stIdx = +b.dataset.i; subIdx = 0; renderA(); }));
   const k = sg.kind === "out" ? sg.k : sg.kind === "push" || sg.kind === "done" ? 99 : 0, prevQ = (uA + NP - 1) % NP, Z = zFor(snB) / planeZoom, K = tgt.length;
   $("zVal").textContent = `×${planeZoom}`; $("zOut").disabled = planeZoom <= 1; $("zIn").disabled = planeZoom >= 8;
   window.mtWhy({ sn: snB, prev: snP, prevLabel: snP ? `before the previous update (pair ${prevQ + 1}, ${S2S.data[prevQ][0].join(" ")})` : "", GL, EN, src, tgt, pre: "tr", pos: k, mode: trMode, Z, inputs: true, encUpTo: sg.kind === "tables" ? 0 : sg.kind === "in" ? sg.i : n, updateRef: "the update after this pair (one stage per output)",
     head: `A. The training cycle, one pair at a time: round ${r + 1}, pair ${q + 1} of 16${trMode === "train" ? "" : " · translating with these tables: no gold output, no update"}`,
     pairHtml: `<span class="pairchip">pair ${q + 1} of 16: <i>${src.join(" ")}</i> → ${tgt.filter(x => x !== "‹end›").join(" ")}</span>${src.join(" ") === "unha tía miña" ? `<span class="note" style="margin:0 0 0 8px">(the lesson's example)</span>` : ""}`,
-    allPairs: S2S.data, pick: m => { stIdx = 1 + n + m; renderA(); }, setMode: m => { trMode = m; stIdx = Math.min(stIdx, 1 + n); renderA(); } });
+    allPairs: S2S.data, pick: m => { stIdx = 1 + n + m; subIdx = 0; renderA(); }, setMode: m => { trMode = m; stIdx = Math.min(stIdx, 1 + n); subIdx = 0; renderA(); } });
   const steps = trMode === "train" ? gradOf(snB, q).sts.map((s_, m) => { const p = softmax(snB.O.map(v => dot(s_, v))); return { fed: EN.indexOf(tgt[m]), j: p.indexOf(Math.max(...p)), p }; }) : translate(snB, src).steps.map(x => ({ fed: EN.indexOf(x.w), j: EN.indexOf(x.w), p: x.p }));
   animTok++;
   $("trDecPane").style.display = sg.kind === "out" ? "" : "none"; $("trUpdPane").style.display = sg.kind === "push" ? "" : "none";
   $("trWhyNote").style.display = sg.kind === "out" || sg.kind === "done" ? "" : "none";
   if (sg.kind === "push") {
-    const { parts, cum, moved, pr } = pushesOf(snB, q), pk = sg.k, x = pr[pk], key = uA + ":" + stIdx;
-    renderUpdChain(snB, q, pk, parts[pk], pr);
-    const draw = cur => { renderTables(snB, null, cur, q, { kind: "update" }, steps, moved[pk], pk); drawUpdatePlane(snB, cur, q, Z, pk); };
-    if (key !== lastStageKey && !reduce) { draw(cum[pk]); tween(cum[pk], cum[pk + 1], 1200, draw); } else draw(cum[pk + 1]);
-    $("trUpdLbl").textContent = `The update, step ${pk + 1} of ${K}: the arrows of output ${pk + 1} are carried out`;
+    const { parts, cum, pr } = pushesOf(snB, q), pk = sg.k, x = pr[pk], gs = groupsFor(q, pk, pr); subIdx = Math.max(0, Math.min(subIdx, gs.length - 1)); const grp = gs[subIdx], key = uA + ":" + stIdx + ":" + subIdx;
+    renderUpdChain(snB, q, pk, parts[pk], pr, grp.part);
+    const doneRows = new Set(gs.slice(0, subIdx).flatMap(g2 => [...g2.rows])), before = applyRows(cum[pk], cum[pk + 1], doneRows), after = applyRows(before, cum[pk + 1], grp.rows);
+    const draw = cur => { renderTables(snB, null, cur, q, { kind: "update" }, steps, grp.part === "rest" ? new Set() : grp.rows, pk); drawUpdatePlane(snB, cur, q, Z, pk); };   // the rest: many rows, so bold and the counting numbers only, no outlines
+    if (key !== lastStageKey && !reduce) { draw(before); tween(before, after, 1500, draw); } else draw(after);
+    $("trUpdLbl").textContent = `The update, step ${pk + 1} of ${K}, part ${subIdx + 1} of ${gs.length}: ${grp.name.split(":")[0]}`;
     const kept = pr.filter(y => correctProbs(cum[K], src, tgt)[y.k] > y.gold.b).length;
-    $("trUpdNote").innerHTML = `<span class="ok">green</span>: toward state ${pk + 1} · <span class="bad">red</span>: away from it · outlined in the tables: the rows this step moves most${pk === K - 1 ? ` · after all ${K} steps, the probability of ${kept} of the ${K} gold outputs is higher than before` : ""}`;
+    $("trUpdNote").innerHTML = `${grp.name}${grp.part === "rest" ? "" : " · outlined in the tables: the row moving now"}${pk === K - 1 && subIdx === gs.length - 1 ? ` · after all ${K} steps, the probability of ${kept} of the ${K} gold outputs is higher than before` : ""}`;
   } else renderTables(snB, snP, snA, q, sg, steps);
   if (sg.kind === "tables" || sg.kind === "in") renderPlaneEnc(snB, src, sg.kind === "in" ? sg.i : 0, Z);
-  lastStageKey = uA + ":" + stIdx;
+  lastStageKey = uA + ":" + stIdx + ":" + subIdx;
   document.documentElement.style.setProperty("--ctlh", ($("trCtl").offsetHeight + 6) + "px");
   const nextQ = (q + 1) % NP;
   $("trStageNote").innerHTML = sg.kind === "tables" ? `Next: the encoder reads input 1, <i>${src[0]}</i> (its row is highlighted).` :
     sg.kind === "in" ? (sg.i < n ? `Input ${sg.i} read: summary = ½ × old + ½ × row <i>${src[sg.i - 1]}</i>. Next: input ${sg.i + 1}, <i>${src[sg.i]}</i>.` : `All inputs read: the summary is the decoder's state 1. Next: output 1.`) :
     sg.kind === "out" ? (sg.k < steps.length - 1 ? `Next: output ${sg.k + 2}${trMode === "train" ? " (the tables do not change yet: the update comes after the last output)" : ""}.` : trMode === "train" ? `Next: the update of the tables, one output's arrows at a time.` : `Next: done (no update when translating).`) :
-    sg.kind === "push" ? (sg.k < K - 1 ? `Next: the arrows of output ${sg.k + 2}.` : `The update is complete. Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with these updated tables${nextQ === 0 ? " (a new round begins)" : ""}.`) :
+    sg.kind === "push" ? (() => { const gs2 = groupsFor(q, sg.k, pushesOf(snB, q).pr); return subIdx < gs2.length - 1 ? `Next: ${gs2[subIdx + 1].name}.` : sg.k < K - 1 ? `Next: the arrows of output ${sg.k + 2}.` : `The update is complete. Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with these updated tables${nextQ === 0 ? " (a new round begins)" : ""}.`; })() :
     `Translating changes nothing in the tables. Next: pair ${nextQ + 1}, <i>${S2S.data[nextQ][0].join(" ")}</i>, with the same tables.`;
   $("trainCurveLbl").innerHTML = `<i>${src.join(" ")}</i> over the rounds: the probability of the gold output at each output`;
   renderCurve(q, src, tgt, sg.kind === "out" && trMode === "train" ? sg.k : -1);
@@ -1098,7 +1110,7 @@ function renderRightCurve() {
   $("trRightCurve").innerHTML = g;
 }
 // a click in part B follows a pair in part A, with the tables as they are after this round
-const goA = (q, m, mode) => { uA = Math.min(ti * NP + q, NU - 1); trMode = mode; stIdx = 1 + S2S.data[q][0].length + m; renderA(); $("trWhy").scrollIntoView({ behavior: "smooth", block: "start" }); };
+const goA = (q, m, mode) => { uA = Math.min(ti * NP + q, NU - 1); trMode = mode; stIdx = 1 + S2S.data[q][0].length + m; subIdx = 0; renderA(); $("trWhy").scrollIntoView({ behavior: "smooth", block: "start" }); };
 function renderWhole() {
   const sn = R[ti];
   $("pathStep").value = ti; $("trBack").disabled = ti <= 0; $("trNext").disabled = ti >= ROUNDS;
@@ -1124,10 +1136,11 @@ function renderWhole() {
 }
 function renderTrain() { renderA(); renderWhole(); }
 function stopTrain() { clearInterval(trTimer); trTimer = null; $("pathPlay").textContent = "Play training"; }
-const setU = u => { uA = Math.max(0, Math.min(NU - 1, u)); stIdx = 0; renderA(); };
+const setU = u => { uA = Math.max(0, Math.min(NU - 1, u)); stIdx = 0; subIdx = 0; renderA(); };
 // the stage walk: next goes through the cycle and on to the next pair; back the other way
-$("aNext").addEventListener("click", () => { const n = stagesFor(uA % NP, trMode, snapAt(uA)).length; if (stIdx < n - 1) stIdx++; else if (uA < NU - 1) { uA++; stIdx = 0; } renderA(); });
-$("aBack").addEventListener("click", () => { if (stIdx > 0) stIdx--; else if (uA > 0) { uA--; stIdx = stagesFor(uA % NP, trMode, snapAt(uA)).length - 1; } renderA(); });
+const nSub = (u, i) => { const st = stagesFor(u % NP, trMode, snapAt(u)), sg = st[i]; return sg && sg.kind === "push" ? groupsFor(u % NP, sg.k, pushesOf(snapAt(u), u % NP).pr).length : 1; };
+$("aNext").addEventListener("click", () => { const n = stagesFor(uA % NP, trMode, snapAt(uA)).length; if (subIdx < nSub(uA, stIdx) - 1) subIdx++; else if (stIdx < n - 1) { stIdx++; subIdx = 0; } else if (uA < NU - 1) { uA++; stIdx = 0; subIdx = 0; } renderA(); });
+$("aBack").addEventListener("click", () => { if (subIdx > 0) subIdx--; else if (stIdx > 0) { stIdx--; subIdx = nSub(uA, stIdx) - 1; } else if (uA > 0) { uA--; stIdx = stagesFor(uA % NP, trMode, snapAt(uA)).length - 1; subIdx = nSub(uA, stIdx) - 1; } renderA(); });
 $("aPairNext").addEventListener("click", () => setU(uA + 1));
 $("zIn").addEventListener("click", () => { planeZoom = Math.min(8, planeZoom * 2); renderA(); });
 $("zOut").addEventListener("click", () => { planeZoom = Math.max(1, planeZoom / 2); renderA(); });
