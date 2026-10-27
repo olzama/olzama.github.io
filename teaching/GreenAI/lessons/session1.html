@@ -2931,7 +2931,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="notes">
     <p>What to take from this screen: a query's numbers are rewards, one per dimension, and setting them chooses which key is read, so indirectly which word is written; each word needs its own query. And on the long sentence, two trained models that differ only in attention: the one without it loses tía and writes “A friend of mine”.</p>
     <p>Section 3, in eight steps (Next step). The frame throughout: the decoder is about to write one word of “an aunt of mine”, and the query decides the mix, and through the mix the word. The page names queries by their rewards: “tía × 6” is (0, 6, 0). Steps 1 to 4: word 1, “an”, which needs more than 0.35 of tía in the mix; tía × 6 gives 0.44. Step 5: miña × 6 reads the key after miña, and the decoder writes “a”. Step 6: tía × 2 ranks the keys right but the weights spread out (0.19, 0.51, 0.31): the mix drifts toward the average, and the decoder writes “a” again. Step 7: the same tía × 6 at word 3, “of”, writes ‹end›: each word needs its own query. Step 7's threshold: “of” needs more than 0.2 of miña (‹end› has a bias of 1.6). Step 8: students choose the word and the query. The page's question: one query for all five words? Yes, by small margins: tía × 6, miña × 3 (its own button).</p>
-    <p>Section 4 (the second tab). Two small models translate our whole sentence: same training data, same number of updates, same size; one difference, attention. Step 1: the translations, and the probability of each whole translation: without attention, what it writes gets 0.00093 and the gold translation 0.000010; with attention, it writes the gold translation, 0.27. On the translation page, the held-out phrase failed for lack of training examples; here both models had the same data, so the difference is due to attention. Step 2: the encoder's vectors, 8 learned numbers each (blue positive, pink negative; key in the strip), computed one from the other as in section 1; the last is the summary. This is the encoder of the model with attention; step 3 shows the other one. Step 3: the first word without attention, “a” 0.77: tía is the second of the sentence's 31 words and marks, and 29 more changed the vector before the summary was made. Step 4: with attention, the biggest weight, 0.47, is on tía, and “an” gets 0.95; this model has no rule for the query, its decoder state plays that part, shaped by training. (Step 4 also gives escravo 0.21; the screen says the weights do not show why: the slide after next takes this up.) Step 5: each model goes on from its own word: after “a”, friend, neighbor and cousin share the probability (0.39, 0.31, 0.28) and aunt is out of reach; after “an”, aunt 0.96. Step 6: the saying loses “says and master of what one” without attention; in 500 test sentences the last verb comes first 370 times without attention, 41 with.</p>
+    <p>Section 4 (the second tab). Two small models translate our whole sentence: same training data, same number of updates, same size; one difference, attention. Step 1: the translations, and the probability of each whole translation: without attention, what it writes gets 0.00093 and the gold translation 0.000010; with attention, it writes the gold translation, 0.27. On the translation page, the held-out phrase failed for lack of training examples; here both models had the same data, so the difference is due to attention. Step 2: the encoder's vectors, 8 learned numbers each (blue positive, pink negative; key in the strip), computed one from the other as in section 1; the last is the summary. This is the encoder of the model with attention; step 3 shows the other one. Step 3: the first word without attention, “a” 0.77: tía is the second of the sentence's 31 words and marks, and 29 more changed the vector before the summary was made. Step 4: with attention, the biggest weight, 0.47, is on tía, and “an” gets 0.95; this model has no rule for the query, its decoder state plays that part, shaped by training. (Step 4 also gives escravo 0.21; the screen says the weights do not show why: the next slide takes this up.) Step 5: each model goes on from its own word: after “a”, friend, neighbor and cousin share the probability (0.39, 0.31, 0.28) and aunt is out of reach; after “an”, aunt 0.96. Step 6: the saying loses “says and master of what one” without attention; in 500 test sentences the last verb comes first 370 times without attention, 41 with.</p>
   </div>
 </section>
 
@@ -2942,7 +2942,7 @@ print("they match" if count == expected else "they do not match: check the loop 
     <div class="cols wide-left">
       <div class="col">
         <ul class="points">
-          <li>A small model with attention has written “an aunt of mine, who solved everything”. Next: “with”.</li>
+          <li>The small model with attention from the previous screen (section 4) has written “an aunt of mine, who solved everything”. Next: “with”.</li>
           <li class="frag">Largest weight before “with”: the <b>full stop</b>, not <i>con</i> (“with”)</li>
           <li class="frag"><b>Test:</b> replace the mix the model reads (table, right). It still writes “with”: the full stop does not matter here.</li>
           <li class="frag"><b>Why:</b> in all 5,000 training sentences, “everything” is followed by “with”. The English already written decides the next word.</li>
@@ -3274,7 +3274,7 @@ print("they match" if count == expected else "they do not match: check the loop 
     </div>
     <div class="col">
       <ul class="points">
-        <li>Size and context length are <b>levers</b> with a real, computable energy cost</li>
+        <li>Model size and the length of the text read and written are <b>levers</b> with a real, computable energy cost</li>
       </ul>
     </div>
   </div>
@@ -3348,7 +3348,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   </div>
   </div>
   <div class="notes">
-    <p>Before the notebook, a short look at the task of Part 1: question answering.</p>
+    <p>Before the notebook, a short look at the task of Notebook 01a: question answering.</p>
     <p>The model gets a few short documents, about green AI, and a question. It has to answer from the documents, in one short sentence. The model is Qwen 2.5, with 1.5 billion parameters: a small general-purpose language model, small enough for a free Colab GPU.</p>
     <p>How do we know if an answer is right? Each question has a reference answer. For example: what does the acronym PUE stand for? The reference is “power usage effectiveness”. An answer counts as right if it contains the reference, ignoring capital letters. Accuracy is the number of right answers divided by the number of questions.</p>
     <p>This check is simple and costs almost nothing. But it is not perfect: a right answer in other words counts as wrong. Keep that in mind when you read your accuracy.</p>
@@ -4019,8 +4019,11 @@ document.querySelectorAll("iframe.frame").forEach(f => f.addEventListener("load"
     }, { passive: true });
     f.contentDocument.addEventListener("keydown", e => {
       if (!presenting()) return;
-      if (e.key === "PageDown") { e.preventDefault(); next(); }
-      else if (e.key === "PageUp") { e.preventDefault(); prev(); }
+      // arrows too: after a click inside the frame the keyboard focus is there (not in sliders, fields or menus)
+      if (e.target.closest && e.target.closest("textarea, input, select")) return;
+      if (e.key === "ArrowRight" && e.shiftKey) { e.preventDefault(); skip(); }
+      else if (e.key === "PageDown" || e.key === "ArrowRight") { e.preventDefault(); next(); }
+      else if (e.key === "PageUp" || e.key === "ArrowLeft") { e.preventDefault(); prev(); }
       else if (e.key === "Escape") exit();
     });
   } catch (err) {}
