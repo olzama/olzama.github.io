@@ -3311,13 +3311,13 @@ print("they match" if count == expected else "they do not match: check the loop 
     <div class="flow"><div class="box g">a <b>smaller</b>, dedicated model (1.3B), trained on Galician and Portuguese</div><span class="arr">→</span><div class="box g">correct Galician</div></div>
     <ul class="points">
       <li>In mainstream LLMs, Galician is “almost residual”</li>
-      <li>The smaller dedicated model beat the giant general one</li>
+      <li>On a Galician text-completion test, the 1.3B model beat all the models it was compared with, including a Portuguese model five times its size</li>
     </ul>
     <p class="src">Source: Gamallo et al., “A Galician-Portuguese Generative Model,” EPIA 2024; Proxecto Nós (USC)</p>
   </div>
   <div class="notes">
     <p>“100+ languages” sounds comprehensive, but in most mainstream LLMs Galician is a tiny share of the training text, in the words of a paper that studied it, “almost residual”. Galician is close to Spanish and Portuguese, and general models tend to blur the three: the output drifts into Spanish or Portuguese.</p>
-    <p>The fix that worked was not a bigger general model but a smaller dedicated one: 1.3 billion parameters, trained on Galician and Portuguese text (Gamallo et al. 2024; Proxecto Nós at the University of Santiago de Compostela works on such models). It produced correct Galician better than the giant general model it was compared with. The same pattern as opus-mt: a model built for the task can be both smaller and better at it.</p>
+    <p>The fix that worked was not a bigger general model but a smaller dedicated one: 1.3 billion parameters, trained on Galician and Portuguese text (Gamallo et al. 2024; Proxecto Nós at the University of Santiago de Compostela works on such models). On a test that asks models to complete Galician sentences, it got the last word exactly right 40% of the time; the other models it was compared with, of the same size or up to 7 billion parameters, at most 27% (Gamallo et al. 2024, Table 2). The same pattern as opus-mt: a model built for the task can be both smaller and better at it.</p>
   </div>
 </section>
 
