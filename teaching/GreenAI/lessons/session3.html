@@ -406,7 +406,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
   <div class="notes">
     <p>A natural question is: how does the model know where to search? The answer is that the model does not search at all. Retrieval is a separate program that runs before the model. The people who build the system decide which documents it can search.</p>
-    <p>This happens in two phases. Phase one happens once, before any user asks anything. The builders collect the documents. For example, a company's help-desk articles, a law firm's contracts, or a university's regulations. This collection is called the knowledge base. Long documents are cut into smaller pieces, called chunks. Each chunk is turned into an embedding, a vector that represents its meaning. The embeddings are stored in an index, together with the text of each chunk.</p>
+    <p>This happens in two phases. Phase one happens once, before any user asks anything. The builders collect the documents. For example, a company's help-desk articles, a law firm's contracts, or a university's regulations. This collection is called the knowledge base. Long documents are cut into smaller parts, called chunks. Each chunk is turned into an embedding, a vector that represents its meaning. The embeddings are stored in an index, together with the text of each chunk.</p>
     <p>Phase two happens every time a user asks a question. The question is turned into an embedding too. The index is searched for the chunks whose embeddings are closest to the question's. Those chunks are pasted into the prompt, above the question. Then the model reads the prompt and writes the answer.</p>
     <p>The model never sees the search. From its side, it just receives a question with some text attached.</p>
   </div>
@@ -497,9 +497,9 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <line x1="70.0" y1="330.0" x2="195.0" y2="155.0" stroke="var(--green)" stroke-width="3" stroke-linecap="round" data-s="2" data-d="0.6"/>
 <path d="M192.2 167.7 L195.0 155.0 L183.9 161.8" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="1.2" data-a="fade" data-t="0.2"/>
 <text x="35.0" y="165.0" font-size="20" style="fill:var(--green)" data-s="2" data-d="1.1">water (2.5, 3.5)</text>
-<line x1="70.0" y1="330.0" x2="270.0" y2="180.0" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" data-s="3" data-d="0"/>
-<path d="M263.5 191.2 L270.0 180.0 L257.4 183.1" fill="none" stroke="var(--orange)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="0.6" data-a="fade" data-t="0.2"/>
-<text x="280.0" y="172.0" font-size="21" style="fill:var(--orange)" data-s="3" data-d="0.6">question (4, 3)</text>
+<line x1="70.0" y1="330.0" x2="270.0" y2="180.0" stroke="currentColor" stroke-width="4" stroke-linecap="round" data-s="3" data-d="0"/>
+<path d="M263.5 191.2 L270.0 180.0 L257.4 183.1" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="0.6" data-a="fade" data-t="0.2"/>
+<text x="280.0" y="172.0" font-size="21" style="fill:currentColor" data-s="3" data-d="0.6">question (4, 3)</text>
 <text y="40" font-size="24" style="fill:var(--muted)" data-s="4" data-d="0" data-line="H" data-x0="420">cos =</text>
 <g class="bfrac" data-line="H"><text class="num" y="27" font-size="20" style="fill:var(--muted)" data-s="4" data-d="0">q · d</text><line class="bar" y1="34" y2="34" stroke="currentColor" stroke-width="2" data-s="4" data-d="0"/><text class="den" y="54" font-size="20" style="fill:var(--muted)" data-s="4" data-d="0">|q| × |d|</text></g>
 <text y="100" font-size="24" style="fill:var(--blue)" data-s="5" data-d="0" data-line="E1" data-x0="420" id="e0">energy:</text>
@@ -524,7 +524,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     </div>
   </div>
   <div class="notes">
-    <p>Here is one example, worked out. Real embeddings have hundreds of dimensions. These have two, so we can draw them and do the arithmetic. They are the toy vectors of the Retrieval Playground notebook.</p>
+    <p>Here is one example, worked out, on three of the five toy documents. The other two, retrieval and quantize, point away from the question; the next panel shows all five. Real embeddings have hundreds of dimensions. These have two, so we can draw them and do the arithmetic. They are the toy vectors of the Retrieval Playground notebook.</p>
     <p>Each document's vector is the average of the vectors of the words we know. The question is "what does it cost in electricity to get an answer". The only word with a vector is electricity, so the question's vector is 4, 3.</p>
     <p>First the energy document, vector 4, 2. The dot product: 4 times 4 plus 3 times 2. That is 16 plus 6, which is 22. The length of the question: the square root of 4 squared plus 3 squared, the square root of 25, which is 5. The length of the document: the square root of 4 squared plus 2 squared, the square root of 20, about 4.47. So the cosine is 22 divided by 5 times 4.47. That is 22 divided by 22.35, about 0.98.</p>
     <p>The carbon document, vector 3, 4: 4 times 3 plus 3 times 4 is 24. Its length is 5. 24 divided by 25 is 0.96.</p>
@@ -1054,7 +1054,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
 <div class="part" id="part-step4"><h1>Step 4 · What retrieval saves</h1></div>
 
 <section class="screen" id="payoff" data-step="4">
-  <header><h2>Fewer tokens to read</h2><p class="sub">Today's 26 documents, counted with Qwen2.5's tokenizer; top 2: the average over the 26 questions</p></header>
+  <header><h2>Fewer tokens to read</h2><p class="sub">Today's 26 documents, cut into tokens the way Qwen2.5 cuts them, without the question; top 2: the average over the 26 questions</p></header>
   <div class="body cols wide-left">
     <div class="col">
       <div class="board">
@@ -1078,16 +1078,16 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       <ul class="points">
         <li>Attention compares every token with every token: twice the tokens, four times the pairs (Session 1)</li>
         <li>The rest of the model grows in step with the tokens</li>
-        <li>Writing the answer, one token at a time, costs the same either way</li>
+        <li>Writing the answer: one run of the model per written token, as many either way; only the attention to the input gets cheaper</li>
         <li>So expect an energy saving smaller than the token saving: the notebook measures it</li>
       </ul>
     </div>
   </div>
   <div class="notes">
     <p>Why does reading fewer tokens save energy? Recall attention from Session 1. Every token is compared with every other token. Twice the tokens means four times the pairs.</p>
-    <p>The board works it out for today's collection. All 26 documents together are 4,031 tokens. The two documents the retriever picks are, on average over the 26 questions, about 310 tokens. 4,031 divided by 310 is about 13: thirteen times fewer tokens.</p>
+    <p>The board works it out for today's collection. All 26 documents together are 4,031 tokens. The two documents the retriever picks are, on average over the 26 questions, about 310 tokens. 4,031 divided by 310 is about 13: thirteen times fewer tokens. The panel before showed one question at a time, with the question's own tokens included, so its numbers were a little different: for the PUE question, 4,040 and 355.</p>
     <p>The pairs: 4,031 squared is about 16.2 million. 310 squared is 96,100. 16.2 million divided by 96,100 is about 169. So attention compares about 169 times fewer pairs.</p>
-    <p>But attention is only part of the work. Other parts of the model do an amount of work that grows in step with the number of tokens, not with the square. And writing the answer, one token at a time, costs the same in both cases. So the energy saving will be smaller than the token saving. You will measure how much smaller this afternoon.</p>
+    <p>But attention is only part of the work. Other parts of the model do an amount of work that grows in step with the number of tokens, not with the square. And writing the answer takes one run of the model for every token written, and the answer is about as long in both cases. Only the attention part of each run gets cheaper, because there are fewer input tokens in the KV cache to look at. So the energy saving will be smaller than the token saving. You will measure how much smaller this afternoon.</p>
   </div>
 </section>
 
@@ -1103,7 +1103,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
   <div class="notes">
     <p>One practical detail matters today. An embedding model can only read a limited number of tokens. Ours, MiniLM, reads at most 128. If a document is longer, the rest is cut off before the embedding is computed. So the embedding represents only the beginning of the document.</p>
     <p>The chart shows our 26 documents. Press Play: MiniLM reads every document from its start, and where the 128-token window ends, the rest turns into hatching. The blue part of each bar is what MiniLM reads. The hatched red part is never seen. 23 of the 26 documents are longer than 128 tokens. For one of them, the answer to its quiz question is in the hatched part. You will see the retriever miss that question this afternoon.</p>
-    <p>Real systems solve this with chunking. They split each long document into smaller pieces, called chunks, embed each chunk, and retrieve chunks. Choosing the chunk size is a design decision of its own.</p>
+    <p>Real systems solve this with chunking. They split each long document into smaller parts, called chunks, embed each chunk, and retrieve chunks. Choosing the chunk size is a design decision of its own.</p>
   </div>
 </section>
 
@@ -1123,7 +1123,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
     <div class="col">
       <p class="label">Self-Route: RAG first; the model says if the chunks are enough; if not, long context</p>
       <table class="plain">
-        <thead><tr><th>model</th><th>cost compared with long context</th></tr></thead>
+        <thead><tr><th>model</th><th>cost (tokens the model reads) compared with long context</th></tr></thead>
         <tbody>
           <tr><td>Gemini-1.5-Pro</td><td class="num">−65%</td></tr>
           <tr><td>GPT-4o</td><td class="num">−39%</td></tr>
@@ -1137,7 +1137,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
     <p>Now some published evidence. A 2024 study from Google DeepMind and the University of Michigan compared the two approaches on three strong models: GPT-4o, GPT-3.5-Turbo and Gemini-1.5-Pro. Each question is about one long source text, for example a whole book or a long report.</p>
     <p>Long context puts the whole source text into the prompt. In their two benchmarks, that is on average 7,000 words in one, and 100,000 tokens in the other. RAG cuts the text into chunks of 300 words and puts only the 5 most relevant chunks into the prompt. 5 times 300 is 1,500 words.</p>
     <p>For all three models, long context gave better answers on average. So retrieval can lose some quality. But for 63 percent of the questions, the two approaches gave exactly the same answer. For those questions, reading everything bought nothing.</p>
-    <p>The authors used this to build a combined method, called Self-Route. The model first tries RAG, and also says whether the retrieved chunks are enough to answer. If yes, the RAG answer is used. If no, the question goes to long context. With Gemini-1.5-Pro, this cut the cost by 65 percent; with GPT-4o, by 39 percent. In both cases, the quality stayed close to long context.</p>
+    <p>The authors used this to build a combined method, called Self-Route. The model first tries RAG, and also says whether the retrieved chunks are enough to answer. If yes, the RAG answer is used. If no, the question goes to long context. With Gemini-1.5-Pro, this cut the cost, the number of tokens the model reads, by 65 percent; with GPT-4o, by 39 percent. In both cases, the quality stayed close to long context.</p>
     <p>The lesson: use the cheap method when it is enough, and the expensive one only when needed.</p>
   </div>
 </section>
@@ -1194,7 +1194,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
           <tr><td>new risk</td><td>rounding error</td><td>the retriever misses</td></tr>
         </tbody>
       </table>
-      <ul class="points"><li>Independent: a system can use both. Notebook 03c combines them.</li></ul>
+      <ul class="points"><li>Independent: a system can use both. Notebook 03c runs them side by side on one GPU.</li></ul>
     </div>
     <div class="col">
       <div class="activity"><h3>Discussion · 10 minutes</h3><div>
@@ -1208,7 +1208,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
   </div>
   <div class="notes">
     <p>Keep the two sessions apart. In Session 2 we changed precision: the model read the same text, but its numbers used fewer bits. Today we change how much text the model reads, and the precision stays the same as in the baseline. Each has its own risk: rounding error for quantization, a missed document for retrieval.</p>
-    <p>The two changes are independent. A real system can use a quantized model and retrieval at the same time. Notebook 3c combines them. Today we change only one thing at a time, so that we can measure the effect of each.</p>
+    <p>The two changes are independent. A real system can use a quantized model and retrieval at the same time. Notebook 03c runs them side by side on one GPU. Today we change only one thing at a time, so that we can measure the effect of each.</p>
     <p>Now a short discussion, about ten minutes. First: when would you give the model everything, on purpose? Think about the type of task, the budget, and how costly a wrong answer is. Second: when would you trust the retriever's top document enough to show the model nothing else? Third: our documents are short, and each is about one topic. Real collections have duplicates, contradictions and very long documents. What goes wrong first? There is no single right answer. Collect the ideas from the room.</p>
   </div>
 </section>
@@ -1222,8 +1222,8 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       <p class="label">kNN-MT: a lookup at every word</p>
       <div class="flow" style="justify-content:flex-start"><div class="box">translation<br>model</div><span class="arr">+</span><div class="box g">datastore of earlier<br>translations</div></div>
       <ul class="points">
-        <li>At each word it writes, it looks up the most similar contexts in the datastore</li>
-        <li>It combines their next word with its own prediction</li>
+        <li>At each word it writes, it compares its decoder state with the states stored from earlier translations</li>
+        <li>It mixes the words written after the k closest states into its own probabilities</li>
       </ul>
       <p class="src">Khandelwal, Fan, Jurafsky, Zettlemoyer &amp; Lewis, “Nearest neighbor machine translation,” ICLR 2021</p>
     </div>
@@ -1244,7 +1244,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
     </div>
   </div>
   <div class="notes">
-    <p>Retrieval is also used in machine translation. One method is called kNN-MT. kNN means k nearest neighbors. It starts with a translation model that is already trained, and adds a large datastore built from earlier translations. Each time the model writes a word, it searches the datastore for the most similar situations, looks at which word came next in them, and combines that word with its own prediction. It is the same idea as RAG, but it looks things up at every word, not once per question.</p>
+    <p>Retrieval is also used in machine translation. One method is called kNN-MT. kNN means k nearest neighbors. It starts with a translation model that is already trained, and adds a large datastore built from earlier translations. The datastore keeps, for every word of the earlier translations, the decoder state just before that word was written, and the word itself. Each time the model writes a word, it compares its current decoder state with the stored states, takes the k closest, looks at which words were written after them, and mixes those words into its own probabilities. It is the same idea as RAG, but it looks things up at every word, not once per question.</p>
     <p>Real kNN-MT needs millions of entries and a lookup at every word. That is too big for a Colab session. We do a small version of the same idea, called a translation memory. Our memory has six Galician sentences from Speechwriter, each with an English translation.</p>
     <p>We compute the embedding of our Galician passage, the one with "unha tía miña", and compare it with the six sentences. The table shows the cosine similarities. The most similar is the sentence about the cousin Fernando, with 0.40. That sentence and its translation go into the prompt as an example. Then the model translates our passage.</p>
     <p>We compare the translations with and without the example, with the four metrics from the earlier sessions: BLEU, BERTScore, Qwen as a judge, and ChatGPT as a judge.</p>
@@ -1254,11 +1254,11 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
 <div class="part" id="part-turn"><h1>Your turn</h1></div>
 
 <section class="screen" id="pieces" data-step="0">
-  <header><h2>The same pieces in our notebook</h2></header>
+  <header><h2>The same parts in our notebook</h2></header>
   <div class="body cols">
     <div class="col">
       <table class="plain">
-        <thead><tr><th>In a real system</th><th>In Notebook 3</th></tr></thead>
+        <thead><tr><th>In a real system</th><th>In Notebook 03a</th></tr></thead>
         <tbody>
           <tr><td>knowledge base</td><td><span class="mono">CORPUS</span>: 26 documents, Session 1's eight plus 18 new</td></tr>
           <tr><td>embedding model</td><td>paraphrase-multilingual-MiniLM-L12-v2</td></tr>
@@ -1292,7 +1292,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
 </section>
 
 <section class="screen" id="act-nb3" data-step="0">
-  <header><span class="kind">Activity · 60–75 minutes for Part 1, +50–70 for Parts 2–3, individual</span><h2>Notebook 3: Retrieval measurement</h2></header>
+  <header><span class="kind">Activity · 60–75 minutes for Part 1, +50–70 for Parts 2–3, individual</span><h2>Notebook 03a: Retrieval measurement</h2></header>
   <div class="body">
     <ul class="points">
       <li>Part 1: the quiz three ways, measured with CodeCarbon; answer accuracy and retrieval accuracy; three rows for your leaderboard</li>
@@ -1302,7 +1302,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
     <div class="activity"><h3>Notebook 03a, in Colab, with a GPU</h3><div>
       <ul class="points">
         <li>In Colab: Runtime → Change runtime type → T4 GPU</li>
-        <li>Upload your three CSV files from Sessions 1 and 2 before you start</li>
+        <li>Upload your three CSV files as saved at the end of Session 2 (<span class="mono">leaderboard.csv</span>, <span class="mono">mt_leaderboard.csv</span>, <span class="mono">mt_eval_leaderboard.csv</span>) before you start</li>
         <li>Download them again at the end</li>
       </ul>
       <div class="links">
@@ -1320,18 +1320,18 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
 </section>
 
 <section class="screen" id="act-nb3c" data-step="0">
-  <header><span class="kind">Activity · 70–90 minutes, if time allows</span><h2>Notebook 3c: three levers, one run</h2></header>
+  <header><span class="kind">Activity · 70–90 minutes, if time allows</span><h2>Notebook 03c: three levers, one run</h2></header>
   <div class="body cols">
     <div class="col">
       <table class="plain">
         <thead><tr><th>configuration</th><th>model</th><th>the model reads</th></tr></thead>
         <tbody>
-          <tr><td>baseline</td><td>16 bits</td><td>the question only</td></tr>
-          <tr><td>quantized</td><td>GPTQ, 4 bits</td><td>the question only</td></tr>
+          <tr><td>baseline, closed book</td><td>16 bits</td><td>the question only</td></tr>
+          <tr><td>quantized, closed book</td><td>GPTQ, 4 bits</td><td>the question only</td></tr>
           <tr><td>retrieval</td><td>16 bits</td><td>the question + the top 2</td></tr>
         </tbody>
       </table>
-      <p class="muted">The same 26 questions, in one Colab session, on one GPU; the translation too.</p>
+      <p class="muted">The same 26 questions, in one Colab session, on one GPU; the translation too. Unlike Session 1's baseline row, this baseline reads no documents.</p>
     </div>
     <div class="col">
       <ul class="points">
@@ -1345,8 +1345,8 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
     </div>
   </div>
   <div class="notes">
-    <p>Notebook 3c is an extra. It runs all three configurations of the course in one Colab session, on the same GPU, so the numbers are directly comparable.</p>
-    <p>The baseline and the quantized model answer closed book: no documents. So this shows what quantization does to what the model knows by itself. The retrieval run uses the 16-bit model with the two retrieved documents. So this shows what retrieval adds, and at what cost. The translation is run the same three ways.</p>
+    <p>Notebook 03c is an extra. It runs all three configurations of the course in one Colab session, on the same GPU, so the numbers are directly comparable.</p>
+    <p>The 16-bit baseline model and the quantized model answer closed book, with no documents. So this baseline row is not Session 1's, which read all the documents. So this shows what quantization does to what the model knows by itself. The retrieval run uses the 16-bit model with the two retrieved documents. So this shows what retrieval adds, and at what cost. The translation is run the same three ways.</p>
   </div>
 </section>
 

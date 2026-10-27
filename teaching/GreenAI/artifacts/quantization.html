@@ -144,6 +144,30 @@ footer p { margin: 0 0 8px; }
 footer a { color: var(--blue); }
 .refs { margin: 0 0 10px; padding-left: 1.1em; display: grid; gap: 4px; }
 footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+
+/* Control strips: one line per row, sticky at the top of the screen while their section is in view;
+   a row too long for the screen scrolls sideways instead of wrapping. */
+.strip { position: sticky; top: 0; z-index: 3; background: var(--panel); padding: 6px 0; display: grid; gap: 4px; box-shadow: 0 6px 8px -8px rgba(0,0,0,0.25); }
+.strip .controls { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; padding: 3px; }
+.strip .controls > * { flex: none; white-space: nowrap; }
+.strip input[type=range] { flex: 1 0 160px; }
+/* Fixed footprints: every box whose text changes keeps the size of its longest text,
+   so nothing below it moves when a control is used. */
+.field .sum { min-height: 8em; }
+#bitVal { min-height: 1.75em; white-space: nowrap; overflow-x: auto; overflow-y: hidden; }
+#bitNote { min-height: 4.5em; }
+#rTable th, #rTable td { width: 6.6em; }
+#rStats, #oStats, #aStats, #bStats, #gStats { min-height: calc(3em + 8px); align-content: flex-start; }
+#rStats { min-height: calc(4.5em + 16px); }
+#rCalc { min-height: calc(9em + 42px); align-content: start; }
+#oClipVal { display: inline-block; width: 11ch; text-align: left; }
+#gCalc { min-height: calc(9em + 30px); align-content: start; }
+/* what the page teaches, at the top: the same box on every course page */
+.learn { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--blue); border-radius: 10px; padding: 12px 18px; }
+.learn > p { font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+.learn ol { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
+.learn li { font-size: 0.95rem; line-height: 1.45; }
+.learn li a { color: var(--blue); font-size: 0.85rem; white-space: nowrap; text-decoration: none; margin-left: 4px; }
 </style>
 
 <div class="wrap">
@@ -151,12 +175,13 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <h1>Quantization, Step by Step</h1>
     <p>A model is billions of numbers. Quantization stores each one with fewer bits. These six stations follow one number into its bits, then a few numbers into integer codes and back, and show what gets lost on the way, and one way to lose less.</p>
   </header>
+  <section class="learn" id="learn" aria-label="What you will learn"><p>What you will learn on this page</p><ol><li>A number in 16 bits is three fields read separately: a sign, an exponent (the scale) and a mantissa (the detail). FP16 and BF16 split the bits differently, and the space to the next number that can be stored grows with the number. <a href="#bits">→ section 1</a></li><li>Absmax: the largest absolute value sets one scale; every value is multiplied by it and rounded to an integer code. With fewer bits there are fewer codes, and different values start to share one. <a href="#round">→ section 2</a></li><li>One outlier stretches the range, so the ordinary values share a few codes. Clipping caps the range: one large error for the outlier, smaller errors for all the others. <a href="#outlier">→ section 3</a></li><li>When all values are 0 or more, symmetric codes for negative values go unused. Asymmetric quantization maps the smallest value to code 0, and the zero point is the code that stands for 0.0. <a href="#asym">→ section 4</a></li><li>GPTQ rounds the weights one at a time and moves each rounding error into the weights not yet rounded (here, simply the next one), so the layer's output stays closer than when each weight is rounded on its own. <a href="#gptq">→ section 5</a></li><li>A scale for each block of weights keeps the small weights from rounding to 0; each extra scale costs 16 bits, as in GGUF files. <a href="#blocks">→ section 6</a></li></ol></section>
 
   <!-- 1 -->
   <section class="panel" id="bits">
     <h2><span class="n">1</span>One number in 16 bits</h2>
     <p class="lead">Click a bit to flip it, or type a number. The three colored fields are read separately, then multiplied.</p>
-    <div class="controls">
+    <div class="strip"><div class="controls">
       <div class="seg" role="group" aria-label="Format">
         <button id="fmtFP16" aria-pressed="true">FP16</button>
         <button id="fmtBF16" aria-pressed="false">BF16</button>
@@ -169,7 +194,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <button data-num="65504">65504</button>
       <label class="note" for="numIn">or type:</label>
       <input type="text" id="numIn" inputmode="decimal" aria-label="A number to store">
-    </div>
+      <button class="primary" id="bitPlay">▶ Play: walk the exponent</button>
+    </div></div>
     <div>
       <div class="bitrow" id="bitRow" role="group" aria-label="The 16 bits"></div>
       <div class="bitkey" id="bitKey" aria-hidden="true"></div>
@@ -181,7 +207,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </div>
     <div class="bigval" id="bitVal" aria-live="polite"></div>
     <p class="note" id="bitNote"></p>
-    <div class="controls"><button class="primary" id="bitPlay">▶ Play: walk the exponent</button><span class="note">1.5, then × 2 and ÷ 2, one exponent step at a time: watch the space to the next number.</span></div>
+    <p class="note">Play walks the exponent: 1.5, then × 2 and ÷ 2, one exponent step at a time. The line below is a scale of sizes: the mark 2^k stands for 2 to the power k, and one power to the right is twice as large. Watch the space to the next number.</p>
     <svg class="fig" id="bitGap" viewBox="0 0 900 110" role="img" aria-label="The number and the space to the next storable number, on a scale of powers of 2"></svg>
   </section>
 
@@ -189,13 +215,13 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="round">
     <h2><span class="n">2</span>Absmax: from floats to integer codes</h2>
     <p class="lead">Nine values, stored as signed integers. The largest absolute value, α = 10.8, is mapped to the largest code. Every value is multiplied by the same scale s and rounded. Fewer bits: fewer codes, and values start to share one.</p>
-    <div class="controls">
+    <div class="strip"><div class="controls">
       <span class="note">Bits:</span>
       <div class="seg" role="group" aria-label="Bits" id="rBits">
         <button data-b="8" aria-pressed="true">8</button><button data-b="4" aria-pressed="false">4</button><button data-b="3" aria-pressed="false">3</button><button data-b="2" aria-pressed="false">2</button>
       </div>
       <button class="primary" id="rPlay">▶ Play: 8 → 4 → 3 → 2 bits</button>
-    </div>
+    </div></div>
     <svg class="fig" id="rFig" viewBox="0 0 900 200" role="img" aria-label="Each value on the float line, joined to the integer code it is rounded to"></svg>
     <div class="legendrow">
       <span><span class="sw" style="background:var(--blue)"></span>a value</span>
@@ -217,7 +243,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="outlier">
     <h2><span class="n">3</span>One outlier stretches the range</h2>
     <p class="lead">Twenty-four ordinary values between −2 and 2, and one value of 256. The picture zooms in on the ordinary values. The vertical ticks are the codes: with the outlier, absmax spreads the codes so far apart that only three of them fall here. Clipping caps the range, so the codes move closer together.</p>
-    <div class="controls">
+    <div class="strip"><div class="controls">
       <label class="check"><input type="checkbox" id="oOut" checked> include the outlier, 256</label>
       <span class="note">Bits:</span>
       <div class="seg" role="group" aria-label="Bits" id="oBits">
@@ -230,7 +256,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <span class="mono" id="oClipVal"></span>
       <button data-clip="none">no clipping</button><button data-clip="10">10</button><button data-clip="5">5</button><button data-clip="2.5">2.5</button>
       <button class="primary" id="oPlay">▶ Play: shrink the range</button>
-    </div>
+    </div></div>
     <svg class="fig" id="oFig" viewBox="0 0 900 170" role="img" aria-label="The ordinary values and the codes near them"></svg>
     <div class="stats" id="oStats" aria-live="polite"></div>
     <p class="note">Clipping trades one error for many: the outlier is stored as the clipping value, and every ordinary value gets closer to a code. Which trade is right depends on how much the outlier matters.</p>
@@ -240,34 +266,36 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="asym">
     <h2><span class="n">4</span>Lopsided values: the zero point</h2>
     <p class="lead">These nine values are all 0 or more, like the outputs of a layer that cuts off negatives. Symmetric absmax keeps codes for negative values that never occur. Asymmetric quantization maps the smallest value to code 0 and the largest to the last code; the <b>zero point</b> z is the code that stands for 0.0.</p>
-    <div class="controls">
+    <div class="strip"><div class="controls">
       <span class="note">Move all values by:</span>
       <input type="range" id="aShift" min="-1" max="1" step="0.1" value="0" aria-label="Shift all values">
       <span class="mono" id="aShiftVal"></span>
       <span class="note">· 4 bits</span>
-    </div>
+    </div></div>
     <svg class="fig" id="aFig" viewBox="0 0 900 230" role="img" aria-label="Symmetric and asymmetric codes for the same values"></svg>
     <div class="cols">
       <div class="calc" id="aCalc"></div>
       <div class="stats" id="aStats"></div>
     </div>
+    <p class="note">Careful with s: here it is the step between two neighbouring codes (a value per code), so a value is divided by it. In section 2, s was codes per unit (127 ÷ 10.8), so a value was multiplied by it. The same name, inverse numbers.</p>
   </section>
 
   <!-- 5 -->
   <section class="panel" id="gptq">
     <h2><span class="n">5</span>GPTQ: round one weight, then correct the next</h2>
-    <p class="lead">A toy layer: six weights, six inputs, one output y = w₁x₁ + … + w₆x₆. The weights can only be stored in steps of 0.25 (the gray lines). Rounding each weight on its own lets the errors add up. GPTQ rounds the weights one at a time, and moves each rounding error into the next weight, before that one is rounded.</p>
-    <div class="controls">
+    <p class="lead">A toy layer: six weights (the model's learned values, its parameters), one input of six numbers x₁ … x₆, and one output, their dot product y = w₁x₁ + … + w₆x₆. The weights can only be stored in steps of 0.25 (the gray lines). Rounding each weight on its own lets the errors add up. GPTQ rounds the weights one at a time, and moves each rounding error into the next weight, before that one is rounded.</p>
+    <div class="strip"><div class="controls">
       <div class="seg" role="group" aria-label="Method" id="gMode"><button data-m="naive" aria-pressed="false">round each on its own</button><button data-m="gptq" aria-pressed="true">GPTQ: correct the next weight</button></div>
       <button class="primary" id="gPlay">▶ Play</button><button id="gStep">One weight</button><button id="gReset">Start over</button>
-    </div>
+    </div></div>
     <svg class="fig" id="gFig" viewBox="0 0 900 300" role="img" aria-label="Six weights, rounded one at a time, and the layer's output"></svg>
     <div class="legendrow">
       <span><span class="sw" style="border:2px solid var(--muted)"></span>the original weight</span>
       <span><span class="sw" style="background:var(--blue)"></span>the weight now, after corrections</span>
       <span><span class="sw" style="background:var(--orange)"></span>rounded and stored</span>
+      <span><span style="color:var(--orange)">▲</span> the next weight to be rounded</span>
     </div>
-    <div class="cols">
+    <div class="col">
       <div class="calc" id="gCalc" aria-live="polite"></div>
       <div class="stats" id="gStats"></div>
     </div>
@@ -278,12 +306,12 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="blocks">
     <h2><span class="n">6</span>One scale per block</h2>
     <p class="lead">Sixteen weights of very different sizes, stored with 4 bits. With one scale for all of them, the large weights set the range and the small ones round to 0. Give each block of weights its own scale, and the small ones keep their values. Each scale costs 16 more bits.</p>
-    <div class="controls">
+    <div class="strip"><div class="controls">
       <span class="note">Weights per block:</span>
       <div class="seg" role="group" aria-label="Block size" id="bSize">
         <button data-k="16" aria-pressed="true">16 (one scale)</button><button data-k="8" aria-pressed="false">8</button><button data-k="4" aria-pressed="false">4</button>
       </div>
-    </div>
+    </div></div>
     <svg class="fig" id="bFig" viewBox="0 0 900 240" role="img" aria-label="Each weight and its stored value"></svg>
     <div class="legendrow">
       <span><span class="sw" style="border:2px solid var(--muted)"></span>the weight</span>
@@ -311,6 +339,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <li>Grootendorst, M. (2024). A visual guide to quantization. <a href="https://newsletter.maartengrootendorst.com/p/a-visual-guide-to-quantization">newsletter.maartengrootendorst.com</a></li>
       <li>Jacob, B., et al. (2018). Quantization and training of neural networks for efficient integer-arithmetic-only inference. CVPR. arXiv:1712.05877</li>
       <li>Dettmers, T., Lewis, M., Belkada, Y., &amp; Zettlemoyer, L. (2022). LLM.int8(): 8-bit matrix multiplication for transformers at scale. NeurIPS. arXiv:2208.07339</li>
+      <li>Frantar, E., Ashkboos, S., Hoefler, T., &amp; Alistarh, D. (2023). GPTQ: Accurate post-training quantization for generative pre-trained transformers. ICLR. arXiv:2210.17323</li>
       <li>Gerganov, G., et al. llama.cpp and the GGUF format. <a href="https://github.com/ggml-org/llama.cpp">github.com/ggml-org/llama.cpp</a></li>
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
@@ -551,7 +580,7 @@ function drawOut() {
   el(svg, "text", { x: 50, y: 150, class: "lab" }, `space between codes: 1 ÷ s = ${fx(1 / s, 3)}`);
   const n = ORD.length, used = new Set(q.slice(0, n)).size, mae = ORD.reduce((t, v, i) => t + Math.abs(v - dq[i]), 0) / n;
   $("oStats").innerHTML = `<span>range: <b>±${+a.toPrecision(4)}</b></span><span>codes used by the 24 ordinary values: <b>${used}</b></span>` +
-    `<span>their mean absolute error: <b>${mae.toFixed(3)}</b></span>` + (withOut ? `<span>outlier error: <b>${(OUT - dq[n]).toFixed(2)}</b></span>` : "");
+    `<span>their mean absolute error: <b>${mae.toFixed(3)}</b></span>` + `<span>outlier error: <b>${withOut ? (OUT - dq[n]).toFixed(2) : "none, no outlier"}</b></span>`;
 }
 $("oClip").addEventListener("input", () => { stopRun("out"); clip = sliderToClip(+$("oClip").value); drawOut(); });
 $("oPlay").onclick = async () => {
@@ -626,7 +655,7 @@ function drawGptq(shown = gcur) {
     const v = gq[i] ?? shown[i];
     el(svg, "rect", { x: X(i), y: Math.min(Yv(v), y0), width: W, height: Math.abs(v) * H, fill: gq[i] != null ? "var(--orange)" : "var(--blue)", opacity: 0.85, rx: 3 });
     el(svg, "rect", { x: X(i) - 3, y: Math.min(Yv(w), y0), width: W + 6, height: Math.max(1, Math.abs(w) * H), fill: "none", stroke: "var(--muted)", "stroke-width": 2, rx: 3 });
-    el(svg, "text", { x: X(i) + W / 2, y: 282, "text-anchor": "middle", class: "lab" }, `w${i + 1} · x = ${GX[i]}`);
+    el(svg, "text", { x: X(i) + W / 2, y: 282, "text-anchor": "middle", class: "lab" }, `w${i + 1}, x${i + 1} = ${GX[i]}`);
     el(svg, "text", { x: X(i) + W / 2, y: v >= 0 ? Yv(v) - 6 : Yv(v) + 14, "text-anchor": "middle", fill: gq[i] != null ? "var(--orange)" : "var(--blue)" }, n2(v));
     if (i === gi && gi < GW.length) el(svg, "path", { d: `M${X(i) + W / 2 - 8} 296 L${X(i) + W / 2} 288 L${X(i) + W / 2 + 8} 296`, fill: "var(--orange)" });
   });
