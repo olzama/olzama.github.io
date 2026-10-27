@@ -195,7 +195,7 @@ body.present .stepper:has(.frag.hide[data-k="8"]) [data-c="8"] { visibility: hid
 .scatters { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
 .scatter { width: 100%; height: auto; display: block; }
 .scatter text { font-family: var(--font-body); font-size: 11px; }
-.kvc { display: block; width: 2.6em; height: 1.8em; border: 1px solid var(--blue); border-radius: 4px; background: var(--blue-soft); }
+.kvc { display: block; width: 2.6em; height: 1.8em; border: 1px solid var(--muted); border-radius: 4px; background: var(--panel); }   /* grey: blue means Galician word vectors on the pages */
 .squares { display: grid; gap: 3px; justify-content: center; }
 .squares i { width: 1.1em; height: 1.1em; border-radius: 2px; display: block; }
 .icons { display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap; }
@@ -3003,7 +3003,7 @@ print("they match" if count == expected else "they do not match: check the loop 
       </ul>
     </div>
     <div class="col">
-      <div class="fig"><img src="img/self-attention.png" alt="Self-attention from it to the animal"><span class="cap">Encoder layer 5 of a trained model; the coloured squares at the top are its 8 heads (orange: the one drawn); right, the word that looks (“it”), left, the words it looks at, darker = more weight; the sentence ends “too tired”, split into pieces as on the attention page (tire·d; _ ends a word). Illustration: jalammar.github.io/illustrated-transformer · Source: Vaswani et al., NeurIPS 2017 (arXiv:1706.03762)</span></div>
+      <div class="fig"><img src="img/self-attention.png" alt="Self-attention from it to the animal"><span class="cap">Layer 5; coloured squares: its 8 heads (orange: the one drawn); right: “it”, left: where it looks, darker = more; “tire·d”: one word, two pieces. Illustration: jalammar.github.io/illustrated-transformer · Source: Vaswani et al., NeurIPS 2017 (arXiv:1706.03762)</span></div>
     </div>
   </div>
   <div class="notes">
@@ -3243,9 +3243,9 @@ print("they match" if count == expected else "they do not match: check the loop 
     <div class="flow kvrow" style="gap:24px;align-items:center">
       <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i></div><span>word 1<br>(cache: 1)</span></div>
       <span class="arr">→</span>
-      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i><i class="kvc" style="background:color-mix(in srgb, var(--blue) 45%, var(--panel))"></i></div><span>word 2<br>(cache: 2)</span></div>
+      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i><i class="kvc" style="background:color-mix(in srgb, var(--muted) 45%, var(--panel))"></i></div><span>word 2<br>(cache: 2)</span></div>
       <span class="arr">→</span>
-      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i><i class="kvc" style="background:color-mix(in srgb, var(--blue) 45%, var(--panel))"></i><i class="kvc" style="background:var(--blue)"></i></div><span>word 3<br>(cache: 3)</span></div>
+      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i><i class="kvc" style="background:color-mix(in srgb, var(--muted) 45%, var(--panel))"></i><i class="kvc" style="background:var(--muted)"></i></div><span>word 3<br>(cache: 3)</span></div>
     </div>
     <ul class="points">
       <li>One word at a time. Each word written gets its own key and value (the decoder's self-attention looks at the words written so far); the <b>KV cache</b> keeps them, so it grows with every word</li>
