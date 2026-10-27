@@ -16,6 +16,8 @@ function stagger(xs) { const o = xs.map((x, i) => i).sort((a, b) => xs[a] - xs[b
   try { ids = (new URLSearchParams(location.search).get("embed") || "").split(",").filter(x => /^[a-z][a-z0-9]*$/.test(x)); } catch (e) {}
   if (!ids.length) return;
   document.documentElement.classList.add("embed");
+  // links to other pages open in a new tab: inside a lesson frame there is no way back
+  document.addEventListener("DOMContentLoaded", () => document.querySelectorAll('a[href]:not([href^="#"])').forEach(a => { a.target = "_blank"; a.rel = "noopener"; }));
   const st = document.createElement("style");
   st.textContent = ".wrap > " + ids.map(i => ":not(#" + i + ")").join("") + " { display: none !important; }"
     + " html.embed body { padding-block: 8px 16px; } html.embed .wrap { gap: 16px; }";
@@ -588,7 +590,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="walk">
     <h2><span class="n">4</span>The same steps in two trained models</h2>
     <p class="lead">Two small models translate our whole sentence. They are new models, neither the translation page's model (2 dimensions, 16 short phrases) nor the made-up one of sections 1 and 2. We trained them on the same data, and they are identical except for one thing: <b>without attention</b>, the decoder gets the summary for every English word; <b>with attention</b>, it gets a new mix of all the encoder's vectors for every English word, as in section 2. Their vectors have 8 dimensions, and their values were learned in training: every number below is the models' own. Each step links to the step of section 1 or 2 that does the same thing by hand.</p>
-    <div class="legend"><span class="note">one square = one dimension of a vector. Every number is between −1 and +1: each new vector of these models is partly the previous vector and partly a new candidate, kept in that range, starting from zeros.</span></div>
+    <div class="legend"><span class="note">one square = one dimension of a vector. Blue is positive and pink negative (key in the strip below). Every number stays between −1 and +1: each new vector is a mix of the previous vector and one computed from the new word, kept in that range, starting from zeros.</span></div>
     <div class="controls stick"><button id="wkBack">Back</button><button class="primary" id="wkNext">Next step</button><span class="pathstrip" id="wkSteps"></span><span class="legend" style="margin-left:auto">  <!-- in the sticky strip: the colour key stays in view at every step --><span class="lab">−1</span><span class="wkstrip h" id="wkLegend"></span><span class="lab">+1</span></span></div>
     <div id="wkBody">
     <h3 class="wkh" id="wkTitle"></h3>
@@ -727,7 +729,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <p class="label noembed">How one layer combines its 8 heads, for one piece</p>
     <div class="flow noembed"><span class="word">head 1: a mix for <i>miña</i></span><span class="word">head 2: a mix for <i>miña</i></span><span class="op">…</span><span class="word">head 8: a mix for <i>miña</i></span><span class="op">→</span><span class="word">the 8 mixes side by side as one long vector, × one learned table</span><span class="op">→</span><span class="word">+ the vector of <i>miña</i></span><span class="op">→</span><span class="word">one more learned step</span><span class="op">→</span><span class="word out">the vector of <i>miña</i> in the next layer</span></div>
     <p class="label">The 8 heads of one layer: one square grid each, with a row and a column for every piece of our sentence; rows look, columns are looked at</p>
-    <p class="note">A dark line just below or above the diagonal: each piece looks at the piece just before it or just after it.</p>
+    <p class="note">The diagonal (top left to bottom right) is each piece looking at itself. A dark line just below it: each piece looks at the piece before it (layer 6, head 7). Just above it: at the piece after it (layer 3, head 4).</p>
     <div class="controls stick">
       <label class="note" for="selfLayer">Encoder layer</label>
       <select id="selfLayer"></select>
@@ -750,7 +752,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <section class="panel" id="who">
     <h2><span class="n">8</span>Who decides what a head does?</h2>
     <p class="lead">Section 7 showed heads with habits: in layer 6 of the real encoder, head 7 makes each piece look at the piece before it. Who gave it that job? Nobody. The people who build a model choose its size and what it predicts. Every head starts with random values, and training nudges all of them at once, as on the <a href="mt.html#train">translation page, section 1</a>. A head ends up with a job because, from its random start, that job was the quickest way to fewer mistakes.</p>
-    <p class="lead keep">Below, a tiny model with 2 layers of 2 heads learns the classic sentence <i>The animal didn't cross the street because it was tired</i>: it must say what “it” refers to. <i>Tired</i> means the animal, <i>wide</i> means the street. It trains on 96 such sentences; the three runs differ only in their random start.</p>
+    <p class="lead keep">Below, a tiny model with 2 layers of 2 heads learns the classic sentence <i>The animal didn't cross the street because it was tired</i>: it must say what “it” refers to. <i>Tired</i> means the animal, <i>wide</i> means the street. It trains on 96 such sentences; the three runs differ only in their random start. Nobody gives a head its job: every head starts random, and training nudges all of them at once.</p>
     <details class="how">
       <summary>How to read the pictures</summary>
       <ul class="tries">
@@ -1133,7 +1135,7 @@ function render() {
   else if (maxNoun > 0.6 && aHead !== pHead) story = `In this run the job is split: head ${aHead.head} of layer 2 finds the animal (${f(aHead.animal_when_animal)}) and head ${pHead.head} finds the place (${f(pHead.place_when_place)}). Nobody told either head which noun to take.`;
   else story = `Every answer is right, yet no head in layer 2 looks at either noun much (at most ${f(maxNoun)}). The information reaches “it” another way, through the other words in layer 1. A model does not have to solve a task the way a person would describe it.`;
   $("whoNote").textContent = !done
-    ? (s.step === 0 ? "Step 0: every head is random, so “it” looks almost everywhere a little. Press Train." : "Training nudges all four heads at once. Watch which head starts to look at the animal or the street: nothing tells it to.")
+    ? (s.step === 0 ? "Step 0: every head is random, so “it” looks almost everywhere a little. Random values still give an answer for every sentence, and they can be wrong more often than guessing. Press Train." : "Training nudges all four heads at once. Watch which head starts to look at the animal or the street: nothing tells it to.")
     : story + " Compare the three starts: same model, same sentences, different jobs. Switching off one head costs many answers, so each head carries part of the work.";
 }
 $("whoRuns").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
@@ -1367,7 +1369,7 @@ function drawStep() {
   };
   const clear = ids => ids.forEach(id => $(id).innerHTML = "");
   if (w) {
-    $("inAtt").innerHTML = fig("s", "decoder state") + op("+") + fig("c", "mix");
+    $("inAtt").innerHTML = fig("s", "decoder state") + op("and") + fig("c", "mix");
     fill($("inAtt"), { s: x.decAtt[i], c: x.ctxAtt[i] });
     const sc = x.scores[i], order = w.map((v, j) => j).sort((a, b) => w[b] - w[a]), top = order.slice(0, 3), j0 = top[0];
     bars("barsAtt", x.pAtt[i], x.att, i);
@@ -1388,7 +1390,7 @@ function drawStep() {
   // without attention: the state changes, the summary vector does not
   const i1 = T_.One - 1, s1 = i1 >= 0 && i1 < x.one.length && !doneO;
   if (s1) {
-    $("inOne").innerHTML = fig("s", "decoder state") + op("+") + fig("c", "summary");
+    $("inOne").innerHTML = fig("s", "decoder state") + op("and") + fig("c", "summary");
     fill($("inOne"), { s: x.decOne[i1], c: x.sumOne });
     bars("barsOne", x.pOne[i1], x.one, i1);
   } else clear(["inOne", "barsOne"]);
@@ -2343,7 +2345,7 @@ function panel(model, i, compact = false) {
   const prev = i === 0 ? "computed by one learned step from the summary and the start mark ‹start›; no English word yet" : `computed from its state for word ${i}, the word it wrote (“${out[i - 1]}”) and ${got}`;
   const right = x.ref[i] === P[0][0] || out.slice(0, i).every((v, k) => v === x.ref[k]) ? x.ref[i] : null;
   const last = (n, from) => `<p class="label">${n}the next word: the decoder state and ${from} → a probability for each English word (section 1, steps 4 and 6)</p>
-    <div class="wkrow">${strip(st, `decoder state for word ${i + 1}`)}<span class="op">+</span>${strip(att ? x.ctxAtt[i] : x.sumOne, from)}<span class="op">→</span>${bars(P, right)}</div><p class="note">The decoder state for word ${i + 1}: ${prev}.</p>`;
+    <div class="wkrow">${strip(st, `decoder state for word ${i + 1}`)}<span class="op">and</span>${strip(att ? x.ctxAtt[i] : x.sumOne, from)}<span class="op">→</span>${bars(P, right)}</div><p class="note">The decoder state for word ${i + 1}: ${prev}.</p>`;
   if (!att) return `<div class="wkpanel"><p class="label"><b>Without attention</b>, word ${i + 1}</p>${last("", "the summary")}</div>`;
   const n = x.src.length, w = x.attw[i], sc = x.scores[i], top = [...w.keys()].sort((a, b) => w[b] - w[a]), t3 = top.slice(0, 3);
   const rest = 1 - t3.reduce((a, j) => a + w[j], 0), restMax = w[top[3]];
@@ -2387,13 +2389,13 @@ const STEPS = [
   ["The encoder's vectors", () => ({ toy: [2, 3], out: [0, 0], src: ["enc"], panels: "",
     text: "The encoder makes one vector per Galician word: 8 numbers, drawn as 8 squares. As in section 1, step 2, it reads the words one at a time, and each vector is computed from the vector before it and the new word (the arrows), so each also carries something of the words before it. The last one is the summary. The rule is not the ½ + ½ of section 1 but a learned one. Each model has its own encoder; this is the encoder of the model with attention. Step 3 shows the other one. In section 1 each vector had 3 numbers, one per word; here the 8 numbers have no names: training chose them." })],
   ["Word 1, without attention", () => ({ toy: [4, 6], out: [1, 1], cur: 0, src: ["one"], panels: panel("one", 0),
-    text: "The decoder starts from the summary. As in section 1, steps 4 and 6, it combines its state and the summary into a probability for each English word; here both are vectors of 8 learned numbers. The first word must be “a” or “an”, and English writes “an” before aunt and uncle: to choose, the decoder needs to know that the noun is tía. But tía is the second of the sentence's 31 words and marks, and the 29 after it changed the vector before the summary was made. The model writes “a”: wrong." })],
+    text: "Above, now the encoder of the model without attention: only its summary (outlined) reaches the decoder, so its other vectors are faded. The decoder starts from the summary. As in section 1, steps 4 and 6, it combines its state and the summary into a probability for each English word; here both are vectors of 8 learned numbers. The first word must be “a” or “an”, and English writes “an” before aunt and uncle: to choose, the decoder needs to know that the noun is tía. But tía is the second of the sentence's 31 words and marks, and the 29 after it changed the vector before the summary was made. The model writes “a”: wrong." })],
   ["Word 1, with attention", () => ({ toy: [8, 9, 10], out: [1, 1], cur: 0, src: ["att", x.attw[0]], panels: panel("att", 0),
-    text: "The decoder scores each of the 31 Galician vectors, as in section 2, step 1. One thing differs: the query is the decoder state itself, not computed by a made-up rule; training shaped the states so that the vectors the decoder needs score highest (in the terms of section 3, the state's numbers are the rewards). The box goes through the three stages: the weights (also the orange bars under the vectors), the mix, and the next word, with the mix in place of the summary." })],
+    text: "The decoder scores each of the 31 Galician vectors, as in section 2, step 1. One thing differs: the query is the decoder state itself, not computed by a made-up rule; training shaped the states so that tía's vector scores highest here (in the terms of section 3, the state's numbers are the rewards). Why escravo gets the second-largest weight, these numbers do not show: a weight shows where the model looks, not what it needs. The box goes through the three stages: the weights (also the orange bars under the vectors), the mix, and the next word, with the mix in place of the summary." })],
   ["Word 2: each model goes on from its own word", () => ({ toy: [7, 11], out: [2, 2], cur: 1, src: ["att", x.attw[1]], panels: panel("one", 1) + panel("att", 1, true),
     text: "Each decoder computes its state for word 2 from its state for word 1, the word it just wrote (section 1, step 7), and the summary or the mix. In every training translation, “an” is followed by aunt or uncle, and “a” by friend, neighbor or cousin.\nWithout attention, the state has taken in “a”: the probability goes to the three nouns that follow “a”, nearly evenly, and aunt is not among them. The model writes “friend”: the wrong first word made the right second word unreachable.\nWith attention, the state has taken in “an”: the choice is between aunt and uncle. The new state is a new query, so the weights change, and this time they are spread over many words. Still “aunt” wins. Whether the new mix or the state (which took in word 1's mix, mostly tía) decides it, these numbers do not show." })],
   ["The rest of the sentence: part of the saying is lost", () => ({ toy: [], out: [x.one.length, x.att.length], cur: -1, src: null, panels: sayingPanels(),
-    text: "Without attention, the rest of the translation also differs from the one with attention, and part of the saying is lost: “says and master of what one” (struck through). The boxes show where. The summary was made right after the saying's last verb, cala (keeps quiet), and the model writes that verb first; then it closes the saying. Section 5 lets you step through every word of both models, and other sentences and vector sizes." })],
+    text: "Without attention, the rest of the translation also differs from the one with attention, and part of the saying is lost: “says and master of what one” (struck through). The boxes show where. The summary was made right after the saying's last verb, cala (keeps quiet), and the model writes that verb first; then it closes the saying. Section 5 of the full page (Open the full page) lets you step through every word of both models, and other sentences and vector sizes." })],
 ];
 let k = 0;
 STEPS.forEach(([t], i) => { const b = document.createElement("button"); b.textContent = i + 1; b.title = t; b.addEventListener("click", () => { k = i; draw(); }); $("wkSteps").appendChild(b); });
@@ -2405,7 +2407,7 @@ function draw() {
   if (v.src) srcSvg(v.src[0], v.src[1]);
   $("wkPanels").innerHTML = v.panels;
   $("wkText").innerHTML = v.text.split("\n").map(esc).join("<br><br>");
-  $("wkToy").innerHTML = v.toy.length ? `<span class="note">The same in the hand-set model:</span>` + v.toy.map(i => `<button data-toy="${i - 1}">${i <= 7 ? `section 1, step ${i}` : `section 2, step ${i - 7}`}</button>`).join("") : "";
+  $("wkToy").innerHTML = v.toy.length && $("look").getClientRects().length ? `<span class="note">The same in the hand-set model:</span>` + v.toy.map(i => `<button data-toy="${i - 1}">${i <= 7 ? `section 1, step ${i}` : `section 2, step ${i - 7}`}</button>`).join("") : "";
   $("wkBack").disabled = k === 0; $("wkNext").disabled = k === STEPS.length - 1;
   [...$("wkSteps").children].forEach((b, i) => b.classList.toggle("on", i === k));
 }

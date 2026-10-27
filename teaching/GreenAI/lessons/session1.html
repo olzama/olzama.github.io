@@ -3673,7 +3673,7 @@ document.querySelectorAll(".tabs").forEach(tabs => {
   const frame = tabs.parentElement.querySelector("iframe");
   tabs.querySelectorAll("button[data-go]").forEach(b => b.onclick = () => {
     tabs.querySelectorAll("button[data-go]").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
-    try { const w = frame.contentWindow, el = frame.contentDocument.getElementById(b.dataset.go); w.scrollTo(0, el.getBoundingClientRect().top + w.scrollY); } catch (e) {}
+    try { const w = frame.contentWindow, el = frame.contentDocument.getElementById(b.dataset.go); w.__lessonScrollAt = performance.now(); w.scrollTo(0, el.getBoundingClientRect().top + w.scrollY); } catch (e) {}
   });
 });
 
@@ -4003,6 +4003,16 @@ if (!isNotes) document.addEventListener("keydown", keys);
 document.querySelectorAll("iframe.frame").forEach(f => f.addEventListener("load", () => {
   zoomFrames();
   try {
+    // with the zoom on the frame, Chromium sends the frame's scroll back to the top when a control gets
+    // focus or content is replaced; a jump straight to the top that no wheel, key or touch asked for is undone
+    const fw = f.contentWindow, fd = f.contentDocument;
+    let lastY = fw.scrollY, userAt = 0;
+    ["wheel", "keydown", "touchstart"].forEach(t => fd.addEventListener(t, () => { userAt = performance.now(); }, { capture: true, passive: true }));
+    fw.addEventListener("scroll", () => {
+      const y = fw.scrollY;
+      if (y === 0 && lastY > 60 && performance.now() - Math.max(userAt, fw.__lessonScrollAt || 0) > 600) { fw.scrollTo(0, lastY); return; }
+      lastY = y;
+    }, { passive: true });
     f.contentDocument.addEventListener("keydown", e => {
       if (!presenting()) return;
       if (e.key === "PageDown") { e.preventDefault(); next(); }
