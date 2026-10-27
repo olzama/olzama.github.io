@@ -2896,7 +2896,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="notes">
     <p>Before we compute attention by hand, the three names you will meet everywhere. Think of a search. The query is what you are searching for: here, what the decoder needs before the word it is about to write. Each source word has a key, a short descriptor the query is compared against, and a value, the content you get back from it.</p>
     <p>The comparison is the dot product of the query with each key: the score. Softmax, as in skip-gram, turns the scores into weights that are all positive and add up to 1. The mix is the sum of the values, each multiplied by its weight, and it goes into the decoder's state. In the picture, a thicker line means a larger weight; the weights are made up for the picture, with most of the weight on tía.</p>
-    <p>On the next page the model is small enough to compute by hand, and there the keys and the values are the same vectors: the encoder's vector after each Galician word. In transformers they are computed separately from each word, and the query too; we come back to that with self-attention.</p>
+    <p>On the next page the model is small enough to compute by hand, and there the keys and the values are the same vectors: the encoder's vector after each Galician word. In real models each of the three is computed from a word's vector by its own learned table (attention page, section 6, step 4); in self-attention every word makes its own query.</p>
   </div>
 </section>
 
@@ -2973,7 +2973,7 @@ print("they match" if count == expected else "they do not match: check the loop 
     <p>On the attention page, section 5 (open the full page: it is not on these screens), with attention, 8 dimensions, the 0.54 on the full stop is at English word 9. The table comes from running the saved model again with the mix replaced.</p>
     <p>Say it plainly: the attention weights at this word land on the full stop, but the full stop is not what makes the model write "with". The English so far, "who solved everything", already settles it: in every training sentence "everything" is followed by "with". Taking the Galician away entirely, all zeros, still gives 0.997.</p>
     <p>The evidence that the weights here are arbitrary: three models trained on the same data, with 8, 16 and 64 numbers per vector, look at three unrelated places (the full stop, con, e), and all three write "with". If someone asks whether the model ignores what it reads: no. Given only the vector of refráns (proverbs), the probability of "with" drops to 0.06. A mix that points strongly to another word can take over; this one doesn't need to.</p>
-    <p>The take-away for the real model on the next screen: a heat map of attention weights shows where the model looked, not what it used. In the real model, several heads put about half of their weight on the commas, the quotation marks and the end-of-sentence mark, although these are only 5 of the 35 pieces the real model reads in our sentence (words or parts of words, as the next screen shows; the small model reads 31 words and marks).</p>
+    <p>The take-away for the real model on the next screen: a heat map of attention weights shows where the model looked, not what it used. In the real model, several heads put about half of their weight on the commas, the quotation marks and the end marker ‹end›, although these are only 5 of the 35 pieces the real model reads in our sentence (words or parts of words, as the next screen shows; the small model reads 31 words and marks).</p>
   </div>
 </section>
 
@@ -2985,8 +2985,9 @@ print("they match" if count == expected else "they do not match: check the loop 
   </div>
   <div class="notes">
     <p>What to take from this screen: one row of an attention grid is one English word's weights over the Galician words, as computed by hand in section 2; a head is one run of section 2's computation (query, scores, weights, mix) with its own learned query, key and value tables, so it makes one grid; a layer runs several heads on the same vectors and combines their mixes into one new vector per word, and the next layer starts from those; a real model stacks several layers, here 6 × 8 = 48 grids. The weights show where the model looks: sometimes that fits a mistake, sometimes not.</p>
-    <p>Six steps, on the short phrase unha tía miña. Step 1: before “an”, section 2's three weights as bars, then the same numbers as one row of cells. Step 2: one row per English word: the grid. Step 3: the real model, opus-mt, on the same phrase. Its grid reads the same way: “Aunt” puts 0.98 on tía. But it writes “A Aunt of mine”. Choosing “An” needs tía, as for the hand-set model, and the row of “A” puts 0.00 on tía in this head, 0.16 on average over all 48 grids: when it chose the article, it looked at tía very little. The capital in “Aunt” is a second slip. (On the whole sentence, below on this screen, the same model writes “An aunt of mine”.) Step 4: what a head is, and the 8 heads of layer 5 as 8 grids. Step 5: all 48 grids: layer 1 spreads its weight or rests it on the end marker; in layer 5 most heads, and in layer 6 several, point each English word at the Galician word it translates. Step 6: down to the whole sentence.</p>
+    <p>Six steps, on the short phrase unha tía miña. Step 1: before “an”, section 2's three weights as bars, then the same numbers as one row of cells. Step 2: one row per English word: the grid. Step 3: the real model, opus-mt, on the same phrase. Its grid reads the same way: “Aunt” puts 0.98 on tía. But it writes “A Aunt of mine”. Choosing “An” needs tía, as for the made-up model, and the row of “A” puts 0.00 on tía in this head, 0.16 on average over all 48 grids: when it chose the article, it looked at tía very little. The capital in “Aunt” is a second slip. (On the whole sentence, below on this screen, the same model writes “An aunt of mine”.) Step 4: what a head is, and the 8 heads of layer 5 as 8 grids. Step 5: all 48 grids: layer 1 spreads its weight or rests it on the end marker; in layer 5 most heads, and in layer 6 several, point each English word at the Galician word it translates. Step 6: down to the whole sentence.</p>
     <p>The whole sentence: press Play the translation, then click aunt. Then the three buttons “Three places where the translation goes wrong”: in all three, layer 6, head 2 looks at the right Galician word, and the model still writes something wrong. So here the weights do not fit the mistake; with “A Aunt” they did.</p>
+    <p>Step 4 multiplies a vector by a table. If the class needs it, show the Refresher screen (Contents, last part): multiplying matrices.</p>
   </div>
 </section>
 
@@ -3000,6 +3001,7 @@ print("they match" if count == expected else "they do not match: check the loop 
       <ul class="points">
         <li>Vaswani et al. (2017): the same mechanism <i>within</i> one sentence: every word looks at every word, itself included, all at once</li>
         <li>“it” → “the animal”, with no hand-written rule</li>
+      <li>No decoder here: every word's vector gives its own query, key and value, each through its own learned table (attention page, section 6, step 4)</li>
       </ul>
     </div>
     <div class="col">
@@ -3013,7 +3015,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="multihead" data-step="5">
-  <header><span class="kind">Step 5 · Self-attention</span><h2>Multiple alignments at once: multi-head attention</h2></header>
+  <header><span class="kind">Step 5 · Self-attention</span><h2>Several heads at once: multi-head attention</h2></header>
   <div class="body">
     <ul class="points">
       <li>Several heads side by side, each with its own grid of weights and its own mix; the mixes are combined into one new vector per word</li>
@@ -3042,7 +3044,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   </div>
   <div class="notes">
     <p>This is the encoder of the real model, reading our Galician sentence. Each small square grid is one head's grid: rows are the words that look, columns the words looked at. Choose encoder layer 6 and head 7, then click miña: it looks back at tía, with weight 0.94. This head looks at the previous word. Choose layer 3, head 4: this head looks at the next word.</p>
-    <p>Press the tab Who decides what a head does. A tiny model with 2 layers of 2 heads learns the sentence “The animal didn't cross the street because it was tired”. It has to find what “it” refers to. Choose start A, B or C and press Train. The three runs differ only in their random start. In one run, one head does the job. In another, the job is split between two heads. In the third, no head of layer 2 looks at the nouns much, yet every answer is right: the information reaches “it” through the other words, in layer 1. A model does not have to solve a task the way a person would describe it.</p>
+    <p>Press the tab Who decides what a head does. A tiny model with 2 layers of 2 heads learns 96 sentences like “The animal didn't cross the street because it was tired” (or “… because it was wide”). It has to find what “it” refers to. Choose start A, B or C and press Train. The three runs differ only in their random start. In one run, one head does the job. In another, the job is split between two heads. In the third, no head of layer 2 looks at the nouns much, yet every answer is right: the information reaches “it” through the other words, in layer 1. A model does not have to solve a task the way a person would describe it.</p>
   </div>
 </section>
 
@@ -3071,7 +3073,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="body cols">
     <div class="col">
       <ul class="points">
-        <li>Two sublayers, always in this order: <b>self-attention</b>, then a <b>feed-forward network</b></li>
+        <li>Two parts, always in this order: <b>self-attention</b>, then a <b>feed-forward network</b></li>
         <li>Self-attention mixes information across words; the feed-forward network does not: it is the “one more learned step” of the attention page (sections 6 and 7), run on each word's vector separately</li>
         <li>This shape is an <b>encoder</b> block. <b>Decoder</b> blocks add one more part: <b>cross-attention</b> into the encoder's output: the decoder's attention of the attention page, section 6</li>
       </ul>
@@ -3085,7 +3087,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="quadratic" data-step="6">
-  <header><span class="kind">Step 6 · Transformers</span><h2>Why attention cost grows with context length</h2></header>
+  <header><span class="kind">Step 6 · Transformers</span><h2>Why attention cost grows with the length of the input</h2></header>
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 760 480" role="img" aria-label="Every word is compared with every word: 4 words give 4 × 4 = 16 comparisons, 8 words give 8 × 8 = 64. n words give n², and 2n words give 4n²">
@@ -3212,7 +3214,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   </div>
   <div class="notes">
     <p>Self-attention computes a score for every pair of words in the input, each word with every word, itself included: for n words, n × n scores. Step through the board: 4 words, 16 scores; 8 words, 64. Twice the words, four times the scores. That is quadratic growth.</p>
-    <p>“unha tía miña” was three words. The whole story is thousands. A caution, which Notebook 01d measures: attention is only part of the work. At the lengths of a short text, the feed-forward parts, which grow only in proportion to the words, take most of the time, so the whole encoder grows by about 2 per doubling there. Attention's own time grows by about 4 per doubling, from about 2,000 tokens on, and above about 3,000 tokens it is the larger part.</p>
+    <p>“unha tía miña” was three words. The whole story is thousands. A caution, which Notebook 01d measures: attention is only part of the work. At the lengths of a short text, the feed-forward parts, which grow only in proportion to the words, take most of the time, so the whole encoder grows by about 2 per doubling there. Attention's own time grows by about 4 per doubling, from about 2,000 tokens (pieces of words, as on the real model's screen) on, and above about 3,000 tokens it is the larger part.</p>
   </div>
 </section>
 
@@ -3221,7 +3223,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="body">
     <div class="activity"><h3>Notebook 01d, in Colab (CPU only, no GPU needed)</h3><div>
       <ul class="points">
-        <li>Part A: score all 48 heads of the real model's encoder (its self-attention), on a sentence you choose, and find what each one does</li>
+        <li>Part A: for each of the 48 heads of the real model's encoder (its self-attention), measure how much it looks at the previous, the same or the next piece, on a sentence you choose</li>
         <li>Part B: count the attention scores, then time the whole encoder as the text gets longer. Does the time grow like n²?</li>
       </ul>
       <div class="links">
@@ -3297,7 +3299,8 @@ print("they match" if count == expected else "they do not match: check the loop 
     </ul>
   </div>
   <div class="notes">
-    <p>The genuine upside: one single model handling 100+ languages, with no need to train and maintain a separate model for every language pair, which the statistical and early neural MT eras required — literally one trained system per pair. It's zero-shot capable, can attempt a pair it wasn't explicitly fine-tuned on, and controllable by instruction: translate this formally, keep the idioms.</p>
+    <p>Back to translation, with what we now know about cost. A general-purpose LLM can translate between many of the 100+ languages it was trained on: one model instead of one per language pair, and you steer it with an instruction, such as “formally” or “keep the idioms”.</p>
+    <p>But, as the previous screen showed, every word it reads or writes passes through a much bigger model, and the instruction is read too: usually far more computation per translation than a dedicated model like opus-mt. Notebook 01e measures exactly this.</p>
   </div>
 </section>
 
@@ -3313,7 +3316,8 @@ print("they match" if count == expected else "they do not match: check the loop 
     <p class="src">Source: Gamallo et al., “A Galician-Portuguese Generative Model,” EPIA 2024; Proxecto Nós (USC)</p>
   </div>
   <div class="notes">
-    <p>"100+ languages" sounds comprehensive, but for most mainstream LLMs, Galician's actual share of the training data is, in the words of a paper studying this directly, "almost residual" — a vanishingly small fraction, sitting close enough to Spanish and Portuguese that general models tend to blur the three together rather than reliably producing genuine, correct Galician. The fix researchers found wasn't a bigger general model, it was a much smaller, dedicated one: 1.3 billion parameters, trained specifically on real Galician and Portuguese text — Proxecto Nós at USC is one source of this kind of work. That small, dedicated model beat the giant general-purpose base model specifically at producing correct Galician.</p>
+    <p>“100+ languages” sounds comprehensive, but in most mainstream LLMs Galician is a tiny share of the training text, in the words of a paper that studied it, “almost residual”. Galician is close to Spanish and Portuguese, and general models tend to blur the three: the output drifts into Spanish or Portuguese.</p>
+    <p>The fix that worked was not a bigger general model but a smaller dedicated one: 1.3 billion parameters, trained on Galician and Portuguese text (Gamallo et al. 2024; Proxecto Nós at the University of Santiago de Compostela works on such models). It produced correct Galician better than the giant general model it was compared with. The same pattern as opus-mt: a model built for the task can be both smaller and better at it.</p>
   </div>
 </section>
 
@@ -3409,7 +3413,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="body">
     <ul class="points">
       <li>Notebook 01a: how much energy and CO₂eq did your run measure? Same model, different hardware: did it matter?</li>
-      <li>Notebook 01d: did your attention time grow by about 4 per doubling of the input?</li>
+      <li>Notebook 01d: per doubling of the input, how much did the whole encoder's time grow, and attention's alone?</li>
       <li>Notebook 01e: how many orders of magnitude separated your cheapest and priciest approach? Did the three metrics agree?</li>
     </ul>
   </div>
