@@ -1072,18 +1072,18 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
   <div class="body cols wide-left">
     <div class="col">
       <div class="board">
-      <svg viewBox="0 0 620 400" role="img" aria-label="All 26 documents: 4,031 tokens; top 2 on average 310; 4,031 ÷ 310 ≈ 13 times fewer tokens. Pairs: 4,031² ≈ 16.2 million; 310² = 96,100; 16.2 million ÷ 96,100 ≈ 169 times fewer pairs">
+      <svg viewBox="0 0 620 400" role="img" aria-label="All 26 documents: 4,037 tokens; top 2 on average 310; 4,037 ÷ 310 ≈ 13 times fewer tokens. Pairs: 4,037² ≈ 16.3 million; 310² = 96,100; 16.3 million ÷ 96,100 ≈ 170 times fewer pairs">
 <text y="50" font-size="25" style="fill:var(--muted)" data-s="1" data-d="0" data-line="A" data-x0="20" id="a0">all 26 documents:</text>
-<text y="50" font-size="25" style="fill:currentColor" data-s="1" data-d="0.3" data-line="A">4,031 tokens</text>
+<text y="50" font-size="25" style="fill:currentColor" data-s="1" data-d="0.3" data-line="A">4,037 tokens</text>
 <text y="100" font-size="25" style="fill:var(--muted)" data-s="2" data-d="0" data-line="B" data-x0="20">top 2, on average:</text>
 <text y="100" font-size="25" style="fill:var(--blue)" data-s="2" data-d="0.3" data-line="B">310 tokens</text>
-<text y="165" font-size="25" style="fill:currentColor" data-s="3" data-d="0" data-line="C" data-x0="20">4,031 ÷ 310</text>
+<text y="165" font-size="25" style="fill:currentColor" data-s="3" data-d="0" data-line="C" data-x0="20">4,037 ÷ 310</text>
 <text y="165" font-size="25" style="fill:var(--blue)" data-s="4" data-d="0" data-line="C">≈ 13 times fewer tokens</text>
 <text y="245" font-size="25" style="fill:var(--muted)" data-s="5" data-d="0" data-line="P1" data-x0="20">pairs:</text>
-<text y="245" font-size="25" style="fill:currentColor" data-s="5" data-d="0.3" data-line="P1">4,031<tspan dy="-11" font-size="0.68em">2</tspan><tspan dy="11">​</tspan> ≈ 16.2 million</text>
+<text y="245" font-size="25" style="fill:currentColor" data-s="5" data-d="0.3" data-line="P1">4,037<tspan dy="-11" font-size="0.68em">2</tspan><tspan dy="11">​</tspan> ≈ 16.3 million</text>
 <text y="295" font-size="25" style="fill:currentColor" data-s="6" data-d="0" data-line="P2" data-x0="95">310<tspan dy="-11" font-size="0.68em">2</tspan><tspan dy="11">​</tspan> = 96,100</text>
-<text y="360" font-size="25" style="fill:currentColor" data-s="7" data-d="0" data-line="P3" data-x0="20">16.2 million ÷ 96,100</text>
-<text y="360" font-size="25" style="fill:var(--orange)" data-s="8" data-d="0" data-line="P3">≈ 169 times fewer pairs</text>
+<text y="360" font-size="25" style="fill:currentColor" data-s="7" data-d="0" data-line="P3" data-x0="20">16.3 million ÷ 96,100</text>
+<text y="360" font-size="25" style="fill:var(--orange)" data-s="8" data-d="0" data-line="P3">≈ 170 times fewer pairs</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
@@ -1099,8 +1099,8 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
   </div>
   <div class="notes">
     <p>Why does reading fewer tokens save energy? Recall attention from Session 1. Every token is compared with every other token. Twice the tokens means four times the pairs.</p>
-    <p>The board works it out for today's collection. All 26 documents together are 4,031 tokens. The two documents the retriever picks are, on average over the 26 questions, about 310 tokens. 4,031 divided by 310 is about 13: thirteen times fewer tokens. The panel before showed one question at a time, with the question's own tokens included, so its numbers were a little different: for the PUE question, 4,040 and 355.</p>
-    <p>The pairs: 4,031 squared is about 16.2 million. 310 squared is 96,100. 16.2 million divided by 96,100 is about 169. So attention compares about 169 times fewer pairs.</p>
+    <p>The board works it out for today's collection. All 26 documents together are 4,037 tokens. The two documents the retriever picks are, on average over the 26 questions, about 310 tokens. 4,037 divided by 310 is about 13: thirteen times fewer tokens. The panel before showed one question at a time, with the question's own tokens included, so its numbers were a little different: for the PUE question, 4,046 and 355.</p>
+    <p>The pairs: 4,037 squared is about 16.3 million. 310 squared is 96,100. 16.3 million divided by 96,100 is about 170. So attention compares about 170 times fewer pairs.</p>
     <p>But attention is only part of the work. Other parts of the model do an amount of work that grows in step with the number of tokens, not with the square. And writing the answer takes one run of the model for every token written, and the answer is about as long in both cases. Only the attention part of each run gets cheaper, because there are fewer input tokens in the KV cache to look at. So the energy saving will be smaller than the token saving. You will measure how much smaller this afternoon.</p>
   </div>
 </section>
