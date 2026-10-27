@@ -2086,8 +2086,18 @@ function planes(px, steps, groups) {
     host.appendChild(el);
     const p = { el, g, items: null, i: 0, view: view3d(el.querySelector("svg.v3"), el.querySelector(".cap")) };
     P.push(p);
-    el.querySelector(".pb").addEventListener("click", () => { if (p.i > 0) { p.i--; draw(pi); } });
-    el.querySelector(".pn").addEventListener("click", () => { if (p.i < p.items.length - 1) { p.i++; draw(pi); } else open(pi + 1); });
+    // in a lesson frame the view is short: after each click, bring what changed into view
+    // (a new step: the plane's top with its text; a new part: the last part of the board that changed)
+    const step = d => {
+      const emb = document.documentElement.classList.contains("embed");
+      const h = el.querySelector(".wkh").textContent, kids = [...el.querySelectorAll(".tyboard > *")], was = kids.map(k => k.innerHTML);
+      d(); if (!emb) return;
+      if (el.querySelector(".wkh").textContent !== h) { el.scrollIntoView({ block: "start" }); return; }
+      const now = [...el.querySelectorAll(".tyboard > *")], ch = now.filter((k, i) => k.innerHTML !== was[i]).pop();
+      if (ch) ch.scrollIntoView({ block: "nearest" });
+    };
+    el.querySelector(".pb").addEventListener("click", () => { if (p.i > 0) step(() => { p.i--; draw(pi); }); });
+    el.querySelector(".pn").addEventListener("click", () => { if (p.i < p.items.length - 1) step(() => { p.i++; draw(pi); }); else open(pi + 1); });
   });
   const itemsOf = p => p.items || (p.items = p.g.flatMap(si => frames(si).map((_, fi) => [si, fi])));
   // the heading block keeps the height of its tallest step text, so nothing below it moves when the step changes
