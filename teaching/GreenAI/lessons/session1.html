@@ -3334,7 +3334,7 @@ print("they match" if count == expected else "they do not match: check the loop 
       <ul class="points">
         <li><b>Input</b>: a few short documents about green AI, and a question. The model must answer from the documents, in one short sentence.</li>
         <li><b>Model</b>: Qwen2.5-1.5B-Instruct, a small general-purpose language model</li>
-        <li><b>Score</b>: an answer is right if it contains the reference answer, ignoring capital letters. <b>Accuracy</b> = right answers ÷ all questions.</li>
+        <li><b>Score</b>: an answer is right if it contains the reference answer as whole words, ignoring capital letters. <b>Accuracy</b> = right answers ÷ all questions.</li>
         <li>Two runs: with the documents, and without them. What do the documents add to accuracy, and to energy?</li>
       </ul>
     </div>
@@ -3350,7 +3350,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="notes">
     <p>Before the notebook, a short look at the task of Notebook 01a: question answering.</p>
     <p>The model gets a few short documents, about green AI, and a question. It has to answer from the documents, in one short sentence. The model is Qwen 2.5, with 1.5 billion parameters: a small general-purpose language model, small enough for a free Colab GPU.</p>
-    <p>How do we know if an answer is right? Each question has a reference answer. For example: what does the acronym PUE stand for? The reference is “power usage effectiveness”. An answer counts as right if it contains the reference, ignoring capital letters. Accuracy is the number of right answers divided by the number of questions.</p>
+    <p>How do we know if an answer is right? Each question has a reference answer. For example: what does the acronym PUE stand for? The reference is “power usage effectiveness”. An answer counts as right if it contains the reference as whole words, ignoring capital letters: “rag” does not count inside “average”, and “0.3” does not count inside “10.3”. Accuracy is the number of right answers divided by the number of questions.</p>
     <p>This check is simple and costs almost nothing. But it is not perfect: a right answer in other words counts as wrong. Keep that in mind when you read your accuracy.</p>
     <p>You run the questions twice: once with the documents, and once without them. Then you compare. How much do the documents add to accuracy? And how much do they add to the energy, since the model now reads much more text? This question comes back in Session 3, with retrieval.</p>
   </div>

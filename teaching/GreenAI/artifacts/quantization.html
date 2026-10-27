@@ -92,8 +92,9 @@ table.t th, table.t td { padding: 4px 9px; text-align: right; border-bottom: 1px
 table.t th { color: var(--muted); font-weight: 400; font-family: var(--font-body); font-size: 0.8rem; }
 table.t tbody tr { cursor: pointer; }
 table.t tbody tr:hover td { color: var(--blue); }
-table.t tr.sel td { background: var(--blue-soft); }
-table.t td.hit { color: var(--orange); }
+/* as on the Session 1 pages: the selected row is highlighted; a loss is red (a shared code here, a weight rounded to 0 in section 6) */
+table.t tr.sel td { background: var(--hi); }
+table.t td.hit { color: var(--neg); }
 .stats { display: flex; flex-wrap: wrap; gap: 8px 22px; font-family: var(--font-mono); font-size: 0.9rem; }
 .stats b { font-weight: 500; color: var(--blue); }
 .calc { font-family: var(--font-mono); font-size: 0.95rem; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 4px; overflow-x: auto; }
@@ -230,7 +231,7 @@ html.embed .fields { container-type: inline-size; }
     <svg class="fig" id="rFig" viewBox="0 0 900 200" role="img" aria-label="Each value on the float line, joined to the integer code it is rounded to"></svg>
     <div class="legendrow">
       <span><span class="sw" style="background:var(--blue)"></span>a value</span>
-      <span><span class="sw" style="background:var(--orange)"></span>a code shared by two values: they can no longer be told apart</span>
+      <span><span class="sw" style="background:var(--neg)"></span>a code shared by two values: they can no longer be told apart</span>
     </div>
     <div class="cols">
       <div class="col">
@@ -516,7 +517,7 @@ function drawRound() {
   const every = qmax > 20 ? 32 : 1;
   for (let c = -qmax; c <= qmax; c++) {
     const x = X(c / s), lab = c % every === 0 || c === qmax || c === -qmax;
-    el(svg, "line", { x1: x, x2: x, y1: yC - (lab ? 7 : 4), y2: yC + (lab ? 7 : 4), stroke: count[c] > 1 && rU === 1 ? "var(--orange)" : "var(--muted)", "stroke-width": count[c] > 1 && rU === 1 ? 3 : 1, opacity: rFrom ? rU : 1 });
+    el(svg, "line", { x1: x, x2: x, y1: yC - (lab ? 7 : 4), y2: yC + (lab ? 7 : 4), stroke: count[c] > 1 && rU === 1 ? "var(--neg)" : "var(--muted)", "stroke-width": count[c] > 1 && rU === 1 ? 3 : 1, opacity: rFrom ? rU : 1 });
     if (lab && !(qmax > 20 && Math.abs(c) > qmax - 12 && Math.abs(c) !== qmax)) el(svg, "text", { x, y: yC + 22, "text-anchor": "middle", class: "m" }, String(c).replace("-", "−"));
   }
   // value labels: a second row where two labels would overlap
@@ -524,11 +525,11 @@ function drawRound() {
   [...RV.keys()].sort((i, j) => RV[i] - RV[j]).forEach(i => { const x = X(RV[i]); lastRow = x - lastX < 34 ? 1 - lastRow : 0; row[i] = lastRow; lastX = x; });
   RV.forEach((v, i) => {
     const hit = count[q[i]] > 1 && rU === 1, sel = i === rsel;
-    el(svg, "line", { x1: X(v), y1: yF, x2: X(end(i)), y2: yC, stroke: hit ? "var(--orange)" : "var(--blue)", "stroke-width": sel ? 2.5 : 1.2, opacity: sel ? 1 : 0.7 });
-    el(svg, "circle", { cx: X(v), cy: yF, r: sel ? 6 : 4.5, fill: hit ? "var(--orange)" : "var(--blue)" });
+    el(svg, "line", { x1: X(v), y1: yF, x2: X(end(i)), y2: yC, stroke: hit ? "var(--neg)" : "var(--blue)", "stroke-width": sel ? 2.5 : 1.2, opacity: sel ? 1 : 0.7 });
+    el(svg, "circle", { cx: X(v), cy: yF, r: sel ? 6 : 4.5, fill: hit ? "var(--neg)" : "var(--blue)" });
     el(svg, "text", { x: X(v), y: yF - 10 - 15 * row[i], "text-anchor": "middle", fill: sel ? "var(--blue)" : "var(--fg)" }, f2(v));
-    el(svg, "circle", { cx: X(end(i)), cy: yC, r: 3.5, fill: "none", stroke: hit ? "var(--orange)" : "var(--blue)" });
-    if (sel && rU === 1) el(svg, "text", { x: X(dq[i]), y: yC + 38, "text-anchor": "middle", fill: hit ? "var(--orange)" : "var(--blue)" }, "code " + String(q[i]).replace("-", "−"));
+    el(svg, "circle", { cx: X(end(i)), cy: yC, r: 3.5, fill: "none", stroke: hit ? "var(--neg)" : "var(--blue)" });
+    if (sel && rU === 1) el(svg, "text", { x: X(dq[i]), y: yC + 38, "text-anchor": "middle", fill: hit ? "var(--neg)" : "var(--blue)" }, "code " + String(q[i]).replace("-", "−"));
   });
   $("rTable").innerHTML = `<thead><tr><th>value x</th><th>x × s</th><th>code</th><th>code ÷ s</th><th>error</th></tr></thead><tbody>` +
     RV.map((v, i) => `<tr data-i="${i}" class="${i === rsel ? "sel" : ""}"><td>${f2(v)}</td><td>${f2(v * s)}</td><td class="${count[q[i]] > 1 ? "hit" : ""}">${String(q[i]).replace("-", "−")}</td><td>${f2(dq[i])}</td><td>${f2(v - dq[i])}</td></tr>`).join("") + "</tbody>";

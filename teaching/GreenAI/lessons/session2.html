@@ -839,7 +839,7 @@ for size in [7, 32, 70]:
     <iframe class="frame" title="Quantization, step by step: absmax" data-src="../artifacts/quantization.html?embed=round"></iframe>
   </div>
   <div class="notes">
-    <p>Here are the same nine values on a number line. Each value is joined to the code it gets. With 8 bits there are 255 codes, and the lines are almost vertical: every value lands close to a code. Only 3.08 and 3.02 share one. That shared code is orange.</p>
+    <p>Here are the same nine values on a number line. Each value is joined to the code it gets. With 8 bits there are 255 codes, and the lines are almost vertical: every value lands close to a code. Only 3.08 and 3.02 share one. That shared code is red.</p>
     <p>Click a row of the table to see its arithmetic: the scale, the multiplication, the rounding, the division back, and the error.</p>
     <p>Now press Play. The lines move from their 8-bit codes to their 4-bit codes, then 3, then 2. Or press the bit widths one by one. At 4 bits there are 15 codes left. The lines lean more, and more values share a code. Press 3, then 2. With 2 bits there are only three codes: minus one, zero and one. Most values end up far from where they started. Watch the mean absolute error under the arithmetic grow.</p>
     <p>This is why 8 bits is usually mild, while 4 bits and below need more careful methods.</p>
@@ -1598,7 +1598,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
         </tbody>
       </table>
     </div>
-    <p class="src">Shi &amp; Ding, “Systematic characterization of LLM quantization: a performance, energy, and quality perspective,” arXiv:2508.16712; Husom et al., “Sustainable LLM inference for edge AI,” ACM Transactions on Internet of Things, 2025, arXiv:2504.03360</p>
+    <p class="src">Shi &amp; Ding, “Systematic characterization of LLM quantization: a performance, energy, and quality perspective,” arXiv:2508.16712; Husom et al., “Sustainable LLM inference for edge AI,” ACM Transactions on Internet of Things 6(4), 2025, doi:10.1145/3767742</p>
   </div>
   <div class="notes">
     <p>What do measurements show? Here are two recent studies, on very different hardware.</p>
@@ -1652,7 +1652,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
   <div class="notes">
     <p>Before the notebook, a short discussion, about ten to fifteen minutes. The question is: when is quantization not worth it?</p>
     <p>Here are some directions. The hardware or the software may not compute in the lower precision, so nothing gets faster. Too few bits may break tasks that need exact details, like code or arithmetic. A small model may already be close to its quality limit. The calibration data may be unlike the real inputs. And the quality check may be too weak to notice what broke.</p>
-    <p>For our own experiment, keep two of these in mind. Our model is small. And our scoring rule is simple: it only checks if the answer contains a keyword.</p>
+    <p>For our own experiment, keep two of these in mind. Our model is small. And our scoring rule is simple: it only checks if the answer contains a reference as whole words.</p>
   </div>
 </section>
 

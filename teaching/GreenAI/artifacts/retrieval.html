@@ -90,8 +90,9 @@ table.t th, table.t td { padding: 4px 9px; text-align: right; border-bottom: 1px
 table.t th { color: var(--muted); font-weight: 400; font-family: var(--font-body); font-size: 0.8rem; }
 table.t td.l, table.t th.l { text-align: left; }
 table.t tbody tr { cursor: pointer; }
-table.t tr.sel td { background: var(--blue-soft); }
-table.t tr.top td.l { color: var(--green); }
+/* as on the Session 1 pages: the selected row is highlighted; the top k are blue, like their thick blue arrows and section 3's dark bars */
+table.t tr.sel td { background: var(--hi); }
+table.t tr.top td.l { color: var(--blue); }
 .stats { display: flex; flex-wrap: wrap; gap: 8px 22px; font-family: var(--font-mono); font-size: 0.9rem; }
 .stats b { font-weight: 500; color: var(--blue); }
 .calc { font-family: var(--font-mono); font-size: 0.92rem; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 4px; overflow-x: auto; }
@@ -190,6 +191,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <div class="cols">
       <div class="col">
         <svg class="fig" id="dFig" viewBox="0 0 420 380" role="img" aria-label="The document vectors and the question vector on a plane"></svg>
+        <div class="legendrow"><span><span class="sw" style="background:var(--blue)"></span>a document (thick: in the top k)</span><span><span class="sw" style="background:var(--orange)"></span>the question, and its angle with the selected document</span></div>
         <p class="note">Known words: energy (4, 2), electricity (4, 3), carbon (3, 4), water (1, 4), retriever (0, 5), memory (2, −3).</p>
       </div>
       <div class="col">
@@ -342,7 +344,8 @@ const DVEC = Object.fromEntries(Object.entries(DOCS).map(([k, t]) => [k, textVec
 
 /* ================= 1. dense ================= */
 let dq = textVec($("dQ").value), dk = 2, dsel = "doc_energy", dshow = null;   // dshow: while playing, how many documents are scored
-const COL = { doc_carbon: "var(--muted)", doc_energy: "var(--blue)", doc_water: "var(--green)", doc_retrieval: "var(--neg)", doc_quantize: "var(--orange)" };
+// as in Session 1's attention picture: the vectors compared are blue (here the documents), the query is orange (here the question)
+const COL = { doc_carbon: "var(--blue)", doc_energy: "var(--blue)", doc_water: "var(--blue)", doc_retrieval: "var(--blue)", doc_quantize: "var(--blue)" };
 function drawDense() {
   const svg = $("dFig"); svg.innerHTML = "";
   const O = [150, 230], S = 40, P = ([x, y]) => [O[0] + S * x, O[1] - S * y];
@@ -365,8 +368,8 @@ function drawDense() {
     arrow(v, COL[k], top.has(k) || (scoring && k === dsel) ? 3.5 : 1.5, k === "doc_water" ? [name, xy] : `${name} ${xy}`, ...off[k]);
   }
   if (dq) {
-    arrow(dq, "var(--fg)", 2, null);
-    const ql = el(svg, "text", { x: P(dq)[0] + 8, y: P(dq)[1] - 10, fill: "var(--fg)", "font-weight": 500 }, `question (${neg(fn(dq[0]))}, ${neg(fn(dq[1]))})`);
+    arrow(dq, "var(--orange)", 2.5, null);
+    const ql = el(svg, "text", { x: P(dq)[0] + 8, y: P(dq)[1] - 10, fill: "var(--orange)", "font-weight": 500 }, `question (${neg(fn(dq[0]))}, ${neg(fn(dq[1]))})`);
     try {   // keep the question's label off the documents' labels
       const others = [...svg.querySelectorAll("text")].filter(t => t !== ql).map(t => t.getBBox());
       const hit = () => { const b = ql.getBBox(); return others.some(o => b.x < o.x + o.width && o.x < b.x + b.width && b.y < o.y + o.height && o.y < b.y + b.height); };
@@ -520,10 +523,10 @@ function drawWindow(pos = WMAX) {   // pos: how far into the documents the readi
     if (pos >= n) el(svg, "text", { x: X0 + (nearLine ? win * SC : n * SC) + 6, y: y + 13, class: "m" }, String(n));
     if (pos >= n && D.docs[i] === "training_vs_inference") el(svg, "text", { x: 896, y: y + 13, "text-anchor": "end", fill: "var(--neg)", id: "wAns" }, "← answer is in the hatched part");
   });
-  if (pos < WMAX) el(svg, "line", { x1: X0 + pos * SC, x2: X0 + pos * SC, y1: T + 2, y2: T + 10 + order.length * G, stroke: pos > win ? "var(--neg)" : "var(--blue)", "stroke-width": 2 });
+  if (pos < WMAX) el(svg, "line", { x1: X0 + pos * SC, x2: X0 + pos * SC, y1: T + 2, y2: T + 10 + order.length * G, stroke: pos > win ? "var(--neg)" : "var(--orange)", "stroke-width": 2 });
   const yb = T + 10 + order.length * G;
-  el(svg, "line", { x1: X0 + win * SC, x2: X0 + win * SC, y1: T, y2: yb + 4, stroke: "var(--orange)", "stroke-width": 2, "stroke-dasharray": "5 4" });
-  el(svg, "text", { x: X0 + win * SC, y: T - 10, "text-anchor": "middle", fill: "var(--orange)" }, `${win} tokens: what MiniLM reads`);
+  el(svg, "line", { x1: X0 + win * SC, x2: X0 + win * SC, y1: T, y2: yb + 4, stroke: "var(--fg)", "stroke-width": 2, "stroke-dasharray": "5 4" });
+  el(svg, "text", { x: X0 + win * SC, y: T - 10, "text-anchor": "middle", fill: "var(--fg)" }, `${win} tokens: what MiniLM reads`);
   const over = D.minilm_tokens.filter(n => n > win).length;
   $("wStats").innerHTML = `<span>documents longer than the window: <b>${over} of 26</b></span><span>longest: <b>${Math.max(...D.minilm_tokens)}</b> tokens</span>`;
 }
