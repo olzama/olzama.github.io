@@ -74,6 +74,13 @@ button:focus-visible, textarea:focus-visible, summary:focus-visible, a:focus-vis
   padding: 8px; display: grid; gap: 2px; width: min(320px, calc(100vw - 32px)); max-height: 70vh; overflow-y: auto; box-shadow: 0 8px 24px rgb(0 0 0 / 0.12); }
 .toc nav a { text-decoration: none; color: var(--fg); padding: 5px 8px; border-radius: 5px; font-size: 0.92rem; }
 .toc nav a:hover { background: var(--blue-soft); }
+/* contents menu of present mode: every screen, opening upward from the bar */
+.ptoc nav { top: auto; bottom: calc(100% + 8px); width: min(480px, calc(100vw - 32px)); max-height: 78vh; }
+.ptoc nav .ph { color: var(--muted); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 8px 2px; }
+.ptoc nav a { font-size: 14px; padding: 4px 8px; display: grid; grid-template-columns: 2.4em minmax(0, 1fr); }
+.ptoc nav a .n { color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
+.ptoc nav a.on { background: var(--blue-soft); }
+.ptoc > summary { font-size: 13px; padding: 4px 10px; }
 
 /* screens, reading mode */
 main { max-width: 1180px; margin: 0 auto; display: grid; gap: 22px; padding-top: 22px; }
@@ -126,6 +133,7 @@ table.plain tr.now td { background: var(--blue-soft); }
 .board svg { width: 100%; height: auto; background: var(--board); border: 1px solid var(--line); border-radius: 10px; color: var(--fg); }
 .board svg text { font-family: "Caveat", "Segoe Print", "Comic Sans MS", cursive; fill: currentColor; }
 .board svg .gk { font-family: Georgia, "Times New Roman", serif; font-size: 0.85em; }
+.board svg text.note { font-family: var(--font-body); }  /* accompanying text: plain, faded in whole; handwriting is for the drawing */
 .board .bctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .board .bctl .bstep { color: var(--muted); font-size: 0.9rem; }
 .board .frag { display: none; }
@@ -164,6 +172,7 @@ body.present .stepper:has(.frag.hide[data-k="8"]) [data-c="8"] { visibility: hid
 .bar.zero { color: var(--muted); }
 .bignum { font-size: 2.4em; color: var(--blue); line-height: 1.1; }
 .fig { display: grid; gap: 6px; justify-items: center; min-width: 0; }
+.kvrow .fig > span { text-align: center; }
 .fig img { max-width: 100%; max-height: 42vh; width: auto; height: auto; border-radius: 4px; background: #fff; }
 .fig .cap { font-size: 0.78rem; color: var(--muted); text-align: center; }
 .figrow { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
@@ -186,7 +195,7 @@ body.present .stepper:has(.frag.hide[data-k="8"]) [data-c="8"] { visibility: hid
 .scatters { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
 .scatter { width: 100%; height: auto; display: block; }
 .scatter text { font-family: var(--font-body); font-size: 11px; }
-.kvc { display: block; width: 2.6em; height: 1.8em; border: 1px solid var(--blue); border-radius: 4px; background: var(--blue-soft); }
+.kvc { display: block; width: 2.6em; height: 1.8em; border: 1px solid var(--muted); border-radius: 4px; background: var(--panel); }   /* grey: blue means Galician word vectors on the pages */
 .squares { display: grid; gap: 3px; justify-content: center; }
 .squares i { width: 1.1em; height: 1.1em; border-radius: 2px; display: block; }
 .icons { display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap; }
@@ -214,7 +223,13 @@ body.present .frag.hide { visibility: hidden; }
 /* embedded interactive pages */
 .tabs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .tabs button[aria-pressed=true] { background: var(--blue); border-color: var(--blue); color: var(--panel); }
-.tabs .open { margin-left: auto; font-size: 0.85rem; }
+.tabs .open { margin-left: auto; font-size: 0.9rem; font-weight: 600; color: var(--orange); border: 2px solid var(--orange); border-radius: 6px; padding: 3px 12px; text-decoration: none; }
+.tabs .open::after { content: " ↗"; }
+.tabs .open:hover { background: var(--orange); color: var(--panel); }
+/* screens with an embedded page: the kind label becomes a badge, a reminder to open the full page */
+.screen:has(iframe.frame) > header .kind { display: inline-block; background: var(--orange); color: var(--panel); font-size: 0.85rem; font-weight: 600; padding: 3px 12px; border-radius: 999px; margin-bottom: 4px; width: fit-content; justify-self: start; align-self: start; }
+/* in present mode the frame is where the work happens: a smaller title leaves it more height */
+body.present .screen:has(iframe.frame) > header h2 { font-size: 1.5em; }
 .frame { width: 100%; height: 78vh; min-height: 420px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); display: block; }
 
 /* exercises */
@@ -390,7 +405,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   <div class="notes">
     <p>A language model is a very large collection of numbers, its parameters. In a computer, every number is stored as a sequence of bits. A bit is 0 or 1.</p>
     <p>Binary numbers work like decimal numbers. In decimal, each position is worth ten times the one to its right: ones, tens, hundreds. In binary, each position is worth twice the one to its right: 1, 2, 4, 8.</p>
-    <p>Let's read the binary number 1101. The board writes the place values above the digits: 8, 4, 2, 1. Then we multiply each digit by its place value. 1 times 8, plus 1 times 4, plus 0 times 2, plus 1 times 1. That is 8 plus 4 plus 0 plus 1, which is 13.</p>
+    <p>Let's read the binary number 1101. The small 2 after it says that it is written in binary. The board writes the place values above the digits: 8, 4, 2, 1. Then we multiply each digit by its place value. 1 times 8, plus 1 times 4, plus 0 times 2, plus 1 times 1. That is 8 plus 4 plus 0 plus 1, which is 13.</p>
     <p>Whole numbers like this are called integers. But most of a model's numbers are not whole numbers. They are numbers like 0.37 or minus 1.85. For those, the computer uses a format called floating point.</p>
   </div>
 </section>
@@ -407,7 +422,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <text x="428.0" y="88" font-size="14" text-anchor="middle" style="fill:var(--blue)">mantissa: 10 bits</text>
       <text x="29.0" y="108" font-size="12" text-anchor="middle" class="muted">+ or −</text>
       <text x="143.0" y="108" font-size="12" text-anchor="middle" class="muted">the scale: × 2 to some power</text>
-      <text x="428.0" y="108" font-size="12" text-anchor="middle" class="muted">the detail: 1 + ½ + ¼ + …</text>
+      <text x="428.0" y="108" font-size="12" text-anchor="middle" class="muted">the detail: ½ + ¼ + … (added to 1)</text>
     </svg>
     <p class="formula">value = <span class="c-green">sign</span> × <span class="c-blue">(1 + mantissa)</span> × 2<sup class="c-orange">exponent − bias</sup></p>
     <ul class="points">
@@ -479,7 +494,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <text x="185.0" y="312.0" font-size="17" style="fill:var(--muted)" data-s="10" data-d="0.3" data-a="fade">minus the bias, 15</text>
 <text y="275" font-size="26" style="fill:var(--neg)" data-s="11" data-d="0" data-line="E2">= 0</text>
 <rect data-box="#b6 #b7 #b8 #b9 #b10 #b11 #b12 #b13 #b14 #b15" data-pad="5" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--blue)" stroke-width="2.5" data-s="12" data-d="0" data-t="0.6"/>
-<text y="345" font-size="26" style="fill:var(--blue)" data-s="12" data-d="0" data-line="M" data-x0="30">mantissa:</text>
+<text y="345" font-size="26" style="fill:var(--blue)" data-s="12" data-d="0" data-line="M" data-x0="30">1 + mantissa:</text>
 <text y="345" font-size="26" style="fill:currentColor" data-s="13" data-d="0" data-line="M" id="lead">1</text>
 <text x="185.0" y="382.0" font-size="17" style="fill:var(--muted)" data-s="13" data-d="0.3" data-a="fade">the leading 1, not stored</text>
 <text y="345" font-size="26" style="fill:currentColor" data-s="14" data-d="0" data-line="M">+ 1·(1/2)</text>
@@ -498,7 +513,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     <p>Here are 16 bits. Let's decode them, one field at a time.</p>
     <p>The sign bit is 0, so the number is positive.</p>
     <p>The exponent bits are 0 1 1 1 1. We read them as a binary number, as on the first screen. 0 times 16, plus 1 times 8, plus 1 times 4, plus 1 times 2, plus 1 times 1. That is 15. Then we subtract the bias, 15. 15 minus 15 is 0. So the scale is 2 to the power 0, which is 1: no scaling up or down.</p>
-    <p>The mantissa bits are 1 followed by nine zeros. The mantissa is read as fractions after an implied leading 1. The leading 1 is not stored. The first mantissa bit is worth one half, the next one quarter, the next one eighth, and so on. Only the first bit is 1. So the mantissa is 1 plus one half, which is 1.5.</p>
+    <p>The mantissa bits are 1 followed by nine zeros. The mantissa is read as fractions after an implied leading 1. The leading 1 is not stored. The first mantissa bit is worth one half, the next one quarter, the next one eighth, and so on. Only the first bit is 1. So the mantissa is one half, and 1 plus the mantissa is 1.5.</p>
     <p>Now we combine the three fields: plus 1, times 1.5, times 2 to the power 0. The number is 1.5.</p>
     <p>It is the same place-value idea as before, used twice: once for the exponent bits, with 16, 8, 4, 2, 1, and once for the mantissa bits, with one half, one quarter, and so on.</p>
   </div>
@@ -515,9 +530,9 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   <div class="notes">
     <p>On this panel you can click any bit to flip it, and the page decodes the number again, field by field.</p>
     <p>First press Play: walk the exponent. The number starts at 1.5 and doubles, one exponent step at a time, then halves. Watch the chart under it: the orange dot is the space to the next number the format can store. It moves with the number, always ten powers of 2 below it. Large numbers are stored coarsely, small numbers finely.</p>
-    <p>Start from 1.5. Click the first exponent bit after the zero, so the exponent becomes 1 0 0 0 0. That is 16, minus the bias 15, which is 1. The number doubles: 3.</p>
+    <p>Start from 1.5: its exponent bits are 0 1 1 1 1, which is 15. Click the last exponent bit, worth 1: the exponent becomes 0 1 1 1 0, which is 14, minus the bias 15 is minus 1. The number halves: 0.75. Click it again to go back. Now click the first exponent bit: all five bits are 1, one of the special cases, and the panel says NaN, not a number.</p>
     <p>Now press the example 0.1. FP16 cannot store 0.1 exactly. The nearest number it can store is 0.0999755859375. Every stored number is rounded to the nearest value the format has. This is already a small rounding error, before any quantization.</p>
-    <p>Look at the line under the value: it says what the next number above it is. Nothing in between can be stored. Then switch the format to BF16 and compare.</p>
+    <p>Look at the line under the value: it says what the next number above it is. Nothing in between can be stored. Then switch the format to BF16 and compare: it has 8 exponent bits, so its bias is 127, and only 7 mantissa bits.</p>
   </div>
 </section>
 
@@ -692,9 +707,9 @@ for size in [7, 32, 70]:
         </g>
         <!-- 1 GB = 3.6 px; bars start at x=60 -->
         <g>
-          <rect x="60" y="18" width="50.4" height="18" fill="var(--blue)"/><text x="116" y="32" font-size="12">FP16 14 GB</text>
-          <rect x="60" y="40" width="25.2" height="18" fill="var(--green)"/><text x="91" y="54" font-size="12">INT8 7</text>
-          <rect x="60" y="62" width="12.6" height="18" fill="var(--green)" fill-opacity="0.6"/><text x="78" y="76" font-size="12">INT4 3.5</text>
+          <rect x="60" y="18" width="50.4" height="18" fill="var(--blue)"/><text x="124" y="32" font-size="12">FP16 14 GB</text>
+          <rect x="60" y="40" width="25.2" height="18" fill="var(--green)"/><text x="124" y="54" font-size="12">INT8 7</text>
+          <rect x="60" y="62" width="12.6" height="18" fill="var(--green)" fill-opacity="0.6"/><text x="124" y="76" font-size="12">INT4 3.5</text>
           <rect x="60" y="118" width="230.4" height="18" fill="var(--blue)"/><text x="296" y="132" font-size="12">FP16 64 GB</text>
           <rect x="60" y="140" width="115.2" height="18" fill="var(--green)"/><text x="181" y="154" font-size="12">INT8 32</text>
           <rect x="60" y="162" width="57.6" height="18" fill="var(--green)" fill-opacity="0.6"/><text x="123" y="176" font-size="12">INT4 16</text>
@@ -732,7 +747,7 @@ for size in [7, 32, 70]:
     <div class="col">
       <ul class="points">
         <li>Map each 16-bit float to a small integer, a <b>code</b>: INT8 has 256 codes, INT4 has 16</li>
-        <li>Absmax, the next method, uses the symmetric codes −127…127: 255 of them (−7…7 at 4 bits: 15)</li>
+        <li>Absmax, the next method, uses the symmetric codes <span style="white-space:nowrap">−127…127</span>: 255 of them (<span style="white-space:nowrap">−7…7</span> at 4 bits: 15)</li>
         <li>Store the codes, plus one number to get back: the <b>scale</b></li>
         <li>Lossy: values that are close can get the same code, and then they cannot be told apart</li>
       </ul>
@@ -1121,7 +1136,7 @@ for bits in [8, 4, 3, 2]:
     <p>This panel zooms in on the 24 ordinary values. The orange vertical ticks are the codes. With the outlier and no clipping, only three ticks fall in this window. Each value, the filled dot, is joined to what is stored, the open dot.</p>
     <p>Press Play: shrink the range. The clipping range goes from 256 down to 2.5, and the codes crowd in around the ordinary values. Or move the clipping slider to the left yourself. The ticks move closer together, and the stored values move closer to the originals. Watch two numbers under the picture: the error of the ordinary values goes down, and the error of the outlier goes up.</p>
     <p>Untick the outlier. Without it, absmax alone gives the ordinary values many codes.</p>
-    <p>The second tab, Zero point, shows the lopsided values from the previous screen. Symmetric codes in the top row: the negative codes are never used. Asymmetric codes in the bottom row: all of them can be used. Move the slider to shift the values, and watch the zero point change.</p>
+    <p>The second tab, Zero point, shows nine one-sided values, from 0 to 2.8, at 4 bits: the idea of the board two screens back, with other values. Symmetric codes in the top row: the negative codes are never used. Asymmetric codes in the bottom row: all of them can be used. Move the slider to shift the values, and watch the zero point change.</p>
   </div>
 </section>
 
@@ -1143,7 +1158,7 @@ for bits in [8, 4, 3, 2]:
       </table>
     </div>
     <div class="col">
-      <div class="flow"><div class="box">input</div><span class="arr">→</span><div class="box">weights<br><span class="muted">fixed after training</span></div><span class="arr">→</span><div class="box g">activations<br><span class="muted">new for every input</span></div></div>
+      <div class="flow" style="flex-wrap:nowrap;font-size:1em"><div class="box">input</div><span class="arr">×</span><div class="box">weights<br><span class="muted">fixed after training</span></div><span class="arr">→</span><div class="box g">activations<br><span class="muted">new for every input</span></div></div>
       <table class="plain">
         <thead><tr><th>Post-training quantization</th><th>scale and zero point</th><th>trade-off</th></tr></thead>
         <tbody>
@@ -1357,7 +1372,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
   <div class="body cols wide-left">
     <div class="col">
       <div class="board">
-      <svg viewBox="0 0 640 520" role="img" aria-label="y = w1·2 + w2·1. Original 0.37·2 + 0.52·1 = 1.26. Rounded on their own to 0.25 and 0.50: 1.00, error 0.26. GPTQ: w1 0.37 → 0.25 loses 0.12·2 = 0.24; w2 0.52 + 0.24 = 0.76 → 0.75; 0.25·2 + 0.75·1 = 1.25, error 0.01">
+      <svg viewBox="0 0 640 520" role="img" aria-label="y = w1·2 + w2·1. Original 0.37·2 + 0.52·1 = 1.26. Rounded on their own to 0.25 and 0.50: 1.00, error 0.26. GPTQ: w1 0.37 → 0.25 loses 0.12·2 = 0.24; w2 0.52 + 0.24 ÷ 1 = 0.76 → 0.75; 0.25·2 + 0.75·1 = 1.25, error 0.01">
 <text y="36" font-size="24" style="fill:var(--muted)" data-s="1" data-d="0" data-line="F" data-x0="20">y = w<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan>·2 + w<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan>·1</text>
 <text y="96" font-size="24" style="fill:var(--blue)" data-s="2" data-d="0" data-line="O" data-x0="20" id="o0">original:</text>
 <text y="96" font-size="24" style="fill:currentColor" data-s="2" data-d="0.3" data-line="O">0.37·2 + 0.52·1</text>
@@ -1373,7 +1388,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
 <text y="300" font-size="20" style="fill:var(--green)" data-s="10" data-d="0" data-line="Gl" data-x0="20">GPTQ: round, then correct the next weight:</text>
 <text y="340" font-size="24" style="fill:currentColor" data-s="11" data-d="0" data-line="G1" data-x0="40">w<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan>: 0.37 → 0.25</text>
 <text y="340" font-size="24" style="fill:var(--neg)" data-s="12" data-d="0" data-line="G1" data-gap="7">the output loses 0.12·2 = 0.24</text>
-<text y="385" font-size="24" style="fill:currentColor" data-s="13" data-d="0" data-line="G2" data-x0="40">w<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan>: 0.52 + 0.24</text>
+<text y="385" font-size="24" style="fill:currentColor" data-s="13" data-d="0" data-line="G2" data-x0="40">w<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan>: 0.52 + 0.24 ÷ 1</text>
 <text y="385" font-size="24" style="fill:currentColor" data-s="14" data-d="0" data-line="G2">= 0.76</text>
 <text y="385" font-size="24" style="fill:var(--green)" data-s="15" data-d="0" data-line="G2">→ 0.75</text>
 <text y="430" font-size="24" style="fill:currentColor" data-s="16" data-d="0" data-line="G3" data-x0="40">0.25·2 + 0.75·1</text>
@@ -1386,7 +1401,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
     </div>
     <div class="col">
       <ul class="points">
-        <li>The goal: keep the layer's <b>output</b> close to the original</li>
+        <li>The goal: keep the <b>output</b> (the dot product) close to the original</li>
         <li>GPTQ rounds the weights one at a time; after each, it adjusts the weights not yet rounded to make up for the error</li>
         <li>The adjustment is computed on a small set of real inputs, the calibration data</li>
         <li>4 bits per weight with little loss, without retraining</li>
@@ -1396,11 +1411,11 @@ for clip in [None, 10.0, 5.0, 2.5]:
   </div>
   <div class="notes">
     <p>Absmax rounds every weight on its own. With 8 bits that is usually fine. With 4 bits the errors are large, and they add up. GPTQ is a method that makes 4 bits work much better. Today's notebook loads a model quantized with GPTQ.</p>
-    <p>The idea is that what matters is the output of the layer. The board shows one output of a learned table, as in Session 1: the dot product of the input with two weights. It computes y equals w1 times x1 plus w2 times x2. The input is 2 and 1. The weights are 0.37 and 0.52. We can only store weights in steps of 0.25.</p>
+    <p>The idea is that what matters is the output. The board shows one output of a learned table, as in Session 1: the dot product of the input with two weights. It computes y equals w1 times x1 plus w2 times x2. The input is 2 and 1. The weights are 0.37 and 0.52. We can only store weights in steps of 0.25.</p>
     <p>First the original output: 0.37 times 2 plus 0.52 times 1. That is 0.74 plus 0.52, which is 1.26.</p>
     <p>Now round each weight on its own. 0.37 becomes 0.25, and 0.52 becomes 0.5. The output is 0.25 times 2 plus 0.5 times 1. That is 0.5 plus 0.5, which is 1.0. The error is 0.26.</p>
-    <p>Now the GPTQ way. Round the first weight: 0.37 becomes 0.25. The output loses 0.12 times 2, which is 0.24. Before rounding the second weight, we add that loss to it: 0.52 plus 0.24 is 0.76. Now round it: 0.75. The output is 0.25 times 2 plus 0.75 times 1. That is 0.5 plus 0.75, which is 1.25. The error is only 0.01.</p>
-    <p>A real layer has thousands of weights and sees many different inputs. GPTQ computes the corrections from a small set of real inputs, called calibration data, so that the output stays close on average. It does this layer by layer. The result is a model with 4 bits per weight, without any retraining. We will not run the calibration ourselves today. We load a checkpoint, a saved copy of a model's weights, that the Qwen team already quantized with GPTQ.</p>
+    <p>Now the GPTQ way. Round the first weight: 0.37 becomes 0.25. The output loses 0.12 times 2, which is 0.24. Before rounding the second weight, we make up for that loss in it: we add 0.24 divided by its input, 1. 0.52 plus 0.24 is 0.76. Now round it: 0.75. The output is 0.25 times 2 plus 0.75 times 1. That is 0.5 plus 0.75, which is 1.25. The error is only 0.01.</p>
+    <p>A real learned table has thousands of weights and sees many different inputs. GPTQ computes the corrections from a small set of real inputs, called calibration data, so that the output stays close on average. It does this layer by layer. The result is a model with 4 bits per weight, without any retraining. We will not run the calibration ourselves today. We load a checkpoint, a saved copy of a model's weights, that the Qwen team already quantized with GPTQ.</p>
   </div>
 </section>
 
@@ -1413,9 +1428,9 @@ for clip in [None, 10.0, 5.0, 2.5]:
     <iframe class="frame" title="Quantization, step by step: GPTQ" data-src="../artifacts/quantization.html?embed=gptq"></iframe>
   </div>
   <div class="notes">
-    <p>The same idea on six weights. Each bar is a weight, the gray outline is its original value, and the gray lines are the steps of 0.25 we can store. On the right is the layer's output: the outline is the original output, 0.79, and the bar is the output now.</p>
+    <p>The same idea on six weights. Each bar is a weight, the gray outline is its original value, and the gray lines are the steps of 0.25 we can store. On the right is the output y: the outline is the original output, 0.79, and the bar is the output now.</p>
     <p>First choose "round each on its own" and press Play. Each weight jumps to the nearest step, one after another, and the output bar drifts away from the outline. At the end the error is 0.54.</p>
-    <p>Now choose GPTQ and press Play. Each time a weight is rounded, the output changes a little, and that change is moved into the next weight before it is rounded: watch the next blue bar grow or shrink. The output stays on the outline the whole way. Only the last weight has nobody to correct it, so a small error remains, 0.17.</p>
+    <p>Now choose GPTQ and press Play. Each time a weight is rounded, the output changes a little, and the next weight makes up for that change, divided by its own input, before it is rounded: watch the next blue bar grow or shrink. The output stays on the outline the whole way. Only the last weight has nobody to correct it, so a small error remains, 0.165.</p>
     <p>The box under the chart writes out each step: the rounding, the change in the output, and the correction.</p>
   </div>
 </section>
@@ -1464,8 +1479,8 @@ for clip in [None, 10.0, 5.0, 2.5]:
   </div>
   <div class="notes">
     <p>Here is the same idea on sixteen weights, stored with 4 bits. The gray outline is each weight. The blue bar is what is stored after rounding.</p>
-    <p>With one scale for all sixteen, the large weights in the second group set the range. Six small weights round to 0. They are red.</p>
-    <p>Press 8 weights per block, then 4. Each block now has its own scale. The red bars disappear, and the average error goes down. But look at the last number: the bits per weight go up, because every extra scale costs 16 bits. Real formats use blocks of about 32 weights, as a balance between the two.</p>
+    <p>With one scale for all sixteen, the large weights (2.00, −1.50, 1.80) set the range. Six small weights round to 0. They are red.</p>
+    <p>Press 8 weights per block: two scales, but each half still holds large weights, so the six small weights still round to 0. Press 4: now the four tiny weights have a block and a scale of their own, the red bars disappear, and the average error goes down. But look at the last number: the bits per weight go up, because every extra scale costs 16 bits. Real formats use blocks of about 32 weights, as a balance between the two.</p>
   </div>
 </section>
 
@@ -1535,7 +1550,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
     <p>Recall the dot product from Session 1: multiply each input number by its own weight, and add the results. Every learned table computes its outputs this way. The board shows it for the inputs 2, 5 and 3.</p>
     <p>With ordinary weights, 0.4, minus 0.1 and 0.9: 0.4 times 2 is 0.8. Minus 0.1 times 5 is minus 0.5. 0.9 times 3 is 2.7. The sum is 0.8 minus 0.5 plus 2.7, which is 3.0.</p>
     <p>With BitNet weights, plus 1, minus 1 and 0: plus 1 times 2 is 2. Minus 1 times 5 is minus 5. 0 times 3 is 0. The sum is minus 3. Look at what happened: there was no real multiplication. Times plus 1 keeps the input. Times minus 1 flips its sign. Times 0 skips it. Only additions are left, and in hardware an addition costs much less energy than a multiplication.</p>
-    <p>Can such coarse weights work? One weight is very coarse. But a layer has thousands of weights, and the sum of thousands of them can still take very many different values. BitNet models are trained this way from the start, like QAT. You cannot take an ordinary trained model and force its weights to minus 1, 0 and 1: it would break. This is a research direction. Today we run GPTQ.</p>
+    <p>Can such coarse weights work? One weight is very coarse. But a learned table has thousands of weights, and the sum of thousands of them can still take very many different values. BitNet models are trained this way from the start, like QAT. You cannot take an ordinary trained model and force its weights to minus 1, 0 and 1: it would break. This is a research direction. Today we run GPTQ.</p>
   </div>
 </section>
 
@@ -1578,7 +1593,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
           <tr><td rowspan="3">Shi &amp; Ding (2025): 11 quantization methods, models of 7B to 70B parameters, A100 and H100 GPUs</td><td>energy efficiency up to <b>30%</b> better (34B models)</td></tr>
           <tr><td>waiting time (latency) of the slowest responses up to <b>70%</b> shorter</td></tr>
           <tr><td>code generation (HumanEval): share of generated programs that pass their tests, down by up to <b>92%</b> for the 13B model; smaller models lose more quality</td></tr>
-          <tr><td rowspan="2">Husom et al. (2025): 28 quantized models, a Raspberry Pi 4</td><td>3- and 4-bit models used up to <b>79%</b> less energy than 16-bit ones</td></tr>
+          <tr><td rowspan="2">Husom et al. (2025): 28 quantized models, a Raspberry&nbsp;Pi&nbsp;4</td><td>3- and 4-bit models used up to <b>79%</b> less energy than 16-bit ones</td></tr>
           <tr><td>for <b>Qwen2.5 1.5B</b>, our model: every 3-bit version used <b>more</b> energy per token than the 4-bit ones</td></tr>
         </tbody>
       </table>
@@ -1826,13 +1841,15 @@ for clip in [None, 10.0, 5.0, 2.5]:
   <span class="count" id="pCount"></span>
   <button id="pPrev" aria-label="Previous">←</button>
   <button id="pNext" aria-label="Next">→</button>
+  <button id="pSkip" aria-label="Next screen, skipping the remaining steps of this one" title="Next screen, skipping the remaining steps (Shift + →)">Next screen ⇥</button>
+  <details class="toc ptoc" id="pToc"><summary title="Contents (C)">Contents</summary><nav id="pTocNav" aria-label="All screens"></nav></details>
   <button id="pNotes">Notes</button>
   <button id="pExit">Exit</button>
 </div>
 
 <div id="nv" aria-live="polite">
   <div class="bar1">
-    <button id="nPrev">← Previous</button><button id="nNext" class="primary">Next →</button>
+    <button id="nPrev">← Previous</button><button id="nNext" class="primary">Next →</button><button id="nSkip" title="Shift + →">Next screen ⇥</button>
     <span class="muted" id="nCount"></span><span class="clock" id="nClock">0:00</span><button id="nReset">Reset timer</button>
   </div>
   <span class="label" id="nKind"></span>
@@ -1898,8 +1915,15 @@ document.querySelectorAll("[data-squares]").forEach(el => {
 });
 document.querySelectorAll("[data-reveal]").forEach(b => b.onclick = () => { $(b.dataset.reveal).hidden = false; b.hidden = true; });
 
-/* ---- embedded pages load only when their screen comes near (data-src), then stay loaded ---- */
-const loadFrames = el => el && el.querySelectorAll("iframe[data-src]").forEach(f => { if (!f.getAttribute("src")) f.src = f.dataset.src; });
+/* ---- embedded pages load only when their screen comes near (data-src); only the three screens with
+   frames visited last stay loaded (each page is large, and many running at once slow the browser down) ---- */
+const liveFrames = [];
+const loadFrames = el => {
+  if (!el || !el.querySelector("iframe[data-src]")) return;
+  el.querySelectorAll("iframe[data-src]").forEach(f => { const src = f.getAttribute("src"); if (!src || src === "about:blank") f.src = f.dataset.src; });
+  const k = liveFrames.indexOf(el); if (k >= 0) liveFrames.splice(k, 1); liveFrames.unshift(el);
+  liveFrames.splice(3).forEach(old => old.querySelectorAll("iframe[data-src]").forEach(f => { f.src = "about:blank"; }));
+};
 if ("IntersectionObserver" in window) {
   const fo = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && !presenting()) loadFrames(e.target); }), { rootMargin: "800px 0px" });
   screens.forEach(s => { if (s.querySelector("iframe[data-src]")) fo.observe(s); });
@@ -1909,7 +1933,7 @@ document.querySelectorAll(".tabs").forEach(tabs => {
   const frame = tabs.parentElement.querySelector("iframe");
   tabs.querySelectorAll("button[data-go]").forEach(b => b.onclick = () => {
     tabs.querySelectorAll("button[data-go]").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
-    try { const w = frame.contentWindow, el = frame.contentDocument.getElementById(b.dataset.go); w.scrollTo(0, el.getBoundingClientRect().top + w.scrollY); } catch (e) {}
+    try { const w = frame.contentWindow, el = frame.contentDocument.getElementById(b.dataset.go); w.__lessonScrollAt = performance.now(); w.scrollTo(0, el.getBoundingClientRect().top + w.scrollY); } catch (e) {}
   });
 });
 
@@ -1963,7 +1987,7 @@ document.querySelectorAll(".board").forEach(b => {
     laid = svg.querySelector("[data-line]")?.getComputedTextLength?.() > 0;
   }
   function play(el) {
-    const d = (+el.dataset.d || 0) * 1000, kind = el.dataset.a || (el.tagName === "text" || el.tagName === "g" ? "write" : "draw");
+    const d = (+el.dataset.d || 0) * 1000, kind = el.dataset.a || (el.classList.contains("note") ? "fade" : el.tagName === "text" || el.tagName === "g" ? "write" : "draw");
     let a;
     if (kind === "draw") {
       const len = el.getTotalLength();
@@ -2182,6 +2206,7 @@ function next() {
   if (k < fs.length) { fs[k].classList.remove("hide"); post(); } else show(cur + 1);
 }
 function prev() { show(cur - 1, { back: true }); }
+function skip() { show(cur + 1); }  // past any steps not yet shown, straight to the next screen
 function enter() {
   const k = screens.findIndex(s => "#" + s.id === location.hash);
   document.body.classList.add("present");
@@ -2204,32 +2229,64 @@ function openNotes() {
 $("presentBtn").onclick = enter;
 $("pPrev").onclick = prev;
 $("pNext").onclick = next;
+$("pSkip").onclick = skip;
 $("pNotes").onclick = openNotes;
 $("pExit").onclick = exit;
+// present mode's contents: every screen under its part; a click jumps there
+{
+  const items = [];
+  document.querySelectorAll("main > .part, main > .screen").forEach(el => {
+    if (el.classList.contains("part")) { items.push(`<div class="ph">${el.querySelector("h1").textContent}</div>`); return; }
+    const k = screens.indexOf(el), h = el.querySelector("header h2, h1");
+    if (k >= 0) items.push(`<a href="#${el.id}" data-k="${k}"><span class="n">${k + 1}</span><span>${h ? h.textContent : el.id}</span></a>`);
+  });
+  $("pTocNav").innerHTML = items.join("");
+  $("pTocNav").addEventListener("click", e => { const a = e.target.closest("a"); if (!a) return; e.preventDefault(); $("pToc").open = false; show(+a.dataset.k); });
+  $("pToc").addEventListener("toggle", () => {
+    if (!$("pToc").open) return;
+    $("pTocNav").querySelectorAll("a").forEach(a => a.classList.toggle("on", +a.dataset.k === cur));
+    $("pTocNav").querySelector("a.on")?.scrollIntoView({ block: "center" });
+  });
+}
 const keys = e => {
   if (!presenting()) return;
   if (e.target.closest && e.target.closest("textarea, input, select")) return;
-  if (["ArrowRight", "PageDown"].includes(e.key) || (e.key === " " && !(e.target.closest && e.target.closest("button, summary, a")))) { e.preventDefault(); next(); }
+  if (e.key === "ArrowRight" && e.shiftKey) { e.preventDefault(); skip(); }
+  else if (["ArrowRight", "PageDown"].includes(e.key) || (e.key === " " && !(e.target.closest && e.target.closest("button, summary, a")))) { e.preventDefault(); next(); }
   else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); prev(); }
-  else if (e.key === "Escape") exit();
+  else if (e.key === "Escape") { if ($("pToc").open) $("pToc").open = false; else exit(); }
   else if (e.key === "n" || e.key === "N") openNotes();
+  else if (e.key === "c" || e.key === "C") $("pToc").open = !$("pToc").open;
 };
 if (!isNotes) document.addEventListener("keydown", keys);
 // a click inside an embedded page moves the keyboard focus there: forward the presenter's keys
 document.querySelectorAll("iframe.frame").forEach(f => f.addEventListener("load", () => {
   zoomFrames();
   try {
+    // with the zoom on the frame, Chromium sends the frame's scroll back to the top when a control gets
+    // focus or content is replaced; a jump straight to the top that no wheel, key or touch asked for is undone
+    const fw = f.contentWindow, fd = f.contentDocument;
+    let lastY = fw.scrollY, userAt = 0;
+    ["wheel", "keydown", "touchstart"].forEach(t => fd.addEventListener(t, () => { userAt = performance.now(); }, { capture: true, passive: true }));
+    fw.addEventListener("scroll", () => {
+      const y = fw.scrollY;
+      if (y === 0 && lastY > 60 && performance.now() - Math.max(userAt, fw.__lessonScrollAt || 0) > 600) { fw.scrollTo(0, lastY); return; }
+      lastY = y;
+    }, { passive: true });
     f.contentDocument.addEventListener("keydown", e => {
       if (!presenting()) return;
-      if (e.key === "PageDown") { e.preventDefault(); next(); }
-      else if (e.key === "PageUp") { e.preventDefault(); prev(); }
+      // arrows too: after a click inside the frame the keyboard focus is there (not in sliders, fields or menus)
+      if (e.target.closest && e.target.closest("textarea, input, select")) return;
+      if (e.key === "ArrowRight" && e.shiftKey) { e.preventDefault(); skip(); }
+      else if (e.key === "PageDown" || e.key === "ArrowRight") { e.preventDefault(); next(); }
+      else if (e.key === "PageUp" || e.key === "ArrowLeft") { e.preventDefault(); prev(); }
       else if (e.key === "Escape") exit();
     });
   } catch (err) {}
 }));
 if (chan && !isNotes) chan.onmessage = ({ data }) => {
   if (data.hello) post();
-  if (data.cmd) { if (!presenting()) enter(); data.cmd === "next" ? next() : prev(); }
+  if (data.cmd) { if (!presenting()) enter(); ({ next, prev, skip })[data.cmd]?.(); }
 };
 
 /* ---- speaker-notes window ---- */
@@ -2252,9 +2309,11 @@ if (isNotes) {
   const send = cmd => chan?.postMessage({ cmd });
   $("nPrev").onclick = () => send("prev");
   $("nNext").onclick = () => send("next");
+  $("nSkip").onclick = () => send("skip");
   $("nReset").onclick = () => { t0 = Date.now(); };
   document.addEventListener("keydown", e => {
-    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); send("next"); }
+    if (e.key === "ArrowRight" && e.shiftKey) { e.preventDefault(); send("skip"); }
+    else if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); send("next"); }
     else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); send("prev"); }
   });
   setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $("nClock").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; }, 1000);

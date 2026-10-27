@@ -74,6 +74,13 @@ button:focus-visible, textarea:focus-visible, summary:focus-visible, a:focus-vis
   padding: 8px; display: grid; gap: 2px; width: min(320px, calc(100vw - 32px)); max-height: 70vh; overflow-y: auto; box-shadow: 0 8px 24px rgb(0 0 0 / 0.12); }
 .toc nav a { text-decoration: none; color: var(--fg); padding: 5px 8px; border-radius: 5px; font-size: 0.92rem; }
 .toc nav a:hover { background: var(--blue-soft); }
+/* contents menu of present mode: every screen, opening upward from the bar */
+.ptoc nav { top: auto; bottom: calc(100% + 8px); width: min(480px, calc(100vw - 32px)); max-height: 78vh; }
+.ptoc nav .ph { color: var(--muted); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 8px 2px; }
+.ptoc nav a { font-size: 14px; padding: 4px 8px; display: grid; grid-template-columns: 2.4em minmax(0, 1fr); }
+.ptoc nav a .n { color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
+.ptoc nav a.on { background: var(--blue-soft); }
+.ptoc > summary { font-size: 13px; padding: 4px 10px; }
 
 /* screens, reading mode */
 main { max-width: 1180px; margin: 0 auto; display: grid; gap: 22px; padding-top: 22px; }
@@ -126,6 +133,7 @@ table.plain tr.now td { background: var(--blue-soft); }
 .board svg { width: 100%; height: auto; background: var(--board); border: 1px solid var(--line); border-radius: 10px; color: var(--fg); }
 .board svg text { font-family: "Caveat", "Segoe Print", "Comic Sans MS", cursive; fill: currentColor; }
 .board svg .gk { font-family: Georgia, "Times New Roman", serif; font-size: 0.85em; }
+.board svg text.note { font-family: var(--font-body); }  /* accompanying text: plain, faded in whole; handwriting is for the drawing */
 .board .bctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .board .bctl .bstep { color: var(--muted); font-size: 0.9rem; }
 .board .frag { display: none; }
@@ -164,6 +172,7 @@ body.present .stepper:has(.frag.hide[data-k="8"]) [data-c="8"] { visibility: hid
 .bar.zero { color: var(--muted); }
 .bignum { font-size: 2.4em; color: var(--blue); line-height: 1.1; }
 .fig { display: grid; gap: 6px; justify-items: center; min-width: 0; }
+.kvrow .fig > span { text-align: center; }
 .fig img { max-width: 100%; max-height: 42vh; width: auto; height: auto; border-radius: 4px; background: #fff; }
 .fig .cap { font-size: 0.78rem; color: var(--muted); text-align: center; }
 .figrow { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; }
@@ -186,7 +195,7 @@ body.present .stepper:has(.frag.hide[data-k="8"]) [data-c="8"] { visibility: hid
 .scatters { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
 .scatter { width: 100%; height: auto; display: block; }
 .scatter text { font-family: var(--font-body); font-size: 11px; }
-.kvc { display: block; width: 2.6em; height: 1.8em; border: 1px solid var(--blue); border-radius: 4px; background: var(--blue-soft); }
+.kvc { display: block; width: 2.6em; height: 1.8em; border: 1px solid var(--muted); border-radius: 4px; background: var(--panel); }   /* grey: blue means Galician word vectors on the pages */
 .squares { display: grid; gap: 3px; justify-content: center; }
 .squares i { width: 1.1em; height: 1.1em; border-radius: 2px; display: block; }
 .icons { display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap; }
@@ -214,7 +223,13 @@ body.present .frag.hide { visibility: hidden; }
 /* embedded interactive pages */
 .tabs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .tabs button[aria-pressed=true] { background: var(--blue); border-color: var(--blue); color: var(--panel); }
-.tabs .open { margin-left: auto; font-size: 0.85rem; }
+.tabs .open { margin-left: auto; font-size: 0.9rem; font-weight: 600; color: var(--orange); border: 2px solid var(--orange); border-radius: 6px; padding: 3px 12px; text-decoration: none; }
+.tabs .open::after { content: " ↗"; }
+.tabs .open:hover { background: var(--orange); color: var(--panel); }
+/* screens with an embedded page: the kind label becomes a badge, a reminder to open the full page */
+.screen:has(iframe.frame) > header .kind { display: inline-block; background: var(--orange); color: var(--panel); font-size: 0.85rem; font-weight: 600; padding: 3px 12px; border-radius: 999px; margin-bottom: 4px; width: fit-content; justify-self: start; align-self: start; }
+/* in present mode the frame is where the work happens: a smaller title leaves it more height */
+body.present .screen:has(iframe.frame) > header h2 { font-size: 1.5em; }
 .frame { width: 100%; height: 78vh; min-height: 420px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); display: block; }
 
 /* exercises */
@@ -348,7 +363,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <div class="col">
         <ul class="points">
           <li>Closed book, in our Session 1 test run: <b>2 of 8</b> right; with the documents, 8 of 8</li>
-          <li>Its wrong answers sounded just as sure: it called RAG “Retrieval-Augmented Learning”</li>
+          <li>Its wrong answers sounded just as sure: it called RAG (retrieval-augmented generation, next screen) “Retrieval-Augmented Learning”</li>
           <li>A small model alone is not a reliable source of facts. Documents supply the facts; retrieval chooses which.</li>
         </ul>
       </div>
@@ -375,7 +390,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <div class="box">answer</div>
     </div>
     <ul class="points">
-      <li>Step 1: find the documents most related to the question. Step 2: put them into the prompt, next to the question.</li>
+      <li>First, find the documents most related to the question; then put them into the prompt, next to the question.</li>
       <li>The model answers from the prompt <i>and</i> from what it learned in training</li>
       <li>The facts only need to be in a document the retriever can find: a small model can answer about facts it never saw in training</li>
     </ul>
@@ -383,7 +398,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
   <div class="notes">
     <p>This technique is called RAG. It stands for retrieval-augmented generation. The main paper is by Lewis and colleagues, from 2020.</p>
-    <p>It has two steps. Step one: a program called a retriever searches a collection of documents and finds the ones most related to the question. Step two: the text of those documents is put into the prompt, next to the question. The prompt is the only way to give the model anything. Then the model writes the answer.</p>
+    <p>It has two steps. First, a program called a retriever searches a collection of documents and finds the ones most related to the question. Then the text of those documents is put into the prompt, next to the question. The prompt is the only way to give the model anything. Then the model writes the answer.</p>
     <p>The model uses the prompt, and it still uses what it learned in training. Retrieval adds facts to the prompt. It does not switch off what the model learned.</p>
     <p>Why is this useful? The facts do not need to be inside the model. They only need to be in a document that the retriever can find. So a small model can answer questions about facts it never saw in training. The questions for today are how well the retriever finds the right document, and what this saves.</p>
   </div>
@@ -449,7 +464,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     <div class="col">
       <ol class="points">
         <li>Turn every document into a vector, an embedding. Once, in advance.</li>
-        <li>Turn the question into a vector, with the same model</li>
+        <li>Turn the question into a vector, with the same embedding model (ours: MiniLM, from Notebook 01c, trained so that texts with the same meaning get close vectors)</li>
         <li>Compare the question's vector with each document's: <b>cosine similarity</b></li>
         <li>Keep the <b>k</b> most similar documents. Only those go into the prompt.</li>
       </ol>
@@ -459,20 +474,20 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <ul class="points">
         <li>q · d: multiply matching values, add them up</li>
         <li>|q|: the length of the vector, √(sum of squares)</li>
-        <li>1: the same direction; 0: a right angle</li>
+        <li>1: the same direction; 0: a right angle; below 0: pointing away</li>
       </ul>
     </div>
   </div>
   <div class="notes">
     <p>How does the retriever decide which documents are relevant? It uses embeddings, which we saw in Session 1. An embedding is a vector, a list of values, that represents the meaning of a text. Texts with similar meanings get similar vectors.</p>
-    <p>The retriever computes one embedding for each document. This is done once, in advance. For each question, it computes the question's embedding, with the same model. Then it compares the question's vector with each document's vector.</p>
-    <p>The comparison is cosine similarity, the measure we used for aunt, uncle and car in Session 1. Multiply the matching values and add them up: that is the dot product. Then divide by the lengths of the two vectors. A value of 1 means the two vectors point in the same direction. A value of 0 means they are at a right angle: unrelated.</p>
+    <p>The retriever computes one embedding for each document. This is done once, in advance. For each question, it computes the question's embedding, with the same embedding model. Ours is MiniLM, the multilingual model of Notebook 01c, trained so that texts with the same meaning get close vectors. Then it compares the question's vector with each document's vector.</p>
+    <p>The comparison is cosine similarity, the measure we used for aunt (4, 2) and uncle (3, 3) in Session 1. Multiply the matching values and add them up: that is the dot product. Then divide by the lengths of the two vectors. A value of 1 means the two vectors point in the same direction. A value of 0 means they are at a right angle: unrelated. Below 0, they point away from each other.</p>
     <p>The retriever keeps the k documents with the highest values. In today's notebook, k is 2. The next screen works one example out.</p>
   </div>
 </section>
 
 <section class="screen" id="cosine" data-step="2">
-  <header><h2>Ranking documents by cosine similarity</h2><p class="sub">Notebook 03b's toy vectors; the question “what does it cost in electricity to get an answer”</p></header>
+  <header><h2>Ranking documents by cosine similarity</h2><p class="sub">Notebook 03b's toy vectors (a text's vector: the average of its known words'); the question “what does it cost in electricity to get an answer”, whose only known word is electricity</p></header>
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1000 520" role="img" aria-label="Question (4, 3). Energy (4, 2): (4·4 + 3·2) ÷ (5 × 4.47) = 22 ÷ 22.35 ≈ 0.98. Carbon (3, 4): 24 ÷ 25 = 0.96. Water (2.5, 3.5): 20.5 ÷ 21.5 ≈ 0.95. With k = 1 the model reads only doc_energy">
@@ -505,8 +520,8 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <text y="100" font-size="24" style="fill:var(--blue)" data-s="5" data-d="0" data-line="E1" data-x0="420" id="e0">energy:</text>
 <text y="100" font-size="24" style="fill:currentColor" data-s="5" data-d="0.3" data-line="E1">4·4 + 3·2</text>
 <text y="100" font-size="24" style="fill:currentColor" data-s="6" data-d="0" data-line="E1">= 16 + 6 = 22</text>
-<text y="145" font-size="24" style="fill:currentColor" data-s="7" data-d="0" data-line="E2" data-at="e0">|q| = √(16 + 9) = √25 = 5</text>
-<text y="145" font-size="24" style="fill:currentColor" data-s="8" data-d="0" data-line="E2" data-gap="20">|d| = √(16 + 4) = √20 ≈ 4.47</text>
+<text y="145" font-size="24" style="fill:currentColor" data-s="7" data-d="0" data-line="E2" data-at="e0">|q| = √(16 + 9) = √25 = 5,</text>
+<text y="145" font-size="24" style="fill:currentColor" data-s="8" data-d="0" data-line="E2" data-gap="28">|d| = √(16 + 4) = √20 ≈ 4.47</text>
 <text y="190" font-size="24" style="fill:currentColor" data-s="9" data-d="0" data-line="E3" data-at="e0">22 ÷ (5 × 4.47)</text>
 <text y="190" font-size="24" style="fill:currentColor" data-s="10" data-d="0" data-line="E3">= 22 ÷ 22.35</text>
 <text y="190" font-size="24" style="fill:var(--blue)" data-s="11" data-d="0" data-line="E3">≈ 0.98</text>
@@ -524,7 +539,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     </div>
   </div>
   <div class="notes">
-    <p>Here is one example, worked out, on three of the five toy documents. The other two, retrieval and quantize, point away from the question; the next panel shows all five. Real embeddings have hundreds of dimensions. These have two, so we can draw them and do the arithmetic. They are the toy vectors of the Retrieval Playground notebook.</p>
+    <p>Here is one example, worked out, on three of the five toy documents. The other two, retrieval and quantize, point away from the question; the next panel shows all five. Real embeddings have hundreds of dimensions. These have two, so we can draw them and do the arithmetic. They are the toy vectors of Notebook 03b.</p>
     <p>Each document's vector is the average of the vectors of the words we know. The question is "what does it cost in electricity to get an answer". The only word with a vector is electricity, so the question's vector is 4, 3.</p>
     <p>First the energy document, vector 4, 2. The dot product: 4 times 4 plus 3 times 2. That is 16 plus 6, which is 22. The length of the question: the square root of 4 squared plus 3 squared, the square root of 25, which is 5. The length of the document: the square root of 4 squared plus 2 squared, the square root of 20, about 4.47. So the cosine is 22 divided by 5 times 4.47. That is 22 divided by 22.35, about 0.98.</p>
     <p>The carbon document, vector 3, 4: 4 times 3 plus 3 times 4 is 24. Its length is 5. 24 divided by 25 is 0.96.</p>
@@ -657,7 +672,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     </div>
   </div>
   <div class="notes">
-    <p>Let's compute it on the five toy documents of the Retrieval Playground.</p>
+    <p>Let's compute it on the five toy documents of Notebook 03b.</p>
     <p>The word "model" is in three of the five documents: carbon, energy and retrieval. Its idf is the natural logarithm of 5 divided by 3. 5 divided by 3 is 1.67, and its logarithm is about 0.51.</p>
     <p>The word "energy" is in only one document. Its idf is the logarithm of 5 divided by 1, the logarithm of 5, about 1.61.</p>
     <p>Now look inside the energy document. Each of the two words appears there once, so tf is 1 for both. For "model": 1 times 0.51 is 0.51. For "energy": 1 times 1.61 is 1.61.</p>
@@ -681,8 +696,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     <div class="col">
       <ul class="points">
         <li>Without the logarithm, the rarest word counts 1,000 times more than a word in 1,000 articles: one rare word, even a typo, would decide the ranking</li>
-        <li>With it: 13.8 against 6.9, twice as much</li>
-        <li>A word in every article adds 0</li>
+        <li>With it: only twice as much</li>
         <li>With 5 documents the ratio is at most 5: the logarithm matters in large collections</li>
       </ul>
     </div>
@@ -700,7 +714,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   <header><h2>Sparse and dense vectors</h2><p class="sub">The picture of Session 1, now for whole documents</p></header>
   <div class="body cols">
     <div class="col">
-      <p class="label">Sparse: one value per word of the vocabulary, mostly 0</p>
+      <p class="label">Sparse: one value per word of the vocabulary (its tf-idf in the document), mostly 0</p>
       <div class="squares" style="grid-template-columns:repeat(12, auto)"><i style="background:var(--grid)"></i><i style="background:var(--grid)"></i><i style="background:var(--blue)"></i><i style="background:var(--grid)"></i><i style="background:var(--grid)"></i><i style="background:var(--grid)"></i><i style="background:var(--blue);opacity:0.5"></i><i style="background:var(--grid)"></i><i style="background:var(--grid)"></i><i style="background:var(--grid)"></i><i style="background:var(--grid)"></i><i style="background:var(--grid)"></i></div>
       <ul class="points"><li>Finds exact word matches only</li><li>Needs only counting</li></ul>
       <p class="label" style="margin-top:12px">Dense: a few hundred learned values, all filled in</p>
@@ -1045,7 +1059,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
   </div>
   <div class="notes">
     <p>Now the real thing: the 26 documents and 26 questions of today's notebook, with the notebook's own models. Each bar is one document's similarity to the question. The green bar is the document that holds the answer. The dark bars are the top k: the only documents the model will read.</p>
-    <p>The panel opens on the question: what does the acronym PUE stand for? With the dense retriever, the right document is ranked 16th. The model will not see it. An acronym is hard for an embedding model: PUE is just three letters to it. Now press sparse, TF-IDF. The word PUE is in one document only, so TF-IDF finds it at once.</p>
+    <p>The panel opens on the question: what does the acronym PUE stand for? With the dense retriever, the right document is ranked 16th. The model will not see it. An acronym is hard for an embedding model: PUE is just three letters to it. Now press sparse, TF-IDF. The word PUE is in one document only, so TF-IDF finds it at once. The second document scores 0: with k = 2 the model still gets two documents, related or not.</p>
     <p>Look at the line above the chart: with k equal to 2, the dense retriever finds the right document for 23 of the 26 questions, and TF-IDF for all 26. On this small, clean collection, counting words works very well.</p>
     <p>On the right: how many tokens the model reads with all 26 documents, and with the top k. Under it, the pairs that attention compares, drawn as a square whose side is the number of tokens: the gray square is all 26 documents, the blue one the top k. Press Play: k goes from 26 down to 2. The blue side shrinks in step with the tokens, and its area, the pairs, shrinks much faster.</p>
   </div>
@@ -1054,7 +1068,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
 <div class="part" id="part-step4"><h1>Step 4 · What retrieval saves</h1></div>
 
 <section class="screen" id="payoff" data-step="4">
-  <header><h2>Fewer tokens to read</h2><p class="sub">Today's 26 documents, cut into tokens the way Qwen2.5 cuts them, without the question; top 2: the average over the 26 questions</p></header>
+  <header><h2>Fewer tokens to read</h2><p class="sub">Today's 26 documents, cut into tokens the way Qwen2.5 cuts them, without the question; top 2 by the dense retriever: the average over the 26 questions (TF-IDF's: 311)</p></header>
   <div class="body cols wide-left">
     <div class="col">
       <div class="board">
@@ -1103,7 +1117,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
   <div class="notes">
     <p>One practical detail matters today. An embedding model can only read a limited number of tokens. Ours, MiniLM, reads at most 128. If a document is longer, the rest is cut off before the embedding is computed. So the embedding represents only the beginning of the document.</p>
     <p>The chart shows our 26 documents. Press Play: MiniLM reads every document from its start, and where the 128-token window ends, the rest turns into hatching. The blue part of each bar is what MiniLM reads. The hatched red part is never seen. 23 of the 26 documents are longer than 128 tokens. For one of them, the answer to its quiz question is in the hatched part. You will see the retriever miss that question this afternoon.</p>
-    <p>Real systems solve this with chunking. They split each long document into smaller parts, called chunks, embed each chunk, and retrieve chunks. Choosing the chunk size is a design decision of its own.</p>
+    <p>Real systems solve this with chunking. They split each long document into chunks, the smaller parts of the earlier screen, embed each chunk, and retrieve chunks. Choosing the chunk size is a design decision of its own.</p>
   </div>
 </section>
 
@@ -1125,7 +1139,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       <table class="plain">
         <thead><tr><th>model</th><th>cost (tokens the model reads) compared with long context</th></tr></thead>
         <tbody>
-          <tr><td>Gemini-1.5-Pro</td><td class="num">−65%</td></tr>
+          <tr><td>Gemini-1.5-Pro</td><td class="num">−61%</td></tr>
           <tr><td>GPT-4o</td><td class="num">−39%</td></tr>
         </tbody>
       </table>
@@ -1137,7 +1151,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
     <p>Now some published evidence. A 2024 study from Google DeepMind and the University of Michigan compared the two approaches on three strong models: GPT-4o, GPT-3.5-Turbo and Gemini-1.5-Pro. Each question is about one long source text, for example a whole book or a long report.</p>
     <p>Long context puts the whole source text into the prompt. In their two benchmarks, that is on average 7,000 words in one, and 100,000 tokens in the other. RAG cuts the text into chunks of 300 words and puts only the 5 most relevant chunks into the prompt. 5 times 300 is 1,500 words.</p>
     <p>For all three models, long context gave better answers on average. So retrieval can lose some quality. But for 63 percent of the questions, the two approaches gave exactly the same answer. For those questions, reading everything bought nothing.</p>
-    <p>The authors used this to build a combined method, called Self-Route. The model first tries RAG, and also says whether the retrieved chunks are enough to answer. If yes, the RAG answer is used. If no, the question goes to long context. With Gemini-1.5-Pro, this cut the cost, the number of tokens the model reads, by 65 percent; with GPT-4o, by 39 percent. In both cases, the quality stayed close to long context.</p>
+    <p>The authors used this to build a combined method, called Self-Route. The model first tries RAG, and also says whether the retrieved chunks are enough to answer. If yes, the RAG answer is used. If no, the question goes to long context. With Gemini-1.5-Pro, this cut the cost, the number of tokens the model reads, by 61 percent; with GPT-4o, by 39 percent. In both cases, the quality stayed close to long context.</p>
     <p>The lesson: use the cheap method when it is enough, and the expensive one only when needed.</p>
   </div>
 </section>
@@ -1169,7 +1183,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
         <tbody>
           <tr><td>What does the acronym PUE stand for?</td><td>an acronym: three letters to the embedding model</td></tr>
           <tr><td>the training-emissions question</td><td>the answer is past the 128-token window</td></tr>
-          <tr><td>the RAG question</td><td>a second document about RAG ranks higher</td></tr>
+          <tr><td>the RAG question</td><td>two other retrieval documents rank higher (the RAG paper, kNN-MT)</td></tr>
         </tbody>
       </table>
     </div>
@@ -1178,7 +1192,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
     <p>Retrieval adds a new way to fail. The baseline read every document, so the document with the answer was always in the prompt. A retriever can choose the wrong documents. Then the answer is not in the prompt at all. The model may say that the documents do not contain the answer. Or it may answer from a wrong document, and sound sure about it.</p>
     <p>So when an answer is wrong today, there are two possible causes: the retriever fetched the wrong documents, or the model misread the right ones. The notebook measures the two separately. Retrieval accuracy says how often the right document was in the top k. Answer accuracy says how often the final answer was right.</p>
     <p>The table shows retrieval accuracy on today's quiz, with k equal to 2. We computed it with the notebook's own models. The dense retriever finds the right document for 23 of the 26 questions. TF-IDF finds it for all 26.</p>
-    <p>The dense retriever misses three. The PUE question: an acronym is hard for an embedding model. The question about training emissions: its answer is past the 128-token window, as we saw. And a question about RAG: there are two documents about RAG, and the other one ranks higher. On a small collection of short, clean documents on clearly different topics, counting words works very well. Real collections are larger and messier.</p>
+    <p>The dense retriever misses three. The PUE question: an acronym is hard for an embedding model. The question about training emissions: its answer is past the 128-token window, as we saw. And a question about RAG: two other documents about retrieval, the RAG paper and kNN-MT, rank higher. On a small collection of short, clean documents on clearly different topics, counting words works very well. Real collections are larger and messier.</p>
   </div>
 </section>
 
@@ -1436,13 +1450,15 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
   <span class="count" id="pCount"></span>
   <button id="pPrev" aria-label="Previous">←</button>
   <button id="pNext" aria-label="Next">→</button>
+  <button id="pSkip" aria-label="Next screen, skipping the remaining steps of this one" title="Next screen, skipping the remaining steps (Shift + →)">Next screen ⇥</button>
+  <details class="toc ptoc" id="pToc"><summary title="Contents (C)">Contents</summary><nav id="pTocNav" aria-label="All screens"></nav></details>
   <button id="pNotes">Notes</button>
   <button id="pExit">Exit</button>
 </div>
 
 <div id="nv" aria-live="polite">
   <div class="bar1">
-    <button id="nPrev">← Previous</button><button id="nNext" class="primary">Next →</button>
+    <button id="nPrev">← Previous</button><button id="nNext" class="primary">Next →</button><button id="nSkip" title="Shift + →">Next screen ⇥</button>
     <span class="muted" id="nCount"></span><span class="clock" id="nClock">0:00</span><button id="nReset">Reset timer</button>
   </div>
   <span class="label" id="nKind"></span>
@@ -1508,8 +1524,15 @@ document.querySelectorAll("[data-squares]").forEach(el => {
 });
 document.querySelectorAll("[data-reveal]").forEach(b => b.onclick = () => { $(b.dataset.reveal).hidden = false; b.hidden = true; });
 
-/* ---- embedded pages load only when their screen comes near (data-src), then stay loaded ---- */
-const loadFrames = el => el && el.querySelectorAll("iframe[data-src]").forEach(f => { if (!f.getAttribute("src")) f.src = f.dataset.src; });
+/* ---- embedded pages load only when their screen comes near (data-src); only the three screens with
+   frames visited last stay loaded (each page is large, and many running at once slow the browser down) ---- */
+const liveFrames = [];
+const loadFrames = el => {
+  if (!el || !el.querySelector("iframe[data-src]")) return;
+  el.querySelectorAll("iframe[data-src]").forEach(f => { const src = f.getAttribute("src"); if (!src || src === "about:blank") f.src = f.dataset.src; });
+  const k = liveFrames.indexOf(el); if (k >= 0) liveFrames.splice(k, 1); liveFrames.unshift(el);
+  liveFrames.splice(3).forEach(old => old.querySelectorAll("iframe[data-src]").forEach(f => { f.src = "about:blank"; }));
+};
 if ("IntersectionObserver" in window) {
   const fo = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && !presenting()) loadFrames(e.target); }), { rootMargin: "800px 0px" });
   screens.forEach(s => { if (s.querySelector("iframe[data-src]")) fo.observe(s); });
@@ -1519,7 +1542,7 @@ document.querySelectorAll(".tabs").forEach(tabs => {
   const frame = tabs.parentElement.querySelector("iframe");
   tabs.querySelectorAll("button[data-go]").forEach(b => b.onclick = () => {
     tabs.querySelectorAll("button[data-go]").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
-    try { const w = frame.contentWindow, el = frame.contentDocument.getElementById(b.dataset.go); w.scrollTo(0, el.getBoundingClientRect().top + w.scrollY); } catch (e) {}
+    try { const w = frame.contentWindow, el = frame.contentDocument.getElementById(b.dataset.go); w.__lessonScrollAt = performance.now(); w.scrollTo(0, el.getBoundingClientRect().top + w.scrollY); } catch (e) {}
   });
 });
 
@@ -1573,7 +1596,7 @@ document.querySelectorAll(".board").forEach(b => {
     laid = svg.querySelector("[data-line]")?.getComputedTextLength?.() > 0;
   }
   function play(el) {
-    const d = (+el.dataset.d || 0) * 1000, kind = el.dataset.a || (el.tagName === "text" || el.tagName === "g" ? "write" : "draw");
+    const d = (+el.dataset.d || 0) * 1000, kind = el.dataset.a || (el.classList.contains("note") ? "fade" : el.tagName === "text" || el.tagName === "g" ? "write" : "draw");
     let a;
     if (kind === "draw") {
       const len = el.getTotalLength();
@@ -1792,6 +1815,7 @@ function next() {
   if (k < fs.length) { fs[k].classList.remove("hide"); post(); } else show(cur + 1);
 }
 function prev() { show(cur - 1, { back: true }); }
+function skip() { show(cur + 1); }  // past any steps not yet shown, straight to the next screen
 function enter() {
   const k = screens.findIndex(s => "#" + s.id === location.hash);
   document.body.classList.add("present");
@@ -1814,32 +1838,64 @@ function openNotes() {
 $("presentBtn").onclick = enter;
 $("pPrev").onclick = prev;
 $("pNext").onclick = next;
+$("pSkip").onclick = skip;
 $("pNotes").onclick = openNotes;
 $("pExit").onclick = exit;
+// present mode's contents: every screen under its part; a click jumps there
+{
+  const items = [];
+  document.querySelectorAll("main > .part, main > .screen").forEach(el => {
+    if (el.classList.contains("part")) { items.push(`<div class="ph">${el.querySelector("h1").textContent}</div>`); return; }
+    const k = screens.indexOf(el), h = el.querySelector("header h2, h1");
+    if (k >= 0) items.push(`<a href="#${el.id}" data-k="${k}"><span class="n">${k + 1}</span><span>${h ? h.textContent : el.id}</span></a>`);
+  });
+  $("pTocNav").innerHTML = items.join("");
+  $("pTocNav").addEventListener("click", e => { const a = e.target.closest("a"); if (!a) return; e.preventDefault(); $("pToc").open = false; show(+a.dataset.k); });
+  $("pToc").addEventListener("toggle", () => {
+    if (!$("pToc").open) return;
+    $("pTocNav").querySelectorAll("a").forEach(a => a.classList.toggle("on", +a.dataset.k === cur));
+    $("pTocNav").querySelector("a.on")?.scrollIntoView({ block: "center" });
+  });
+}
 const keys = e => {
   if (!presenting()) return;
   if (e.target.closest && e.target.closest("textarea, input, select")) return;
-  if (["ArrowRight", "PageDown"].includes(e.key) || (e.key === " " && !(e.target.closest && e.target.closest("button, summary, a")))) { e.preventDefault(); next(); }
+  if (e.key === "ArrowRight" && e.shiftKey) { e.preventDefault(); skip(); }
+  else if (["ArrowRight", "PageDown"].includes(e.key) || (e.key === " " && !(e.target.closest && e.target.closest("button, summary, a")))) { e.preventDefault(); next(); }
   else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); prev(); }
-  else if (e.key === "Escape") exit();
+  else if (e.key === "Escape") { if ($("pToc").open) $("pToc").open = false; else exit(); }
   else if (e.key === "n" || e.key === "N") openNotes();
+  else if (e.key === "c" || e.key === "C") $("pToc").open = !$("pToc").open;
 };
 if (!isNotes) document.addEventListener("keydown", keys);
 // a click inside an embedded page moves the keyboard focus there: forward the presenter's keys
 document.querySelectorAll("iframe.frame").forEach(f => f.addEventListener("load", () => {
   zoomFrames();
   try {
+    // with the zoom on the frame, Chromium sends the frame's scroll back to the top when a control gets
+    // focus or content is replaced; a jump straight to the top that no wheel, key or touch asked for is undone
+    const fw = f.contentWindow, fd = f.contentDocument;
+    let lastY = fw.scrollY, userAt = 0;
+    ["wheel", "keydown", "touchstart"].forEach(t => fd.addEventListener(t, () => { userAt = performance.now(); }, { capture: true, passive: true }));
+    fw.addEventListener("scroll", () => {
+      const y = fw.scrollY;
+      if (y === 0 && lastY > 60 && performance.now() - Math.max(userAt, fw.__lessonScrollAt || 0) > 600) { fw.scrollTo(0, lastY); return; }
+      lastY = y;
+    }, { passive: true });
     f.contentDocument.addEventListener("keydown", e => {
       if (!presenting()) return;
-      if (e.key === "PageDown") { e.preventDefault(); next(); }
-      else if (e.key === "PageUp") { e.preventDefault(); prev(); }
+      // arrows too: after a click inside the frame the keyboard focus is there (not in sliders, fields or menus)
+      if (e.target.closest && e.target.closest("textarea, input, select")) return;
+      if (e.key === "ArrowRight" && e.shiftKey) { e.preventDefault(); skip(); }
+      else if (e.key === "PageDown" || e.key === "ArrowRight") { e.preventDefault(); next(); }
+      else if (e.key === "PageUp" || e.key === "ArrowLeft") { e.preventDefault(); prev(); }
       else if (e.key === "Escape") exit();
     });
   } catch (err) {}
 }));
 if (chan && !isNotes) chan.onmessage = ({ data }) => {
   if (data.hello) post();
-  if (data.cmd) { if (!presenting()) enter(); data.cmd === "next" ? next() : prev(); }
+  if (data.cmd) { if (!presenting()) enter(); ({ next, prev, skip })[data.cmd]?.(); }
 };
 
 /* ---- speaker-notes window ---- */
@@ -1862,9 +1918,11 @@ if (isNotes) {
   const send = cmd => chan?.postMessage({ cmd });
   $("nPrev").onclick = () => send("prev");
   $("nNext").onclick = () => send("next");
+  $("nSkip").onclick = () => send("skip");
   $("nReset").onclick = () => { t0 = Date.now(); };
   document.addEventListener("keydown", e => {
-    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); send("next"); }
+    if (e.key === "ArrowRight" && e.shiftKey) { e.preventDefault(); send("skip"); }
+    else if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); send("next"); }
     else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); send("prev"); }
   });
   setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $("nClock").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; }, 1000);

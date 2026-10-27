@@ -289,6 +289,9 @@ const RDATA = /*RDATA*/{"docs": ["training_vs_inference", "data_centers", "quant
 const $ = id => document.getElementById(id);
 const NS = "http://www.w3.org/2000/svg";
 const neg = s => String(s).replace(/-/g, "−");
+const par = s => (s.startsWith("−") ? `(${s})` : s);   // a negative factor in a product: 3·(−3)
+// in a lesson frame, bring what a Play changed into view (only when embedded)
+const reveal = e => { if (e && document.documentElement.classList.contains("embed")) e.scrollIntoView({ block: "nearest" }); };
 const press = (group, btn) => group.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b === btn ? "true" : "false"));
 function el(svg, tag, attrs, text) {
   const e = document.createElementNS(NS, tag);
@@ -363,7 +366,12 @@ function drawDense() {
   }
   if (dq) {
     arrow(dq, "var(--fg)", 2, null);
-    el(svg, "text", { x: P(dq)[0] + 8, y: P(dq)[1] - 10, fill: "var(--fg)", "font-weight": 500 }, `question (${neg(fn(dq[0]))}, ${neg(fn(dq[1]))})`);
+    const ql = el(svg, "text", { x: P(dq)[0] + 8, y: P(dq)[1] - 10, fill: "var(--fg)", "font-weight": 500 }, `question (${neg(fn(dq[0]))}, ${neg(fn(dq[1]))})`);
+    try {   // keep the question's label off the documents' labels
+      const others = [...svg.querySelectorAll("text")].filter(t => t !== ql).map(t => t.getBBox());
+      const hit = () => { const b = ql.getBBox(); return others.some(o => b.x < o.x + o.width && o.x < b.x + b.width && b.y < o.y + o.height && o.y < b.y + b.height); };
+      for (let i = 0; i < 4 && hit(); i++) ql.setAttribute("y", +ql.getAttribute("y") + 14);
+    } catch (e) {}
     const d = DVEC[dsel], a0 = Math.atan2(dq[1], dq[0]), a1 = Math.atan2(d[1], d[0]), r = 34;
     const p0 = [O[0] + r * Math.cos(a0), O[1] - r * Math.sin(a0)], p1 = [O[0] + r * Math.cos(a1), O[1] - r * Math.sin(a1)];
     el(svg, "path", { d: `M${p0[0]} ${p0[1]} A${r} ${r} 0 0 ${a1 > a0 ? 0 : 1} ${p1[0]} ${p1[1]}`, fill: "none", stroke: "var(--orange)", "stroke-width": 2 });
@@ -391,10 +399,10 @@ function drawDense() {
     rank.slice(0, dk).map(k => `<span>[${k}] ${DOCS[k]}</span>`).join("") + `<span class="r">Question: ${$("dQ").value || "(the point you clicked)"}</span>`;
   const d = DVEC[dsel], qd = dot(dq, d), nq = norm(dq), nd = norm(d);
   $("dCalc").innerHTML = `<span class="k">cosine(question, ${dsel})</span>` +
-    `<span>= (${neg(fn(dq[0]))}·${neg(fn(d[0]))} + ${neg(fn(dq[1]))}·${neg(fn(d[1]))}) ÷ (|q| × |d|)</span>` +
+    `<span>= (${neg(fn(dq[0]))}·${par(neg(fn(d[0])))} + ${neg(fn(dq[1]))}·${par(neg(fn(d[1])))}) ÷ (|q| × |d|)</span>` +
     `<span>= ${neg(fn(qd))} ÷ (${nq.toFixed(2)} × ${nd.toFixed(2)})</span>` +
     `<span>= ${neg(fn(qd))} ÷ ${(nq * nd).toFixed(2)} = <span class="r">${neg((qd / nq / nd).toFixed(3))}</span></span>` +
-    `<span class="k">the orange arc is the angle between the two arrows</span>`;
+    `<span class="k">orange arc: the angle between the arrows</span>`;
 }
 $("dQ").addEventListener("input", () => { stopRun("dense"); dshow = null; dq = textVec($("dQ").value); drawDense(); });
 $("dPlay").onclick = async () => {
@@ -406,10 +414,11 @@ $("dPlay").onclick = async () => {
   dshow = null;
   const best = names.slice().sort((a, b) => dot(dq, DVEC[b]) / norm(DVEC[b]) - dot(dq, DVEC[a]) / norm(DVEC[a]))[0];
   dsel = best; flip($("dTable").querySelector("tbody"), drawDense);
+  reveal($("dPrompt"));
 };
-document.querySelectorAll("#dense [data-q]").forEach(b => b.onclick = () => { $("dQ").value = b.dataset.q; dq = textVec(b.dataset.q); drawDense(); });
+document.querySelectorAll("#dense [data-q]").forEach(b => b.onclick = () => { stopRun("dense"); dshow = null; $("dQ").value = b.dataset.q; dq = textVec(b.dataset.q); drawDense(); });
 $("dK").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; stopRun("dense"); dshow = null; dk = +b.dataset.k; press($("dK"), b); drawDense(); });
-$("dTable").addEventListener("click", e => { const r = e.target.closest("tr[data-k]"); if (r) { dsel = r.dataset.k; drawDense(); } });
+$("dTable").addEventListener("click", e => { const r = e.target.closest("tr[data-k]"); if (r) { stopRun("dense"); dshow = null; dsel = r.dataset.k; drawDense(); } });
 drawDense();
 window.__askState.push(() => `Section 1: question "${$("dQ").value}", vector ${dq ? dq.map(fn).join(", ") : "none"}, top ${dk}; selected ${dsel}`);
 
@@ -427,9 +436,9 @@ function drawSparse() {
     return { k, overlap: shared.length, tfidf: shared.reduce((s, w) => s + ws.filter(x => x === w).length * idf(w), 0), shared, ws };
   }).sort((a, b) => b.tfidf - a.tfidf || b.overlap - a.overlap);
   $("sTable").innerHTML = `<thead><tr><th class="l">document</th><th>shared words</th><th>TF-IDF</th></tr></thead><tbody>` +
-    rows.map((r, i) => `<tr data-k="${r.k}" class="${r.k === ssel ? "sel " : ""}${i === 0 && r.tfidf > 0 ? "top" : ""}"><td class="l">${r.k}</td><td>${r.overlap}</td><td>${r.tfidf.toFixed(2)}</td></tr>`).join("") + "</tbody>";
+    rows.map(r => `<tr data-k="${r.k}" class="${r.k === ssel ? "sel " : ""}${r.tfidf > 0 && r.tfidf.toFixed(6) === rows[0].tfidf.toFixed(6) ? "top" : ""}"><td class="l">${r.k}</td><td>${r.overlap}</td><td>${r.tfidf.toFixed(2)}</td></tr>`).join("") + "</tbody>";
   const r = rows.find(x => x.k === ssel);
-  $("sCalc").innerHTML = `<span class="k">TF-IDF(question, ${ssel}) = sum over shared words of tf × idf</span>` +
+  $("sCalc").innerHTML = `<span class="k">TF-IDF(question, ${ssel})</span><span class="k">= the sum of tf × idf over the shared words</span>` +
     (r.shared.length ? r.shared.map(w => `<span>${w}: tf ${r.ws.filter(x => x === w).length} × ln(5 ÷ ${df(w)}) = ${r.ws.filter(x => x === w).length} × ${idf(w).toFixed(2)} = ${(r.ws.filter(x => x === w).length * idf(w)).toFixed(2)}</span>`).join("") +
       `<span>sum = <span class="r">${r.tfidf.toFixed(2)}</span></span>` : "<span>no shared words: score 0</span>");
 }
@@ -485,7 +494,7 @@ $("qM").addEventListener("click", e => { const b = e.target.closest("button"); i
 $("qK").addEventListener("input", () => { stopRun("quiz"); qk = +$("qK").value; drawQuiz(); });
 $("qPlay").onclick = async () => {
   const run = newRun("quiz");
-  qk = 26; $("qK").value = 26; drawQuiz(); await sleep(900);
+  qk = 26; $("qK").value = 26; drawQuiz(); reveal($("qFig")); await sleep(900);
   for (let k = 25; k >= 2; k--) { if (run.stop) return; qk = k; $("qK").value = k; drawQuiz(); await sleep(k > 6 ? 220 : 700); }
 };
 drawQuiz();
@@ -509,7 +518,7 @@ function drawWindow(pos = WMAX) {   // pos: how far into the documents the readi
     if (cut > 0) el(svg, "rect", { x: X0 + win * SC, y, width: cut * SC, height: H, fill: "url(#hatch)", stroke: "var(--neg)", "stroke-width": 0.8 });
     const nearLine = n * SC + 30 > win * SC - 4 && n * SC < win * SC + 4;   // a label here would sit on the dashed line
     if (pos >= n) el(svg, "text", { x: X0 + (nearLine ? win * SC : n * SC) + 6, y: y + 13, class: "m" }, String(n));
-    if (pos >= n && D.docs[i] === "training_vs_inference") el(svg, "text", { x: 896, y: y + 13, "text-anchor": "end", fill: "var(--neg)" }, "← answer is in the hatched part");
+    if (pos >= n && D.docs[i] === "training_vs_inference") el(svg, "text", { x: 896, y: y + 13, "text-anchor": "end", fill: "var(--neg)", id: "wAns" }, "← answer is in the hatched part");
   });
   if (pos < WMAX) el(svg, "line", { x1: X0 + pos * SC, x2: X0 + pos * SC, y1: T + 2, y2: T + 10 + order.length * G, stroke: pos > win ? "var(--neg)" : "var(--blue)", "stroke-width": 2 });
   const yb = T + 10 + order.length * G;
@@ -519,7 +528,9 @@ function drawWindow(pos = WMAX) {   // pos: how far into the documents the readi
   $("wStats").innerHTML = `<span>documents longer than the window: <b>${over} of 26</b></span><span>longest: <b>${Math.max(...D.minilm_tokens)}</b> tokens</span>`;
 }
 drawWindow();
-$("wPlay").onclick = async () => { const run = newRun("window"); await tween(5000, u => { if (!run.stop) drawWindow(u * WMAX); }); };
+$("wPlay").onclick = async () => { const run = newRun("window"); await tween(5000, u => { if (!run.stop) drawWindow(u * WMAX); }); if (!run.stop) reveal($("wAns")); };
+// in a lesson frame the note on token counts goes under the chart, so that the chart starts higher
+if (document.documentElement.classList.contains("embed")) { const n = $("wFig").previousElementSibling; if (n && n.classList.contains("note")) $("wFig").after(n); }
 })();
 </script>
 

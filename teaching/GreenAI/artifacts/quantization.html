@@ -162,6 +162,11 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 #rCalc { min-height: calc(9em + 42px); align-content: start; }
 #oClipVal { display: inline-block; width: 11ch; text-align: left; }
 #gCalc { min-height: calc(9em + 30px); align-content: start; }
+/* inside a lesson: a control brings what it changes into view, below the sticky strip */
+html.embed #bitGap, html.embed #bitNote, html.embed #rStats, html.embed #oStats, html.embed #aCalc, html.embed #gStats, html.embed #bStats { scroll-margin-top: 96px; scroll-margin-bottom: 8px; }
+/* inside a lesson, the bit fields reserve only their longest text at this width (measured: 6.6em from about 900px up) */
+html.embed .fields { container-type: inline-size; }
+@container (min-width: 900px) { html.embed .field .sum { min-height: 6.7em; } }
 /* what the page teaches, at the top: the same box on every course page */
 .learn { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--blue); border-radius: 10px; padding: 12px 18px; }
 .learn > p { font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
@@ -175,7 +180,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <h1>Quantization, Step by Step</h1>
     <p>A model is billions of numbers. Quantization stores each one with fewer bits. These six stations follow one number into its bits, then a few numbers into integer codes and back, and show what gets lost on the way, and one way to lose less.</p>
   </header>
-  <section class="learn" id="learn" aria-label="What you will learn"><p>What you will learn on this page</p><ol><li>A number in 16 bits is three fields read separately: a sign, an exponent (the scale) and a mantissa (the detail). FP16 and BF16 split the bits differently, and the space to the next number that can be stored grows with the number. <a href="#bits">→ section 1</a></li><li>Absmax: the largest absolute value sets one scale; every value is multiplied by it and rounded to an integer code. With fewer bits there are fewer codes, and different values start to share one. <a href="#round">→ section 2</a></li><li>One outlier stretches the range, so the ordinary values share a few codes. Clipping caps the range: one large error for the outlier, smaller errors for all the others. <a href="#outlier">→ section 3</a></li><li>When all values are 0 or more, symmetric codes for negative values go unused. Asymmetric quantization maps the smallest value to code 0, and the zero point is the code that stands for 0.0. <a href="#asym">→ section 4</a></li><li>GPTQ rounds the weights one at a time and moves each rounding error into the weights not yet rounded (here, simply the next one), so the layer's output stays closer than when each weight is rounded on its own. <a href="#gptq">→ section 5</a></li><li>A scale for each block of weights keeps the small weights from rounding to 0; each extra scale costs 16 bits, as in GGUF files. <a href="#blocks">→ section 6</a></li></ol></section>
+  <section class="learn" id="learn" aria-label="What you will learn"><p>What you will learn on this page</p><ol><li>A number in 16 bits is three fields read separately: a sign, an exponent (the scale) and a mantissa (the detail). FP16 and BF16 split the bits differently, and the space to the next number that can be stored grows with the number. <a href="#bits">→ section 1</a></li><li>Absmax: the largest absolute value sets one scale; every value is multiplied by it and rounded to an integer code. With fewer bits there are fewer codes, and different values start to share one. <a href="#round">→ section 2</a></li><li>One outlier stretches the range, so the ordinary values share a few codes. Clipping caps the range: one large error for the outlier, smaller errors for all the others. <a href="#outlier">→ section 3</a></li><li>When all values are 0 or more, symmetric codes for negative values go unused. Asymmetric quantization maps the smallest value to code 0, and the zero point is the code that stands for 0.0. <a href="#asym">→ section 4</a></li><li>GPTQ rounds the weights one at a time and moves each rounding error into the weights not yet rounded (here, simply the next one), so the output stays closer than when each weight is rounded on its own. <a href="#gptq">→ section 5</a></li><li>A scale for each block of weights keeps the small weights from rounding to 0; each extra scale costs 16 bits, as in GGUF files. <a href="#blocks">→ section 6</a></li></ol></section>
 
   <!-- 1 -->
   <section class="panel" id="bits">
@@ -265,7 +270,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="asym">
     <h2><span class="n">4</span>Lopsided values: the zero point</h2>
-    <p class="lead">These nine values are all 0 or more, like the outputs of a layer that cuts off negatives. Symmetric absmax keeps codes for negative values that never occur. Asymmetric quantization maps the smallest value to code 0 and the largest to the last code; the <b>zero point</b> z is the code that stands for 0.0.</p>
+    <p class="lead">These nine values are all 0 or more, like the outputs of ReLU, a step inside networks that replaces every negative value with 0. Symmetric absmax keeps codes for negative values that never occur. Asymmetric quantization maps the smallest value to code 0 and the largest to the last code; the <b>zero point</b> z is the code that stands for 0.0.</p>
     <div class="strip"><div class="controls">
       <span class="note">Move all values by:</span>
       <input type="range" id="aShift" min="-1" max="1" step="0.1" value="0" aria-label="Shift all values">
@@ -283,12 +288,12 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 5 -->
   <section class="panel" id="gptq">
     <h2><span class="n">5</span>GPTQ: round one weight, then correct the next</h2>
-    <p class="lead">A toy layer: six weights (the model's learned values, its parameters), one input of six numbers x₁ … x₆, and one output, their dot product y = w₁x₁ + … + w₆x₆. The weights can only be stored in steps of 0.25 (the gray lines). Rounding each weight on its own lets the errors add up. GPTQ rounds the weights one at a time, and moves each rounding error into the next weight, before that one is rounded.</p>
+    <p class="lead">One output of a learned table: six weights (the model's learned values, its parameters), one input of six numbers x₁ … x₆, and one output, their dot product y = w₁x₁ + … + w₆x₆. The weights can only be stored in steps of 0.25 (the gray lines). Rounding each weight on its own lets the errors add up. GPTQ rounds the weights one at a time, and moves each rounding error into the next weight, before that one is rounded.</p>
     <div class="strip"><div class="controls">
       <div class="seg" role="group" aria-label="Method" id="gMode"><button data-m="naive" aria-pressed="false">round each on its own</button><button data-m="gptq" aria-pressed="true">GPTQ: correct the next weight</button></div>
       <button class="primary" id="gPlay">▶ Play</button><button id="gStep">One weight</button><button id="gReset">Start over</button>
     </div></div>
-    <svg class="fig" id="gFig" viewBox="0 0 900 300" role="img" aria-label="Six weights, rounded one at a time, and the layer's output"></svg>
+    <svg class="fig" id="gFig" viewBox="0 0 900 300" role="img" aria-label="Six weights, rounded one at a time, and the output"></svg>
     <div class="legendrow">
       <span><span class="sw" style="border:2px solid var(--muted)"></span>the original weight</span>
       <span><span class="sw" style="background:var(--blue)"></span>the weight now, after corrections</span>
@@ -355,6 +360,10 @@ const f2 = x => (Math.abs(x) < 0.005 && x !== 0 ? x.toExponential(1) : x.toFixed
 const fs = s => (s < 1 ? s.toPrecision(3) : s.toFixed(2));  // a scale, with enough digits to redo the arithmetic
 const fx = (x, d) => x.toFixed(d).replace("-", "−");
 const rhe = x => { const r = Math.round(x); return Math.abs(x % 1) === 0.5 ? 2 * Math.round(x / 2) : r; };  // ties to even, like NumPy
+// inside a lesson (?embed=…), a control scrolls what it changes into view; on the full page nothing scrolls
+const EMBED = document.documentElement.classList.contains("embed");
+// (once more a moment later: in a zoomed lesson frame, Chromium may send the scroll back to the top when content is replaced)
+const reveal = id => { if (!EMBED) return; const go = () => { const e = document.getElementById(id); if (e) e.scrollIntoView({ block: "nearest" }); }; go(); setTimeout(go, 80); };
 const press = (group, btn) => group.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b === btn ? "true" : "false"));
 window.__askState = [];
 const REDUCE = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -425,7 +434,7 @@ function showBits() {
   const lead = d.kind === "normal" ? "1" : "0";
   const mv = (d.kind === "normal" ? 1 : 0) + d.m / 2 ** F.M;
   $("fMan").innerHTML = d.kind === "inf" || d.kind === "nan" ? "not used" :
-    `${lead}${mt.length ? " + " + mt.join(" + ") : ""}<br>= <b>${+mv.toPrecision(10)}</b>`;
+    `${lead} + mantissa = ${lead}${mt.length ? " + " + mt.join(" + ") : " + 0"}<br>= <b>${+mv.toPrecision(10)}</b>`;
   const p = d.kind === "normal" ? d.e - F.bias : 1 - F.bias;
   const v = d.value;
   $("bitVal").innerHTML = d.kind === "inf" || d.kind === "nan" ? `= <b>${d.kind === "inf" ? (d.s ? "−∞" : "∞") : "NaN"}</b>` :
@@ -462,11 +471,11 @@ $("bitRow").addEventListener("click", e => { const b = e.target.closest("button"
 $("bitPlay").onclick = async () => {
   const run = newRun("bits");
   const ps = fmt === "FP16" ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, -1, -2, -4, -6, -8, -10, -12, -14, 0] : [0, 4, 8, 16, 24, 32, 40, -4, -8, -16, -24, 0];
-  for (const k of ps) { if (run.stop) return; setNum(1.5 * 2 ** k); $("numIn").value = ""; await sleep(650); }
+  for (const k of ps) { if (run.stop) return; setNum(1.5 * 2 ** k); $("numIn").value = ""; reveal("bitGap"); await sleep(650); }
 };
-document.querySelectorAll("#bits [data-num]").forEach(b => b.onclick = () => { $("numIn").value = b.dataset.num; setNum(+b.dataset.num); });
-$("numIn").addEventListener("change", () => { const x = parseFloat($("numIn").value.replace(",", ".").replace("−", "-")); if (!isNaN(x)) setNum(x); });
-const setFmt = f => { const v = decode(bits, FMT[fmt]).value; fmt = f; press($("fmtFP16").parentElement, $("fmt" + f)); setNum(isNaN(v) ? 1.5 : v); };
+document.querySelectorAll("#bits [data-num]").forEach(b => b.onclick = () => { $("numIn").value = b.dataset.num; setNum(+b.dataset.num); reveal("bitNote"); });
+$("numIn").addEventListener("change", () => { const x = parseFloat($("numIn").value.replace(",", ".").replace("−", "-")); if (!isNaN(x)) { setNum(x); reveal("bitNote"); } });
+const setFmt = f => { const v = decode(bits, FMT[fmt]).value; fmt = f; press($("fmtFP16").parentElement, $("fmt" + f)); setNum(isNaN(v) ? 1.5 : v); reveal("bitNote"); };
 $("fmtFP16").onclick = () => setFmt("FP16"); $("fmtBF16").onclick = () => setFmt("BF16");
 setNum(1.5);
 window.__askState.push(() => { const d = decode(bits, FMT[fmt]); return `Section 1: format ${fmt}, bits ${bits.join("")}, value ${d.value}`; });
@@ -519,16 +528,16 @@ function drawRound() {
     el(svg, "circle", { cx: X(v), cy: yF, r: sel ? 6 : 4.5, fill: hit ? "var(--orange)" : "var(--blue)" });
     el(svg, "text", { x: X(v), y: yF - 10 - 15 * row[i], "text-anchor": "middle", fill: sel ? "var(--blue)" : "var(--fg)" }, f2(v));
     el(svg, "circle", { cx: X(end(i)), cy: yC, r: 3.5, fill: "none", stroke: hit ? "var(--orange)" : "var(--blue)" });
-    if (sel && rU === 1) el(svg, "text", { x: X(dq[i]), y: yC + 38, "text-anchor": "middle", fill: "var(--orange)" }, "code " + String(q[i]).replace("-", "−"));
+    if (sel && rU === 1) el(svg, "text", { x: X(dq[i]), y: yC + 38, "text-anchor": "middle", fill: hit ? "var(--orange)" : "var(--blue)" }, "code " + String(q[i]).replace("-", "−"));
   });
   $("rTable").innerHTML = `<thead><tr><th>value x</th><th>x × s</th><th>code</th><th>code ÷ s</th><th>error</th></tr></thead><tbody>` +
-    RV.map((v, i) => `<tr data-i="${i}" class="${i === rsel ? "sel" : ""}"><td>${f2(v)}</td><td>${f2(v * s)}</td><td class="${count[q[i]] > 1 ? "hit" : ""}">${q[i]}</td><td>${f2(dq[i])}</td><td>${f2(v - dq[i])}</td></tr>`).join("") + "</tbody>";
+    RV.map((v, i) => `<tr data-i="${i}" class="${i === rsel ? "sel" : ""}"><td>${f2(v)}</td><td>${f2(v * s)}</td><td class="${count[q[i]] > 1 ? "hit" : ""}">${String(q[i]).replace("-", "−")}</td><td>${f2(dq[i])}</td><td>${f2(v - dq[i])}</td></tr>`).join("") + "</tbody>";
   const v = RV[rsel];
   $("rCalc").innerHTML = `<span><span class="k">largest code</span> 2<sup>${rb}−1</sup> − 1 = ${qmax}</span>` +
     `<span><span class="k">scale</span> s = ${qmax} ÷ ${a} = ${fs(s)}</span>` +
     `<span><span class="k">quantize</span> ${f2(v)} × ${fs(s)} = ${f2(v * s)} → round → <span class="r">${String(q[rsel]).replace("-", "−")}</span></span>` +
     `<span><span class="k">dequantize</span> ${String(q[rsel]).replace("-", "−")} ÷ ${fs(s)} = ${f2(dq[rsel])}</span>` +
-    `<span><span class="k">error</span> ${f2(v)} − ${f2(dq[rsel])} = ${f2(v - dq[rsel])}</span>`;
+    `<span><span class="k">error</span> ${f2(v)} − ${f2(dq[rsel]).replace(/^(−.*)$/, "($1)")} = ${f2(v - dq[rsel])}</span>`;
   const used = new Set(q).size, mae = RV.reduce((t, x, i) => t + Math.abs(x - dq[i]), 0) / RV.length;
   $("rStats").innerHTML = `<span>codes available: <b>${2 * qmax + 1}</b></span><span>codes used: <b>${used}</b> for 9 values</span><span>mean absolute error: <b>${mae.toFixed(3)}</b></span>`;
 }
@@ -538,9 +547,9 @@ async function toBits(b, run) {
   await tween(900, u => { if (!run.stop) { rU = u; drawRound(); } });
   rFrom = null; rU = 1; drawRound();
 }
-$("rBits").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; toBits(+b.dataset.b, newRun("round")); });
+$("rBits").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; reveal("rStats"); toBits(+b.dataset.b, newRun("round")); });
 $("rPlay").onclick = async () => {
-  const run = newRun("round");
+  const run = newRun("round"); reveal("rStats");
   if (rb !== 8) { await toBits(8, run); await sleep(500); }
   for (const b of [4, 3, 2]) { if (run.stop) return; await sleep(900); if (run.stop) return; await toBits(b, run); }
 };
@@ -583,16 +592,17 @@ function drawOut() {
     `<span>their mean absolute error: <b>${mae.toFixed(3)}</b></span>` + `<span>outlier error: <b>${withOut ? (OUT - dq[n]).toFixed(2) : "none, no outlier"}</b></span>`;
 }
 $("oClip").addEventListener("input", () => { stopRun("out"); clip = sliderToClip(+$("oClip").value); drawOut(); });
+$("oClip").addEventListener("change", () => reveal("oStats"));
 $("oPlay").onclick = async () => {
-  const run = newRun("out"), from = 100, to = clipToSlider(2.5);
+  const run = newRun("out"), from = 100, to = clipToSlider(2.5); reveal("oStats");
   if (!$("oOut").checked) $("oOut").checked = true;
   clip = null; $("oClip").value = 100; drawOut(); await sleep(800);
   await tween(4500, u => { if (run.stop) return; const t = Math.round(from + (to - from) * u); $("oClip").value = t; clip = t >= 100 ? null : sliderToClip(t); drawOut(); });
   if (!run.stop) { clip = 2.5; drawOut(); }
 };
-document.querySelectorAll("#outlier [data-clip]").forEach(b => b.onclick = () => { clip = b.dataset.clip === "none" ? null : +b.dataset.clip; $("oClip").value = clipToSlider(clip); drawOut(); });
-$("oOut").onchange = drawOut;
-$("oBits").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; ob = +b.dataset.b; press($("oBits"), b); drawOut(); });
+document.querySelectorAll("#outlier [data-clip]").forEach(b => b.onclick = () => { clip = b.dataset.clip === "none" ? null : +b.dataset.clip; $("oClip").value = clipToSlider(clip); drawOut(); reveal("oStats"); });
+$("oOut").onchange = () => { drawOut(); reveal("oStats"); };
+$("oBits").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; ob = +b.dataset.b; press($("oBits"), b); drawOut(); reveal("oStats"); });
 drawOut();
 window.__askState.push(() => `Section 3: outlier ${$("oOut").checked ? "included" : "left out"}, ${ob} bits, clipping ${clip ?? "none"}; ${$("oStats").textContent}`);
 
@@ -627,12 +637,13 @@ function drawAsym() {
   el(svg, "text", { x: X(0), y: 140, "text-anchor": "middle", class: "m" }, "");
   const maeS = xs.reduce((t, v, i) => t + Math.abs(v - sym.dq[i]), 0) / xs.length, maeA = xs.reduce((t, v, i) => t + Math.abs(v - dqa[i]), 0) / xs.length;
   $("aCalc").innerHTML = `<span><span class="k">scale</span> s = (${f2(hi)} − ${f2(lo).replace(/^(−.*)$/, "($1)")}) ÷ ${qn} = ${fx(sa, 4)}</span>` +
-    `<span><span class="k">zero point</span> z = round(0 − ${f2(lo).replace(/^(−.*)$/, "($1)")} ÷ ${fx(sa, 4)}) = round(${f2(-lo / sa)}) = <span class="r">${z}</span></span>` +
+    `<span><span class="k">zero point</span> z = round((0 − ${f2(lo).replace(/^(−.*)$/, "($1)")}) ÷ ${fx(sa, 4)}) = round(${f2(-lo / sa)}) = <span class="r">${z}</span></span>` +
     `<span><span class="k">quantize</span> code = round(x ÷ s + z)</span><span><span class="k">dequantize</span> x ≈ (code − z) × s</span>`;
   $("aStats").innerHTML = `<span>codes used, symmetric: <b>${new Set(sym.q).size} of ${2 * sym.qmax + 1}</b></span><span>asymmetric: <b>${new Set(qa).size} of ${qn + 1}</b></span>` +
     `<span>mean absolute error, symmetric: <b>${maeS.toFixed(3)}</b></span><span>asymmetric: <b>${maeA.toFixed(3)}</b></span>`;
 }
 $("aShift").addEventListener("input", drawAsym);
+$("aShift").addEventListener("change", () => reveal("aCalc"));
 drawAsym();
 window.__askState.push(() => `Section 4: values shifted by ${$("aShift").value}; ${$("aStats").textContent}`);
 
@@ -676,21 +687,22 @@ async function gStep(run) {
   if (gi >= GW.length) return false;
   const i = gi, w = gcur[i], r = grid(w), err = (w - r) * GX[i];
   gq[i] = r;
-  let line = `w${i + 1}: ${n2(w)} → ${n2(r)}; the output changes by (${n2(r)} − ${n2(w)})·${GX[i]} = ${n3(-err)}`;
+  const par = s => s.startsWith("−") ? `(${s})` : s;
+  let line = `w${i + 1}: ${n3(w)} → ${n2(r)}; the output changes by (${n2(r)} − ${par(n3(w))})·${GX[i]} = ${n3(-err)}`;
   if (gmode === "gptq" && i + 1 < GW.length) {
     const before = [...gcur], add = err / GX[i + 1];
     gcur[i + 1] = gcur[i + 1] + add;
-    line += `; move it into w${i + 2}: ${n2(before[i + 1])} + ${n3(err)} ÷ ${GX[i + 1]} = ${n3(gcur[i + 1])}`;
+    line += `; make up for it in w${i + 2}: ${n3(before[i + 1])} ${err >= 0 ? "+" : "−"} ${n3(Math.abs(err))} ÷ ${GX[i + 1]} = ${n3(gcur[i + 1])}`;
     glog.push(line); gi++;
     await tween(700, u => { if (!run.stop) drawGptq(before.map((v, k) => k === i + 1 ? v + add * u : v)); });
   } else { glog.push(line); gi++; drawGptq(); }
   if (gi === GW.length) { glog.push(`all rounded: y = ${n3(gOut())}, error ${n3(gOut() - Y0)}`); drawGptq(); }
   return true;
 }
-$("gStep").onclick = () => gStep(newRun("gptq"));
-$("gReset").onclick = () => { stopRun("gptq"); gReset(); drawGptq(); };
-$("gPlay").onclick = async () => { const run = newRun("gptq"); gReset(); drawGptq(); await sleep(600); while (!run.stop && await gStep(run)) await sleep(900); };
-$("gMode").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; gmode = b.dataset.m; press($("gMode"), b); stopRun("gptq"); gReset(); drawGptq(); });
+$("gStep").onclick = () => { reveal("gStats"); gStep(newRun("gptq")); };
+$("gReset").onclick = () => { stopRun("gptq"); gReset(); drawGptq(); reveal("gStats"); };
+$("gPlay").onclick = async () => { const run = newRun("gptq"); gReset(); drawGptq(); reveal("gStats"); await sleep(600); while (!run.stop && await gStep(run)) await sleep(900); };
+$("gMode").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; gmode = b.dataset.m; press($("gMode"), b); stopRun("gptq"); gReset(); drawGptq(); reveal("gStats"); });
 gReset(); drawGptq();
 window.__askState.push(() => `Section 5: mode ${gmode}; weights ${GW.join(", ")}, inputs ${GX.join(", ")}; ${gi} rounded; current ${gcur.map(n3).join(", ")}; output ${n3(gOut())} against ${n3(Y0)}`);
 
@@ -722,7 +734,7 @@ function drawBlocks() {
   $("bStats").innerHTML = `<span>scales: <b>${scales.length}</b></span><span>weights rounded to 0: <b>${zeros}</b></span>` +
     `<span>average error, relative to each weight: <b>${Math.round(rel * 100)}%</b></span><span>bits per weight: 4 + 16 ÷ ${bk} = <b>${4 + 16 / bk}</b></span>`;
 }
-$("bSize").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; bk = +b.dataset.k; press($("bSize"), b); drawBlocks(); });
+$("bSize").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; bk = +b.dataset.k; press($("bSize"), b); drawBlocks(); reveal("bStats"); });
 drawBlocks();
 window.__askState.push(() => `Section 5: ${bk} weights per block; ${$("bStats").textContent}`);
 })();
