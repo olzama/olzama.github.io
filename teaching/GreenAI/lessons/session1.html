@@ -2950,7 +2950,7 @@ print("they match" if count == expected else "they do not match: check the loop 
         </ul>
       </div>
       <div class="col">
-        <p class="label">The weights before “with”: the four largest of 31</p>
+        <p class="label">The weights before “with”: the four largest of 31, one per Galician word or mark</p>
         <table class="plain">
           <tr><td>. (the full stop)</td><td class="num">0.54</td></tr>
           <tr><td><i>solucionaba</i> (solved)</td><td class="num">0.12</td></tr>
@@ -3018,7 +3018,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">Step 5 · Self-attention</span><h2>Several heads at once: multi-head attention</h2></header>
   <div class="body">
     <ul class="points">
-      <li>Several heads side by side, each with its own grid of weights and its own mix; the mixes are combined into one new vector per word</li>
+      <li>Several heads side by side, each with its own grid of weights and its own mix; one learned table combines the mixes into one new vector per word (the real model: 8 heads)</li>
     </ul>
     <div class="flow">
       <div class="box">a vector per word</div><span class="arr">⇉</span>
@@ -3090,7 +3090,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">Step 6 · Transformers</span><h2>Why attention cost grows with the length of the input</h2></header>
   <div class="body">
     <div class="board">
-      <svg viewBox="0 0 760 480" role="img" aria-label="Every word is compared with every word: 4 words give 4 × 4 = 16 comparisons, 8 words give 8 × 8 = 64. n words give n², and 2n words give 4n²">
+      <svg viewBox="0 0 760 480" role="img" aria-label="Every word is scored against every word: 4 words give 4 × 4 = 16 scores, 8 words give 8 × 8 = 64. n words give n², and 2n words give 4n²">
 <text x="142.0" y="142.0" font-size="17" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.0">Unha</text>
 <text x="142.0" y="176.0" font-size="17" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.08">tía</text>
 <text x="142.0" y="210.0" font-size="17" style="fill:currentColor" text-anchor="end" data-s="1" data-d="0.16">miña</text>
@@ -3208,8 +3208,8 @@ print("they match" if count == expected else "they do not match: check the loop 
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
     <ul class="points">
-      <li>Double the words → four times the comparisons: the growth is quadratic</li>
-      <li>“unha tía miña” was three words. The full story is thousands.</li>
+      <li>One square = one score (query · key). Double the words → four times the scores: the growth is quadratic</li>
+      <li>“unha tía miña” was three words; a whole document is thousands</li>
     </ul>
   </div>
   <div class="notes">
@@ -3243,12 +3243,13 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">Step 6 · Transformers</span><h2>Generating text: why inference is sequential</h2></header>
   <div class="body">
     <div class="flow kvrow" style="gap:24px;align-items:center">
-      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i></div><span>word 1<br>(cache: 1)</span></div>
+      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i></div><span>word 1<br>(cache: 1 word)</span></div>
       <span class="arr">→</span>
-      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i><i class="kvc" style="background:color-mix(in srgb, var(--muted) 45%, var(--panel))"></i></div><span>word 2<br>(cache: 2)</span></div>
+      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i><i class="kvc" style="background:color-mix(in srgb, var(--muted) 45%, var(--panel))"></i></div><span>word 2<br>(cache: 2 words)</span></div>
       <span class="arr">→</span>
-      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i><i class="kvc" style="background:color-mix(in srgb, var(--muted) 45%, var(--panel))"></i><i class="kvc" style="background:var(--muted)"></i></div><span>word 3<br>(cache: 3)</span></div>
+      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i><i class="kvc" style="background:color-mix(in srgb, var(--muted) 45%, var(--panel))"></i><i class="kvc" style="background:var(--muted)"></i></div><span>word 3<br>(cache: 3 words)</span></div>
     </div>
+    <p class="cap">one box = the key and value of one written word, kept in the cache; darker = added later</p>
     <ul class="points">
       <li>One word at a time. Each word written gets its own key and value (the decoder's self-attention looks at the words written so far); the <b>KV cache</b> keeps them, so it grows with every word</li>
       <li>Translating the rest of our story this way: the cache keeps growing the whole time</li>
@@ -3307,16 +3308,15 @@ print("they match" if count == expected else "they do not match: check the loop 
 <section class="screen" id="galician" data-step="0">
   <header><span class="kind">Translation today</span><h2>How well do LLMs actually serve Galician?</h2></header>
   <div class="body">
-    <div class="flow"><div class="box">a general LLM</div><span class="arr">→</span><div class="box o">Galician, mixed with Spanish and Portuguese</div></div>
-    <div class="flow"><div class="box g">a <b>smaller</b>, dedicated model (1.3B), trained on Galician and Portuguese</div><span class="arr">→</span><div class="box g">correct Galician</div></div>
+    <div class="flow"><div class="box">a general LLM</div><span class="arr">→</span><div class="box o">trained on text where Galician is “almost residual”</div></div>
+    <div class="flow"><div class="box g">a <b>smaller</b>, dedicated model (1.3B), trained on Galician and Portuguese</div><span class="arr">→</span><div class="box g">the best score on a Galician test</div></div>
     <ul class="points">
-      <li>In mainstream LLMs, Galician is “almost residual”</li>
       <li>On a Galician text-completion test, the 1.3B model beat all the models it was compared with, including a Portuguese model five times its size</li>
     </ul>
     <p class="src">Source: Gamallo et al., “A Galician-Portuguese Generative Model,” EPIA 2024; Proxecto Nós (USC)</p>
   </div>
   <div class="notes">
-    <p>“100+ languages” sounds comprehensive, but in most mainstream LLMs Galician is a tiny share of the training text, in the words of a paper that studied it, “almost residual”. Galician is close to Spanish and Portuguese, and general models tend to blur the three: the output drifts into Spanish or Portuguese.</p>
+    <p>“100+ languages” sounds comprehensive, but in most mainstream LLMs Galician is a tiny share of the training text, in the words of a paper that studied it, “almost residual”.</p>
     <p>The fix that worked was not a bigger general model but a smaller dedicated one: 1.3 billion parameters, trained on Galician and Portuguese text (Gamallo et al. 2024; Proxecto Nós at the University of Santiago de Compostela works on such models). On a test that asks models to complete Galician sentences, it got the last word exactly right 40% of the time; the other models it was compared with, of the same size or up to 7 billion parameters, at most 27% (Gamallo et al. 2024, Table 2). The same pattern as opus-mt: a model built for the task can be both smaller and better at it.</p>
   </div>
 </section>

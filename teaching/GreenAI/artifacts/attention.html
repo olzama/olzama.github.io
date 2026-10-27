@@ -157,7 +157,7 @@ html.embed .steptext, html.embed .lead, html.embed .note { max-width: 115ch; }
 #walk > * { min-width: 0; }
 html:not(.embed) .embonly { display: none; }   /* said once more in lesson frames, where the paragraph above is hidden */   /* the wide encoder strip scrolls inside its box instead of widening the section */
 /* section 3 in a lesson frame: the picture right after the step text; the controls (inactive until step 5) below it */
-html.embed #qkBody { display: flex; flex-direction: column; } html.embed #qkBody > .tycols { order: 1; } html.embed #qkPosRow, html.embed #qkCtl { order: 2; } html.embed #qkWordsBox { order: 3; }   /* in a lesson frame the height is short: wider lines leave room for the pictures */
+html.embed #qkBody { display: flex; flex-direction: column; } html.embed #qkBody > .tycols { grid-template-columns: 600px minmax(0, 1fr); }   /* the softmax board is 600px wide: the picture gets the rest */ html.embed #qkBody > .tycols { order: 1; } html.embed #qkPosRow, html.embed #qkCtl { order: 2; } html.embed #qkWordsBox { order: 3; }   /* in a lesson frame the height is short: wider lines leave room for the pictures */
 .choose:has(.flow:empty) > .op { visibility: hidden; }
 table.cmp7 td:first-child { color: var(--muted); white-space: nowrap; } table.cmp7 td { vertical-align: top; }
 /* section 6: from section 2's weights to the real model's grids */
@@ -542,7 +542,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <tr><td>sections 4 and 5 here</td><td>5,000 template sentences; ours held out</td><td><span class="bad">A friend of mine, …</span>; with attention, An aunt of mine, …</td><td>same data, same number of updates, same size: the difference is attention's</td></tr>
       </tbody></table></div>
       <p>Step 5 shows, on a made-up training run, how training on the example translations would produce values like those of sections 1 and 2.</p></div>
-    <p class="lead keep">A made-up translation model, small enough to run by hand, on <i>unha tía miña</i>: three dimensions per vector (one per Galician word), a decoder with eight English words, every value on the page. Without attention it writes “a friend of mine”: made up to fail the way a model without attention fails on a long sentence (the translation page's model gets this phrase right). The steps show why; section 2 adds attention, and it writes “an aunt of mine”. A real model learns its values from examples (the skip-gram lesson); these are made up, to keep the arithmetic simple (step 5 shows how training would produce such values).</p>
+    <p class="lead keep">A made-up translation model, small enough to compute by hand, on <i>unha tía miña</i>: vectors of three dimensions (one per Galician word), a decoder that chooses among eight English words, and every number shown. Its values are made up so that without attention it writes “a friend of mine”, as a model without attention does on a long sentence; section 2 adds attention, and it writes “an aunt of mine”. (Step 5: how training would produce such values.)</p>
     <div class="planes" id="tyPlanes"></div>
   </section>
 
@@ -993,23 +993,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const POINTS = [
     "A row of a grid: one English word's weights over the Galician words. They add up to 1. Section 2 computed one by hand.",
     "The grid: all the rows, one per English word written. Darker means more weight.",
-    "A real model's grid reads the same way: “Aunt” looks at tía. It can also show a mistake: “A Aunt of mine”. Choosing “An” needs tía, and the row of “A” puts almost no weight on it (0.00 in this head, 0.16 on average over all 48 of the model's grids: step 3; all 48 grids in step 5).",
+    "A real model's grid reads the same way: “Aunt” looks at tía. It can also show a mistake: “A Aunt of mine”. Choosing “An” needs tía, and the row of “A” puts little weight on it: 0.00 in this head, 0.16 on average over all 48 grids, where an even share over the 4 columns would be 0.25 (the 48 grids: step 5).",
     "A head is one run of section 2's computation (query, scores, weights, mix) with its own learned tables for queries, keys and values: one head, one grid. Several heads run side by side, each with its own pattern.",
     "A layer: all the heads run on the same vectors, and their mixes are combined into one new vector per word; the next layer starts from these. 6 layers × 8 heads = 48 grids. Early layers spread their weight; late layers point each English word at the word it translates.",
-    "The weights show where the model looks. Sometimes that fits a mistake (“A”: almost no weight on tía); sometimes it does not (below: the right word looked at, a wrong output)."];
+    "The weights show where the model looks. Sometimes that fits a mistake (“A”: little weight on tía); sometimes it does not (below: the right word looked at, a wrong output)."];
   const STEPS6 = [
     ["One row: the weights for one English word",
       "In section 2, before writing “an”, the decoder scored the three encoder vectors (one after each Galician word), and softmax turned the scores into three weights that add up to 1: the bars. Write the same three numbers in a row of cells, darker for more weight. That row is one row of an attention grid."],
     ["All the rows: the grid",
       "The decoder does the same before every English word it writes: new weights each time, one row each. Stacked, the rows make the grid: one row per English word, one column per Galician word. Click a row to see its weights as bars."],
     ["A real model's grid reads the same way",
-      `A real translation model, opus-mt-gl-en, trained by others on a large amount of Galician–English text, on the same phrase: one of its 48 grids (steps 4 and 5 explain “layer 5, head 3”). Rows: the English words it wrote; columns: the Galician words it read, then ‹end›, the end marker. “Aunt” looks at tía, as in our grid. But it writes “${TGT_R.slice(0, -1).join(" ")}”. “A” or “An” depends on the next word, aunt, so it needs tía, as in sections 1 to 3. The row of “A” puts almost no weight on tía, in this head and on average over all ${NL * NH} grids (point 3 below): choosing the article, the model barely looked at tía. (The capital in “Aunt” is a second slip.)`],
+      `A real translation model, opus-mt-gl-en, trained by others on a large amount of Galician–English text, on the same phrase: one of its 48 grids (steps 4 and 5 explain “layer 5, head 3”). Rows: the English words it wrote; columns: the Galician words it read, then ‹end›, the end marker. “Aunt” looks at tía, as in our grid. But it writes “${TGT_R.slice(0, -1).join(" ")}”. “A” or “An” depends on the next word, aunt, so it needs tía, as in sections 1 to 3. The row of “A” puts no weight on tía in this head, and little on average over all ${NL * NH} grids (point 3 below): choosing the article, the model barely looked at tía. (The capital in “Aunt” is a second slip.)`],
     ["What a head is",
-      "In section 2 the decoder ran the computation once before each English word (query, scores, softmax, weights, mix): one grid. A head is one such run with its own three learned tables (the flow on the right). Here a table is not looked up by row: a vector multiplied by it gives a new vector (the lesson's refresher on multiplying matrices). Sections 2 to 5 had no tables: the query came from a made-up rule (section 2) or was the decoder state itself (section 4), and the keys and values were the encoder's vectors as they were. This model runs 8 heads side by side: 8 grids, 8 mixes, combined into one vector. Under the flow, one grid per head, read like the grid of step 3 (outlined)."],
+      "In section 2 the decoder ran the computation once before each English word (query, scores, softmax, weights, mix): one grid. A head is one such run with its own three learned tables (the flow on the right). Here a table is not looked up by row: a vector multiplied by it gives a new vector: each new number is a weighted sum of the vector's numbers. Sections 2 to 5 had no tables: the query came from a made-up rule (section 2) or was the decoder state itself (section 4), and the keys and values were the encoder's vectors as they were. This model runs 8 heads side by side: 8 grids, 8 mixes, combined into one vector. Under the flow, one grid per head, read like the grid of step 3 (outlined)."],
     ["6 layers × 8 heads = 48 grids",
       "A layer (a block, on the lesson's transformer screens) is one round of step 4's computation, drawn in the flow on the right; the next layer starts from its new vectors. The decoder's 6 layers each have their own 8 heads. (Each decoder layer also has heads that look at the English words already written; section 7 shows heads of that kind in the encoder.) Layer 1: most heads spread their weight or rest it on ‹end›. Layer 5 (most heads) and layer 6 (several): each English word points at the Galician word it translates. Nobody assigned these patterns: section 8 shows how heads get them."],
     ["The whole sentence",
-      "Below, the same grids for our whole sentence: pick a layer and a head, or their average; play the translation; and see three places where it goes wrong. In “A Aunt”, the weights fit the mistake: almost no weight on tía. In those three places they do not: attention points at the right Galician word, and the output is still wrong."]];
+      "Below, the same grids for our whole sentence: pick a layer and a head, or their average; play the translation; and see three places where it goes wrong. In “A Aunt”, the weights fit the mistake: little weight on tía. In those three places they do not: attention points at the right Galician word, and the output is still wrong."]];
   let k = 0, sel = 0;
   STEPS6.forEach(([t], i) => { const b = document.createElement("button"); b.textContent = i + 1; b.title = t; b.addEventListener("click", () => { k = i; draw6(); }); $("hbSteps").appendChild(b); });
   function draw6() {
@@ -1135,7 +1135,7 @@ function render() {
   const maxNoun = Math.max(...L2.map(h => Math.max(h.animal_when_animal, h.place_when_place)));
   const done = i === S.length - 1;
   let story;
-  if (bothHead) story = `In this run, head ${bothHead.head} of layer 2 looks at the animal when the adjective fits an animal (${f(bothHead.animal_when_animal)}) and at the place when it fits a place (${f(bothHead.place_when_place)}). It follows the adjective: the picture of the Google blog post this example comes from (Uszkoreit 2017, references), and it came out of training.`;
+  if (bothHead) story = `In this run, head ${bothHead.head} of layer 2 looks at the animal when the adjective fits an animal (${f(bothHead.animal_when_animal)}) and at the place when it fits a place (${f(bothHead.place_when_place)}). It follows the adjective, as in the original version of this example (Uszkoreit 2017): nobody set it; it came out of training.`;
   else if (maxNoun > 0.6 && aHead !== pHead) story = `In this run the job is split: head ${aHead.head} of layer 2 finds the animal (${f(aHead.animal_when_animal)}) and head ${pHead.head} finds the place (${f(pHead.place_when_place)}). Nobody told either head which noun to take.`;
   else story = `Every answer is right, yet no head in layer 2 looks at either noun much (at most ${f(maxNoun)}). The information reaches “it” another way, through the other words in layer 1. A model does not have to solve a task the way a person would describe it.`;
   $("whoNote").textContent = !done
@@ -2203,7 +2203,7 @@ function drawQ() {
   $("qkSit").innerHTML = `<div class="flow">` + PHR.map((w, j) => j < pos ? fig(w, "okw", "written") : j === pos ? fig(w, "out", `word ${j + 1}: to write now`) : fig(w, "dimw", "later")).join("") + `</div>` +
     `<p class="note">The correct word ${pos + 1} is “${PHR[pos]}”. It needs ${nd.txt}.</p>`;
   // the 3-D picture: the keys always; the query's line and the mix when the step has reached them
-  const pts = [...encPts(ENC.map((e, j) => show.has("q3") ? `${encPlain(j)}: weight ${f(a.sm.p[j])}` : encPlain(j)))];
+  const pts = [...encPts(ENC.map((e, j) => show.has("sm") ? `${encPlain(j)}: weight ${f(a.sm.p[j])}` : encPlain(j)))];
   if (show.has("m3")) pts.push({ p: a.mix, cls: "mix", label: `the mix ${vecTxt(a.mix)}`, dx: -10, dy: -26, anchor: "end" });   // higher: clear of the key labels below
   v2.set({ ...(show.has("q3") ? queryScene(a) : { arrows: [], segs: [], notes: [] }), range: 0.5, noTicks: true, tri: ENC, pts });
   $("qkCap").textContent = show.has("m3") ? `The mix ${vecTxt(a.mix)} lies inside the triangle of the three keys, pulled toward the one with the largest weight. It reaches ${f(a.mix[TIA])} along tía and ${f(a.mix[MINA])} along miña.`
