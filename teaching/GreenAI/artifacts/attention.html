@@ -249,6 +249,7 @@ svg.sb .bg, .sw.bg { fill: rgb(var(--heat)); background: rgb(var(--heat)); } svg
 .es-row .es-l .vc { margin-bottom: -26px; }
 .es-row .es-l.lk .ar { font-size: 1.1rem; } .es-row .es-l.lk.cur { color: var(--orange); }
 .work.es-line { min-height: 4.5em; }
+.work.wbox { min-height: 4.5em; }   /* section 1, step 7 and section 2, step 4: the hand-written lines of every part, in one place */
 
 .gcap { margin: 0; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); height: 2.7em; overflow: hidden; line-height: 1.35; }
 .gwrap { overflow-x: auto; }
@@ -522,16 +523,16 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 <div class="wrap">
   <header>
     <h1>Attention, Step by Step</h1>
-    <p>How a translation model decides which source words to look at while it writes each output word. The running example is the start of our sentence: <span class="gl">Unha <b>tía miña</b>, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»</span>. It continues the <a href="mt.html">neural translation page</a>, which shows how an encoder and a decoder translate without attention.</p>
+    <p>How a translation model chooses which input words to look at before it writes each output word. Running example, the start of our sentence: <span class="gl">Unha <b>tía miña</b>, que todo o solucionaba con ditos e refráns, dicía algo así como «un é escravo do que di e dono do que cala»</span>. It continues the <a href="mt.html">neural translation page</a> (translation without attention).</p>
   </header>
-  <section class="learn" id="learn" aria-label="What you will learn"><p>What you will learn on this page</p><ol><li>Without attention, the decoder gets one summary of the whole sentence, and a word read long ago has faded from it. <a href="#look">→ sections 1, 4</a></li><li>With attention, before each English word the decoder builds a new mix of all the encoder's vectors: query · each key → scores → softmax: weights → the weighted sum: the mix. <a href="#lookatt">→ section 2</a></li><li>The query's numbers decide which key is read, and so which word is written; each word needs its own query. <a href="#qk">→ section 3</a></li><li>The evidence: two models with the same data, updates and size; only attention differs. With small vectors (8 dimensions), only the model with attention translates our long sentence; with 64 dimensions, both do (section 5). <a href="#walk">→ sections 4, 5</a></li><li>A row of an attention grid is one word's weights; a head is one run of query, scores, weights and mix with its own learned tables, so one grid; a layer runs several heads on the same vectors; a real model stacks several layers. The weights show where the model looks, not whether what it writes is right. <a href="#real">→ section 6</a></li><li>Self-attention: every piece looks at every piece. Heads get their habits from training; nobody assigns them. <a href="#self">→ sections 7, 8</a></li></ol></section>
+  <section class="learn" id="learn" aria-label="What you will learn"><p>What you will learn on this page</p><ol><li>Without attention, the decoder gets one summary of the whole sentence, and a word read long ago has faded from it. <a href="#look">→ sections 1, 4</a></li><li>With attention, before each English word the decoder builds a new mix of all the encoder's vectors: query · each key → scores → softmax → weights → weighted sum = the mix. <a href="#lookatt">→ section 2</a></li><li>The query's numbers decide which key is read, and so which word is written; each word needs its own query. <a href="#qk">→ section 3</a></li><li>The evidence: two models alike except for attention. With 8 dimensions, only the one with attention translates our long sentence; with 64, both do (section 5). <a href="#walk">→ sections 4, 5</a></li><li>A grid row is one word's weights. A head is one run of query, scores, weights and mix with its own learned tables: one grid. A layer runs several heads side by side; a real model stacks layers. The weights show where the model looks, not whether its output is right. <a href="#real">→ section 6</a></li><li>Self-attention: every piece looks at every piece. Heads get their habits from training; nobody assigns them. <a href="#self">→ sections 7, 8</a></li></ol></section>
 
 
   <!-- 4 -->
   <section class="panel" id="look">
     <h2><span class="n">1</span>Without attention, computed by hand</h2>
-    <div class="review recap"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page</a>: a translation model has two parts. The <b>encoder</b> reads the Galician words and turns them into one vector, the <b>summary</b>. The <b>decoder</b> then writes the English words one at a time. From the <a href="skipgram.html">skip-gram lesson</a>: a <b>vector</b> is a list of values, and each position in the list is a <b>dimension</b>; the <b>dot product</b> of two vectors multiplies them dimension by dimension and adds up the results.</p></div>
-    <div class="review noembed"><span class="rtag">Review</span><p>The example translations: the 16 phrases, translated by people, that the model on the <a href="mt.html#train">translation page</a> was trained on. Every “in the example translations” below refers to this table.</p>
+    <div class="review recap"><span class="rtag">Review</span><p>From the <a href="mt.html#enc">translation page</a>: the <b>encoder</b> reads the Galician words into one vector, the <b>summary</b>; the <b>decoder</b> writes the English words one at a time. From the <a href="skipgram.html">skip-gram lesson</a>: a <b>vector</b> is a list of values, one per <b>dimension</b>; the <b>dot product</b> multiplies two vectors dimension by dimension and adds up the results.</p></div>
+    <div class="review noembed"><span class="rtag">Review</span><p>The example translations: the 16 phrases, translated by people, that the <a href="mt.html#train">translation page</a>'s model was trained on.</p>
       <div class="heatwrap"><table class="ty corpus"><tbody><tr><td><i>a miña tía</i></td><td>my aunt</td><td class="cpm"><i>unha tía miña</i></td><td class="cpm">an aunt of mine <span class="cpt">our phrase</span></td></tr><tr><td><i>a túa tía</i></td><td>your aunt</td><td><i>unha tía túa</i></td><td>an aunt of yours</td></tr><tr><td><i>o meu amigo</i></td><td>my friend</td><td><i>un amigo meu</i></td><td>a friend of mine</td></tr><tr><td><i>o teu amigo</i></td><td>your friend</td><td><i>un amigo teu</i></td><td>a friend of yours</td></tr><tr><td><i>o meu irmán</i></td><td>my brother</td><td><i>un irmán meu</i></td><td>a brother of mine</td></tr><tr><td><i>o teu irmán</i></td><td>your brother</td><td><i>un irmán teu</i></td><td>a brother of yours</td></tr><tr><td><i>a miña veciña</i></td><td>my neighbor</td><td class="cpm"><i>unha veciña miña</i></td><td class="cpm">a neighbor of mine <span class="cpt">2nd phrase (steps 5–6)</span></td></tr><tr><td><i>a túa veciña</i></td><td>your neighbor</td><td><i>unha veciña túa</i></td><td>a neighbor of yours</td></tr></tbody></table></div>
       <p class="label noembed" style="margin-top:10px">Which model writes what for <i>unha tía miña</i></p>
       <div class="heatwrap noembed"><table class="ty models"><thead><tr><th>model</th><th>trained on</th><th>writes</th><th>why</th></tr></thead><tbody>
@@ -541,14 +542,14 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <tr class="cpm"><td>sections 1 and 2 here</td><td>nothing: made-up values</td><td><span class="bad">a friend of mine</span>; with attention, an aunt of mine</td><td>made up to fail the way a model without attention fails on our <i>long</i> sentence, where 29 more words and marks follow tía</td></tr>
       <tr><td>sections 4 and 5 here</td><td>5,000 template sentences; ours held out</td><td><span class="bad">A friend of mine, …</span>; with attention, An aunt of mine, …</td><td>same data, same number of updates, same size: the difference is attention's</td></tr>
       </tbody></table></div>
-      <p>Step 5 shows, on a made-up training run, how training on the example translations would produce values like those of sections 1 and 2.</p></div>
-    <p class="lead keep">A made-up translation model, small enough to compute by hand, on <i>unha tía miña</i>: vectors of three dimensions (one per Galician word), a decoder that chooses among eight English words, and every number shown. Its values are made up so that without attention it writes “a friend of mine”, as a model without attention does on a long sentence; section 2 adds attention, and it writes “an aunt of mine”. (Step 5: how training would produce such values.)</p>
+      <p>Step 5: how training on these would produce such values.</p></div>
+    <p class="lead keep">A made-up model, small enough to compute by hand, on <i>unha tía miña</i>: vectors of three dimensions, eight English words to choose from, every number shown. Its values are made up so that it fails like a model without attention on a long sentence: it writes “a friend of mine”. Section 2 adds attention: “an aunt of mine”.</p>
     <div class="planes" id="tyPlanes"></div>
   </section>
 
   <section class="panel" id="lookatt">
     <h2><span class="n">2</span>With attention, computed by hand</h2>
-    <p class="lead">Section 1 ended with “a friend of mine”. The first three dimensions of the decoder state held the summary, with 0.25 of tía, and this made-up model needs more than 0.35 of tía to write “an” (its values are made up so that the summary is not enough, as for a model without attention on a long sentence). Attention changes the values in those three dimensions, and nothing else. Before each English word, the decoder looks back at all three encoder vectors, not only the last one, and builds a new vector from them: the <b>mix</b>. The word vectors, the biases and the values in the last eight dimensions stay as in section 1.</p>
+    <p class="lead">Section 1 wrote “a friend of mine”: the summary held 0.25 of tía, and “an” needs more than 0.35. Attention changes only the state's first three dimensions: before each English word, the decoder builds a new vector from all three encoder vectors, the <b>mix</b>.</p>
     <div class="cmpflow">
       <p class="label">without attention (section 1)</p>
       <div class="flow"><span class="word dimw">after unha</span><span class="word dimw">after tía</span><span class="word">after miña = the summary</span><span class="op">→</span><span class="word out">the state's first three dimensions</span></div>
@@ -560,7 +561,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <section class="panel" id="qk">
     <h2><span class="n">3</span>Query and key: what the query's numbers mean</h2>
-    <p class="lead">Section 2 gave the decoder its query ready-made: (0, 6, 0) before the first two English words, then shifted toward miña. We did not say why those numbers, or what other numbers would have done. This section takes the query apart. A query is three numbers, one per dimension of the encoder's vectors, and each number says how much a key is rewarded for what it holds in that dimension. From the query follow the scores, the weights, the mix, and the English word the decoder writes with that mix. Setting the query is therefore, indirectly, choosing the next word. Here you set it yourself and follow the chain to the word, where it works and where it fails. The same chain runs in the trained models of section 4 and in the real model of section 6. There the model computes its own queries, and training succeeds when each query fetches what the next word needs.</p>
+    <p class="lead">Section 2's query was given ready-made. Here you set it yourself and follow the chain query → scores → weights → mix → word, to see where it works and where it fails.</p>
     <div class="controls stick"><button id="qkBack">Back</button><button class="primary" id="qkNext">Next step</button><span class="pathstrip" id="qkSteps"></span></div>
     <div id="qkBody">
     <h3 class="wkh" id="qkTitle"></h3>
@@ -582,7 +583,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </div>
     <div id="qkWordsBox">
       <p class="label">the same query at every word of the phrase</p>
-      <p class="note">One row per English word. Before each, the correct words have been written (so the last eight dimensions of the state are as in section 2), and the first three dimensions hold this query's mix.</p>
+      <p class="note">One row per English word: the correct words before it are written, and the state's first three dimensions hold this query's mix.</p>
       <div class="heatwrap"><table class="ty dec" id="qkWords"></table></div>
       <p class="note" id="qkNote"></p>
     </div>
@@ -591,8 +592,8 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <section class="panel" id="walk">
     <h2><span class="n">4</span>The same steps in two trained models</h2>
-    <p class="lead">Two small models translate our whole sentence. They are new models, neither the translation page's model (2 dimensions, 16 short phrases) nor the made-up one of sections 1 and 2. We trained them on the same data, and they are identical except for one thing: <b>without attention</b>, the decoder gets the summary for every English word; <b>with attention</b>, it gets a new mix of all the encoder's vectors for every English word, as in section 2. Their vectors have 8 dimensions, and their values were learned in training: every number below is the models' own. Each step links to the step of section 1 or 2 that does the same thing by hand.</p>
-    <div class="legend"><span class="note">one square = one dimension of a vector. Blue is positive and pink negative (key in the strip below). Every number stays between −1 and +1: each new vector is a mix of the previous vector and one computed from the new word, kept in that range, starting from zeros.</span></div>
+    <p class="lead">Two new small models translate our whole sentence. Same data, same training; one difference: <b>without attention</b>, the decoder gets the summary for every English word; <b>with attention</b>, a new mix of all the encoder's vectors, as in section 2. Their vectors have 8 dimensions, all values learned in training.</p>
+    <div class="legend"><span class="note">one square = one dimension of a vector; blue positive, pink negative (key in the strip below). Every number stays between −1 and +1.</span></div>
     <div class="controls stick"><button id="wkBack">Back</button><button class="primary" id="wkNext">Next step</button><span class="pathstrip" id="wkSteps"></span><span class="legend" style="margin-left:auto">  <!-- in the sticky strip: the colour key stays in view at every step --><span class="lab">−1</span><span class="wkstrip h" id="wkLegend"></span><span class="lab">+1</span></span></div>
     <div id="wkBody">
     <h3 class="wkh" id="wkTitle"></h3>
@@ -606,7 +607,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <section class="panel" id="compare">
     <h2><span class="n">5</span>The two models, word by word</h2>
-    <p class="lead">The two models of section 4, for every word: on our sentence, on each of its three parts (the noun phrase, the clause, the saying), and on five test sentences, at three vector sizes. They were trained on the same data for the same number of updates, and have the same number of parameters (learned values). The training data is built from templates around our sentence (other relatives, other verbs, other sayings). Both models train on the same 5,000 template sentences. Another 500 are kept apart as <b>test data</b>, and so is our own sentence: the models never see them in training, so they translate them for the first time. Test data is like the development data of the translation page (never trained on), but it is not used for choices about the models either: it only measures them, at the end. Every word in them appears in training, but in other combinations.</p>
+    <p class="lead">The two models of section 4, word by word: on our sentence, its three parts (the noun phrase, the clause, the saying) and five test sentences, at three vector sizes. Same data, same number of updates, same number of parameters (learned values). Both train on 5,000 sentences built from templates around ours (other relatives, verbs, sayings). Another 500, and our sentence, are kept apart as <b>test data</b>: never trained on, never used for choices, only for measuring at the end. Their words all appear in training, in other combinations.</p>
     <div class="controls">
       <span class="note">Vector size</span>
       <div class="seg" role="group" aria-label="Vector size" id="cmpSize"></div>
@@ -620,7 +621,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <button class="primary" id="cmpPlay">Write both translations</button>
       <span class="note">or step through each model with its own buttons below</span>
     </div>
-    <div class="legend"><span class="lab">−1</span><span class="strip" id="legendStrip"></span><span class="lab">+1</span><span class="note">one square = one dimension of a vector; every number is between −1 and +1 (see section 4). Under each model: its five most probable next words; orange = the word it writes; ✓ = the gold word (shown while the words so far match the gold translation). With attention, the thickness of a line from a Galician vector is its weight.</span></div>
+    <div class="legend"><span class="lab">−1</span><span class="strip" id="legendStrip"></span><span class="lab">+1</span><span class="note">one square = one dimension of a vector, between −1 and +1. Under each model: its five most probable next words; orange = the word it writes; ✓ = the gold word (while the words so far match the gold translation). With attention: line thickness = weight.</span></div>
     <div class="writers">
       <div class="writer">
         <p class="label">Without attention</p>
@@ -657,13 +658,13 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <p class="note" id="cmpAccNote"></p>
       </div>
     </div>
-    <p class="note">Words in <span style="color:var(--neg)">red</span> are not in the gold translation; <span class="miss">struck-through</span> words are missing. Real sentences hold much more than these templates: with 64 dimensions, one vector holds this toy data perfectly, but real models of 2014 lost details in long sentences (Cho et al. 2014; Bahdanau et al. 2015). Attention solved this without making the vector bigger.</p>
+    <p class="note">Words in <span style="color:var(--neg)">red</span> are not in the gold translation; <span class="miss">struck-through</span> words are missing. With 64 dimensions, one vector holds this toy data perfectly; real models of 2014 lost details in long sentences (Cho et al. 2014; Bahdanau et al. 2015). Attention solved this without a bigger vector.</p>
   </section>
 
   <!-- 4 -->
   <section class="panel" id="real">
     <h2><span class="n">6</span>A real model on our sentence</h2>
-    <p class="lead">From the weights computed by hand in section 2 to the grids of a real translation model, <i>opus-mt-gl-en</i>, trained by others on a large amount of Galician–English text: first on our short phrase, step by step, then on the whole sentence.</p>
+    <p class="lead">From section 2's weights to the grids of a real translation model, <i>opus-mt-gl-en</i>: first on our phrase, then on the whole sentence.</p>
     <div class="hb" id="hb">
       <div class="controls stick"><button id="hbBack">Back</button><button class="primary" id="hbNext">Next step</button><span class="pathstrip" id="hbSteps"></span></div>
       <h3 class="wkh" id="hbTitle"></h3>
@@ -675,7 +676,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <div class="hbtake"><p class="label">What to take from this</p><ol id="hbPoints"></ol></div>
     </div>
     <h3 class="wkh" style="margin-top:22px">The whole sentence</h3>
-    <p class="note">The same grids for our whole sentence. The model reads and writes <b>pieces</b> of words from a fixed list: a common word is one piece, a rarer one is split, as in <span class="mono">solucion·aba</span>; ‹end› is the end marker, as on the translation page.</p>
+    <p class="note">The model reads and writes <b>pieces</b> of words from a fixed list: a common word is one piece, a rarer one is split, as in <span class="mono">solucion·aba</span>.</p>
     <p class="note" id="realTr"></p>
     <div id="realLLM"></div>
     <div class="controls stick">
@@ -705,7 +706,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       </div>
     </div>
     <p class="label">All 48 grids at once, for the whole sentence: one row per layer, one column per head (as in step 5 above)</p>
-    <p class="note">Each thumbnail is one head's grid, drawn like the large grid above: rows are the English pieces, columns the Galician pieces. Click one to show it above; an orange frame marks the heads the grid above shows (a whole row or column when one menu says average, all 48 when both do). In layer 1 most heads spread their weight; in the last layers many heads draw a sharp line from each English piece to the Galician piece it translates.</p>
+    <p class="note">One thumbnail per head, read like the large grid; click one to show it there (orange frame: the heads shown). Layer 1 spreads its weight; the last layers draw sharp lines from each English piece to the Galician piece it translates.</p>
     <div class="xheads" id="realHeads"></div>
     <p class="label">What the layers do: the weight on the right Galician word, averaged over the 8 heads of each layer</p>
     <div class="heatwrap"><table class="grid" id="realLayers"></table></div>
@@ -716,9 +717,9 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 4 -->
   <section class="panel" id="self">
     <h2><span class="n">7</span>Self-attention, and many heads at once</h2>
-    <p class="lead keep">Section 6 looked at the decoder's attention: each English piece looks at the Galician pieces. The same model's encoder uses attention inside the Galician sentence: every Galician piece looks at every Galician piece, itself included. This is <b>self-attention</b>, and it takes the place of the chain of sections 1 to 5.</p>
+    <p class="lead keep">In the encoder, every Galician piece looks at every Galician piece, itself included: <b>self-attention</b>. It takes the place of the chain of sections 1 to 5.</p>
     <div class="heatwrap"><svg class="selfdg" viewBox="0 0 560 210" role="img" aria-label="Above, a chain: each vector is computed from the one before it. Below, every piece is linked to every other piece."><defs><marker id="selfA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="0" y="22" class="sh">sections 1 to 5: a chain</text><text x="60" y="58" text-anchor="middle" class="sw">Unha</text><text x="144" y="58" text-anchor="middle" class="sw">tía</text><path d="M84,53 H120" class="ch" marker-end="url(#selfA)"/><text x="228" y="58" text-anchor="middle" class="sw">miña</text><path d="M168,53 H204" class="ch" marker-end="url(#selfA)"/><text x="312" y="58" text-anchor="middle" class="sw">,</text><path d="M252,53 H288" class="ch" marker-end="url(#selfA)"/><text x="396" y="58" text-anchor="middle" class="sw">que</text><path d="M336,53 H372" class="ch" marker-end="url(#selfA)"/><text x="480" y="58" text-anchor="middle" class="sw">todo</text><path d="M420,53 H456" class="ch" marker-end="url(#selfA)"/><text x="516" y="58" class="sh">…</text><text x="0" y="96" class="sh">this model: every piece looks at every piece, in every layer</text><path d="M60,184 Q102.0,140 144,184" class="arc"/><path d="M60,184 Q144.0,120 228,184" class="arc hl"/><path d="M60,184 Q186.0,100 312,184" class="arc"/><path d="M60,184 Q228.0,80 396,184" class="arc"/><path d="M60,184 Q270.0,60 480,184" class="arc"/><path d="M144,184 Q186.0,140 228,184" class="arc hl"/><path d="M144,184 Q228.0,120 312,184" class="arc"/><path d="M144,184 Q270.0,100 396,184" class="arc"/><path d="M144,184 Q312.0,80 480,184" class="arc"/><path d="M228,184 Q270.0,140 312,184" class="arc hl"/><path d="M228,184 Q312.0,120 396,184" class="arc hl"/><path d="M228,184 Q354.0,100 480,184" class="arc hl"/><path d="M312,184 Q354.0,140 396,184" class="arc"/><path d="M312,184 Q396.0,120 480,184" class="arc"/><path d="M396,184 Q438.0,140 480,184" class="arc"/><text x="60" y="200" text-anchor="middle" class="sw">Unha</text><text x="144" y="200" text-anchor="middle" class="sw">tía</text><text x="228" y="200" text-anchor="middle" class="sw hl">miña</text><text x="312" y="200" text-anchor="middle" class="sw">,</text><text x="396" y="200" text-anchor="middle" class="sw">que</text><text x="480" y="200" text-anchor="middle" class="sw">todo</text><text x="516" y="200" class="sh">…</text></svg></div>
-    <p class="note">Above, each vector waits for the one before it. Below, no vector waits: in every layer, each piece takes what it needs from all the others at once. The orange arcs are the links of <i>miña</i>; each carries a weight, as in section 6. Order is kept: at the start, each piece's vector gets a second vector added to it, one that stands for its position (1st, 2nd, …), so the model can tell the order.</p>
+    <p class="note">Above, each vector waits for the one before it; below, none waits. Orange: the links of <i>miña</i>, each with a weight. To keep the order, each piece's vector first gets a vector for its position (1st, 2nd, …) added.</p>
     <p class="label noembed">Section 6's attention and self-attention, side by side</p>
     <div class="heatwrap noembed"><table class="ty cmp7"><thead><tr><th></th><th>the decoder's attention (section 6)</th><th>self-attention (this section)</th></tr></thead><tbody>
       <tr><td>rows: who looks</td><td>each English piece the decoder writes</td><td>each Galician piece</td></tr>
@@ -731,9 +732,9 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </tbody></table></div>
     <p class="label noembed">How one layer combines its 8 heads, for one piece</p>
     <div class="flow noembed"><span class="word">head 1: a mix for <i>miña</i></span><span class="word">head 2: a mix for <i>miña</i></span><span class="op">…</span><span class="word">head 8: a mix for <i>miña</i></span><span class="op">→</span><span class="word">the 8 mixes side by side as one long vector, × one learned table</span><span class="op">→</span><span class="word">+ the vector of <i>miña</i></span><span class="op">→</span><span class="word">one more learned step</span><span class="op">→</span><span class="word out">the vector of <i>miña</i> in the next layer</span></div>
-    <p class="note noembed">“+ the vector of miña”: what the heads found is added to the vector miña already had, so nothing it held is lost. The decoder layers of section 6 do the same.</p>
-    <p class="label">The 8 heads of one layer: one square grid each, with a row and a column for every piece of our sentence; rows look, columns are looked at</p>
-    <p class="note">The diagonal (top left to bottom right) is each piece looking at itself. A dark line just below it: each piece looks at the piece before it (layer 6, head 7). Just above it: at the piece after it (layer 3, head 4).</p>
+    <p class="note noembed">“+ the vector of miña”: added to what miña had, so nothing is lost. Decoder layers do the same.</p>
+    <p class="label">The 8 heads of one layer: one square grid each, a row and a column per piece; rows look, columns are looked at</p>
+    <p class="note">Diagonal (top left to bottom right): each piece looks at itself. Just below it: at the piece before (layer 6, head 7); just above: at the piece after (layer 3, head 4).</p>
     <div class="controls stick">
       <label class="note" for="selfLayer">Encoder layer</label>
       <select id="selfLayer"></select>
@@ -755,15 +756,15 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
   <!-- 5 -->
   <section class="panel" id="who">
     <h2><span class="n">8</span>Who decides what a head does?</h2>
-    <p class="lead">Section 7 showed heads with habits: in layer 6 of the real encoder, head 7 makes each piece look at the piece before it. Who gave it that job? Nobody. The people who build a model choose its size and what it predicts. Every head starts with random values, and training nudges all of them at once, as on the <a href="mt.html#train">translation page, section 1</a>. A head ends up with a job because, from its random start, that job was the quickest way to fewer mistakes.</p>
-    <p class="lead keep">Below, a tiny model with 2 layers of 2 heads learns the classic sentence <i>The animal didn't cross the street because it was tired</i>: it must say what “it” refers to. <i>Tired</i> means the animal, <i>wide</i> means the street. It trains on 96 such sentences; the three runs differ only in their random start. <span class="embonly">Nobody gives a head its job: every head starts random, and training nudges all of them at once.</span></p>
+    <p class="lead">Who gave layer 6, head 7 its habit of looking at the piece before? Nobody. Every head starts random, and training nudges all of them at once (<a href="mt.html#train">translation page, section 1</a>); a head's job is the quickest way, from its start, to fewer mistakes.</p>
+    <p class="lead keep">A tiny model, 2 layers of 2 heads, says what “it” refers to in <i>The animal didn't cross the street because it was tired</i> (<i>tired</i>: the animal; <i>wide</i>: the street). 96 such sentences; three runs, differing only in their random start. <span class="embonly">Nobody gives a head its job: every head starts random, and training nudges all of them at once.</span></p>
     <details class="how">
       <summary>How to read the pictures</summary>
       <ul class="tries">
-        <li><b>The model.</b> In layer 1, every word looks at every word (self-attention, as in section 7). In layer 2, only “it” looks, and the model reads its answer, animal or street, from the vector of “it” after layer 2.</li>
-        <li><b>Left: where “it” looks.</b> For two sentences, one row per head: the weights of “it” (outlined) on every word, darker for more weight, as one row of a grid in section 7. Under each sentence, the model's answer after this update.</li>
-        <li><b>Right, top: right answers.</b> How many of the 96 sentences the model answers right after each update, as the translation page counts the inputs translated right. The orange line and dot are the current update.</li>
-        <li><b>Right, bottom: the job each head ended up with.</b> Measured after training over all 96 sentences: the weight “it” puts on the animal when the adjective fits an animal, the weight on the place when it fits a place, and how many answers stay right when that head is switched off (its output set to zero).</li>
+        <li><b>The model.</b> Layer 1: self-attention. Layer 2: only “it” looks; its vector gives the answer, animal or street.</li>
+        <li><b>Left: where “it” looks.</b> One row per head, darker = more weight; under each sentence, the current answer.</li>
+        <li><b>Right, top: right answers</b> out of 96 after each update; orange: the current update.</li>
+        <li><b>Right, bottom: each head's job</b> after training: weight on the animal when the adjective fits an animal, on the place when it fits a place, and right answers with the head switched off (output set to zero).</li>
       </ul>
     </details>
     <div class="controls stick">
@@ -785,7 +786,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <p class="note" id="whoNote"></p>
       </div>
     </div>
-    <p class="note">Training details: keys and queries have 2 dimensions; the training method is Adam, a common refinement of the nudges on the <a href="mt.html#train">translation page, section 1</a>, with a learning rate (step size) of 0.03, for 500 updates. Some heads put much of their weight on words such as <i>because</i> or <i>didn't</i>: models often use such positions to store or park information, as the real model parked weight on ‹end› in section 6.</p>
+    <p class="note">Training: keys and queries of 2 dimensions; Adam, a common refinement of the translation page's nudges; step size 0.03; 500 updates. Weight on <i>because</i> or <i>didn't</i> is resting, like the real model's weight on ‹end›.</p>
   </section>
 
   <button id="askbtn" hidden>Ask Claude</button>
@@ -924,12 +925,12 @@ $("realPlay").addEventListener("click", () => {
   clearInterval(realTimer); tSel = 0; realUpto = 1; renderReal();
   realTimer = setInterval(() => { if (tSel >= D.tgt.length - 1) { clearInterval(realTimer); realUpto = undefined; renderReal(); return; } tSel++; realUpto = tSel + 1; renderReal(); }, reduce ? 250 : 650);
 });
-$("realUnsure").textContent = `Pieces with a dashed red outline were written with a probability below ${UNSURE}: the model was unsure of them.`;
+$("realUnsure").textContent = `Dashed red outline: written with a probability below ${UNSURE} (the model was unsure).`;
 // three places where the translation goes wrong, all seen through layer 6, head 2
 const WALK = [
-  ["▁worked", 0, "The Galician verb is solucion·aba, “solved”. Layer 6, head 2 puts almost all its weight on it: the model looks at the right word. Its candidates include “solved” and “resolved”, but “worked” is more probable, and the model writes the most probable piece. The pieces after it make “worked it up with”, which does not mean “solved”."],
-  ["▁saying", 0, "The Galician words are dito·s e ref·rán·s, “sayings and proverbs”. For the first “saying”, the head looks at dito·s: the right word again. But no candidate is probable; the model is unsure what to write. Click the next piece, the second “saying”, and the one after it, “it”: the head stays on dito·s, and the probabilities get even smaller. The model writes “saying saying it”, which is not English."],
-  ["▁they", 0, "Next comes ref·rán·s, “proverbs”, a word the model seems not to know. For “they”, “'”, “ll”, “re”, “f” and “ute”, the head puts almost all its weight on ref. Look at the candidates for “they”: several begin with the same letters as ref (re, refresh, referr). The model seems to go by the letters of the Galician word, not by its meaning, and builds “they'll refute” piece by piece."],
+  ["▁worked", 0, "solucion·aba means “solved”. Layer 6, head 2 puts almost all its weight on it: the right word. “solved” and “resolved” are candidates, but “worked” is more probable, so the model writes it: “worked it up with”."],
+  ["▁saying", 0, "dito·s e ref·rán·s means “sayings and proverbs”. For “saying” the head looks at dito·s, the right word, but no candidate is probable. Click the next two pieces: the head stays on dito·s, the probabilities shrink, and the model writes “saying saying it”."],
+  ["▁they", 0, "ref·rán·s, “proverbs”, seems unknown to the model. For “they”, “'”, “ll”, “re”, “f” and “ute”, the head looks at ref, and several candidates begin with its letters (re, refresh, referr). The model goes by the letters, not the meaning: “they'll refute”."],
 ];
 $("realWalk").querySelectorAll("[data-w]").forEach(b => b.addEventListener("click", () => {
   const [t, nth, txt] = WALK[+b.dataset.w];
@@ -940,7 +941,7 @@ $("realWalk").querySelectorAll("[data-w]").forEach(b => b.addEventListener("clic
   $("realWalkWrap").innerHTML = walkHtml(+b.dataset.w);
   renderReal();
 }));
-const walkHtml = w => `<p class="steptext">${WALK[w][2]}</p>` + (w === 2 ? "<p class=\"steptext\"><b>What to take from the three:</b> in all three places, attention found the right Galician word. That is not enough: the model also has to know how to translate it. The weights show where a model looks, not whether what it writes is right.</p>" : "");
+const walkHtml = w => `<p class="steptext">${WALK[w][2]}</p>` + (w === 2 ? "<p class=\"steptext\"><b>All three:</b> attention found the right Galician word, and the output is still wrong. The weights show where a model looks, not whether what it writes is right.</p>" : "");
 renderReal();
 { let kw = ""; reserveMax($("realWalkWrap"), () => { kw = $("realWalkWrap").innerHTML; return WALK.map((_, w) => () => { $("realWalkWrap").innerHTML = walkHtml(w); }); }, () => { $("realWalkWrap").innerHTML = kw; }); }
 
@@ -988,28 +989,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const key = (o.sel !== undefined ? `<span style="color:var(--orange)">orange outline</span>: the row of “${String(TGT_R[o.sel]).replace(/&/g, "&amp;").replace(/</g, "&lt;")}” · ` : "") + `<b>dark frame</b>: layer ${FL + 1}, head ${FH + 1}, the grid of step 3<br>each grid: ${TGT_R.length} rows (${TGT_R.map(t => String(t).replace(/</g, "&lt;")).join(", ")}) × ${SRC_R.length} columns (${SRC_R.map(t => String(t).replace(/</g, "&lt;")).join(", ")})`;
     return `<svg viewBox="0 0 ${W} ${Ht}" style="max-width:${W}px" role="img" aria-label="one small grid per head">${g}</svg><p class="note" style="margin:4px 0 0">${key}</p>`;
   }
-  const layerFlow = `<div class="hbflow"><span class="note">one layer:</span><span class="word">a vector per English word</span><span class="op">→</span><span class="word">8 heads: 8 grids, 8 mixes</span><span class="op">→</span><span class="word">combined by one learned table</span><span class="op">→</span><span class="word">one more learned step</span><span class="op">→</span><span class="word">a new vector per English word</span><span class="op">→ next layer … after layer 6:</span><span class="word">a probability for each English word</span></div>`;
   const headFlow = `<div class="hbflow"><span class="note">one head:</span><span class="word">decoder state × <b>query table</b> → query</span><span class="word">encoder's vectors × <b>key table</b> → keys</span><span class="op">→</span><span class="word">query · each key → softmax → <b>weights: one row</b></span><span class="op">→</span><span class="word">encoder's vectors × <b>value table</b>, mixed with the weights → this head's mix</span></div>`;
   const POINTS = [
     "A row of a grid: one English word's weights over the Galician words. They add up to 1. Section 2 computed one by hand.",
     "The grid: all the rows, one per English word written. Darker means more weight.",
-    "A real model's grid reads the same way: “Aunt” looks at tía. It can also show a mistake: “A Aunt of mine”. Choosing “An” needs tía, and the row of “A” puts little weight on it: 0.00 in this head, 0.16 on average over all 48 grids, where an even share over the 4 columns would be 0.25 (the 48 grids: step 5).",
-    "A head is one run of section 2's computation (query, scores, weights, mix) with its own learned tables for queries, keys and values: one head, one grid. Several heads run side by side, each with its own pattern.",
-    "A layer: all the heads run on the same vectors, and their mixes are combined into one new vector per word; the next layer starts from these. 6 layers × 8 heads = 48 grids. Early layers spread their weight; late layers point each English word at the word it translates.",
+    "A real model's grid reads the same way: “Aunt” looks at tía. It can also show a mistake: “A Aunt of mine”. Choosing “An” needs tía, and the row of “A” puts little weight on it (0.00 in this head, 0.16 on average over the 48 grids; an even share would be 0.25).",
+    "A head is one run of section 2's computation with its own learned tables for queries, keys and values, so it makes one grid. A layer runs several heads side by side, each with its own pattern.",
+    "A real model stacks layers of heads: 6 layers × 8 heads = 48 grids. Early layers spread their weight; late layers point each English word at the word it translates.",
     "The weights show where the model looks. Sometimes that fits a mistake (“A”: little weight on tía); sometimes it does not (below: the right word looked at, a wrong output)."];
   const STEPS6 = [
     ["One row: the weights for one English word",
-      "In section 2, before writing “an”, the decoder scored the three encoder vectors (one after each Galician word), and softmax turned the scores into three weights that add up to 1: the bars. Write the same three numbers in a row of cells, darker for more weight. That row is one row of an attention grid."],
+      "Section 2's three weights before “an”, the bars, written as a row of cells, darker for more weight: one row of an attention grid."],
     ["All the rows: the grid",
-      "The decoder does the same before every English word it writes: new weights each time, one row each. Stacked, the rows make the grid: one row per English word, one column per Galician word. Click a row to see its weights as bars."],
+      "New weights before every English word, one row each. Stacked, the rows make the grid: one row per English word, one column per Galician word. Click a row to see its bars."],
     ["A real model's grid reads the same way",
-      `A real translation model, opus-mt-gl-en, trained by others on a large amount of Galician–English text, on the same phrase: one of its 48 grids (steps 4 and 5 explain “layer 5, head 3”). Rows: the English words it wrote; columns: the Galician words it read, then ‹end›, the end marker. “Aunt” looks at tía, as in our grid. But it writes “${TGT_R.slice(0, -1).join(" ")}”. “A” or “An” depends on the next word, aunt, so it needs tía, as in sections 1 to 3. The row of “A” puts no weight on tía in this head, and little on average over all ${NL * NH} grids (point 3 below): choosing the article, the model barely looked at tía. (The capital in “Aunt” is a second slip.)`],
+      `opus-mt-gl-en, trained by others on much Galician–English text, on the same phrase: one of its 48 grids (“layer 5, head 3”: steps 4 and 5). Columns end with ‹end›, the end marker. “Aunt” looks at tía, as in our grid, but it writes “${TGT_R.slice(0, -1).join(" ")}”. “A” or “An” needs tía, and the row of “A” puts no weight on it here, little on average over all ${NL * NH} grids.`],
     ["What a head is",
-      "In section 2 the decoder ran the computation once before each English word (query, scores, softmax, weights, mix): one grid. A head is one such run with its own three learned tables (the flow on the right). Here a table is not looked up by row: a vector multiplied by it gives a new vector: each new number is a weighted sum of the vector's numbers. Sections 2 to 5 had no tables: the query came from a made-up rule (section 2) or was the decoder state itself (section 4), and the keys and values were the encoder's vectors as they were. This model runs 8 heads side by side: 8 grids, 8 mixes, combined into one vector. Under the flow, one grid per head, read like the grid of step 3 (outlined)."],
+      "In section 2 there was one way to make the query and the keys, so one grid. A head is one such run of the computation with its own three learned tables: one turns the decoder state into a query, one turns the encoder's vectors into keys, one into the values that are mixed. This model runs 8 heads side by side, each with its own tables: 8 grids, 8 mixes, which it then combines into one vector. The outlined one is the grid of step 3."],
     ["6 layers × 8 heads = 48 grids",
-      "A layer (a block, on the lesson's transformer screens) is one round of step 4's computation, drawn in the flow on the right; the next layer starts from its new vectors. The decoder's 6 layers each have their own 8 heads. (Each decoder layer also has heads that look at the English words already written; section 7 shows heads of that kind in the encoder.) Layer 1: most heads spread their weight or rest it on ‹end›. Layer 5 (most heads) and layer 6 (several): each English word points at the Galician word it translates. Nobody assigned these patterns: section 8 shows how heads get them."],
+      "The decoder repeats its computation 6 times, one layer on top of the other, and each layer has its own 8 heads: 48 grids for the same phrase. In layer 1 most heads spread their weight or rest it on ‹end›; in layer 5 most heads, and in layer 6 several, point each English word at the Galician word it translates. Nobody assigned these patterns: section 8 shows how heads get them."],
     ["The whole sentence",
-      "Below, the same grids for our whole sentence: pick a layer and a head, or their average; play the translation; and see three places where it goes wrong. In “A Aunt”, the weights fit the mistake: little weight on tía. In those three places they do not: attention points at the right Galician word, and the output is still wrong."]];
+      "Below, the whole sentence: pick a layer and a head, or their average, play the translation, and see three places where it goes wrong although attention points at the right Galician word."]];
   let k = 0, sel = 0;
   STEPS6.forEach(([t], i) => { const b = document.createElement("button"); b.textContent = i + 1; b.title = t; b.addEventListener("click", () => { k = i; draw6(); }); $("hbSteps").appendChild(b); });
   function draw6() {
@@ -1023,7 +1023,7 @@ document.addEventListener("DOMContentLoaded", () => {
     else if (k === 3) { $("hbRightLbl").textContent = `opus-mt-gl-en, layer ${FL + 1}: its 8 heads, one grid each`;
       $("hbRight").innerHTML = headFlow + thumbs([FL], { c: 24, per: 4, gx: 14, gy: 8, big: true, sel }); }
     else { $("hbRightLbl").textContent = `opus-mt-gl-en: all ${NL} layers × ${NH} heads = ${NL * NH} grids`;
-      $("hbRight").innerHTML = layerFlow + thumbs([...Array(NL).keys()], { c: 9, gx: 7, gy: 8, sel }) + (k === 5 ? `<p style="margin:8px 0 0"><button id="hbDown">to the whole sentence ↓</button></p>` : ""); }
+      $("hbRight").innerHTML = thumbs([...Array(NL).keys()], { c: 9, gx: 7, gy: 8, sel }) + (k === 5 ? `<p style="margin:8px 0 0"><button id="hbDown">to the whole sentence ↓</button></p>` : ""); }
     $("hbPoints").innerHTML = POINTS.map((p, i) => `<li class="${i === k ? "on" : i < k ? "done" : "later"}">${p}</li>`).join("");   // later points keep their space, unseen
     $("hbBack").disabled = k === 0; $("hbNext").disabled = k === STEPS6.length - 1;
     [...$("hbSteps").children].forEach((b, i) => b.classList.toggle("on", i === k));
@@ -1042,16 +1042,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const lay = (l, [r, c]) => D.cross[l].reduce((x, H) => x + H[r][c], 0) / D.cross[l].length;
   $("realLayers").innerHTML = `<thead><tr><th>layer</th>${D.cross.map((_, l) => `<th>${l + 1}</th>`).join("")}</tr></thead><tbody>` +
     pairs.map(([r, c]) => `<tr><th>“${clean(D.tgt[r])}” → <i>${clean(D.src[c])}</i></th>${D.cross.map((_, l) => `<td>${f2(lay(l, [r, c]))}</td>`).join("")}</tr>`).join("") + "</tbody>";
-  $("realLayersNote").textContent = "In the first layers, the weights for an English piece do not follow the Galician word it translates; in the last layers they do. The thumbnails show the same: compare the row of layer 1 with the row of layer 6.";
+  $("realLayersNote").textContent = "First layers: the weights do not follow the word translated. Last layers: they do.";
   const end = D.src.length - 1, endL = D.cross.map(L => { let x = 0, k = 0; for (const H of L) for (const row of H) { x += row[end]; k++; } return x / k; });
-  $("realEnd").textContent = `Why so much weight on ‹end›: the weights in each row add up to 1, so a head that needs nothing from the Galician sentence for a word still has to put its weight somewhere. Many heads put it on ‹end›: ${f2(endL[0])} of all weight in layer 1, ${f2(endL[endL.length - 1])} in layer 6.`;
+  $("realEnd").textContent = `Why so much on ‹end›: each row adds up to 1, so a head that needs nothing still puts its weight somewhere, often on ‹end›: ${f2(endL[0])} of all weight in layer 1, ${f2(endL[endL.length - 1])} in layer 6.`;
   // the same sentence from current large language models: GPT and Gemini as pasted by the course author, Claude's own (October 2026)
   const LLM = [["GPT Astra (medium)", "An aunt of mine, who had a saying or proverb for everything, used to say something like, ‘You are a slave to what you say and master of what you keep to yourself.’"],
     ["Gemini Argon", "An aunt of mine, who solved everything with sayings and proverbs, used to say something like ‘one is a slave to what one says and master of what one keeps silent.’"],
     ["Claude Opus 5.5", "An aunt of mine, who solved everything with sayings and proverbs, used to say something like: ‘One is a slave to what one says and master of what one keeps quiet about.’"]];
   $("realLLM").innerHTML = `<p class="label">for comparison, the same sentence translated by current large language models (October 2026)</p><div class="cmprows">` +
     LLM.map(([who, t]) => `<p class="label">${who}</p><p class="cmpline">${t.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</p>`).join("") + `</div>`;
-  $("realTr").innerHTML = `Its whole translation: “${D.translation.replace(/&/g, "&amp;").replace(/</g, "&lt;")}” On the phrase alone it wrote “A Aunt of mine” (step 3); with the whole sentence as input it starts with “An aunt of mine”: correct, but rare in English (<a href="mt.html#bound">translation page</a>, section 3, part d). Later it goes wrong. Press “Play the translation” to see where it looked for each piece.`;
+  $("realTr").innerHTML = `Its whole translation: “${D.translation.replace(/&/g, "&amp;").replace(/</g, "&lt;")}” On the whole sentence it starts “An aunt of mine” (correct, but rare in English: <a href="mt.html#bound">translation page</a>, section 3, part d), then goes wrong. Press “Play the translation”.`;
 }
 
 // ---------- 4: self-attention heads ----------
@@ -1076,8 +1076,8 @@ function renderSelf() {
   const habit = off => { let s = 0, k = 0; for (let i = 0; i < n; i++) if (i + off >= 0 && i + off < n) { s += D.self[sLayer][sHead][i][i + off]; k++; } return s / k; };
   const hb = [["the piece before it", habit(-1)], ["the piece after it", habit(1)], ["itself", habit(0)]].sort((a, b) => b[1] - a[1])[0];
   $("selfNote").textContent = hb[1] > 0.45
-    ? `In this head, each piece mostly looks at ${hb[0]} (on average ${f2(hb[1])} of each piece's weight). Nobody gave it this habit: section 8 shows how heads get theirs.`
-    : "This head spreads its weight without a simple habit of position: what it looks at depends on the pieces themselves. Section 8 shows how heads get their habits.";
+    ? `Each piece mostly looks at ${hb[0]} (${f2(hb[1])} of its weight on average). Nobody gave it this habit: section 8.`
+    : "No simple habit of position: what it looks at depends on the pieces themselves (section 8).";
 }
 $("selfLayer").addEventListener("change", () => { sLayer = +$("selfLayer").value; renderSelf(); });
 renderSelf();
@@ -1135,12 +1135,12 @@ function render() {
   const maxNoun = Math.max(...L2.map(h => Math.max(h.animal_when_animal, h.place_when_place)));
   const done = i === S.length - 1;
   let story;
-  if (bothHead) story = `In this run, head ${bothHead.head} of layer 2 looks at the animal when the adjective fits an animal (${f(bothHead.animal_when_animal)}) and at the place when it fits a place (${f(bothHead.place_when_place)}). It follows the adjective, as in the original version of this example (Uszkoreit 2017): nobody set it; it came out of training.`;
-  else if (maxNoun > 0.6 && aHead !== pHead) story = `In this run the job is split: head ${aHead.head} of layer 2 finds the animal (${f(aHead.animal_when_animal)}) and head ${pHead.head} finds the place (${f(pHead.place_when_place)}). Nobody told either head which noun to take.`;
-  else story = `Every answer is right, yet no head in layer 2 looks at either noun much (at most ${f(maxNoun)}). The information reaches “it” another way, through the other words in layer 1. A model does not have to solve a task the way a person would describe it.`;
+  if (bothHead) story = `Layer 2, head ${bothHead.head} looks at the animal when the adjective fits an animal (${f(bothHead.animal_when_animal)}) and at the place when it fits a place (${f(bothHead.place_when_place)}), as in the original example (Uszkoreit 2017). Nobody set it.`;
+  else if (maxNoun > 0.6 && aHead !== pHead) story = `The job is split: layer 2, head ${aHead.head} finds the animal (${f(aHead.animal_when_animal)}), head ${pHead.head} the place (${f(pHead.place_when_place)}). Nobody told them.`;
+  else story = `All answers right, yet no head in layer 2 looks at either noun much (at most ${f(maxNoun)}): the information reaches “it” through the other words in layer 1.`;
   $("whoNote").textContent = !done
-    ? (s.step === 0 ? "Step 0: every head is random, so “it” looks almost everywhere a little. Random values still give an answer for every sentence, and they can be wrong more often than guessing. Press Train." : "Training nudges all four heads at once. Watch which head starts to look at the animal or the street: nothing tells it to.")
-    : story + " Compare the three starts: same model, same sentences, different jobs. Switching off one head costs many answers, so each head carries part of the work.";
+    ? (s.step === 0 ? "Update 0: every head is random; “it” looks everywhere a little. Random answers can be wrong more often than guessing. Press Train." : "Training nudges all four heads at once. Which one starts to look at the animal or the street? Nothing tells it to.")
+    : story + " Compare the three starts: same model, same sentences, different jobs.";
 }
 $("whoRuns").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
   stop(); r = +b.dataset.r; i = 0;
@@ -1218,7 +1218,7 @@ function render() {
     });
   });
   $("cmpAcc").innerHTML = h + "</tbody>";
-  $("cmpAccNote").textContent = `Each model was trained on ${CMP.train.toLocaleString("en-US")} items (${CMP.trainSentences.toLocaleString("en-US")} sentences, each also split into its three parts) for ${CMP.steps.toLocaleString("en-US")} updates. The highlighted rows are the selected vector size. A second training run from another random start shows the same pattern.`;
+  $("cmpAccNote").textContent = `Training: ${CMP.train.toLocaleString("en-US")} items (${CMP.trainSentences.toLocaleString("en-US")} sentences, each also split into its three parts), ${CMP.steps.toLocaleString("en-US")} updates. Highlighted: the selected vector size. A second run from another random start shows the same pattern.`;
   drawStep();
 }
 const len = m => CMP.runs[r].examples[e][m === "One" ? "one" : "att"].length;
@@ -1261,8 +1261,8 @@ function board(x, i, j0) {
   const ex = sc.map(Math.exp), Z = ex.reduce((a, b) => a + b, 0);
   const sub = k => `<sub>${k}</sub>`;
   const L = [
-    `score(${g}) = <b class="v">h</b> · <b class="v">e</b>${sub(g)}<span class="why">h: the decoder's new state after ${prev}, the query (as in section 4, step 4); e${sub(g)}: the encoder's vector at ${g}, the key</span>`,
-    `<b class="v">h</b> = (${h.map(num).join(", ")})<span class="why">the ${H} numbers of the decoder's new state, the squares of its strip above, from left to right</span>`,
+    `score(${g}) = <b class="v">h</b> · <b class="v">e</b>${sub(g)}<span class="why">h: the decoder's new state after ${prev}, the query; e${sub(g)}: the encoder's vector at ${g}, the key</span>`,
+    `<b class="v">h</b> = (${h.map(num).join(", ")})<span class="why">the ${H} squares of the new state's strip above, left to right</span>`,
     `= ${terms(H, k => `h${sub(k + 1)}e${sub(k + 1)}`)}<span class="why">multiply square by square, then add</span>`,
     `= ${terms(H, k => `${par(h[k])}·${par(ev[k])}`)}`,
     `= ${terms(H, k => par(h[k] * ev[k]))}`,
@@ -1388,7 +1388,7 @@ function drawStep() {
     $("cmpWAtt").textContent = w[j0] < 0.4 ? "The weights are spread out: this small model also relies on its state." : "\u00a0";   // never empty: an empty step text is hidden and its space lost
   } else {
     clear(["inAtt", "barsAtt", "cmpScores"]);
-    $("cmpDot").innerHTML = '<p class="note">Step with “Next English word”: here the score and the weight of the Galician word with the most weight are worked out for the current word.</p>';
+    $("cmpDot").innerHTML = '<p class="note">Click “Next English word”: the score and weight of the Galician word with the most weight are worked out here.</p>';
     $("cmpBoard").hidden = true; bdKey = "";
     $("cmpWAtt").textContent = doneA ? "Step through the translation to see why each word comes out." : "\u00a0";
   }
@@ -1827,8 +1827,8 @@ function smCore(o, n) {
 }
 // section 2, steps 1 and 2 share one board: the query rule, the query · key rows, the softmax board, then the mix
 function qkParts(a) {
-  const qrule = work([`The query is computed from the decoder state. A real model learns how, in training. Here the query is made up, like the word vectors: we chose it because we know the result we want, “an aunt of mine”.`,
-        `Before the first two English words, the query is ${vecTxt(Q0)}: it points along tía. After that, each of “aunt”, “friend”, “of”, “mine” and “yours” shifts it by its value in the state × (0, −12, 12), away from tía and toward miña; the other words do not (step 4).`,
+  const qrule = work([`The query comes from the decoder state. A real model learns how; here it is made up, like the word vectors.`,
+        `Before the first two English words: ${vecTxt(Q0)}, along tía. Then each of “aunt”, “friend”, “of”, “mine”, “yours” shifts it by its state value × (0, −12, 12), toward miña (step 4).`,
         `Nothing is written yet, so the query is ${vecTxt(a.q)}.`]);
   const rowsHtml = n => ENC.slice(0, n).map((e, j) => eq(col(a.q, "the query"), op("·"), col(e, `key ${j + 1}: encoder vector ${encName(j)}`), op("="), `<div class="res">${dotTxt(a.q, e)} = <b>${f(a.sc[j])}</b></div>`)).join("");
   return { qrule, rowsHtml, LBL: `<p class="label">the score of each key: the dot product of the query and the key</p>` };
@@ -1840,48 +1840,48 @@ const smStage = (a, n, from) => smCore({ labels: ENC.map((e, j) => encPlain(j)),
 const smWords = (sc, n, title) => smCore({ labels: sc.rows.map(r => r.w), sc: sc.rows.map(r => r.s), e: sc.rows.map(r => r.e), Z: sc.Z, p: sc.rows.map(r => r.p),
   head: "English word", outHead: "probability", strong: sc.rows.indexOf(sc.best), title }, n);
 const WTXT = sc => [
-  [`The decoder now has eight scores, one per English word. Softmax turns them into probabilities: values that are 0 or more and add up to 1. Then the decoder writes the most probable word. (A real model may also pick a word at random, with these probabilities.)`,
-    `<span class="review"><span class="rtag">Review</span> The <a href="skipgram.html">skip-gram</a> model used the same softmax to turn its scores into probabilities.</span>`],
-  [`Part 1: e to the power of each score. e is a fixed number, about 2.718. The results are always more than 0, and each 1 more in the score multiplies the result by 2.718. So the two high scores, ${f(sc.rows[0].s)} for “a” and ${f(sc.rows[1].s)} for “an”, give by far the longest bars; the other bars are too short to see.`],
+  [`Softmax turns the eight scores into probabilities: 0 or more, adding up to 1. The decoder writes the most probable word.`,
+    `<span class="review"><span class="rtag">Review</span> The <a href="skipgram.html">skip-gram</a> model used the same softmax.</span>`],
+  [`Part 1: e (about 2.718) to the power of each score: always more than 0, and each 1 more in the score multiplies it by 2.718. So “a” (${f(sc.rows[0].s)}) and “an” (${f(sc.rows[1].s)}) give by far the longest bars; the others are too short to see.`],
   [`The eight bars end to end: their sum is ${f(sc.Z)}.`],
-  [`Part 2: divide each bar by the sum. The whole bar now has length 1, and each probability is its part's share: “a” ${f(sc.rows[0].p)}, “an” ${f(sc.rows[1].p)}; the other six are below 0.005 and show as 0. The decoder writes the most probable word, <b>“${sc.best.w}”</b>.`]];
+  [`Part 2: divide each bar by the sum; the whole bar now has length 1. Each probability is its part's share: “a” ${f(sc.rows[0].p)}, “an” ${f(sc.rows[1].p)}; the other six are below 0.005 (shown as 0). The decoder writes <b>“${sc.best.w}”</b>.`]];
 const SMTXT = a => [
-  [`The weights have to be 0 or more and add up to 1, so that the mix is a weighted average of the encoder vectors. The scores ${a.sc.map(f).join(", ")} add up to ${f(r2(a.sc.reduce((x, y) => x + y, 0)))}. Softmax turns scores into weights, in two parts.`,
-    `<span class="review"><span class="rtag">Review</span> This is the same softmax that turned the decoder's eight scores into probabilities in section 1, step 6.</span>`],
-  [`Part 1: e to the power of each score. e is a fixed number, about 2.718. e<sup>0</sup> = 1; e<sup>1.5</sup> = ${f(a.sm.e[2])}; e<sup>3</sup> = 2.718 × 2.718 × 2.718 = ${f(a.sm.e[1])}. The results are always more than 0, and a higher score gives a larger result: each 1 more in the score multiplies it by 2.718.`],
+  [`Weights must be 0 or more and add up to 1, so the mix is a weighted average. The scores ${a.sc.map(f).join(", ")} add up to ${f(r2(a.sc.reduce((x, y) => x + y, 0)))}. Softmax makes weights, in two parts.`,
+    `<span class="review"><span class="rtag">Review</span> The same softmax as in section 1, step 6.</span>`],
+  [`Part 1: e (about 2.718) to the power of each score: e<sup>0</sup> = 1; e<sup>1.5</sup> = ${f(a.sm.e[2])}; e<sup>3</sup> = 2.718 × 2.718 × 2.718 = ${f(a.sm.e[1])}. Always more than 0; each 1 more in the score multiplies it by 2.718.`],
   [`The three bars end to end: 1 + ${f(a.sm.e[1])} + ${f(a.sm.e[2])} = ${f(a.sm.Z)}.`],
-  [`Part 2: divide each bar by the sum: ${a.sm.p.map((w, j) => `${f(a.sm.e[j])} / ${f(a.sm.Z)} = ${f(w)}`).join(", ")}. The whole bar now has length 1, and each weight is its part's share. (Rounded to two decimals they add up to ${f(r2(a.sm.p.reduce((x, y) => x + y, 0)))}; exactly, to 1.)`]];
+  [`Part 2: divide each bar by the sum: ${a.sm.p.map((w, j) => `${f(a.sm.e[j])} / ${f(a.sm.Z)} = ${f(w)}`).join(", ")}. Each weight is its part's share of a bar of length 1. (Rounded: ${f(r2(a.sm.p.reduce((x, y) => x + y, 0)))}; exactly 1.)`]];
 const SMCAP = ["The three scores, from the dot products above.", "The scores have not changed; only the bars are new.", "The scores have not changed; only the bars are new.",
-  "The key with the largest score gets most of the weight: the vector after tía, 0.79."];
+  "The largest score gets most of the weight: the vector after tía, 0.79."];
 
 const STEPS = [
   ["The three Galician words as vectors", {
-    text: "This small model gives each Galician word a vector with three dimensions, one per word of the phrase: 1 in the word's own dimension, 0 in the other two. In the picture, each dimension is one axis, so each word is a point at 1 on its own axis.",
+    text: "Each Galician word gets a vector of three dimensions, one per word of the phrase: 1 in its own dimension, 0 in the others. In the picture, one axis per dimension.",
     frames: () => [{ board: encStage(-1), scene: { pts: DIMS.map((d, j) => ({ p: WORD[d], cls: "word", label: `word vector of ${d}\n(${WORD[d].join(", ")})`, dx: j === 2 ? 10 : 0, dy: j === 2 ? 4 : -30, anchor: j === 2 ? "start" : "middle" })),
-      cap: "Each word vector has 1 in its own dimension, so it is the point at 1 on its own axis." } }] }],
+      cap: "Each word: the point at 1 on its own axis." } }] }],
   ["The encoder reads the phrase", {
-    text: "The encoder reads the words one at a time and keeps one vector, which it updates after each word: the new vector is half the old vector plus half the word's vector. This is one running computation; each result feeds into the next. The vector after the last word is the summary.",
+    text: "The encoder reads one word at a time and updates one vector: new = ½ × old + ½ × the word's vector. The vector after the last word is the summary.",
     frames: () => upto(3, i => ({
       board: encStage(i),
       scene: { noTicks: true, segs: ENC.slice(0, i + 1).map((e, j) => ({ a: j ? ENC[j - 1] : ZERO, b: WORD[DIMS[j]], cls: "gd" })),
         pts: [...wordPts(), ...encPts(ENC.map((e, j) => `${encPlain(j)} ${vecTxt(e)}` + (j === 2 ? "\n= the summary" : "")), "enc", [{ dx: -10, dy: -10, anchor: "end" }, { dx: 4, dy: 26 }, ENC_OFF[2]]).slice(0, i + 1)],
         cap: `${i ? `From the vector ${encPlain(i - 1)}` : "From all zeros, where the axes meet,"} halfway along the dashed line to the word vector of ${DIMS[i]}: ${vecTxt(ENC[i])}.${i === 2 ? " This last vector is the summary." : ""}` } })) }],
   ["From the encoder to the decoder", {
-    text: "The decoder writes the English phrase one word at a time, choosing among eight English words. Before each word it holds one vector, the decoder state: everything it has to go on when it chooses. In this model the decoder state has eleven dimensions. The first three dimensions (unha, tía, miña) hold values passed on from the encoder. The last eight dimensions (‹start›, a, an, aunt, friend, of, mine, yours) hold values that record which English words have been written so far.",
+    text: "The decoder writes one English word at a time, choosing among eight. Before each word it holds one vector, the decoder state: all it has to go on. Here it has eleven dimensions: the first three (unha, tía, miña) come from the encoder; the last eight (‹start›, a, an, aunt, friend, of, mine, yours) record which English words have been written.",
     frames: () => [
       { board: g11({ cap: "the summary, from the encoder (step 2)", sum: { v: SUMMARY } }) +
-          work(["The rows below the decoder state are the eight English words the decoder can write. ‹end› means: the phrase is finished. The columns are the eleven dimensions."]),
-        scene: decScene(SUMMARY, false, { path: true, xLabel: "the summary", cap: "The encoder has read the phrase. Its summary is what the decoder gets." }) },
+          work(["Rows: the eight English words the decoder can write (‹end›: the phrase is finished). Columns: the eleven dimensions."]),
+        scene: decScene(SUMMARY, false, { path: true, xLabel: "the summary", cap: "The summary: what the decoder gets from the encoder." }) },
       { board: g11({ cap: "the summary is copied into the first three dimensions of the decoder state", sum: { v: SUMMARY }, st: { v: stateOf(SUMMARY, ZS), hi: [0, 1, 2] } }) +
-          work(["Without attention, the values in the first three dimensions are the summary, and they stay the same before every English word the decoder writes."]),
-        scene: decScene(SUMMARY, false, { path: true, xLabel: `the summary ${vecTxt(SUMMARY)}\n= the state's first three dimensions`, cap: "The picture has room for three dimensions. For the decoder state, they are its first three: unha, tía and miña." }) },
+          work(["Without attention, the first three dimensions hold the summary before every English word."]),
+        scene: decScene(SUMMARY, false, { path: true, xLabel: `the summary ${vecTxt(SUMMARY)}\n= the state's first three dimensions`, cap: "The picture shows the state's first three dimensions: unha, tía, miña." }) },
       { board: g11({ cap: "the decoder state before word 1", sum: { v: SUMMARY }, st: { v: stateOf(SUMMARY, ST0), hi: [3] } }) +
-          work(["The last eight dimensions: one for each English word the decoder can write (except ‹end›), and one, ‹start›, for the beginning of the phrase. Their values record what has been written.",
-            "How the values are updated: the same way the encoder updated its vector. When a word is written, every value is halved, and the value in that word's dimension goes up by 0.5 (½ × the old value + ½ × 1).",
-            "Before the first word all eight values are 0. The decoder applies the update once for ‹start›, as if ‹start› had just been written: ½ × 0 + ½ × 1 = 0.5 in the ‹start› dimension. Real decoders also begin with such a start token."]),
-        scene: decScene(SUMMARY, false, { path: true, cap: "The last eight dimensions do not fit in the picture; the grid on the left shows all eleven." }) }] }],
+          work(["The last eight: one per English word except ‹end›, and ‹start› for the beginning of the phrase.",
+            "The update, as in the encoder: when a word is written, every value is halved, and that word's dimension gets + 0.5 (½ × old + ½ × 1).",
+            "Before word 1 all eight are 0; the decoder updates once for ‹start›, as if it had just been written: ½ × 0 + ½ × 1 = 0.5. Real decoders start the same way."]),
+        scene: decScene(SUMMARY, false, { path: true, cap: "The last eight do not fit in the picture; the grid shows all eleven." }) }] }],
   ["How the decoder scores a word", {
-    text: "When the decoder translates, it gives each of its eight words a score and writes the word with the highest score. Each English word has its own vector, with the same eleven dimensions as the state, and its score is the dot product of that vector and the state. While the decoder translates, only the state changes; the word vectors stay as they are.",
+    text: "The decoder scores each of its eight words and writes the highest. Each English word has a vector with the state's eleven dimensions; its score is the dot product of that vector and the state. While translating, only the state changes; the word vectors stay fixed.",
     frames: () => {
       const st = stateOf(SUMMARY, ST0), base = { sum: { v: SUMMARY }, st: { v: st }, sums: true, resHead: "dot product" }, sc = scoreAll(SUMMARY, ST0);
       const anArrow = [{ a: ZERO, b: [0.25, 0.5, 0], cls: "ca", label: "“an”", dx: 6, dy: 18, anchor: "start" }];
@@ -1892,23 +1892,23 @@ const STEPS = [
       const W = (extra = {}, cur = false) => { const o = {}; EN.forEach(w => { o[w] = { v: vecOf(w), cur }; }); return Object.assign(o, extra); };
       return [
         { board: g11({ ...base, cap: "the eight word vectors: values made up for this example", words: W({}, true) }) +
-            work(["The values in these vectors are made up, small enough to compute by hand. We chose them so that this tiny model behaves like the small trained models of sections 4 and 5. Without attention, the trained model loses tía and writes “A friend of mine” for our sentence; this model does the same here. With attention, both write “an aunt of mine” (section 2). A real model gets its values from training on example translations. Step 5 shows where a made-up training run takes two of these vectors.",
-              "What a value does: in the dot product it is multiplied by the state's value in the same dimension. A positive value raises the word's score when the state has a value there; a negative value lowers it. For example, “an” has 8 in tía and “a” has −8: the more tía the state holds, the more “an” gains and the more “a” loses.",
-              "The last eight dimensions of the state record which English words have been written (step 3), so they differ before every word. A word vector with a large value in ‹start›, like “a” and “an”, scores highest before the first word."]),
-          scene: { ...decScene(SUMMARY, false, { arrows: true }), cap: "The word vectors in the first three dimensions, drawn at 1/16 of their length: “an” and “aunt” toward tía, “a” and “friend” away from it, “of” and “mine” along miña. (“yours”, −8 along miña, is not drawn.)" } },
+            work(["Made-up values, chosen so that this model fails like the trained models of sections 4 and 5: without attention it loses tía and writes “a friend of mine”. A real model gets its values by training (step 5).",
+              "Each value is multiplied by the state's value in the same dimension: a positive value raises the score, a negative one lowers it. “an” has 8 in tía, “a” −8: the more tía in the state, the more “an” gains and “a” loses.",
+              "The last eight differ before every word (step 3): a large value in ‹start›, as in “a” and “an”, scores high before the first word."]),
+          scene: { ...decScene(SUMMARY, false, { arrows: true }), cap: "Word vectors, first three dimensions, at 1/16 length: “an”, “aunt” toward tía; “a”, “friend” away; “of”, “mine” along miña (“yours” not drawn)." } },
         { board: g11({ ...base, cap: "translating <i>unha tía miña</i>, word 1: the dot product of the state and the vector of “an”", words: W({ an: anDone }) }) +
-            work([`Each product sits under its own column: the value of the state times the value of “an” in that dimension. The dot product adds all eleven products. Σ first three adds the products in unha, tía and miña: ${f(sc.rows[1].gp)}. Σ last eight adds the products in ‹start› to yours: ${f(sc.rows[1].ep)}. Together: ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}, the bar on the right.`]),
-          scene: { ...drop2, arrows: anArrow, cap: `The first three products are the part the picture shows: unha 4 × ${f(SUMMARY[0])} = ${f(4 * SUMMARY[0])}, tía 8 × ${f(SUMMARY[TIA])} = ${f(8 * SUMMARY[TIA])}. ‹start› adds 12 × 0.5 = ${f(sc.rows[1].ep)}.` } },
+            work([`Under each column: the state's value × the value of “an”. The dot product adds all eleven: Σ first three (unha, tía, miña) ${f(sc.rows[1].gp)} + Σ last eight (‹start› to yours) ${f(sc.rows[1].ep)} = ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}, the bar on the right.`]),
+          scene: { ...drop2, arrows: anArrow, cap: `In the picture: unha 4 × ${f(SUMMARY[0])} = ${f(4 * SUMMARY[0])}, tía 8 × ${f(SUMMARY[TIA])} = ${f(8 * SUMMARY[TIA])}. Off it: ‹start› 12 × 0.5 = ${f(sc.rows[1].ep)}.` } },
         { board: g11({ ...base, cap: "translating <i>unha tía miña</i>, word 1: the dot product of the state and the vector of “a”", words: W({ an: anDone, a: aDone }) }) +
             work([`Dot product of “a”: ${sumTxt("a", st)}. unha and ‹start› add the same to “a” and “an”; tía makes all the difference.`]),
-          scene: { ...drop2, arrows: [...anArrow, ...aArrow], cap: `“a” and “an” lean the same way along unha and opposite ways along tía. unha adds ${f(4 * SUMMARY[0])} to both. tía adds ${f(8 * SUMMARY[TIA])} to “an” and takes ${f(8 * SUMMARY[TIA])} from “a”.` } },
+          scene: { ...drop2, arrows: [...anArrow, ...aArrow], cap: `unha adds ${f(4 * SUMMARY[0])} to both; tía adds ${f(8 * SUMMARY[TIA])} to “an” and takes ${f(8 * SUMMARY[TIA])} from “a”.` } },
         { board: g11({ ...base, cap: "translating <i>unha tía miña</i>, word 1: every word's dot product with the state", resHead: "dot product", words: allBars(SUMMARY, ST0, ["g", "e"], { subs: true, anim: "e" }) }) +
-            work([`For every word: Σ first three (the part of the dot product the picture shows) + Σ last eight = the dot product. Each row has its own scale, from −4 to 12. The blue bar is Σ first three, drawn from 0. The green bar is Σ last eight, drawn from where the blue bar ends. The black mark is where the green bar ends: the dot product. “an” has ${f(sc.rows[1].gp)} + ${f(sc.rows[1].ep)} = ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}; “a” has ${f(sc.rows[0].gp)} + ${f(sc.rows[0].ep)} = ${f(r2(sc.rows[0].gp + sc.rows[0].ep))}. Their green bars are equal; the blue bars make the difference.`,
-              "How a real model differs: its dimensions have no names, and each mixes many signals, so nobody can read off why a value is there. Its state is not updated by our simple ½ + ½ rule but by a learned function."]),
+            work([`Bars, each row on its own scale from −4 to 12: blue = Σ first three, from 0; green = Σ last eight, from where blue ends; black mark = the dot product. “an” has ${f(sc.rows[1].gp)} + ${f(sc.rows[1].ep)} = ${f(r2(sc.rows[1].gp + sc.rows[1].ep))}; “a” has ${f(sc.rows[0].gp)} + ${f(sc.rows[0].ep)} = ${f(r2(sc.rows[0].gp + sc.rows[0].ep))}. Same green bars; the blue bars make the difference.`,
+              "In a real model, dimensions have no names and each mixes many signals; the state is updated by a learned function, not by ½ + ½."]),
           scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], cap: "Every word's dot product with the state." }) }];
     } }],
   ["Training (made up): where the values in the word vectors come from", {
-    text: "Step 4 gave the word vectors made-up values. A real model finds its values by training on example translations, such as the translation page's 16 training pairs. Training shows the model an example and moves the vector of the right word a little toward the decoder state, so that its dot product grows; the vectors of the wrong words move a little away. The translation page, section 1, shows that training step by step. Here, only for “an” and “a”, on two of the example translations: what the two examples look like to the decoder, and where training takes the two vectors.",
+    text: "A real model finds its values by training on example translations: the right word's vector moves a little toward the decoder state, so its dot product grows; the wrong words' vectors move a little away (translation page, section 1). Here only for “an” and “a”, on two example translations.",
     frames: () => {
       const S1 = stateOf(SUMMARY, ST0), S2 = stateOf(VEC, ST0), STEP = 16;
       const EX = [["unha tía miña", S1, "an", SUMMARY], ["unha veciña miña", S2, "a", VEC]], seq = [0, 1, 0, 1];
@@ -1924,24 +1924,24 @@ const STEPS = [
         tips: [vAn, vA].flatMap(V => V.slice(1, n).map(v => g3(v))),
         arrows: n ? [{ a: ZERO, b: g3(vAn[n]), cls: "ca", label: "“an”", dx: 6, dy: 18 }, { a: ZERO, b: g3(vA[n]), cls: "ca", label: "“a”", dx: 0, dy: 26, anchor: "start" }] : [], ...extra });
       const L2 = (r, ph) => `<span>${r}<small>${ph}</small></span>`, OURS = "our phrase", AMIP = "2nd phrase";
-      const ENCL = ["½ × (0, 0, 0) + ½ × (1, 0, 0) = (0.5, 0, 0)", "½ × (0.5, 0, 0) + ½ × (0, 0, 0) = (0.25, 0, 0). This small model has no dimension for veciña, so its word vector is all zeros: reading it adds nothing and halves what was there.", "½ × (0.25, 0, 0) + ½ × (0, 0, 1) = (0.125, 0, 0.5). No tía ever entered this summary."];
+      const ENCL = ["½ × (0, 0, 0) + ½ × (1, 0, 0) = (0.5, 0, 0)", "½ × (0.5, 0, 0) + ½ × (0, 0, 0) = (0.25, 0, 0). No dimension for veciña: its vector is all zeros, so reading it only halves what was there.", "½ × (0.25, 0, 0) + ½ × (0, 0, 1) = (0.125, 0, 0.5). No tía ever entered this summary."];
       // the encoder's reading of the 2nd phrase in one frame (the rule is step 2's); the nudges themselves are the translation page's section 1
       const encAll = { board: g11({ cap: "the 2nd example translation, <i>unha veciña miña</i>, “a neighbor of mine”: its summary", sum: { label: L2("summary", AMIP), v: AMI[2], hi: [0, 1, 2] }, st: { label: L2("state", AMIP) }, dim: others }) +
-          work(["To train, we need a second example translation, the 2nd phrase. The encoder reads it as in step 2:"].concat(ENCL.map((t, n) => `reading <i>${AMI_W[n]}</i>: ${t}`))),
-        scene: tScene(0, "The encoder's path for unha veciña miña. It starts along unha, like our phrase, and never moves along tía.", { segs: amiSeg }) };
+          work(["A second example translation, the 2nd phrase, read as in step 2:"].concat(ENCL.map((t, n) => `reading <i>${AMI_W[n]}</i>: ${t}`))),
+        scene: tScene(0, "The path for unha veciña miña: along unha, never along tía.", { segs: amiSeg }) };
       return [encAll,
         { board: g11({ cap: "the decoder state before word 1, for the 2nd phrase, <i>unha veciña miña</i>", sum: { label: L2("summary", AMIP), v: VEC }, st: { label: L2("state", AMIP), v: S2, hi: [0, 1, 2, 3] }, dim: others }) +
-            work([`For our phrase, <i>unha tía miña</i>, the state before word 1 was ${vecTxt(S1.slice(0, 4))}, then zeros (step 3). For the 2nd phrase it is ${vecTxt(S2.slice(0, 4))}, then zeros: tía is 0, because the 2nd phrase has no tía. The two states differ only in tía.`]),
-          scene: tScene(0, "The first three dimensions of the two states: unha tía miña reaches 0.25 along tía, unha veciña miña reaches 0.") },
+            work([`State before word 1: our phrase ${vecTxt(S1.slice(0, 4))}, then zeros (step 3); the 2nd phrase ${vecTxt(S2.slice(0, 4))}, then zeros. They differ only in tía.`]),
+          scene: tScene(0, "Along tía: unha tía miña 0.25, unha veciña miña 0.") },
         { board: g11({ cap: "before training: the vectors of “an” and “a” are all zeros", sum: { label: L2("summary", AMIP), v: VEC }, st: { label: L2("state", AMIP), v: S2 }, dim: others, words: { an: { v: vAn[0], cur: true }, a: { v: vA[0], cur: true } } }) +
-            work(["With zeros, both get the dot product 0 from any state, so the model has no reason to prefer either."]),
-          scene: tScene(0, "The vectors of “an” and “a” start at zero, at the corner where the axes meet.") },
+            work(["All zeros: both get the dot product 0 from any state, so neither is preferred."]),
+          scene: tScene(0, "“an” and “a” start at zero, where the axes meet.") },
         { board: g11({ cap: "after training on the two examples", sum: { label: L2("summary", AMIP), v: VEC }, st: { label: L2("state", AMIP), v: S2 }, dim: others, words: { an: { v: vAn[4] }, a: { v: vA[4] } } }) +
-            work(["Training, as on the translation page: for each example, the right first word's vector moves toward the decoder state, the wrong one's away (here by 16 × the state, two rounds over the two examples). The two states agree in unha, miña and ‹start›, so those pushes cancel; only tía is left.", "This made-up run gives “an” 8 and “a” −8 in tía, the values of step 4. unha and ‹start› end at 0 here, because both phrases have the same values there, so their pushes cancel. The 4 in unha and the 12 in ‹start› of step 4 would come from more examples: the other example translations, and the later words of each phrase. We did not run those; we set those values, and the vectors of the other six words, directly."]),
-          scene: tScene(4, "Where the vectors of “an” and “a” end up: on the tía axis, pointing opposite ways.") }];
+            work(["For each example, the right first word's vector moves toward the state and the wrong one's away: by 16 × the state, two rounds over the two examples. The states agree in unha, miña and ‹start›, so those pushes cancel; only tía is left.", "Result: “an” 8 and “a” −8 in tía, the values of step 4. Step 4's 4 in unha and 12 in ‹start› would come from more examples (not run here: we set those values, and the other six vectors, directly)."]),
+          scene: tScene(4, "“an” and “a” end up on the tía axis, pointing opposite ways.") }];
     } }],
   ["The bias, and why the decoder writes “a”", {
-    text: "The score has one more part. Each word has a bias: one extra value of its own, added to its score whatever the state is. Like the word vectors, it is set before translating (in a real model, by training) and stays fixed while the decoder translates. First, why it is needed.",
+    text: "The score has one more part, the bias: one value per word, added to its score whatever the state. Like the word vectors, it stays fixed while translating (a real model trains it). First, why it is needed.",
     frames: () => {
       const sv0 = scoreAll(VEC, ST0, false), sv = scoreAll(VEC, ST0), sc = scoreAll(SUMMARY, ST0), gap = r2(sc.rows[0].b - sc.rows[1].b);
       const others = EN.filter(w => !["a", "an"].includes(w));
@@ -1951,15 +1951,15 @@ const STEPS = [
       const vScene = cap => decScene(VEC, false, { arrows: true, drops: [TIA], xLabel: `unha veciña miña ${vecTxt(VEC)}`, cap });
       return [
         { board: g11({ ...am, cap: "the 2nd phrase, <i>unha veciña miña</i>: scores without a bias", words: allBars(VEC, ST0, ["g", "e"]) }) +
-            work([`Take the 2nd phrase, <i>unha veciña miña</i>, again. Its state holds nothing of tía, so “a” and “an” get the same score, ${f(r2(sv0.rows[0].gp + sv0.rows[0].ep))}. The state gives no reason to prefer either.`,
-              "Yet of the translation page's 16 training pairs, 8 translations start with “a” or “an”, and 6 of them with “a” (a friend, a brother, a neighbor, each of mine and of yours). The model needs a way to prefer “a” when the state says nothing either way."]),
-          scene: vScene("This state reaches 0 along tía: nothing in it speaks for “an” or for “a”.") },
+            work([`The 2nd phrase, <i>unha veciña miña</i>: no tía in the state, so “a” and “an” get the same score, ${f(r2(sv0.rows[0].gp + sv0.rows[0].ep))}.`,
+              "Yet of the 16 example translations, 8 start with “a” or “an”, 6 of them with “a”. The model needs a way to prefer “a” when the state says nothing."]),
+          scene: vScene("This state is 0 along tía: nothing in it speaks for “an” or “a”.") },
         { board: g11({ ...am, bias: true, cap: "the 2nd phrase, <i>unha veciña miña</i>: the bias is added", words: allBars(VEC, ST0, ALL, { anim: "b" }) }) +
-            work([`That is the bias. Training raises the bias of a word that is right more often than its dot product says: “a” gets ${f(CAND.a.b)}. Now “a” scores ${f(sv.rows[0].s)} and “an” ${f(sv.rows[1].s)}.`,
+            work([`Training raises the bias of a word that is right more often than its dot product says: “a” gets ${f(CAND.a.b)}. Now “a” scores ${f(sv.rows[0].s)}, “an” ${f(sv.rows[1].s)}.`,
               `Biases in this model: “a” ${f(CAND.a.b)}, “friend” ${f(CAND.friend.b)}, “‹end›” ${f(CAND["‹end›"].b)}, all others 0. Score = dot product + bias.`]),
-          scene: vScene("The bias does not depend on the state: the gray part is added to the bar of “a” whatever the picture shows.") },
+          scene: vScene("The bias (gray) does not depend on the state.") },
         { board: g11({ ...ti, bias: true, cap: "back to our phrase, <i>unha tía miña</i>", words: allBars(SUMMARY, ST0, ALL, { anim: "b" }) }) + whyLines(sc, SUMMARY, "the summary"),
-          scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA], cap: `Here the state does speak for “an”: unha adds ${f(4 * SUMMARY[0])} to both, and tía adds ${f(8 * SUMMARY[TIA])} to “an” and takes ${f(8 * SUMMARY[TIA])} from “a”, a gap of ${f(r2(sc.rows[1].gp - sc.rows[0].gp))}. But the bias of “a” is ${f(gap)}, more than that.` }) },
+          scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA], cap: `Here tía speaks for “an”: it adds ${f(8 * SUMMARY[TIA])} to “an” and takes ${f(8 * SUMMARY[TIA])} from “a”, a gap of ${f(r2(sc.rows[1].gp - sc.rows[0].gp))}. The bias of “a”, ${f(gap)}, is larger.` }) },
         { board: g11({ ...ti, bias: true, cap: "how much tía would “an” need?", words: allBars(SUMMARY, ST0, ALL) }) + ruler(SUMMARY, false) +
             work([`Each unit of tía in the state adds 8 to “an” and takes 8 from “a”. “an” beats the bias of “a” only if 16 × tía > ${f(gap)}: tía > ${f(gap)} ÷ 16 = ${f(MARK)}, the red mark.`]),
           scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA], mark: true, cap: `The summary reaches ${f(SUMMARY[TIA])} along tía, short of the mark. After reading tía the encoder had ${f(ENC[1][TIA])}; reading miña halved it.` }) },
@@ -1968,7 +1968,7 @@ const STEPS = [
           scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA], mark: true, cap: n === 3 ? "The decoder writes “a”: the summary holds too little of tía to beat the bias." : "The summary holds too little of tía to beat the bias of “a”." }) }))];
     } }],
   ["The rest of the phrase", {
-    text: "After each word, the decoder updates the values in the last eight dimensions: every value is halved, and the value in the dimension of the word just written goes up by 0.5. The values in the first three dimensions stay the summary. Then all eight words are scored again.",
+    text: "After each word, the decoder updates its state (as in step 3), then scores all eight words again.",
     frames: () => {
       const caps = [
         `Highest score: “friend”. tía helps “aunt” by ${f(8 * SUMMARY[TIA])} and costs “friend” ${f(8 * SUMMARY[TIA])}, but the bias of “friend” is ${f(CAND.friend.b)}: the same contest as “a” against “an”.`,
@@ -1981,29 +1981,29 @@ const STEPS = [
         const W0 = {}; EN.forEach(x => { W0[x] = { v: vecOf(x) }; });
         const base = { sum: { v: SUMMARY }, bias: true, sums: true, resHead: "score" };
         return [
-          { board: g11({ ...base, bias: false, cap: `“${w}” has been written: the decoder updates its state`, st: { v: now, from: prev, delay: 0.8, hi }, words: W0,
-              stSide: sideLines([`½ × (${L8(prev)})`, `+ 0.5 in ${w}`, `= ${L8(now)}`]), sideHead: "last eight; all others 0:" }) +
-              work(i === 0 ? ["After each word, every value in the last eight dimensions is halved, and the dimension of the word just written gets + 0.5. The first three dimensions stay the summary."] : []),
-            scene: decScene(SUMMARY, false, { arrows: true, cap: `Word ${i + 2}: the summary has not changed; only the last eight dimensions of the state have.` }) },
-          { board: g11({ ...base, cap: `word ${i + 2}: every word's score with the new state`, st: { v: now }, win: s.w, words: allBars(SUMMARY, s.st, ALL) }) + work([caps[i]]),
+          // both parts in one layout: the score columns stay (filled when scored), the hand-written lines sit in one box under the grid
+          { board: g11({ ...base, cap: `“${w}” has been written: the decoder updates its state`, st: { v: now, from: prev, delay: 0.8, hi }, words: W0 }) +
+              `<p class="work wbox">${[`last eight dimensions (all others 0): ½ × (${L8(prev)}) + 0.5 in ${w} = ${L8(now)}`, ...(i === 0 ? ["Every value in the last eight is halved; the word just written gets + 0.5. The first three stay the summary."] : [])].join("<br>")}</p>`,
+            scene: decScene(SUMMARY, false, { arrows: true, cap: `Word ${i + 2}: the summary is unchanged; only the last eight dimensions changed.` }) },
+          { board: g11({ ...base, cap: `word ${i + 2}: every word's score with the new state`, st: { v: now }, win: s.w, words: allBars(SUMMARY, s.st, ALL) }) + `<p class="work wbox">${caps[i]}</p>`,
             scene: decScene(SUMMARY, false, { arrows: true, drops: [TIA, MINA], mark: i === 0 && markAunt, cap: `Word ${i + 2}. ${caps[i]}` }) }];
       });
     } }],
   ["The query: one score for each encoder vector", {
-    text: "With attention, before each English word the decoder looks at all three encoder vectors, not only the last one, and takes a weighted mix of them. To set the weights, it computes the dot product of each encoder vector with one more vector, the query. This gives one score per encoder vector, and softmax turns the scores into weights. The query is computed from the decoder state, so it can be different before each English word. In this role, the encoder vectors are called keys.",
+    text: "Before each English word, the decoder takes the dot product of each encoder vector with one more vector, the query: one score each. Softmax turns the scores into weights. The query comes from the decoder state, so it can change before each word. In this role the encoder vectors are called keys.",
     frames: () => {
       const a = ATT[0].a, qs = queryScene(a), keys = encPts(ENC.map((e, j) => `key ${j + 1}: ${encPlain(j)}`));
       const { qrule, rowsHtml, LBL } = qkParts(a);
       return [
-        { board: qrule + LBL + eq(col(a.q, "the query")), scene: { ...SMALL, arrows: qs.arrows, pts: keys, cap: "The query has 6 in the tía dimension, so it points along the tía axis. The three encoder vectors are the keys it is compared with." } },
+        { board: qrule + LBL + eq(col(a.q, "the query")), scene: { ...SMALL, arrows: qs.arrows, pts: keys, cap: "The query: 6 in tía, so it points along tía. The three keys are compared with it." } },
         ...upto(3, j => ({ board: qrule + LBL + rowsHtml(j + 1), scene: { ...SMALL, arrows: qs.arrows, segs: qs.segs.slice(0, j + 2), notes: qs.notes.slice(0, j + 1), pts: keys,
-          cap: `Key ${j + 1}: the dashed line drops it onto the query's line, at ${f(ENC[j][TIA])} along tía. Its score: 6 × ${f(ENC[j][TIA])} = ${f(a.sc[j])}.` } })),
+          cap: `Key ${j + 1} lands at ${f(ENC[j][TIA])} along tía. Score: 6 × ${f(ENC[j][TIA])} = ${f(a.sc[j])}.` } })),
         ...upto(4, n => ({ board: qrule + LBL + rowsHtml(3) + smStage(a, n) + work(SMTXT(a)[n]),
           scene: n < 3 ? { ...SMALL, arrows: qs.arrows, segs: qs.segs, notes: qs.notes, pts: keys, cap: SMCAP[n] }
             : { ...SMALL, ...qs, pts: encPts(ENC.map((e, j) => `key ${j + 1}: weight ${f(a.sm.p[j])}`)), cap: SMCAP[3] } }))];
     } }],
   ["The mix", {
-    text: "The mix is the three encoder vectors added up, each multiplied by its weight. In this role the encoder vectors are called values (here a value is a whole vector, not one number as elsewhere on this page). The mix takes the summary's place in the decoder state.",
+    text: "The mix: the three encoder vectors, each times its weight, added up. In this role they are called values (here a value is a whole vector). The mix takes the summary's place in the decoder state.",
     frames: () => {
       const a = ATT[0].a, terms = n => ENC.slice(0, n).flatMap((e, j) => [j ? op("+") : "", k(`${f(a.sm.p[j])} ×`), col(e, encName(j))]);
       const vals = n => encPts(ENC.map((e, j) => j < n ? `weight ${f(a.sm.p[j])}` + (j === 2 ? " (summary)" : "") : ""), "enc").map((p, j) => j < n ? p : { ...p, cls: "enc faint" });
@@ -2011,29 +2011,29 @@ const STEPS = [
       return [...upto(3, j => ({ board: top + `<p class="label">the mix: each encoder vector (here called a value) times its weight, added up</p>` + eq(...terms(j + 1)), scene: { ...SMALL, pts: vals(j + 1), cap: `${f(a.sm.p[j])} × the encoder vector ${encPlain(j)}.` } })),
         { board: top + `<p class="label">the mix: each encoder vector (here called a value) times its weight, added up</p>` + eq(...terms(3), op("="), col(a.mix, "the mix", "cur")) + work([`Dimension by dimension, for example tía: ${a.sm.p.map((w, j) => `${f(w)} × ${f(ENC[j][TIA])}`).join(" + ")} = <b>${f(a.mix[TIA])}</b>`]),
           scene: { ...SMALL, tri: ENC, pts: [...vals(3), { p: a.mix, cls: "mix", label: `mix ${vecTxt(a.mix)}`, dx: 10, dy: 18 }],
-            cap: `Added up: the mix. It lies inside the triangle of the three encoder vectors, pulled toward the one with the largest weight. It holds ${f(a.mix[TIA])} of tía; the summary held ${f(SUMMARY[TIA])}.` } }];
+            cap: `The mix, pulled toward the largest weight: ${f(a.mix[TIA])} of tía (the summary: ${f(SUMMARY[TIA])}).` } }];
     } }],
   ["Word 1 with the mix: why “an”", {
-    text: "The mix is copied into the first three dimensions of the decoder state, where the summary was. Everything else, the word vectors, the biases and the values in the last eight dimensions, is exactly as in section 1.",
+    text: "The mix goes into the state's first three dimensions, where the summary was. Everything else is as in section 1.",
     frames: () => {
       const s = ATT[0], x = s.a.mix, base = { sum: { label: "the mix", v: x, cls: "mixl" }, bias: true, sums: true, resHead: "score" };
       const AA = ["a", "an"], W = ws => Object.fromEntries(ws.map(w => [w, { v: vecOf(w), cur: true }]));
       return [
         { board: g11({ ...base, cap: "the mix is copied into the first three dimensions of the decoder state", st: { v: stateOf(x, ST0), hi: [0, 1, 2] } }) +
-            work([`The first three dimensions of the decoder state now hold the mix, ${vecTxt(x)}, where section 1 had the summary, ${vecTxt(SUMMARY)}. The last eight are as in section 1: nothing is written yet, so ‹start› is 0.5 and the rest 0.`]),
-          scene: decScene(x, true, { cap: `The mix in the picture. It reaches ${f(x[TIA])} along tía; the summary reached ${f(SUMMARY[TIA])}.` }) },
+            work([`First three: the mix ${vecTxt(x)} (section 1: the summary ${vecTxt(SUMMARY)}). Last eight: nothing written yet, so ‹start› 0.5, the rest 0.`]),
+          scene: decScene(x, true, { cap: `The mix reaches ${f(x[TIA])} along tía; the summary reached ${f(SUMMARY[TIA])}.` }) },
         { board: g11({ ...base, cap: "the vectors of “a” and “an”: the same as in section 1", st: { v: stateOf(x, ST0) }, words: W(AA) }) +
-            work(["The word vectors were set before translating (section 1, step 4) and do not change. Attention changes only the state."]),
+            work(["The word vectors do not change (section 1, step 4). Attention changes only the state."]),
           scene: decScene(x, true, { arrows: true, cap: "The vectors of “a” and “an” lean the same way along unha and opposite ways along tía." }) },
-        { board: g11({ ...base, cap: "the vectors of the other six words: the same as in section 1", st: { v: stateOf(x, ST0) }, words: { ...Object.fromEntries(AA.map(w => [w, { v: vecOf(w) }])), ...W(EN.filter(w => !AA.includes(w))) } }) + work(["The same vectors as in section 1, with the same made-up values."]),
+        { board: g11({ ...base, cap: "the vectors of the other six words: the same as in section 1", st: { v: stateOf(x, ST0) }, words: { ...Object.fromEntries(AA.map(w => [w, { v: vecOf(w) }])), ...W(EN.filter(w => !AA.includes(w))) } }) + work(["The same made-up vectors as in section 1."]),
           scene: decScene(x, true, { arrows: true, cap: "“aunt” along tía, “friend” the opposite way; “of” and “mine” along miña." }) },
         { board: g11({ ...base, cap: "the first three dimensions of each dot product", st: { v: stateOf(x, ST0) }, words: allBars(x, ST0, ["g"]) }),
           scene: decScene(x, true, { arrows: true, drops: [TIA, MINA], cap: `tía gives “an” and “aunt” 8 × ${f(x[TIA])} = ${f(r2(8 * x[TIA]))}, and takes the same from “a” and “friend”. Along miña the mix reaches only ${f(x[MINA])}: “of” and “mine” get ${f(r2(8 * x[MINA]))}.` }) },
         { board: g11({ ...base, cap: "the decoder writes “an”", st: { v: stateOf(x, ST0) }, win: "an", words: allBars(x, ST0, ALL) }) + ruler(x, true) + whyLines(s.sc, x, "the mix") + smWords(s.sc, 3, "softmax, as in section 1: from the eight scores to a probability for each word") + pickLine(s.sc),
-          scene: decScene(x, true, { arrows: true, drops: [TIA], mark: true, cap: `Why “an” now: the gap from tía is ${f(r2(2 * 8 * x[TIA]))}, more than the bias of “a”, ${f(CAND.a.b)}. The mix is past the ${f(MARK)} mark. The decoder writes “an”.` }) }];
+          scene: decScene(x, true, { arrows: true, drops: [TIA], mark: true, cap: `The gap from tía, ${f(r2(2 * 8 * x[TIA]))}, beats the bias of “a”, ${f(CAND.a.b)}: past the ${f(MARK)} mark, so “an”.` }) }];
     } }],
   ["The rest of the phrase, with attention", {
-    text: "Each word in three parts. 1: the decoder updates the last eight dimensions of its state, as in section 1. 2: it computes the query from the state. “aunt”, “friend”, “of”, “mine” and “yours” shift it, the other words do not: once the noun is written, the next words, “of mine”, translate miña, so the made-up rule moves the query from tía toward miña (a real model learns such shifts: section 4). A shifted query gives new weights and a new mix. 3: all words are scored.",
+    text: "Each word in three parts: 1. update the state, as in section 1; 2. the query from the state, and if it changed, new weights and a new mix; 3. score every word. After the noun, the made-up rule shifts the query toward miña: “of mine” translates miña.",
     frames: () => {
       const S = (k, w) => ATT[k].sc.rows.find(r => r.w === w).s, M = k => ATT[k].a.mix[MINA];
       const caps = [
@@ -2048,21 +2048,25 @@ const STEPS = [
         const P = ATT[i], w = P.w, prev = stateOf(P.a.mix, P.st), mid = stateOf(P.a.mix, s.st), now = stateOf(s.a.mix, s.st);
         const same = vecTxt(P.q) === vecTxt(s.q), terms = ST.map((r, j) => s.st[j] && QSHIFT[r][2] ? `+ ${f(s.st[j])} (${r}) × (0, −12, 12)` : "").filter(Boolean);
         const sc3 = decScene(P.a.mix, true, { arrows: true, mixes: ATT.slice(0, i).map(t => t.a.mix), cap: `Word ${i + 2}: the mix has not changed yet; only the last eight dimensions of the state have.` });
+        // one layout for all three parts: the score columns are always there (filled in part 3), the hand-written lines
+        // sit in one box under the grid, and the weights board below it shows the weights that made the current mix
+        const G = { sum: { ...ML, v: s.a.mix }, st: { v: now }, words: W0, bias: true, sums: true, resHead: "score" };
+        const box = ls => `<p class="work wbox">${ls.join("<br>")}</p>`;
+        const wts = (t, from) => smStage(t.a, 3, from) + work([wLine(t)]);
         return [
-          { board: g11({ cap: `“${w}” has been written: the decoder updates its state`, sum: { ...ML, v: P.a.mix }, st: { v: mid, from: prev, delay: 0.8, hi: changed(prev, mid) }, words: W0,
-              stSide: sideLines([`½ × (${L8(prev)})`, `+ 0.5 in ${w}`, `= ${L8(mid)}`]), sideHead: "last eight; all others 0:" }) +
-              work(i === 0 ? ["As in section 1: every value in the last eight dimensions is halved, and the dimension of the word just written gets + 0.5."] : []),
+          { board: g11({ ...G, cap: `“${w}” has been written: the decoder updates its state`, sum: { ...ML, v: P.a.mix }, st: { v: mid, from: prev, delay: 0.8, hi: changed(prev, mid) } }) +
+              box([`last eight dimensions (all others 0): ½ × (${L8(prev)}) + 0.5 in ${w} = ${L8(mid)}`, ...(i === 0 ? ["As in section 1: every value in the last eight dimensions is halved, and the dimension of the word just written gets + 0.5."] : [])]) +
+              wts(P, "the weights so far"),
             scene: sc3 },
           same
-            ? { board: g11({ cap: "the query from the new state: unchanged", sum: { ...ML, v: s.a.mix }, st: { v: now }, words: W0,
-                  stSide: sideLines([`query = ${vecTxt(Q0)}`, `+ nothing: ${ST.filter((r, j) => s.st[j]).join(" and ")} do not shift it`, `= ${vecTxt(s.q)}`]), sideHead: "the query:" }) +
-                  work([`The query is the same as for word 1, so the scores, the weights (${s.a.sm.p.map(f).join(", ")}) and the mix ${vecTxt(s.a.mix)} are the ones from step 3.`]),
+            ? { board: g11({ ...G, cap: "the query from the new state: unchanged" }) +
+                  box([`query = ${vecTxt(Q0)} + nothing: ${ST.filter((r, j) => s.st[j]).join(" and ")} do not shift it = ${vecTxt(s.q)}`, "The same query gives the same scores, weights and mix."]) +
+                  wts(s, "the same query"),
                 scene: sc3 }
-            : { board: g11({ cap: "the query from the new state: new weights, a new mix", sum: { ...ML, v: s.a.mix, from: P.a.mix, delay: 2.4, hi: changed(P.a.mix, s.a.mix) }, st: { v: now, from: mid, delay: 2.4, hi: changed(mid, now) }, words: W0,
-                  stSide: sideLines([`query = ${vecTxt(Q0)}`, ...terms, `= ${vecTxt(s.q)}`]), sideHead: "the query:" }) +
-                  smStage(s.a, 3, "the new query") + work([wLine(s)]),
+            : { board: g11({ ...G, cap: "the query from the new state: new weights, a new mix", sum: { ...ML, v: s.a.mix, from: P.a.mix, delay: 2.4, hi: changed(P.a.mix, s.a.mix) }, st: { v: now, from: mid, delay: 2.4, hi: changed(mid, now) } }) +
+                  box([`query = ${vecTxt(Q0)} ${terms.join(" ")} = ${vecTxt(s.q)}`]) + wts(s, "the new query"),
                 scene: decScene(s.a.mix, true, { arrows: true, mixes: ATT.slice(0, i + 1).map(t => t.a.mix), xLabel: `mix for word ${i + 2}`, cap: `Word ${i + 2}: the new mix ${vecTxt(s.a.mix)}; the faint points are the earlier mixes.` }) },
-          { board: g11({ cap: `word ${i + 2}: every word's score with the new state`, sum: { ...ML, v: s.a.mix }, st: { v: now }, bias: true, sums: true, resHead: "score", win: s.w, words: allBars(s.a.mix, s.st, ALL) }) + work([caps[i]]),
+          { board: g11({ ...G, cap: `word ${i + 2}: every word's score with the new state`, win: s.w, words: allBars(s.a.mix, s.st, ALL) }) + box([caps[i]]) + wts(s, same ? "the same query" : "the new query"),
             scene: decScene(s.a.mix, true, { arrows: true, drops: [TIA, MINA], mark: i === 0 && markAunt, mixes: ATT.slice(0, i + 1).map(t => t.a.mix), xLabel: `mix for word ${i + 2}`, cap: `Word ${i + 2}. ${caps[i]}` }) }];
       });
     } }],
@@ -2103,7 +2107,7 @@ function planes(px, steps, groups) {
   // the heading block keeps the height of its tallest step text, so nothing below it moves when the step changes
   function fitHead(p) {
     const h = p.el.querySelector(".plhead"); if (p.el.hidden || p.g.length < 2) return; h.style.minHeight = "";
-    let m = 0; p.g.forEach(si => { setHead(p, si); m = Math.max(m, h.offsetHeight); }); h.style.minHeight = m + "px";
+    let m = 0; p.g.forEach(si => { setHead(p, si); m = Math.max(m, h.getBoundingClientRect().height); }); h.style.minHeight = Math.ceil(m) + "px";
   }
   const setHead = (p, si) => { p.el.querySelector(".wkh").textContent = `Step ${si + 1} of ${steps.length}: ${steps[si][0]}`; p.el.querySelector(".steptext").textContent = steps[si][1].text; };
   function draw(pi) {
@@ -2159,39 +2163,39 @@ const qName = v => { const p = DIMS.map((d, i) => v[i] ? `${d} × ${f(v[i])}` : 
 // each preset: group, query, one line on what it reads
 const PRESETS = [
   ["which dimension earns points", [0, 6, 0], "Only tía earns points, so the keys are ranked by their tía: the key after tía is read most."],
-  ["which dimension earns points", [0, 0, 6], "Only miña earns points: the key after miña, the only one that holds miña, is read most."],
-  ["which dimension earns points", [6, 0, 0], "Only unha earns points. All three keys hold some unha, the key after unha the most, so it is read most. No word of our phrase needs that."],
-  ["which dimension earns points", [0, 4, 4], "tía and miña earn the same. The key after miña holds both, so it is read most; the key after tía comes second."],
-  ["which dimension earns points", [0, 0, 0], "Nothing earns points: every key scores 0, every weight is 1/3, and the mix is the plain average of the three keys."],
-  ["how many points: weaker or stronger", [0, 2, 0], "The same ranking as tía × 6 with smaller gaps between the scores: the weights are more even and the mix is nearer the average."],
+  ["which dimension earns points", [0, 0, 6], "Only miña earns points: the key after miña, the only one holding miña, is read most."],
+  ["which dimension earns points", [6, 0, 0], "Only unha earns points: the key after unha holds the most, so it is read most. No word of our phrase needs that."],
+  ["which dimension earns points", [0, 4, 4], "tía and miña earn the same: the key after miña holds both, so it is read most."],
+  ["which dimension earns points", [0, 0, 0], "Nothing earns points: every score 0, every weight 1/3, the mix the plain average."],
+  ["how many points: weaker or stronger", [0, 2, 0], "Same ranking as tía × 6, smaller gaps: more even weights, a mix nearer the average."],
   ["how many points: weaker or stronger", [0, 6, 0], "Section 2's query before the first two words."],
   ["how many points: weaker or stronger", [0, 10, 0], "The same ranking with larger gaps: nearly all the weight goes to the key after tía."],
-  ["one query for all five words", [0, 6, 3], "Rewards tía twice as much as miña. With it all five words come out right, each by a small margin: see the table."]];
+  ["one query for all five words", [0, 6, 3], "tía rewarded twice as much as miña: all five words right, by small margins (table)."]];
 // the steps: title, text, the query it sets (or null to keep the current one), the word it moves to (or null), the parts it shows
 const QSTEPS = [
   ["The task: make the decoder write “an”",
-    "Nothing is written yet; the correct first word is “an”. Section 2, step 3: “an” wins when the mix puts more than 0.35 of tía into the first three dimensions of the decoder state; otherwise “a” wins. So the query's task: a mix with enough tía. What it can read, below: three keys, the encoder's vectors, each holding a share of the Galician words read so far; the key after tía holds the most tía. Word vectors, biases and the last eight dimensions stay as in sections 1 and 2.",
+    "Word 1 should be “an”. It wins when the mix holds more than 0.35 of tía (section 2, step 3); otherwise “a” wins. The query's task: a mix with enough tía. It can read three keys, the encoder's vectors; the key after tía holds the most tía.",
     [0, 6, 0], 0, ["keys", "3d"]],
   ["What the query's numbers mean",
-    "A query has the keys' three dimensions, and each of its numbers is a reward: a key's score adds up, over the three dimensions, the query's number × what the key holds there (the dot product). We call (0, 6, 0) tía × 6: each unit of tía earns 6 points, unha and miña nothing, so the keys are ranked by their tía. The query does not say “the second word”; it says what to reward.",
+    "Each of the query's three numbers is a reward: a key's score adds up the query's number × what the key holds, dimension by dimension (the dot product). (0, 6, 0) is tía × 6: each unit of tía earns 6 points, so the keys are ranked by their tía. The query says what to reward, not which word.",
     [0, 6, 0], 0, ["scores", "3d", "q3"]],
   ["From scores to weights",
-    "Softmax turns the scores into weights, as in section 2, step 1: shares that are positive and add up to 1. Only the gaps between the scores matter, and each point of gap multiplies the share by about 2.7. The key after tía is 1.5 points above the key after miña, so its share is about 4.5 times larger. Softmax does not pick one key: it divides the reading among all three, most of it to the highest score.",
+    "Softmax turns the scores into weights (section 2, step 1). Only the gaps matter: each point of gap multiplies the share by about 2.7. The key after tía is 1.5 points above the key after miña, so its share is about 4.5 times larger. Every key gets some weight.",
     [0, 6, 0], 0, ["scores", "sm"]],
   ["The mix, and the word it produces",
-    "The keys added up with those weights are the mix: mostly the key after tía, with a little of the other two. The mix fills the first three dimensions of the decoder state, and the decoder scores its eight words as in section 2, step 3. The mix holds more than 0.35 of tía, so “an” wins: the task is done. This is the whole chain, query → scores → weights → mix → word. The box under the mix shows the last link, with the three best-scoring words and their margins.",
+    "The keys added up with those weights: the mix, mostly the key after tía. It fills the state's first three dimensions, and the decoder scores its words (section 2, step 3). More than 0.35 of tía, so “an” wins. The box under the mix: the three best scores and their margins.",
     [0, 6, 0], 0, ["sm", "mix", "out", "3d", "q3", "m3"]],
   ["Reward another dimension: another key is read, another word comes out",
-    "Move the 6 from tía to miña. Now the key after miña scores highest and the mix is mostly that key. It holds a quarter of tía, less than 0.35, and the decoder writes “a”: wrong. Nothing else changed: same sentence, same keys, same decoder. Which dimension the query rewards decides which key is read, and that decides the word. The buttons try the other cases: unha × 6 reads mostly the key after unha, which no word of our phrase needs; equal rewards for tía and miña favour the key after miña, which holds both; all × 0 reads the plain average.",
+    "Move the 6 from tía to miña. The key after miña now scores highest; the mix holds a quarter of tía, less than 0.35, so “a”: wrong. Only the query changed. The rewarded dimension decides which key is read, and so the word. The buttons try other queries.",
     [0, 0, 6], 0, ["ctl", "scores", "sm", "mix", "out", "3d", "q3", "m3"]],
   ["Reward it more or less: how sharply attention focuses",
-    "Still tía only, but 2 points per unit instead of 6. Same ranking, smaller gaps: softmax spreads the weight, and the mix drifts toward the average of the three keys. Too little tía: the decoder writes “a”, although the query rewards the right dimension. With 10 per unit nearly all the weight goes to the key after tía, and “an” wins clearly. So the size of the numbers sets how sharply attention focuses; a weak query reads a blur of all three keys, close to the summary that failed in section 1. The real model of section 6 has both: sharp rows and spread rows.",
+    "tía only, but 2 points per unit instead of 6. Same ranking, smaller gaps: the weight spreads, the mix drifts toward the average, too little tía, so “a”. With 10 per unit nearly all the weight goes to the key after tía. The size of the numbers sets how sharply attention focuses.",
     [0, 2, 0], 0, ["ctl", "scores", "sm", "mix", "out", "3d", "q3", "m3"]],
   ["The same query at a later word: why each word needs its own query",
-    "Now the third word: “an aunt” is written, and the correct next word is “of”. “of” needs 8 × miña > 1.6, the bias of ‹end› (section 1, step 6), so more than 0.2 of miña in the mix; with less, ‹end› wins and the translation stops at “an aunt”. tía × 6, right for word 1, fetches little miña: ‹end›, wrong. Reward miña and “of” comes out. So the decoder computes a new query from its state before every word: by a made-up rule in section 2, from learned values in section 4 (where the state itself is the query). Table: the same query at all five words.",
+    "Word 3: “an aunt” is written; next should be “of”. “of” needs 8 × miña > 1.6, the bias of ‹end› (section 1, step 6): more than 0.2 of miña. tía × 6 fetches little miña, so ‹end›: wrong. Reward miña and “of” comes out. So each word needs its own query, computed from the state. Table: this query at all five words.",
     [0, 6, 0], 2, ["ctl", "pos", "mix", "out", "words"]],
   ["Your turn",
-    "Choose the word the decoder is about to write, set the query with the sliders or the buttons, and follow the chain to the word. Things to try: a negative number punishes a dimension, so keys that hold it score lower (section 2 used tía × −3, miña × 9 before “mine”). And is there one query that gets all five words right? There is, by small margins: tía × 6, miña × 3. Check the margins in the box and in the table.",
+    "Choose the word, set the query, follow the chain. Try a negative number: it punishes a dimension (section 2 used tía × −3, miña × 9 before “mine”). Is there one query that gets all five words right? Yes, by small margins: tía × 6, miña × 3.",
     null, null, ["ctl", "pos", "keys", "scores", "sm", "mix", "out", "3d", "q3", "m3", "words"]]];
 let q = [0, 6, 0], cur = 0, qstep = 0, pos = 0;
 const sliders = DIMS.map((d, i) => $("qk" + i));
@@ -2216,7 +2220,7 @@ function drawQ() {
   const pts = [...encPts(ENC.map((e, j) => show.has("sm") ? `${encPlain(j)}: weight ${f(a.sm.p[j])}` : encPlain(j)))];
   if (show.has("m3")) pts.push({ p: a.mix, cls: "mix", label: `the mix ${vecTxt(a.mix)}`, dx: -10, dy: -26, anchor: "end" });   // higher: clear of the key labels below
   v2.set({ ...(show.has("q3") ? queryScene(a) : { arrows: [], segs: [], notes: [] }), range: 0.5, noTicks: true, tri: ENC, pts });
-  $("qkCap").textContent = show.has("m3") ? `The mix ${vecTxt(a.mix)} lies inside the triangle of the three keys, pulled toward the one with the largest weight. It reaches ${f(a.mix[TIA])} along tía and ${f(a.mix[MINA])} along miña.`
+  $("qkCap").textContent = show.has("m3") ? `The mix ${vecTxt(a.mix)}, pulled toward the largest weight: ${f(a.mix[TIA])} along tía, ${f(a.mix[MINA])} along miña.`
     : show.has("q3") ? `The three keys as points, and the query's line.` : `The three keys as points: one axis per Galician word.`;
   $("qkCapQ").hidden = !show.has("q3");
   // the board, part by part
@@ -2238,8 +2242,7 @@ function drawQ() {
     return `<tr${i === pos ? ' style="background:var(--hi)"' : ""}><td>${i + 1}</td><td>${PHR.slice(0, i).join(" ") || "—"}</td><td>${cw}</td><td><b${okk ? "" : ' class="badw"'}>${r.best.w}</b> ${okk ? "✓" : "✗"}</td><td class="n" style="white-space:nowrap">${top3(r)}</td></tr>`;
   }).join("") + "</tbody>";
   $("qkNote").textContent = `With the query ${qName(q)} at every word, ${right === PHR.length ? "all five" : right + " of the five"} words come out right.` +
-    (right === PHR.length ? " One mix holds just enough tía for “an” and “aunt” and just enough miña for “of” and “mine”." : "") +
-    " A mix heavy in unha and poor in tía can also let “a” win, as it did at word 1 without attention in section 1; the three best scores show when.";
+    (right === PHR.length ? " One mix holds just enough tía for “an” and “aunt”, and just enough miña for “of” and “mine”." : "");
   $("qkTip").textContent = cur === null ? `Your own query: ${qName(q)}.` : PRESETS[cur][2];
   // which parts this step shows
   [["qkKeys", "keys"], ["qkScores", "scores"], ["qkSm", "sm"], ["qkMix", "mix"], ["qkOut", "out"], ["qkWordsBox", "words"]].forEach(([id, part]) => { $(id).hidden = !show.has(part); });
@@ -2372,10 +2375,10 @@ function panel(model, i, compact = false) {
     <p class="label">1 and 2 · weights (largest: ${t3.map(j => `<i>${esc(x.src[j])}</i> ${w[j].toFixed(2)}`).join(", ")}) → the mix</p><div class="wkrow">${strip(x.ctxAtt[i], "the mix")}</div>
     ${last("3 · ", "the mix")}</div>`;
   return `<div class="wkpanel"><p class="label"><b>With attention</b>, word ${i + 1}, in three stages</p>
-    <p class="label">1 · scores and weights (section 2, step 1): the query is the decoder state itself; one score per Galician word or mark, ${n} in all. The three largest:</p>${rows}
-    <p class="note">Each score multiplies the two vectors square by square and adds up the 8 products. Softmax over all ${n} scores gives ${n} weights that add up to 1; the orange bars above show all of them.</p>
+    <p class="label">1 · scores and weights (section 2, step 1): the query is the decoder state itself; ${n} scores, one per Galician word or mark. The three largest:</p>${rows}
+    <p class="note">Score: multiply square by square, add the 8 products. Softmax over all ${n} scores: ${n} weights that add up to 1 (the orange bars above).</p>
     <p class="label">2 · the mix (section 2, step 2): all ${n} vectors, each times its weight, added up</p>${mix}
-    <p class="note">The three largest weights add up to ${(1 - rest).toFixed(2)}. The other ${n - 3} words and marks share the remaining ${rest.toFixed(2)}; the largest of them is ${restMax.toFixed(2)}, on <i>${esc(x.src[top[3]])}</i>.</p>
+    <p class="note">The three largest weights: ${(1 - rest).toFixed(2)} together. The other ${n - 3} share ${rest.toFixed(2)}; the largest of them, ${restMax.toFixed(2)}, is on <i>${esc(x.src[top[3]])}</i>.</p>
     ${last("3 · ", "the mix")}</div>`;
 }
 // step 6: where the model without attention loses part of the saying.
@@ -2385,34 +2388,34 @@ function sayingPanels() {
   const k1 = x.one.findIndex((w, k) => k >= 2 && x.one[k - 2] === "what" && x.one[k - 1] === "one"), k2 = k1 + 2;
   const box = (title, k, right, note) => `<div class="wkpanel"><p class="label">${title}</p>${bars(x.pOne[k], right)}<p class="note">${note}</p></div>`;
   return box(`<b>Without attention</b>, 1 · the first verb of the saying, after “${x.one.slice(k1 - 5, k1).join(" ")}”`, k1, "says",
-      "The probabilities are spread over five verbs, the right one, “says”, last. The model writes “keeps” and then “quiet”: the translation of cala, the saying's last verb.") +
+      "Five verbs share the probability; the right one, “says”, comes last. The model writes “keeps quiet”: cala, the saying's last verb.") +
     box(`<b>Without attention</b>, 2 · after “${x.one.slice(k1, k2).join(" ")}”`, k2, "and",
-      "Having written the saying's last verb, the model closes the saying instead of going on with “and master of what one …”.") +
+      "After the last verb, the model closes the saying: “and master of what one …” is lost.") +
     `<div class="wkpanel"><p class="label">The same in ${SAYING.n} test sentences, not in the training data</p>
       <div class="heatwrap"><table class="ty"><thead><tr><th></th><th>without attention</th><th>with attention</th></tr></thead><tbody>
       <tr><td>the first verb written is the saying's last verb</td><td class="n">${SAYING.lastFirst.one}</td><td class="n">${SAYING.lastFirst.att}</td></tr>
       <tr><td>the saying stops after one verb</td><td class="n">${SAYING.oneVerb.one}</td><td class="n">${SAYING.oneVerb.att}</td></tr></tbody></table></div>
-      <p class="note">Counted by running the two trained models again. Writing “says” for the model without attention in box 1 is enough: it then goes on with “and master of what one keeps quiet”.</p></div>`;
+      <p class="note">Counted by running the two models again. Given “says” in box 1, the model without attention goes on with “and master of what one keeps quiet”.</p></div>`;
 }
 // the probability of a whole translation, its words' probabilities multiplied, as on the translation page
 const seqPanel = () => `<div class="wkpanel"><p class="label">The probability of a whole translation: its words' probabilities multiplied</p>
   <div class="heatwrap"><table class="ty"><thead><tr><th></th><th>what it writes</th><th>probability of what it writes</th><th>probability of the gold translation</th></tr></thead><tbody>
   <tr><td>without attention</td><td class="bad">${esc(x.one.slice(0, 4).join(" "))} …</td><td class="n">${fmtP(x.seqOne[1])}</td><td class="n">${fmtP(x.seqOne[0])}</td></tr>
   <tr><td>with attention</td><td>${esc(x.att.slice(0, 4).join(" "))} … (the gold one)</td><td class="n">${fmtP(x.seqAtt[1])}</td><td class="n">${fmtP(x.seqAtt[0])}</td></tr></tbody></table></div>
-  <p class="note">Same training data, same number of updates, same number of parameters (learned values): the only difference between the two models is attention. So here the difference in the gold translation's probability is attention's. On the translation page, the held-out <i>unha tía miña</i> failed for another reason: a combination missing from its training data.</p></div>`;
+  <p class="note">Same training data, same number of updates, same number of parameters (learned values): the only difference is attention, so the gap in the gold translation's probability is attention's. (On the translation page, <i>unha tía miña</i> failed for another reason: a combination missing from its training data.)</p></div>`;
 const STEPS = [
   ["Two translations of our sentence", () => ({ toy: [7, 11], out: [x.one.length, x.att.length], cur: -1, src: null, panels: seqPanel(),
-    text: `Both models read our sentence for the first time: it was kept out of their training data. Without attention, the translation has several issues: the words in red differ from the translation with attention, which is right, and ${nMiss(ALIGN.one)} words of the saying are left out (struck through). Step 6 shows where the part of the saying is lost. The next steps show where the first difference, “a” for “an”, comes from.` })],
+    text: `Both models read our sentence for the first time. With attention, the translation is right. Without: the red words differ, and ${nMiss(ALIGN.one)} words of the saying are missing (struck through). Steps 2–5: where “a” for “an” comes from. Step 6: where the saying is lost.` })],
   ["The encoder's vectors", () => ({ toy: [2, 3], out: [0, 0], src: ["enc"], panels: "",
-    text: "The encoder makes one vector per Galician word: 8 numbers, drawn as 8 squares. As in section 1, step 2, it reads the words one at a time, and each vector is computed from the vector before it and the new word (the arrows), so each also carries something of the words before it. The last one is the summary. The rule is not the ½ + ½ of section 1 but a learned one. Each model has its own encoder; this is the encoder of the model with attention. Step 3 shows the other one. In section 1 each vector had 3 numbers, one per word; here the 8 numbers have no names: training chose them." })],
+    text: "One vector per Galician word: 8 numbers, 8 squares. As in section 1, step 2, each is computed from the vector before it and the new word (the arrows); the last one is the summary. The rule is learned, not section 1's ½ + ½, and the 8 numbers have no names. This is the encoder of the model with attention; step 3 shows the other." })],
   ["Word 1, without attention", () => ({ toy: [4, 6], out: [1, 1], cur: 0, src: ["one"], panels: panel("one", 0),
-    text: "Above: the encoder of the model without attention. Only its summary (outlined) reaches the decoder; the other vectors are faded. The first word is “a” or “an”, and English writes “an” before aunt and uncle: the decoder needs to know that the noun is tía. But tía is the second of the sentence's 31 words and marks, and the 29 after it changed the vector before the summary was made. The model writes “a”: wrong." })],
+    text: "The encoder without attention: only its summary (outlined) reaches the decoder. “an” comes before aunt and uncle, so the decoder needs tía. But tía is the 2nd of 31 words and marks, and the 29 after it changed the vector before the summary was made. The model writes “a”: wrong." })],
   ["Word 1, with attention", () => ({ toy: [8, 9, 10], out: [1, 1], cur: 0, src: ["att", x.attw[0]], panels: panel("att", 0),
-    text: "One thing differs from section 2: no made-up rule makes the query. Training shaped the decoder states so that tía's vector scores highest here (in section 3's terms, the state's numbers are the rewards). Why escravo gets the second-largest weight, these numbers do not show: a weight shows where the model looks, not what it needs." })],
+    text: "Unlike section 2, no made-up rule makes the query: training shaped the decoder states so that tía's vector scores highest (section 3: the state's numbers are the rewards). Why escravo gets the second-largest weight, these numbers do not show: a weight shows where the model looks, not what it needs." })],
   ["Word 2: each model goes on from its own word", () => ({ toy: [7, 11], out: [2, 2], cur: 1, src: ["att", x.attw[1]], panels: panel("one", 1) + panel("att", 1, true),
-    text: "In every training translation, “an” is followed by aunt or uncle, and “a” by friend, neighbor or cousin. Each decoder's new state takes in the word it just wrote (section 1, step 7).\nWithout attention, the state took in “a”: the probability goes, nearly evenly, to the three nouns that follow “a”; aunt is not among them. The model writes “friend”: the wrong first word made the right second word unreachable.\nWith attention, the state took in “an”: aunt or uncle. The new state is a new query, so the weights change; now they are spread over many words. “aunt” still wins. Whether the new mix decides it or the state (which took in word 1's mix, mostly tía), these numbers do not show." })],
+    text: "In training, “an” is always followed by aunt or uncle, “a” by friend, neighbor or cousin. Each new state takes in the word just written (section 1, step 7).\nWithout attention, the state took in “a”: the three nouns after “a” share the probability. It writes “friend”: the wrong first word made the right second word unreachable.\nWith attention, the state took in “an”. The new state is a new query, so the weights change and spread. “aunt” wins; whether the mix or the state (which took in word 1's mix, mostly tía) decides it, these numbers do not show." })],
   ["The rest of the sentence: part of the saying is lost", () => ({ toy: [], out: [x.one.length, x.att.length], cur: -1, src: null, panels: sayingPanels(),
-    text: "Without attention, the rest of the translation also differs from the one with attention, and part of the saying is lost: “says and master of what one” (struck through). The boxes show where. The summary was made right after the saying's last verb, cala (keeps quiet), and the model writes that verb first; then it closes the saying. " + (document.documentElement.classList.contains("embed") ? "Section 5 of the full page (Open the full page)" : "Section 5, below,") + " lets you step through every word of both models, and other sentences and vector sizes." })],
+    text: "Without attention, part of the saying is lost: “says and master of what one” (struck through). The summary was made right after the saying's last verb, cala (keeps quiet): the model writes that verb first, then closes the saying. " + (document.documentElement.classList.contains("embed") ? "Section 5 of the full page (Open the full page)" : "Section 5, below,") + " steps through every word of both models, other sentences and vector sizes." })],
 ];
 let k = 0;
 STEPS.forEach(([t], i) => { const b = document.createElement("button"); b.textContent = i + 1; b.title = t; b.addEventListener("click", () => { k = i; draw(); }); $("wkSteps").appendChild(b); });
