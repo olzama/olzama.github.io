@@ -869,7 +869,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T19:28Z">3 Nov 2026, 19:28 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T19:31Z">3 Nov 2026, 19:31 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -1060,6 +1060,7 @@ const init6 = () => {
       if (on && !o.still) g += `<rect class="hc" data-r="${i}" x="${lx - 60}" y="${y}" width="${cols.length * cw + 60}" height="${ch}" fill="transparent"/>`; });
     if (o.sel !== undefined && o.sel < n) g += `<rect x="${lx - 1}" y="${ty + o.sel * ch}" width="${cols.length * cw + 2}" height="${ch}" rx="4" fill="none" stroke="var(--orange)" stroke-width="2.5" pointer-events="none"/>`;
     const gw = cols.length * cw, right = lx + gw;
+    (o.marks || []).forEach(([i, j]) => { g += `<rect x="${lx + j * cw + 1}" y="${ty + i * ch + 1}" width="${cw - 2}" height="${ch - 2}" rx="3" fill="none" stroke="var(--fg)" stroke-width="2.5" pointer-events="none"/>`; });
     if (o.annot) {   // what the axes are: a bracket over the columns, a bracket along the rows
       g += `<path d="M${lx + 2} ${ty - 30} v-4 h${gw - 4} v4" fill="none" stroke="var(--muted)" stroke-width="1"/><text x="${lx + gw / 2}" y="${ty - 38}" text-anchor="middle" style="${tf};fill:var(--muted)">columns: the Galician words looked at</text>`;
       g += `<path d="M${lx - 66} ${ty + 2} h-4 v${n * ch - 4} h4" fill="none" stroke="var(--muted)" stroke-width="1"/><text transform="translate(${lx - 74} ${ty + rows.length * ch / 2}) rotate(-90)" text-anchor="middle" style="${tf};fill:var(--muted)">rows: English word written next</text>`; }
@@ -1182,7 +1183,13 @@ const init6 = () => {
   const goTo = i => { if (i === 3 && k !== 3) sel = 1; k = i; draw6(); };   // step 4 opens on the row of “Aunt”, the row the section's question asks about
   // why this grid: of the 48, the largest sum of the three cells where the weight should be (A → unha, Aunt → tía, mine → miña)
   const pick = [[0, 0], [1, 1], [3, 2]], pickSum = M => pick.reduce((s, [i, j]) => s + M[i][j], 0);
-  const pickHtml = () => `<p class="note" style="margin:6px 0 0"><b>dark frame</b>: chosen for reading in step 4, because of the 48 it follows the translation most closely: ${pick.map(([i, j]) => `“${TGT_R[i]}” · <i>${SRC_R[j]}</i>`).join(" + ")} = ${pick.map(([i, j]) => C[FL][FH][i][j].toFixed(2)).join(" + ")} = <b>${pickSum(C[FL][FH]).toFixed(2)}</b> (3 at most): layer ${FL + 1}, head ${FH + 1}. Most heads are less clear.</p>`;
+  // why the framed grid: the cells where an English word meets the Galician word it translates, outlined in the framed grid and in the least clear grid
+  let LL = 0, LH = 0; for (let l = 0; l < NL; l++) for (let h = 0; h < NH; h++) if (pickSum(C[l][h]) < pickSum(C[LL][LH])) { LL = l; LH = h; }
+  const pickHtml = () => { const small = M => grid(TGT_R, SRC_R, M, { cw: 40, ch: 22, lx: 52, still: true, marks: pick });
+    return `<p class="label" style="margin-top:10px">why the dark frame: A translates <i>unha</i>, Aunt <i>tía</i>, mine <i>miña</i>; outlined: those three cells</p>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start"><div><p class="note" style="margin:0"><b>layer ${FL + 1}, head ${FH + 1}</b> (framed): ${pick.map(([i, j]) => C[FL][FH][i][j].toFixed(2)).join(", ")}</p>${small(C[FL][FH])}</div>
+      <div><p class="note" style="margin:0"><b>layer ${LL + 1}, head ${LH + 1}</b>: ${pick.map(([i, j]) => C[LL][LH][i][j].toFixed(2)).join(", ")}</p>${small(C[LL][LH])}</div></div>
+      <p class="note" style="margin:4px 0 0">In the framed grid each English word puts almost all its weight on the word it translates: the easiest grid to read first. Every other head lies somewhere between these two.</p>`; };
   STEPS6.forEach(([t], i) => { const b = document.createElement("button"); b.textContent = i + 1; b.title = t; b.addEventListener("click", () => goTo(i)); $("hbSteps").appendChild(b); });
   // the head of layer FL whose weight, in the chosen row, on the featured head's darkest column is smallest: the comparison of step 5
   const otherHead = r => { const j = argmax(C[FL][FH][r]); let h0 = FH, m = 2; for (let h = 0; h < NH; h++) if (h !== FH && C[FL][h][r][j] < m) { m = C[FL][h][r][j]; h0 = h; } return h0; };
