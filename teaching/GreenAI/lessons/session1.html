@@ -2372,103 +2372,113 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Backpropagation</h2></header>
   <div class="body">
     <div class="board">
-      <svg viewBox="0 0 1400 816" role="img" aria-label="Backpropagation, schematic. The encoder reads inputs x₁, x₂, x₃ into summaries s₁, s₂, s₃; the decoder gives the gold output a probability p; the loss is L = −log p. The backward pass starts at the loss and goes right to left: by the chain rule, dL/ds₂ = dL/ds₃ · ds₃/ds₂, the gradient handed back times the step&#x27;s own derivative. Each step also gives its own parameters their gradient: the input vectors and the decoder&#x27;s parameters. Then gradient descent updates every parameter at once. If each step&#x27;s derivative is about 0.5, the gradient halves at each step back: the vanishing gradient. The backward pass costs about twice the forward pass, and every intermediate value is kept in memory.">
+      <svg viewBox="0 0 1400 560" role="img" aria-label="Backpropagation, animated on the encoder-decoder. Blue dots, values: the forward pass, from the inputs x₁, x₂, x₃ through the summaries s₁, s₂, s₃, the decoder and the probability p of the gold output to the loss L = −log p. Orange dots, gradients: the backward pass, from the loss back to s₁. By the chain rule, dL/ds₂ = dL/ds₃ · ds₃/ds₂: the gradient handed back times this step&#x27;s own derivative. The gradient reaches every parameter, the input vectors and the decoder&#x27;s parameters, and all are updated: new = old − learning rate × gradient. One training update costs about three times one use of the model. The next screen trains a translation model this way, one pair after another.">
 <text x="70.0" y="98.0" font-size="20" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0">inputs</text>
 <text x="70.0" y="238.0" font-size="20" style="fill:var(--blue)" text-anchor="middle" data-s="1" data-d="0">encoder</text>
-<rect x="190.0" y="62.0" width="120.0" height="56.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.0" data-a="fade"/>
-<text x="250.0" y="98.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.1">x<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan></text>
-<line x1="234.0" y1="122.0" x2="234.0" y2="196.0" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.1"/>
-<path d="M230.5 187.7 L234.0 196.0 L237.5 187.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="0.7" data-a="fade" data-t="0.2"/>
-<rect x="190.0" y="202.0" width="120.0" height="56.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.2" data-a="fade"/>
-<text x="250.0" y="238.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.3">s<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan></text>
-<rect x="390.0" y="62.0" width="120.0" height="56.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.35" data-a="fade"/>
-<text x="450.0" y="98.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.45">x<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan></text>
-<line x1="434.0" y1="122.0" x2="434.0" y2="196.0" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.45"/>
-<path d="M430.5 187.7 L434.0 196.0 L437.5 187.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.05" data-a="fade" data-t="0.2"/>
-<rect x="390.0" y="202.0" width="120.0" height="56.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.55" data-a="fade"/>
-<text x="450.0" y="238.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.65">s<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan></text>
-<line x1="314.0" y1="230.0" x2="384.0" y2="230.0" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.5"/>
-<path d="M375.7 233.5 L384.0 230.0 L375.7 226.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.1" data-a="fade" data-t="0.2"/>
-<rect x="590.0" y="62.0" width="120.0" height="56.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.7" data-a="fade"/>
-<text x="650.0" y="98.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.8">x<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan></text>
-<line x1="634.0" y1="122.0" x2="634.0" y2="196.0" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.8"/>
-<path d="M630.5 187.7 L634.0 196.0 L637.5 187.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.4" data-a="fade" data-t="0.2"/>
-<rect x="590.0" y="202.0" width="120.0" height="56.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.9" data-a="fade"/>
-<text x="650.0" y="238.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.0">s<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan></text>
-<line x1="514.0" y1="230.0" x2="584.0" y2="230.0" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="1" data-d="0.85"/>
-<path d="M575.7 233.5 L584.0 230.0 L575.7 226.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.45" data-a="fade" data-t="0.2"/>
-<line x1="714.0" y1="230.0" x2="804.0" y2="230.0" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="1" data-d="1.0"/>
-<path d="M795.7 233.5 L804.0 230.0 L795.7 226.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.6" data-a="fade" data-t="0.2"/>
-<rect x="810.0" y="202.0" width="180.0" height="56.0" rx="4" fill="none" stroke="var(--green)" stroke-width="2" data-s="1" data-d="1.1" data-a="fade"/>
-<text x="900.0" y="238.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.2">decoder</text>
-<text x="900.0" y="188.0" font-size="18" style="fill:var(--green)" text-anchor="middle" data-s="1" data-d="1.2">its own parameters</text>
-<line x1="994.0" y1="230.0" x2="1059.0" y2="230.0" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="1" data-d="1.3"/>
-<path d="M1050.7 233.5 L1059.0 230.0 L1050.7 226.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.9" data-a="fade" data-t="0.2"/>
-<rect x="1065.0" y="202.0" width="100.0" height="56.0" rx="4" fill="none" stroke="var(--green)" stroke-width="2" data-s="1" data-d="1.4" data-a="fade"/>
-<text x="1115.0" y="238.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.5">p</text>
-<text x="1115.0" y="188.0" font-size="18" style="fill:var(--green)" text-anchor="middle" data-s="1" data-d="1.5">of the gold output</text>
-<line x1="1169.0" y1="230.0" x2="1229.0" y2="230.0" stroke="currentColor" stroke-width="2" stroke-linecap="round" data-s="1" data-d="1.6"/>
-<path d="M1220.7 233.5 L1229.0 230.0 L1220.7 226.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="2.2" data-a="fade" data-t="0.2"/>
-<rect x="1235.0" y="202.0" width="120.0" height="56.0" rx="4" fill="none" stroke="var(--orange)" stroke-width="2" data-s="1" data-d="1.7" data-a="fade"/>
-<text x="1295.0" y="238.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.8">L</text>
-<text x="1295.0" y="188.0" font-size="18" style="fill:var(--orange)" text-anchor="middle" data-s="1" data-d="1.8">loss: −log p</text>
-<text class="note" x="40.0" y="418.0" font-size="17.6" style="fill:currentColor" data-s="1" data-d="2.0">forward pass: each value is computed from the ones before it, from the inputs to the loss</text>
-<line x1="1285.0" y1="300.0" x2="1125.0" y2="300.0" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" data-s="2" data-d="0"/>
-<path d="M1135.1 295.7 L1125.0 300.0 L1135.1 304.3" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.6" data-a="fade" data-t="0.2"/>
-<text x="1205.0" y="332.0" font-size="20" style="fill:var(--orange)" text-anchor="middle" data-s="2" data-d="0.3">dL/dp</text>
-<text class="note" x="40.0" y="450.0" font-size="17.6" style="fill:var(--orange)" data-s="2" data-d="0.5">backward pass: start at the loss; how L changes with p is known from the loss itself</text>
-<line x1="1105.0" y1="300.0" x2="660.0" y2="300.0" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" data-s="3" data-d="0"/>
-<path d="M670.1 295.7 L660.0 300.0 L670.1 304.3" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="0.6" data-a="fade" data-t="0.2"/>
-<text x="882.5" y="332.0" font-size="20" style="fill:var(--orange)" text-anchor="middle" data-s="3" data-d="0.3">dL/ds<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan></text>
-<text y="506" font-size="24" style="fill:var(--orange)" data-s="4" data-d="0" data-line="E" data-x0="40">dL/ds<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan></text>
-<text y="506" font-size="24" style="fill:currentColor" data-s="4" data-d="0.2" data-line="E" data-gap="22">=</text>
-<text y="506" font-size="24" style="fill:var(--orange)" data-s="4" data-d="0.3" data-line="E" id="hand" data-gap="22">dL/ds<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan></text>
-<text y="506" font-size="24" style="fill:currentColor" data-s="4" data-d="0.45" data-line="E" data-gap="22">·</text>
-<text y="506" font-size="24" style="fill:var(--blue)" data-s="4" data-d="0.55" data-line="E" id="own" data-gap="22">ds<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan>/ds<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan></text>
-<rect data-box="#hand" data-pad="6" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2" data-s="4" data-d="0.8" data-t="0.9"/>
-<rect data-box="#own" data-pad="6" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--blue)" stroke-width="2" data-s="4" data-d="0.9" data-t="0.9"/>
-<text class="note" x="40.0" y="546.0" font-size="16.8" style="fill:currentColor" data-s="4" data-d="1.0">the gradient handed back by the step after × the step's own derivative: each step needs only these two</text>
-<line x1="586.0" y1="300.0" x2="460.0" y2="300.0" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" data-s="4" data-d="1.3"/>
-<path d="M470.1 295.7 L460.0 300.0 L470.1 304.3" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="4" data-d="1.9" data-a="fade" data-t="0.2"/>
-<text x="523.0" y="332.0" font-size="20" style="fill:var(--orange)" text-anchor="middle" data-s="4" data-d="1.6">dL/ds<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan></text>
-<line x1="386.0" y1="300.0" x2="260.0" y2="300.0" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" data-s="4" data-d="1.8"/>
-<path d="M270.1 295.7 L260.0 300.0 L270.1 304.3" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="4" data-d="2.4" data-a="fade" data-t="0.2"/>
-<text x="323.0" y="332.0" font-size="20" style="fill:var(--orange)" text-anchor="middle" data-s="4" data-d="2.1">dL/ds<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan></text>
-<line x1="266.0" y1="196.0" x2="266.0" y2="124.0" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" data-s="5" data-d="0.6"/>
-<path d="M269.9 133.2 L266.0 124.0 L262.1 133.2" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="5" data-d="1.2" data-a="fade" data-t="0.2"/>
-<text x="278.0" y="166.0" font-size="18" style="fill:var(--orange)" data-s="5" data-d="0.9">dL/dx<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan></text>
-<line x1="466.0" y1="196.0" x2="466.0" y2="124.0" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" data-s="5" data-d="0.3"/>
-<path d="M469.9 133.2 L466.0 124.0 L462.1 133.2" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="5" data-d="0.9" data-a="fade" data-t="0.2"/>
-<text x="478.0" y="166.0" font-size="18" style="fill:var(--orange)" data-s="5" data-d="0.6">dL/dx<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan></text>
-<line x1="666.0" y1="196.0" x2="666.0" y2="124.0" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" data-s="5" data-d="0.0"/>
-<path d="M669.9 133.2 L666.0 124.0 L662.1 133.2" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="5" data-d="0.6" data-a="fade" data-t="0.2"/>
-<text x="678.0" y="166.0" font-size="18" style="fill:var(--orange)" data-s="5" data-d="0.3">dL/dx<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan></text>
-<line x1="960.0" y1="172.0" x2="960.0" y2="132.0" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" data-s="5" data-d="0.9"/>
-<path d="M963.9 141.2 L960.0 132.0 L956.1 141.2" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="5" data-d="1.5" data-a="fade" data-t="0.2"/>
-<text x="974.0" y="150.0" font-size="18" style="fill:var(--orange)" data-s="5" data-d="1.1">its gradient</text>
-<text class="note" x="40.0" y="584.0" font-size="16.8" style="fill:currentColor" data-s="5" data-d="1.2">at each step the gradient also goes to the step's own parameters: one backward pass gives every parameter its gradient</text>
-<text class="note" x="40.0" y="620.0" font-size="17.6" style="fill:var(--green)" data-s="6" data-d="0">then every parameter steps at once, by gradient descent: new = old − learning rate × gradient</text>
-<text class="note" x="40.0" y="648.0" font-size="16.8" style="fill:var(--green)" data-s="6" data-d="0.4">forward, backward, update, for each training pair; repeated over all the pairs: backpropagation (Rumelhart, Hinton & Williams, 1986)</text>
-<rect x="240.0" y="346.0" width="20.0" height="10.0" rx="2" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="7" data-d="0.6" data-a="fade"/>
-<rect x="430.0" y="346.0" width="40.0" height="10.0" rx="2" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="7" data-d="0.3" data-a="fade"/>
-<rect x="610.0" y="346.0" width="80.0" height="10.0" rx="2" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="7" data-d="0.0" data-a="fade"/>
-<text x="190.0" y="388.0" font-size="18" style="fill:var(--blue)" data-s="7" data-d="1.0">the size of the gradient, if each step's derivative is about 0.5</text>
-<text class="note" x="40.0" y="690.0" font-size="16.8" style="fill:var(--blue)" data-s="7" data-d="1.2">the gradient for an early input is a product of one derivative per step it passes back through; below 1, it shrinks at each step</text>
-<text class="note" x="40.0" y="718.0" font-size="16.8" style="fill:var(--blue)" data-s="7" data-d="1.5">a 20-word sentence: 0.5<tspan dy="-11" font-size="0.68em">20</tspan><tspan dy="11"> ≈ one millionth for the first word's vector: the vanishing gradient</tspan></text>
-<text class="note" x="40.0" y="760.0" font-size="16.8" style="fill:var(--orange)" data-s="8" data-d="0">the cost: each step computes two gradients on the way back (for its parameters, and to hand back): about twice the forward pass,</text>
-<text class="note" x="40.0" y="788.0" font-size="16.8" style="fill:var(--orange)" data-s="8" data-d="0.4">so one update costs about three times one use of the model; and every intermediate value (s₁, s₂, s₃, …) is kept in memory for the way back</text>
+<rect x="190.0" y="62.0" width="120.0" height="56.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.1" data-a="fade"/>
+<text x="250.0" y="98.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.2">x<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan></text>
+<rect x="190.0" y="202.0" width="120.0" height="56.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.15" data-a="fade"/>
+<text x="250.0" y="238.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.25">s<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan></text>
+<line x1="210.0" y1="122.0" x2="210.0" y2="196.0" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0.1"/>
+<path d="M206.9 188.6 L210.0 196.0 L213.1 188.6" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="0.7" data-a="fade" data-t="0.2"/>
+<rect x="390.0" y="62.0" width="120.0" height="56.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.2" data-a="fade"/>
+<text x="450.0" y="98.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.3">x<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan></text>
+<rect x="390.0" y="202.0" width="120.0" height="56.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.25" data-a="fade"/>
+<text x="450.0" y="238.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.35">s<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan></text>
+<line x1="410.0" y1="122.0" x2="410.0" y2="196.0" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0.2"/>
+<path d="M406.9 188.6 L410.0 196.0 L413.1 188.6" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="0.8" data-a="fade" data-t="0.2"/>
+<line x1="314.0" y1="230.0" x2="384.0" y2="230.0" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0.2"/>
+<path d="M376.6 233.1 L384.0 230.0 L376.6 226.9" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="0.8" data-a="fade" data-t="0.2"/>
+<rect x="590.0" y="62.0" width="120.0" height="56.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.3" data-a="fade"/>
+<text x="650.0" y="98.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.4">x<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan></text>
+<rect x="590.0" y="202.0" width="120.0" height="56.0" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.35" data-a="fade"/>
+<text x="650.0" y="238.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.45">s<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan></text>
+<line x1="610.0" y1="122.0" x2="610.0" y2="196.0" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0.3"/>
+<path d="M606.9 188.6 L610.0 196.0 L613.1 188.6" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="0.9" data-a="fade" data-t="0.2"/>
+<line x1="514.0" y1="230.0" x2="584.0" y2="230.0" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0.3"/>
+<path d="M576.6 233.1 L584.0 230.0 L576.6 226.9" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="0.9" data-a="fade" data-t="0.2"/>
+<line x1="714.0" y1="230.0" x2="804.0" y2="230.0" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0.4"/>
+<path d="M796.6 233.1 L804.0 230.0 L796.6 226.9" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.0" data-a="fade" data-t="0.2"/>
+<rect x="810.0" y="202.0" width="180.0" height="56.0" rx="4" fill="none" stroke="var(--green)" stroke-width="2" data-s="1" data-d="0.45" data-a="fade"/>
+<text x="900.0" y="238.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.55">decoder</text>
+<text x="900.0" y="172.0" font-size="18" style="fill:var(--green)" text-anchor="middle" data-s="1" data-d="0.5" id="decpar">its own parameters</text>
+<line x1="994.0" y1="230.0" x2="1059.0" y2="230.0" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0.5"/>
+<path d="M1051.6 233.1 L1059.0 230.0 L1051.6 226.9" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.1" data-a="fade" data-t="0.2"/>
+<rect x="1065.0" y="202.0" width="100.0" height="56.0" rx="4" fill="none" stroke="var(--green)" stroke-width="2" data-s="1" data-d="0.55" data-a="fade"/>
+<text x="1115.0" y="238.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.65">p</text>
+<text x="1115.0" y="172.0" font-size="18" style="fill:var(--green)" text-anchor="middle" data-s="1" data-d="0.6">of the gold output</text>
+<line x1="1169.0" y1="230.0" x2="1229.0" y2="230.0" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" data-s="1" data-d="0.6"/>
+<path d="M1221.6 233.1 L1229.0 230.0 L1221.6 226.9" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.2" data-a="fade" data-t="0.2"/>
+<rect x="1235.0" y="202.0" width="120.0" height="56.0" rx="4" fill="none" stroke="var(--orange)" stroke-width="2" data-s="1" data-d="0.65" data-a="fade"/>
+<text x="1295.0" y="238.0" font-size="24" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.75">L</text>
+<text x="1295.0" y="172.0" font-size="18" style="fill:var(--orange)" text-anchor="middle" data-s="1" data-d="0.7">loss: −log p</text>
+<rect x="31.0" y="21.0" width="18.0" height="18.0" rx="9" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.8" data-a="fade"/>
+<text class="note" x="58.0" y="37.0" font-size="17.6" style="fill:var(--blue)" data-s="1" data-d="0.8">value, forward pass →</text>
+<circle cx="226.0" cy="202.0" r="9" fill="var(--blue)" data-s="1" data-d="1.2" data-a="move" data-mx="-16.0" data-my="-84.0" data-t="0.5"/>
+<circle cx="426.0" cy="202.0" r="9" fill="var(--blue)" data-s="1" data-d="1.8" data-a="move" data-mx="-16.0" data-my="-84.0" data-t="0.5"/>
+<circle cx="426.0" cy="202.0" r="9" fill="var(--blue)" data-s="1" data-d="1.8" data-a="move" data-mx="-200.0" data-my="0.0" data-t="0.5"/>
+<circle cx="626.0" cy="202.0" r="9" fill="var(--blue)" data-s="1" data-d="2.4" data-a="move" data-mx="-16.0" data-my="-84.0" data-t="0.5"/>
+<circle cx="626.0" cy="202.0" r="9" fill="var(--blue)" data-s="1" data-d="2.4" data-a="move" data-mx="-200.0" data-my="0.0" data-t="0.5"/>
+<circle cx="876.0" cy="202.0" r="9" fill="var(--blue)" data-s="1" data-d="3.0" data-a="move" data-mx="-250.0" data-my="0.0" data-t="0.6"/>
+<circle cx="1091.0" cy="202.0" r="9" fill="var(--blue)" data-s="1" data-d="3.7" data-a="move" data-mx="-215.0" data-my="0.0" data-t="0.6"/>
+<circle cx="1271.0" cy="202.0" r="9" fill="var(--blue)" data-s="1" data-d="4.4" data-a="move" data-mx="-180.0" data-my="0.0" data-t="0.6"/>
+<rect x="321.0" y="21.0" width="18.0" height="18.0" rx="9" fill="var(--orange)" stroke="var(--orange)" stroke-width="1.5" data-s="2" data-d="0" data-a="fade"/>
+<text class="note" x="348.0" y="37.0" font-size="17.6" style="fill:var(--orange)" data-s="2" data-d="0">← gradient, backward pass</text>
+<line x1="1275.0" y1="300.0" x2="1155.0" y2="300.0" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" data-s="2" data-d="0.1"/>
+<path d="M1163.3 296.5 L1155.0 300.0 L1163.3 303.5" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.7" data-a="fade" data-t="0.2"/>
+<line x1="1095.0" y1="300.0" x2="940.0" y2="300.0" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" data-s="2" data-d="0.1"/>
+<path d="M948.3 296.5 L940.0 300.0 L948.3 303.5" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.7" data-a="fade" data-t="0.2"/>
+<line x1="880.0" y1="300.0" x2="690.0" y2="300.0" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" data-s="2" data-d="0.1"/>
+<path d="M698.3 296.5 L690.0 300.0 L698.3 303.5" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.7" data-a="fade" data-t="0.2"/>
+<line x1="630.0" y1="300.0" x2="490.0" y2="300.0" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" data-s="2" data-d="0.1"/>
+<path d="M498.3 296.5 L490.0 300.0 L498.3 303.5" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.7" data-a="fade" data-t="0.2"/>
+<line x1="430.0" y1="300.0" x2="290.0" y2="300.0" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" data-s="2" data-d="0.1"/>
+<path d="M298.3 296.5 L290.0 300.0 L298.3 303.5" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.7" data-a="fade" data-t="0.2"/>
+<rect x="1310.0" y="249.0" width="18.0" height="18.0" rx="9" fill="var(--orange)" stroke="var(--orange)" stroke-width="1.5" data-s="2" data-d="0.3" data-a="fade"/>
+<circle cx="1139.0" cy="258.0" r="9" fill="var(--orange)" data-s="2" data-d="0.6" data-a="move" data-mx="180.0" data-my="0.0" data-t="0.6"/>
+<circle cx="924.0" cy="258.0" r="9" fill="var(--orange)" data-s="2" data-d="1.3" data-a="move" data-mx="215.0" data-my="0.0" data-t="0.6"/>
+<circle id="gs3" cx="674.0" cy="258.0" r="9" fill="var(--orange)" data-s="2" data-d="2.0" data-a="move" data-mx="250.0" data-my="0.0" data-t="0.6"/>
+<circle cx="474.0" cy="258.0" r="9" fill="var(--orange)" data-s="2" data-d="2.7" data-a="move" data-mx="200.0" data-my="0.0" data-t="0.6"/>
+<circle cx="274.0" cy="258.0" r="9" fill="var(--orange)" data-s="2" data-d="3.4" data-a="move" data-mx="200.0" data-my="0.0" data-t="0.6"/>
+<rect data-box="#gs3" data-pad="4" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2" data-s="3" data-d="0" data-t="0.9"/>
+<text y="392" font-size="20" style="fill:var(--muted)" data-s="3" data-d="0.1" data-line="E" data-x0="40">chain rule:</text>
+<text y="392" font-size="24" style="fill:var(--orange)" data-s="3" data-d="0.2" data-line="E" data-x0="160">dL/ds<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan></text>
+<text y="392" font-size="24" style="fill:currentColor" data-s="3" data-d="0.4" data-line="E" data-x0="236">=</text>
+<text y="392" font-size="24" style="fill:var(--orange)" data-s="3" data-d="0.5" data-line="E" data-x0="266" id="hand">dL/ds<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan></text>
+<text y="392" font-size="24" style="fill:currentColor" data-s="3" data-d="0.65" data-line="E" data-x0="344">·</text>
+<text y="392" font-size="24" style="fill:var(--blue)" data-s="3" data-d="0.75" data-line="E" data-x0="366" id="own">ds<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan>/ds<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan></text>
+<rect data-box="#hand" data-pad="6" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--orange)" stroke-width="2" data-s="3" data-d="1.0" data-t="0.9"/>
+<rect data-box="#own" data-pad="6" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--blue)" stroke-width="2" data-s="3" data-d="1.1" data-t="0.9"/>
+<text class="note" x="262.0" y="430.0" font-size="14.4" style="fill:var(--orange)" data-s="3" data-d="1.3">handed back</text>
+<text class="note" x="362.0" y="430.0" font-size="14.4" style="fill:var(--blue)" data-s="3" data-d="1.4">this step's own derivative</text>
+<circle cx="274.0" cy="118.0" r="9" fill="var(--orange)" data-s="4" data-d="0.6" data-a="move" data-mx="0.0" data-my="140.0" data-t="0.6"/>
+<circle cx="474.0" cy="118.0" r="9" fill="var(--orange)" data-s="4" data-d="0.3" data-a="move" data-mx="0.0" data-my="140.0" data-t="0.6"/>
+<circle cx="674.0" cy="118.0" r="9" fill="var(--orange)" data-s="4" data-d="0.0" data-a="move" data-mx="0.0" data-my="140.0" data-t="0.6"/>
+<circle cx="996.0" cy="166.0" r="9" fill="var(--orange)" data-s="4" data-d="0.9" data-a="move" data-mx="-72.0" data-my="92.0" data-t="0.7"/>
+<rect x="184.0" y="56.0" width="132.0" height="68.0" rx="8" fill="none" stroke="var(--green)" stroke-width="3" data-s="5" data-d="0.0" data-a="fade"/>
+<rect x="384.0" y="56.0" width="132.0" height="68.0" rx="8" fill="none" stroke="var(--green)" stroke-width="3" data-s="5" data-d="0.1" data-a="fade"/>
+<rect x="584.0" y="56.0" width="132.0" height="68.0" rx="8" fill="none" stroke="var(--green)" stroke-width="3" data-s="5" data-d="0.2" data-a="fade"/>
+<rect data-box="#decpar" data-pad="6" x="0" y="0" width="0" height="0" rx="8" fill="none" stroke="var(--green)" stroke-width="3" data-s="5" data-d="0.3" data-t="0.9"/>
+<text class="note" x="800.0" y="98.0" font-size="19.2" style="fill:var(--green)" data-s="5" data-d="0.5">update, every green parameter: new = old − learning rate × gradient</text>
+<text class="note" x="40.0" y="486.0" font-size="17.6" style="fill:currentColor" data-s="6" data-d="0">one use of the model</text>
+<rect x="240.0" y="470.0" width="90.0" height="22.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="6" data-d="0.1" data-a="fade"/>
+<text class="note" x="390.0" y="486.0" font-size="17.6" style="fill:currentColor" data-s="6" data-d="0.3">one training update</text>
+<rect x="580.0" y="470.0" width="90.0" height="22.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="6" data-d="0.4" data-a="fade"/>
+<rect x="670.0" y="470.0" width="180.0" height="22.0" rx="3" fill="var(--orange)" stroke="var(--orange)" stroke-width="1.5" data-s="6" data-d="0.6" data-a="fade"/>
+<text class="note" x="864.0" y="486.0" font-size="17.6" style="fill:currentColor" data-s="6" data-d="0.8">≈ 3 ×</text>
+<text class="note" x="40.0" y="536.0" font-size="19.2" style="fill:currentColor" data-s="7" data-d="0">next screen: a translation model trained this way, one pair after another</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
   <div class="notes">
-    <p>The chain rule at work on a whole model: the encoder and decoder from two screens back. Training needs a gradient for every parameter, and most of them are far from the loss. Backpropagation computes them all in one pass.</p>
-    <p>First the forward pass, left to right. The encoder reads the inputs one by one: x1 gives the summary s1, s1 and x2 give s2, s2 and x3 give s3. The decoder starts from s3 and gives the gold output a probability p, and the loss is minus log p. Each value is computed from the ones before it.</p>
-    <p>Then the backward pass, right to left. It starts at the loss: how the loss changes with p is known from the loss itself. Through the decoder, we get the gradient for s3: how the loss changes with each number of s3.</p>
-    <p>One step of the chain rule: the gradient for s2 is the gradient for s3, handed back from the step after, times how s3 changes with s2, the step's own derivative. That is all each step needs: the gradient handed back, and its own derivative. Then the same again for s1.</p>
-    <p>At each step the gradient also goes to the step's own parameters: here, the vectors of the inputs, x1, x2, x3, and the decoder's parameters. One backward pass gives every parameter in the model its gradient. Then gradient descent, as on the loss screen: every parameter takes its step at once. Forward, backward, update, for each training pair, repeated over all the pairs: that is backpropagation. It was popularized by Rumelhart, Hinton and Williams in 1986, and every neural network today is trained this way. The next screen trains a small translation model exactly like this, and you will see its vectors move.</p>
-    <p>A consequence. The gradient for an early input is a product of one derivative for every step it passes back through. If those derivatives are smaller than 1, say about 0.5, the gradient halves at each step back: the bars. In a 20-word sentence the first word's vector would get 0.5 to the power 20, about a millionth, and would hardly be updated. This is the vanishing gradient. Attention, in Step 4, gives the decoder a direct path to every input.</p>
-    <p>And the cost, the subject of this course. On the way back, each step computes two gradients: one for its own parameters, and one to hand back. That is about twice the arithmetic of the forward pass. So one training update, forward and backward, costs about three times one use of the model. And every intermediate value of the forward pass, every summary and state, must be kept in memory for the way back. This is the training side of “training once, inference every time” from the start of the session.</p>
+    <p>The last two screens gave two pieces. From “Loss and gradient”: gradient descent changes every parameter by its gradient, so training needs the gradient of every parameter. From “The chain rule”: along a chain of steps, the rates multiply. Backpropagation puts them together on a whole model. The model is the encoder and decoder from “Neural translation: an encoder and a decoder”.</p>
+    <p>Blue dots are values: the forward pass. The encoder reads x1, x2, x3 into the summaries s1, s2, s3; the decoder gives the gold output a probability p; the loss is minus log p. Each value is computed from the ones before it.</p>
+    <p>Orange dots are gradients: the backward pass. It starts at the loss, where the gradient is known from the loss itself, and goes back step by step: through the decoder to s3, then to s2, then to s1.</p>
+    <p>Each step back is one use of the chain rule. The gradient for s2 is the gradient for s3, handed back from the step after, times how s3 changes with s2, this step's own derivative. That is all each step needs.</p>
+    <p>On the way back, the gradient also reaches the parameters: the vectors of the inputs, and the decoder's own parameters. One backward pass gives every parameter its gradient. Then the update, gradient descent from the loss screen: every green parameter at once, new equals old minus the learning rate times its gradient. Forward pass, backward pass, update: this is backpropagation (popularized by Rumelhart, Hinton and Williams in 1986). Every neural network in this course is trained this way.</p>
+    <p>The cost. On the way back, each step computes two gradients: one for its own parameters, and one to hand back. That is about twice the arithmetic of the forward pass, so one training update costs about three times one use of the model. The values of the forward pass, the blue dots, also have to be kept in memory until the backward pass has used them. This is the training side of “Training once, inference every time” from the start of the session.</p>
+    <p>The next screen trains a small translation model exactly this way, one training pair after another. In its part A, each pair goes through the same cycle: the inputs are read, each output gets its probabilities, and then comes the update, which changes the numbers in the model's three tables of vectors.</p>
   </div>
 </section>
 
@@ -3751,6 +3761,9 @@ document.querySelectorAll(".board").forEach(b => {
       const n = (el.textContent || "").length;
       a = el.animate([{ clipPath: "inset(-40% 100% -40% -2%)" }, { clipPath: "inset(-40% -2% -40% -2%)" }],
         { duration: (+el.dataset.t || Math.max(0.35, n * 0.045)) * 1000, delay: d, fill: "backwards", easing: "linear" });
+    } else if (kind === "move") {  // travels to its place from data-mx, data-my away (a value or a gradient passed on)
+      a = el.animate([{ transform: `translate(${+el.dataset.mx || 0}px, ${+el.dataset.my || 0}px)`, opacity: 0 }, { opacity: 1, offset: 0.05 },
+        { transform: "translate(0px, 0px)", opacity: 1 }], { duration: (+el.dataset.t || 0.5) * 1000, delay: d, fill: "backwards", easing: "ease-in-out" });
     } else a = el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: (+el.dataset.t || 0.4) * 1000, delay: d, fill: "backwards" });
     anims.push(a);
     return d + a.effect.getTiming().duration;
