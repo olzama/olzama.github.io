@@ -862,7 +862,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T18:23Z">3 Nov 2026, 18:23 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T18:26Z">3 Nov 2026, 18:26 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -1150,9 +1150,9 @@ const init6 = () => {
     ["All the rows: the grid",
       "Before “aunt” the decoder's state has changed, so it makes a new query and gets new weights: a new row. One row per English word, stacked: the grid. Click a row: its darkest cell is read in the margin. A real model has 48 such grids for this phrase: steps 3 and 4 say why."],
     ["What a head is",
-      "The grid shows the weights of one head: section 2's computation, drawn on the right. It shows only the weights, the result of query · keys and softmax; the values and the mix are not in it. A real model learns the three tables; other tables give other weights, so another grid."],
+      "One head, drawn on the right: section 2's computation. The grid shows only its weights (query · keys, softmax); the values and the mix are not in it. Other tables give other weights, so another grid."],
     ["What a layer is",
-      "A layer: the decoder state and the encoder vectors go into 8 heads at once. Head 1 is section 2's head, with the grid on the left; heads 2 to 8 do the same computation with other tables, so they get other weights: 8 grids. A learned table combines the 8 mixes into one vector per English word, one more learned step is applied to it, and the result is the decoder state for the next layer. 6 layers: 48 grids."],
+      "One layer, drawn on the right, and under it the decoder's 6 layers. Head 1 is section 2's head, with the grid on the left; the other seven have other tables."],
     ["A real model's grid reads the same way",
       `opus-mt-gl-en on the phrase alone: layer ${FL + 1}, head ${FH + 1}, one of its 48 grids. The columns end with ‹end›, the end marker. The row of “Aunt” is chosen and its darkest cell read in the margin: the same kind of number as in our grid, a share of this head's mix. It is not the probability of writing “Aunt”; that is another number, the bars in the whole-sentence part below. The phrase alone comes out “${TGT_R.slice(0, -1).join(" ")}”; the whole sentence starts “An aunt of mine”.`],
     ["The 8 heads of one layer",
