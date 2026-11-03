@@ -218,6 +218,9 @@ table.cmp7 td:first-child { color: var(--muted); white-space: nowrap; } table.cm
 .headbox .hrow { display: grid; grid-template-columns: 3.2em repeat(3, 56px); gap: 3px; align-items: center; margin: 6px 0; font-family: var(--font-mono); font-size: 0.8rem; }
 .headbox .hrow i { text-align: center; font-size: 0.78rem; color: var(--muted); } .headbox .hrow b { text-align: right; font-weight: 600; padding-right: 6px; } .headbox .hrow span { height: 26px; border-radius: 4px; display: grid; place-items: center; }
 .try { margin: 6px 0 0; padding-left: 1.4em; font-size: 0.9rem; color: var(--muted); display: grid; gap: 3px; max-width: 70ch; } .try b { color: var(--fg); font-weight: 600; }
+.linewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); margin: 6px 0; }
+.linewrap svg { display: block; max-width: none !important; }
+.linewrap .pc { cursor: pointer; }
 .subplane { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 0 0 12px; }
 .layerframe { border: 2px solid var(--fg); border-radius: 8px; padding: 10px 10px 6px; position: relative; margin: 12px 0 0; }
 .layerframe > .tag { position: absolute; top: -9px; left: 10px; background: var(--bg); padding: 0 6px; font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--fg); }
@@ -734,7 +737,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <p class="note" id="realTr"></p>
     <div id="realLLM"></div>
     <div class="controls stick">
-      <button class="primary" id="realPlay">Play the translation</button>
+      <button id="realBack">Back</button><button class="primary" id="realNext">Next English piece</button>
       <label class="note" for="realLayer">Layer</label>
       <select id="realLayer"></select>
       <label class="note" for="realHead">Head</label>
@@ -744,26 +747,21 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <p class="note" id="realTryNote"></p>
     <div class="controls" id="realWalk"><span class="note">Three places where the translation goes wrong:</span><button data-w="0">1 · worked</button><button data-w="1">2 · saying saying it</button><button data-w="2">3 · they'll refute</button></div>
     <div id="realWalkWrap"><p class="note">Click one of the three places above: its explanation appears here.</p></div>
+    <p class="label">The same picture as section 5, now for a real model: before the English piece in orange, lines to the Galician pieces it puts weight on, as thick as the weight (lines under 0.05 left out); click an English piece</p>
+    <div class="linewrap" id="realLinesWrap"><svg id="realLines" role="img" aria-label="English pieces above, Galician pieces below; lines from the chosen English piece to the Galician pieces, as thick as their weights"></svg></div>
+    <p class="note" id="realUnsure"></p>
     <div class="cols">
       <div class="col">
-        <p class="label">Galician pieces, shaded by their weight just before the English piece chosen below (the same weights as the orange row of the grid)</p>
-        <div class="chips" id="realSrc"></div>
-        <p class="label">English pieces, as the model wrote them: click one</p>
-        <div class="chips" id="realTgt"></div>
-        <p class="note" id="realUnsure"></p>
         <div class="weights" id="realWeights"></div>
         <p class="note" id="realNote"></p>
         <p class="label" id="realCandLab"></p>
         <div class="pbars" id="realCand"></div>
       </div>
       <div class="col">
-        <p class="label">The whole grid: one row per English piece, one column per Galician piece</p>
+        <p class="label">The same weights for all English pieces at once: one row per English piece, one column per Galician piece</p>
         <div class="heatwrap"><canvas id="realHeat" aria-label="Cross-attention weights"></canvas></div>
       </div>
     </div>
-    <p class="label">All 48 grids at once, for the whole sentence: a row of thumbnails is a layer, a column is a head (as in step 3 above)</p>
-    <p class="note">One thumbnail per head, read like the large grid: inside it, a row is one English piece. Click one to show it large (orange frame: the heads shown). Layer 1 spreads its weight; the last layers draw sharp lines from each English piece to the Galician piece it translates.</p>
-    <div class="xheads" id="realHeads"></div>
     <p class="label">What the layers do: the weight on the Galician word translated, just before the English word, averaged over the 8 heads of each layer</p>
     <div class="heatwrap"><table class="grid" id="realLayers"></table></div>
     <p class="note" id="realLayersNote"></p>
@@ -869,7 +867,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T19:50Z">3 Nov 2026, 19:50 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T20:20Z">3 Nov 2026, 20:20 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -932,12 +930,29 @@ $("realLayer").value = String(FEAT.l); $("realHead").value = String(FEAT.h);
 let tSel = D.tgt.indexOf("▁aunt"), realUpto = undefined, realTimer = null;
 let walkW = 0, walkStage = 0;   // the three errors below: walkStage 1 = the prediction is open and the bars hidden; 2 = shown
 const UNSURE = 0.3, pWrote = i => D.top[i][0][1];  // the model wrote its most probable piece each time
+// the lines view, as in section 5: English pieces above, Galician pieces below, lines from the chosen English piece as thick as the weights
+const CW = 7.8, pieceW = s => Math.max(22, clean(s).length * CW + 12), rowX = toks => { let x = 8; return toks.map(s => { const a = x; x += pieceW(s) + 4; return a; }); };
+const TX = rowX(D.tgt), SX = rowX(D.src), LW = Math.max(TX.at(-1) + pieceW(D.tgt.at(-1)), SX.at(-1) + pieceW(D.src.at(-1))) + 8;
+function drawLines(w) {
+  const sv = $("realLines"), H = 178, yT = 10, yS = 132, ph = 24, heat = css("--heat");
+  const tScale = (LW - 16) / (TX.at(-1) + pieceW(D.tgt.at(-1)) - 8), sScale = (LW - 16) / (SX.at(-1) + pieceW(D.src.at(-1)) - 8);   // both rows span the same width
+  const tx = i => 8 + (TX[i] - 8) * tScale, sx = j => 8 + (SX[j] - 8) * sScale;
+  let g = "";
+  D.src.forEach((s, j) => { if (w[j] >= 0.05) g += `<line x1="${tx(tSel) + pieceW(D.tgt[tSel]) * tScale / 2}" y1="${yT + ph}" x2="${sx(j) + pieceW(s) * sScale / 2}" y2="${yS}" style="stroke:rgba(${heat},${(0.35 + 0.65 * w[j]).toFixed(2)})" stroke-width="${(1 + 9 * w[j]).toFixed(1)}" stroke-linecap="round"/>`; });
+  D.tgt.forEach((s, i) => { const x = tx(i), wd = pieceW(s) * tScale, done = realUpto === undefined || i < realUpto, cur = i === tSel, uns = done && pWrote(i) < UNSURE;
+    g += `<g class="pc" data-i="${i}"><rect x="${x}" y="${yT}" width="${wd}" height="${ph}" rx="4" style="fill:${cur ? "var(--hi)" : "transparent"};stroke:${cur ? "var(--orange)" : uns ? "var(--neg)" : "transparent"}" stroke-width="${cur ? 2 : 1}" ${uns && !cur ? 'stroke-dasharray="3 2"' : ""}/><text x="${x + wd / 2}" y="${yT + 16}" text-anchor="middle" style="font-family:var(--font-mono);font-size:13px;fill:${done ? "var(--fg)" : "var(--line)"}">${clean(s).replace(/&/g, "&amp;").replace(/</g, "&lt;")}</text></g>`; });
+  D.src.forEach((s, j) => { const x = sx(j), wd = pieceW(s) * sScale;
+    g += `<rect x="${x}" y="${yS}" width="${wd}" height="${ph}" rx="4" style="fill:rgba(${heat},${Math.min(0.9, w[j] * 1.1).toFixed(2)})"/><text x="${x + wd / 2}" y="${yS + 16}" text-anchor="middle" style="font-family:var(--font-mono);font-size:13px;font-style:italic;fill:${w[j] > 0.55 ? "#fff" : "var(--fg)"}">${clean(s).replace(/&/g, "&amp;").replace(/</g, "&lt;")}</text>`;
+    if (w[j] >= 0.05) g += `<text x="${x + wd / 2}" y="${yS + ph + 13}" text-anchor="middle" style="font-family:var(--font-mono);font-size:10px;font-weight:600;fill:var(--fg)">${f2(w[j])}</text>`; });
+  g += `<text x="8" y="${yT + ph + 14}" style="font-family:var(--font-body);font-size:10px;fill:var(--muted)">English, as written</text><text x="8" y="${yS - 5}" style="font-family:var(--font-body);font-size:10px;fill:var(--muted)">Galician</text>`;
+  sv.setAttribute("viewBox", `0 0 ${LW} ${H}`); sv.style.width = LW + "px"; sv.style.height = H + "px"; sv.innerHTML = g;
+  sv.querySelectorAll(".pc").forEach(b => b.addEventListener("click", () => { realUpto = undefined; tSel = +b.dataset.i; if (walkStage === 1) { walkStage = 2; showWalk(); } renderReal(); }));
+  const wrap = $("realLinesWrap"), cx = tx(tSel); if (cx < wrap.scrollLeft + 40 || cx > wrap.scrollLeft + wrap.clientWidth - 120) wrap.scrollLeft = Math.max(0, cx - wrap.clientWidth / 3);
+}
 function renderReal() {
   const M = avgOf(D.cross, $("realLayer").value, $("realHead").value);
   const w = M[tSel];
-  $("realSrc").innerHTML = chipsHTML(D.src, "src", w, -1);
-  $("realTgt").innerHTML = chipsHTML(D.tgt, "tgt", null, tSel, realUpto, i => (realUpto === undefined || i < realUpto) && pWrote(i) < UNSURE);
-  $("realTgt").querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => { clearInterval(realTimer); realUpto = undefined; tSel = +b.dataset.i; if (walkStage === 1) { walkStage = 2; showWalk(); } renderReal(); }));
+  drawLines(w);
   // the orange row of the grid, enlarged: its three largest cells, and the rest of the row in one cell
   { const order = [...w.keys()].sort((a, b) => w[b] - w[a]), top = order.slice(0, 3), rest = order.slice(3).reduce((s, i) => s + w[i], 0), heat = css("--heat");
     const cell = (lab, v) => `<div class="vc"><div class="vh">${lab}</div><div class="sq" style="background:rgba(${heat},${(0.06 + 0.94 * Math.min(1, v)).toFixed(3)});color:${v > 0.55 ? "#fff" : "var(--fg)"}">${f2(v)}</div></div>`;
@@ -951,22 +966,6 @@ function renderReal() {
     : hd === "all" ? `layer ${+lay + 1}, the average of its 8 heads` : `layer ${+lay + 1}, head ${+hd + 1}, one of the 48 grids`;
   $("realNote").textContent = `Shown: ${which}; row “${clean(D.tgt[tSel])}”. The row adds up to 1.`;
   drawHeat(M);
-  drawHeads();
-}
-// the 48 thumbnails; the one chosen in the menus is outlined (a whole row or column when the menu says "average")
-function drawHeads() {
-  const host = $("realHeads"), L = D.cross.length, Hn = D.cross[0].length, R = D.tgt.length, C = D.src.length, heat = css("--heat");
-  const lay = $("realLayer").value, hd = $("realHead").value;
-  if (!host.children.length) {
-    host.innerHTML = `<span></span>` + D.cross[0].map((_, h) => `<span class="hd top">head ${h + 1}</span>`).join("") +
-      D.cross.map((Ls, l) => `<span class="hd">layer ${l + 1}</span>` + Ls.map((_, h) => `<button class="head" data-l="${l}" data-h="${h}" aria-label="layer ${l + 1}, head ${h + 1}"><canvas width="${C}" height="${R}"></canvas></button>`).join("")).join("");
-    host.querySelectorAll(".head").forEach(b => {
-      const M = D.cross[+b.dataset.l][+b.dataset.h], g = b.querySelector("canvas").getContext("2d");
-      for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) { g.fillStyle = `rgba(${heat},${Math.min(1, M[r][c] * 1.3).toFixed(3)})`; g.fillRect(c, r, 1, 1); }
-      b.addEventListener("click", () => { $("realLayer").value = b.dataset.l; $("realHead").value = b.dataset.h; renderReal(); });
-    });
-  }
-  host.querySelectorAll(".head").forEach(b => b.setAttribute("aria-pressed", String((lay === "all" || lay === b.dataset.l) && (hd === "all" || hd === b.dataset.h))));
 }
 function drawHeat(M) {
   const cv = $("realHeat"), R = M.length, C = M[0].length, cell = 13, lw = 92, th = 70;
@@ -985,7 +984,7 @@ function drawHeat(M) {
 $("realLayer").addEventListener("change", () => { tryNote(""); renderReal(); });
 $("realHead").addEventListener("change", () => { tryNote(""); renderReal(); });
 // the walkthrough: each button makes the change and says what did and did not change
-const TRY0 = `Chosen: layer ${FEAT.l + 1}, head ${FEAT.h + 1} (the grid read in step 4) and the English piece “aunt”, in orange. The shaded Galician pieces, the enlarged row and the orange row of the grid are one and the same weights.`;
+const TRY0 = `Chosen: layer ${FEAT.l + 1}, head ${FEAT.h + 1} (the grid read in step 4) and the English piece “aunt”, in orange. The lines, the enlarged row and the orange row of the grid are one and the same weights. Change the head: the lines change; the English does not.`;
 const tryNote = s => { $("realTryNote").textContent = s || TRY0; };
 tryNote("");
 $("realTry").querySelectorAll("[data-try]").forEach(b => b.addEventListener("click", () => {
@@ -994,15 +993,14 @@ $("realTry").querySelectorAll("[data-try]").forEach(b => b.addEventListener("cli
   $("realLayer").value = String(FEAT.l); $("realHead").value = k === "avg" ? "all" : String(k === "other" ? other : FEAT.h);
   renderReal();
   const w = avgOf(D.cross, $("realLayer").value, $("realHead").value)[tSel], j = [...w.keys()].sort((a, b) => w[b] - w[a])[0];
-  tryNote(k === "back" ? TRY0 : `${k === "avg" ? `Layer ${FEAT.l + 1}'s 8 grids averaged cell by cell` : `Head ${other + 1}`}: the shading, the enlarged row and the grid changed (largest now: ${clean(D.src[j])} ${f2(w[j])}); the English pieces and the bars did not. The head changes the view of the weights, not the translation.`);
+  tryNote(k === "back" ? TRY0 : `${k === "avg" ? `Layer ${FEAT.l + 1}'s 8 grids averaged cell by cell` : `Head ${other + 1}`}: the lines, the enlarged row and the grid changed (largest now: ${clean(D.src[j])} ${f2(w[j])}); the English pieces and the bars did not. The head changes the view of the weights, not the translation.`);
 }));
-{ let keep; reserveMax(["realTgt", "realWeights", "realNote", "realCandLab", "realCand"].map(id => $(id)), () => { keep = [$("realLayer").value, $("realHead").value];
+{ let keep; reserveMax(["realWeights", "realNote", "realCandLab", "realCand"].map(id => $(id)), () => { keep = [$("realLayer").value, $("realHead").value];
     return [...$("realLayer").options].flatMap(L => [...$("realHead").options].map(H => () => { $("realLayer").value = L.value; $("realHead").value = H.value; renderReal(); })); },
   () => { [$("realLayer").value, $("realHead").value] = keep; renderReal(); }); }
-$("realPlay").addEventListener("click", () => {
-  clearInterval(realTimer); tSel = 0; realUpto = 1; renderReal();
-  realTimer = setInterval(() => { if (tSel >= D.tgt.length - 1) { clearInterval(realTimer); realUpto = undefined; renderReal(); return; } tSel++; realUpto = tSel + 1; renderReal(); }, reduce ? 250 : 650);
-});
+// as in section 5: one English piece at a time; the pieces not yet written are greyed
+$("realNext").addEventListener("click", () => { if (realUpto === undefined) { tSel = 0; realUpto = 1; } else if (tSel < D.tgt.length - 1) { tSel++; realUpto = tSel + 1; } else realUpto = undefined; renderReal(); });
+$("realBack").addEventListener("click", () => { if (tSel > 0) { tSel--; realUpto = tSel + 1; } renderReal(); });
 $("realUnsure").textContent = `Dashed red outline: written with a probability below ${UNSURE} (the model was unsure).`;
 // three places where the translation goes wrong, all seen through layer 6, head 2: first the weights and a prediction, then what the model wrote; the numbers come from the recorded data
 const WL = 5, WH = 1, wAt = (i, s) => D.cross[WL][WH][i][D.src.indexOf(s)], cands = (i, n = 4) => D.top[i].slice(0, n).map(([t, p]) => `${clean(t)} ${f2(p)}`).join(", ");
@@ -1010,7 +1008,7 @@ const nthOf = (tok, nth) => D.tgt.findIndex((x, i) => x === tok && D.tgt.slice(0
 const SHOW = `<button id="walkShow" class="primary" style="margin-left:8px">Show what it wrote</button>`;
 const WALK = [
   ["▁worked", 0,
-    i => `<p class="steptext"><b>solucion·aba</b> means “solved”. Layer ${WL + 1}, head ${WH + 1}, just before “worked”: <i>solucion</i> ${f2(wAt(i, "▁solucion"))}, the shaded piece and the orange row. <b>Predict:</b> with nearly all its weight on the right piece, does the model write “solved”? ${SHOW}</p>`,
+    i => `<p class="steptext"><b>solucion·aba</b> means “solved”. Layer ${WL + 1}, head ${WH + 1}, just before “worked”: <i>solucion</i> ${f2(wAt(i, "▁solucion"))}, the thick line. <b>Predict:</b> with nearly all its weight on the right piece, does the model write “solved”? ${SHOW}</p>`,
     i => `<p class="steptext">It wrote “worked”: ${cands(i)} (the bars below). The grid shows where the head looked; it does not say why “worked” beat “solved”.</p>`],
   ["▁saying", 0,
     i => `<p class="steptext"><b>dito·s e ref·rán·s</b> means “sayings and proverbs”. Just before “saying”: <i>dito</i> ${f2(wAt(i, "▁dito"))}. <b>Predict:</b> is any English piece probable here? ${SHOW}</p>`,
@@ -1212,9 +1210,9 @@ const init6 = () => {
     else if (k === 2) R(`opus-mt-gl-en on the phrase: ${NL} layers × ${NH} heads = ${NL * NH} grids`, thumbs([...Array(NL).keys()], { c: 9, gx: 7, gy: 8, sel, key: false }) + `<p class="note" style="margin:4px 0 0">a row of thumbnails: a layer · a column: a head · inside each grid: ${TGT_R.length} rows (${TGT_R.join(", ")}) × ${SRC_R.length} columns (${SRC_R.join(", ")}) · <span style="color:var(--orange)">orange</span>: the row of “${TGT_R[sel]}”</p>` + pickHtml());
     else if (k === 3) R(`opus-mt-gl-en on the phrase: layer ${FL + 1}, head ${FH + 1}, the framed grid of step 3`, bars(SRC_R, C[FL][FH][sel], `before “${TGT_R[sel]}”: the ${SRC_R.length} weights`) + `<p class="label" style="margin-top:10px">its grid</p>` + grid(TGT_R, SRC_R, C[FL][FH], { sel, cw: 50, annot: true, read: readOf(C[FL][FH], sel) }));
     else if (k === 4) { const h2 = otherHead(sel), j = argmax(C[FL][FH][sel]), two = [C[FL][FH][sel], C[FL][h2][sel]];
-      R(`opus-mt-gl-en, layer ${FL + 1}: its 8 heads`, thumbs([FL], { c: 24, per: 4, gx: 14, gy: 8, big: true, sel }) + `<p class="label" style="margin-top:8px">the row of “${TGT_R[sel]}” in two heads</p>` +
+      R(`opus-mt-gl-en, layer ${FL + 1}: two of its 8 heads`, `<p class="label" style="margin-top:8px">the row of “${TGT_R[sel]}” in two heads of layer ${FL + 1}</p>` +
         grid([`head ${FH + 1}`, `head ${h2 + 1}`], SRC_R, two, { cw: 50, still: true, read: [0, j], lines: [`<tspan font-style="italic">${SRC_R[j]}</tspan> just before “${TGT_R[sel]}”:`, `<tspan font-weight="700">${two[0][j].toFixed(2)}</tspan> in head ${FH + 1}, <tspan font-weight="700">${two[1][j].toFixed(2)}</tspan> in head ${h2 + 1}`] })); }
-    else R(`opus-mt-gl-en: all ${NL * NH} grids`, thumbs([...Array(NL).keys()], { c: 9, gx: 7, gy: 8, sel }) + `<p style="margin:8px 0 0"><button id="hbDown">to the whole sentence ↓</button></p>`);
+    else R("the whole sentence", `<p class="hbempty">the same model on the whole sentence, below<br><br><button id="hbDown">to the whole sentence ↓</button></p>`);
     $("hbPoints").innerHTML = POINTS.map((p, i) => `<li class="${i === k ? "on" : i < k ? "done" : "later"}">${p}</li>`).join("");   // later points keep their space, unseen
     $("hbBack").disabled = k === 0; $("hbNext").disabled = k === STEPS6.length - 1;
     [...$("hbSteps").children].forEach((b, i) => b.classList.toggle("on", i === k));
@@ -1245,7 +1243,7 @@ if (document.readyState === "loading") document.addEventListener("DOMContentLoad
     ["Claude Opus 5.5", "An aunt of mine, who solved everything with sayings and proverbs, used to say something like: ‘One is a slave to what one says and master of what one keeps quiet about.’"]];
   $("realLLM").innerHTML = `<p class="label">for comparison only: the same sentence by three large language models (October 2026); the grids on this page are opus-mt-gl-en's</p><div class="cmprows">` +
     LLM.map(([who, t]) => `<p class="label">${who}</p><p class="cmpline">${t.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</p>`).join("") + `</div>`;
-  $("realTr").innerHTML = `opus-mt-gl-en on the whole sentence: “${D.translation.replace(/&/g, "&amp;").replace(/</g, "&lt;")}” It starts “An aunt of mine” (correct, but rare in English: <a href="mt.html#bound">translation page</a>, section 3, part d); on the phrase alone, in the steps above, it wrote “A Aunt of mine”. Then it goes wrong. Press “Play the translation”.`;
+  $("realTr").innerHTML = `opus-mt-gl-en on the whole sentence: “${D.translation.replace(/&/g, "&amp;").replace(/</g, "&lt;")}” It starts “An aunt of mine” (correct, but rare in English: <a href="mt.html#bound">translation page</a>, section 3, part d); on the phrase alone, in the steps above, it wrote “A Aunt of mine”. Then it goes wrong. Press “Next English piece” to write it piece by piece, as in section 5.`;
 }
 
 // ---------- 4: self-attention heads ----------
