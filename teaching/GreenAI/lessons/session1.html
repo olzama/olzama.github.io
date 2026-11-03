@@ -2372,101 +2372,167 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">Encoder–decoder</span><h2>Backpropagation</h2></header>
   <div class="body">
     <div class="board">
-      <svg viewBox="0 0 1400 806" role="img" aria-label="Backpropagation on the encoder-decoder, with the weights visible: input vectors x₁, x₂, x₃ and one output vector for each possible output A, B, C, D. Forward pass: the encoder mixes the input vectors into the summary, the decoder&#x27;s state; each output&#x27;s score is the dot product of the state and its vector; softmax gives probabilities; the loss is −log p of the gold output D. Backward pass: to lower the loss, D&#x27;s score must rise and the others fall, so D&#x27;s vector moves toward the state and the others away; the state should move toward D&#x27;s vector, and since the summary is ⅛ x₁ + ¼ x₂ + ½ x₃, each input vector moves toward D&#x27;s vector by its share. Backpropagation passes the change the loss needs back to every weight, in proportion to its effect (the chain rule). The next screen trains a small translation model this way.">
-<text x="165.0" y="188.0" font-size="18" style="fill:var(--blue)" text-anchor="middle" data-s="1" data-d="0">input vectors (weights)</text>
-<text x="70.0" y="222.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.1">x<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan></text>
-<rect x="46.0" y="238.0" width="24.0" height="24.0" rx="2" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.1" data-a="fade" fill-opacity="0.8"/>
-<rect x="70.0" y="238.0" width="24.0" height="24.0" rx="2" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.1" data-a="fade" fill-opacity="0.3"/>
-<text x="165.0" y="222.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.2">x<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan></text>
-<rect x="141.0" y="238.0" width="24.0" height="24.0" rx="2" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.2" data-a="fade" fill-opacity="0.4"/>
-<rect x="165.0" y="238.0" width="24.0" height="24.0" rx="2" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.2" data-a="fade" fill-opacity="0.7"/>
-<text x="260.0" y="222.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.3">x<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan></text>
-<rect x="236.0" y="238.0" width="24.0" height="24.0" rx="2" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.3" data-a="fade" fill-opacity="0.6"/>
-<rect x="260.0" y="238.0" width="24.0" height="24.0" rx="2" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.3" data-a="fade" fill-opacity="0.5"/>
-<line x1="292.0" y1="250.0" x2="339.0" y2="250.0" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" data-s="1" data-d="0.4"/>
-<path d="M330.7 253.5 L339.0 250.0 L330.7 246.5" fill="none" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.0" data-a="fade" data-t="0.2"/>
-<rect x="345.0" y="218.0" width="150.0" height="64.0" rx="12" fill="none" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.5" data-a="fade"/>
-<text x="420.0" y="260.0" font-size="28" style="fill:var(--blue)" text-anchor="middle" data-s="1" data-d="0.6" font-weight="bold">Encoder</text>
-<line x1="499.0" y1="250.0" x2="544.0" y2="250.0" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" data-s="1" data-d="0.6"/>
-<path d="M535.7 253.5 L544.0 250.0 L535.7 246.5" fill="none" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.2" data-a="fade" data-t="0.2"/>
-<rect x="556.0" y="238.0" width="24.0" height="24.0" rx="2" fill="var(--orange)" stroke="var(--orange)" stroke-width="1.5" data-s="1" data-d="0.7" data-a="fade" fill-opacity="0.5"/>
-<rect x="580.0" y="238.0" width="24.0" height="24.0" rx="2" fill="var(--orange)" stroke="var(--orange)" stroke-width="1.5" data-s="1" data-d="0.7" data-a="fade" fill-opacity="0.4625"/>
-<text x="580.0" y="290.0" font-size="17" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.7">summary</text>
-<text x="580.0" y="310.0" font-size="17" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.7">= the decoder's state</text>
-<line x1="610.0" y1="250.0" x2="659.0" y2="250.0" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" data-s="1" data-d="0.8"/>
-<path d="M650.7 253.5 L659.0 250.0 L650.7 246.5" fill="none" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.4" data-a="fade" data-t="0.2"/>
-<rect x="665.0" y="218.0" width="140.0" height="64.0" rx="12" fill="none" stroke="var(--green)" stroke-width="2" data-s="1" data-d="0.9" data-a="fade"/>
-<text x="735.0" y="260.0" font-size="28" style="fill:var(--green)" text-anchor="middle" data-s="1" data-d="1.0" font-weight="bold">Decoder</text>
-<text x="862.0" y="92.0" font-size="18" style="fill:var(--green)" data-s="1" data-d="1.0">output vectors (weights)</text>
-<text x="1008.0" y="120.0" font-size="17" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="1.0">score</text>
-<text x="1085.0" y="120.0" font-size="17" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="1.0">p</text>
-<text x="880.0" y="157.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.0">A</text>
-<rect x="905.0" y="138.0" width="24.0" height="24.0" rx="2" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.0" data-a="fade" fill-opacity="0.3"/>
-<rect x="929.0" y="138.0" width="24.0" height="24.0" rx="2" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.0" data-a="fade" fill-opacity="0.8"/>
-<text x="1008.0" y="157.0" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.0">0.52</text>
-<text x="1085.0" y="157.0" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.0">0.24</text>
-<line x1="809.0" y1="250.0" x2="862.0" y2="150.0" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" data-s="1" data-d="1.0"/>
-<path d="M861.4 157.0 L862.0 150.0 L856.6 154.4" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.6" data-a="fade" data-t="0.2"/>
-<text x="880.0" y="212.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.1">B</text>
-<rect x="905.0" y="193.0" width="24.0" height="24.0" rx="2" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.1" data-a="fade" fill-opacity="0.7"/>
-<rect x="929.0" y="193.0" width="24.0" height="24.0" rx="2" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.1" data-a="fade" fill-opacity="0.4"/>
-<text x="1008.0" y="212.0" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.1">0.54</text>
-<text x="1085.0" y="212.0" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.1">0.24</text>
-<line x1="809.0" y1="250.0" x2="862.0" y2="205.0" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" data-s="1" data-d="1.1"/>
-<path d="M858.8 211.3 L862.0 205.0 L855.3 207.1" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.7" data-a="fade" data-t="0.2"/>
-<text x="880.0" y="267.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.2">C</text>
-<rect x="905.0" y="248.0" width="24.0" height="24.0" rx="2" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.2" data-a="fade" fill-opacity="0.5"/>
-<rect x="929.0" y="248.0" width="24.0" height="24.0" rx="2" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.2" data-a="fade" fill-opacity="0.5"/>
-<text x="1008.0" y="267.0" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.2">0.48</text>
-<text x="1085.0" y="267.0" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.2">0.23</text>
-<line x1="809.0" y1="250.0" x2="862.0" y2="260.0" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" data-s="1" data-d="1.2"/>
-<path d="M855.2 261.5 L862.0 260.0 L856.2 256.1" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.8" data-a="fade" data-t="0.2"/>
-<text x="880.0" y="322.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.3">D</text>
-<rect x="905.0" y="303.0" width="24.0" height="24.0" rx="2" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.3" data-a="fade" fill-opacity="0.9"/>
-<rect x="929.0" y="303.0" width="24.0" height="24.0" rx="2" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.3" data-a="fade" fill-opacity="0.6"/>
-<text x="1008.0" y="322.0" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.3">0.73</text>
-<text x="1085.0" y="322.0" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.3">0.29</text>
-<line x1="809.0" y1="250.0" x2="862.0" y2="315.0" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" data-s="1" data-d="1.3"/>
-<path d="M855.8 311.7 L862.0 315.0 L860.0 308.3" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.9" data-a="fade" data-t="0.2"/>
-<rect x="862.0" y="295.0" width="257.0" height="40.0" rx="6" fill="none" stroke="currentColor" stroke-width="1.5" data-s="1" data-d="1.4" data-a="fade" stroke-dasharray="4 3"/>
-<text x="862.0" y="355.0" font-size="17" style="fill:currentColor" data-s="1" data-d="1.4">D: the gold output</text>
-<line x1="1119.0" y1="325.0" x2="1274.0" y2="392.0" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" data-s="1" data-d="1.5"/>
-<path d="M1265.0 391.9 L1274.0 392.0 L1267.8 385.5" fill="none" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="2.1" data-a="fade" data-t="0.2"/>
-<rect x="1280.0" y="364.0" width="100.0" height="56.0" rx="12" fill="none" stroke="var(--orange)" stroke-width="2" data-s="1" data-d="1.6" data-a="fade"/>
-<text x="1330.0" y="401.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.7">L</text>
-<text x="1330.0" y="354.0" font-size="17" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="1.7">−log p(D)</text>
+      <svg viewBox="0 0 1400 840" role="img" aria-label="Backpropagation on the encoder-decoder, with the weights as vectors of two numbers: input vectors x₁, x₂, x₃ and an output vector for each possible output A, B, C, D (D is the gold output). Forward pass: the summary, the decoder&#x27;s state, is ⅛ x₁ + ¼ x₂ + ½ x₃; each score is the dot product of the state and an output vector; softmax gives p; the loss is −log p(D). Backward pass: D&#x27;s score must rise and the others fall, so D&#x27;s vector moves toward the state and the others away; the state should move toward D&#x27;s vector, and each input vector takes that change times its share. Each vector&#x27;s change is written under it in green or red, and the update gives every vector its new numbers. The next screen trains a small translation model this way.">
+<text x="195.0" y="180.0" font-size="18" style="fill:var(--blue)" text-anchor="middle" data-s="1" data-d="0">input vectors (weights)</text>
+<text x="80.0" y="220.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.1">x<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan></text>
+<rect x="36.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.1" data-a="fade" fill-opacity="0.64" data-until="5"/>
+<text x="58.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.1" data-until="5">0.80</text>
+<rect x="80.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.1" data-a="fade" fill-opacity="0.24" data-until="5"/>
+<text x="102.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.1" data-until="5">0.30</text>
+<text x="195.0" y="220.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.2">x<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan></text>
+<rect x="151.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.2" data-a="fade" fill-opacity="0.32" data-until="5"/>
+<text x="173.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.2" data-until="5">0.40</text>
+<rect x="195.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.2" data-a="fade" fill-opacity="0.56" data-until="5"/>
+<text x="217.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.2" data-until="5">0.70</text>
+<text x="310.0" y="220.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.3">x<tspan dy="6" font-size="0.68em">3</tspan><tspan dy="-6">​</tspan></text>
+<rect x="266.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.3" data-a="fade" fill-opacity="0.48" data-until="5"/>
+<text x="288.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.3" data-until="5">0.60</text>
+<rect x="310.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.3" data-a="fade" fill-opacity="0.40" data-until="5"/>
+<text x="332.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.3" data-until="5">0.50</text>
+<line x1="360.0" y1="250.0" x2="394.0" y2="250.0" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" data-s="1" data-d="0.4"/>
+<path d="M385.7 253.5 L394.0 250.0 L385.7 246.5" fill="none" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.0" data-a="fade" data-t="0.2"/>
+<rect x="400.0" y="218.0" width="150.0" height="64.0" rx="12" fill="none" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.5" data-a="fade"/>
+<text x="475.0" y="260.0" font-size="28" style="fill:var(--blue)" text-anchor="middle" data-s="1" data-d="0.6" font-weight="bold">Encoder</text>
+<line x1="554.0" y1="250.0" x2="595.0" y2="250.0" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" data-s="1" data-d="0.6"/>
+<path d="M586.7 253.5 L595.0 250.0 L586.7 246.5" fill="none" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.2" data-a="fade" data-t="0.2"/>
+<rect x="601.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--orange)" stroke="var(--orange)" stroke-width="1.5" data-s="1" data-d="0.7" data-a="fade" fill-opacity="0.40" data-until="5"/>
+<text x="623.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.7" data-until="5">0.50</text>
+<rect x="645.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--orange)" stroke="var(--orange)" stroke-width="1.5" data-s="1" data-d="0.7" data-a="fade" fill-opacity="0.37" data-until="5"/>
+<text x="667.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.7" data-until="5">0.46</text>
+<text x="645.0" y="220.0" font-size="17" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.7">summary = state</text>
+<text x="645.0" y="294.0" font-size="17" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="0.7">⅛ x₁ + ¼ x₂ + ½ x₃</text>
+<line x1="693.0" y1="250.0" x2="729.0" y2="250.0" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" data-s="1" data-d="0.8"/>
+<path d="M720.7 253.5 L729.0 250.0 L720.7 246.5" fill="none" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.4" data-a="fade" data-t="0.2"/>
+<rect x="735.0" y="218.0" width="140.0" height="64.0" rx="12" fill="none" stroke="var(--green)" stroke-width="2" data-s="1" data-d="0.9" data-a="fade"/>
+<text x="805.0" y="260.0" font-size="28" style="fill:var(--green)" text-anchor="middle" data-s="1" data-d="1.0" font-weight="bold">Decoder</text>
+<text x="897.0" y="88.0" font-size="18" style="fill:var(--green)" data-s="1" data-d="1.0">output vectors (weights)</text>
+<text x="1079.0" y="110.0" font-size="17" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="1.0">score</text>
+<text x="1156.0" y="110.0" font-size="17" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="1.0">p</text>
+<text x="915.0" y="147.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.0">A</text>
+<rect x="935.0" y="124.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.0" data-a="fade" fill-opacity="0.56" data-until="5"/>
+<text x="957.0" y="146.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.0" data-until="5">0.70</text>
+<rect x="979.0" y="124.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.0" data-a="fade" fill-opacity="0.16" data-until="5"/>
+<text x="1001.0" y="146.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.0" data-until="5">0.20</text>
+<text x="1079.0" y="147.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.0" data-until="5">0.44</text>
+<text x="1156.0" y="147.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.0" data-until="5">0.24</text>
+<line x1="879.0" y1="250.0" x2="897.0" y2="140.0" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" data-s="1" data-d="1.0"/>
+<path d="M898.6 146.8 L897.0 140.0 L893.3 145.9" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.6" data-a="fade" data-t="0.2"/>
+<text x="915.0" y="213.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.1">B</text>
+<rect x="935.0" y="190.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.1" data-a="fade" fill-opacity="0.24" data-until="5"/>
+<text x="957.0" y="212.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.1" data-until="5">0.30</text>
+<rect x="979.0" y="190.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.1" data-a="fade" fill-opacity="0.32" data-until="5"/>
+<text x="1001.0" y="212.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.1" data-until="5">0.40</text>
+<text x="1079.0" y="213.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.1" data-until="5">0.33</text>
+<text x="1156.0" y="213.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.1" data-until="5">0.22</text>
+<line x1="879.0" y1="250.0" x2="897.0" y2="206.0" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" data-s="1" data-d="1.1"/>
+<path d="M897.1 213.0 L897.0 206.0 L892.0 210.9" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.7" data-a="fade" data-t="0.2"/>
+<text x="915.0" y="279.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.2">C</text>
+<rect x="935.0" y="256.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.2" data-a="fade" fill-opacity="0.48" data-until="5"/>
+<text x="957.0" y="278.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.2" data-until="5">0.60</text>
+<rect x="979.0" y="256.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.2" data-a="fade" fill-opacity="0.48" data-until="5"/>
+<text x="1001.0" y="278.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.2" data-until="5">0.60</text>
+<text x="1079.0" y="279.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.2" data-until="5">0.58</text>
+<text x="1156.0" y="279.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.2" data-until="5">0.28</text>
+<line x1="879.0" y1="250.0" x2="897.0" y2="272.0" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" data-s="1" data-d="1.2"/>
+<path d="M890.8 268.7 L897.0 272.0 L895.0 265.3" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.8" data-a="fade" data-t="0.2"/>
+<text x="915.0" y="345.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.3">D</text>
+<rect x="935.0" y="322.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.3" data-a="fade" fill-opacity="0.16" data-until="5"/>
+<text x="957.0" y="344.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.3" data-until="5">0.20</text>
+<rect x="979.0" y="322.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="1" data-d="1.3" data-a="fade" fill-opacity="0.72" data-until="5"/>
+<text x="1001.0" y="344.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.3" data-until="5">0.90</text>
+<text x="1079.0" y="345.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.3" data-until="5">0.52</text>
+<text x="1156.0" y="345.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.3" data-until="5">0.26</text>
+<line x1="879.0" y1="250.0" x2="897.0" y2="338.0" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" data-s="1" data-d="1.3"/>
+<path d="M893.0 332.2 L897.0 338.0 L898.4 331.1" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="1.9" data-a="fade" data-t="0.2"/>
+<rect x="897.0" y="314.0" width="293.0" height="72.0" rx="6" fill="none" stroke="currentColor" stroke-width="1.5" data-s="1" data-d="1.4" data-a="fade" stroke-dasharray="4 3"/>
+<text x="897.0" y="408.0" font-size="17" style="fill:currentColor" data-s="1" data-d="1.4">D: the gold output</text>
+<line x1="1190.0" y1="368.0" x2="1279.0" y2="430.0" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" data-s="1" data-d="1.5"/>
+<path d="M1270.2 428.1 L1279.0 430.0 L1274.2 422.4" fill="none" stroke="var(--muted)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="2.1" data-a="fade" data-t="0.2"/>
+<rect x="1285.0" y="402.0" width="100.0" height="56.0" rx="12" fill="none" stroke="var(--orange)" stroke-width="2" data-s="1" data-d="1.6" data-a="fade"/>
+<text x="1335.0" y="439.0" font-size="26" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.7">L</text>
+<text x="1335.0" y="486.0" font-size="20" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="1.7" data-until="5">= 1.34</text>
+<text x="1335.0" y="392.0" font-size="17" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="1.7">−log p(D)</text>
 <line x1="40.0" y1="70.0" x2="1330.0" y2="70.0" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" data-s="1" data-d="1.8"/>
 <path d="M1317.1 75.5 L1330.0 70.0 L1317.1 64.5" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="2.4" data-a="fade" data-t="0.2"/>
 <text x="680.0" y="56.0" font-size="24" style="fill:var(--blue)" text-anchor="middle" data-s="1" data-d="1.9">forward pass</text>
-<text class="note" x="40.0" y="508.0" font-size="16.8" style="fill:var(--blue)" data-s="1" data-d="2.0">Forward pass: the model reads the input of a training pair and gives its gold output a probability p; the loss is L = −log p.</text>
-<text class="note" x="40.0" y="534.0" font-size="15.2" style="fill:var(--muted)" data-s="1" data-d="2.2">Here: the encoder mixes the input vectors into the summary; each output's score is the dot product of the state and its vector; softmax gives p (as in skip-gram).</text>
-<line x1="1330.0" y1="446.0" x2="40.0" y2="446.0" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" data-s="2" data-d="0"/>
-<path d="M52.9 440.5 L40.0 446.0 L52.9 451.5" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.6" data-a="fade" data-t="0.2"/>
-<text x="680.0" y="476.0" font-size="24" style="fill:var(--orange)" text-anchor="middle" data-s="2" data-d="0.2">backward pass</text>
-<text x="1030.0" y="158.0" font-size="24" style="fill:var(--neg)" data-s="2" data-d="0.4">↓</text>
-<text x="1030.0" y="213.0" font-size="24" style="fill:var(--neg)" data-s="2" data-d="0.4">↓</text>
-<text x="1030.0" y="268.0" font-size="24" style="fill:var(--neg)" data-s="2" data-d="0.4">↓</text>
-<text x="1030.0" y="323.0" font-size="24" style="fill:var(--green)" data-s="2" data-d="0.4">↑</text>
-<text class="note" x="40.0" y="570.0" font-size="16.8" style="fill:var(--orange)" data-s="2" data-d="0.6">Backward pass. To lower L, p(D) must rise: D's score must go up, and the other scores down (↑ ↓).</text>
-<text x="1125.0" y="156.0" font-size="16" style="fill:var(--neg)" data-s="3" data-d="0.0">away from the state</text>
-<text x="1125.0" y="211.0" font-size="16" style="fill:var(--neg)" data-s="3" data-d="0.2">away from the state</text>
-<text x="1125.0" y="266.0" font-size="16" style="fill:var(--neg)" data-s="3" data-d="0.4">away from the state</text>
-<text x="1125.0" y="321.0" font-size="16" style="fill:var(--green)" data-s="3" data-d="0.6">toward the state</text>
-<text class="note" x="40.0" y="598.0" font-size="16.8" style="fill:var(--orange)" data-s="3" data-d="0.6">A score is the dot product of the state and an output vector. So D's vector moves toward the state, and the other output vectors away from it.</text>
-<path d="M735 284 C 735 340, 580 340, 580 322" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="4" data-d="0"/>
-<text x="657.5" y="358.0" font-size="18" style="fill:var(--orange)" text-anchor="middle" data-s="4" data-d="0.3">the state: toward D's vector</text>
-<path d="M570 322 C 520 370, 90 360, 70 266" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" data-s="4" data-d="1.4"/>
-<text x="78.0" y="302.0" font-size="20" style="fill:var(--orange)" text-anchor="middle" data-s="4" data-d="1.7">× ⅛</text>
-<path d="M570 322 C 520 370, 185 360, 165 266" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" data-s="4" data-d="1.1"/>
-<text x="173.0" y="302.0" font-size="20" style="fill:var(--orange)" text-anchor="middle" data-s="4" data-d="1.4">× ¼</text>
-<path d="M570 322 C 520 370, 280 360, 260 266" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" data-s="4" data-d="0.8"/>
-<text x="268.0" y="302.0" font-size="20" style="fill:var(--orange)" text-anchor="middle" data-s="4" data-d="1.1">× ½</text>
-<text class="note" x="40.0" y="626.0" font-size="16.8" style="fill:var(--orange)" data-s="4" data-d="0.4">The state should also move toward D's vector. The state is the summary, and the summary is made of the input vectors: s = ⅛ x₁ + ¼ x₂ + ½ x₃</text>
-<text class="note" x="40.0" y="650.0" font-size="16.8" style="fill:var(--orange)" data-s="4" data-d="0.4">(the encoder of the next screen). So each input vector moves toward D's vector too, by its share: ½ for x₃, ¼ for x₂, ⅛ for x₁.</text>
-<text class="note" x="40.0" y="686.0" font-size="16.8" style="fill:currentColor" data-s="5" data-d="0">Backpropagation: the change the loss needs is passed back, from the output through the decoder and the encoder, to every weight, in proportion</text>
-<text class="note" x="40.0" y="710.0" font-size="16.8" style="fill:currentColor" data-s="5" data-d="0">to how much that weight affects the loss (the chain rule). Then all the weights change at once (gradient descent).</text>
-<text class="note" x="40.0" y="746.0" font-size="16.8" style="fill:currentColor" data-s="6" data-d="0">The next screen trains a small translation model this way: after each training pair, its output vectors and input vectors make exactly these moves.</text>
-<text class="note" x="40.0" y="782.0" font-size="16.8" style="fill:currentColor" data-s="7" data-d="0">Cost: one update takes about 3 times the computation of one use of the model, plus memory for the forward pass's values.</text>
+<text class="note" x="40.0" y="570.0" font-size="16.8" style="fill:var(--blue)" data-s="1" data-d="2.0">Forward pass: the model reads the input of a training pair and gives its gold output a probability p; the loss is L = −log p.</text>
+<text class="note" x="40.0" y="596.0" font-size="15.2" style="fill:var(--muted)" data-s="1" data-d="2.2">Here: the encoder mixes the input vectors into the summary; each output's score is the dot product of the state and its vector; softmax gives p (as in skip-gram).</text>
+<line x1="1330.0" y1="510.0" x2="40.0" y2="510.0" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" data-s="2" data-d="0"/>
+<path d="M52.9 504.5 L40.0 510.0 L52.9 515.5" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.6" data-a="fade" data-t="0.2"/>
+<text x="680.0" y="540.0" font-size="24" style="fill:var(--orange)" text-anchor="middle" data-s="2" data-d="0.2">backward pass</text>
+<text x="1115.0" y="148.0" font-size="24" style="fill:var(--neg)" data-s="2" data-d="0.4">↓</text>
+<text x="1115.0" y="214.0" font-size="24" style="fill:var(--neg)" data-s="2" data-d="0.4">↓</text>
+<text x="1115.0" y="280.0" font-size="24" style="fill:var(--neg)" data-s="2" data-d="0.4">↓</text>
+<text x="1115.0" y="346.0" font-size="24" style="fill:var(--green)" data-s="2" data-d="0.4">↑</text>
+<text class="note" x="40.0" y="632.0" font-size="16.8" style="fill:var(--orange)" data-s="2" data-d="0.6">Backward pass. To lower L, p(D) must rise: D's score must go up, and the other scores down (↑ ↓).</text>
+<text x="957.0" y="176.0" font-size="17" style="fill:var(--neg)" text-anchor="middle" data-s="3" data-d="0.0">−0.06</text>
+<text x="1001.0" y="176.0" font-size="17" style="fill:var(--neg)" text-anchor="middle" data-s="3" data-d="0.0">−0.06</text>
+<text x="957.0" y="242.0" font-size="17" style="fill:var(--neg)" text-anchor="middle" data-s="3" data-d="0.2">−0.05</text>
+<text x="1001.0" y="242.0" font-size="17" style="fill:var(--neg)" text-anchor="middle" data-s="3" data-d="0.2">−0.05</text>
+<text x="957.0" y="308.0" font-size="17" style="fill:var(--neg)" text-anchor="middle" data-s="3" data-d="0.4">−0.07</text>
+<text x="1001.0" y="308.0" font-size="17" style="fill:var(--neg)" text-anchor="middle" data-s="3" data-d="0.4">−0.06</text>
+<text x="957.0" y="374.0" font-size="17" style="fill:var(--green)" text-anchor="middle" data-s="3" data-d="0.6">+0.18</text>
+<text x="1001.0" y="374.0" font-size="17" style="fill:var(--green)" text-anchor="middle" data-s="3" data-d="0.6">+0.17</text>
+<text class="note" x="40.0" y="660.0" font-size="16.8" style="fill:var(--orange)" data-s="3" data-d="0.6">A score is the dot product of the state and an output vector: so D's vector moves toward the state and the others away from it (their changes, in green and red).</text>
+<path d="M805 284 C 805 370, 645 370, 645 308" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="4" data-d="0"/>
+<text x="755.0" y="380.0" font-size="17" style="fill:var(--orange)" text-anchor="middle" data-s="4" data-d="0.3">the state: toward D's vector</text>
+<path d="M625 310 C 565 400, 110 400, 84 312" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" data-s="4" data-d="1.6"/>
+<text x="104.0" y="374.0" font-size="19" style="fill:var(--orange)" text-anchor="middle" data-s="4" data-d="1.8">× ⅛</text>
+<text x="58.0" y="286.0" font-size="17" style="fill:var(--neg)" text-anchor="middle" data-s="4" data-d="1.9">−0.02</text>
+<text x="102.0" y="286.0" font-size="17" style="fill:var(--green)" text-anchor="middle" data-s="4" data-d="1.9">+0.02</text>
+<path d="M625 310 C 565 400, 225 400, 199 312" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" data-s="4" data-d="1.2"/>
+<text x="219.0" y="374.0" font-size="19" style="fill:var(--orange)" text-anchor="middle" data-s="4" data-d="1.4">× ¼</text>
+<text x="173.0" y="286.0" font-size="17" style="fill:var(--neg)" text-anchor="middle" data-s="4" data-d="1.5">−0.03</text>
+<text x="217.0" y="286.0" font-size="17" style="fill:var(--green)" text-anchor="middle" data-s="4" data-d="1.5">+0.05</text>
+<path d="M625 310 C 565 400, 340 400, 314 312" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" data-s="4" data-d="0.8"/>
+<text x="334.0" y="374.0" font-size="19" style="fill:var(--orange)" text-anchor="middle" data-s="4" data-d="1.0">× ½</text>
+<text x="288.0" y="286.0" font-size="17" style="fill:var(--neg)" text-anchor="middle" data-s="4" data-d="1.1">−0.06</text>
+<text x="332.0" y="286.0" font-size="17" style="fill:var(--green)" text-anchor="middle" data-s="4" data-d="1.1">+0.09</text>
+<text class="note" x="40.0" y="688.0" font-size="16.8" style="fill:var(--orange)" data-s="4" data-d="0.6">The state should move toward D's vector too. The state is ⅛ x₁ + ¼ x₂ + ½ x₃, so each input vector takes that change times its share.</text>
+<rect x="36.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="5" data-d="0.1" data-a="fade" fill-opacity="0.63"/>
+<text x="58.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.1">0.78</text>
+<rect x="80.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="5" data-d="0.1" data-a="fade" fill-opacity="0.26"/>
+<text x="102.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.1">0.32</text>
+<rect x="151.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="5" data-d="0.2" data-a="fade" fill-opacity="0.29"/>
+<text x="173.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.2">0.37</text>
+<rect x="195.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="5" data-d="0.2" data-a="fade" fill-opacity="0.60"/>
+<text x="217.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.2">0.75</text>
+<rect x="266.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="5" data-d="0.3" data-a="fade" fill-opacity="0.43"/>
+<text x="288.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.3">0.54</text>
+<rect x="310.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="5" data-d="0.3" data-a="fade" fill-opacity="0.47"/>
+<text x="332.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.3">0.59</text>
+<rect x="935.0" y="124.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="5" data-d="0.4" data-a="fade" fill-opacity="0.51"/>
+<text x="957.0" y="146.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.4">0.64</text>
+<rect x="979.0" y="124.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="5" data-d="0.4" data-a="fade" fill-opacity="0.12"/>
+<text x="1001.0" y="146.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.4">0.14</text>
+<rect x="935.0" y="190.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="5" data-d="0.5" data-a="fade" fill-opacity="0.20"/>
+<text x="957.0" y="212.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.5">0.25</text>
+<rect x="979.0" y="190.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="5" data-d="0.5" data-a="fade" fill-opacity="0.28"/>
+<text x="1001.0" y="212.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.5">0.35</text>
+<rect x="935.0" y="256.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="5" data-d="0.6" data-a="fade" fill-opacity="0.42"/>
+<text x="957.0" y="278.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.6">0.53</text>
+<rect x="979.0" y="256.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="5" data-d="0.6" data-a="fade" fill-opacity="0.43"/>
+<text x="1001.0" y="278.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.6">0.54</text>
+<rect x="935.0" y="322.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="5" data-d="0.7" data-a="fade" fill-opacity="0.31"/>
+<text x="957.0" y="344.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.7">0.38</text>
+<rect x="979.0" y="322.0" width="44.0" height="32.0" rx="3" fill="var(--green)" stroke="var(--green)" stroke-width="1.5" data-s="5" data-d="0.7" data-a="fade" fill-opacity="0.80"/>
+<text x="1001.0" y="344.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.7">1.07</text>
+<rect x="601.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--orange)" stroke="var(--orange)" stroke-width="1.5" data-s="5" data-d="0.8" data-a="fade" fill-opacity="0.37"/>
+<text x="623.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.8">0.46</text>
+<rect x="645.0" y="234.0" width="44.0" height="32.0" rx="3" fill="var(--orange)" stroke="var(--orange)" stroke-width="1.5" data-s="5" data-d="0.8" data-a="fade" fill-opacity="0.42"/>
+<text x="667.0" y="256.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="0.8">0.52</text>
+<text x="1079.0" y="147.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="1.2">0.37</text>
+<text x="1156.0" y="147.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="1.2">0.22</text>
+<text x="1079.0" y="213.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="1.2">0.29</text>
+<text x="1156.0" y="213.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="1.2">0.20</text>
+<text x="1079.0" y="279.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="1.2">0.52</text>
+<text x="1156.0" y="279.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="1.2">0.26</text>
+<text x="1079.0" y="345.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="5" data-d="1.2">0.74</text>
+<text x="1156.0" y="345.0" font-size="19" style="fill:var(--green)" text-anchor="middle" data-s="5" data-d="1.2">0.32</text>
+<text x="1335.0" y="486.0" font-size="20" style="fill:var(--green)" text-anchor="middle" data-s="5" data-d="1.4">= 1.15</text>
+<text class="note" x="40.0" y="720.0" font-size="16.8" style="fill:var(--green)" data-s="5" data-d="1.0">Update: every vector takes its change at once (learning rate 0.5). Read again: p(D) rises from 0.26 to 0.32, and L falls from 1.34 to 1.15.</text>
+<text class="note" x="40.0" y="756.0" font-size="16.8" style="fill:currentColor" data-s="6" data-d="0">The next screen trains a small translation model this way: after each training pair, its output vectors and input vectors make exactly these moves.</text>
+<text class="note" x="40.0" y="792.0" font-size="16.8" style="fill:currentColor" data-s="7" data-d="0">Cost: one update takes about 3 times the computation of one use of the model, plus memory for the forward pass's values.</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
