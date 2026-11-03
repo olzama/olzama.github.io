@@ -856,7 +856,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T17:23Z">3 Nov 2026, 17:23 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T17:27Z">3 Nov 2026, 17:27 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -1914,11 +1914,13 @@ const workedEntry = (v, W, name, j, c) => `${name} ${j + 1}, ${DIMS[c]} entry: $
 function qkParts(a) {
   const headHtml = `<p class="label">the key table: 3 × 3 numbers chosen for this toy (a real model learns them) · each word's key = its encoder vector × the key table</p>` +
     eqT(...[matHtml(WK, "key table")], `<div class="gap"></div><div class="gap"></div>`, ...ENC.flatMap((e, j) => [j ? `<div class="gap"></div>` : "", col(e, `encoder vector (<i>${DIMS[j]}</i>)`), times("key"), col(matVec(e, WK), `key ${j + 1}`)])) +
-    `<p class="note" style="margin:2px 0 0">For example ${workedEntry(ENC[1], WK, "key", 1, TIA)}. With 1 on the diagonal and 0 elsewhere, each key comes out equal to its encoder vector.</p>` +
-    `<p class="label" style="margin-top:8px">the query: one vector from the decoder state, what the decoder looks for (values chosen for this toy)</p>` + eqT(col(a.q, "the query", "cur"));
-  const colS = (v, label, s) => `<div class="vc"><div class="vh">${label}</div>${v.map(sq).join("")}<div class="vh" style="margin-top:3px;color:var(--fg)"><b>score ${s}</b></div></div>`;
-  const rowsHtml = n => eq(col(a.q, "the query", "cur"), ...ENC.slice(0, n).flatMap((e, j) => [op("×"), colS(a.q.map((x, d) => r2(x * matVec(e, WK)[d])), `key ${j + 1}`, f(a.sc[j]))]));
-  return { headHtml, rowsHtml, LBL: `<p class="label">the score of each key: query × key, dimension by dimension, added up</p>` };
+    `<p class="note" style="margin:2px 0 0">For example ${workedEntry(ENC[1], WK, "key", 1, TIA)}. With 1 on the diagonal and 0 elsewhere, each key comes out equal to its encoder vector.</p>`;
+  // the query × each key: the products dimension by dimension, their sum under them; every column has the same bottom slot, so the rows align
+  const colS = (v, label, s, cls = "") => `<div class="vc${cls ? " " + cls : ""}"><div class="vh">${label}</div>${v.map(sq).join("")}<div class="vh" style="margin-top:3px;color:var(--fg)">${s ? `<b>${s}</b>` : "&nbsp;"}</div></div>`;
+  const rowsS = `<div class="vc rl"><div class="vh"></div>${DIMS.map(d => `<div>${d}</div>`).join("")}<div class="vh" style="margin-top:3px">&nbsp;</div></div>`;   // the row labels, with the same bottom slot
+  const rowsHtml = n => `<div class="eq tight">${rowsS}${[colS(a.q, "the query", "", "cur"), ...ENC.slice(0, n).flatMap((e, j) => { const kj = matVec(e, WK);
+    return [op("×"), colS(kj, `key ${j + 1}`, ""), op("="), colS(a.q.map((x, d) => r2(x * kj[d])), "products", `score = ${f(a.sc[j])}`)]; })].join("")}</div>`;
+  return { headHtml, rowsHtml, LBL: `<p class="label">the query (one vector from the decoder state, what the decoder looks for; values chosen for this toy) × each key, dimension by dimension; the products added up are the score</p>` };
 }
 // softmax over the three encoder vectors (attention weights)
 const smStage = (a, n, from) => smCore({ labels: ENC.map((e, j) => encPlain(j)), sc: a.sc, e: a.sm.e, Z: a.sm.Z, p: a.sm.p, head: "encoder vector", outHead: "weight",
