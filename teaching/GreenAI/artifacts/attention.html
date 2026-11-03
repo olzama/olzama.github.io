@@ -218,6 +218,8 @@ table.cmp7 td:first-child { color: var(--muted); white-space: nowrap; } table.cm
 .headbox .hrow { display: grid; grid-template-columns: 3.2em repeat(3, 56px); gap: 3px; align-items: center; margin: 6px 0; font-family: var(--font-mono); font-size: 0.8rem; }
 .headbox .hrow i { text-align: center; font-size: 0.78rem; color: var(--muted); } .headbox .hrow b { text-align: right; font-weight: 600; padding-right: 6px; } .headbox .hrow span { height: 26px; border-radius: 4px; display: grid; place-items: center; }
 .try { margin: 6px 0 0; padding-left: 1.4em; font-size: 0.9rem; color: var(--muted); display: grid; gap: 3px; max-width: 70ch; } .try b { color: var(--fg); font-weight: 600; }
+.layerframe { border: 2px solid var(--fg); border-radius: 8px; padding: 10px 10px 6px; position: relative; margin: 12px 0 0; }
+.layerframe > .tag { position: absolute; top: -9px; left: 10px; background: var(--bg); padding: 0 6px; font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--fg); }
 .hbempty { color: var(--muted); font-size: 0.85rem; padding: 30px 0; text-align: center; }
 /* what is in a vector of the first three dimensions, as the translation page's "what is in the state" */
 .mix { display: flex; height: 26px; border-radius: 4px; overflow: hidden; background: var(--grid); max-width: 360px; margin-top: 6px; }
@@ -754,7 +756,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="heatwrap"><canvas id="realHeat" aria-label="Cross-attention weights"></canvas></div>
       </div>
     </div>
-    <p class="label">All 48 grids at once, for the whole sentence: a row of thumbnails is a layer, a column is a head (as in step 7 above)</p>
+    <p class="label">All 48 grids at once, for the whole sentence: a row of thumbnails is a layer, a column is a head (as in step 5 above)</p>
     <p class="note">One thumbnail per head, read like the large grid: inside it, a row is one English piece. Click one to show it large (orange frame: the heads shown). Layer 1 spreads its weight; the last layers draw sharp lines from each English piece to the Galician piece it translates.</p>
     <div class="xheads" id="realHeads"></div>
     <p class="label">What the layers do: the weight on the Galician word translated, just before the English word, averaged over the 8 heads of each layer</p>
@@ -862,7 +864,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T18:26Z">3 Nov 2026, 18:26 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T18:37Z">3 Nov 2026, 18:37 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -918,7 +920,7 @@ const D = REAL.sentence;
 const optsLayer = n => `<option value="all">average of all ${n}</option>` + Array.from({ length: n }, (_, i) => `<option value="${i}">${i + 1}</option>`).join("");
 $("realLayer").innerHTML = optsLayer(D.cross.length);
 $("realHead").innerHTML = optsLayer(D.cross[0].length);
-// the featured head: the sharpest on the phrase (A → unha, Aunt → tía, mine → miña); the menus start on it, as step 5 of the steps above
+// the featured head: the sharpest on the phrase (A → unha, Aunt → tía, mine → miña); the menus start on it, as step 6 of the steps above
 const FEAT = (() => { const C = REAL.fragment.cross; let l0 = 0, h0 = 0, best = -1;
   for (let l = 0; l < C.length; l++) for (let h = 0; h < C[l].length; h++) { const g = C[l][h], v = g[0][0] + g[1][1] + g[3][2]; if (v > best) { best = v; l0 = l; h0 = h; } } return { l: l0, h: h0 }; })();
 $("realLayer").value = String(FEAT.l); $("realHead").value = String(FEAT.h);
@@ -978,7 +980,7 @@ function drawHeat(M) {
 $("realLayer").addEventListener("change", () => { tryNote(""); renderReal(); });
 $("realHead").addEventListener("change", () => { tryNote(""); renderReal(); });
 // the walkthrough: each button makes the change and says what did and did not change
-const TRY0 = `Chosen: layer ${FEAT.l + 1}, head ${FEAT.h + 1} (the grid of step 5) and the English piece “aunt”, in orange. The shaded Galician pieces, the enlarged row and the orange row of the grid are one and the same weights.`;
+const TRY0 = `Chosen: layer ${FEAT.l + 1}, head ${FEAT.h + 1} (the grid read in step 6) and the English piece “aunt”, in orange. The shaded Galician pieces, the enlarged row and the orange row of the grid are one and the same weights.`;
 const tryNote = s => { $("realTryNote").textContent = s || TRY0; };
 tryNote("");
 $("realTry").querySelectorAll("[data-try]").forEach(b => b.addEventListener("click", () => {
@@ -1081,7 +1083,7 @@ const init6 = () => {
         if (o.sel !== undefined) g += `<rect x="${x0}" y="${y0 + o.sel * c}" width="${tw}" height="${c}" fill="none" style="stroke:var(--orange)" stroke-width="1.5"/>`;
         const f0 = l === FL && h === FH; g += `<rect x="${x0 - 1.5}" y="${y0 - 1.5}" width="${tw + 3}" height="${th + 3}" fill="none" style="stroke:${f0 ? "var(--fg)" : "var(--line)"}" stroke-width="${f0 ? 2.5 : 1}"/>`; } });
     const W = (o.big ? 4 : lx) + per * (tw + gx), Ht = ty + layers.length * bandH;
-    const key = (o.sel !== undefined ? `<span style="color:var(--orange)">orange outline</span>: the row of “${String(TGT_R[o.sel]).replace(/&/g, "&amp;").replace(/</g, "&lt;")}” · ` : "") + `<b>dark frame</b>: layer ${FL + 1}, head ${FH + 1}, the grid of step 5 · a row of thumbnails: a layer; a column: a head<br>inside each grid: ${TGT_R.length} rows (${TGT_R.map(t => String(t).replace(/</g, "&lt;")).join(", ")}) × ${SRC_R.length} columns (${SRC_R.map(t => String(t).replace(/</g, "&lt;")).join(", ")})`;
+    const key = (o.sel !== undefined ? `<span style="color:var(--orange)">orange outline</span>: the row of “${String(TGT_R[o.sel]).replace(/&/g, "&amp;").replace(/</g, "&lt;")}” · ` : "") + `<b>dark frame</b>: layer ${FL + 1}, head ${FH + 1}, the grid read in step 6 · a row of thumbnails: a layer; a column: a head<br>inside each grid: ${TGT_R.length} rows (${TGT_R.map(t => String(t).replace(/</g, "&lt;")).join(", ")}) × ${SRC_R.length} columns (${SRC_R.map(t => String(t).replace(/</g, "&lt;")).join(", ")})`;
     return `<svg viewBox="0 0 ${W} ${Ht}" style="max-width:${W}px" role="img" aria-label="one small grid per head">${g}</svg>${o.key === false ? "" : `<p class="note" style="margin:4px 0 0">${key}</p>`}`;
   }
   // step 3: one head as a schematic: section 2's steps 1 and 2 (three tables → query, keys, values → scores → softmax → weights → mix), the weights of the chosen row in it
@@ -1110,39 +1112,57 @@ const init6 = () => {
     const ln = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:var(--muted)" stroke-width="1.2"/>`;
     const sm = (x, y, s, anchor = "start", fs = 10) => `<text x="${x}" y="${y}" text-anchor="${anchor}" style="${tf};font-size:${fs}px;fill:var(--muted)">${s}</text>`;
     let g = `<defs><marker id="hbArr2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" style="fill:var(--muted)"/></marker></defs>`;
-    g += bx(6, 4, 264, 24, "decoder state (the English words written so far)", "var(--fg)") + bx(290, 4, 264, 24, "encoder vectors (section 1)", "var(--blue)")
-      + ln(138, 28, 138, 50) + sm(144, 43, "× query table → the query") + ln(422, 28, 422, 50) + sm(416, 43, "× key table, × value table → keys, values", "end") + ln(37, 50, 523, 50);
-    const HW = 58, GAP = 66, X0 = 8, c = 8, cols = SRC_H.length, rows = ROWS.length, Y = 60;
-    for (let h = 0; h < NH; h++) { const x = X0 + h * GAP, cx = x + HW / 2, first = h === 0;
-      g += ar(cx, 50, cx, Y) + `<rect x="${x}" y="${Y}" width="${HW}" height="124" rx="4" style="fill:var(--panel);stroke:${first ? "var(--fg)" : "var(--line)"}" stroke-width="${first ? 2 : 1.3}"/>`;
-      g += sm(cx, Y + 13, `head ${h + 1}`, "middle", 11) + bx(x + 4, Y + 18, HW - 8, 16, first ? "its tables" : "other tables", "var(--green)", tbl, 8.5) + ar(cx, Y + 34, cx, Y + 44);
+    const HW = 58, GAP = 66, X0 = 8, c = 8, cols = SRC_H.length, rows = ROWS.length, Y = 4;
+    // what goes in: above the frame
+    let gin = g + bx(6, 4, 264, 24, "decoder state (the English words written so far)", "var(--fg)") + bx(290, 4, 264, 24, "encoder vectors (section 1)", "var(--blue)")
+      + ln(138, 28, 138, 50) + sm(132, 43, "× query table → query", "end") + ln(422, 28, 422, 50) + sm(428, 43, "× key, value tables → keys, values") + ln(37, 50, 523, 50);
+    for (let h = 0; h < NH; h++) gin += ar(X0 + h * GAP + HW / 2, 50, X0 + h * GAP + HW / 2, 62);
+    for (let h = 0; h < NH; h++) { const x = X0 + h * GAP, cx = x + HW / 2;
+      g += `<rect x="${x}" y="${Y}" width="${HW}" height="124" rx="4" style="fill:var(--panel);stroke:var(--line)" stroke-width="1.3"/>`;
+      g += sm(cx, Y + 13, `head ${h + 1}`, "middle", 11) + bx(x + 4, Y + 18, HW - 8, 16, "its 3 tables", "var(--green)", tbl, 8.5) + ar(cx, Y + 34, cx, Y + 44);
       const gx = cx - cols * c / 2, gy = Y + 45;
-      for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) g += first ? `<rect x="${gx + j * c}" y="${gy + i * c}" width="${c}" height="${c}" style="fill:${heatOf(H.w[i][j])}"/>` : `<rect x="${gx + j * c + 0.5}" y="${gy + i * c + 0.5}" width="${c - 1}" height="${c - 1}" style="fill:var(--grid)"/>`;
-      if (first) g += `<rect x="${gx}" y="${gy + sel * c}" width="${cols * c}" height="${c}" fill="none" style="stroke:var(--orange)" stroke-width="1.3"/>`;
+      for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) g += `<rect x="${gx + j * c + 0.5}" y="${gy + i * c + 0.5}" width="${c - 1}" height="${c - 1}" style="fill:var(--grid)"/>`;
       g += `<rect x="${gx}" y="${gy}" width="${cols * c}" height="${rows * c}" fill="none" style="stroke:var(--line)" stroke-width="0.8"/>` + ar(cx, gy + rows * c, cx, Y + 97) + bx(x + 8, Y + 98, HW - 16, 18, `mix ${h + 1}`, "var(--orange)", "var(--panel)", 9.5); }
-    const chain = [...Array(NL).keys()].map(l => bx(6 + l * 92, 4, 76, 24, `layer ${l + 1}`) + (l < NL - 1 ? ar(82 + l * 92, 16, 96 + l * 92, 16) : "")).join("");
+    // the decoder: the English words written so far → layer 1 → … → layer 6 → a probability for each English word; the encoder vectors go into every layer
+    let dec = `<defs><marker id="hbArr3" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" style="fill:var(--muted)"/></marker></defs>`;
+    const LX = 180, LW = 290, LH = 26, LG = 22, Y0 = 46, a3 = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:var(--muted)" stroke-width="1.2" marker-end="url(#hbArr3)"/>`;
+    dec += bx(LX, 4, LW, 24, "the English words written so far", "var(--fg)") + a3(LX + LW / 2, 28, LX + LW / 2, Y0) + sm(LX + LW / 2 + 6, 40, "decoder state");
+    const encY0 = Y0, encY1 = Y0 + NL * (LH + LG) - LG;
+    dec += `<rect x="6" y="${encY0}" width="110" height="${encY1 - encY0}" rx="4" style="fill:var(--panel);stroke:var(--blue)" stroke-width="1.3"/><text x="61" y="${(encY0 + encY1) / 2 - 10}" text-anchor="middle" style="${tf}">encoder vectors</text><text x="61" y="${(encY0 + encY1) / 2 + 6}" text-anchor="middle" style="${tf};font-size:10px;fill:var(--muted)">(section 1)</text><text x="61" y="${(encY0 + encY1) / 2 + 20}" text-anchor="middle" style="${tf};font-size:10px;fill:var(--muted)">the same for every layer</text>`;
+    for (let l = 0; l < NL; l++) { const y = Y0 + l * (LH + LG);
+      dec += bx(LX, y, LW, LH, l === 0 ? "layer 1: the frame above" : `layer ${l + 1}: the same, with its own tables`, "var(--fg)", l === 0 ? "var(--hi)" : "var(--panel)", 11) + a3(116, y + LH / 2, LX, y + LH / 2) + (l === 0 ? sm(120, y + LH / 2 - 5, "keys, values", "start", 9) : "");
+      dec += sm(LX + LW + 8, y + LH / 2 + 4, "8 grids");
+      if (l < NL - 1) dec += a3(LX + LW / 2, y + LH, LX + LW / 2, y + LH + LG) + sm(LX + LW / 2 + 6, y + LH + 14, "decoder state"); }
+    const yEnd = encY1;
+    dec += a3(LX + LW / 2, yEnd, LX + LW / 2, yEnd + LG) + bx(LX, yEnd + LG, LW, 24, "a probability for each English word → the word written", "var(--fg)") ;
+    dec += `<path d="M${LX + LW + 50} ${Y0} h5 v${encY1 - Y0} h-5" fill="none" style="stroke:var(--muted)" stroke-width="1"/><text transform="translate(${LX + LW + 68} ${(Y0 + encY1) / 2}) rotate(90)" text-anchor="middle" style="${tf};font-size:10px;fill:var(--muted)">${NL} layers × ${NH} heads = ${NL * NH} grids (step 5)</text>`;
+    const decH = yEnd + LG + 30;
     // the 8 mixes side by side × a learned table = one vector: section 2's vector columns; head 1's mix has section 2's numbers, the other seven are not computed here
     const sqE = `<div class="sq" style="background:var(--grid);color:var(--muted)">?</div>`;   // a number the toy did not compute
-    const mixCol = h => h ? `<div class="vc"><div class="vh">mix ${h + 1}</div>${sqE}${sqE}${sqE}</div>` : H.col(H.mix[sel], "mix 1", "cur");
-    const combine = `<div class="eq tight" style="row-gap:10px">${H.rowsOf()}${[...Array(NH).keys()].map(mixCol).join("")}<div class="op" style="font-size:0.85rem;line-height:1.25;text-align:center;padding-bottom:28px;white-space:nowrap">× a learned table<br>(24 rows × 3 columns) =</div><div class="vc"><div class="vh">one vector</div>${sqE}${sqE}${sqE}</div></div>`;
-    return `<p class="label">the same decoder state and encoder vectors go into 8 heads: 8 grids, 8 mixes (before “${ROWS[sel]}”)</p>
-      <svg viewBox="0 0 ${W} ${Y + 128}" style="max-width:${W}px" role="img" aria-label="one layer: the decoder state and the encoder vectors go into 8 heads, each with its own three tables, its own grid and its own mix">${g}</svg>
-      <p class="note" style="margin:2px 0 0">head 1: section 2's head, its grid the one on the left (<span style="color:var(--orange)">orange</span>: the row of “${ROWS[sel]}”) · heads 2–8: the same computation with other tables, so other weights in a grid of the same shape; grey: numbers the toy does not have, section 2 computed one head (a real model's 8 grids: step 6) · <span style="color:var(--green)">green</span>: learned</p>
-      <p class="label" style="margin-top:10px">the 8 mixes before “${ROWS[sel]}”, side by side (24 numbers), × a learned table = one vector of 3 numbers</p>
+    const mixCol = h => `<div class="vc"><div class="vh">mix ${h + 1}</div>${sqE}${sqE}${sqE}</div>`;
+    const combine = `<div class="eq tight" style="row-gap:10px">${H.rowsOf()}${[...Array(NH).keys()].map(mixCol).join("")}<div class="op" style="font-size:0.85rem;line-height:1.25;text-align:center;padding-bottom:28px;white-space:nowrap">× learned table<br>(24 × 3) =</div><div class="vc"><div class="vh">result</div>${sqE}${sqE}${sqE}</div></div>`;
+    return `<p class="label">what goes into a layer</p>
+      <svg viewBox="0 0 ${W} 64" style="max-width:${W}px" role="img" aria-label="the decoder state and the encoder vectors go into the layer's 8 heads">${gin}</svg>
+      <div class="layerframe"><span class="tag">one layer = 8 heads → their 8 mixes combined → one more learned step</span>
+      <p class="label">8 heads on the same inputs, each step 3's computation with its own tables: 8 grids, 8 mixes</p>
+      <svg viewBox="0 0 ${W} ${Y + 124}" style="max-width:${W}px" role="img" aria-label="8 heads, each with its own three tables, its own grid and its own mix">${g}</svg>
+      <p class="note" style="margin:2px 0 0">each grid: ${rows} English words × ${cols} Galician words of our phrase; grey: numbers not computed here (a real model's 8 grids: step 7) · <span style="color:var(--green)">green</span>: learned</p>
+      <p class="label" style="margin-top:10px">the 8 mixes before one English word, side by side (24 numbers), × a learned table = one vector of 3 numbers</p>
       ${combine}
-      <div class="hbflow" style="margin-top:6px"><span class="word">one vector per English word</span><span class="op">→</span><span class="word" style="background:${tbl};border:1px solid var(--green)">one more learned step on each vector (the feed-forward network)</span><span class="op">→</span><span class="word">into the decoder state, where the mix went in section 2 (step 3)</span><span class="op">→</span><span class="word out">the next layer</span></div>
-      <p class="label" style="margin-top:10px">the decoder: ${NL} such layers, one after the other</p>
-      <svg viewBox="0 0 ${W} 32" style="max-width:${W}px" role="img" aria-label="six layers in a chain">${chain}</svg>
-      <p class="note" style="margin:2px 0 0">Layer 1's decoder state comes from the English words written so far; each layer's output is the next layer's decoder state; every layer's heads read the same encoder vectors; after layer ${NL}, a probability for each English word. ${NL} layers × ${NH} heads = ${NL * NH} grids (step 7).</p>`;
+      <div class="hbflow" style="margin-top:6px"><span class="word">one vector per English word</span><span class="op">→</span><span class="word" style="background:${tbl};border:1px solid var(--green)">one more learned step on each vector (the feed-forward network)</span></div>
+      </div>
+      <div class="hbflow" style="margin-top:6px"><span class="op">↓ what comes out:</span><span class="word out">the decoder state with it inside, where the mix went in section 2 (step 3)</span><span class="op">→ into the next layer</span></div>
+      <p class="label" style="margin-top:10px">the decoder: ${NL} such layers (yellow: the one framed above)</p>
+      <svg viewBox="0 0 ${W} ${decH}" style="max-width:${W}px" role="img" aria-label="the decoder: the English words written so far go into layer 1; each layer's output is the next layer's decoder state; the encoder vectors go into every layer; after layer 6, a probability for each English word">${dec}</svg>`;
   };
   const POINTS = [
     "A cell: the weight of one Galician word in the mix just before one English word. A row: one English word's weights; they add up to 1. Section 2 computed one row by hand.",
     "The grid: one row per English word, because each English word gets its own query and its own weights. Darker means more weight.",
     "A head: section 2's computation with its own three learned tables. Its grid shows only the weights; not the values, not the mix. Other tables, other weights: that is why a model has many grids for one phrase.",
     "A layer: 8 heads on the same decoder state and encoder vectors; their 8 mixes, combined, update the state for the next layer. 6 layers × 8 heads = 48 grids.",
-    "A real model's grid reads the same way: row, column, cell. The cell is a share of the mix, not the probability of writing the word. On the phrase alone the model writes “A Aunt of mine”; on the whole sentence, “An aunt of mine”.",
-    "Same phrase, same English word, another head: other weights. Only the head changed.",
-    "A row of thumbnails is a layer, a column is a head, a row inside a thumbnail is one English word. Early layers spread their weight; late layers point each English word at the word it translates. Nobody assigned these patterns: section 8.",
+    "A real model's 48 grids for one phrase: a row of thumbnails is a layer, a column is a head, a row inside a thumbnail is one English word. Early layers spread their weight; late layers point each English word at the word it translates. Nobody assigned these patterns: section 8.",
+    "One of them reads the same way as ours: row, column, cell. The cell is a share of the mix, not the probability of writing the word. On the phrase alone the model writes “A Aunt of mine”; on the whole sentence, “An aunt of mine”.",
+    "Same phrase, same English word, another head of the same layer: other weights. Only the head changed.",
     "The weights show where the model looks, not whether what it writes is right: below, three places where the right Galician piece is looked at and the English is still wrong."];
   const STEPS6 = [
     ["One row: the weights for one English word",
@@ -1152,36 +1172,41 @@ const init6 = () => {
     ["What a head is",
       "One head, drawn on the right: section 2's computation. The grid shows only its weights (query · keys, softmax); the values and the mix are not in it. Other tables give other weights, so another grid."],
     ["What a layer is",
-      "One layer, drawn on the right, and under it the decoder's 6 layers. Head 1 is section 2's head, with the grid on the left; the other seven have other tables."],
-    ["A real model's grid reads the same way",
-      `opus-mt-gl-en on the phrase alone: layer ${FL + 1}, head ${FH + 1}, one of its 48 grids. The columns end with ‹end›, the end marker. The row of “Aunt” is chosen and its darkest cell read in the margin: the same kind of number as in our grid, a share of this head's mix. It is not the probability of writing “Aunt”; that is another number, the bars in the whole-sentence part below. The phrase alone comes out “${TGT_R.slice(0, -1).join(" ")}”; the whole sentence starts “An aunt of mine”.`],
-    ["The 8 heads of one layer",
+      "The framed part on the right: what goes in above it, what comes out below it."],
+    ["The real model on the phrase: 48 grids",
+      `opus-mt-gl-en, trained by others on much Galician–English text, on the phrase alone: 6 layers × 8 heads = 48 grids, one thumbnail each; a row of thumbnails is a layer, a column is a head, a row inside a thumbnail is one English word. Its columns end with ‹end›, the end marker. In layer 1 most heads spread their weight or rest it on ‹end›; in layers 5 and 6 most heads point each English word at the Galician word it translates. To read one grid, we take the one whose weights follow the translation most closely: the dark frame, chosen below.`],
+    ["That grid reads the same way as ours",
+      `Layer ${FL + 1}, head ${FH + 1}, the framed grid, large. The row of “Aunt” is chosen and its darkest cell read in the margin: the same kind of number as in our grid, a share of this head's mix. It is not the probability of writing “Aunt”; that is another number, the bars in the whole-sentence part below. The phrase alone comes out “${TGT_R.slice(0, -1).join(" ")}”; the whole sentence starts “An aunt of mine”.`],
+    ["The 8 heads of its layer",
       `Layer ${FL + 1}'s 8 heads on the same phrase, the same row outlined in each: only the head changes. Under them, that row in head ${FH + 1} and in the head that differs most from it.`],
-    ["6 layers × 8 heads = 48 grids",
-      "All 48 grids for the phrase: a row of thumbnails is a layer, a column is a head, a row inside a thumbnail is one English word (orange: the row chosen). In layer 1 most heads spread their weight or rest it on ‹end›; in layers 5 and 6 most heads point each English word at the Galician word it translates. Nobody assigned these patterns: section 8 shows how heads get them."],
     ["The whole sentence",
-      `Below, the same model on the whole sentence, with layer ${FL + 1}, head ${FH + 1} and the English piece “aunt” chosen at the start. The question to carry: just before “aunt”, how much weight on tía? Then three places where the translation goes wrong.`]];
+      `Below, the same model on the whole sentence, with layer ${FL + 1}, head ${FH + 1} (the grid of step 6) and the English piece “aunt” chosen at the start. The question to carry: just before “aunt”, how much weight on tía? Then three places where the translation goes wrong.`]];
   let k = 0, sel = 0;
-  const goTo = i => { if (i === 4 && k !== 4) sel = 1; k = i; draw6(); };   // step 5 opens on the row of “Aunt”, the row the section's question asks about
+  const goTo = i => { if (i === 5 && k !== 5) sel = 1; k = i; draw6(); };   // step 6 opens on the row of “Aunt”, the row the section's question asks about
+  // why this grid: of the 48, the largest sum of the three cells where the weight should be (A → unha, Aunt → tía, mine → miña)
+  const pick = [[0, 0], [1, 1], [3, 2]], pickSum = M => pick.reduce((s, [i, j]) => s + M[i][j], 0);
+  const pickHtml = () => `<p class="note" style="margin:6px 0 0"><b>dark frame</b>: the grid chosen to read in step 6. Of the 48, it has the largest sum of the three cells where the weight belongs: ${pick.map(([i, j]) => `“${TGT_R[i]}” · <i>${SRC_R[j]}</i>`).join(" + ")} = ${pick.map(([i, j]) => C[FL][FH][i][j].toFixed(2)).join(" + ")} = <b>${pickSum(C[FL][FH]).toFixed(2)}</b>: layer ${FL + 1}, head ${FH + 1}.</p>`;
   STEPS6.forEach(([t], i) => { const b = document.createElement("button"); b.textContent = i + 1; b.title = t; b.addEventListener("click", () => goTo(i)); $("hbSteps").appendChild(b); });
-  // the head of layer FL whose weight, in the chosen row, on the featured head's darkest column is smallest: the comparison of step 6
+  // the head of layer FL whose weight, in the chosen row, on the featured head's darkest column is smallest: the comparison of step 7
   const otherHead = r => { const j = argmax(C[FL][FH][r]); let h0 = FH, m = 2; for (let h = 0; h < NH; h++) if (h !== FH && C[FL][h][r][j] < m) { m = C[FL][h][r][j]; h0 = h; } return h0; };
   function draw6() {
     const [t, txt] = STEPS6[k];
     $("hbTitle").textContent = `Step ${k + 1} of ${STEPS6.length}: ${t}`; $("hbText").textContent = txt;
     const n = k === 0 ? 1 : ROWS.length; if (sel >= n) sel = 0;
     $("hbLeft").innerHTML = bars(SRC_H, H.w[sel], `before “${ROWS[sel]}”: the three weights`) + `<p class="label" style="margin-top:10px">${n === 1 ? "the three weights as a row of cells, darker for more weight" : `the grid: one such row per English word (orange: the row of “${ROWS[sel]}”)`}</p>` + grid(ROWS, SRC_H, H.w, { n, sel, annot: true, read: readOf(H.w, sel) });
-    if (k < 2) { $("hbRightLbl").textContent = "a real model on the same phrase"; $("hbRight").innerHTML = `<p class="hbempty">step 5 puts here the same kind of row and grid from opus-mt-gl-en, a real translation model, on the same phrase</p>`; }
+    if (k < 2) { $("hbRightLbl").textContent = "a real model on the same phrase"; $("hbRight").innerHTML = `<p class="hbempty">steps 5 and 6 put here the same kind of row and grid from opus-mt-gl-en, a real translation model, on the same phrase</p>`; }
     else if (k === 2) { $("hbRightLbl").textContent = "one head"; $("hbRight").innerHTML = headHtml(sel); }
     else if (k === 3) { $("hbRightLbl").textContent = "one layer: 8 heads; the decoder: 6 layers"; $("hbRight").innerHTML = layerHtml(); }
-    else if (k === 4) { $("hbRightLbl").textContent = `opus-mt-gl-en on the phrase: layer ${FL + 1}, head ${FH + 1}`;
+    else if (k === 4) { $("hbRightLbl").textContent = `opus-mt-gl-en on the phrase: all ${NL} layers × ${NH} heads = ${NL * NH} grids`;
+      $("hbRight").innerHTML = thumbs([...Array(NL).keys()], { c: 9, gx: 7, gy: 8, sel, key: false }) + `<p class="note" style="margin:4px 0 0"><span style="color:var(--orange)">orange outline</span>: the row of “${TGT_R[sel]}” in every grid · inside each grid: ${TGT_R.length} rows (${TGT_R.join(", ")}) × ${SRC_R.length} columns (${SRC_R.join(", ")})</p>` + pickHtml(); }
+    else if (k === 5) { $("hbRightLbl").textContent = `opus-mt-gl-en on the phrase: layer ${FL + 1}, head ${FH + 1} (the framed grid of step 5)`;
       $("hbRight").innerHTML = bars(SRC_R, C[FL][FH][sel], `before “${TGT_R[sel]}”: the ${SRC_R.length} weights`) + `<p class="label" style="margin-top:10px">its grid: rows, the English pieces it wrote; columns, the Galician pieces</p>` + grid(TGT_R, SRC_R, C[FL][FH], { sel, cw: 50, annot: true, read: readOf(C[FL][FH], sel) }); }
-    else if (k === 5) { const h2 = otherHead(sel); $("hbRightLbl").textContent = `opus-mt-gl-en, layer ${FL + 1}: its 8 heads, one grid each`;
+    else if (k === 6) { const h2 = otherHead(sel); $("hbRightLbl").textContent = `opus-mt-gl-en, layer ${FL + 1}: its 8 heads, one grid each`;
       const j = argmax(C[FL][FH][sel]), two = [C[FL][FH][sel], C[FL][h2][sel]];
       $("hbRight").innerHTML = thumbs([FL], { c: 24, per: 4, gx: 14, gy: 8, big: true, sel }) + `<p class="label" style="margin-top:8px">the row of “${TGT_R[sel]}” in two heads: same phrase, same English word, other tables</p>` +
         grid([`head ${FH + 1}`, `head ${h2 + 1}`], SRC_R, two, { cw: 50, still: true, read: [0, j], lines: [`<tspan font-style="italic">${SRC_R[j]}</tspan> just before “${TGT_R[sel]}”:`, `<tspan font-weight="700">${two[0][j].toFixed(2)}</tspan> in head ${FH + 1}, <tspan font-weight="700">${two[1][j].toFixed(2)}</tspan> in head ${h2 + 1}`] }); }
     else { $("hbRightLbl").textContent = `opus-mt-gl-en: all ${NL} layers × ${NH} heads = ${NL * NH} grids`;
-      $("hbRight").innerHTML = thumbs([...Array(NL).keys()], { c: 9, gx: 7, gy: 8, sel }) + (k === 7 ? `<p style="margin:8px 0 0"><button id="hbDown">to the whole sentence ↓</button></p>` : ""); }
+      $("hbRight").innerHTML = thumbs([...Array(NL).keys()], { c: 9, gx: 7, gy: 8, sel }) + `<p style="margin:8px 0 0"><button id="hbDown">to the whole sentence ↓</button></p>`; }
     $("hbPoints").innerHTML = POINTS.map((p, i) => `<li class="${i === k ? "on" : i < k ? "done" : "later"}">${p}</li>`).join("");   // later points keep their space, unseen
     $("hbBack").disabled = k === 0; $("hbNext").disabled = k === STEPS6.length - 1;
     [...$("hbSteps").children].forEach((b, i) => b.classList.toggle("on", i === k));
