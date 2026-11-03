@@ -869,7 +869,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T19:31Z">3 Nov 2026, 19:31 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T19:50Z">3 Nov 2026, 19:50 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -1189,7 +1189,15 @@ const init6 = () => {
     return `<p class="label" style="margin-top:10px">why the dark frame: A translates <i>unha</i>, Aunt <i>tía</i>, mine <i>miña</i>; outlined: those three cells</p>
       <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start"><div><p class="note" style="margin:0"><b>layer ${FL + 1}, head ${FH + 1}</b> (framed): ${pick.map(([i, j]) => C[FL][FH][i][j].toFixed(2)).join(", ")}</p>${small(C[FL][FH])}</div>
       <div><p class="note" style="margin:0"><b>layer ${LL + 1}, head ${LH + 1}</b>: ${pick.map(([i, j]) => C[LL][LH][i][j].toFixed(2)).join(", ")}</p>${small(C[LL][LH])}</div></div>
-      <p class="note" style="margin:4px 0 0">In the framed grid each English word puts almost all its weight on the word it translates: the easiest grid to read first. Every other head lies somewhere between these two.</p>`; };
+      <p class="note" style="margin:4px 0 0">In the framed grid each English word puts almost all its weight on the word it translates: the easiest grid to read first. Every other head lies somewhere between these two.</p>
+      <div style="background:var(--hi);border-left:4px solid var(--orange);border-radius:6px;padding:8px 12px;margin:10px 0 0">
+        <p class="label" style="color:var(--fg);margin:0 0 4px">Why keep the less clear heads?</p>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:0.88rem">
+          <span class="word">a grid</span><span class="op">=</span><span>where a head looks</span><span class="op">≠</span><span>what its mix adds</span>
+          <span class="op">→</span><span>measured by switching heads off:</span><a href="#who" class="word" style="text-decoration:none">section 8 does it for a tiny model ↓</a>
+        </div>
+        <p class="note" style="margin:6px 0 0">In translation models, a few heads can go; most cannot (Michel et al. 2019).</p>
+      </div>`; };
   STEPS6.forEach(([t], i) => { const b = document.createElement("button"); b.textContent = i + 1; b.title = t; b.addEventListener("click", () => goTo(i)); $("hbSteps").appendChild(b); });
   // the head of layer FL whose weight, in the chosen row, on the featured head's darkest column is smallest: the comparison of step 5
   const otherHead = r => { const j = argmax(C[FL][FH][r]); let h0 = FH, m = 2; for (let h = 0; h < NH; h++) if (h !== FH && C[FL][h][r][j] < m) { m = C[FL][h][r][j]; h0 = h; } return h0; };
