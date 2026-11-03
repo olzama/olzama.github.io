@@ -214,6 +214,9 @@ table.cmp7 td:first-child { color: var(--muted); white-space: nowrap; } table.cm
 .hbbar .tr { height: 14px; background: var(--grid); border-radius: 3px; overflow: hidden; } .hbbar .tr i { display: block; height: 100%; background: var(--blue); }
 .hbflow { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; font-size: 0.8rem; margin: 2px 0 8px; } .hbflow .word { font-size: 0.78rem; padding: 2px 6px; } .hbflow .op { color: var(--muted); }
 .hbtake ol { margin: 4px 0 0; padding-left: 1.4em; display: grid; gap: 3px; font-size: 0.92rem; color: var(--muted); } .hbtake li.on { color: var(--fg); background: var(--hi); border-radius: 3px; }   /* no bold: the list must not rewrap */ .hbtake li.done { color: var(--fg); } .hbtake li.later { visibility: hidden; }
+.headbox { background: var(--hi); border-radius: 8px; padding: 10px 12px; margin-top: 4px; }
+.headbox .hrow { display: grid; grid-template-columns: 3.2em repeat(3, 56px); gap: 3px; align-items: center; margin: 6px 0; font-family: var(--font-mono); font-size: 0.8rem; }
+.headbox .hrow i { text-align: center; font-size: 0.78rem; color: var(--muted); } .headbox .hrow b { text-align: right; font-weight: 600; padding-right: 6px; } .headbox .hrow span { height: 26px; border-radius: 4px; display: grid; place-items: center; }
 .hbempty { color: var(--muted); font-size: 0.85rem; padding: 30px 0; text-align: center; }
 /* what is in a vector of the first three dimensions, as the translation page's "what is in the state" */
 .mix { display: flex; height: 26px; border-radius: 4px; overflow: hidden; background: var(--grid); max-width: 360px; margin-top: 6px; }
@@ -856,7 +859,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T17:42Z">3 Nov 2026, 17:42 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T17:47Z">3 Nov 2026, 17:47 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -2119,10 +2122,18 @@ const STEPS = [
         `<p class="note" style="margin:2px 0 0">For example ${workedEntry(ENC[2], WV, "value", 2)}: this product is miña's value. With these numbers each value comes out equal to its encoder vector, and so to its key.</p>`;
       const vals = n => encPts(ENC.map((e, j) => j < n ? `value ${j + 1}: weight ${f(a.sm.p[j])}` + (j === 2 ? " (summary)" : "") : ""), "enc").map((p, j) => j < n ? p : { ...p, cls: "enc faint" });
       const top = smStage(a, 3, "from step 1");
+      const mixScene = { ...SMALL, tri: ENC, pts: [...vals(3), { p: a.mix, cls: "mix", label: `mix ${vecTxt(a.mix)}`, dx: 10, dy: 18 }], cap: `The mix, pulled toward the largest weight: ${f(a.mix[TIA])} of tía (the summary: ${f(SUMMARY[TIA])}).` };
+      // the head box: steps 1 and 2 named as one attention head, its weights drawn the way heads are usually shown (a row of cells, section 6's grids)
+      const chip = s => `<span class="word">${s}</span>`, arr = `<span class="op">→</span>`;
+      const heat = v => `rgba(var(--heat),${(0.06 + 0.94 * v).toFixed(3)})`;
+      const headBox = `<div class="headbox"><p class="label" style="color:var(--fg)">steps 1 and 2 together are one <b>attention head</b></p>
+        <div class="hbflow">${chip(`the query (${a.q.map(f).join(", ")})`)}<span class="op">·</span>${chip("keys 1–3")}${arr}${chip(`scores ${a.sc.map(f).join(", ")}`)}${arr}${chip("softmax")}${arr}${chip(`weights ${a.sm.p.map(f).join(", ")}`)}<span class="op">;</span>${chip("weights × values 1–3, added up")}${arr}${chip(`the mix (${a.mix.map(f).join(", ")})`)}</div>
+        <p class="note">A head is usually shown by its weights alone, as cells, darker for more weight: here, the weights before “an”</p>
+        <div class="hrow"><i></i>${ENC.map((e, j) => `<i>${DIMS[j]}</i>`).join("")}<b>an</b>${a.sm.p.map(w => `<span style="background:${heat(w)};color:${w > 0.55 ? "#fff" : "var(--fg)"}">${w.toFixed(2)}</span>`).join("")}</div>
+        <p class="note">One such row before each English word is the head's grid (section 6, steps 1 and 2). In a real model the query is the decoder state × a query table, and the three tables are learned (section 6, step 3).</p></div>`;
       return [...upto(3, j => ({ board: top + valuesHtml + `<p class="label">the mix: each value scaled by its weight, then added up</p>` + eq(...terms(j + 1)), scene: { ...SMALL, pts: vals(j + 1), cap: `Value ${j + 1} scaled by its weight ${f(a.sm.p[j])}.` } })),
-        { board: top + valuesHtml + `<p class="label">the mix: each value scaled by its weight, then added up</p>` + eq(...terms(3), op("="), col(a.mix, "the mix", "cur")) + `<p class="note" style="margin:8px 0 0">Steps 1 and 2 together are one <b>attention head</b>: a query; keys and values made from the encoder vectors by the key table and the value table; query · keys → scores → softmax → weights; weights × values, added up → the mix. In a real model the query is the decoder state × a query table, and the three tables are learned (section 6, step 3), so a word's key and value differ from its encoder vector and from each other.</p>`,
-          scene: { ...SMALL, tri: ENC, pts: [...vals(3), { p: a.mix, cls: "mix", label: `mix ${vecTxt(a.mix)}`, dx: 10, dy: 18 }],
-            cap: `The mix, pulled toward the largest weight: ${f(a.mix[TIA])} of tía (the summary: ${f(SUMMARY[TIA])}).` } }];
+        { board: top + valuesHtml + `<p class="label">the mix: each value scaled by its weight, then added up</p>` + eq(...terms(3), op("="), col(a.mix, "the mix", "cur")), scene: mixScene },
+        { board: headBox, scene: mixScene }];
     } }],
   ["Word 1 with the mix: why “an”", {
     text: "The mix goes into the state's first three dimensions, the part that comes from the encoder, where the summary was (section 1, step 3). Everything else is as in section 1.",
