@@ -321,10 +321,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   <h1>Fundamentals of NLP</h1>
   <p class="muted">Tema: Natural language processing · Sesión 1 · Ponente: Olga Zamaraeva</p>
   <div class="logos"><img src="img/logo-citicudc.png" alt="CITIC, Universidade da Coruña"><img src="img/logo-financiacion.png" alt="Funding"></div>
-  <div class="notes">
-    <p>Welcome, everyone. This is Session 1 of the microcredential on green algorithms for AI: "Fundamentals of NLP." I'm Olga Zamaraeva; I'll teach this session and the next two.</p>
-    <p>First, a disclaimer: I taught this module last year too, and it did not go well, in my opinion — it was super technical and boring for everyone. It's important to study model architectures and the underlying math, what makes one architecture more computationally and environmentally expensive than another, but I don't think that's the best focus for this course. So this year I changed everything, which means I'm doing this material for the first time today, which can be a little embarrassing. I'll even use a prompter on my iPad to help me explain things properly and not forget something important. Just a disclaimer.</p>
-  </div>
 </section>
 
 <section class="screen" id="howworks" data-step="0">
@@ -340,12 +336,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <li>The longer notebooks run in Google Colab.</li>
     </ul>
     <p class="src">olga.zamaraeva@udc.es · UDC Teams · CITIC, 2nd floor</p>
-  </div>
-  <div class="notes">
-    <p>A note on how this session works. This year there are no slides. We use one web page for the whole session. You see it on the screen, and you can open the same page on your laptop or phone.</p>
-    <p>The address is on the screen: olzama.github.io, teaching, GreenAI. You can follow along during the session and come back to the page later.</p>
-    <p>Some screens are explanations, like slides. Some are interactive: animations you can step through, change, and replay, with real numbers. Some are exercises: Python code that runs in your browser. Nothing to install. The longer notebooks run in Google Colab.</p>
-    <p>My contact details are at the bottom of the screen.</p>
   </div>
 </section>
 
@@ -372,9 +362,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       </svg>
     </div>
   </div>
-  <div class="notes">
-    <p>These terms are sometimes used interchangeably, and sometimes to denote two related but distinct fields, which can be confusing. Originally, Computational Linguistics uses computers as a tool to study language scientifically — syntax, semantics, how languages differ typologically. The object of study is language as a natural phenomenon, something people do. Natural Language Processing used to be an engineering discipline: building systems that do something useful with language — translate it, summarize it, answer questions about it. Recently NLP has become very close to AI, which is why this module exists in this course. AI used to ask questions like "how similar is a model's performance to some measured human capacity, and how do we close the gap." Now, thanks to this merge with NLP, AI got good enough at so many tasks that the field shifted to questions like "how do we tell AI apart from a person" or "how should people work with AI." Question for you: is it easy to tell if you're talking to AI or a person? Is it easy to tell if you're reading AI-generated text? What if it's a Galician text?</p>
-  </div>
 </section>
 
 <section class="screen" id="oneengine" data-step="0">
@@ -391,9 +378,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     </div>
   </div>
   <p class="src">Radford et al., “Language Models are Unsupervised Multitask Learners,” 2019; Brown et al., “Language Models are Few-Shot Learners,” NeurIPS 2020</p>
-  <div class="notes">
-    <p>Until recently, "NLP" meant a separate, purpose-built model for each task: one system for translation, a different one for summarization, another for classifying sentiment. What changed is this: a single model, trained on nothing more sophisticated than "predict the next word of text" — the definition of a language model — turned out to be able to do all of these tasks. You just phrase your request differently to the same model, which is what "prompting" means. OpenAI showed this could work in 2019 with GPT-2; the real scale came in 2020 with GPT-3. This is the moment the public conversation stopped distinguishing "NLP" from "AI" — a general-purpose language model looks, from the outside, like general intelligence.</p>
-  </div>
 </section>
 
 <section class="screen" id="costs" data-step="0">
@@ -407,14 +391,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     </div>
     <ul class="points"><li>Building the hardware has a cost too, before any of this runs.</li></ul>
   </div>
-  <div class="notes">
-    <p>So NLP today means large language models. What does a language model cost? There are four places where the cost comes from.</p>
-    <p>First, training. Training means computing the model's parameters from a large amount of text. For a large model this uses many processors for days or weeks. This cost is paid once for each model.</p>
-    <p>Second, inference. Inference means using the trained model: you send a request, and the model computes an answer. One request costs little. But it is paid for every request, by every user, for as long as the model is in use.</p>
-    <p>Third, storage. The model's parameters and the data have to be kept somewhere: on disks, and in the memory of the machines that run the model. That hardware uses electricity all the time, also when nobody is asking anything.</p>
-    <p>Fourth, cooling and water. Processors turn electricity into heat. A data center has to remove that heat. Many data centers do it by evaporating water. So a data center uses water as well as electricity.</p>
-    <p>And one more: the hardware itself has to be built, and building it also has a cost. We will come back to this when we talk about measurement.</p>
-  </div>
 </section>
 
 <section class="screen" id="traininf" data-step="0">
@@ -426,11 +402,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <li>Generating text costs more than classifying it: the model runs once for every word it writes.</li>
       <li>One request runs on more than the processor that computes it: the host machine, idle spare machines, and the data center around them.</li>
     </ul>
-  </div>
-  <div class="notes">
-    <p>Training is paid once. Inference is paid every time. A popular model may answer millions of requests a day, for months or years. So over the life of a model, the cost of all its requests can add up to more than the cost of training it.</p>
-    <p>The cost of a request depends on the task. If the model only has to pick an answer from a few options, for example to classify a review as positive or negative, it runs once. If it has to write text, it writes one word at a time, and it runs once for every word. So a long answer costs more than a short one.</p>
-    <p>And a request does not only use the processor that computes the answer. It also uses the machine around that processor, spare machines that wait for the next request, and the data center: cooling, power supply, and so on. When we measure, we have to decide which of these we count. The next screens show why that matters.</p>
   </div>
 </section>
 
@@ -469,13 +440,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     </div>
       <p class="muted">A real run draws less than the maximum, so 0.07 kWh is an upper bound for the GPU alone.</p>
     </div>
-  </div>
-  <div class="notes">
-    <p>To compare costs, we need units. Let's go through them with one simple example.</p>
-    <p>First, FLOPs: floating-point operations. One FLOP is one multiplication or one addition of two numbers. FLOPs count how much computation a model does. They do not depend on the hardware. The same model, on the same input, needs the same number of FLOPs on any computer.</p>
-    <p>But FLOPs are not electricity. How much electricity the computation uses depends on the hardware that runs it. For electricity there are two units, and people mix them up.</p>
-    <p>Power is measured in watts. Power says how fast a device uses electricity at a given moment. Energy is power times time. It is measured in watt-hours, or in kilowatt-hours: one kilowatt-hour is a thousand watt-hours. Energy is what appears on an electricity bill.</p>
-    <p>The example on the right is the GPU you will use in Colab today, an NVIDIA T4. Its maximum power is 70 watts. If it runs at maximum power for one hour, it uses 70 watt-hours. That is 0.07 kilowatt-hours. A real run usually draws less than the maximum, so this is an upper bound, and it is only the GPU, not the rest of the machine.</p>
   </div>
 </section>
 
@@ -524,15 +488,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <p class="muted">Example values. Real ones depend on the data center and the grid.</p>
       <p class="muted">Notebook 1 measures with CodeCarbon: it tracks the power of the processor, GPU and memory while your code runs, and multiplies the energy by your region's carbon intensity.</p>
     </div>
-  </div>
-  <div class="notes">
-    <p>Energy is not yet carbon. We need a few more steps, and each step has its own unit.</p>
-    <p>First, PUE, power usage effectiveness. A data center uses energy for more than the computers: for cooling, for lighting, for converting power. PUE is the total energy of the data center divided by the energy of the computers. A PUE of 1.0 would mean no overhead at all. With a PUE of 1.1, our 0.07 kilowatt-hours become about 0.077.</p>
-    <p>Second, carbon intensity. This says how many grams of CO2-equivalent are emitted to produce one kilowatt-hour of electricity. It depends on where the electricity comes from: coal, gas, wind, sun, nuclear. So it changes from country to country, and also from hour to hour. With an example value of 200 grams per kilowatt-hour, our hour on the GPU emits about 15 grams.</p>
-    <p>CO2-equivalent means that other greenhouse gases, like methane, are counted too. Each is converted into the amount of CO2 that would have the same effect on the climate.</p>
-    <p>Third, water. WUE, water usage effectiveness, is the number of liters of water a data center uses for each kilowatt-hour that its computers use. WUE is applied to the computers' energy, before PUE. With 1.15 liters per kilowatt-hour, our hour uses about 0.08 liters, a small glass of water.</p>
-    <p>All of this is operational carbon: it comes from running the hardware. Embodied carbon comes from building the hardware: making the chips, the servers, the building. It is real, but harder to measure, and most reports leave it out.</p>
-    <p>These are example values, to show the steps. In Notebook 1 you will measure with a tool called CodeCarbon. It tracks the power of the processor, the GPU and the memory while your code runs. It adds this up to energy, and it multiplies the energy by the carbon intensity of your region.</p>
   </div>
 </section>
 
@@ -602,15 +557,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     </div>
   </div>
   <p class="src">Source: Elsworth et al., “Measuring the environmental impact of delivering AI at Google Scale,” 2025 (arXiv:2508.15734)</p>
-  <div class="notes">
-    <p>Here is a real measurement of inference, from a paper published in August 2025 by Google. It measures one text prompt to Gemini, Google's chatbot: the median prompt, in May 2025.</p>
-    <p>The table shows what they counted. The AI accelerators, the chips that compute the answer, use 0.14 watt-hours. The host machine around them, its processor and memory, adds 0.06. Machines that sit idle, ready for the next requests, add 0.02. And the data center overhead adds 0.02 more. Their PUE is 1.09. The total is 0.24 watt-hours.</p>
-    <p>Look at the first row and the last row. If you count only the accelerators, you get a little over half of the total. So two honest measurements of the same prompt can differ by almost a factor of two, just because they count different things. When you read a number like this, always ask what was counted.</p>
-    <p>The board on the right does the arithmetic step by step. First the sum: the four rows add up to 0.24 watt-hours. Then the share: 0.14 out of 0.24 is about 0.58, a little over half.</p>
-    <p>Then carbon, with the steps from the last screen. 0.24 watt-hours is 0.00024 kilowatt-hours. Google multiplies it by 94 grams of CO2-equivalent per kilowatt-hour. That is not the carbon intensity of the grid itself, which averaged 345: Google subtracts the clean energy it buys, and this is called a market-based number. The kilowatt-hours cancel, and we get about 0.023 grams. To that they add 0.010 grams, the prompt's share of the carbon from building the chips and the machines around them. Together, about 0.03 grams.</p>
-    <p>Last, water. As on the last screen, WUE is applied to the computers' energy, without the data center overhead: 0.24 minus 0.02 is 0.22 watt-hours, or 0.00022 kilowatt-hours. Times 1.15 liters per kilowatt-hour gives about 0.25 milliliters, about five drops. The paper reports 0.26, because it starts from the unrounded values.</p>
-    <p>One more thing: this measurement is by the company that runs the model, for its own system. It has not been checked independently. It is still one of the most complete measurements published so far.</p>
-  </div>
 </section>
 
 <div class="part" id="part-course"><h1>What this course covers</h1></div>
@@ -631,12 +577,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <li>Topic 3: not a kind of model, but a way of using one: give it only the relevant pieces of the documents</li>
       <li>Every topic: the same tasks, measured the same way. One row per run in your own leaderboard.</li>
     </ul>
-  </div>
-  <div class="notes">
-    <p>Now, what this course covers. The goal is that you can talk about modern large language models, and about what they cost, with understanding.</p>
-    <p>To understand large language models, we first need to understand language models in general. And for that, it helps to see how NLP got to them. So today we go through a short history of language models, from the simplest one to the transformer.</p>
-    <p>The course has three topics. Topic 1, which we start today: language models. Topic 2: quantized language models. That is the same model, but each of its numbers is stored and computed with fewer bits. Topic 3: retrieval-augmented generation. This is not a kind of model. It is a way of using a model: instead of giving the model everything, we first retrieve the relevant pieces of the documents, and give the model only those.</p>
-    <p>For every topic we run the same tasks and measure them the same way. Every run adds one row to a leaderboard, a file you keep for the whole course. By the end, you have your own comparison.</p>
   </div>
 </section>
 
@@ -661,12 +601,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <p class="src">from the novel <i>Speechwriter</i> by Paulo Naseiro</p>
     </div>
   </div>
-  <div class="notes">
-    <p>In the hands-on parts we work with two classic NLP tasks.</p>
-    <p>The first is question answering. The model gets a small set of documents and a question, and it answers. This task is easy to evaluate: each answer is right or wrong, so the score is simply the share of right answers. That is why it is our main task for measurement, in all three sessions.</p>
-    <p>The second is machine translation. It is harder to evaluate, because one sentence has many good translations. But it shows very well how language models work. Attention, which we will see today, was invented for translation.</p>
-    <p>Our example is this sentence, from the novel Speechwriter by Paulo Naseiro. It is in Galician. Galician is a low-resource language: there is much less text in Galician than in Spanish or English, and so much less data to learn from. We will come back to the two highlighted words, tía miña, many times today.</p>
-  </div>
 </section>
 
 <section class="screen" id="roadmap" data-step="0">
@@ -686,16 +620,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       </table>
     </div>
     <p class="muted">Before statistics, NLP systems were written by hand, as rules. Each step since has replaced hand-written knowledge with more data and more computation.</p>
-  </div>
-  <div class="notes">
-    <p>Here is the plan for the technical part of today. We go in six steps. Each step fixes a problem of the step before. The bar at the bottom of the screen shows which step we are on.</p>
-    <p>Before these steps, NLP systems were written by hand, as rules. Each step since then has replaced hand-written knowledge with more data and more computation. That is why the history matters for a course about costs.</p>
-    <p>Step 1 is n-grams. An n-gram model predicts the next word by counting which words follow which. Its problem: it only knows what it has counted. If it has seen “my aunt spoke” but never “my uncle spoke”, it gives “spoke” after uncle a probability of 0. What it counted for aunt does not carry over to uncle, a word used in the same places.</p>
-    <p>Step 2 is embeddings. Each word gets a vector, a list of values, learned from the words around it. Similar words get similar vectors. But these are vectors for single words. They say nothing about a sentence.</p>
-    <p>Step 3 is the encoder–decoder model for translation. The encoder reads the whole sentence into one vector. The decoder writes the translation from that vector. Its problem: one vector has to hold the whole sentence, and the early words fade.</p>
-    <p>Step 4 is attention. The decoder may look back at every source word, and it decides how much to use each one. But the source sentence is still read one word after another.</p>
-    <p>Step 5 is self-attention. Every word looks at every other word of its own sentence, all at the same time.</p>
-    <p>Step 6 is the transformer: many blocks of self-attention stacked on top of each other. This is the architecture of today's large language models. Its cost grows with the size of the model and the length of the text. That is where the rest of the course starts.</p>
   </div>
 </section>
 
@@ -717,9 +641,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <div class="bars" data-bars='[["aunt",0.6667],["uncle",0.3333],["my",0],["stayed",0],["spoke",0],["quiet",0],["wisely",0]]'></div>
       <p class="muted" style="font-size:0.9rem">Counted from three sentences, on the next screen. The vocabulary has 7 words.</p>
     </div>
-  </div>
-  <div class="notes">
-    <p>Let's step back and give some definitions. We said there were various epochs in NLP; we'll skip the symbolic era for now, though it's important — maybe we'll cover it in Session 3 when we talk about retrieval-augmented generation. So we start with the statistical era, directly with "language models." Language models were the step from task-specific to general AI. Formally: a language model assigns a probability to sequences of words, and in practice is almost always used to predict the next word given the words so far — not just a single guess, but a full probability distribution over the entire vocabulary, where every word gets some probability, even if tiny. This is the task underlying everything from the 1990s n-gram counting we're about to do by hand, to GPT-3. N-grams are the simplest possible instance of this idea: instead of anything learned or neural, just count how often word sequences occur in real text, and turn counts into probabilities.</p>
   </div>
 </section>
 
@@ -785,11 +706,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <div class="ask"><b>Question</b><span>Is a bigger n better?</span><button data-reveal="nAnswer" style="justify-self:start">Show one answer</button><span id="nAnswer" hidden>More context helps in principle. But a longer word sequence is rarer, so the model has seen fewer of them, and more of its counts are 0.</span></div>
     </div>
   </div>
-  <div class="notes">
-    <p>An n-gram is just a sequence of n consecutive words — a bigram is 2 words, a trigram is 3, and so on. This is a bigram model: it estimates the probability of the next word using only the one preceding word.</p>
-    <p>Our toy corpus stays with the story's cast of characters. The formula on screen is nothing more than: out of all the times "my" appeared, what fraction of the time was it immediately followed by "aunt"? "My" appears 3 times total; "my aunt" appears 2 of those times, so P(aunt|my) = 2/3 ≈ 0.67. "My uncle" appears once, so P(uncle|my) = 1/3 ≈ 0.33. Counting, then dividing — that really is the entire model, there's no hidden step.</p>
-    <p>Question for you: is it better to use a bigger n? Using a longer n gives the model more context to condition on, but the exact sequence it needs to have seen becomes rarer and rarer in any real corpus — more context helps in principle but makes the sparsity problem worse in practice. And this is the thread we keep pulling: a Galician n-gram model has dramatically fewer real sentences to count from than a Spanish or English one does — every count in this toy example stands in for a much bigger, real problem. Sparse data means noisy, unreliable probability estimates.</p>
-  </div>
 </section>
 
 <section class="screen fill" id="explore" data-step="1">
@@ -803,13 +719,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <a class="open" href="../artifacts/ngram.html#count" target="_blank" rel="noopener" style="align-self:center;margin-left:auto">Open the full page</a>
     </div>
     <iframe class="frame" id="ngFrame" title="N-grams, step by step: count, generate, score" data-src="../artifacts/ngram.html?embed=count,gen,score"></iframe>
-  </div>
-  <div class="notes">
-    <p>Count, then divide. Press Replay counting. A window slides over the three sentences and fills the count table, one pair at a time. Click the row for “my”. The page divides: aunt gets 0.67, uncle gets 0.33. These are the numbers from the last screen.</p>
-    <p>Now choose Edit the corpus. Add the sentence “my uncle spoke kindly”. Press Use this corpus. Click “my” again. Aunt and uncle now get half each.</p>
-    <p>Then move the smoothing slider. Smoothing adds a small count k to every pair, so some probability moves to pairs the corpus never saw.</p>
-    <p>Press the tab Generate text. Pick a start word and press Generate, first with Greedy, then with Sample. Greedy always takes the most frequent next word. Sample draws a word using the probabilities.</p>
-    <p>Press the tab Score a sentence. Move the smoothing slider back to 0 first: with smoothing on, no factor is 0. Type “her aunt stayed quiet”. The corpus never saw “her”, so one factor is 0, and the whole sentence gets probability 0. This is the sparsity problem again.</p>
   </div>
 </section>
 
@@ -1010,12 +919,6 @@ print(f"P(uncle | my) = {bigram_prob('my', 'uncle', ext_counts, ext_unigrams):.3
 </script>
     </div>
   </div>
-  <div class="notes">
-    <p>Now everyone works alone, for about 15 minutes. There are three screens of exercises: this one and the next two.</p>
-    <p>The code runs in the browser. Nothing to install. The first Run loads Python and takes a few seconds.</p>
-    <p>How it works: replace every gap, the three underscores, with code. Run shows what the code prints. Run the tests checks it. Each test checks one thing, also with unusual inputs like an empty corpus, and a failing test says what to fix. The tests, the hints and the solution are under each exercise. Ask them to read a failing test's message before they open the solution.</p>
-    <p>Exercise 1 rebuilds the model from the worked example. It should print 0.67 and 0.33. Exercise 2 changes the corpus, so the numbers change: the data is the model.</p>
-  </div>
 </section>
 
 <section class="screen" id="tryGen" data-step="1">
@@ -1117,11 +1020,6 @@ print(generate("my", counts, unigram_counts))
 </script>
     </div>
     <div class="reflect"><b>Think about it.</b> Change the last line to <code>generate("her", counts, unigram_counts)</code> and run it. Why does the model stop at once? There is far less Galician text online than Spanish or English text. What would you predict about an n-gram model trained on Galician?</div>
-  </div>
-  <div class="notes">
-    <p>Exercise 3 makes the model write. Start from a word. Look at the words that followed it in the corpus. Take the most frequent one. Repeat.</p>
-    <p>From “my” it writes “my aunt stayed quiet”. From “her” it writes nothing more. The corpus never saw “her”, so there is no row to look up.</p>
-    <p>The question at the bottom links this to Galician. Less text means more words and pairs the model has never seen. So it gets stuck more often.</p>
   </div>
 </section>
 
@@ -1351,11 +1249,6 @@ print("they match" if count == expected else "they do not match: check the loop 
     </div>
     <div class="reflect"><b>Think about it.</b> 3 words have 6 orderings and 8 words have 40,320. How many does a 20-word sentence have? Could a system try them all?</div>
   </div>
-  <div class="notes">
-    <p>Part B uses the model for translation. A word-for-word translator gives “a aunt my”. The right words, in the wrong order.</p>
-    <p>Exercise 4 tries every order of the three words. The bigram model scores each one. The best score wins. The best order is “a my aunt”. Better, still wrong. The model only knows which words sit next to each other. It knows no grammar.</p>
-    <p>Exercise 5 counts the orders. 3 words have 6. 8 words have 40,320. A 20-word sentence has about 2.4 billion billion. Nobody can try them all. A translation system has to decide where each word goes in a smarter way. That is what attention will do, in step 4.</p>
-  </div>
 </section>
 
 <section class="screen fill" id="shakespeare" data-step="1">
@@ -1367,12 +1260,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <a class="open" href="../artifacts/ngram.html#shk" target="_blank" rel="noopener" style="align-self:center;margin-left:auto">Open the full page</a>
     </div>
     <iframe class="frame" title="N-grams, step by step: Shakespeare" data-src="../artifacts/ngram.html?embed=shk,game"></iframe>
-  </div>
-  <div class="notes">
-    <p>The same counting, on the complete works of Shakespeare: about a million words.</p>
-    <p>Press Write new lines. There are four models. The unigram model looks at no context. The bigram model looks at one word, the trigram model at two, the 4-gram model at three. The longer the context, the more it sounds like Shakespeare.</p>
-    <p>Click a word to see the choices the model had at that step. The 4-gram model often has only one choice. A long context was usually seen once, so the model copies Shakespeare word for word. This is sparsity again, from the other side.</p>
-    <p>Then press the tab Shakespeare or n-gram. One line is real, one comes from the model. Let the class vote.</p>
   </div>
 </section>
 
@@ -1390,12 +1277,6 @@ print("they match" if count == expected else "they do not match: check the loop 
         <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01b_ngrams_playground-advanced.ipynb" target="_blank" rel="noopener">Open in Colab: advanced</a>
       </div>
     </div></div>
-  </div>
-  <div class="notes">
-    <p>Now the same counting on real text. Open Notebook 01b in Colab. It needs no GPU.</p>
-    <p>The notebook downloads 2 million words of Galician Wikipedia and 2 million of Spanish. It trains bigram models on more and more text, from 10 thousand words to 1.8 million. For each model it measures how many bigrams of new text the model has never seen. Those bigrams get probability 0.</p>
-    <p>Then it repeats the count for longer n-grams, up to 4 words. And at the end a trigram model writes Galician.</p>
-    <p>Look at two things. First: at the same amount of text, are Galician and Spanish very different? Second: how much text does each language have? The notebook gives the totals for all of Wikipedia.</p>
   </div>
 </section>
 
@@ -1504,17 +1385,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
-  <div class="notes">
-    <p>Back to the problem from “Count, then divide”: the n-gram counts for aunt say nothing about uncle, although the two words are used in the same way. Step 2 gives each word a vector, so that words used in similar ways can get similar vectors. Whatever the vectors hold, we need a number that says how similar two of them are. I will derive it on the board, step by step. Each press draws the next part of an equation: one term, one factor, or one summand.</p>
-    <p>Two words, as vectors with two values: aunt is 4, 2, and uncle is 3, 3. We draw each one as an arrow from the origin. Words used in similar ways should point in similar directions. So we want to measure how similar the directions are.</p>
-    <p>Each arrow has a length. By Pythagoras, the length of aunt is the square root of 4 squared, the horizontal side, plus 2 squared, the vertical side: the square root of 16 plus 4, which is the square root of 20, about 4.47. Uncle has length square root of 9 plus 9, the square root of 18, about 4.24. Length is not direction, so we remove it.</p>
-    <p>To remove the length, divide each vector by its own length. We call the results a-hat and u-hat. They point in the same directions as before, but both have length 1. So they end on the circle of radius 1. For aunt, that is 4 divided by 4.47 and 2 divided by 4.47: about 0.89 and 0.45. For uncle, 3 divided by 4.24, twice: about 0.71 and 0.71.</p>
-    <p>A point on the circle of radius 1, at angle alpha from the x-axis, has coordinates cos alpha, sin alpha. You can see it on the drawing: the dashed lines go down to cos alpha and across to sin alpha. So a-hat is cos alpha, sin alpha, and u-hat is cos beta, sin beta.</p>
-    <p>Multiply the matching entries and add them up: the first entries, cos alpha times cos beta, plus the second entries, sin alpha times sin beta. This is called the dot product.</p>
-    <p>Trigonometry says this sum is exactly the cosine of beta minus alpha. And beta minus alpha is the angle between the two arrows, theta. So the dot product of the two short arrows is the cosine of the angle between them.</p>
-    <p>Now put it together. The short arrows were the vectors divided by their lengths. So the cosine of theta is the dot product of the original vectors, divided by both lengths. That is the formula for cosine similarity.</p>
-    <p>With our numbers: 4 times 3 is 12, and 2 times 3 is 6. Together 18. Below, 4.47 times 4.24 is about 18.95. The result is about 0.95, close to 1, the maximum. 1 means the same direction, and 0 a right angle.</p>
-  </div>
 </section>
 
 <section class="screen fill" id="cosine-i" data-step="2">
@@ -1522,12 +1392,6 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="body">
     <div class="tabs"><a class="open" href="../artifacts/ngram.html#td" target="_blank" rel="noopener">Open the full page</a></div>
     <iframe class="frame" title="Shakespeare, counted by play" data-src="../artifacts/ngram.html?embed=td"></iframe>
-  </div>
-  <div class="notes">
-    <p>Here is a first way to get vectors: by counting. The table counts four words, battle, soldier, fool and clown, in four plays.</p>
-    <p>Choose Plays as vectors: each play is a column of counts, so each play is a vector. The plot draws two of the dimensions. Now choose Words as vectors: each row is a vector too.</p>
-    <p>In the similarity table, click a cell. The page shows the cosine arithmetic for that pair. Switch between cosine and dot product: the dot product grows with frequency, the cosine does not.</p>
-    <p>Count it adds a word of your own, counted in the full text of the plays.</p>
   </div>
 </section>
 
@@ -1631,13 +1495,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
-  <div class="notes">
-    <p>The previous screen turned counts into vectors. Here is what goes wrong with vectors of counts, and what replaces them.</p>
-    <p>Our three sentences again. For each word we count how often every word of the vocabulary stands right before or right after it. The vocabulary has seven words, so the vector has seven entries. Aunt: “my” twice, “stayed” once, “spoke” once, and 0 for the rest. Uncle: “my” once, “stayed” once. Already in this tiny example, most entries are 0.</p>
-    <p>Now real text: 2 million words of Galician Wikipedia, the sample from Notebook 01b. It has 127,848 different words, so each vector has 127,848 entries. For tía, aunt, only 23 entries are not 0. The other 127,825 are 0. A vector that is mostly 0 is called sparse. Storing and comparing it means handling 127,848 numbers to use 23.</p>
-    <p>Worse, similar words do not line up. In Galician, “her aunt” or “his aunt” is “súa tía”, and “his uncle” is “seu tío”: súa goes with feminine words, seu with masculine ones. So the most frequent neighbour of tía and the most frequent neighbour of tío sit in two different columns. With so few counts, little else is shared. The cosine of tía and tío is about 0.05, almost unrelated, and lower than the cosine of tía and casa, house, at about 0.33.</p>
-    <p>This is what an embedding is for. An embedding of a word is a vector of a few hundred numbers, none of them 0: a dense vector, instead of 127,848 mostly empty entries. Its numbers are not counted; they are learned from text. The learning aims at one thing: words used in similar ways should get similar vectors. Then tía and tío, which are used in the same ways, should get a high cosine, even though their counts do not line up. The next screens show how the numbers are learned.</p>
-  </div>
 </section>
 
 <section class="screen" id="sglearn" data-step="2">
@@ -1675,16 +1532,6 @@ print("they match" if count == expected else "they do not match: check the loop 
     <li>The task: given <i>cats</i>, give high probability to <i>chase</i> and <i>eat</i></li>
     <li>The task never mentions word vectors. The vectors appear because the model needs them to make predictions.</li>
   </ul>
-  <div class="notes">
-    <p>The previous screen said embeddings are learned. This screen and the next one set up how, with a tiny example. Then we watch it on the skip-gram page.</p>
-    <p>The method is called skip-gram. It was introduced by Mikolov and colleagues in 2013.</p>
-    <p>Skip-gram is trained to do one thing. It is given a word. It must predict which words appear next to that word.</p>
-    <p>On the left is a tiny corpus. A corpus is a collection of text. This one has four sentences: cats chase mice, dogs chase balls, cats eat fish, dogs eat meat.</p>
-    <p>We use a window of size 1. This means each word predicts only the word directly before it and the word directly after it. The picture shows this for the word "chase" in the first sentence. "Chase" must predict "cats" and "mice".</p>
-    <p>We do this for every word in every sentence. The result is the list on the right. There are 16 training pairs. Each pair is an input word and one word the model should predict. For example, the first pair says: given "cats", predict "chase".</p>
-    <p>So the task is: given "cats", give high probability to "chase" and to "eat". Given "dogs", also give high probability to "chase" and to "eat".</p>
-    <p>Notice that the task says nothing about word vectors. Nobody asks the model to find good representations of words. The vectors appear because the model needs some numbers for each word in order to make its predictions. The next screen shows where those numbers live, and what the model multiplies.</p>
-  </div>
 </section>
 
 <section class="screen" id="classic" data-step="2">
@@ -1723,12 +1570,6 @@ print("they match" if count == expected else "they do not match: check the loop 
     <li>Input w(t) = “tape”, as a one-hot vector. Projection = its row of <i>p</i>, called <i>h</i>: the word's embedding.</li>
     <li>Output = <i>h</i> × <i>p′</i>: one score per word, with the same <i>p′</i> for every position. The picture stops at the scores; <b>softmax</b>, on the next screens, turns them into probabilities.</li>
   </ul>
-  <div class="notes">
-    <p>Here are two pictures of skip-gram. On the left is the classic picture, from the paper by Mikolov and colleagues, 2013. The input is one word, w of t. It goes through a projection. The output is the words around it: two before, w of t minus 2 and t minus 1, and two after.</p>
-    <p>On the right is the same model with its numbers. The blue column is the input word, “tape”, as a one-hot vector: all zeros, and a 1 at the position of “tape”. The table p is the embedding table. Multiplying the one-hot vector by p picks out one row of p. That row is h, the projection. It is the word's embedding.</p>
-    <p>Then h is multiplied by the second table, p prime. This gives one score for every word in the vocabulary. The four colored outputs are the four positions in the window. In word2vec they all use the same table p prime. So the model makes one prediction, and that prediction is checked against each of the neighbors.</p>
-    <p>Look at the orange output column: 0.4, 0.3, and so on. These are scores. They do not add up to 1, so they are not probabilities yet. The picture leaves out the last step, softmax, which turns scores into probabilities. The next two screens go through all the steps, with our own small example.</p>
-  </div>
 </section>
 
 <section class="screen" id="inside" data-step="2">
@@ -1852,12 +1693,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
-  <div class="notes">
-    <p>Now the same steps with our own small example: the corpus about cats and dogs, and the tables at the very start of training, when they are still random. Each press shows the next step.</p>
-    <p>The input word is cats. The model cannot read a word, so it writes it as a one-hot vector. There is one position for every word in the vocabulary, eight here. All of them are 0, except a 1 at the word's own position. The board shows the one-hot vectors of all eight words, one row each; the input word cats uses the first row.</p>
-    <p>The table p is the embedding table. It has one row for every word, and each row has two values. At the start, these values are random.</p>
-    <p>Now multiply the one-hot vector by the table. Every row of p is multiplied by its own 0 or 1, and then the rows are added up. The rows multiplied by 0 disappear. Only the row of cats is left. So the result, h, is just the row of cats: minus 0.41 and minus 0.26. That is why the rows of p are the embeddings: reading a word means copying out its row.</p>
-  </div>
 </section>
 
 <section class="screen" id="inside2" data-step="2">
@@ -1945,14 +1780,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
-  <div class="notes">
-    <p>The second half: from h to a probability for every word.</p>
-    <p>The second table, p prime, has one column for every word. On the screen each column is shown as a row, so that it fits next to the word. Where does it come from? It is part of the model, like p: it does not come from the corpus. At the start its values are random, just like the values of p. Training changes both tables together. After training, word2vec keeps p as the embeddings and usually throws p prime away: it was only needed to make the predictions.</p>
-    <p>The score. For each word, multiply h by that word's column: first value times first value, second times second, and add them up. This is called a dot product. For chase it gives minus 0.074. Every word gets a score like this. Scores can be negative, and they do not add up to 1. So they are not probabilities yet.</p>
-    <p>Softmax turns scores into probabilities, in two parts. First, take e to the power of each score. e is a number, about 2.718. The result is always positive, and a higher score still gives a higher number. For chase, e to the minus 0.074 is 0.929.</p>
-    <p>Second, divide each of these numbers by their sum. The sum is 8.346. After the division, the eight numbers add up to exactly 1. Now they are probabilities. The probability of chase, given cats, is 0.929 divided by 8.346, which is 0.111. That is the softmax: e to the power, then divide by the sum.</p>
-    <p>The training pair says that chase is a true neighbor of cats. But the model gives chase only 0.111, and mice gets the most. So training changes the numbers a little: the row of cats in p, and the columns of p prime, so that chase gets a higher probability next time. The interactive panel on the next screen does exactly this, one pair at a time.</p>
-  </div>
 </section>
 
 <section class="screen fill" id="sg-i" data-step="2">
@@ -1960,11 +1787,6 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="body">
     <div class="tabs"><a class="open" href="../artifacts/skipgram.html" target="_blank" rel="noopener">Open the full page</a></div>
     <iframe class="frame" title="Skip-gram, step by step" data-src="../artifacts/skipgram.html?embed=train"></iframe>
-  </div>
-  <div class="notes">
-    <p>First the training data: each of the four sentences gives four pairs, shown as the sentence itself. The input word is boxed, the neighbor to predict is underlined, and the third word is faded: with window 1, a neighbor is the word just left or just right of the input. So "cats chase mice" gives cats with chase, chase with cats, chase with mice, and mice with chase. Below it, the multiplication panel. Press Play the multiplication. Show the steps: the one-hot vector times p gives h. h times p prime gives eight scores. The scores become eight probabilities. Then choose all words at once: now all eight one-hot vectors are multiplied together, and we get a full table of predictions.</p>
-    <p>Now train. The control bar at the top stays in view while you scroll. Press Step: next pair; the pair gets a check mark in the training data once it has been trained on in this round. The first pair is cats to chase. The bar chart shows the model's guess for cats. Every word gets about one eighth. Chase gets 0.111, too low. In the plot, the green arrow adds a little of the vector for chase to cats. The red arrow subtracts a little of the average guess. The black arrow, their sum, is the step. Cats moves a little. Press Step a few more times. The list of the 16 training pairs ticks off each pair, and the multiplication at the top is redrawn for the pair just trained.</p>
-    <p>Then press One round: it trains on the rest of the 16 pairs. Then press Play: it trains round after round, all 16 pairs every time, 30 rounds per second. Every word is an input in every round, so while Play runs, the multiplication at the top switches to all words at once: all eight one-hot rows times p, and each word's predictions next to what the corpus says. Pause, and it goes back to one pair. Watch the colors. The model never sees them. Cats and dogs end up pointing the same way. So do mice and balls, and fish and meat. Move the slider to 100 rounds, then to 3000. Turn on paths and go back to 100 rounds: about two thirds of the movement up to round 100 happened in the first 20 rounds. If there is time, press new random start and play again. The starting points change; the grouping comes back.</p>
   </div>
 </section>
 
@@ -2001,13 +1823,6 @@ print("they match" if count == expected else "they do not match: check the loop 
     <li>Task solved: P(chase | cats) 0.11 → 0.47, P(eat | cats) 0.12 → 0.52</li>
   </ul>
   <p class="quote">“You shall know a word by the company it keeps.” J. R. Firth (1957)</p>
-  <div class="notes">
-    <p>Why did this happen? The left table shows the company each word keeps, meaning the words it has to predict. Cats has to predict chase and eat. Dogs has to predict exactly the same two words.</p>
-    <p>So every time training nudges the cats row to predict chase better, it later nudges the dogs row in the same way, for the same reason. Pair after pair, the two rows receive the same kind of changes. In the end they point in the same direction. The right table shows this. Cats is 0.63 and 0.37. Dogs is 0.86 and 0.48. Both have the second number a little more than half of the first. Dogs is only further from the origin. Mice and balls are almost identical, and so are fish and meat.</p>
-    <p>We can measure this with cosine similarity from a few screens ago. Cosine similarity measures direction and ignores length. Cosine of cats and dogs is 1.00, the maximum. Cosine of cats and fish is 0.44, much lower.</p>
-    <p>The model also got good at its actual task. Before training, the probability of chase given cats was 0.11. After training it is 0.47. The probability of eat given cats went from 0.12 to 0.52. Those two numbers add up to almost 1. The model has learned that cats is always followed by one of these two words, and it splits its bet equally between them.</p>
-    <p>The quote at the bottom is from the linguist J. R. Firth, 1957: "You shall know a word by the company it keeps." This is called the distributional idea: words that appear in similar contexts tend to have similar meanings. Skip-gram turns this idea into a training procedure. If two words keep similar company, the model does better when it gives them similar vectors.</p>
-  </div>
 </section>
 
 <section class="screen fill" id="similar-i" data-step="2">
@@ -2015,11 +1830,6 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="body">
     <div class="tabs"><a class="open" href="../artifacts/skipgram.html#similar" target="_blank" rel="noopener">Open the full page</a></div>
     <iframe class="frame" title="Which words are similar?" data-src="../artifacts/skipgram.html?embed=similar"></iframe>
-  </div>
-  <div class="notes">
-    <p>The corpus grows with the same pattern as ours, up to 92 words. Choose 92 words and press Play.</p>
-    <p>There are three columns. Left: one-hot vectors. Every pair of words is at a right angle, so the cosine is 0. One-hot vectors have no similarity at all. Middle: trained vectors with as many dimensions as words. Right: trained vectors with 2 dimensions.</p>
-    <p>Watch the chart of the cosine of cats and dogs. With 2 dimensions it reaches 0.95 at round 4. With 92 dimensions it takes 352 rounds. Why so much sooner with 2? Cats and dogs get nearly the same nudges from the start; what keeps them apart is only their random starting values, and with 2 dimensions there are 2 of those to overwrite, with 92 dimensions 92. More dimensions take more training to show the same similarity.</p>
   </div>
 </section>
 
@@ -2042,13 +1852,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       </ul>
     </div>
   </div>
-  <div class="notes">
-    <p>The left side summarizes the whole story as a chain of causes. The task is to predict neighboring words. To do that, the model needs adjustable numbers for each word. Training adjusts those numbers, one pair at a time. Words with similar neighbors receive similar adjustments. The result is a space where similar words are close together.</p>
-    <p>When training is finished, we do not need the prediction part anymore. We keep only the table. Each row of the table is the embedding of one word. This is what people mean by word embeddings.</p>
-    <p>You will sometimes hear that embeddings are a byproduct of training. That is roughly right, but it can make them sound accidental. A more precise way to say it: embeddings are learned internal representations. They are exactly the parameters the model uses to solve its prediction task.</p>
-    <p>Now the resource problem from the n-gram screen comes back. A word gets nudged only when it appears in a training pair. A rare word appears in few pairs. So its vector gets few nudges and may stay close to where it started, which was random. There is less Galician text online than Spanish or English text. So many Galician words are rare in the training data, and their embeddings are weaker.</p>
-    <p>Remember the two tables from the page: p, one vector per word as an input, and p′, one vector per word as a predicted neighbor. We keep the first one.</p>
-  </div>
 </section>
 
 <section class="screen" id="act-emb" data-step="2">
@@ -2066,12 +1869,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       </div>
     </div></div>
   </div>
-  <div class="notes">
-    <p>Now you train skip-gram yourself, on real text. Open Notebook 01c in Colab. It needs no GPU; the training runs take about three minutes in all.</p>
-    <p>Part A trains skip-gram on 2 million words of Galician Wikipedia, five times: with 2, 10, 50, 100 and 300 dimensions. CodeCarbon measures each run. The quality test uses five groups of Galician words: months, days of the week, numbers, colors and family words. A good model puts each word near the other words of its group.</p>
-    <p>Part B trains on less text, from 100 thousand words up. Look at which group suffers first, and compare with how often its words occur. This is the claim from the last screen: rare words get poorly placed vectors.</p>
-    <p>Part C tests a multilingual model on Galician words. Most of them are spelled differently from Spanish. Look at which words it gets wrong.</p>
-  </div>
 </section>
 
 <div class="part" id="part-step3"><h1>Step 3 · Encoder–decoder translation</h1></div>
@@ -2085,9 +1882,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <li>Each shift trades hand-written knowledge for more data and more compute</li>
     </ul>
     <p class="src">Source: Hutchins, “Machine Translation: A Concise History,” 2007</p>
-  </div>
-  <div class="notes">
-    <p>Just because I like MT so much. MT is one of AI's oldest stated goals — the first public demonstration was in 1954, the Georgetown–IBM experiment, translating a small set of Russian sentences into English (Russia being the enemy back then too, sadly, my own native country), received with enormous, and in hindsight unrealistic, optimism about how soon "solved" translation was. In 1966, the U.S. government's ALPAC report concluded MT wasn't living up to its promises and recommended cutting funding, setting back American MT research roughly a decade. Progress resumed with the rules era — bilingual dictionaries plus hand-written grammatical transformation rules, a linguist encoding "how do you convert this Russian sentence structure into an English one" — then the statistical era starting in the 1990s, learning translation patterns directly from large amounts of already-translated text, no hand-written grammar needed, Google Translate launched on this in 2006, then neural plus attention from 2015, and today's LLM-based translation.</p>
   </div>
 </section>
 
@@ -2185,14 +1979,6 @@ print("they match" if count == expected else "they do not match: check the loop 
     </div>
     <p class="src">The first neural translation models: Sutskever, Vinyals &amp; Le, NeurIPS 2014 (arXiv:1409.3215)</p>
   </div>
-  <div class="notes">
-    <p>The first neural translation design, from around 2014, has two parts: an encoder and a decoder. They are two parts of one model, and the idea is not specific to translation, so the board shows it in general.</p>
-    <p>First, the possible inputs: a fixed set of things the input can be made of. For translation from Galician, the Galician words; for speech, short slices of a recording; for an image, small patches of it. One input is a sequence of them: here input 1 is c, input 2 is a, input 3 is e.</p>
-    <p>The encoder reads the inputs one by one and updates a vector after each one. At the end, that vector stands for the whole input, as numbers; it is often called the summary. In translation, each Galician word is a vector, learned from translated examples like skip-gram's embeddings.</p>
-    <p>The decoder has a fixed set of possible outputs too: for translation into English, the English words, plus ‹end›, a special output that means “finished”. The decoder keeps a vector of its own, its state, which starts as the encoder's vector. At each step it gives every possible output a probability, writes one, and mixes the output it wrote into its state: that is the dashed arrow back. Then the next step, until it writes ‹end›. In translation, the probabilities come the way skip-gram chose neighbors: a score for every English word, then softmax.</p>
-    <p>Both parts are trained together, on pairs: an input and its gold output: the right output for it, made by a person. From here on, the gold output. Training compares the model's output with the gold output and passes the difference back through the decoder and the encoder, to every vector in the model. That is backpropagation. It needs three ideas, on the next screens: the loss and its gradient, the chain rule, and backpropagation itself.</p>
-    <p>The table: many tasks are built this way. What changes is only the set of possible inputs and the set of possible outputs. Next, how the two parts are trained; then translation, with a trained model. Two words for the two phases, as the translation page names its sections: training, where the model learns its vectors from pairs and the gold output is fed back after each output; and inference, where the trained model translates a new input and its own written word is fed back.</p>
-  </div>
 </section>
 <section class="screen" id="lossgrad" data-step="3">
   <header><span class="kind">Encoder–decoder</span><h2>Loss and gradient</h2></header>
@@ -2242,13 +2028,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
-  </div>
-  <div class="notes">
-    <p>Training needs a number for how bad the model is on its training data: the loss. For a training pair, the decoder gives the gold output some probability p, and the loss is minus the log of p. If the gold output is certain, p is 1 and the loss is 0; the smaller p, the larger the loss.</p>
-    <p>The loss depends on the model's parameters, the numbers in its vectors. The curve shows how the loss changes as one parameter changes, while all the others stay as they are. It is an illustration: a real loss depends on millions of parameters, but along any one of them it looks like a curve like this.</p>
-    <p>At the parameter's current value, the curve has a slope. That slope is the gradient: how much the loss changes per change of the parameter. Here it is negative, minus 1.96: increasing the parameter lowers the loss.</p>
-    <p>So training steps against the gradient: new value equals old value minus the learning rate times the derivative. The learning rate is a number chosen by hand that sets the size of the steps; here it is 0.4. The first step: minus 1.60, minus 0.4 times minus 1.96, which is minus 1.60 plus 0.78, minus 0.82. With a negative gradient, the minus makes the step go up, to the right, which is downhill. With a positive gradient it would go left, again downhill. Each step lands lower, and the steps shrink as the slope flattens near the bottom. This is gradient descent.</p>
-    <p>A model has many parameters. The gradient has one slope for each of them, and every parameter takes its step at the same time. How the gradient is computed for all of them together, even for parameters far from the loss, is the subject of the chain rule and of backpropagation, on the next screens.</p>
   </div>
 </section>
 
@@ -2304,14 +2083,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
-  <div class="notes">
-    <p>Where does the data come from, and how do we know whether training worked? Traditionally, one collection of data is divided at random into three parts: most of it, say 80 percent, is training data; 10 percent is development data; 10 percent is test data. All three come from the same collection.</p>
-    <p>The graph is an illustration of the typical shapes, not measured data. The loss on the left, and on the right the probability each loss stands for. The solid curve is the loss on the training data, the pairs the model learns from by gradient descent. It falls toward 0.</p>
-    <p>A low training loss is not the goal: the model should do well on new data. The development data are never learned from; their loss is only measured, every few steps. It falls at first, then rises: from there on the model fits its training data better and new data worse. This is overfitting. Training is stopped where the development loss is lowest: early stopping. The development data change no parameter; they only decide when to stop, and which model to keep. The translation page shows both directions on its toy models: section 1 part D, where the development pair keeps improving long after the training pairs are all right (so training longer helps), and section 4 part C, where the development sentence comes closest around step 1200 and then moves away (so stopping early helps).</p>
-    <p>Because they made that decision, the kept model is a little tuned to them. So the test data are kept apart from everything: never learned from and never used for any decision. They are measured once, at the end, on the kept model. They estimate how the model does on new data from the same collection. The test curve is drawn whole only to show that it follows the development curve, a little higher.</p>
-    <p>And then real use. The data a model meets once it is in use come from somewhere else and later: other topics, other kinds of text, other speakers. Its loss there can be far higher than the test loss, and nobody knows that in advance, because the test data come from the same collection as the training data. The gap shows up only in use.</p>
-    <p>Stopping early also saves energy: every step past the best point costs computation and makes the model worse on new data. Back to training: most parameters sit far from the loss, and their gradients come from the chain rule, next.</p>
-  </div>
 </section>
 
 <section class="screen" id="chainrule" data-step="3">
@@ -2359,12 +2130,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
-  </div>
-  <div class="notes">
-    <p>Training has to change every vector in the model, the encoder's too, but the model is only compared with the gold output at the very end. To know which way to change a vector at the start, we need to know how a change there reaches the end. The tool is the chain rule, one of the most general ideas in mathematics.</p>
-    <p>An everyday chain first. A car goes twice as fast as a bicycle, and a bicycle four times as fast as someone walking. Then the car goes four times two, eight times as fast as the walker. Along a chain, the rates multiply. (The example is George Simmons's, from his calculus textbook.)</p>
-    <p>In general: y is computed from u, and u is computed from x. How much y changes per change of x is how much y changes per change of u, times how much u changes per change of x. In symbols, dy over dx equals dy over du times du over dx. Each of these is a rate: how much the output of a step changes per unit change of its input. A longer chain just has more factors.</p>
-    <p>Why we need it: a model is a long chain of steps, from each of its vectors to the probability of the gold output. Training needs to know, for every vector, how that probability changes when the vector changes. That is the vector's gradient. The chain rule gives it, step by step, starting from the output and going back. The next screen does this for a whole model: backpropagation.</p>
   </div>
 </section>
 
@@ -2548,13 +2313,6 @@ print("they match" if count == expected else "they do not match: check the loop 
     </div>
     <iframe class="frame" title="Neural translation, step by step" data-src="../artifacts/mt.html?embed=train,enc,bound,ihad"></iframe>
   </div>
-  <div class="notes">
-    <p>What to take from this screen: a translation model is three tables of vectors, all learned from translated pairs; training raises the probability of each gold output; development data show what the training data cannot; the decoder writes the most probable word and builds on its own words; and a model writes what its training data says.</p>
-    <p>Tab 1, training. The 16 pairs are listed at the top. Part A, with next: one pair at a time. The encoder reads the inputs into the summary; at each output the decoder scores every possible output and the gold output is fed back; the update moves the gold output's row toward the state and the others away. Point at the curve under it: the probability of this pair's whole gold translation climbs. Part B: press Play training. The procedure switch: one pair per update, or all 16 added up. The count switch on the curve: counted in rounds, one pair at a time wins (all right from round 252 against 1612); counted in updates, all at once wins (1612 against 4032); on a GPU, time follows updates. Part C: the same training without unha tía miña, the development pair. At round 3000 the model gives its own “an aunt ‹end›” 0.456, the gold “an aunt of mine ‹end›” 0.359: a combination it never saw. Part D: training on, to 6000 rounds. All training pairs are right from round 313, the development pair from round 4217. Only the development data show that training longer helps.</p>
-    <p>Tab 2, the summary: ½ old + ½ new word. Switch between the short phrase and the long sentence: in the long one, tía's share fades to almost nothing.</p>
-    <p>Tab 3, the decoder writes. Choose a phrase and step with next: (a) scores and probabilities, the most probable word is written; (b) the state mixes in the word written; (c) for the first word, what each Galician word contributes to each score; (d) “an aunt of mine” is correct, but rare in English. Try the test phrases unha tía and unha veciña, and the model trained on 15.</p>
-    <p>Tab 4, a model trained on “I had an aunt”. Part A: the data, with I, had and who, words with no Galician counterpart. Part B: trained on all 24, it writes all of them right. Part C: unha tía miña cantaba held out; it writes “a colleague of mine sang”. The curve: the gold translation 0.015, what it writes 0.536: the model prefers its own translation, so this is a matter of the training data. The why block: at output 1, “I” 0.31 against “a” 0.69.</p>
-  </div>
 </section>
 
 <section class="screen" id="realwhy" data-step="3">
@@ -2607,7 +2365,7 @@ print("they match" if count == expected else "they do not match: check the loop 
       <ul class="points">
         <li>The bottleneck: the whole sentence squeezed into <b>one vector</b></li>
         <li>Bahdanau, Cho &amp; Bengio (2015): for every word it writes, the decoder <b>looks back</b> at every source word and computes how much to use each one: the <b>attention weights</b> (scores, then softmax, as for p)</li>
-        <li>They are not stored parameters: they are recomputed for every word written, from the state and the source vectors. But they are learned all the same: backpropagation trains the vectors and tables they are computed from, so the model learns from translated sentences where to look (“learning to align”, in the paper's title)</li>
+        <li>They are computed anew for every word written, from vectors that backpropagation trains (diagram, right)</li>
         <li>Which source word goes with which word written (<b>alignment</b>) comes out of the attention weights, with no hand-written rule</li>
         <li>Invented for translation, years before today's LLMs</li>
       </ul>
@@ -2906,16 +2664,38 @@ print("they match" if count == expected else "they do not match: check the loop 
   </g>
 </svg>
 <!--/FIG3A-->
+      <!--AWLEARN-->
+<svg class="svgfig" viewBox="0 0 740 180" role="img" aria-label="Where attention weights come from: the state and the source vectors give scores; softmax gives the attention weights; they weight the mix that produces the next word. The attention weights are not stored: they are computed anew for every word. The backward pass goes from the loss back to the state and the source vectors, which are trained by backpropagation." style="max-width:560px">
+  <defs>
+    <marker id="awA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--muted)"/></marker>
+    <marker id="awO" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--orange)"/></marker>
+  </defs>
+  <g font-size="15" text-anchor="middle">
+    <rect x="6" y="12" width="108" height="42" rx="8" fill="none" stroke="var(--green)" stroke-width="2"/>
+    <rect x="12" y="18" width="96" height="30" rx="5" fill="var(--green-soft)" stroke="var(--green)"/><text x="60" y="38">state</text>
+    <rect x="6" y="68" width="132" height="42" rx="8" fill="none" stroke="var(--green)" stroke-width="2"/>
+    <rect x="12" y="74" width="120" height="30" rx="5" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="72" y="94">source vectors</text>
+    <text x="12" y="130" font-size="13" text-anchor="start" style="fill:var(--green)">trained by backpropagation</text>
+    <path d="M114 36 L186 56" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
+    <path d="M138 90 L186 68" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
+    <rect x="190" y="46" width="92" height="30" rx="5" fill="none" stroke="var(--fg)"/><text x="236" y="66">scores</text>
+    <path d="M282 61 L338 61" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
+    <text x="310" y="52" font-size="12" class="muted">softmax</text>
+    <rect x="340" y="46" width="150" height="30" rx="5" fill="none" stroke="var(--orange)" stroke-width="2"/><text x="415" y="66">attention weights</text>
+    <text x="415" y="100" font-size="13" class="muted">not stored: computed anew</text>
+    <text x="415" y="116" font-size="13" class="muted">for every word written</text>
+    <path d="M490 61 L528 61" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
+    <rect x="530" y="46" width="64" height="30" rx="5" fill="none" stroke="var(--fg)"/><text x="562" y="66">mix</text>
+    <path d="M594 61 L622 61" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
+    <rect x="624" y="46" width="108" height="30" rx="5" fill="none" stroke="var(--fg)"/><text x="678" y="66">next word</text>
+    <path d="M678 150 L62 150" stroke="var(--orange)" stroke-width="2.5" marker-end="url(#awO)"/>
+    <text x="370" y="170" font-size="13" style="fill:var(--orange)">backward pass: from the loss back to the vectors the attention weights are computed from</text>
+  </g>
+</svg>
+<!--/AWLEARN-->
     </div>
   </div>
   <p class="src">Attention weights: Bahdanau, Cho &amp; Bengio, ICLR 2015 (arXiv:1409.0473), Figure 3(a), read from the paper and redrawn</p>
-  <div class="notes">
-    <p>We saw the problem: the encoder squeezes the whole sentence into one vector. The longer the sentence, the more of the early words is lost. Translation quality got worse as sentences got longer.</p>
-    <p>Bahdanau, Cho and Bengio fixed this in 2015. The decoder no longer gets only the last summary. It may look back at the encoder's vector for every source word. For every English word it writes, it decides how much to use each source word. These amounts are called attention weights. The idea is called attention.</p>
-    <p>Both pictures use the weights of their trained model, translating an English sentence into French. On the left, the decoder is about to write zone. It looks back at every English word, and the line width is the weight: most of it on Area, some on Economic. On the right, the same weights for every French word at once: each row is a French word being written, each column an English word, and the stronger the orange, the more weight. Mostly the orange runs along a diagonal: the words come in the same order. The blue box is where the order flips: European Economic Area becomes zone économique européenne, and the weights follow the words, not the positions. The green box: two English words, was signed, become three French ones, a été signé. One more detail: la puts some of its weight on Area, because the French noun there, zone, decides between la and le.</p>
-    <p>Finding which source word goes with which word of the translation is called alignment, one of the oldest problems in translation. The words do not match one to one, and the order can change. In our story, unha tía miña, three Galician words, becomes an aunt of mine, four English words: miña becomes of mine. Rule-based systems needed hand-written rules for alignment, for every language pair. Nobody told this model where to look: it learned these weights from translated sentences, with no separate alignment step.</p>
-    <p>Attention was invented for machine translation, years before it became the core of every modern large language model. The next screens take apart how such weights are computed, by hand.</p>
-  </div>
 </section>
 
 <section class="screen" id="qkv" data-step="4">
@@ -2925,13 +2705,13 @@ print("they match" if count == expected else "they do not match: check the loop 
       <ul class="points">
         <li><b>Query</b> <i>q</i>: what the decoder looks for, before the word it is about to write</li>
         <li><b>Key</b> <i>k</i>: what each source word offers to be found by</li>
-        <li><b>Score</b> = <i>q</i> · <i>k</i>, the dot product; <b>softmax</b> turns the scores into weights that add up to 1</li>
-        <li><b>Value</b> <i>v</i>: what each source word contributes; the mix is the sum of the values, each times its weight</li>
+        <li><b>Score</b> = <i>q</i> · <i>k</i>, the dot product; <b>softmax</b> turns the scores into attention weights that add up to 1</li>
+        <li><b>Value</b> <i>v</i>: what each source word contributes; the mix is the sum of the values, each times its attention weight</li>
         <li>On the attention page (next screen), the keys and the values are the same vectors: the encoder's, after each word</li>
       </ul>
     </div>
     <div class="col">
-      <svg class="svgfig" viewBox="-140 0 780 326" role="img" aria-label="The query, from the decoder about to write the next English word, is compared with the key of each source word, unha, tía, miña: score q · k, then softmax gives weights that add up to 1. The mix is the weighted sum of the source words' values, w1 v1 + w2 v2 + w3 v3, and goes into the decoder's state. Line width shows the weight; here most of it on tía." style="max-width:700px">
+      <svg class="svgfig" viewBox="-140 0 780 326" role="img" aria-label="The query, from the decoder about to write the next English word, is compared with the key of each source word, unha, tía, miña: score q · k, then softmax gives attention weights that add up to 1. The mix is the weighted sum of the source words' values, w1 v1 + w2 v2 + w3 v3, and goes into the decoder's state. Line width shows the weight; here most of it on tía." style="max-width:700px">
   <rect x="210" y="14" width="180" height="40" rx="6" fill="var(--orange-soft)" stroke="var(--orange)" stroke-width="1.5"/>
   <text x="300" y="40" text-anchor="middle" font-size="17">query <tspan font-style="italic">q</tspan></text>
   <text x="400" y="30" font-size="17" class="muted">the decoder, about to</text><text x="400" y="47" font-size="17" class="muted">write the next English word</text>
@@ -2950,20 +2730,15 @@ print("they match" if count == expected else "they do not match: check the loop 
   <rect x="405" y="150" width="90" height="34" rx="5" fill="none" stroke="var(--muted)" stroke-width="1"/><text x="450" y="173" text-anchor="middle" font-size="17" font-style="italic">miña</text>
   <rect x="405" y="190" width="90" height="30" rx="5" fill="var(--green-soft)" stroke="var(--green)" stroke-width="1.5"/><text x="450" y="211" text-anchor="middle" font-size="16">value <tspan font-style="italic">v</tspan><tspan font-size="11" dy="4">3</tspan></text>
   <line x1="450" y1="220" x2="300" y2="262" stroke="var(--green)" stroke-width="3" stroke-linecap="round"/>
-  <text x="-130" y="72" font-size="17" class="muted">score of each key: q · k;</text><text x="-130" y="89" font-size="17" class="muted">softmax: weights that</text><text x="-130" y="106" font-size="17" class="muted">add up to 1</text>
-  <text x="-130" y="173" font-size="17" class="muted">each source word →</text><text x="-130" y="248" font-size="17" class="muted">values, times the weights</text>
+  <text x="-130" y="72" font-size="17" class="muted">score of each key: q · k;</text><text x="-130" y="89" font-size="17" class="muted">softmax: attention weights</text><text x="-130" y="106" font-size="17" class="muted">that add up to 1</text>
+  <text x="-130" y="173" font-size="17" class="muted">each source word →</text><text x="-130" y="248" font-size="17" class="muted">values × attention weights</text>
   <rect x="190" y="264" width="220" height="34" rx="6" fill="var(--green-soft)" stroke="var(--green)" stroke-width="1.5"/>
   <text x="300" y="287" text-anchor="middle" font-size="16">the mix: w<tspan font-size="11" dy="4">1</tspan><tspan dy="-4">v</tspan><tspan font-size="11" dy="4">1</tspan><tspan dy="-4"> + w</tspan><tspan font-size="11" dy="4">2</tspan><tspan dy="-4">v</tspan><tspan font-size="11" dy="4">2</tspan><tspan dy="-4"> + w</tspan><tspan font-size="11" dy="4">3</tspan><tspan dy="-4">v</tspan><tspan font-size="11" dy="4">3</tspan></text>
   <text x="420" y="286" font-size="17" class="muted">→ the decoder's state</text>
-  <text x="300" y="318" text-anchor="middle" font-size="15" class="muted">thicker line: larger weight (weights made up for the picture)</text>
+  <text x="300" y="318" text-anchor="middle" font-size="15" class="muted">thicker line: larger attention weight (made up for the picture)</text>
 </svg>
     </div>
-  <p style="grid-column:1/-1;margin:4px 0 0;padding:10px 16px;border-left:4px solid var(--orange);background:var(--orange-soft);border-radius:4px;line-height:1.45">Like a search in a library. You come with a question: the <b>query</b>. Every book has a label on its spine: its <b>key</b>. You compare your question with each label, and the better the match, the more of that book you read: the <b>weight</b>. What you take away is a blend of the books' contents, the <b>values</b>, mostly from the best matches. The decoder does this before every word it writes, each time with a new question.</p>
-  </div>
-  <div class="notes">
-    <p>Before we compute attention by hand, the three names you will meet everywhere. Think of a search. The query is what you are searching for: here, what the decoder needs before the word it is about to write. Each source word has a key, a short descriptor the query is compared against, and a value, the content you get back from it.</p>
-    <p>The comparison is the dot product of the query with each key: the score. Softmax, as in skip-gram, turns the scores into weights that are all positive and add up to 1. The mix is the sum of the values, each multiplied by its weight, and it goes into the decoder's state. In the picture, a thicker line means a larger weight; the weights are made up for the picture, with most of the weight on tía.</p>
-    <p>On the next page the model is small enough to compute by hand, and there the keys and the values are the same vectors: the encoder's vector after each Galician word. In real models each of the three is computed from a word's vector by its own learned table (attention page, section 6, step 4); in self-attention every word makes its own query.</p>
+  <p style="grid-column:1/-1;margin:4px 0 0;padding:10px 16px;border-left:4px solid var(--orange);background:var(--orange-soft);border-radius:4px;line-height:1.45">Like a search in a library. You come with a question: the <b>query</b>. Every book has a label on its spine: its <b>key</b>. You compare your question with each label, and the better the match, the more of that book you read: the <b>attention weight</b>. What you take away is a blend of the books' contents, the <b>values</b>, mostly from the best matches. The decoder does this before every word it writes, each time with a new question.</p>
   </div>
 </section>
 
@@ -2977,12 +2752,6 @@ print("they match" if count == expected else "they do not match: check the loop 
     </div>
     <iframe class="frame" title="Attention, computed by hand" data-src="../artifacts/attention.html?embed=look,lookatt"></iframe>
   </div>
-  <div class="notes">
-    <p>What to take from this screen: without attention, the decoder gets one summary in which tía has only 0.25, and this model needs more than 0.35 of tía to write “an”; with attention, the decoder builds a new mix of all the encoder's vectors before every English word, and the mix for “an” has 0.44 of tía.</p>
-    <p>First, say why this model fails where the translation page's model succeeded. The translation page's model gets this short phrase right; the model here is made up, small enough to compute by hand, and built to fail the way a model without attention fails on our long sentence, where 29 more words and marks follow tía. Section 4 shows that real failure.</p>
-    <p>Section 1. Step 1: one dimension per Galician word, so each word vector is a 1 on its own axis (blue squares in the picture). Step 2: the encoder, as on the translation page, half the old vector plus half the word's vector; the summary is 0.125 unha, 0.25 tía, 0.5 miña (the last column of the table, outlined in orange, and the point marked “= the summary” in the picture). Step 3: the decoder state has eleven dimensions; the first three are the summary, the last eight record the English words written so far. Step 4: each English word's score is the dot product of its vector (a ring in the picture) with the state. The bars: blue = the first three dimensions (the part the picture shows), green = the last eight, black mark = the dot product. Before the bias, “an” 8.5 beats “a” 4.5: the green parts are equal, tía makes the difference. Step 5: where such values come from, a made-up training run on two example translations. Step 6: the bias, one extra value per word, added to its score whatever the state. Of the 8 example translations that start with “a” or “an”, 6 start with “a”, so training gives “a” a bias of 5.6. Each unit of tía is worth 16 points between “an” and “a”, so “an” needs more than 5.6 ÷ 16 = 0.35 of tía (the red mark); the summary has 0.25. Parts 5 to 8 compute softmax step by step (e to the power of each score, the sum, each bar's share): “a” 0.83, “an” 0.17. Section 2 uses the same softmax for its weights. Step 7: the whole phrase, “a friend of mine”. Good English, wrong translation.</p>
-    <p>Section 2: only the first three dimensions of the state change. Step 1: the query, (0, 6, 0) for the first two words, scores each encoder vector (here called a key); softmax turns the scores into weights. Step 2: the mix, the encoder vectors (in this role called values) added up with those weights: 0.44 along tía. Step 3: the mix goes into the state, and “an” wins. Step 4: the rest of the phrase; after “aunt” the query shifts toward miña. The result: “an aunt of mine”.</p>
-  </div>
 </section>
 
 <section class="screen fill" id="qk-i" data-step="4">
@@ -2995,11 +2764,6 @@ print("they match" if count == expected else "they do not match: check the loop 
     </div>
     <iframe class="frame" title="Query and key, and two trained models" data-src="../artifacts/attention.html?embed=qk,walk"></iframe>
   </div>
-  <div class="notes">
-    <p>What to take from this screen: a query's numbers are rewards, one per dimension, and setting them chooses which key is read, so indirectly which word is written; each word needs its own query. And on the long sentence, two trained models that differ only in attention: the one without it loses tía and writes “A friend of mine”.</p>
-    <p>Section 3, in eight steps (Next step). The frame throughout: the decoder is about to write one word of “an aunt of mine”, and the query decides the mix, and through the mix the word. The page names queries by their rewards: “tía × 6” is (0, 6, 0). Steps 1 to 4: word 1, “an”, which needs more than 0.35 of tía in the mix; tía × 6 gives 0.44. Step 5: miña × 6 reads the key after miña, and the decoder writes “a”. Step 6: tía × 2 ranks the keys right but the weights spread out (0.19, 0.51, 0.31): the mix drifts toward the average, and the decoder writes “a” again. Step 7: the same tía × 6 at word 3, “of”, writes ‹end›: each word needs its own query. Step 7's threshold: “of” needs more than 0.2 of miña (‹end› has a bias of 1.6). Step 8: students choose the word and the query. The page's question: one query for all five words? Yes, by small margins: tía × 6, miña × 3 (its own button).</p>
-    <p>Section 4 (the second tab). Two small models translate our whole sentence: same training data, same number of updates, same size; one difference, attention. Step 1: the translations, and the probability of each whole translation: without attention, what it writes gets 0.00093 and the gold translation 0.000010; with attention, it writes the gold translation, 0.27. On the translation page, the held-out phrase failed for lack of training examples; here both models had the same data, so the difference is due to attention. Step 2: the encoder's vectors, 8 learned numbers each (blue positive, pink negative; key in the strip), computed one from the other as in section 1; the last is the summary. This is the encoder of the model with attention; step 3 shows the other one. Step 3: the first word without attention, “a” 0.77: tía is the second of the sentence's 31 words and marks, and 29 more changed the vector before the summary was made. Step 4: with attention, the biggest weight, 0.47, is on tía, and “an” gets 0.95; this model has no rule for the query, its decoder state plays that part, shaped by training. (Step 4 also gives escravo 0.21; the screen says the weights do not show why: the next slide takes this up.) Step 5: each model goes on from its own word: after “a”, friend, neighbor and cousin share the probability (0.39, 0.31, 0.28) and aunt is out of reach; after “an”, aunt 0.96. Step 6: the saying loses “says and master of what one” without attention; in 500 test sentences the last verb comes first 370 times without attention, 41 with.</p>
-  </div>
 </section>
 
 <section class="screen" id="bigweight" data-step="4">
@@ -3010,14 +2774,14 @@ print("they match" if count == expected else "they do not match: check the loop 
       <div class="col">
         <ul class="points">
           <li>The small model with attention from the previous screen (section 4) has written “an aunt of mine, who solved everything”. Next: “with”.</li>
-          <li class="frag">Largest weight before “with”: the <b>full stop</b>, not <i>con</i> (“with”)</li>
+          <li class="frag">Largest attention weight before “with”: the <b>full stop</b>, not <i>con</i> (“with”)</li>
           <li class="frag"><b>Test:</b> replace the mix the model reads (table, right). It still writes “with”: the full stop does not matter here.</li>
           <li class="frag"><b>Why:</b> in all 5,000 training sentences, “everything” is followed by “with”. The English already written decides the next word.</li>
-          <li class="frag">A weight shows where the model looked, not what it needed.</li>
+          <li class="frag">An attention weight shows where the model looked, not what it needed.</li>
         </ul>
       </div>
       <div class="col">
-        <p class="label">The weights before “with”: the four largest of 31, one per Galician word or mark</p>
+        <p class="label">The attention weights before “with”: the four largest of 31, one per Galician word or mark</p>
         <table class="plain">
           <tr><td>. (the full stop)</td><td class="num">0.54</td></tr>
           <tr><td><i>solucionaba</i> (solved)</td><td class="num">0.12</td></tr>
@@ -3034,27 +2798,13 @@ print("they match" if count == expected else "they do not match: check the loop 
       </div>
     </div>
   </div>
-  <div class="notes">
-    <p>The model: the small trained translation model with attention from the attention page, sections 4 and 5, with vectors of 8 numbers. Its training data are 5,000 sentences built from our sentence by swapping words: other relatives, other possessives, other verbs and nouns. The model on this screen is the one with attention, reading the Galician through attention weights as on the earlier screens.</p>
-    <p>Before each English word, the model gives every Galician word and mark a weight; the weights add up to 1, and the model reads them mixed in these proportions. Before “with”, <i>con</i>, the Galician for “with”, gets only 0.10.</p>
-    <p>On the attention page, section 5 (open the full page: it is not on these screens), with attention, 8 dimensions, the 0.54 on the full stop is at English word 9. The table comes from running the saved model again with the mix replaced.</p>
-    <p>Say it plainly: the attention weights at this word land on the full stop, but the full stop is not what makes the model write "with". The English so far, "who solved everything", already settles it: in every training sentence "everything" is followed by "with". Taking the Galician away entirely, all zeros, still gives 0.997.</p>
-    <p>The evidence that the weights here are arbitrary: three models trained on the same data, with 8, 16 and 64 numbers per vector, look at three unrelated places (the full stop, con, e), and all three write "with". If someone asks whether the model ignores what it reads: no. Given only the vector of refráns (proverbs), the probability of "with" drops to 0.06. A mix that points strongly to another word can take over; this one doesn't need to.</p>
-    <p>The take-away for the real model on the next screen: a heat map of attention weights shows where the model looked, not what it used. In the real model, several heads put about half of their weight on the commas, the quotation marks and the end marker ‹end›, although these are only 5 of the 35 pieces the real model reads in our sentence (words or parts of words, as the next screen shows; the small model reads 31 words and marks).</p>
-  </div>
 </section>
 
 <section class="screen fill" id="real-i" data-step="4">
-  <header><span class="kind">Interactive</span><h2>From a row of weights to a real model's grids</h2></header>
+  <header><span class="kind">Interactive</span><h2>From a row of attention weights to a real model's grids</h2></header>
   <div class="body">
     <div class="tabs"><a class="open" href="../artifacts/attention.html#real" target="_blank" rel="noopener">Open the full page</a></div>
     <iframe class="frame" title="From a row of weights to a real model's grids" data-src="../artifacts/attention.html?embed=real"></iframe>
-  </div>
-  <div class="notes">
-    <p>What to take from this screen: one row of an attention grid is one English word's weights over the Galician words, as computed by hand in section 2; a head is one run of section 2's computation (query, scores, weights, mix) with its own learned query, key and value tables, so it makes one grid; a layer runs several heads on the same vectors and combines their mixes into one new vector per word, and the next layer starts from those; a real model stacks several layers, here 6 × 8 = 48 grids. The weights show where the model looks: sometimes that fits a mistake, sometimes not.</p>
-    <p>Six steps, on the short phrase unha tía miña. Step 1: before “an”, section 2's three weights as bars, then the same numbers as one row of cells. Step 2: one row per English word: the grid. Step 3: the real model, opus-mt, on the same phrase. One of its grids (layer 5, head 3) reads the same way: “Aunt” puts 0.98 on tía. But it writes “A Aunt of mine”. Choosing “An” needs tía, as for the made-up model, and the row of “A” puts 0.00 on tía in this head, 0.16 on average over all 48 grids: when it chose the article, it looked at tía very little. The capital in “Aunt” is a second slip. (On the whole sentence, below on this screen, the same model writes “An aunt of mine”.) Step 4: what a head is, and the 8 heads of layer 5 as 8 grids. Step 5: all 48 grids: layer 1 spreads its weight or rests it on the end marker; in layer 5 most heads, and in layer 6 several, point each English word at the Galician word it translates. Step 6: down to the whole sentence.</p>
-    <p>The whole sentence: press Play the translation, then click aunt. Then the three buttons “Three places where the translation goes wrong”: in all three, layer 6, head 2 looks at the right Galician word, and the model still writes something wrong. So here the weights do not fit the mistake; with “A Aunt” they did.</p>
-    <p>Step 4 multiplies a vector by a table. If the class needs it, show the Refresher screen (Contents, last part): multiplying matrices.</p>
   </div>
 </section>
 
@@ -3075,27 +2825,19 @@ print("they match" if count == expected else "they do not match: check the loop 
       <div class="fig"><img src="img/self-attention.png" alt="Self-attention from it to the animal"><span class="cap">Layer 5; coloured squares: its 8 heads (orange: the one drawn); right: “it”, left: where it looks, darker = more; “tire·d”: one word, two pieces. Illustration: jalammar.github.io/illustrated-transformer · Source: Vaswani et al., NeurIPS 2017 (arXiv:1706.03762)</span></div>
     </div>
   </div>
-  <div class="notes">
-    <p>Everything so far was attention across two languages: the decoder, writing English, looks back at the Galician. Vaswani and colleagues showed in 2017 that the same mechanism also works inside one sentence: every word looks at every word of the same sentence, itself included. That is self-attention.</p>
-    <p>The classic example: in “The animal didn't cross the street because it was tired”, which noun does “it” refer to? No hand-written rule decides; the same query, key and weights arithmetic as before, inside one sentence. The next interactive screen shows both: the real model's encoder looking inside our Galician sentence (attention page, section 7), and a tiny model learning this very “it” sentence (section 8).</p>
-  </div>
 </section>
 
 <section class="screen" id="multihead" data-step="5">
   <header><span class="kind">Self-attention</span><h2>Several heads at once: multi-head attention</h2></header>
   <div class="body">
     <ul class="points">
-      <li>Several heads side by side, each with its own grid of weights and its own mix; one learned table combines the mixes into one new vector per word (the real model: 8 heads)</li>
+      <li>Several heads side by side, each with its own grid of attention weights and its own mix; one learned table combines the mixes into one new vector per word (the real model: 8 heads)</li>
     </ul>
     <div class="flow">
       <div class="box">a vector per word</div><span class="arr">⇉</span>
       <div style="display:grid;gap:6px"><div class="box g">head 1</div><div class="box g">head 2</div><div class="box g">head 3</div><div class="box g">head 4</div></div>
       <span class="arr">⇉</span><div class="box">combined: one new vector per word</div>
     </div>
-  </div>
-  <div class="notes">
-    <p>The attention page, section 6, step 4, already showed what a head is: one run of the attention computation (query, scores, weights, mix) with its own learned tables for queries, keys and values, so one grid of weights and one mix. A transformer runs several heads side by side in every layer, here 4 in the picture, 8 in the real model, and combines their mixes into one vector per word. Each head can follow a different relation: which word goes with which noun, which verb with which subject, what a pronoun refers to.</p>
-    <p>Splitting the work into more heads does not by itself add arithmetic: in Notebook 01d's FLOP count, a layer's cost depends on the vector size, the feed-forward size and the number of words, not on the number of heads. (The number of stored scores, n × n per head, does grow with the heads.) The cost levers are wider vectors and more blocks.</p>
   </div>
 </section>
 
@@ -3108,10 +2850,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <a class="open" href="../artifacts/attention.html#self" target="_blank" rel="noopener">Open the full page</a>
     </div>
     <iframe class="frame" title="Self-attention heads" data-src="../artifacts/attention.html?embed=self,who"></iframe>
-  </div>
-  <div class="notes">
-    <p>This is the encoder of the real model, reading our Galician sentence. Each small square grid is one head's grid: rows are the words that look, columns the words looked at. The frame opens at encoder layer 6, head 7, with miña chosen: it looks back at tía, with weight 0.94. (Above it, the picture contrasts the chain of sections 1–5 with every piece looking at every piece; since nothing waits in order, each piece's vector gets a position vector added at the start.) This head looks at the previous word. Choose layer 3, head 4 (miña now looks at the comma after it, 0.98): this head looks at the next word.</p>
-    <p>Press the tab Who decides what a head does. A tiny model with 2 layers of 2 heads learns 96 sentences like “The animal didn't cross the street because it was tired” (or “… because it was wide”). It has to find what “it” refers to. Choose start A, B or C and press Train. Before training, start A gets 13 of 96 right (B 12, C 9): random values still give an answer, and they can be worse than guessing (about 48). The table on the right always shows the end of training; its last column switches one head off. The three runs differ only in their random start. Start A: head 1 of layer 2 follows the adjective, as in the famous picture (0.99 on the animal for tired, 0.63 on the place for wide). Start B: the job is split: head 2 of layer 2 finds the animal (1.00), head 1 the place (0.75). Start C: no head of layer 2 looks at either noun much (at most 0.26), yet every answer is right: the information reaches “it” through the other words, in layer 1. In every run, switching off a single head costs answers, so no one head carries the whole job. A model does not have to solve a task the way a person would describe it.</p>
   </div>
 </section>
 
@@ -3129,10 +2867,6 @@ print("they match" if count == expected else "they do not match: check the loop 
     </div>
     <div class="col"><div class="fig"><img src="img/encoder-decoder-stack.png" alt="A stack of encoders feeding a stack of decoders"><span class="cap">Credit: jalammar.github.io/illustrated-transformer</span></div></div>
   </div>
-  <div class="notes">
-    <p>A transformer is not one attention computation: it is the same block, multi-head self-attention followed by a small feed-forward network, repeated many times. The real translation model on the attention page has 6 blocks in its encoder and 6 in its decoder: the 6 layers of its 48 grids. GPT-3 stacks 96.</p>
-    <p>Each block refines every word's vector a little more. Every word passes through every block, so the number of blocks multiplies the computation for every word: fewer blocks, less computation, and usually somewhat lower quality.</p>
-  </div>
 </section>
 
 <section class="screen" id="block" data-step="6">
@@ -3146,10 +2880,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       </ul>
     </div>
     <div class="col"><div class="fig"><img src="img/encoder-block.png" alt="One encoder block: self-attention, then feed-forward"><span class="cap">Credit: jalammar.github.io/illustrated-transformer</span></div></div>
-  </div>
-  <div class="notes">
-    <p>What one block contains: two parts, always in this order. First, self-attention: each word's vector is updated with a mix of every word's vector, as on the attention page. This is the only place where information moves between words. Second, a feed-forward network: a small network run on each word's vector separately, with no mixing across words. Most of the parameters, and most of the computation for each word, are here.</p>
-    <p>Decoder blocks have one more part between the two: cross-attention, the decoder looking at the encoder's output. That is the attention of the attention page's section 6, where each English piece looked at the Galician pieces. (The real architecture also adds each part's input to its output and normalizes the vectors; that is what keeps deep stacks trainable. We skip the details.)</p>
   </div>
 </section>
 
@@ -3279,10 +3009,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <li>“unha tía miña” was three words; a whole document is thousands</li>
     </ul>
   </div>
-  <div class="notes">
-    <p>Self-attention computes a score for every pair of words in the input, each word with every word, itself included: for n words, n × n scores. Step through the board: 4 words, 16 scores; 8 words, 64. Twice the words, four times the scores. That is quadratic growth.</p>
-    <p>“unha tía miña” was three words. The whole story is thousands. A caution, which Notebook 01d measures: attention is only part of the work. At the lengths of a short text, the feed-forward parts, which grow only in proportion to the words, take most of the time, so the whole encoder grows by about 2 per doubling there. Attention's own time grows by about 4 per doubling already from 512 tokens (pieces of words, as on the real model's screen; Notebook 01d times it alone), and above about 3,000 tokens it is the larger part of the computation.</p>
-  </div>
 </section>
 
 <section class="screen" id="act-attn" data-step="6">
@@ -3298,11 +3024,6 @@ print("they match" if count == expected else "they do not match: check the loop 
         <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01d_attention_playground-advanced.ipynb" target="_blank" rel="noopener">Open in Colab: advanced</a>
       </div>
     </div></div>
-  </div>
-  <div class="notes">
-    <p>Now you work with the real translation model yourself. Open Notebook 01d in Colab. It needs no GPU.</p>
-    <p>Part A finds what the heads do. The notebook scores all 48 heads of the encoder: how much each one looks at the previous token, the same token, or the next token. Check that you find the heads from the screen Self-attention heads (attention page, section 7). Then put in a Galician sentence of your own, and see whether the same heads win.</p>
-    <p>Part B is about cost. The number of attention scores grows like n squared, as on this screen. The notebook then times the whole encoder, from 32 to 512 tokens. Look at what each doubling of the text does to the time: is it four times, or less? The last cells explain the answer, by counting where the computation of a transformer goes.</p>
   </div>
 </section>
 
@@ -3321,10 +3042,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <li>One word at a time. Each word written gets its own key and value (the decoder's self-attention looks at the words written so far); the <b>KV cache</b> keeps them, so it grows with every word</li>
       <li>Translating the rest of our story this way: the cache keeps growing the whole time</li>
     </ul>
-  </div>
-  <div class="notes">
-    <p>Training can process a whole sentence at once, all positions in parallel, because the gold output is known. Writing new text cannot: the model writes one word, feeds it back, and only then can it write the next one, as on the translation page's section 3.</p>
-    <p>To avoid recomputing the keys and values of all earlier words at every step, models keep them: the KV cache. Each new word adds its own key and value and attends to all the cached ones. The cache grows with every word written, so later words cost more than earlier ones. This one-word-at-a-time loop, with a growing cache, is why generating a long text costs much more than reading it.</p>
   </div>
 </section>
 
@@ -3346,10 +3063,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       </ul>
     </div>
   </div>
-  <div class="notes">
-    <p>Three things set the cost of using a model, at every query. Its size: more parameters, wider vectors and more blocks mean more computation for every word. The length of the input: attention compares every word with every word, so twice the text means four times the comparisons. And the length of the output: one word at a time, each step with a bigger cache.</p>
-    <p>So a big model costs not only to train and to store: every use of it costs, and that cost grows with the size of the model and the length of the text. Both are levers you can measure, as the notebooks do.</p>
-  </div>
 </section>
 
 <div class="part" id="part-backmt"><h1>Back to translation</h1></div>
@@ -3366,10 +3079,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <li>But: usually far more expensive per translation than a dedicated MT model</li>
     </ul>
   </div>
-  <div class="notes">
-    <p>Back to translation, with what we now know about cost. A general-purpose LLM can translate between many of the 100+ languages it was trained on: one model instead of one per language pair, and you steer it with an instruction, such as “formally” or “keep the idioms”.</p>
-    <p>But, as the previous screen showed, every word it reads or writes passes through a much bigger model, and the instruction is read too: usually far more computation per translation than a dedicated model like opus-mt. Notebook 01e measures exactly this.</p>
-  </div>
 </section>
 
 <section class="screen" id="galician" data-step="0">
@@ -3381,10 +3090,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <li>On a Galician text-completion test, the 1.3B model beat all the models it was compared with, including a Portuguese model five times its size</li>
     </ul>
     <p class="src">Source: Gamallo et al., “A Galician-Portuguese Generative Model,” EPIA 2024; Proxecto Nós (USC)</p>
-  </div>
-  <div class="notes">
-    <p>“100+ languages” sounds comprehensive, but in most mainstream LLMs Galician is a tiny share of the training text, in the words of a paper that studied it, “almost residual”.</p>
-    <p>The fix that worked was not a bigger general model but a smaller dedicated one: 1.3 billion parameters, trained on Galician and Portuguese text (Gamallo et al. 2024; Proxecto Nós at the University of Santiago de Compostela works on such models). On a test that asks models to complete Galician sentences, it got the last word exactly right 40% of the time; the other models it was compared with, of the same size or up to 7 billion parameters, at most 27% (Gamallo et al. 2024, Table 2). The same pattern as opus-mt: a model built for the task can be both smaller and better at it.</p>
   </div>
 </section>
 
@@ -3414,13 +3119,6 @@ print("they match" if count == expected else "they do not match: check the loop 
     </div>
   </div>
   </div>
-  <div class="notes">
-    <p>Before the notebook, a short look at the task of Notebook 01a: question answering.</p>
-    <p>The model gets a few short documents, about green AI, and a question. It has to answer from the documents, in one short sentence. The model is Qwen 2.5, with 1.5 billion parameters: a small general-purpose language model, small enough for a free Colab GPU.</p>
-    <p>How do we know if an answer is right? Each question has a reference answer. For example: what does the acronym PUE stand for? The reference is “power usage effectiveness”. An answer counts as right if it contains the reference as whole words, ignoring capital letters: “rag” does not count inside “average”, and “0.3” does not count inside “10.3”. Accuracy is the number of right answers divided by the number of questions.</p>
-    <p>This check is simple and costs almost nothing. But it is not perfect: a right answer in other words counts as wrong. Keep that in mind when you read your accuracy.</p>
-    <p>You run the questions twice: once with the documents, and once without them. Then you compare. How much do the documents add to accuracy? And how much do they add to the energy, since the model now reads much more text? This question comes back in Session 3, with retrieval.</p>
-  </div>
 </section>
 
 
@@ -3444,11 +3142,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       </div>
     </div></div>
   </div>
-  <div class="notes">
-    <p>Now it is your turn. Notebook 01a is the baseline for the whole course.</p>
-    <p>The task is question answering over a small set of documents. Every run is measured with CodeCarbon, the tool from the measurement screens. It reports energy and CO2-equivalent, next to the share of right answers. The notebook runs the quiz twice: once with the documents, and once without them, to see what the model knows on its own. Both runs go into your leaderboard file.</p>
-    <p>Open the notebook in Colab. Choose Runtime, Change runtime type, T4 GPU. At the end, download the file leaderboard.csv: every later session adds rows to it.</p>
-  </div>
 </section>
 <section class="screen" id="act-nb1e" data-step="0">
   <header><span class="kind">Activity · 40–60 minutes, individual, if time allows</span><h2>Notebook 01e: Translation and its evaluation</h2></header>
@@ -3468,11 +3161,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       </div>
     </div></div>
   </div>
-  <div class="notes">
-    <p>If there is time, continue with Notebook 01e. It follows the history of machine translation from this session.</p>
-    <p>Part 1 translates a short Galician passage that contains our sentence, in four ways. First a rule-based system, Apertium. It is a real system that is still maintained, and it still cannot reorder the words: it writes something like "a mine aunt". Then a small statistical system, IBM Model 1. It learns word translations from 24 short phrase pairs, then translates word by word, with no reordering. Then the dedicated neural model, opus-mt from Helsinki. And last, the general-purpose language model from Notebook 01a. CodeCarbon measures each one.</p>
-    <p>Part 2 grades the translations in three ways, plus an optional second judge that you ask by hand in a chat tool. BLEU counts n-grams shared with a reference translation; it costs almost nothing. BERTScore compares the translations with embeddings, so it needs a neural model. And an LLM can act as the judge. The notebook measures the cost of each way of grading, next to the score it gives.</p>
-  </div>
 </section>
 
 <section class="screen" id="shareout" data-step="0">
@@ -3483,13 +3171,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <li>Notebook 01d: per doubling of the input, how much did the whole encoder's time grow, and attention's alone?</li>
       <li>Notebook 01e: how many orders of magnitude separated your cheapest and priciest approach? Did the three metrics agree?</li>
     </ul>
-  </div>
-  <div class="notes">
-    <p>Before we wrap up, compare notes with your neighbor.</p>
-    <p>On the baseline: what energy and emissions did you measure? How close were your numbers to your neighbor's, with the same model on similar Colab hardware? What was your accuracy, and what went wrong in the misses? Did CodeCarbon warn that it did not recognize your hardware? What does that tell you about trusting a single carbon number?</p>
-    <p>On translation: how many orders of magnitude separated the cheapest and the most expensive approach? How did each system introduce the aunt: "my aunt", "an aunt of mine", "I had an aunt who", or not at all? Why can neither the rule-based nor the statistical system write "I had an aunt who"?</p>
-    <p>On attention: in Notebook 01d, did the attention time grow by about 4 for every doubling of the input, and the whole encoder by less? Which heads did you find?</p>
-    <p>On evaluation: did BLEU, BERTScore and the LLM judge agree on which translation was best?</p>
   </div>
 </section>
 
@@ -3509,12 +3190,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <li>Both are measured against today's baseline, with the same method.</li>
     </ul>
   </div>
-  <div class="notes">
-    <p>To close, what comes next. Today you measured the baseline: a language model, used as it is.</p>
-    <p>In Session 2 we keep the same model and quantize it. Each of its numbers is stored with fewer bits. The model needs less memory, and often less energy. The question is whether the quality of the answers holds.</p>
-    <p>In Session 3 we change how we use the model. Retrieval-augmented generation first finds the passages of the documents that are relevant to the question, and gives the model only those. Remember from step 6 that attention cost grows with the length of the text. So less text means less computation for every question.</p>
-    <p>Both changes are measured against today's baseline, with the same method, so you can compare them on equal terms.</p>
-  </div>
 </section>
 
 <section class="screen titlescreen" id="thanks" data-step="0">
@@ -3525,9 +3200,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <div class="logos"><img src="img/logo-inditexudc.png" alt="Cátedra Inditex–UDC de Algoritmos Verdes"></div>
       <a href="https://catedrainditexalgoritmosverdes.com/" class="mono">catedrainditexalgoritmosverdes.com</a>
     </div>
-  </div>
-  <div class="notes">
-    <p>That's Session 1 — from one Galician sentence, through counting, vectors, and attention, to a working, measured baseline you built yourself. Thank you for your attention. See you next time.</p>
   </div>
 </section>
 
@@ -3612,10 +3284,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
-  </div>
-  <div class="notes">
-    <p>Let's actually multiply these, since watching the arithmetic happen is worth more than being told the rule. Top-left entry of the result: take row 1 of the first matrix, column 1 of the second, multiply matching entries, and add them up: 1 times 2, plus 2 times 1, plus 0 times 0, that's 4. Do that for every row-column pair and you get the full result. That's genuinely the whole operation, dot products, one per output entry, nothing else going on.</p>
-    <p>Now the special case, because it's exactly what shows up when a network reads a word. A one-hot vector is just a vector with a single 1 and the rest zeros. Multiply it by a matrix the same way, row times column, and every row except the one lined up with that 1 gets multiplied by zero and disappears entirely. What's left is exactly that one row, copied out untouched. That's not some clever trick the network does on purpose, it's just what the arithmetic already does on its own the moment one side is a one-hot vector.</p>
   </div>
 </section>
 
@@ -4034,6 +3702,7 @@ function exit() {
   screens[cur].scrollIntoView({ block: "start" });
 }
 function openNotes() {
+  if (!document.querySelector(".notes")) return;
   const w = window.open(location.pathname + "?notes", "lesson-notes", "width=980,height=760");
   if (!w) $("pNotes").textContent = "Allow pop-ups for notes";
 }
@@ -4042,6 +3711,7 @@ $("pPrev").onclick = prev;
 $("pNext").onclick = next;
 $("pSkip").onclick = skip;
 $("pNotes").onclick = openNotes;
+if (!document.querySelector(".notes")) $("pNotes").hidden = true;   // this lesson has no speaker notes
 $("pExit").onclick = exit;
 // present mode's contents: every screen under its part; a click jumps there
 {
