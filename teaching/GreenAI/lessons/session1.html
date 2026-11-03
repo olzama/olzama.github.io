@@ -2607,7 +2607,7 @@ print("they match" if count == expected else "they do not match: check the loop 
       <ul class="points">
         <li>The bottleneck: the whole sentence squeezed into <b>one vector</b></li>
         <li>Bahdanau, Cho &amp; Bengio (2015): for every word it writes, the decoder <b>looks back</b> at every source word and computes how much to use each one: the <b>attention weights</b> (scores, then softmax, as for p)</li>
-        <li>Attention weights are computed in the forward pass, new for every word written; training does not set them. Backpropagation trains the vectors they are computed from, on translated sentences</li>
+        <li>They are not stored parameters: they are recomputed for every word written, from the state and the source vectors. But they are learned all the same: backpropagation trains the vectors and tables they are computed from, so the model learns from translated sentences where to look (“learning to align”, in the paper's title)</li>
         <li>Which source word goes with which word written (<b>alignment</b>) comes out of the attention weights, with no hand-written rule</li>
         <li>Invented for translation, years before today's LLMs</li>
       </ul>
