@@ -1036,15 +1036,15 @@ const init6 = () => {
     const q = H.q[r], sc = H.sc[r], w = H.w[r], mix = H.mix[r], word = ROWS[r];
     const lab = s => `<div class="k" style="padding-bottom:0;font-family:var(--font-body);color:var(--muted);font-size:0.78rem;max-width:9em;line-height:1.2">${s}</div>`;
     return `<p class="label">1 · what section 2 computed before “${word}” (its steps 1 and 2)</p>
-      <div class="eq">${H.rowsOf()}${H.col(q, "the query", "cur")}<div class="op">·</div>${H.enc.map((v, j) => H.col(v, `after <i>${SRC_H[j]}</i>`)).join("")}${lab("the encoder's vectors, as keys")}<div class="op">→</div><div class="k" style="padding-bottom:36px">scores ${sc.map(H.f).join(", ")}<br>→ softmax →</div></div>
+      <div class="eq">${H.rowsOf()}${H.col(q, "the query", "cur")}<div class="op">·</div>${H.enc.map((v, j) => H.col(v, `after <i>${SRC_H[j]}</i>`)).join("")}${lab("the keys: encoder vectors × the identity matrix")}<div class="op">→</div><div class="k" style="padding-bottom:36px">scores ${sc.map(H.f).join(", ")}<br>→ softmax →</div></div>
       ${noClick(grid([word], SRC_H, [w], { n: 1, sel: 0, cw: 50 }))}
-      <div class="eq"><div class="k" style="padding-bottom:0">the weights, the row of “${word}” on the left · × the encoder's vectors as values, added up →</div>${H.rowsOf()}${H.col(mix, "the mix", "cur")}${lab("→ into the decoder state (its step 3)")}</div>
-      <p class="label" style="margin-top:12px">2 · a head: the same computation, with three learned tables</p>
+      <div class="eq"><div class="k" style="padding-bottom:0">the weights, the row of “${word}” on the left · × the values (the same vectors), added up →</div>${H.rowsOf()}${H.col(mix, "the mix", "cur")}${lab("→ into the decoder state (its step 3)")}</div>
+      <p class="label" style="margin-top:12px">2 · a head: the same computation, with its three tables learned instead of fixed</p>
       <table class="ty"><thead><tr><th></th><th>in section 2</th><th>in a head</th></tr></thead><tbody>
-        <tr><td>the query</td><td>made up: ${H.f(q[0])}, ${H.f(q[1])}, ${H.f(q[2])}</td><td>decoder state × <b>query table</b></td></tr>
-        <tr><td>the keys</td><td>the encoder's vectors</td><td>encoder's vectors × <b>key table</b></td></tr>
-        <tr><td>the values</td><td>the encoder's vectors</td><td>encoder's vectors × <b>value table</b></td></tr></tbody></table>
-      <p class="note" style="margin:6px 0 0">The tables are learned in training. Everything else is as in section 2: scores, softmax, weights, mix.</p>
+        <tr><td>the query</td><td>made up: ${H.f(q[0])}, ${H.f(q[1])}, ${H.f(q[2])}</td><td>decoder state × a learned <b>query table</b></td></tr>
+        <tr><td>the keys</td><td>encoder vectors × the identity matrix</td><td>encoder vectors × a learned <b>key table</b></td></tr>
+        <tr><td>the values</td><td>encoder vectors × the identity matrix</td><td>encoder vectors × a learned <b>value table</b></td></tr></tbody></table>
+      <p class="note" style="margin:6px 0 0">Everything else is as in section 2: scores, softmax, weights, mix. With learned tables, a word's key and value are no longer the same vector.</p>
       <p class="label" style="margin-top:12px">3 · so: one head = one row of weights before each English word = one grid (step 2)</p>`;
   };
   // step 4: one layer = 8 such heads on the same inputs (the real model's 8 grids of one layer), their mixes combined; the decoder = 6 layers (the 48 grids)
@@ -1057,7 +1057,7 @@ const init6 = () => {
   const POINTS = [
     "A row of a grid: one English word's weights over the Galician words. They add up to 1. Section 2 computed one by hand.",
     "The grid: all the rows, one per English word written. Darker means more weight.",
-    "A head: the computation of section 2 (query, scores, softmax, weights, mix) with its own three learned tables. The query comes from the decoder state; keys and values come from the encoder's vectors. One head, one grid.",
+    "A head: section 2's computation (query · keys → scores → softmax → weights → × values = the mix) with its three tables learned instead of fixed. One head, one grid.",
     "A layer: several heads side by side on the same vectors; their mixes are combined into one new vector per word, and the next layer starts from these. 6 layers × 8 heads = 48 grids.",
     "A real model's grid reads the same way: “Aunt” looks at tía. It can also show a mistake: “A Aunt of mine”. Choosing “An” needs tía, and the row of “A” puts little weight on it (0.00 in this head, 0.16 on average over the 48 grids; an even share would be 0.25).",
     "The 8 heads of one layer make 8 different grids for the same phrase: each head has its own tables, so its own pattern.",
@@ -1069,7 +1069,7 @@ const init6 = () => {
     ["All the rows: the grid",
       "New weights before every English word, one row each. Stacked, the rows make the grid: one row per English word, one column per Galician word. Click a row to see its bars."],
     ["What a head is",
-      "Section 2 computed, before each English word: the query · each encoder vector → scores → softmax → the weights → the mix (its steps 1 and 2; on the right, its numbers before the chosen word). A head is that computation with three learned tables added: one makes the query from the decoder state, one the keys and one the values from the encoder's vectors, so keys and values are no longer the same vectors. Nothing else changes. One head gives one row of weights per English word: one grid, as in step 2. Click a row on the left to see the numbers before another word."],
+      "Section 2 computed, before each English word: the query · each key → scores → softmax → the weights → × the values, added up: the mix (its steps 1 and 2; on the right, its numbers before the chosen word). There the key table and the value table were the identity matrix and the query was made up. A head is the same computation with the three tables learned: the query from the decoder state, the keys and the values from the encoder's vectors. Nothing else changes. One head gives one row of weights per English word: one grid, as in step 2. Click a row on the left to see the numbers before another word."],
     ["What a layer is",
       "If one head is step 3's computation, a layer runs several of them side by side on the same inputs, each with its own three tables: the real model has 8 per layer, so 8 grids (on the right, layer 5's, as in step 6) and 8 mixes. One more learned table combines the 8 mixes into one new vector per English word, and one more learned step (the feed-forward network of the lesson's transformer screens) is applied to each vector. The next layer starts from these new vectors. The decoder has 6 such layers: the 6 rows of grids on the right, large in step 7."],
     ["A real model's grid reads the same way",
@@ -1901,15 +1901,16 @@ function smCore(o, n) {
 }
 // section 2, steps 1 and 2 share one board: the query rule, the query · key rows, the softmax board, then the mix
 function qkParts(a) {
-  const qrule = work([`The query comes from the decoder state. A real model learns how; here it is made up, like the word vectors.`,
+  const qrule = work([`Three kinds of vector: the <b>query</b>, one vector from the decoder state: what the decoder looks for. For each word, a <b>key</b> = its encoder vector × a key table: what the query is compared with (their dot product is the score). A <b>value</b> = its encoder vector × a value table: what the weights mix. In this model both tables are the identity matrix, which leaves a vector as it is: so key = value = the encoder vector after that word. A real model learns both tables (section 6, step 3).`,
+        `The query comes from the decoder state. A real model learns how; here it is made up, like the word vectors.`,
         `Before the first two English words: ${vecTxt(Q0)}, along tía. Then each of “aunt”, “friend”, “of”, “mine”, “yours” shifts it by its state value × (0, −12, 12), toward miña (step 4).`,
         `Nothing is written yet, so the query is ${vecTxt(a.q)}.`]);
-  const rowsHtml = n => ENC.slice(0, n).map((e, j) => eq(col(a.q, "the query"), op("·"), col(e, `key ${j + 1}: encoder vector ${encName(j)}`), op("="), `<div class="res">${dotTxt(a.q, e)} = <b>${f(a.sc[j])}</b></div>`)).join("");
-  return { qrule, rowsHtml, LBL: `<p class="label">the score of each key: the dot product of the query and the key</p>` };
+  const rowsHtml = n => ENC.slice(0, n).map((e, j) => eq(col(a.q, "the query"), op("·"), col(e, `key ${j + 1} = encoder vector ${encName(j)}`), op("="), `<div class="res">${dotTxt(a.q, e)} = <b>${f(a.sc[j])}</b></div>`)).join("");
+  return { qrule, rowsHtml, LBL: `<p class="label">the score of each key: query · key (the dot product)</p>` };
 }
 // softmax over the three encoder vectors (attention weights)
 const smStage = (a, n, from) => smCore({ labels: ENC.map((e, j) => encPlain(j)), sc: a.sc, e: a.sm.e, Z: a.sm.Z, p: a.sm.p, head: "encoder vector", outHead: "weight",
-  title: `${from ? `${from}: ` : ""}scores (query · each encoder vector) → softmax → weights` }, n);
+  title: `${from ? `${from}: ` : ""}scores (query · each key) → softmax → weights` }, n);
 // softmax over the eight English words (probabilities of the next word)
 const smWords = (sc, n, title) => smCore({ labels: sc.rows.map(r => r.w), sc: sc.rows.map(r => r.s), e: sc.rows.map(r => r.e), Z: sc.Z, p: sc.rows.map(r => r.p),
   head: "English word", outHead: "probability", strong: sc.rows.indexOf(sc.best), title }, n);
@@ -2064,7 +2065,7 @@ const STEPS = [
       });
     } }],
   ["The query: one score for each encoder vector", {
-    text: "Before each English word, the decoder takes the dot product of each encoder vector with one more vector, the query: one score each. Softmax turns the scores into weights. The query comes from the decoder state, so it can change before each word. In this role the encoder vectors are called keys: a key is what the query is compared with.",
+    text: "Before each English word, the decoder takes the dot product of each encoder vector with one more vector, the query: one score each. Softmax turns the scores into weights. The query comes from the decoder state, so it can change before each word. The vectors compared with the query are called keys: here, the encoder vectors themselves, because this model's key table is the identity matrix.",
     frames: () => {
       const a = ATT[0].a, qs = queryScene(a), keys = encPts(ENC.map((e, j) => `key ${j + 1}: ${encPlain(j)}`));
       const { qrule, rowsHtml, LBL } = qkParts(a);
@@ -2077,13 +2078,13 @@ const STEPS = [
             : { ...SMALL, ...qs, pts: encPts(ENC.map((e, j) => `key ${j + 1}: weight ${f(a.sm.p[j])}`)), cap: SMCAP[3] } }))];
     } }],
   ["The mix", {
-    text: "The mix: the same three encoder vectors, each times its weight, added up. In this role they are called values: a value is what gets mixed (here, a whole vector). So in this model keys and values are the same vectors in two roles: first compared with the query, then mixed. A real model makes them different: it computes the keys and the values from the encoder vectors through two learned tables (section 6, step 3). The mix takes the summary's place in the decoder state.",
+    text: "The mix: the values, each times its weight, added up. A value is what gets mixed: a word's encoder vector × a value table. Here that table is the identity matrix too, so the values are the same three encoder vectors as the keys. A real model learns a key table and a value table, and then a word's key and value differ (section 6, step 3). The mix takes the summary's place in the decoder state.",
     frames: () => {
-      const a = ATT[0].a, terms = n => ENC.slice(0, n).flatMap((e, j) => [j ? op("+") : "", k(`${f(a.sm.p[j])} ×`), col(e, encName(j))]);
-      const vals = n => encPts(ENC.map((e, j) => j < n ? `weight ${f(a.sm.p[j])}` + (j === 2 ? " (summary)" : "") : ""), "enc").map((p, j) => j < n ? p : { ...p, cls: "enc faint" });
+      const a = ATT[0].a, terms = n => ENC.slice(0, n).flatMap((e, j) => [j ? op("+") : "", k(`${f(a.sm.p[j])} ×`), col(e, `value ${j + 1} = encoder vector ${encName(j)}`)]);
+      const vals = n => encPts(ENC.map((e, j) => j < n ? `value ${j + 1}: weight ${f(a.sm.p[j])}` + (j === 2 ? " (summary)" : "") : ""), "enc").map((p, j) => j < n ? p : { ...p, cls: "enc faint" });
       const { qrule, rowsHtml, LBL } = qkParts(a), top = qrule + LBL + rowsHtml(3) + smStage(a, 3);
-      return [...upto(3, j => ({ board: top + `<p class="label">the mix: each encoder vector (here called a value) times its weight, added up</p>` + eq(...terms(j + 1)), scene: { ...SMALL, pts: vals(j + 1), cap: `${f(a.sm.p[j])} × the encoder vector ${encPlain(j)}.` } })),
-        { board: top + `<p class="label">the mix: each encoder vector (here called a value) times its weight, added up</p>` + eq(...terms(3), op("="), col(a.mix, "the mix", "cur")) + work([`Dimension by dimension, for example tía: ${a.sm.p.map((w, j) => `${f(w)} × ${f(ENC[j][TIA])}`).join(" + ")} = <b>${f(a.mix[TIA])}</b>`]),
+      return [...upto(3, j => ({ board: top + `<p class="label">the values (encoder vector × the identity matrix = the encoder vector) · the mix = each value × its weight, added up</p>` + eq(...terms(j + 1)), scene: { ...SMALL, pts: vals(j + 1), cap: `${f(a.sm.p[j])} × value ${j + 1}, the encoder vector ${encPlain(j)}.` } })),
+        { board: top + `<p class="label">the values (encoder vector × the identity matrix = the encoder vector) · the mix = each value × its weight, added up</p>` + eq(...terms(3), op("="), col(a.mix, "the mix", "cur")),
           scene: { ...SMALL, tri: ENC, pts: [...vals(3), { p: a.mix, cls: "mix", label: `mix ${vecTxt(a.mix)}`, dx: 10, dy: 18 }],
             cap: `The mix, pulled toward the largest weight: ${f(a.mix[TIA])} of tía (the summary: ${f(SUMMARY[TIA])}).` } }];
     } }],
