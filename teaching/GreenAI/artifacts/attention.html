@@ -865,7 +865,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T18:57Z">3 Nov 2026, 18:57 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T19:01Z">3 Nov 2026, 19:01 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -1138,21 +1138,21 @@ const init6 = () => {
     for (let h = 0; h < NH; h++) { const cx = X0 + h * GAP + HW / 2, tx = cat0 + (h + 0.5) * 64 * PX; g += `<path d="M${cx} ${Y + 112} L${cx} ${Y + 118} L${tx} ${mY - 6} L${tx} ${mY}" fill="none" style="stroke:var(--muted)" stroke-width="1" marker-end="url(#hbArr${id})"/>`; }
     for (let h = 0; h < NH; h++) g += `<rect x="${cat0 + h * 64 * PX}" y="${mY}" width="${64 * PX}" height="12" style="fill:var(--grid);stroke:var(--orange)" stroke-width="1"/>`;
     g += sm(cx0 + 256 * PX + 6, mY + 10, "the 8 mixes side by side: 8 × 64 = 512");
-    g += ar(cx0, mY + 12, cx0, mY + 26) + bx(cx0 - 105, mY + 26, 210, 20, "× a learned table (512 × 512)", "var(--green)", tbl, 11) + ar(cx0, mY + 46, cx0, mY + 58) + strip(mY + 58, 512, "512: what the 8 heads add");
-    g += ar(cx0, mY + 70, cx0, mY + 84) + bx(cx0 - 120, mY + 84, 240, 20, "+ the decoder state that came in", "var(--fg)", "var(--panel)", 11) + ar(cx0, mY + 104, cx0, mY + 116) + strip(mY + 116, 512, "512");
+    g += ar(cx0, mY + 12, cx0, mY + 26) + bx(cx0 - 105, mY + 26, 210, 20, "× a learned table (512 × 512)", "var(--green)", tbl, 11) + ar(cx0, mY + 46, cx0, mY + 58) + strip(mY + 58, 512, "attention output: 512 numbers");
+    g += ar(cx0, mY + 70, cx0, mY + 84) + bx(cx0 - 120, mY + 84, 240, 20, "+ the decoder state that came in", "var(--fg)", "var(--panel)", 11) + ar(cx0, mY + 104, cx0, mY + 116) + strip(mY + 116, 512, "the word's hidden state: 512");
     // the feed-forward step: each English word's vector on its own: 512 → 2048 → 512
     const fY = mY + 146;
     g += `<rect x="12" y="${fY}" width="${W - 24}" height="168" rx="6" style="fill:${tbl};stroke:var(--green)" stroke-width="1" stroke-dasharray="4 3"/>` + `<text x="22" y="${fY + 15}" style="${tf};font-size:11px;font-weight:600">feed-forward: each English word's vector on its own, no mixing between words</text>`;
     g += ar(cx0, mY + 128, cx0, fY + 24) + bx(cx0 - 105, fY + 24, 210, 20, "× a learned table (512 × 2048)", "var(--green)", "var(--panel)", 11) + ar(cx0, fY + 44, cx0, fY + 54);
-    g += `<rect x="${cx0 - 1024 * PX}" y="${fY + 54}" width="${2048 * PX}" height="12" rx="2" style="fill:var(--grid);stroke:var(--fg)" stroke-width="1"/><text x="${cx0}" y="${fY + 64}" text-anchor="middle" style="${tf};font-size:9px;fill:var(--muted)">2048: four times as many numbers</text>`;
-    g += ar(cx0, fY + 66, cx0, fY + 80) + bx(cx0 - 150, fY + 80, 300, 20, "each number: negative ones pushed toward 0", "var(--green)", "var(--panel)", 11) + ar(cx0, fY + 100, cx0, fY + 112) + bx(cx0 - 105, fY + 112, 210, 20, "× a learned table (2048 × 512)", "var(--green)", "var(--panel)", 11) + ar(cx0, fY + 132, cx0, fY + 144) + strip(fY + 144, 512, "512: back to the decoder state's size");
+    g += `<rect x="${cx0 - 1024 * PX}" y="${fY + 54}" width="${2048 * PX}" height="12" rx="2" style="fill:var(--grid);stroke:var(--fg)" stroke-width="1"/><text x="${cx0}" y="${fY + 64}" text-anchor="middle" style="${tf};font-size:9px;fill:var(--muted)">the feed-forward's hidden layer: 2048 numbers, used only inside this step</text>`;
+    g += ar(cx0, fY + 66, cx0, fY + 80) + bx(cx0 - 150, fY + 80, 300, 20, "each number: negative ones pushed toward 0", "var(--green)", "var(--panel)", 11) + ar(cx0, fY + 100, cx0, fY + 112) + bx(cx0 - 105, fY + 112, 210, 20, "× a learned table (2048 × 512)", "var(--green)", "var(--panel)", 11) + ar(cx0, fY + 132, cx0, fY + 144) + strip(fY + 144, 512, "feed-forward output: 512");
     const oY = fY + 206;
     g += ar(cx0, fY + 156, cx0, oY) + sm(cx0 + 6, fY + 194, "+ the 512 that went in") + bx(cx0 - 140, oY, 280, 22, "decoder state for the next layer: 512 numbers", "var(--fg)", "var(--panel)", 11);
     // the frame and its name, drawn last so nothing crosses the name
     const tag = "one layer";
     g += `<rect x="4" y="${F0}" width="${W - 8}" height="${fY + 176 - F0}" rx="8" fill="none" style="stroke:var(--fg)" stroke-width="2"/><rect x="${W - 100}" y="${F0 - 8}" width="86" height="16" style="fill:var(--panel)"/><text x="${W - 57}" y="${F0 + 4}" text-anchor="middle" style="${tf};font-weight:600">${tag}</text>`;
     return `<svg viewBox="0 0 ${W} ${oY + 26}" style="max-width:${W}px" role="img" aria-label="one decoder layer: self-attention over the English words; 8 heads, each with its own tables, grid and mix of 64 numbers; the 8 mixes combined into 512 numbers; the feed-forward step from 512 to 2048 and back to 512">${g}</svg>
-      <p class="note" style="margin:2px 0 0">grey strips: vectors, as wide as the numbers they hold · grey grids: each head's weights, read in steps 4 to 8 · <span style="color:var(--green)">green</span>: learned</p>`;
+      <p class="note" style="margin:2px 0 0">grey strips: one English word's vector at each stage, as wide as the numbers it holds · grey grids: each head's weights, read in steps 4 to 8 · <span style="color:var(--green)">green</span>: learned</p>`;
   };
   // part A, step 3: the decoder: the English words written so far → 6 layers → a probability for each English word; the encoder vectors go into every layer
   const decoderHtml = () => {
