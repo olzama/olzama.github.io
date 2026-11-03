@@ -2561,7 +2561,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">Encoder–decoder</span><h2>Why a real model still writes “an aunt of mine”</h2></header>
   <div class="body">
     <div class="board">
-      <svg viewBox="0 0 1400 670" role="img" aria-label="The real model translates our sentence as An aunt of mine. Its probabilities for four openings, log scale: An aunt of mine 0.33, My aunt 0.015, I had an aunt 7.5 in a million, One of my aunts 5.5 in ten billion. Word by word, I had an aunt loses at its first words. Likely reasons: it learned translations; a … of mine is common; rebuilding is a big step; Galician is low-resource.">
+      <svg viewBox="0 0 1400 670" role="img" aria-label="The real model translates our sentence as An aunt of mine. Its probabilities for four openings, log scale: An aunt of mine 0.33, My aunt 0.015, I had an aunt 7.5 in a million, One of my aunts 5.5 in ten billion. Word by word, I had an aunt loses at its first words. What we can say: it was trained on translated sentences, not on English text in general; it writes one word at a time, and once An is chosen each next word of an aunt of mine is likely.">
 <text class="note" x="40" y="40" font-size="19.2" style="fill:var(--muted)" text-anchor="start" data-s="1" data-d="0">Helsinki-NLP/opus-mt-gl-en, a real Galician–English model, translates our sentence as</text>
 <text x="40" y="76" font-size="30" style="fill:var(--orange)" text-anchor="start" data-s="1" data-d="0.3">“An aunt of mine, who …”</text>
 <text x="40" y="128" font-size="22" style="fill:var(--muted)" text-anchor="start" data-s="2" data-d="0">its probability for each opening, given the Galician sentence (log scale)</text>
@@ -2588,12 +2588,9 @@ print("they match" if count == expected else "they do not match: check the loop 
 <text x="430.70000000000005" y="422" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.6">had 0.03</text>
 <text x="553.5" y="422" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.6">an 0.04</text>
 <text x="664.2" y="422" font-size="22" style="fill:currentColor" text-anchor="start" data-s="3" data-d="0.6">aunt 0.90</text>
-<text class="note" x="40" y="476" font-size="17.6" style="fill:var(--muted)" text-anchor="start" data-s="4" data-d="0">likely reasons</text>
-<text class="note" x="60" y="510" font-size="17.6" style="fill:currentColor" text-anchor="start" data-s="4" data-d="0.0">1. it learned translations, not English in general: “unha X miña” is usually rendered “a X of mine”</text>
-<text class="note" x="60" y="542" font-size="17.6" style="fill:currentColor" text-anchor="start" data-s="4" data-d="0.3">2. rare is not absent: “a … of mine” is a common pattern, so it comes out fluently</text>
-<text class="note" x="60" y="574" font-size="17.6" style="fill:currentColor" text-anchor="start" data-s="5" data-d="0.0">3. rebuilding is a big step: “I had …” needs a new subject and verb, chosen one word at a time</text>
-<text class="note" x="60" y="606" font-size="17.6" style="fill:currentColor" text-anchor="start" data-s="5" data-d="0.3">4. Galician is low-resource: little translated text, much of it fairly literal</text>
-<text class="note" x="40" y="650" font-size="16.0" style="fill:var(--green)" text-anchor="start" data-s="6" data-d="0">likely, not measured · section 4 of the translation page shows reason 1 directly: what the training data says, the model writes</text>
+<text class="note" x="40" y="476" font-size="17.6" style="fill:var(--muted)" text-anchor="start" data-s="4" data-d="0">what we can say</text>
+<text class="note" x="60" y="510" font-size="17.6" style="fill:currentColor" text-anchor="start" data-s="4" data-d="0.0">1. it was trained on translated sentences (Galician with their English translations), not on English text in general</text>
+<text class="note" x="60" y="542" font-size="17.6" style="fill:currentColor" text-anchor="start" data-s="4" data-d="0.3">2. it writes one word at a time: once “An” is chosen (0.53), each next word of “an aunt of mine” is likely</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
@@ -2601,8 +2598,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="notes">
     <p>The real Galician–English model, Helsinki-NLP/opus-mt-gl-en, translates our sentence as “An aunt of mine, who…”, even though English books rarely say it (the n-gram page, section 7, has the book counts: 0.36 “an aunt of mine” per 100 “my aunt”, against 12.5 for friends; part d of section 3 of the translation page comes back to it). This is a real model, trained on many translated sentences; it comes back on the attention screens. We can ask the model how likely it finds other openings: give it the Galician sentence and an English opening, and read off its probability for each word.</p>
     <p>“An aunt of mine” is its favorite by far; “I had an aunt” is tens of thousands of times less likely. Word by word, the alternatives lose at their first words: “I” has a probability of about 0.006 as the first word, “had” about 0.03 after it; “An” starts at 0.53, and after that each word of “an aunt of mine” is likely.</p>
-    <p>Likely reasons. It learned translations, not English in general: book counts show how often English writers choose a phrasing, while a translation model learns how translators rendered similar Galician phrases, and unha X miña is usually rendered “a X of mine”, right for friends and colleagues, applied to tía too. Rare is not absent: “an aunt of mine” is unusual, but “a … of mine” is very common, so the model writes it fluently. Rebuilding a sentence is a big step: “I had an aunt who…” needs a new subject and verb, the model chooses one word at a time given the Galician, and staying close to the Galician wins at each step. Galician is low-resource: there is relatively little translated text to learn from, and much of it is fairly literal.</p>
-    <p>These are likely explanations, not measured ones. Section 4 of the translation page shows the first directly: a toy model trained on English that follows the book counts writes “I had an aunt who sang”. The numbers come from mt_score_alternatives.py.</p>
+    <p>Section 4 of the translation page: a toy model trained on English that follows the book counts writes “I had an aunt who sang”. The numbers come from mt_score_alternatives.py.</p>
   </div>
 </section>
 
