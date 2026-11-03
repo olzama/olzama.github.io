@@ -2372,7 +2372,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">Encoder–decoder</span><h2>Backpropagation</h2></header>
   <div class="body">
     <div class="board">
-      <svg viewBox="0 0 1400 776" role="img" aria-label="Backpropagation in training the encoder-decoder. Forward pass: the inputs, the encoder, the summary, the decoder, the probability p of the gold output, the loss L = −log p. One parameter, w, one number of input 1&#x27;s vector. Blue row: if w were larger by 0.01, the summary would change by +0.005, p by +0.002, L by −0.004 (toy numbers): the derivative of L for w is −0.4. Orange row, the backward pass: start with 1 at L and go right to left, multiplying by −2 (the loss at p = 0.5), 0.4 (the decoder) and 0.5 (the encoder): −2 for p, −0.8 for the summary, −0.4 for w. Every other parameter gets its derivative from the orange number next to it. Update: new = old − learning rate × derivative; w grows. One training update costs about 3 times one use of the model.">
+      <svg viewBox="0 0 1400 750" role="img" aria-label="Backpropagation in training the encoder-decoder. Forward pass: the inputs, the encoder, the summary, the decoder, the probability p of the gold output, the loss L = −log p. One parameter, w, one number of input 1&#x27;s vector. Blue row: if w were larger by 0.01, the summary would change by +0.005, p by +0.002, L by −0.004 (toy numbers): the derivative of L for w is −0.4. Orange row, the backward pass: start with 1 at L and go right to left, multiplying by −2 (the loss at p = 0.5), 0.4 (the decoder) and 0.5 (the encoder): −2 for p, −0.8 for the summary, −0.4 for w. Every other parameter gets its derivative from the orange number next to it. Update: new = old − learning rate × derivative; w grows. One training update costs about 3 times one use of the model.">
 <rect x="38.0" y="148.0" width="84.0" height="64.0" rx="12" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.1" data-a="fade"/>
 <text x="80.0" y="170.0" font-size="17" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.2">input 1</text>
 <rect x="47.0" y="182.0" width="22.0" height="20.0" rx="2" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="1" data-d="0.1" data-a="fade" fill-opacity="0.8"/>
@@ -2428,18 +2428,25 @@ print("they match" if count == expected else "they do not match: check the loop 
 <line x1="108.0" y1="352.0" x2="560.0" y2="352.0" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" data-s="2" data-d="0.5"/>
 <path d="M552.6 355.1 L560.0 352.0 L552.6 348.9" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="1.1" data-a="fade" data-t="0.2"/>
 <text x="334.0" y="386.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.6">× 0.5</text>
-<text x="334.0" y="408.0" font-size="16" style="fill:var(--muted)" text-anchor="middle" data-s="2" data-d="0.6">the encoder passes on half</text>
+<text x="334.0" y="410.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="0.6">toy encoder: summary = 0.5 × w + …</text>
 <line x1="680.0" y1="352.0" x2="950.0" y2="352.0" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" data-s="2" data-d="1.0"/>
 <path d="M942.6 355.1 L950.0 352.0 L942.6 348.9" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="1.6" data-a="fade" data-t="0.2"/>
 <text x="815.0" y="386.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="1.1">× 0.4</text>
-<text x="815.0" y="408.0" font-size="16" style="fill:var(--muted)" text-anchor="middle" data-s="2" data-d="1.1">the decoder passes on 0.4</text>
+<text x="815.0" y="410.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="1.1">toy decoder: p = 0.4 × summary + …</text>
 <line x1="1070.0" y1="352.0" x2="1180.0" y2="352.0" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" data-s="2" data-d="1.5"/>
 <path d="M1172.6 355.1 L1180.0 352.0 L1172.6 348.9" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="2.1" data-a="fade" data-t="0.2"/>
 <text x="1125.0" y="386.0" font-size="22" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="1.6">× (−2)</text>
-<text x="1125.0" y="408.0" font-size="16" style="fill:var(--muted)" text-anchor="middle" data-s="2" data-d="1.6">L falls 2 per unit p rises</text>
-<text class="note" x="40.0" y="560.0" font-size="16.8" style="fill:var(--blue)" data-s="2" data-d="2.0">Training must decide, for each parameter, whether to raise or lower it. Take one, w (outlined): what happens to L if w is raised a little?</text>
-<text class="note" x="40.0" y="586.0" font-size="16.8" style="fill:var(--blue)" data-s="2" data-d="2.3">Blue row: raise w by 0.01 and follow the change through the model (toy numbers). L falls by 0.004.</text>
-<text class="note" x="40.0" y="612.0" font-size="16.8" style="fill:var(--blue)" data-s="2" data-d="2.6">So raising w lowers L, by 0.4 per unit of w. This number, −0.4, is called the derivative of L for w.</text>
+<text x="1125.0" y="410.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="2" data-d="1.6">L = −log p: 0.693 → 0.689</text>
+<path d="M1130 560 V 690 H 1360" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" data-s="2" data-d="2.0"/>
+<text x="1124.0" y="572.0" font-size="16" style="fill:var(--muted)" text-anchor="end" data-s="2" data-d="2.0">L</text>
+<text x="1360.0" y="710.0" font-size="16" style="fill:var(--muted)" text-anchor="end" data-s="2" data-d="2.0">w</text>
+<path d="M1150 590 L1350 670" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="2" data-d="2.1"/>
+<path d="M1210 614 H 1300 V 650" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" data-s="2" data-d="2.3" stroke-dasharray="5 4"/>
+<text x="1255.0" y="606.0" font-size="17" style="fill:var(--blue)" text-anchor="middle" data-s="2" data-d="2.4">+ 0.01</text>
+<text x="1306.0" y="638.0" font-size="17" style="fill:var(--blue)" data-s="2" data-d="2.5">− 0.004</text>
+<text x="1100.0" y="728.0" font-size="21" style="fill:var(--orange)" data-s="2" data-d="2.6">rate of change: −0.004 ÷ 0.01 = −0.4</text>
+<text class="note" x="40.0" y="560.0" font-size="16.8" style="fill:var(--blue)" data-s="2" data-d="2.0">Training must decide, for each parameter, whether to raise or lower it. Take one, w: what happens to L if w is raised a little?</text>
+<text class="note" x="40.0" y="586.0" font-size="16.8" style="fill:var(--blue)" data-s="2" data-d="2.3">Blue row: raise w by 0.01 and follow the change through the rules under the arrows. L falls by 0.004.</text>
 <text x="680.0" y="314.0" font-size="24" style="fill:var(--orange)" text-anchor="middle" data-s="3" data-d="0">backward pass</text>
 <line x1="1300.0" y1="284.0" x2="60.0" y2="284.0" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" data-s="3" data-d="0"/>
 <path d="M72.9 278.5 L60.0 284.0 L72.9 289.5" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="0.6" data-a="fade" data-t="0.2"/>
@@ -2454,21 +2461,21 @@ print("they match" if count == expected else "they do not match: check the loop 
 <line x1="580.0" y1="450.0" x2="104.0" y2="450.0" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" data-s="3" data-d="2.3"/>
 <path d="M111.4 446.9 L104.0 450.0 L111.4 453.1" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="2.9" data-a="fade" data-t="0.2"/>
 <text x="1240.0" y="482.0" font-size="16" style="fill:var(--muted)" text-anchor="middle" data-s="3" data-d="0.4">(L itself)</text>
-<text x="40.0" y="482.0" font-size="18" style="fill:var(--orange)" data-s="3" data-d="0.2">how much L changes per unit of each value</text>
-<text class="note" x="40.0" y="646.0" font-size="16.8" style="fill:var(--orange)" data-s="3" data-d="3.2">Backward pass: the same number without trying anything, for every value at once: start at L and move left, multiplying by what each part passes on.</text>
+<text x="40.0" y="482.0" font-size="18" style="fill:var(--orange)" data-s="3" data-d="0.2">rate of change of L for each value</text>
+<text class="note" x="40.0" y="620.0" font-size="16.8" style="fill:var(--orange)" data-s="3" data-d="3.2">Backward pass: the same rates without trying anything, from L to the left, multiplying by the numbers in the rules.</text>
 <line x1="180.0" y1="278.0" x2="180.0" y2="246.0" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="4" data-d="0.0"/>
 <path d="M183.9 255.2 L180.0 246.0 L176.1 255.2" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" data-s="4" data-d="0.6" data-a="fade" data-t="0.2"/>
 <line x1="450.0" y1="278.0" x2="450.0" y2="246.0" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="4" data-d="0.3"/>
 <path d="M453.9 255.2 L450.0 246.0 L446.1 255.2" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" data-s="4" data-d="0.9" data-a="fade" data-t="0.2"/>
 <line x1="800.0" y1="278.0" x2="800.0" y2="246.0" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="4" data-d="0.6"/>
 <path d="M803.9 255.2 L800.0 246.0 L796.1 255.2" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" data-s="4" data-d="1.2" data-a="fade" data-t="0.2"/>
-<text class="note" x="40.0" y="672.0" font-size="16.8" style="fill:var(--orange)" data-s="4" data-d="1.0">Every parameter of the encoder, the decoder and the input vectors gets its derivative in this one sweep.</text>
+<text class="note" x="40.0" y="646.0" font-size="16.8" style="fill:var(--orange)" data-s="4" data-d="1.0">In the same sweep, every parameter of the encoder, the decoder and the input vectors gets its rate.</text>
 <rect x="30.0" y="140.0" width="300.0" height="80.0" rx="14" fill="none" stroke="var(--green)" stroke-width="3" data-s="5" data-d="0.0" data-a="fade"/>
 <rect x="364.0" y="140.0" width="172.0" height="80.0" rx="14" fill="none" stroke="var(--green)" stroke-width="3" data-s="5" data-d="0.1" data-a="fade"/>
 <rect x="714.0" y="140.0" width="172.0" height="80.0" rx="14" fill="none" stroke="var(--green)" stroke-width="3" data-s="5" data-d="0.2" data-a="fade"/>
-<text class="note" x="40.0" y="704.0" font-size="16.8" style="fill:var(--green)" data-s="5" data-d="0.5">Then every parameter moves the way that lowers L: new = old − learning rate × derivative. Here w is raised.</text>
-<text class="note" x="40.0" y="732.0" font-size="16.8" style="fill:currentColor" data-s="6" data-d="0">Cost: one update takes about 3 times the computation of one use of the model, plus memory for the forward pass's values.</text>
-<text class="note" x="40.0" y="760.0" font-size="16.8" style="fill:currentColor" data-s="7" data-d="0">The next screen trains a small translation model this way, one pair after another.</text>
+<text class="note" x="40.0" y="678.0" font-size="16.8" style="fill:var(--green)" data-s="5" data-d="0.5">Then every parameter moves the way that lowers L: new = old − learning rate × its orange number. Here w is raised.</text>
+<text class="note" x="40.0" y="706.0" font-size="16.8" style="fill:currentColor" data-s="6" data-d="0">Cost: one update takes about 3 times the computation of one use of the model, plus memory for the forward pass's values.</text>
+<text class="note" x="40.0" y="734.0" font-size="16.8" style="fill:currentColor" data-s="7" data-d="0">The next screen trains a small translation model this way, one pair after another.</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
