@@ -865,7 +865,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T19:01Z">3 Nov 2026, 19:01 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T19:08Z">3 Nov 2026, 19:08 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -1124,35 +1124,25 @@ const init6 = () => {
     // the frame: one layer
     const F0 = 44;
     // self-attention over the English words, then the 8 heads
-    g += ar(131, 28, 131, F0 + 16) + bx(16, F0 + 16, 230, 24, "the English words look at each other (section 7)", "var(--line)", "var(--panel)", 10);
-    const Y = F0 + 66, HW = 58, GAP = 66, X0 = 15, c = 8;
-    g += ln(131, F0 + 40, 131, Y - 10) + sm(125, Y - 13, "× query table", "end", 9) + ln(429, 28, 429, Y - 10) + sm(435, Y - 13, "× key, value tables", "start", 9) + ln(X0 + HW / 2, Y - 10, X0 + 7 * GAP + HW / 2, Y - 10);
+    const Y = F0 + 40, HW = 58, GAP = 66, X0 = 15, c = 8;
+    g += ln(131, 28, 131, Y - 10) + sm(125, Y - 13, "× query table", "end", 9) + ln(429, 28, 429, Y - 10) + sm(435, Y - 13, "× key, value tables", "start", 9) + ln(X0 + HW / 2, Y - 10, X0 + 7 * GAP + HW / 2, Y - 10);
     for (let h = 0; h < NH; h++) { const x = X0 + h * GAP, cx = x + HW / 2;
       g += ar(cx, Y - 10, cx, Y) + `<rect x="${x}" y="${Y}" width="${HW}" height="112" rx="4" style="fill:var(--panel);stroke:var(--line)" stroke-width="1.3"/>`;
       g += sm(cx, Y + 13, `head ${h + 1}`, "middle", 11) + bx(x + 4, Y + 18, HW - 8, 15, "its 3 tables", "var(--green)", tbl, 8.5) + ar(cx, Y + 33, cx, Y + 41);
       const gx = cx - 2 * c, gy = Y + 42;
       for (let i = 0; i < 5; i++) for (let j = 0; j < 4; j++) g += `<rect x="${gx + j * c + 0.5}" y="${gy + i * c + 0.5}" width="${c - 1}" height="${c - 1}" style="fill:var(--grid)"/>`;
       g += ar(cx, gy + 40, cx, Y + 88) + `<rect x="${cx - 64 * PX}" y="${Y + 89}" width="${64 * PX * 2}" height="8" rx="2" style="fill:var(--grid);stroke:var(--orange)" stroke-width="1"/>` + sm(cx, Y + 107, "mix: 64", "middle", 8.5); }
-    // the 8 mixes side by side (512) × a table (512 × 512) = 512; + what came in
-    const mY = Y + 132, cat0 = cx0 - 256 * PX;
-    for (let h = 0; h < NH; h++) { const cx = X0 + h * GAP + HW / 2, tx = cat0 + (h + 0.5) * 64 * PX; g += `<path d="M${cx} ${Y + 112} L${cx} ${Y + 118} L${tx} ${mY - 6} L${tx} ${mY}" fill="none" style="stroke:var(--muted)" stroke-width="1" marker-end="url(#hbArr${id})"/>`; }
-    for (let h = 0; h < NH; h++) g += `<rect x="${cat0 + h * 64 * PX}" y="${mY}" width="${64 * PX}" height="12" style="fill:var(--grid);stroke:var(--orange)" stroke-width="1"/>`;
-    g += sm(cx0 + 256 * PX + 6, mY + 10, "the 8 mixes side by side: 8 × 64 = 512");
-    g += ar(cx0, mY + 12, cx0, mY + 26) + bx(cx0 - 105, mY + 26, 210, 20, "× a learned table (512 × 512)", "var(--green)", tbl, 11) + ar(cx0, mY + 46, cx0, mY + 58) + strip(mY + 58, 512, "attention output: 512 numbers");
-    g += ar(cx0, mY + 70, cx0, mY + 84) + bx(cx0 - 120, mY + 84, 240, 20, "+ the decoder state that came in", "var(--fg)", "var(--panel)", 11) + ar(cx0, mY + 104, cx0, mY + 116) + strip(mY + 116, 512, "the word's hidden state: 512");
-    // the feed-forward step: each English word's vector on its own: 512 → 2048 → 512
-    const fY = mY + 146;
-    g += `<rect x="12" y="${fY}" width="${W - 24}" height="168" rx="6" style="fill:${tbl};stroke:var(--green)" stroke-width="1" stroke-dasharray="4 3"/>` + `<text x="22" y="${fY + 15}" style="${tf};font-size:11px;font-weight:600">feed-forward: each English word's vector on its own, no mixing between words</text>`;
-    g += ar(cx0, mY + 128, cx0, fY + 24) + bx(cx0 - 105, fY + 24, 210, 20, "× a learned table (512 × 2048)", "var(--green)", "var(--panel)", 11) + ar(cx0, fY + 44, cx0, fY + 54);
-    g += `<rect x="${cx0 - 1024 * PX}" y="${fY + 54}" width="${2048 * PX}" height="12" rx="2" style="fill:var(--grid);stroke:var(--fg)" stroke-width="1"/><text x="${cx0}" y="${fY + 64}" text-anchor="middle" style="${tf};font-size:9px;fill:var(--muted)">the feed-forward's hidden layer: 2048 numbers, used only inside this step</text>`;
-    g += ar(cx0, fY + 66, cx0, fY + 80) + bx(cx0 - 150, fY + 80, 300, 20, "each number: negative ones pushed toward 0", "var(--green)", "var(--panel)", 11) + ar(cx0, fY + 100, cx0, fY + 112) + bx(cx0 - 105, fY + 112, 210, 20, "× a learned table (2048 × 512)", "var(--green)", "var(--panel)", 11) + ar(cx0, fY + 132, cx0, fY + 144) + strip(fY + 144, 512, "feed-forward output: 512");
-    const oY = fY + 206;
-    g += ar(cx0, fY + 156, cx0, oY) + sm(cx0 + 6, fY + 194, "+ the 512 that went in") + bx(cx0 - 140, oY, 280, 22, "decoder state for the next layer: 512 numbers", "var(--fg)", "var(--panel)", 11);
-    // the frame and its name, drawn last so nothing crosses the name
-    const tag = "one layer";
-    g += `<rect x="4" y="${F0}" width="${W - 8}" height="${fY + 176 - F0}" rx="8" fill="none" style="stroke:var(--fg)" stroke-width="2"/><rect x="${W - 100}" y="${F0 - 8}" width="86" height="16" style="fill:var(--panel)"/><text x="${W - 57}" y="${F0 + 4}" text-anchor="middle" style="${tf};font-weight:600">${tag}</text>`;
-    return `<svg viewBox="0 0 ${W} ${oY + 26}" style="max-width:${W}px" role="img" aria-label="one decoder layer: self-attention over the English words; 8 heads, each with its own tables, grid and mix of 64 numbers; the 8 mixes combined into 512 numbers; the feed-forward step from 512 to 2048 and back to 512">${g}</svg>
-      <p class="note" style="margin:2px 0 0">grey strips: one English word's vector at each stage, as wide as the numbers it holds · grey grids: each head's weights, read in steps 4 to 8 · <span style="color:var(--green)">green</span>: learned</p>`;
+    // below the heads: the remaining steps named by their purpose only
+    const stepBox = (y, n, s) => `<rect x="20" y="${y}" width="${W - 40}" height="26" rx="5" style="fill:var(--panel);stroke:var(--fg)" stroke-width="1.3"/><text x="${W / 2}" y="${y + 17.5}" text-anchor="middle" style="${tf}">${s}</text>`;
+    const s1 = Y + 136;
+    for (let h = 0; h < NH; h++) { const cx = X0 + h * GAP + HW / 2; g += ln(cx, Y + 112, cx, Y + 122); }
+    g += ln(X0 + HW / 2, Y + 122, X0 + 7 * GAP + HW / 2, Y + 122) + ar(cx0, Y + 122, cx0, s1);
+    g += stepBox(s1, "1", "the 8 mixes combined into one vector per English word") + ar(cx0, s1 + 26, cx0, s1 + 42) + stepBox(s1 + 42, "2", "each word's vector reworked on its own (feed-forward)");
+    const oY = s1 + 104;
+    g += ar(cx0, s1 + 68, cx0, oY) + bx(cx0 - 140, oY, 280, 22, "decoder state for the next layer", "var(--fg)");
+    g += `<rect x="4" y="${F0}" width="${W - 8}" height="${s1 + 80 - F0}" rx="8" fill="none" style="stroke:var(--fg)" stroke-width="2"/><rect x="${W - 100}" y="${F0 - 8}" width="86" height="16" style="fill:var(--panel)"/><text x="${W - 57}" y="${F0 + 4}" text-anchor="middle" style="${tf};font-weight:600">one layer</text>`;
+    return `<svg viewBox="0 0 ${W} ${oY + 26}" style="max-width:${W}px" role="img" aria-label="one decoder layer: 8 heads, each with its own tables, grid and mix; the 8 mixes combined into one vector per English word; each word's vector reworked on its own">${g}</svg>
+      <p class="note" style="margin:2px 0 0">grey grids: each head's weights, read in steps 4 to 8 · <span style="color:var(--green)">green</span>: learned</p>`;
   };
   // part A, step 3: the decoder: the English words written so far → 6 layers → a probability for each English word; the encoder vectors go into every layer
   const decoderHtml = () => {
@@ -1172,7 +1162,7 @@ const init6 = () => {
   };
   const POINTS = [
     "A head: section 2's computation with three learned tables; its weights, one row per English word, make its grid.",
-    "A layer: the English words look at each other, then 8 heads look at the Galician words; their mixes are combined, then each word's vector goes through the feed-forward step.",
+    "A layer: 8 heads, 8 grids; their mixes combined; then each English word's vector reworked on its own.",
     "The decoder: 6 layers in a chain, the encoder vectors into each: 48 heads, 48 grids.",
     "A cell: one Galician word's share of the mix just before one English word. A row adds up to 1.",
     "A grid: one row per English word; darker means more weight.",
