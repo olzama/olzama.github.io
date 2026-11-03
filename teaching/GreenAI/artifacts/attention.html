@@ -733,12 +733,13 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <label class="note" for="realHead">Head</label>
       <select id="realHead"></select>
     </div>
-    <ol class="try"><li><b>Chosen at the start:</b> layer 5, head 3 (the grid of step 5) and the English piece “aunt” (orange).</li><li><b>Three views of the same weights:</b> the Galician pieces shaded (tía darkest), the list of the three largest, the orange row of the grid.</li><li><b>Change Head</b> to another number, then to the average: the shading changes; the English pieces do not. The head changes the view of the weights, not the translation.</li><li><b>The bars</b> at the bottom left answer another question: what the model was likely to write at this point. The first bar is what it wrote.</li></ol>
+    <div class="controls" id="realTry"><span class="note">Try:</span><button data-try="other">another head</button><button data-try="avg">the layer's 8 heads averaged</button><button data-try="back">back to head 3</button></div>
+    <p class="note" id="realTryNote"></p>
     <div class="controls" id="realWalk"><span class="note">Three places where the translation goes wrong:</span><button data-w="0">1 · worked</button><button data-w="1">2 · saying saying it</button><button data-w="2">3 · they'll refute</button></div>
     <div id="realWalkWrap"><p class="note">Click one of the three places above: its explanation appears here.</p></div>
     <div class="cols">
       <div class="col">
-        <p class="label">Galician pieces, shaded by their weight for the English piece chosen below</p>
+        <p class="label">Galician pieces, shaded by their weight just before the English piece chosen below (the same weights as the orange row of the grid)</p>
         <div class="chips" id="realSrc"></div>
         <p class="label">English pieces, as the model wrote them: click one</p>
         <div class="chips" id="realTgt"></div>
@@ -861,7 +862,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T18:04Z">3 Nov 2026, 18:04 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T18:23Z">3 Nov 2026, 18:23 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -922,22 +923,26 @@ const FEAT = (() => { const C = REAL.fragment.cross; let l0 = 0, h0 = 0, best = 
   for (let l = 0; l < C.length; l++) for (let h = 0; h < C[l].length; h++) { const g = C[l][h], v = g[0][0] + g[1][1] + g[3][2]; if (v > best) { best = v; l0 = l; h0 = h; } } return { l: l0, h: h0 }; })();
 $("realLayer").value = String(FEAT.l); $("realHead").value = String(FEAT.h);
 let tSel = D.tgt.indexOf("▁aunt"), realUpto = undefined, realTimer = null;
+let walkW = 0, walkStage = 0;   // the three errors below: walkStage 1 = the prediction is open and the bars hidden; 2 = shown
 const UNSURE = 0.3, pWrote = i => D.top[i][0][1];  // the model wrote its most probable piece each time
 function renderReal() {
   const M = avgOf(D.cross, $("realLayer").value, $("realHead").value);
   const w = M[tSel];
   $("realSrc").innerHTML = chipsHTML(D.src, "src", w, -1);
   $("realTgt").innerHTML = chipsHTML(D.tgt, "tgt", null, tSel, realUpto, i => (realUpto === undefined || i < realUpto) && pWrote(i) < UNSURE);
-  $("realTgt").querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => { clearInterval(realTimer); realUpto = undefined; tSel = +b.dataset.i; renderReal(); }));
-  $("realWeights").innerHTML = `Just before “${clean(D.tgt[tSel])}”, the three largest weights: ` + topList(D.src, w, 3);
+  $("realTgt").querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => { clearInterval(realTimer); realUpto = undefined; tSel = +b.dataset.i; if (walkStage === 1) { walkStage = 2; showWalk(); } renderReal(); }));
+  // the orange row of the grid, enlarged: its three largest cells, and the rest of the row in one cell
+  { const order = [...w.keys()].sort((a, b) => w[b] - w[a]), top = order.slice(0, 3), rest = order.slice(3).reduce((s, i) => s + w[i], 0), heat = css("--heat");
+    const cell = (lab, v) => `<div class="vc"><div class="vh">${lab}</div><div class="sq" style="background:rgba(${heat},${(0.06 + 0.94 * Math.min(1, v)).toFixed(3)});color:${v > 0.55 ? "#fff" : "var(--fg)"}">${f2(v)}</div></div>`;
+    $("realWeights").innerHTML = `<p class="label">the orange row of the grid, enlarged: just before “${clean(D.tgt[tSel])}”, its three largest cells and the other ${order.length - 3} together</p><div class="eq tight" style="border:2px solid var(--orange);border-radius:6px;padding:4px 8px;display:inline-flex">${top.map(i => cell(clean(D.src[i]), w[i])).join("")}<div class="op" style="padding-bottom:4px">…</div>${cell(`the other ${order.length - 3}`, rest)}</div>`; }
   // what the model could have written here: its five most probable pieces, the first is the one it wrote
   $("realCandLab").textContent = `Another question: what was the model likely to write at this point? Its five most probable pieces; it wrote the first, “${clean(D.tgt[tSel])}”.`;
-  $("realCand").innerHTML = D.top[tSel].map(([t, p], k) => `<span class="bw ${k ? "" : "win"}">${clean(t).replace(/&/g, "&amp;").replace(/</g, "&lt;")}</span><span class="bt ${k ? "" : "win"}"><i style="width:${(p * 100).toFixed(1)}%"></i></span><span class="bp">${p.toFixed(2)}</span>`).join("");
+  $("realCand").innerHTML = walkStage === 1 ? `<p class="note" style="grid-column:1 / -1;text-align:center;padding:40px 0">hidden until you press “Show what it wrote”</p>` : D.top[tSel].map(([t, p], k) => `<span class="bw ${k ? "" : "win"}">${clean(t).replace(/&/g, "&amp;").replace(/</g, "&lt;")}</span><span class="bt ${k ? "" : "win"}"><i style="width:${(p * 100).toFixed(1)}%"></i></span><span class="bp">${p.toFixed(2)}</span>`).join("");
   const lay = $("realLayer").value, hd = $("realHead").value;
   const which = lay === "all" && hd === "all" ? "the average of all 48 grids (6 layers × 8 heads)"
     : lay === "all" ? `head ${+hd + 1} of every layer, averaged (heads with the same number in different layers are unrelated, so this says little)`
     : hd === "all" ? `layer ${+lay + 1}, the average of its 8 heads` : `layer ${+lay + 1}, head ${+hd + 1}, one of the 48 grids`;
-  $("realNote").textContent = `Shown: ${which}; row “${clean(D.tgt[tSel])}”. The shaded pieces, the list above and the orange row of the grid are these same weights; they add up to 1.`;
+  $("realNote").textContent = `Shown: ${which}; row “${clean(D.tgt[tSel])}”. The row adds up to 1.`;
   drawHeat(M);
   drawHeads();
 }
@@ -970,8 +975,20 @@ function drawHeat(M) {
   g.strokeStyle = orange; g.lineWidth = 2; g.strokeRect(lw - 1, th + tSel * cell - 1, C * cell + 1, cell + 1);
   cv.onclick = e => { const b = cv.getBoundingClientRect(), r = Math.floor((e.clientY - b.top - th) / cell); if (r >= 0 && r < R) { tSel = r; realUpto = undefined; renderReal(); } };
 }
-$("realLayer").addEventListener("change", renderReal);
-$("realHead").addEventListener("change", renderReal);
+$("realLayer").addEventListener("change", () => { tryNote(""); renderReal(); });
+$("realHead").addEventListener("change", () => { tryNote(""); renderReal(); });
+// the walkthrough: each button makes the change and says what did and did not change
+const TRY0 = `Chosen: layer ${FEAT.l + 1}, head ${FEAT.h + 1} (the grid of step 5) and the English piece “aunt”, in orange. The shaded Galician pieces, the enlarged row and the orange row of the grid are one and the same weights.`;
+const tryNote = s => { $("realTryNote").textContent = s || TRY0; };
+tryNote("");
+$("realTry").querySelectorAll("[data-try]").forEach(b => b.addEventListener("click", () => {
+  const k = b.dataset.try, other = (FEAT.h + 3) % D.cross[0].length;
+  clearInterval(realTimer); realUpto = undefined; walkStage = 0;
+  $("realLayer").value = String(FEAT.l); $("realHead").value = k === "avg" ? "all" : String(k === "other" ? other : FEAT.h);
+  renderReal();
+  const w = avgOf(D.cross, $("realLayer").value, $("realHead").value)[tSel], j = [...w.keys()].sort((a, b) => w[b] - w[a])[0];
+  tryNote(k === "back" ? TRY0 : `${k === "avg" ? `Layer ${FEAT.l + 1}'s 8 grids averaged cell by cell` : `Head ${other + 1}`}: the shading, the enlarged row and the grid changed (largest now: ${clean(D.src[j])} ${f2(w[j])}); the English pieces and the bars did not. The head changes the view of the weights, not the translation.`);
+}));
 { let keep; reserveMax(["realTgt", "realWeights", "realNote", "realCandLab", "realCand"].map(id => $(id)), () => { keep = [$("realLayer").value, $("realHead").value];
     return [...$("realLayer").options].flatMap(L => [...$("realHead").options].map(H => () => { $("realLayer").value = L.value; $("realHead").value = H.value; renderReal(); })); },
   () => { [$("realLayer").value, $("realHead").value] = keep; renderReal(); }); }
@@ -980,26 +997,36 @@ $("realPlay").addEventListener("click", () => {
   realTimer = setInterval(() => { if (tSel >= D.tgt.length - 1) { clearInterval(realTimer); realUpto = undefined; renderReal(); return; } tSel++; realUpto = tSel + 1; renderReal(); }, reduce ? 250 : 650);
 });
 $("realUnsure").textContent = `Dashed red outline: written with a probability below ${UNSURE} (the model was unsure).`;
-// three places where the translation goes wrong, all seen through layer 6, head 2: the weights and the candidates come from the recorded data
+// three places where the translation goes wrong, all seen through layer 6, head 2: first the weights and a prediction, then what the model wrote; the numbers come from the recorded data
 const WL = 5, WH = 1, wAt = (i, s) => D.cross[WL][WH][i][D.src.indexOf(s)], cands = (i, n = 4) => D.top[i].slice(0, n).map(([t, p]) => `${clean(t)} ${f2(p)}`).join(", ");
 const nthOf = (tok, nth) => D.tgt.findIndex((x, i) => x === tok && D.tgt.slice(0, i).filter(y => y === tok).length === nth);
+const SHOW = `<button id="walkShow" class="primary" style="margin-left:8px">Show what it wrote</button>`;
 const WALK = [
-  ["▁worked", 0, i => `<p class="steptext"><b>solucion·aba</b> means “solved”. <b>Predict:</b> can this head give nearly all its weight to <i>solucion</i> and the model still write a poor word? <b>Look</b> (layer ${WL + 1}, head ${WH + 1}, row “worked”): <i>solucion</i> ${f2(wAt(i, "▁solucion"))}. <b>What happened:</b> candidates ${cands(i)}; it wrote “worked”. The grid shows where the head looked; it does not say why “worked” beat “solved”.</p>`],
-  ["▁saying", 0, i => `<p class="steptext"><b>dito·s e ref·rán·s</b> means “sayings and proverbs”. <b>Look</b> (row “saying”): <i>dito</i> ${f2(wAt(i, "▁dito"))}. <b>What happened:</b> candidates ${cands(i, 3)}: nothing probable. Click the next two pieces: <i>dito</i> ${f2(wAt(i + 1, "▁dito"))} and ${f2(wAt(i + 2, "▁dito"))}, while the top probability falls to ${f2(pWrote(i + 1))} and ${f2(pWrote(i + 2))}: “saying saying it”. The right piece was looked at; no good continuation became probable.</p>`],
-  ["▁they", 0, i => `<p class="steptext"><b>ref·rán·s</b> is “proverbs”. <b>Look</b> (row “they”): <i>ref</i> ${f2(wAt(i, "▁ref"))}. <b>What happened:</b> candidates ${cands(i, 5)}: several begin with the letters r·e. Then “'”: <i>ref</i> ${f2(wAt(i + 1, "▁ref"))}; “ll”: <i>‹end›</i> ${f2(wAt(i + 2, "</s>"))}: “they'll refute”. The grid supports: the head looked at <i>ref</i>. It does not support: that the model knew the word; the candidates suggest it went by the letters.</p><p class="steptext"><b>All three:</b> the weight is on the right Galician piece and the output is still wrong. The weights show where the model looks, not whether what it writes is right.</p>`],
+  ["▁worked", 0,
+    i => `<p class="steptext"><b>solucion·aba</b> means “solved”. Layer ${WL + 1}, head ${WH + 1}, just before “worked”: <i>solucion</i> ${f2(wAt(i, "▁solucion"))}, the shaded piece and the orange row. <b>Predict:</b> with nearly all its weight on the right piece, does the model write “solved”? ${SHOW}</p>`,
+    i => `<p class="steptext">It wrote “worked”: ${cands(i)} (the bars below). The grid shows where the head looked; it does not say why “worked” beat “solved”.</p>`],
+  ["▁saying", 0,
+    i => `<p class="steptext"><b>dito·s e ref·rán·s</b> means “sayings and proverbs”. Just before “saying”: <i>dito</i> ${f2(wAt(i, "▁dito"))}. <b>Predict:</b> is any English piece probable here? ${SHOW}</p>`,
+    i => `<p class="steptext">${cands(i, 3)}: nothing probable. Click the next two English pieces: <i>dito</i> ${f2(wAt(i + 1, "▁dito"))} and ${f2(wAt(i + 2, "▁dito"))}, while the top probability falls to ${f2(pWrote(i + 1))} and ${f2(pWrote(i + 2))}: “saying saying it”.</p>`],
+  ["▁they", 0,
+    i => `<p class="steptext"><b>ref·rán·s</b> is “proverbs”. Just before “they”: <i>ref</i> ${f2(wAt(i, "▁ref"))}. <b>Predict:</b> does the model know this word? ${SHOW}</p>`,
+    i => `<p class="steptext">${cands(i, 5)}: pieces that begin with r·e. Then “'”: <i>ref</i> ${f2(wAt(i + 1, "▁ref"))}; “ll”: <i>‹end›</i> ${f2(wAt(i + 2, "</s>"))}: “they'll refute”. The grid supports: the head looked at <i>ref</i>. The candidates suggest it went by the letters.</p><p class="steptext"><b>All three:</b> the weight is on the right Galician piece and the output is still wrong. The weights show where the model looks, not whether what it writes is right.</p>`],
 ];
+const walkHtml = (w, stage) => { const i = nthOf(WALK[w][0], WALK[w][1]); return WALK[w][2](i) + (stage === 2 ? WALK[w][3](i) : ""); };
+function showWalk() {
+  $("realWalkWrap").innerHTML = walkHtml(walkW, walkStage);
+  const s = $("walkShow"); if (s) { if (walkStage === 2) s.hidden = true; else s.addEventListener("click", () => { walkStage = 2; showWalk(); renderReal(); }); }
+}
 $("realWalk").querySelectorAll("[data-w]").forEach(b => b.addEventListener("click", () => {
-  const [tok, nth] = WALK[+b.dataset.w];
+  const w = +b.dataset.w, [tok, nth] = WALK[w];
   clearInterval(realTimer); realUpto = undefined;
-  tSel = nthOf(tok, nth);
+  tSel = nthOf(tok, nth); walkW = w; walkStage = 1;
   $("realLayer").value = String(WL); $("realHead").value = String(WH);
   $("realWalk").querySelectorAll("[data-w]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
-  $("realWalkWrap").innerHTML = walkHtml(+b.dataset.w);
-  renderReal();
+  showWalk(); renderReal();
 }));
-const walkHtml = w => WALK[w][2](nthOf(WALK[w][0], WALK[w][1]));
 renderReal();
-{ let kw = ""; reserveMax($("realWalkWrap"), () => { kw = $("realWalkWrap").innerHTML; return WALK.map((_, w) => () => { $("realWalkWrap").innerHTML = walkHtml(w); }); }, () => { $("realWalkWrap").innerHTML = kw; }); }
+{ let kw = ""; reserveMax($("realWalkWrap"), () => { kw = $("realWalkWrap").innerHTML; return WALK.flatMap((_, w) => [1, 2].map(s => () => { $("realWalkWrap").innerHTML = walkHtml(w, s); })); }, () => { $("realWalkWrap").innerHTML = kw; }); }
 
 // ---------- section 6, steps: from section 2's weights to the real model's grids, on the same phrase ----------
 // needs the hand model's numbers (window.__handAtt): its script is loaded first (data-needs)
@@ -1012,28 +1039,32 @@ const init6 = () => {
   for (let l = 0; l < NL; l++) for (let h = 0; h < NH; h++) { const g = C[l][h], v = g[0][0] + g[1][1] + g[3][2]; if (v > best) { best = v; FL = l; FH = h; } }
   const heatOf = v => `rgba(var(--heat),${(0.06 + 0.94 * v).toFixed(3)})`;
   const avgTiaA = C.reduce((a, L) => a + L.reduce((b, G) => b + G[0][1], 0), 0) / (NL * NH);   // the weight of "A" on tía, averaged over all heads
-  // a grid: one row per English word, one column per Galician word; darker = more weight; the chosen row outlined; o.cell = [row, column] outlines one cell, o.tag writes its reading beside the row
+  // a grid: one row per English word, one column per Galician word; darker = more weight; the chosen row outlined.
+  // o.read = [row, column]: that cell is outlined and read in the margin (its number, its meaning, the row's sum); o.annot: what rows and columns are, written along the grid
+  const argmax = a => a.indexOf(Math.max(...a));
   function grid(rows, cols, M, o = {}) {
-    const cw = o.cw || 58, ch = o.ch || 30, lx = o.lx || 64, ty = 34, n = o.n ?? rows.length, tagW = o.tag ? 190 : 0;
+    const cw = o.cw || 58, ch = o.ch || 30, lx = o.lx || (o.annot ? 84 : 64), ty = o.annot ? 48 : 34, n = o.n ?? rows.length, tagW = o.read ? 215 : 0, tf = `font-family:var(--font-body);font-size:11px;fill:var(--fg)`;
     let g = cols.map((c, j) => `<text x="${lx + j * cw + cw / 2}" y="${ty - 10}" text-anchor="middle" font-size="12" font-style="italic" fill="var(--fg)">${c}</text>`).join("");
     rows.forEach((r, i) => { const y = ty + i * ch, on = i < n;
       g += `<text x="${lx - 8}" y="${y + ch / 2 + 4}" text-anchor="end" font-size="12" font-weight="600" fill="var(--fg)" opacity="${on ? 1 : 0.25}">${r}</text>`;
       cols.forEach((c, j) => { const v = M[i][j];
         g += on ? `<rect x="${lx + j * cw + 1}" y="${y + 1}" width="${cw - 2}" height="${ch - 2}" rx="3" style="fill:${heatOf(v)}"/><text x="${lx + j * cw + cw / 2}" y="${y + ch / 2 + 4}" text-anchor="middle" font-size="11" style="font-family:var(--font-mono);fill:${v > 0.55 ? "#fff" : "var(--fg)"}">${v.toFixed(2)}</text>`
           : `<rect x="${lx + j * cw + 1}" y="${y + 1}" width="${cw - 2}" height="${ch - 2}" rx="3" fill="none" stroke="var(--line)" stroke-dasharray="3 3"/>`; });
-      if (on) g += `<rect class="hc" data-r="${i}" x="${lx - 60}" y="${y}" width="${cols.length * cw + 60}" height="${ch}" fill="transparent"/>`; });
+      if (on && !o.still) g += `<rect class="hc" data-r="${i}" x="${lx - 60}" y="${y}" width="${cols.length * cw + 60}" height="${ch}" fill="transparent"/>`; });
     if (o.sel !== undefined && o.sel < n) g += `<rect x="${lx - 1}" y="${ty + o.sel * ch}" width="${cols.length * cw + 2}" height="${ch}" rx="4" fill="none" stroke="var(--orange)" stroke-width="2.5" pointer-events="none"/>`;
-    if (o.cell) { const [i, j] = o.cell, x = lx + j * cw, y = ty + i * ch;
+    const gw = cols.length * cw, right = lx + gw;
+    if (o.annot) {   // what the axes are: a bracket over the columns, a bracket along the rows
+      g += `<path d="M${lx + 2} ${ty - 30} v-4 h${gw - 4} v4" fill="none" stroke="var(--muted)" stroke-width="1"/><text x="${lx + gw / 2}" y="${ty - 38}" text-anchor="middle" style="${tf};fill:var(--muted)">columns: the Galician words looked at</text>`;
+      g += `<path d="M${lx - 66} ${ty + 2} h-4 v${n * ch - 4} h4" fill="none" stroke="var(--muted)" stroke-width="1"/><text transform="translate(${lx - 74} ${ty + rows.length * ch / 2}) rotate(-90)" text-anchor="middle" style="${tf};fill:var(--muted)">rows: English word written next</text>`; }
+    if (o.read) { const [i, j] = o.read, x = lx + j * cw, y = ty + i * ch, v = M[i][j], sum = M[i].slice(0, cols.length);
       g += `<rect x="${x + 1}" y="${y + 1}" width="${cw - 2}" height="${ch - 2}" rx="3" fill="none" stroke="var(--fg)" stroke-width="2.5" pointer-events="none"/>`;
-      if (o.tag) g += `<line x1="${lx + cols.length * cw + 4}" y1="${y + ch / 2}" x2="${lx + cols.length * cw + 14}" y2="${y + ch / 2}" stroke="var(--fg)" stroke-width="1.2"/>` + o.tag.map((ln, k) => `<text x="${lx + cols.length * cw + 18}" y="${y + ch / 2 + 4 + (k - (o.tag.length - 1) / 2) * 13}" style="font-family:var(--font-body);font-size:11px;fill:var(--fg)">${ln}</text>`).join(""); }
-    const W = lx + cols.length * cw + 4 + tagW, Ht = ty + rows.length * ch + 4;
+      g += `<path d="M${right + 3} ${y + ch / 2} H${right + 12}" fill="none" stroke="var(--fg)" stroke-width="1.2"/>`;
+      const lines = o.lines || [`<tspan font-weight="700">${v.toFixed(2)}</tspan>: the share of <tspan font-style="italic">${cols[j]}</tspan>'s value`, `in the mix just before “${rows[i]}”`, `the row: ${sum.map(x => x.toFixed(2)).join(" + ")} = 1`];
+      g += lines.map((ln, k) => `<text x="${right + 16}" y="${y + ch / 2 + 4 + (k - (lines.length - 1) / 2) * 13}" style="${tf}">${ln}</text>`).join(""); }
+    const W = right + 4 + tagW, Ht = ty + rows.length * ch + 4;
     return `<svg viewBox="0 0 ${W} ${Ht}" style="max-width:${W}px" role="img" aria-label="attention weights, one row per English word">${g}</svg>`;
   }
-  // one cell read aloud: row, column, the number, and what it means
-  const argmax = a => a.indexOf(Math.max(...a));
-  const cellRead = (rows, cols, M, i, who) => { const j = argmax(M[i]), v = M[i][j];
-    return `<p class="note" style="margin:4px 0 0">Row “${rows[i]}”, column <i>${cols[j]}</i>, the darkest cell: <b>${v.toFixed(2)}</b>. Just before ${who} wrote “${rows[i]}”, ${Math.round(v * 100)}% of its mix was the value of <i>${cols[j]}</i>. The row adds up to 1; darker is more weight.</p>`; };
-  const cellTag = (rows, cols, M, i) => { const j = argmax(M[i]); return { cell: [i, j], tag: [`${M[i][j].toFixed(2)}: the weight of ${cols[j]}`, `just before “${rows[i]}”`] }; };
+  const readOf = (M, i) => [i, argmax(M[i])];
   // the weights of one row as bars, as in section 2
   const bars = (cols, w, title) => `<p class="label" style="margin-top:8px">${title}</p>` + cols.map((c, j) => `<div class="hbbar"><span style="text-align:right"><i>${c}</i></span><span class="tr"><i style="width:${(w[j] * 100).toFixed(1)}%"></i></span><span>${w[j].toFixed(2)}</span></div>`).join("") +
     `<p class="note" style="margin:2px 0 0">they add up to 1</p>`;
@@ -1115,17 +1146,17 @@ const init6 = () => {
     "The weights show where the model looks, not whether what it writes is right: below, three places where the right Galician piece is looked at and the English is still wrong."];
   const STEPS6 = [
     ["One row: the weights for one English word",
-      "Section 2's three weights before “an”, as bars and as three cells in the same order, darker for more weight. One cell is read under the grid: the share of one Galician word's value in the mix, just before one English word."],
+      "Section 2's three weights before “an”, as bars and as three cells in the same order, darker for more weight. The outlined cell is read in the margin."],
     ["All the rows: the grid",
-      "Before “aunt” the decoder's state has changed, so it makes a new query and gets new weights: a new row. One row per English word, stacked: the grid. Click a row to read its darkest cell. A real model has 48 such grids for this phrase: steps 3 and 4 say why."],
+      "Before “aunt” the decoder's state has changed, so it makes a new query and gets new weights: a new row. One row per English word, stacked: the grid. Click a row: its darkest cell is read in the margin. A real model has 48 such grids for this phrase: steps 3 and 4 say why."],
     ["What a head is",
       "The grid shows the weights of one head: section 2's computation, drawn on the right. It shows only the weights, the result of query · keys and softmax; the values and the mix are not in it. A real model learns the three tables; other tables give other weights, so another grid."],
     ["What a layer is",
       "A layer: the decoder state and the encoder vectors go into 8 heads at once. Head 1 is section 2's head, with the grid on the left; heads 2 to 8 do the same computation with other tables, so they get other weights: 8 grids. A learned table combines the 8 mixes into one vector per English word, one more learned step is applied to it, and the result is the decoder state for the next layer. 6 layers: 48 grids."],
     ["A real model's grid reads the same way",
-      `opus-mt-gl-en on the phrase alone: layer ${FL + 1}, head ${FH + 1}, one of its 48 grids. The columns end with ‹end›, the end marker. The row of “Aunt” is chosen; read it at tía on the right: the same kind of number as in our grid, a share of this head's mix. It is not the probability of writing “Aunt”; that is another number, the bars in the whole-sentence part below. The phrase alone comes out “${TGT_R.slice(0, -1).join(" ")}”; the whole sentence starts “An aunt of mine”.`],
+      `opus-mt-gl-en on the phrase alone: layer ${FL + 1}, head ${FH + 1}, one of its 48 grids. The columns end with ‹end›, the end marker. The row of “Aunt” is chosen and its darkest cell read in the margin: the same kind of number as in our grid, a share of this head's mix. It is not the probability of writing “Aunt”; that is another number, the bars in the whole-sentence part below. The phrase alone comes out “${TGT_R.slice(0, -1).join(" ")}”; the whole sentence starts “An aunt of mine”.`],
     ["The 8 heads of one layer",
-      `Layer ${FL + 1}'s 8 heads on the same phrase, the same row outlined in each: only the head changes. On the right, that row in head ${FH + 1} and in the head that differs most from it: same English word, same Galician words, other tables, other weights.`],
+      `Layer ${FL + 1}'s 8 heads on the same phrase, the same row outlined in each: only the head changes. Under them, that row in head ${FH + 1} and in the head that differs most from it.`],
     ["6 layers × 8 heads = 48 grids",
       "All 48 grids for the phrase: a row of thumbnails is a layer, a column is a head, a row inside a thumbnail is one English word (orange: the row chosen). In layer 1 most heads spread their weight or rest it on ‹end›; in layers 5 and 6 most heads point each English word at the Galician word it translates. Nobody assigned these patterns: section 8 shows how heads get them."],
     ["The whole sentence",
@@ -1139,14 +1170,16 @@ const init6 = () => {
     const [t, txt] = STEPS6[k];
     $("hbTitle").textContent = `Step ${k + 1} of ${STEPS6.length}: ${t}`; $("hbText").textContent = txt;
     const n = k === 0 ? 1 : ROWS.length; if (sel >= n) sel = 0;
-    $("hbLeft").innerHTML = bars(SRC_H, H.w[sel], `before “${ROWS[sel]}”: the three weights`) + `<p class="label" style="margin-top:10px">${n === 1 ? "the three weights as a row of cells, darker for more weight" : `the grid: one such row per English word (orange: the row of “${ROWS[sel]}”)`}</p>` + grid(ROWS, SRC_H, H.w, { n, sel, ...cellTag(ROWS, SRC_H, H.w, sel) }) + cellRead(ROWS, SRC_H, H.w, sel, "the decoder");
+    $("hbLeft").innerHTML = bars(SRC_H, H.w[sel], `before “${ROWS[sel]}”: the three weights`) + `<p class="label" style="margin-top:10px">${n === 1 ? "the three weights as a row of cells, darker for more weight" : `the grid: one such row per English word (orange: the row of “${ROWS[sel]}”)`}</p>` + grid(ROWS, SRC_H, H.w, { n, sel, annot: true, read: readOf(H.w, sel) });
     if (k < 2) { $("hbRightLbl").textContent = "a real model on the same phrase"; $("hbRight").innerHTML = `<p class="hbempty">step 5 puts here the same kind of row and grid from opus-mt-gl-en, a real translation model, on the same phrase</p>`; }
     else if (k === 2) { $("hbRightLbl").textContent = "one head"; $("hbRight").innerHTML = headHtml(sel); }
     else if (k === 3) { $("hbRightLbl").textContent = "one layer: 8 heads; the decoder: 6 layers"; $("hbRight").innerHTML = layerHtml(); }
     else if (k === 4) { $("hbRightLbl").textContent = `opus-mt-gl-en on the phrase: layer ${FL + 1}, head ${FH + 1}`;
-      $("hbRight").innerHTML = bars(SRC_R, C[FL][FH][sel], `before “${TGT_R[sel]}”: the ${SRC_R.length} weights`) + `<p class="label" style="margin-top:10px">its grid: rows, the English pieces it wrote; columns, the Galician pieces</p>` + grid(TGT_R, SRC_R, C[FL][FH], { sel, cw: 50, ...cellTag(TGT_R, SRC_R, C[FL][FH], sel) }) + cellRead(TGT_R, SRC_R, C[FL][FH], sel, "this head"); }
+      $("hbRight").innerHTML = bars(SRC_R, C[FL][FH][sel], `before “${TGT_R[sel]}”: the ${SRC_R.length} weights`) + `<p class="label" style="margin-top:10px">its grid: rows, the English pieces it wrote; columns, the Galician pieces</p>` + grid(TGT_R, SRC_R, C[FL][FH], { sel, cw: 50, annot: true, read: readOf(C[FL][FH], sel) }); }
     else if (k === 5) { const h2 = otherHead(sel); $("hbRightLbl").textContent = `opus-mt-gl-en, layer ${FL + 1}: its 8 heads, one grid each`;
-      $("hbRight").innerHTML = thumbs([FL], { c: 24, per: 4, gx: 14, gy: 8, big: true, sel }) + bars(SRC_R, C[FL][FH][sel], `head ${FH + 1}, before “${TGT_R[sel]}”`) + bars(SRC_R, C[FL][h2][sel], `head ${h2 + 1}, before “${TGT_R[sel]}”: the same row, another head`); }
+      const j = argmax(C[FL][FH][sel]), two = [C[FL][FH][sel], C[FL][h2][sel]];
+      $("hbRight").innerHTML = thumbs([FL], { c: 24, per: 4, gx: 14, gy: 8, big: true, sel }) + `<p class="label" style="margin-top:8px">the row of “${TGT_R[sel]}” in two heads: same phrase, same English word, other tables</p>` +
+        grid([`head ${FH + 1}`, `head ${h2 + 1}`], SRC_R, two, { cw: 50, still: true, read: [0, j], lines: [`<tspan font-style="italic">${SRC_R[j]}</tspan> just before “${TGT_R[sel]}”:`, `<tspan font-weight="700">${two[0][j].toFixed(2)}</tspan> in head ${FH + 1}, <tspan font-weight="700">${two[1][j].toFixed(2)}</tspan> in head ${h2 + 1}`] }); }
     else { $("hbRightLbl").textContent = `opus-mt-gl-en: all ${NL} layers × ${NH} heads = ${NL * NH} grids`;
       $("hbRight").innerHTML = thumbs([...Array(NL).keys()], { c: 9, gx: 7, gy: 8, sel }) + (k === 7 ? `<p style="margin:8px 0 0"><button id="hbDown">to the whole sentence ↓</button></p>` : ""); }
     $("hbPoints").innerHTML = POINTS.map((p, i) => `<li class="${i === k ? "on" : i < k ? "done" : "later"}">${p}</li>`).join("");   // later points keep their space, unseen
