@@ -2596,12 +2596,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
-  <div class="notes">
-    <p>The real Galician–English model, Helsinki-NLP/opus-mt-gl-en, translates our sentence as “An aunt of mine, who…”, even though English books rarely say it (the n-gram page, section 7, has the book counts: 0.36 “an aunt of mine” per 100 “my aunt”, against 12.5 for friends; part d of section 3 of the translation page comes back to it). This is a real model, trained on many translated sentences; it comes back on the attention screens. We can ask the model how likely it finds other openings: give it the Galician sentence and an English opening, and read off its probability for each word.</p>
-    <p>“An aunt of mine” is its favorite by far; “I had an aunt” is tens of thousands of times less likely. Word by word, the alternatives lose at their first words: “I” has a probability of about 0.006 as the first word, “had” about 0.03 after it; “An” starts at 0.53, and after that each word of “an aunt of mine” is likely.</p>
-    <p>Likely reasons. It learned translations, not English in general: book counts show how often English writers choose a phrasing, while a translation model learns how translators rendered similar Galician phrases, and unha X miña is usually rendered “a X of mine”, right for friends and colleagues, applied to tía too. Rare is not absent: “an aunt of mine” is unusual, but “a … of mine” is very common, so the model writes it fluently. Rebuilding a sentence is a big step: “I had an aunt who…” needs a new subject and verb, the model chooses one word at a time given the Galician, and staying close to the Galician wins at each step.</p>
-    <p>These are likely explanations, not measured ones. Section 4 of the translation page shows the first directly: a toy model trained on English that follows the book counts writes “I had an aunt who sang”. The numbers come from mt_score_alternatives.py.</p>
-  </div>
 </section>
 
 <div class="part" id="part-step4"><h1>Step 4 · Attention</h1></div>
