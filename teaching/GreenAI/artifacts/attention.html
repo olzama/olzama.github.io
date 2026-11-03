@@ -856,7 +856,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T17:18Z">3 Nov 2026, 17:18 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T17:23Z">3 Nov 2026, 17:23 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -1045,8 +1045,8 @@ const init6 = () => {
       <p class="label" style="margin-top:12px">2 · a head: the same computation, with three learned tables making the query, the keys and the values</p>
       <table class="ty"><thead><tr><th></th><th>in section 2</th><th>in a head</th></tr></thead><tbody>
         <tr><td>the query</td><td>made up: ${H.f(q[0])}, ${H.f(q[1])}, ${H.f(q[2])}</td><td>decoder state × a learned <b>query table</b></td></tr>
-        <tr><td>the keys</td><td>the encoder vectors, unchanged by the toy's key table</td><td>encoder vectors × a learned <b>key table</b></td></tr>
-        <tr><td>the values</td><td>the encoder vectors, unchanged by the toy's value table</td><td>encoder vectors × a learned <b>value table</b></td></tr></tbody></table>
+        <tr><td>the keys</td><td>encoder vectors × the toy's key table (1 on the diagonal, 0 elsewhere)</td><td>encoder vectors × a learned <b>key table</b></td></tr>
+        <tr><td>the values</td><td>encoder vectors × the toy's value table (the same numbers)</td><td>encoder vectors × a learned <b>value table</b></td></tr></tbody></table>
       <p class="note" style="margin:6px 0 0">Everything else is as in section 2: scores, softmax, weights, mix.</p>
       <p class="label" style="margin-top:12px">3 · so: one head = one row of weights before each English word = one grid (step 2)</p>`;
   };
@@ -1072,7 +1072,7 @@ const init6 = () => {
     ["All the rows: the grid",
       "New weights before every English word, one row each. Stacked, the rows make the grid: one row per English word, one column per Galician word. Click a row to see its bars."],
     ["What a head is",
-      "Section 2 computed, before each English word: the query · each key → scores → softmax → the weights → × the values, added up: the mix (its steps 1 and 2; on the right, its numbers before the chosen word). There the query was chosen for the example, and the key and value tables left the encoder vectors unchanged. A head is the same computation with the three tables learned: the query from the decoder state, the keys and the values from the encoder's vectors. Nothing else changes. One head gives one row of weights per English word: one grid, as in step 2. Click a row on the left to see the numbers before another word."],
+      "Section 2 computed, before each English word: the query · each key → scores → softmax → the weights → × the values, added up: the mix (its steps 1 and 2; on the right, its numbers before the chosen word). There the query and the two tables had numbers chosen for the example. A head is the same computation with the three tables learned: the query from the decoder state, the keys and the values from the encoder's vectors. Nothing else changes. One head gives one row of weights per English word: one grid, as in step 2. Click a row on the left to see the numbers before another word."],
     ["What a layer is",
       "If one head is step 3's computation, a layer runs several of them side by side on the same inputs, each with its own three tables: the real model has 8 per layer, so 8 grids (on the right, layer 5's, as in step 6) and 8 mixes. One more learned table combines the 8 mixes into one new vector per English word, and one more learned step (the feed-forward network of the lesson's transformer screens) is applied to each vector. The next layer starts from these new vectors. The decoder has 6 such layers: the 6 rows of grids on the right, large in step 7."],
     ["A real model's grid reads the same way",
@@ -1903,15 +1903,21 @@ function smCore(o, n) {
   return `<p class="label">${o.title}</p><svg class="smst" viewBox="0 0 600 ${H2}" role="img" aria-label="softmax of the scores ${o.sc.map(f).join(", ")}">${g}</svg>`;
 }
 // section 2, steps 1 and 2 share one board: the query rule, the query · key rows, the softmax board, then the mix
+// the toy's key table and value table: 3 × 3 matrices, rows = the encoder vector's dimensions, columns = the key's (or value's)
+const WK = [[1, 0, 0], [0, 1, 0], [0, 0, 1]], WV = WK;
+const matVec = (v, W) => W[0].map((_, c) => Math.round(v.reduce((s, x, r) => s + x * W[r][c], 0) * 1000) / 1000);
+const times = name => `<div class="op" style="font-size:0.7rem;line-height:1.15;text-align:center;padding-bottom:30px">× ${name}<br>table<br>=</div>`;
+const eqT = (...items) => `<div class="eq tight">${rowsOf(DIMS)}${items.join("")}</div>`;
+// the matrix as three columns (one per output dimension); the row labels are the input dimensions
+const matHtml = (W, name) => W[0].map((_, c) => col(W.map(r => r[c]), `${name}<br>→ ${DIMS[c]}`)).join("");
+const workedEntry = (v, W, name, j, c) => `${name} ${j + 1}, ${DIMS[c]} entry: ${v.map((x, r) => `${f(x)} × ${f(W[r][c])}`).join(" + ")} = <b>${f(matVec(v, W)[c])}</b>`;
 function qkParts(a) {
-  // one row: the query, then each word's encoder vector → key table → key
-  const tbl = s => `<div class="op" style="display:grid;justify-items:center;font-size:0.66rem;line-height:1.1;padding-bottom:28px"><span>${s}</span><span>table</span><span style="font-size:1.1rem;line-height:1">→</span></div>`;
-  const eqT = (...items) => `<div class="eq tight">${rowsOf(DIMS)}${items.join("")}</div>`;
-  const headHtml = `<p class="label">the query (values chosen for this toy) · the keys: each made from its word's encoder vector by the key table (a real model learns that table; in this toy it leaves the vector unchanged)</p>` +
-    eqT(col(a.q, "the query", "cur"), `<div class="gap"></div>`, ...ENC.flatMap((e, j) => [j ? `<div class="gap"></div>` : "", col(e, `encoder vector (<i>${DIMS[j]}</i>)`), tbl("key"), col(e, `key ${j + 1}`)]));
-  // one row: the query × each key, dimension by dimension, with the score under each product column
+  const headHtml = `<p class="label">the key table: 3 × 3 numbers chosen for this toy (a real model learns them) · each word's key = its encoder vector × the key table</p>` +
+    eqT(...[matHtml(WK, "key table")], `<div class="gap"></div><div class="gap"></div>`, ...ENC.flatMap((e, j) => [j ? `<div class="gap"></div>` : "", col(e, `encoder vector (<i>${DIMS[j]}</i>)`), times("key"), col(matVec(e, WK), `key ${j + 1}`)])) +
+    `<p class="note" style="margin:2px 0 0">For example ${workedEntry(ENC[1], WK, "key", 1, TIA)}. With 1 on the diagonal and 0 elsewhere, each key comes out equal to its encoder vector.</p>` +
+    `<p class="label" style="margin-top:8px">the query: one vector from the decoder state, what the decoder looks for (values chosen for this toy)</p>` + eqT(col(a.q, "the query", "cur"));
   const colS = (v, label, s) => `<div class="vc"><div class="vh">${label}</div>${v.map(sq).join("")}<div class="vh" style="margin-top:3px;color:var(--fg)"><b>score ${s}</b></div></div>`;
-  const rowsHtml = n => eq(col(a.q, "the query", "cur"), ...ENC.slice(0, n).flatMap((e, j) => [op("×"), colS(a.q.map((x, d) => r2(x * e[d])), `key ${j + 1}`, f(a.sc[j]))]));
+  const rowsHtml = n => eq(col(a.q, "the query", "cur"), ...ENC.slice(0, n).flatMap((e, j) => [op("×"), colS(a.q.map((x, d) => r2(x * matVec(e, WK)[d])), `key ${j + 1}`, f(a.sc[j]))]));
   return { headHtml, rowsHtml, LBL: `<p class="label">the score of each key: query × key, dimension by dimension, added up</p>` };
 }
 // softmax over the three encoder vectors (attention weights)
@@ -2086,15 +2092,14 @@ const STEPS = [
   ["The mix", {
     text: "The mix: each value scaled by its weight, added up; it takes the summary's place in the decoder state.",
     frames: () => {
-      const a = ATT[0].a, terms = n => ENC.slice(0, n).flatMap((e, j) => [j ? op("+") : "", col(e.map(x => r2(a.sm.p[j] * x)), `${f(a.sm.p[j])} × value ${j + 1}`)]);
-      const tbl = s => `<div class="op" style="display:grid;justify-items:center;font-size:0.66rem;line-height:1.1;padding-bottom:28px"><span>${s}</span><span>table</span><span style="font-size:1.1rem;line-height:1">→</span></div>`;
-      const eqT = (...items) => `<div class="eq tight">${rowsOf(DIMS)}${items.join("")}</div>`;
-      const valuesHtml = `<p class="label">the values: each made from its word's encoder vector by the value table (a real model learns that table too; in this toy it leaves the vector unchanged, so here value = key)</p>` +
-        eqT(...ENC.flatMap((e, j) => [j ? `<div class="gap"></div>` : "", col(e, `encoder vector (<i>${DIMS[j]}</i>)`), tbl("value"), col(e, `value ${j + 1}`)]));
+      const a = ATT[0].a, terms = n => ENC.slice(0, n).flatMap((e, j) => [j ? op("+") : "", col(matVec(e, WV).map(x => r2(a.sm.p[j] * x)), `${f(a.sm.p[j])} × value ${j + 1}`)]);
+      const valuesHtml = `<p class="label">the value table: 3 × 3 numbers chosen for this toy (a real model learns them; here the same numbers as the key table) · each word's value = its encoder vector × the value table</p>` +
+        eqT(...[matHtml(WV, "value table")], `<div class="gap"></div><div class="gap"></div>`, ...ENC.flatMap((e, j) => [j ? `<div class="gap"></div>` : "", col(e, `encoder vector (<i>${DIMS[j]}</i>)`), times("value"), col(matVec(e, WV), `value ${j + 1}`)])) +
+        `<p class="note" style="margin:2px 0 0">For example ${workedEntry(ENC[2], WV, "value", 2, MINA)}. With these numbers each value comes out equal to its encoder vector, and so to its key.</p>`;
       const vals = n => encPts(ENC.map((e, j) => j < n ? `value ${j + 1}: weight ${f(a.sm.p[j])}` + (j === 2 ? " (summary)" : "") : ""), "enc").map((p, j) => j < n ? p : { ...p, cls: "enc faint" });
       const top = smStage(a, 3, "from step 1");
       return [...upto(3, j => ({ board: top + valuesHtml + `<p class="label">the mix: each value scaled by its weight, then added up</p>` + eq(...terms(j + 1)), scene: { ...SMALL, pts: vals(j + 1), cap: `Value ${j + 1} scaled by its weight ${f(a.sm.p[j])}.` } })),
-        { board: top + valuesHtml + `<p class="label">the mix: each value scaled by its weight, then added up</p>` + eq(...terms(3), op("="), col(a.mix, "the mix", "cur")) + `<p class="note" style="margin:8px 0 0">With learned tables, a word's key and value differ (section 6, step 3).</p>`,
+        { board: top + valuesHtml + `<p class="label">the mix: each value scaled by its weight, then added up</p>` + eq(...terms(3), op("="), col(a.mix, "the mix", "cur")) + `<p class="note" style="margin:8px 0 0">With learned tables (section 6, step 3), a word's key and value differ from its encoder vector and from each other.</p>`,
           scene: { ...SMALL, tri: ENC, pts: [...vals(3), { p: a.mix, cls: "mix", label: `mix ${vecTxt(a.mix)}`, dx: 10, dy: 18 }],
             cap: `The mix, pulled toward the largest weight: ${f(a.mix[TIA])} of tía (the summary: ${f(SUMMARY[TIA])}).` } }];
     } }],
