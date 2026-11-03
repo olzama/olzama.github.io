@@ -702,7 +702,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <div class="part" id="part-step1"><h1>Step 1 · N-grams</h1></div>
 
 <section class="screen" id="lm" data-step="1">
-  <header><span class="kind">Step 1 · N-grams</span><h2>What is a language model?</h2></header>
+  <header><span class="kind">N-grams</span><h2>What is a language model?</h2></header>
   <div class="body cols">
     <div class="col">
       <ul class="points">
@@ -724,7 +724,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 </section>
 
 <section class="screen" id="worked" data-step="1">
-  <header><span class="kind">Step 1 · N-grams</span><h2>Count, then divide</h2></header>
+  <header><span class="kind">N-grams</span><h2>Count, then divide</h2></header>
   <div class="body cols">
     <div class="col">
     <div class="board">
@@ -1402,7 +1402,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 <div class="part" id="part-step2"><h1>Step 2 · Embeddings</h1></div>
 
 <section class="screen" id="cosine" data-step="2">
-  <header><span class="kind">Step 2 · Embeddings</span><h2>Comparing vectors: cosine similarity</h2><p class="sub">How similar are the directions of two vectors? The formula, derived on the board.</p></header>
+  <header><span class="kind">Embeddings</span><h2>Comparing vectors: cosine similarity</h2><p class="sub">How similar are the directions of two vectors? The formula, derived on the board.</p></header>
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1000 600" role="img" aria-label="Deriving cosine similarity: the vectors aunt (4, 2) and uncle (3, 3), their lengths, the unit vectors on the circle of radius 1, the angles, the dot product, and the formula cos θ = aunt · uncle / (‖aunt‖ ‖uncle‖) ≈ 0.95">
@@ -1532,7 +1532,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="embeddings" data-step="2">
-  <header><span class="kind">Step 2 · Embeddings</span><h2>From words to vectors: embeddings</h2><p class="sub">Why vectors of counts are not enough: they are long, mostly 0, and similar words do not line up</p></header>
+  <header><span class="kind">Embeddings</span><h2>From words to vectors: embeddings</h2><p class="sub">Why vectors of counts are not enough: they are long, mostly 0, and similar words do not line up</p></header>
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1400 650" role="img" aria-label="Count vectors from the corpus my aunt stayed quiet, my aunt spoke wisely, my uncle stayed quiet: aunt is 2 0 0 1 1 0 0 and uncle is 1 0 0 1 0 0 0. In 2 million words of Galician Wikipedia there are 127,848 columns; tía has 23 that are not 0. súa tía and seu tío fall in different columns, so cos(tía, tío) ≈ 0.05, less than cos(tía, casa) ≈ 0.33. An embedding has a few hundred learned numbers, none of them 0.">
@@ -1641,7 +1641,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="sglearn" data-step="2">
-  <header><span class="kind">Step 2 · Embeddings</span><h2>How embeddings are actually learned</h2><p class="sub">Skip-gram (Mikolov et al., 2013): predict the neighbors</p></header>
+  <header><span class="kind">Embeddings</span><h2>How embeddings are actually learned</h2><p class="sub">Skip-gram (Mikolov et al., 2013): predict the neighbors</p></header>
   <div class="body cols">
     <div class="col">
       <p class="label">A tiny corpus</p>
@@ -1688,7 +1688,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="classic" data-step="2">
-  <header><span class="kind">Step 2 · Embeddings</span><h2>Skip-gram: two pictures of the same model</h2></header>
+  <header><span class="kind">Embeddings</span><h2>Skip-gram: two pictures of the same model</h2></header>
   <div class="body cols">
     <div class="col">
       <p class="label">The classic picture (Mikolov et al., 2013)</p>
@@ -1732,7 +1732,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="inside" data-step="2">
-  <header><span class="kind">Step 2 · Embeddings</span><h2>Step by step, 1: from a word to its vector</h2><p class="sub">Our corpus, with the tables at the start of training</p></header>
+  <header><span class="kind">Embeddings</span><h2>Step by step, 1: from a word to its vector</h2><p class="sub">Our corpus, with the tables at the start of training</p></header>
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1240 370" role="img" aria-label="The one-hot vectors of all eight words, one row each; the row of cats times the embedding table p: the rows multiplied by 0 drop out, and h = (−0.41, −0.26) is the row of cats">
@@ -1861,7 +1861,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="inside2" data-step="2">
-  <header><span class="kind">Step 2 · Embeddings</span><h2>Step by step, 2: from the vector to probabilities</h2><p class="sub">The model's guess for the neighbor of <i>cats</i>, before any training</p></header>
+  <header><span class="kind">Embeddings</span><h2>Step by step, 2: from the vector to probabilities</h2><p class="sub">The model's guess for the neighbor of <i>cats</i>, before any training</p></header>
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1000 470" role="img" aria-label="For each word, score = h · its column of p′; for chase, (−0.41)(0.20) + (−0.26)(−0.03) = −0.074. Softmax: e to the power of each score, divided by their sum 8.346: P(chase | cats) = 0.111; mice gets the most, 0.166">
@@ -1970,7 +1970,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 
 
 <section class="screen" id="similar" data-step="2">
-  <header><span class="kind">Step 2 · Embeddings</span><h2>Similar company, similar vectors</h2></header>
+  <header><span class="kind">Embeddings</span><h2>Similar company, similar vectors</h2></header>
   <div class="body cols">
     <div class="col">
       <p class="label">The company each word keeps</p>
@@ -2024,7 +2024,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="keep" data-step="2">
-  <header><span class="kind">Step 2 · Embeddings</span><h2>What we keep: the embedding table</h2></header>
+  <header><span class="kind">Embeddings</span><h2>What we keep: the embedding table</h2></header>
   <div class="body cols">
     <div class="col">
       <div class="box">task: predict neighboring words</div><div class="center arr">↓</div>
@@ -2077,7 +2077,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 <div class="part" id="part-step3"><h1>Step 3 · Encoder–decoder translation</h1></div>
 
 <section class="screen" id="mthistory" data-step="3">
-  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Machine translation: a very short history</h2></header>
+  <header><span class="kind">Encoder–decoder</span><h2>Machine translation: a very short history</h2></header>
   <div class="body">
     <div class="flow"><div class="box">Rules<br>1950s</div><span class="arr">→</span><div class="box">Statistics<br>1990s</div><span class="arr">→</span><div class="box">Neural +<br>attention, 2015</div><span class="arr">→</span><div class="box g">LLMs<br>2020s</div></div>
     <ul class="points">
@@ -2092,7 +2092,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="encdec2" data-step="3">
-  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Neural translation: an encoder and a decoder</h2></header>
+  <header><span class="kind">Encoder–decoder</span><h2>Neural translation: an encoder and a decoder</h2></header>
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1400 630" role="img" aria-label="Possible inputs a, b, c, …; an input is a sequence of them, here c, a, e. The encoder reads the inputs one by one and updates a vector after each; that vector, the summary, is the input as numbers. The decoder keeps its own vector, the state, which starts as the encoder's vector. Possible outputs A, B, C, D, …, ‹end›: at each step the decoder gives each a probability and writes one, here D, then B, then ‹end›, which means finished; each output is mixed into the state. Both parts are trained together on pairs of an input and its gold output, the right output made by a person. The possible inputs and outputs depend on the task: translation, Galician words to English words; summarization, words to words; speech recognition, slices of a recording to written words; image captioning, patches of an image to words.">
@@ -2195,7 +2195,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   </div>
 </section>
 <section class="screen" id="lossgrad" data-step="3">
-  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Loss and gradient</h2></header>
+  <header><span class="kind">Encoder–decoder</span><h2>Loss and gradient</h2></header>
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1400 740" role="img" aria-label="Loss and gradient, illustrated. The loss of a pair is L = −log p, with p the probability of the gold output. The curve: the loss as one parameter changes, all others fixed. At the parameter&#x27;s current value, the slope of the curve is the gradient; here it is negative, so increasing the parameter lowers the loss. Gradient descent, new = old − learning rate × gradient, steps downhill, with steps that shrink as the slope flattens. A model has one slope per parameter.">
@@ -2253,7 +2253,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="datasets" data-step="3">
-  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Training, development and test data</h2></header>
+  <header><span class="kind">Encoder–decoder</span><h2>Training, development and test data</h2></header>
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1400 820" role="img" aria-label="Training, development and test data, illustrated. One collection of data is divided at random: training 80%, development 10%, test 10%. The training loss falls toward 0. The development loss, never learned from, falls and then rises: training stops at its lowest point. The test data, never used for any decision, are measured once there. Real use brings data from elsewhere, whose loss can be far higher than the test loss and is not known in advance.">
@@ -2315,7 +2315,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="chainrule" data-step="3">
-  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>The chain rule</h2></header>
+  <header><span class="kind">Encoder–decoder</span><h2>The chain rule</h2></header>
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1400 670" role="img" aria-label="The chain rule. A car is 2 times as fast as a bicycle, a bicycle 4 times as fast as a walker, so the car is 8 times as fast as the walker: along a chain, the rates multiply. If y is computed from u and u from x, the change of y per change of x is the change of y per change of u times the change of u per change of x: dy/dx = dy/du · du/dx. A model is a long chain of steps, from its vectors to the loss; the chain rule gives each vector&#x27;s gradient.">
@@ -2369,10 +2369,10 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="backprop" data-step="3">
-  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Backpropagation</h2></header>
+  <header><span class="kind">Encoder–decoder</span><h2>Backpropagation</h2></header>
   <div class="body">
     <div class="board">
-      <svg viewBox="0 0 1400 620" role="img" aria-label="Backpropagation in training the encoder-decoder. Forward pass: the inputs, the encoder, the summary, the decoder, the probability p of the gold output, the loss L = −log p. Backward pass: from L back through the decoder and the encoder; step by step, the chain rule gives the derivative of L for every value on the way. Every parameter gets its derivative: the numbers of the input vectors and the parameters of the encoder and the decoder. An inset: a parameter&#x27;s derivative is the slope of L, rise ÷ run. Update, all at once: new = old − learning rate × derivative. One training update costs about 3 times the computation of one use of the model, and the values of the forward pass are kept in memory. The next screen trains a small translation model this way.">
+      <svg viewBox="0 0 1400 520" role="img" aria-label="Backpropagation in training the encoder-decoder. Forward pass: the inputs, the encoder, the summary, the decoder, the probability p of the gold output, the loss L = −log p. Backward pass: from L back through the decoder and the encoder; step by step, the chain rule gives the derivative of L for every value on the way. Every parameter gets its derivative: the numbers of the input vectors and the parameters of the encoder and the decoder. An inset: a parameter&#x27;s derivative is the slope of L, rise ÷ run. Update, all at once: new = old − learning rate × derivative. One training update costs about 3 times the computation of one use of the model, and the values of the forward pass are kept in memory. The next screen trains a small translation model this way.">
 <rect x="38.0" y="148.0" width="84.0" height="64.0" rx="12" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.1" data-a="fade"/>
 <text x="80.0" y="189.0" font-size="19" style="fill:currentColor" text-anchor="middle" data-s="1" data-d="0.2">input 1</text>
 <rect x="138.0" y="148.0" width="84.0" height="64.0" rx="12" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="2" data-s="1" data-d="0.2" data-a="fade"/>
@@ -2407,41 +2407,38 @@ print("they match" if count == expected else "they do not match: check the loop 
 <text x="1240.0" y="236.0" font-size="17" style="fill:var(--muted)" text-anchor="middle" data-s="1" data-d="1.3">loss: −log p</text>
 <line x1="60.0" y1="92.0" x2="1300.0" y2="92.0" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" data-s="1" data-d="1.5"/>
 <path d="M1287.1 97.5 L1300.0 92.0 L1287.1 86.5" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="1" data-d="2.1" data-a="fade" data-t="0.2"/>
-<text x="680.0" y="78.0" font-size="24" style="fill:var(--blue)" text-anchor="middle" data-s="1" data-d="1.6">forward pass</text>
-<text class="note" x="40.0" y="360.0" font-size="16.8" style="fill:var(--blue)" data-s="1" data-d="1.8">Forward pass: the model reads the input of a training pair and gives its gold output a probability p; the loss is L = −log p.</text>
+<text x="680.0" y="78.0" font-size="24" style="fill:var(--blue)" text-anchor="middle" data-s="1" data-d="1.6">forward pass: from the input to the loss</text>
 <line x1="1300.0" y1="284.0" x2="60.0" y2="284.0" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" data-s="2" data-d="0"/>
 <path d="M72.9 278.5 L60.0 284.0 L72.9 289.5" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-s="2" data-d="0.6" data-a="fade" data-t="0.2"/>
-<text x="680.0" y="314.0" font-size="24" style="fill:var(--orange)" text-anchor="middle" data-s="2" data-d="0.6">backward pass</text>
-<text class="note" x="40.0" y="392.0" font-size="16.8" style="fill:var(--orange)" data-s="2" data-d="0.8">Backward pass: from L back through the decoder and the encoder, the chain rule gives the derivative of L at each step.</text>
+<text x="680.0" y="316.0" font-size="24" style="fill:var(--orange)" text-anchor="middle" data-s="2" data-d="0.6">backward pass: from the loss back, by the chain rule</text>
 <line x1="180.0" y1="278.0" x2="180.0" y2="246.0" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="3" data-d="0.0"/>
 <path d="M183.9 255.2 L180.0 246.0 L176.1 255.2" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="0.6" data-a="fade" data-t="0.2"/>
 <line x1="450.0" y1="278.0" x2="450.0" y2="246.0" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="3" data-d="0.3"/>
 <path d="M453.9 255.2 L450.0 246.0 L446.1 255.2" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="0.9" data-a="fade" data-t="0.2"/>
 <line x1="800.0" y1="278.0" x2="800.0" y2="246.0" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="3" data-d="0.6"/>
 <path d="M803.9 255.2 L800.0 246.0 L796.1 255.2" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" data-s="3" data-d="1.2" data-a="fade" data-t="0.2"/>
-<text class="note" x="40.0" y="424.0" font-size="16.8" style="fill:var(--orange)" data-s="3" data-d="1.0">Every parameter gets its derivative of L (the inset): the input vectors' numbers and the encoder's and decoder's parameters.</text>
-<rect x="1110.0" y="330.0" width="270.0" height="150.0" rx="8" fill="none" stroke="var(--muted)" stroke-width="1" data-s="3" data-d="0.2" data-a="fade"/>
-<path d="M1140.0 420.6 L1145.0 414.1 L1150.0 408.0 L1155.0 402.1 L1160.0 396.6 L1165.0 391.4 L1170.0 386.4 L1175.0 381.8 L1180.0 377.4 L1185.0 373.4 L1190.0 369.6 L1195.0 366.1 L1200.0 363.0 L1205.0 360.1 L1210.0 357.6 L1215.0 355.4 L1220.0 353.4 L1225.0 351.8 L1230.0 350.4 L1235.0 349.4 L1240.0 348.6" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="3" data-d="0.4"/>
-<path d="M1158.0 395.9 L1230.0 335.4" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" data-s="3" data-d="0.5"/>
-<path d="M1180.0 377.4 H 1214.0 V 348.8" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" data-s="3" data-d="0.6" stroke-dasharray="4 3"/>
-<text x="1122.0" y="380.0" font-size="15" style="fill:var(--muted)" data-s="3" data-d="0.6">L</text>
-<text x="1206.0" y="438.0" font-size="14" style="fill:var(--muted)" data-s="3" data-d="0.6">one parameter →</text>
-<text class="note" x="1260.0" y="360.0" font-size="14.4" style="fill:currentColor" data-s="3" data-d="0.7">its derivative:</text>
-<text class="note" x="1260.0" y="380.0" font-size="14.4" style="fill:currentColor" data-s="3" data-d="0.7">the slope of L,</text>
-<text class="note" x="1260.0" y="400.0" font-size="14.4" style="fill:currentColor" data-s="3" data-d="0.7">rise ÷ run</text>
-<text class="note" x="1122.0" y="466.0" font-size="13.6" style="fill:var(--muted)" data-s="3" data-d="0.8">(as on “Loss and gradient”)</text>
+<text x="816.0" y="262.0" font-size="18" style="fill:var(--orange)" data-s="3" data-d="1.0">each parameter's derivative of L</text>
+<rect x="1110.0" y="340.0" width="270.0" height="150.0" rx="8" fill="none" stroke="var(--muted)" stroke-width="1" data-s="3" data-d="0.2" data-a="fade"/>
+<path d="M1140.0 430.6 L1145.0 424.1 L1150.0 418.0 L1155.0 412.1 L1160.0 406.6 L1165.0 401.4 L1170.0 396.4 L1175.0 391.8 L1180.0 387.4 L1185.0 383.4 L1190.0 379.6 L1195.0 376.1 L1200.0 373.0 L1205.0 370.1 L1210.0 367.6 L1215.0 365.4 L1220.0 363.4 L1225.0 361.8 L1230.0 360.4 L1235.0 359.4 L1240.0 358.6" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" data-s="3" data-d="0.4"/>
+<path d="M1158.0 405.9 L1230.0 345.4" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" data-s="3" data-d="0.5"/>
+<path d="M1180.0 387.4 H 1214.0 V 358.8" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" data-s="3" data-d="0.6" stroke-dasharray="4 3"/>
+<text x="1122.0" y="390.0" font-size="15" style="fill:var(--muted)" data-s="3" data-d="0.6">L</text>
+<text x="1206.0" y="448.0" font-size="14" style="fill:var(--muted)" data-s="3" data-d="0.6">one parameter →</text>
+<text class="note" x="1260.0" y="370.0" font-size="14.4" style="fill:currentColor" data-s="3" data-d="0.7">its derivative:</text>
+<text class="note" x="1260.0" y="390.0" font-size="14.4" style="fill:currentColor" data-s="3" data-d="0.7">the slope of L,</text>
+<text class="note" x="1260.0" y="410.0" font-size="14.4" style="fill:currentColor" data-s="3" data-d="0.7">rise ÷ run</text>
+<text class="note" x="1122.0" y="476.0" font-size="13.6" style="fill:var(--muted)" data-s="3" data-d="0.8">(as on “Loss and gradient”)</text>
 <rect x="30.0" y="140.0" width="300.0" height="80.0" rx="14" fill="none" stroke="var(--green)" stroke-width="3" data-s="4" data-d="0.0" data-a="fade"/>
 <rect x="364.0" y="140.0" width="172.0" height="80.0" rx="14" fill="none" stroke="var(--green)" stroke-width="3" data-s="4" data-d="0.1" data-a="fade"/>
 <rect x="714.0" y="140.0" width="172.0" height="80.0" rx="14" fill="none" stroke="var(--green)" stroke-width="3" data-s="4" data-d="0.2" data-a="fade"/>
-<text class="note" x="40.0" y="456.0" font-size="16.8" style="fill:var(--green)" data-s="4" data-d="0.5">Update, all parameters at once: new = old − learning rate × derivative (gradient descent). Then the next training pair.</text>
-<text class="note" x="40.0" y="512.0" font-size="16.8" style="fill:currentColor" data-s="5" data-d="0">One use of the model:</text>
-<rect x="260.0" y="494.0" width="70.0" height="24.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="5" data-d="0.1" data-a="fade"/>
-<text class="note" x="360.0" y="512.0" font-size="16.8" style="fill:currentColor" data-s="5" data-d="0.3">one training update:</text>
-<rect x="570.0" y="494.0" width="70.0" height="24.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="5" data-d="0.4" data-a="fade"/>
-<rect x="640.0" y="494.0" width="140.0" height="24.0" rx="3" fill="var(--orange)" stroke="var(--orange)" stroke-width="1.5" data-s="5" data-d="0.6" data-a="fade"/>
-<text class="note" x="792.0" y="512.0" font-size="16.8" style="fill:currentColor" data-s="5" data-d="0.8">about 3 times as much computation.</text>
-<text class="note" x="40.0" y="544.0" font-size="16.8" style="fill:currentColor" data-s="5" data-d="1.0">Every value of the forward pass is kept in memory until the backward pass has used it.</text>
-<text class="note" x="40.0" y="600.0" font-size="16.8" style="fill:currentColor" data-s="6" data-d="0">The next screen trains a small translation model this way, one pair after another: its “update” is the backward pass and the update shown here.</text>
+<text x="40.0" y="384.0" font-size="24" style="fill:var(--green)" data-s="4" data-d="0.5">update: new = old − learning rate × derivative</text>
+<text x="40.0" y="440.0" font-size="20" style="fill:currentColor" data-s="5" data-d="0">one use</text>
+<rect x="150.0" y="422.0" width="70.0" height="24.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="5" data-d="0.1" data-a="fade"/>
+<text x="270.0" y="440.0" font-size="20" style="fill:currentColor" data-s="5" data-d="0.3">one training update</text>
+<rect x="470.0" y="422.0" width="70.0" height="24.0" rx="3" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" data-s="5" data-d="0.4" data-a="fade"/>
+<rect x="540.0" y="422.0" width="140.0" height="24.0" rx="3" fill="var(--orange)" stroke="var(--orange)" stroke-width="1.5" data-s="5" data-d="0.6" data-a="fade"/>
+<text x="692.0" y="440.0" font-size="20" style="fill:currentColor" data-s="5" data-d="0.8">≈ 3 ×, plus memory for the forward pass's values</text>
+<text class="note" x="40.0" y="496.0" font-size="17.6" style="fill:currentColor" data-s="6" data-d="0">Next screen: a translation model trained this way.</text>
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
@@ -2470,7 +2467,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="realwhy" data-step="3">
-  <header><span class="kind">Step 3 · Encoder–decoder</span><h2>Why a real model still writes “an aunt of mine”</h2></header>
+  <header><span class="kind">Encoder–decoder</span><h2>Why a real model still writes “an aunt of mine”</h2></header>
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1400 670" role="img" aria-label="The real model translates our sentence as An aunt of mine. Its probabilities for four openings, log scale: An aunt of mine 0.33, My aunt 0.015, I had an aunt 7.5 in a million, One of my aunts 5.5 in ten billion. Word by word, I had an aunt loses at its first words. Likely reasons: it learned translations; a … of mine is common; rebuilding is a big step; Galician is low-resource.">
@@ -2521,7 +2518,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 <div class="part" id="part-step4"><h1>Step 4 · Attention</h1></div>
 
 <section class="screen" id="born" data-step="4">
-  <header><span class="kind">Step 4 · Attention</span><h2>Attention was born in machine translation</h2></header>
+  <header><span class="kind">Attention</span><h2>Attention was born in machine translation</h2></header>
   <div class="body cols">
     <div class="col">
       <ul class="points">
@@ -2838,7 +2835,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="qkv" data-step="4">
-  <header><span class="kind">Step 4 · Attention</span><h2>Query, key and value</h2></header>
+  <header><span class="kind">Attention</span><h2>Query, key and value</h2></header>
   <div class="body cols">
     <div class="col">
       <ul class="points">
@@ -2922,7 +2919,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="bigweight" data-step="4">
-  <header><span class="kind">Step 4 · Attention</span><h2>A large attention weight does not mean an important word</h2></header>
+  <header><span class="kind">Attention</span><h2>A large attention weight does not mean an important word</h2></header>
   <div class="body">
     <p class="sent small">Unha tía miña, que todo o solucionaba con ditos e refráns, dicía algo así como “un é escravo do que di e dono do que cala”.</p>
     <div class="cols wide-left">
@@ -2981,7 +2978,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 <div class="part" id="part-step5"><h1>Step 5 · Self-attention</h1></div>
 
 <section class="screen" id="selfattn" data-step="5">
-  <header><span class="kind">Step 5 · Self-attention</span><h2>Self-attention: every word looks at every word of its own sentence</h2></header>
+  <header><span class="kind">Self-attention</span><h2>Self-attention: every word looks at every word of its own sentence</h2></header>
   <div class="body cols">
     <div class="col">
       <ul class="points">
@@ -3001,7 +2998,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="multihead" data-step="5">
-  <header><span class="kind">Step 5 · Self-attention</span><h2>Several heads at once: multi-head attention</h2></header>
+  <header><span class="kind">Self-attention</span><h2>Several heads at once: multi-head attention</h2></header>
   <div class="body">
     <ul class="points">
       <li>Several heads side by side, each with its own grid of weights and its own mix; one learned table combines the mixes into one new vector per word (the real model: 8 heads)</li>
@@ -3037,7 +3034,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 <div class="part" id="part-step6"><h1>Step 6 · Transformers</h1></div>
 
 <section class="screen" id="stack" data-step="6">
-  <header><span class="kind">Step 6 · Transformers</span><h2>Inside a transformer: stacked blocks</h2></header>
+  <header><span class="kind">Transformers</span><h2>Inside a transformer: stacked blocks</h2></header>
   <div class="body cols">
     <div class="col">
       <ul class="points">
@@ -3055,7 +3052,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="block" data-step="6">
-  <header><span class="kind">Step 6 · Transformers</span><h2>Inside one block</h2></header>
+  <header><span class="kind">Transformers</span><h2>Inside one block</h2></header>
   <div class="body cols">
     <div class="col">
       <ul class="points">
@@ -3073,7 +3070,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="quadratic" data-step="6">
-  <header><span class="kind">Step 6 · Transformers</span><h2>Why attention cost grows with the length of the input</h2></header>
+  <header><span class="kind">Transformers</span><h2>Why attention cost grows with the length of the input</h2></header>
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 760 480" role="img" aria-label="Every word is scored against every word: 4 words give 4 × 4 = 16 scores, 8 words give 8 × 8 = 64. n words give n², and 2n words give 4n²">
@@ -3226,7 +3223,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="kv" data-step="6">
-  <header><span class="kind">Step 6 · Transformers</span><h2>Generating text: why inference is sequential</h2></header>
+  <header><span class="kind">Transformers</span><h2>Generating text: why inference is sequential</h2></header>
   <div class="body">
     <div class="flow kvrow" style="gap:24px;align-items:center">
       <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i></div><span>word 1<br>(cache: 1 word)</span></div>
@@ -3248,7 +3245,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="size" data-step="6">
-  <header><span class="kind">Step 6 · Transformers</span><h2>Why does model size cost so much?</h2></header>
+  <header><span class="kind">Transformers</span><h2>Why does model size cost so much?</h2></header>
   <div class="body cols">
     <div class="col">
       <p class="label">What doubling each one does to the computation of one use</p>
