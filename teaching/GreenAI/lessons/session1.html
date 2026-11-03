@@ -2365,7 +2365,7 @@ print("they match" if count == expected else "they do not match: check the loop 
       <ul class="points">
         <li>The bottleneck: the whole sentence squeezed into <b>one vector</b></li>
         <li>Bahdanau, Cho &amp; Bengio (2015): for every word it writes, the decoder <b>looks back</b> at every source word and computes how much to use each one: the <b>attention weights</b> (scores, then softmax, as for p)</li>
-        <li>They are computed anew for every word written, from vectors that backpropagation trains (diagram, right)</li>
+        <li>Computed anew for every word written, through learned tables that backpropagation trains (diagram, right; next screen: query, key and value)</li>
         <li>Which source word goes with which word written (<b>alignment</b>) comes out of the attention weights, with no hand-written rule</li>
         <li>Invented for translation, years before today's LLMs</li>
       </ul>
@@ -2665,31 +2665,36 @@ print("they match" if count == expected else "they do not match: check the loop 
 </svg>
 <!--/FIG3A-->
       <!--AWLEARN-->
-<svg class="svgfig" viewBox="0 0 740 180" role="img" aria-label="Where attention weights come from: the state and the source vectors give scores; softmax gives the attention weights; they weight the mix that produces the next word. The attention weights are not stored: they are computed anew for every word. The backward pass goes from the loss back to the state and the source vectors, which are trained by backpropagation." style="max-width:560px">
+<svg class="svgfig" viewBox="0 0 800 186" role="img" aria-label="Where attention weights come from. The decoder's state, through a learned query table, gives the query; the source vectors, through a learned key table, give the keys. Query and keys give scores; softmax gives the attention weights; they mix the source vectors for the next word. The attention weights are not stored: they are computed anew for every word. The two tables are trained by backpropagation; the backward pass goes from the loss back to them." style="max-width:600px">
   <defs>
     <marker id="awA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--muted)"/></marker>
     <marker id="awO" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--orange)"/></marker>
   </defs>
   <g font-size="15" text-anchor="middle">
-    <rect x="6" y="12" width="108" height="42" rx="8" fill="none" stroke="var(--green)" stroke-width="2"/>
-    <rect x="12" y="18" width="96" height="30" rx="5" fill="var(--green-soft)" stroke="var(--green)"/><text x="60" y="38">state</text>
-    <rect x="6" y="68" width="132" height="42" rx="8" fill="none" stroke="var(--green)" stroke-width="2"/>
-    <rect x="12" y="74" width="120" height="30" rx="5" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="72" y="94">source vectors</text>
-    <text x="12" y="130" font-size="13" text-anchor="start" style="fill:var(--green)">trained by backpropagation</text>
-    <path d="M114 36 L186 56" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
-    <path d="M138 90 L186 68" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
-    <rect x="190" y="46" width="92" height="30" rx="5" fill="none" stroke="var(--fg)"/><text x="236" y="66">scores</text>
-    <path d="M282 61 L338 61" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
-    <text x="310" y="52" font-size="12" class="muted">softmax</text>
-    <rect x="340" y="46" width="150" height="30" rx="5" fill="none" stroke="var(--orange)" stroke-width="2"/><text x="415" y="66">attention weights</text>
-    <text x="415" y="100" font-size="13" class="muted">not stored: computed anew</text>
-    <text x="415" y="116" font-size="13" class="muted">for every word written</text>
-    <path d="M490 61 L528 61" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
-    <rect x="530" y="46" width="64" height="30" rx="5" fill="none" stroke="var(--fg)"/><text x="562" y="66">mix</text>
-    <path d="M594 61 L622 61" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
-    <rect x="624" y="46" width="108" height="30" rx="5" fill="none" stroke="var(--fg)"/><text x="678" y="66">next word</text>
-    <path d="M678 150 L62 150" stroke="var(--orange)" stroke-width="2.5" marker-end="url(#awO)"/>
-    <text x="370" y="170" font-size="13" style="fill:var(--orange)">backward pass: from the loss back to the vectors the attention weights are computed from</text>
+    <rect x="6" y="14" width="110" height="30" rx="5" fill="var(--green-soft)" stroke="var(--green)"/><text x="61" y="34">decoder's state</text>
+    <path d="M116 29 L134 29" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
+    <rect x="136" y="14" width="96" height="30" rx="5" fill="none" stroke="var(--green)" stroke-width="2.5"/><text x="184" y="34">query table</text>
+    <path d="M232 29 L250 29" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
+    <rect x="252" y="14" width="62" height="30" rx="5" fill="none" stroke="var(--fg)"/><text x="283" y="34">query</text>
+    <rect x="6" y="72" width="110" height="30" rx="5" fill="var(--blue-soft)" stroke="var(--blue)"/><text x="61" y="92">source vectors</text>
+    <path d="M116 87 L134 87" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
+    <rect x="136" y="72" width="96" height="30" rx="5" fill="none" stroke="var(--green)" stroke-width="2.5"/><text x="184" y="92">key table</text>
+    <path d="M232 87 L250 87" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
+    <rect x="252" y="72" width="62" height="30" rx="5" fill="none" stroke="var(--fg)"/><text x="283" y="92">keys</text>
+    <text x="6" y="130" font-size="13" text-anchor="start" style="fill:var(--green)">thick green: learned tables, trained by backpropagation</text>
+    <path d="M314 32 L344 52" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
+    <path d="M314 84 L344 64" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
+    <rect x="346" y="43" width="76" height="30" rx="5" fill="none" stroke="var(--fg)"/><text x="384" y="63">scores</text>
+    <path d="M422 58 L470 58" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
+    <text x="446" y="38" font-size="12" class="muted">softmax</text>
+    <rect x="472" y="43" width="140" height="30" rx="5" fill="none" stroke="var(--orange)" stroke-width="2"/><text x="542" y="63">attention weights</text>
+    <text x="542" y="98" font-size="13" class="muted">not stored: computed anew</text>
+    <text x="542" y="114" font-size="13" class="muted">for every word written</text>
+    <path d="M612 58 L700 58" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#awA)"/>
+    <text x="656" y="38" font-size="12" class="muted">mix</text>
+    <rect x="702" y="43" width="92" height="30" rx="5" fill="none" stroke="var(--fg)"/><text x="748" y="63">next word</text>
+    <path d="M748 150 L190 150" stroke="var(--orange)" stroke-width="2.5" marker-end="url(#awO)"/>
+    <text x="470" y="172" font-size="13" style="fill:var(--orange)">backward pass: from the loss back to the tables (and to the vectors the state and the keys are made from)</text>
   </g>
 </svg>
 <!--/AWLEARN-->
@@ -2703,7 +2708,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="body cols">
     <div class="col">
       <ul class="points">
-        <li><b>Query</b> <i>q</i>: what the decoder looks for, before the word it is about to write</li>
+        <li><b>Query</b> <i>q</i>, computed from the decoder's state: what the decoder looks for, before the word it is about to write</li>
         <li><b>Key</b> <i>k</i>: what each source word offers to be found by</li>
         <li><b>Score</b> = <i>q</i> · <i>k</i>, the dot product; <b>softmax</b> turns the scores into attention weights that add up to 1</li>
         <li><b>Value</b> <i>v</i>: what each source word contributes; the mix is the sum of the values, each times its attention weight</li>
