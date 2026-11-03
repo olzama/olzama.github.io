@@ -859,7 +859,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T17:47Z">3 Nov 2026, 17:47 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T17:54Z">3 Nov 2026, 17:54 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -1054,34 +1054,44 @@ const init6 = () => {
       <p class="note" style="margin:4px 0 0"><span style="color:var(--green)">green</span>: the three tables. Section 2 (steps 1 and 2) was this, with chosen numbers in the tables and a chosen query; a real model learns the tables (section 8).</p>
       <p class="label" style="margin-top:10px">the weights before “${word}”: the row of “${word}” on the left · one head → one row per English word → one grid (step 2)</p>`;
   };
-  // step 4: one layer as a schematic: the same two inputs into 8 heads (each: its own three tables, its grid, its mix), the 8 mixes combined; then the decoder's 6 layers in a chain
+  // step 4: one layer: the decoder state and the encoder vectors into 8 heads (head 1 = section 2's head with its grid, the one on the left; heads 2–8 the same computation with other tables); the 8 mixes side by side × a learned table = one vector; the feed-forward step; the state for the next layer; then the decoder's 6 layers in a chain
   const layerHtml = () => {
-    const tf = `font-family:var(--font-body);font-size:11px;fill:var(--fg)`, tbl = "rgba(63,127,61,0.13)";
-    const bx = (x, y, wd, h, s, stroke = "var(--line)", fill = "var(--panel)", fs = 11) => `<rect x="${x}" y="${y}" width="${wd}" height="${h}" rx="4" style="fill:${fill};stroke:${stroke}" stroke-width="1.3"/><text x="${x + wd / 2}" y="${y + h / 2 + fs * 0.36}" text-anchor="middle" style="${tf};font-size:${fs}px">${s}</text>`;
+    const W = 560, tf = `font-family:var(--font-body);font-size:12px;fill:var(--fg)`, tbl = "rgba(63,127,61,0.13)";
+    const bx = (x, y, wd, h, s, stroke = "var(--line)", fill = "var(--panel)", fs = 12) => `<rect x="${x}" y="${y}" width="${wd}" height="${h}" rx="4" style="fill:${fill};stroke:${stroke}" stroke-width="1.3"/><text x="${x + wd / 2}" y="${y + h / 2 + fs * 0.36}" text-anchor="middle" style="${tf};font-size:${fs}px">${s}</text>`;
     const ar = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:var(--muted)" stroke-width="1.2" marker-end="url(#hbArr2)"/>`;
     const ln = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:var(--muted)" stroke-width="1.2"/>`;
+    const sm = (x, y, s, anchor = "start", fs = 10) => `<text x="${x}" y="${y}" text-anchor="${anchor}" style="${tf};font-size:${fs}px;fill:var(--muted)">${s}</text>`;
     let g = `<defs><marker id="hbArr2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" style="fill:var(--muted)"/></marker></defs>`;
-    g += bx(6, 4, 208, 22, "decoder state", "var(--fg)") + bx(226, 4, 208, 22, "encoder vectors", "var(--blue)") + ln(110, 26, 110, 38) + ln(330, 26, 330, 38) + ln(44, 38, 400, 38);
-    const HW = 46, X0 = 21, c = 7, cols = SRC_R.length, rows = TGT_R.length;
-    for (let h = 0; h < NH; h++) { const x = X0 + h * 51, cx = x + HW / 2, M = C[FL][h];
-      g += ar(cx, 38, cx, 48) + `<rect x="${x}" y="48" width="${HW}" height="106" rx="4" style="fill:var(--panel);stroke:${h === FH ? "var(--fg)" : "var(--line)"}" stroke-width="${h === FH ? 2 : 1.3}"/>`;
-      g += `<text x="${cx}" y="60" text-anchor="middle" style="${tf};font-size:9px;fill:var(--muted)">head ${h + 1}</text>` + bx(x + 4, 64, HW - 8, 14, "3 tables", "var(--green)", tbl, 8) + ar(cx, 78, cx, 86);
-      const gx = cx - cols * c / 2, gy = 87; for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) g += `<rect x="${gx + j * c}" y="${gy + i * c}" width="${c}" height="${c}" style="fill:${heatOf(M[i][j])}"/>`;
-      g += `<rect x="${gx}" y="${gy}" width="${cols * c}" height="${rows * c}" fill="none" style="stroke:var(--line)" stroke-width="0.8"/>` + ar(cx, gy + rows * c, cx, 131) + bx(x + 8, 132, HW - 16, 16, "mix", "var(--orange)", "var(--panel)", 9) + ln(cx, 154, cx, 164); }
-    g += ln(X0 + HW / 2, 164, X0 + 7 * 51 + HW / 2, 164) + ar(220, 164, 220, 176) + bx(6, 176, 428, 22, "the 8 mixes side by side × a learned table = one new vector per English word", "var(--green)", tbl)
-      + ar(220, 198, 220, 212) + bx(6, 212, 428, 22, "one more learned step on each vector (the feed-forward network)", "var(--green)", tbl) + ar(220, 234, 220, 248) + bx(6, 248, 428, 22, "the next layer starts from these vectors", "var(--fg)");
-    const chain = [...Array(NL).keys()].map(l => bx(6 + l * 72, 4, 62, 22, `layer ${l + 1}`, l === FL ? "var(--fg)" : "var(--line)") + (l < NL - 1 ? ar(68 + l * 72, 15, 78 + l * 72, 15) : "")).join("");
-    return `<svg viewBox="0 0 440 274" role="img" aria-label="one layer: the same inputs into 8 heads, each with its own three tables, its own grid and its own mix; the 8 mixes combined into one new vector per English word">${g}</svg>
-      <p class="note" style="margin:4px 0 0">each head: step 3's schematic, folded up; its grid here: the real model's, layer ${FL + 1} (step 6; the dark frame: head ${FH + 1}, the grid of step 5) · <span style="color:var(--green)">green</span>: learned</p>
+    g += bx(6, 4, 264, 24, "decoder state (the English words written so far)", "var(--fg)") + bx(290, 4, 264, 24, "encoder vectors (section 1)", "var(--blue)")
+      + ln(138, 28, 138, 50) + sm(144, 43, "× query table → the query") + ln(422, 28, 422, 50) + sm(416, 43, "× key table, × value table → keys, values", "end") + ln(37, 50, 523, 50);
+    const HW = 58, GAP = 66, X0 = 8, c = 8, cols = SRC_H.length, rows = ROWS.length, Y = 60;
+    for (let h = 0; h < NH; h++) { const x = X0 + h * GAP, cx = x + HW / 2, first = h === 0;
+      g += ar(cx, 50, cx, Y) + `<rect x="${x}" y="${Y}" width="${HW}" height="124" rx="4" style="fill:var(--panel);stroke:${first ? "var(--fg)" : "var(--line)"}" stroke-width="${first ? 2 : 1.3}"/>`;
+      g += sm(cx, Y + 13, `head ${h + 1}`, "middle", 11) + bx(x + 4, Y + 18, HW - 8, 16, first ? "its tables" : "other tables", "var(--green)", tbl, 8.5) + ar(cx, Y + 34, cx, Y + 44);
+      const gx = cx - cols * c / 2, gy = Y + 45;
+      for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) g += first ? `<rect x="${gx + j * c}" y="${gy + i * c}" width="${c}" height="${c}" style="fill:${heatOf(H.w[i][j])}"/>` : `<rect x="${gx + j * c + 0.5}" y="${gy + i * c + 0.5}" width="${c - 1}" height="${c - 1}" fill="none" style="stroke:var(--line)" stroke-dasharray="1.5 1.5"/>`;
+      if (first) g += `<rect x="${gx}" y="${gy + sel * c}" width="${cols * c}" height="${c}" fill="none" style="stroke:var(--orange)" stroke-width="1.3"/>`;
+      g += `<rect x="${gx}" y="${gy}" width="${cols * c}" height="${rows * c}" fill="none" style="stroke:var(--line)" stroke-width="0.8"/>` + ar(cx, gy + rows * c, cx, Y + 97) + bx(x + 8, Y + 98, HW - 16, 18, `mix ${h + 1}`, "var(--orange)", "var(--panel)", 9.5); }
+    const chain = [...Array(NL).keys()].map(l => bx(6 + l * 92, 4, 76, 24, `layer ${l + 1}`) + (l < NL - 1 ? ar(82 + l * 92, 16, 96 + l * 92, 16) : "")).join("");
+    // the 8 mixes side by side × a learned table = one vector: section 2's vector columns; head 1's mix has section 2's numbers, the other seven are not computed here
+    const sqE = `<div class="sq" style="border:1.5px dashed var(--line)"></div>`;
+    const mixCol = h => h ? `<div class="vc"><div class="vh">mix ${h + 1}</div>${sqE}${sqE}${sqE}</div>` : H.col(H.mix[sel], "mix 1", "cur");
+    const combine = `<div class="eq tight" style="row-gap:10px">${H.rowsOf()}${[...Array(NH).keys()].map(mixCol).join("")}<div class="op" style="font-size:0.85rem;line-height:1.25;text-align:center;padding-bottom:28px;white-space:nowrap">× a learned table<br>(24 rows × 3 columns) =</div><div class="vc"><div class="vh">one vector</div>${sqE}${sqE}${sqE}</div></div>`;
+    return `<p class="label">the same decoder state and encoder vectors go into 8 heads: 8 grids, 8 mixes (before “${ROWS[sel]}”)</p>
+      <svg viewBox="0 0 ${W} ${Y + 128}" style="max-width:${W}px" role="img" aria-label="one layer: the decoder state and the encoder vectors go into 8 heads, each with its own three tables, its own grid and its own mix">${g}</svg>
+      <p class="note" style="margin:2px 0 0">head 1: section 2's head, its grid the one on the left (<span style="color:var(--orange)">orange</span>: the row of “${ROWS[sel]}”) · heads 2–8: the same computation with other tables, so other weights in a grid of the same shape (a real model's 8 grids: step 6) · <span style="color:var(--green)">green</span>: learned</p>
+      <p class="label" style="margin-top:10px">the 8 mixes before “${ROWS[sel]}”, side by side (24 numbers), × a learned table = one vector of 3 numbers</p>
+      ${combine}
+      <div class="hbflow" style="margin-top:6px"><span class="word">one vector per English word</span><span class="op">→</span><span class="word" style="background:${tbl};border:1px solid var(--green)">one more learned step on each vector (the feed-forward network)</span><span class="op">→</span><span class="word">into the decoder state, where the mix went in section 2 (step 3)</span><span class="op">→</span><span class="word out">the next layer</span></div>
       <p class="label" style="margin-top:10px">the decoder: ${NL} such layers, one after the other</p>
-      <svg viewBox="0 0 440 30" role="img" aria-label="six layers in a chain"><defs></defs>${chain}</svg>
-      <p class="note" style="margin:2px 0 0">Layer 1's decoder state comes from the English words written so far; each layer's new vectors are the next layer's decoder state; after layer ${NL}, a probability for each English word. ${NL} layers × ${NH} heads = ${NL * NH} grids (step 7).</p>`;
+      <svg viewBox="0 0 ${W} 32" style="max-width:${W}px" role="img" aria-label="six layers in a chain">${chain}</svg>
+      <p class="note" style="margin:2px 0 0">Layer 1's decoder state comes from the English words written so far; each layer's output is the next layer's decoder state; every layer's heads read the same encoder vectors; after layer ${NL}, a probability for each English word. ${NL} layers × ${NH} heads = ${NL * NH} grids (step 7).</p>`;
   };
   const POINTS = [
     "A row of a grid: one English word's weights over the Galician words. They add up to 1. Section 2 computed one by hand.",
     "The grid: all the rows, one per English word written. Darker means more weight.",
     "A head: section 2's computation (steps 1 and 2), with the three tables learned. One head, one grid.",
-    "A layer: 8 heads on the same inputs, each with its own tables, grid and mix; the 8 mixes are combined into one new vector per English word, the next layer's input. 6 layers × 8 heads = 48 grids.",
+    "A layer: 8 heads on the same decoder state and encoder vectors, each with its own tables, so its own grid and mix; the 8 mixes combined go into the decoder state for the next layer. 6 layers × 8 heads = 48 grids.",
     "A real model's grid reads the same way: “Aunt” looks at tía. It can also show a mistake: “A Aunt of mine”. Choosing “An” needs tía, and the row of “A” puts little weight on it (0.00 in this head, 0.16 on average over the 48 grids; an even share would be 0.25).",
     "The 8 heads of one layer make 8 different grids for the same phrase: each head has its own tables, so its own pattern.",
     "Early layers spread their weight; late layers point each English word at the word it translates. Nobody assigned these patterns: training did.",
@@ -1094,7 +1104,7 @@ const init6 = () => {
     ["What a head is",
       "A head is what section 2 computed before each English word (its steps 1 and 2), drawn on the right. There the tables held chosen numbers and the query was chosen; a real model learns the three tables and makes the query from the decoder state. One head gives one row of weights per English word: one grid, as in step 2. Click a row on the left to see another word's weights in it."],
     ["What a layer is",
-      "A layer: the same decoder state and encoder vectors go into 8 heads at once, each with its own three tables, so each with its own grid and its own mix. A learned table combines the 8 mixes into one new vector per English word, and one more learned step is applied to each vector. The decoder has 6 such layers in a chain; each layer's new vectors are the next layer's decoder state."],
+      "A layer: the decoder state and the encoder vectors go into 8 heads at once. Head 1 is section 2's head, with the grid on the left; heads 2 to 8 do the same computation with other tables, so they get other weights. A learned table combines the 8 mixes into one vector per English word, one more learned step is applied to it, and the result is the decoder state for the next layer. The decoder has 6 such layers in a chain."],
     ["A real model's grid reads the same way",
       `opus-mt-gl-en, trained by others on much Galician–English text, on the same phrase: one of its 48 grids (layer 5, head 3). Columns end with ‹end›, the end marker. “Aunt” looks at tía, as in our grid, but it writes “${TGT_R.slice(0, -1).join(" ")}”. “A” or “An” needs tía, and the row of “A” puts no weight on it here, little on average over all ${NL * NH} grids.`],
     ["The 8 heads of one layer",
@@ -1112,7 +1122,7 @@ const init6 = () => {
     $("hbLeft").innerHTML = bars(SRC_H, H.w[sel], `before “${ROWS[sel]}”: the three weights`) + `<p class="label" style="margin-top:10px">${n === 1 ? "the three weights as a row of cells, darker for more weight" : `the grid: one such row per English word (orange: the row of “${ROWS[sel]}”)`}</p>` + grid(ROWS, SRC_H, H.w, { n, sel });
     if (k < 2) { $("hbRightLbl").textContent = "a real model on the same phrase"; $("hbRight").innerHTML = `<p class="hbempty">step 5 puts here the same kind of row and grid, from a real translation model reading the same phrase</p>`; }
     else if (k === 2) { $("hbRightLbl").textContent = "one head"; $("hbRight").innerHTML = headHtml(sel); }
-    else if (k === 3) { $("hbRightLbl").textContent = "one layer, and the decoder's 6 layers"; $("hbRight").innerHTML = layerHtml(); }
+    else if (k === 3) { $("hbRightLbl").textContent = "one layer: 8 heads; the decoder: 6 layers"; $("hbRight").innerHTML = layerHtml(); }
     else if (k === 4) { $("hbRightLbl").textContent = `opus-mt-gl-en: layer ${FL + 1}, head ${FH + 1}`;
       $("hbRight").innerHTML = bars(SRC_R, C[FL][FH][sel], `before “${TGT_R[sel]}”: the ${SRC_R.length} weights`) + `<p class="label" style="margin-top:10px">its grid</p>` + grid(TGT_R, SRC_R, C[FL][FH], { sel, cw: 50 }); }
     else if (k === 5) { $("hbRightLbl").textContent = `opus-mt-gl-en, layer ${FL + 1}: its 8 heads, one grid each`;
