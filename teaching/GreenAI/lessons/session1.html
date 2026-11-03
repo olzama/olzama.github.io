@@ -2610,8 +2610,9 @@ print("they match" if count == expected else "they do not match: check the loop 
     <div class="col">
       <ul class="points">
         <li>The bottleneck: the whole sentence squeezed into <b>one vector</b></li>
-        <li>Bahdanau, Cho &amp; Bengio (2015): the decoder <b>looks back</b> at every source word and chooses new weights for every word it writes: <b>attention</b></li>
-        <li>Which source word goes with which word written (<b>alignment</b>) comes out of the weights, learned from translated sentences, with no hand-written rule</li>
+        <li>Bahdanau, Cho &amp; Bengio (2015): for every word it writes, the decoder <b>looks back</b> at every source word and computes how much to use each one: the <b>attention weights</b> (scores, then softmax, as for p)</li>
+        <li>Attention weights are computed in the forward pass, new for every word written; training does not set them. Backpropagation trains the vectors they are computed from, on translated sentences</li>
+        <li>Which source word goes with which word written (<b>alignment</b>) comes out of the attention weights, with no hand-written rule</li>
         <li>Invented for translation, years before today's LLMs</li>
       </ul>
       <!--LOOKBACK-->
