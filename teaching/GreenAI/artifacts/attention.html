@@ -705,7 +705,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
         <div class="heatwrap"><canvas id="realHeat" aria-label="Cross-attention weights"></canvas></div>
       </div>
     </div>
-    <p class="label">All 48 grids at once, for the whole sentence: one row per layer, one column per head (as in step 5 above)</p>
+    <p class="label">All 48 grids at once, for the whole sentence: one row per layer, one column per head (as in step 7 above)</p>
     <p class="note">One thumbnail per head, read like the large grid; click one to show it there (orange frame: the heads shown). Layer 1 spreads its weight; the last layers draw sharp lines from each English piece to the Galician piece it translates.</p>
     <div class="xheads" id="realHeads"></div>
     <p class="label">What the layers do: the weight on the right Galician word, averaged over the 8 heads of each layer</p>
@@ -986,28 +986,61 @@ document.addEventListener("DOMContentLoaded", () => {
         if (o.sel !== undefined) g += `<rect x="${x0}" y="${y0 + o.sel * c}" width="${tw}" height="${c}" fill="none" style="stroke:var(--orange)" stroke-width="1.5"/>`;
         const f0 = l === FL && h === FH; g += `<rect x="${x0 - 1.5}" y="${y0 - 1.5}" width="${tw + 3}" height="${th + 3}" fill="none" style="stroke:${f0 ? "var(--fg)" : "var(--line)"}" stroke-width="${f0 ? 2.5 : 1}"/>`; } });
     const W = (o.big ? 4 : lx) + per * (tw + gx), Ht = ty + layers.length * bandH;
-    const key = (o.sel !== undefined ? `<span style="color:var(--orange)">orange outline</span>: the row of “${String(TGT_R[o.sel]).replace(/&/g, "&amp;").replace(/</g, "&lt;")}” · ` : "") + `<b>dark frame</b>: layer ${FL + 1}, head ${FH + 1}, the grid of step 3<br>each grid: ${TGT_R.length} rows (${TGT_R.map(t => String(t).replace(/</g, "&lt;")).join(", ")}) × ${SRC_R.length} columns (${SRC_R.map(t => String(t).replace(/</g, "&lt;")).join(", ")})`;
+    const key = (o.sel !== undefined ? `<span style="color:var(--orange)">orange outline</span>: the row of “${String(TGT_R[o.sel]).replace(/&/g, "&amp;").replace(/</g, "&lt;")}” · ` : "") + `<b>dark frame</b>: layer ${FL + 1}, head ${FH + 1}, the grid of step 5<br>each grid: ${TGT_R.length} rows (${TGT_R.map(t => String(t).replace(/</g, "&lt;")).join(", ")}) × ${SRC_R.length} columns (${SRC_R.map(t => String(t).replace(/</g, "&lt;")).join(", ")})`;
     return `<svg viewBox="0 0 ${W} ${Ht}" style="max-width:${W}px" role="img" aria-label="one small grid per head">${g}</svg><p class="note" style="margin:4px 0 0">${key}</p>`;
   }
-  const headFlow = `<div class="hbflow"><span class="note">one head:</span><span class="word">decoder state × <b>query table</b> → query</span><span class="word">encoder's vectors × <b>key table</b> → keys</span><span class="op">→</span><span class="word">query · each key → softmax → <b>weights: one row</b></span><span class="op">→</span><span class="word">encoder's vectors × <b>value table</b>, mixed with the weights → this head's mix</span></div>`;
+  // the two schematics of steps 3 and 4: one head, one layer (and the stack of layers). Text styles are inline: the page's svg text rule is mono, 12px
+  const hbF = (size, col) => `style="font-family:var(--font-body);font-size:${size}px;fill:${col}"`;
+  const hbSV = (w, h, body) => `<svg viewBox="0 0 ${w} ${h}" role="img" style="max-width:none"><defs><marker id="hbA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--muted)"/></marker></defs><g text-anchor="middle">${body}</g></svg>`;
+  const hbBx = (x, y, w, lab, kind = "") => {
+    const st = kind === "t" ? 'fill="none" stroke="var(--green)" stroke-width="2.5"' : kind === "o" ? 'fill="none" stroke="var(--orange)" stroke-width="2"' : kind === "b" ? 'fill="var(--bg)" stroke="var(--blue)"' : 'fill="none" stroke="var(--fg)"';
+    return `<rect x="${x}" y="${y - 13}" width="${w}" height="26" rx="5" ${st}/><text x="${x + w / 2}" y="${y + 4}" ${hbF(12, "var(--fg)")}>${lab}</text>`; };
+  const hbAr = (x0, y0, x1, y1) => `<path d="M${x0} ${y0} L${x1} ${y1}" stroke="var(--muted)" stroke-width="1.3" fill="none" marker-end="url(#hbA)"/>`;
+  const hbTx = (x, y, s, col = "var(--muted)", size = 11, anchor = "middle") => `<text x="${x}" y="${y}" text-anchor="${anchor}" ${hbF(size, col)}>${s}</text>`;
+  const headSvg = hbSV(520, 212,
+    hbBx(6, 24, 110, "decoder state", "b") + hbAr(116, 24, 132, 24) + hbBx(134, 24, 92, "query table", "t") + hbAr(226, 24, 242, 24) + hbBx(244, 24, 58, "query") +
+    hbBx(6, 70, 110, "encoder's vectors", "b") + hbAr(116, 70, 132, 70) + hbBx(134, 70, 92, "key table", "t") + hbAr(226, 70, 242, 70) + hbBx(244, 70, 58, "keys") +
+    hbBx(6, 116, 110, "encoder's vectors", "b") + hbAr(116, 116, 132, 116) + hbBx(134, 116, 92, "value table", "t") + hbAr(226, 116, 242, 116) + hbBx(244, 116, 58, "values") +
+    hbAr(302, 28, 322, 42) + hbAr(302, 66, 322, 52) + hbBx(324, 47, 62, "scores") + hbAr(386, 47, 402, 47) + hbTx(394, 31, "softmax", "var(--muted)", 10) +
+    hbBx(404, 47, 76, "weights", "o") + hbTx(442, 73, "one row of a grid", "var(--orange)", 10) +
+    hbAr(442, 60, 442, 103) + hbAr(302, 116, 402, 116) + hbBx(404, 116, 76, "mix") + hbTx(442, 142, "one vector", "var(--muted)", 10) +
+    hbTx(6, 170, "one head: one run of this, with its own three learned tables (green): one grid, one mix", "var(--fg)", 12, "start") +
+    hbTx(6, 190, "a table multiplies a vector and gives a new vector; the tables are learned in training", "var(--muted)", 12, "start"));
+  const hbHeads8 = (y) => [...Array(8).keys()].map(h => `<rect x="${20 + h * 33}" y="${y - 13}" width="28" height="26" rx="4" fill="rgba(var(--heat),0.12)" stroke="var(--blue)"/>` + hbTx(34 + h * 33, y + 4, `h${h + 1}`, "var(--fg)", 11)).join("");
+  const hbSlab = (l, y) => `<rect x="340" y="${y - 12}" width="170" height="24" rx="4" fill="rgba(var(--heat),${(0.06 + 0.03 * l).toFixed(2)})" stroke="var(--blue)"/>` + hbTx(350, y + 4, `layer ${l + 1}`, "var(--fg)", 11, "start") + [...Array(8).keys()].map(h => `<rect x="${410 + h * 12}" y="${y - 5}" width="9" height="10" rx="1" fill="var(--blue)" fill-opacity="0.6"/>`).join("");
+  const layerSvg = hbSV(520, 234,
+    hbTx(150, 226, "a vector per English word, from the layer below", "var(--fg)", 11) + hbAr(150, 212, 150, 186) +
+    hbHeads8(172) + hbTx(150, 202, "8 heads, side by side, on the same vectors: 8 grids, 8 mixes", "var(--muted)", 10) +
+    hbAr(150, 158, 150, 140) + hbBx(20, 126, 260, "the 8 mixes combined by one learned table") +
+    hbAr(150, 112, 150, 94) + hbBx(20, 80, 260, "one more learned step on each vector") + hbTx(150, 102, "(the feed-forward network)", "var(--muted)", 10) +
+    hbAr(150, 66, 150, 46) + hbTx(150, 36, "a new vector per English word", "var(--fg)", 11) + hbTx(150, 20, "→ the next layer starts from these", "var(--muted)", 10) +
+    [0, 1, 2, 3, 4, 5].map(l => hbSlab(l, 206 - 32 * l)).join("") + hbAr(425, 32, 425, 14) +
+    hbTx(425, 10, "", "var(--muted)") + hbTx(516, 10, "a probability for each English word", "var(--muted)", 10, "end") +
+    hbTx(425, 226, "the decoder: 6 layers × 8 heads", "var(--fg)", 11));
   const POINTS = [
     "A row of a grid: one English word's weights over the Galician words. They add up to 1. Section 2 computed one by hand.",
     "The grid: all the rows, one per English word written. Darker means more weight.",
+    "A head: one run of the computation of section 2 (query, scores, softmax, weights, mix) with its own learned tables for the query, the keys and the values. One head, one grid.",
+    "A layer: several heads side by side on the same vectors; their mixes are combined into one new vector per word, and the next layer starts from these. 6 layers × 8 heads = 48 grids.",
     "A real model's grid reads the same way: “Aunt” looks at tía. It can also show a mistake: “A Aunt of mine”. Choosing “An” needs tía, and the row of “A” puts little weight on it (0.00 in this head, 0.16 on average over the 48 grids; an even share would be 0.25).",
-    "A head is one run of section 2's computation with its own learned tables for queries, keys and values, so it makes one grid. A layer runs several heads side by side, each with its own pattern.",
-    "A real model stacks layers of heads: 6 layers × 8 heads = 48 grids. Early layers spread their weight; late layers point each English word at the word it translates.",
+    "The 8 heads of one layer make 8 different grids for the same phrase: each head has its own tables, so its own pattern.",
+    "Early layers spread their weight; late layers point each English word at the word it translates. Nobody assigned these patterns: training did.",
     "The weights show where the model looks. Sometimes that fits a mistake (“A”: little weight on tía); sometimes it does not (below: the right word looked at, a wrong output)."];
   const STEPS6 = [
     ["One row: the weights for one English word",
       "Section 2's three weights before “an”, the bars, written as a row of cells, darker for more weight: one row of an attention grid."],
     ["All the rows: the grid",
       "New weights before every English word, one row each. Stacked, the rows make the grid: one row per English word, one column per Galician word. Click a row to see its bars."],
-    ["A real model's grid reads the same way",
-      `opus-mt-gl-en, trained by others on much Galician–English text, on the same phrase: one of its 48 grids (“layer 5, head 3”: steps 4 and 5). Columns end with ‹end›, the end marker. “Aunt” looks at tía, as in our grid, but it writes “${TGT_R.slice(0, -1).join(" ")}”. “A” or “An” needs tía, and the row of “A” puts no weight on it here, little on average over all ${NL * NH} grids.`],
     ["What a head is",
-      "In section 2 there was one way to make the query and the keys, so one grid. A head is one such run of the computation with its own three learned tables: one turns the decoder state into a query, one turns the encoder's vectors into keys, one into the values that are mixed. This model runs 8 heads side by side, each with its own tables: 8 grids, 8 mixes, which it then combines into one vector. The outlined one is the grid of step 3."],
+      "In section 2 the decoder computed the attention weights once before each English word: query, scores, softmax, weights, mix. In a real model that computation is a head. Its query comes from the decoder state through a learned query table; its keys and values come from the encoder's vectors through a learned key table and a learned value table. One head, with its own three tables, makes one grid and one mix. Sections 2 to 5 had no tables: the query came from a made-up rule (section 2) or was the decoder state itself (section 4), and the keys and values were the encoder's vectors as they were."],
+    ["What a layer is",
+      "A layer runs several heads side by side on the same vectors, each with its own three tables: this model has 8 heads per layer, so 8 grids and 8 mixes. One more learned table combines the 8 mixes into one new vector per English word, and one more learned step (the feed-forward network of the lesson's transformer screens) is applied to each vector. The next layer starts from these new vectors. This model's decoder has 6 layers; after layer 6, a probability for each English word."],
+    ["A real model's grid reads the same way",
+      `opus-mt-gl-en, trained by others on much Galician–English text, on the same phrase: one of its 48 grids (layer 5, head 3). Columns end with ‹end›, the end marker. “Aunt” looks at tía, as in our grid, but it writes “${TGT_R.slice(0, -1).join(" ")}”. “A” or “An” needs tía, and the row of “A” puts no weight on it here, little on average over all ${NL * NH} grids.`],
+    ["The 8 heads of one layer",
+      "Layer 5's 8 heads on the same phrase: 8 grids. The outlined one is the grid of step 5. Each head has its own tables, so each has its own pattern; several of them point each English word at the Galician word it translates, others rest their weight on ‹end›."],
     ["6 layers × 8 heads = 48 grids",
-      "The decoder repeats its computation 6 times, one layer on top of the other, and each layer has its own 8 heads: 48 grids for the same phrase. In layer 1 most heads spread their weight or rest it on ‹end›; in layer 5 most heads, and in layer 6 several, point each English word at the Galician word it translates. Nobody assigned these patterns: section 8 shows how heads get them."],
+      "All 48 grids for the same phrase, one row of thumbnails per layer. In layer 1 most heads spread their weight or rest it on ‹end›; in layer 5 most heads, and in layer 6 several, point each English word at the Galician word it translates. Nobody assigned these patterns: section 8 shows how heads get them."],
     ["The whole sentence",
       "Below, the whole sentence: pick a layer and a head, or their average, play the translation, and see three places where it goes wrong although attention points at the right Galician word."]];
   let k = 0, sel = 0;
@@ -1017,13 +1050,15 @@ document.addEventListener("DOMContentLoaded", () => {
     $("hbTitle").textContent = `Step ${k + 1} of ${STEPS6.length}: ${t}`; $("hbText").textContent = txt;
     const n = k === 0 ? 1 : ROWS.length; if (sel >= n) sel = 0;
     $("hbLeft").innerHTML = bars(SRC_H, H.w[sel], `before “${ROWS[sel]}”: the three weights`) + `<p class="label" style="margin-top:10px">the same numbers as ${n === 1 ? "a row" : "a grid"}</p>` + grid(ROWS, SRC_H, H.w, { n, sel });
-    if (k < 2) { $("hbRightLbl").textContent = "a real model on the same phrase"; $("hbRight").innerHTML = `<p class="hbempty">step 3 puts here the same kind of row and grid, from a real translation model reading the same phrase</p>`; }
-    else if (k === 2) { $("hbRightLbl").textContent = `opus-mt-gl-en: layer ${FL + 1}, head ${FH + 1}`;
+    if (k < 2) { $("hbRightLbl").textContent = "a real model on the same phrase"; $("hbRight").innerHTML = `<p class="hbempty">step 5 puts here the same kind of row and grid, from a real translation model reading the same phrase</p>`; }
+    else if (k === 2) { $("hbRightLbl").textContent = "one head: its three learned tables, its grid, its mix"; $("hbRight").innerHTML = headSvg; }
+    else if (k === 3) { $("hbRightLbl").textContent = "one layer (left), and the decoder's 6 layers (right)"; $("hbRight").innerHTML = layerSvg; }
+    else if (k === 4) { $("hbRightLbl").textContent = `opus-mt-gl-en: layer ${FL + 1}, head ${FH + 1}`;
       $("hbRight").innerHTML = bars(SRC_R, C[FL][FH][sel], `before “${TGT_R[sel]}”: the ${SRC_R.length} weights`) + `<p class="label" style="margin-top:10px">its grid</p>` + grid(TGT_R, SRC_R, C[FL][FH], { sel, cw: 50 }); }
-    else if (k === 3) { $("hbRightLbl").textContent = `opus-mt-gl-en, layer ${FL + 1}: its 8 heads, one grid each`;
-      $("hbRight").innerHTML = headFlow + thumbs([FL], { c: 24, per: 4, gx: 14, gy: 8, big: true, sel }); }
+    else if (k === 5) { $("hbRightLbl").textContent = `opus-mt-gl-en, layer ${FL + 1}: its 8 heads, one grid each`;
+      $("hbRight").innerHTML = thumbs([FL], { c: 24, per: 4, gx: 14, gy: 8, big: true, sel }); }
     else { $("hbRightLbl").textContent = `opus-mt-gl-en: all ${NL} layers × ${NH} heads = ${NL * NH} grids`;
-      $("hbRight").innerHTML = thumbs([...Array(NL).keys()], { c: 9, gx: 7, gy: 8, sel }) + (k === 5 ? `<p style="margin:8px 0 0"><button id="hbDown">to the whole sentence ↓</button></p>` : ""); }
+      $("hbRight").innerHTML = thumbs([...Array(NL).keys()], { c: 9, gx: 7, gy: 8, sel }) + (k === 7 ? `<p style="margin:8px 0 0"><button id="hbDown">to the whole sentence ↓</button></p>` : ""); }
     $("hbPoints").innerHTML = POINTS.map((p, i) => `<li class="${i === k ? "on" : i < k ? "done" : "later"}">${p}</li>`).join("");   // later points keep their space, unseen
     $("hbBack").disabled = k === 0; $("hbNext").disabled = k === STEPS6.length - 1;
     [...$("hbSteps").children].forEach((b, i) => b.classList.toggle("on", i === k));
