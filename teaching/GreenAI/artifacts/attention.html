@@ -549,12 +549,12 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 
   <section class="panel" id="lookatt">
     <h2><span class="n">2</span>With attention, computed by hand</h2>
-    <p class="lead">Section 1 wrote “a friend of mine”: the summary held 0.25 of tía, and “an” needs more than 0.35. Attention changes only the state's first three dimensions: before each English word, the decoder builds a new vector from all three encoder vectors, the <b>mix</b>.</p>
+    <p class="lead">Section 1 wrote “a friend of mine”: the summary held 0.25 of tía, and “an” needs more than 0.35. The decoder state has eleven dimensions (section 1, step 3): the first three, one per Galician word, hold what came from the encoder; the other eight record the English words written so far. Attention changes only the first three: before each English word, the decoder builds a new vector from all three encoder vectors, the <b>mix</b>, and puts it there in place of the summary.</p>
     <div class="cmpflow">
       <p class="label">without attention (section 1)</p>
-      <div class="flow"><span class="word dimw">after unha</span><span class="word dimw">after tía</span><span class="word">after miña = the summary</span><span class="op">→</span><span class="word out">the state's first three dimensions</span></div>
+      <div class="flow"><span class="word dimw">after unha</span><span class="word dimw">after tía</span><span class="word">after miña = the summary</span><span class="op">→</span><span class="word out">the state's first three dimensions (from the encoder)</span></div>
       <p class="label">with attention (this section)</p>
-      <div class="flow"><span class="word">after unha</span><span class="word">after tía</span><span class="word">after miña</span><span class="op">→</span><span class="word">dot product with the query: three scores</span><span class="op">→</span><span class="word">softmax: three weights</span><span class="op">→</span><span class="word">weighted sum: the mix</span><span class="op">→</span><span class="word out">the state's first three dimensions</span></div>
+      <div class="flow"><span class="word">after unha</span><span class="word">after tía</span><span class="word">after miña</span><span class="op">→</span><span class="word">dot product with the query: three scores</span><span class="op">→</span><span class="word">softmax: three weights</span><span class="op">→</span><span class="word">weighted sum: the mix</span><span class="op">→</span><span class="word out">the state's first three dimensions (from the encoder)</span></div>
     </div>
     <div class="planes" id="atPlanes"></div>
   </section>
@@ -583,7 +583,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </div>
     <div id="qkWordsBox">
       <p class="label">the same query at every word of the phrase</p>
-      <p class="note">One row per English word: the correct words before it are written, and the state's first three dimensions hold this query's mix.</p>
+      <p class="note">One row per English word: the correct words before it are written, and the state's first three dimensions, the part that comes from the encoder (section 1, step 3), hold this query's mix.</p>
       <div class="heatwrap"><table class="ty dec" id="qkWords"></table></div>
       <p class="note" id="qkNote"></p>
     </div>
@@ -2014,7 +2014,7 @@ const STEPS = [
             cap: `The mix, pulled toward the largest weight: ${f(a.mix[TIA])} of tía (the summary: ${f(SUMMARY[TIA])}).` } }];
     } }],
   ["Word 1 with the mix: why “an”", {
-    text: "The mix goes into the state's first three dimensions, where the summary was. Everything else is as in section 1.",
+    text: "The mix goes into the state's first three dimensions, the part that comes from the encoder, where the summary was (section 1, step 3). Everything else is as in section 1.",
     frames: () => {
       const s = ATT[0], x = s.a.mix, base = { sum: { label: "the mix", v: x, cls: "mixl" }, bias: true, sums: true, resHead: "score" };
       const AA = ["a", "an"], W = ws => Object.fromEntries(ws.map(w => [w, { v: vecOf(w), cur: true }]));
@@ -2183,7 +2183,7 @@ const QSTEPS = [
     "Softmax turns the scores into weights (section 2, step 1). Only the gaps matter: each point of gap multiplies the share by about 2.7. The key after tía is 1.5 points above the key after miña, so its share is about 4.5 times larger. Every key gets some weight.",
     [0, 6, 0], 0, ["scores", "sm"]],
   ["The mix, and the word it produces",
-    "The keys added up with those weights: the mix, mostly the key after tía. It fills the state's first three dimensions, and the decoder scores its words (section 2, step 3). More than 0.35 of tía, so “an” wins. The box under the mix: the three best scores and their margins.",
+    "The keys added up with those weights: the mix, mostly the key after tía. It fills the state's first three dimensions, the part that comes from the encoder (section 1, step 3), and the decoder scores its words (section 2, step 3). More than 0.35 of tía, so “an” wins. The box under the mix: the three best scores and their margins.",
     [0, 6, 0], 0, ["sm", "mix", "out", "3d", "q3", "m3"]],
   ["Reward another dimension: another key is read, another word comes out",
     "Move the 6 from tía to miña. The key after miña now scores highest; the mix holds a quarter of tía, less than 0.35, so “a”: wrong. Only the query changed. The rewarded dimension decides which key is read, and so the word. The buttons try other queries.",
