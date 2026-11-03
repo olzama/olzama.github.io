@@ -54,8 +54,10 @@ function stagger(xs) { const o = xs.map((x, i) => i).sort((a, b) => xs[a] - xs[b
       h.addEventListener("click", toggle);
       h.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
     });
+    // a section link clicked on the page opens its section; a page opened with #id starts folded like any other, scrolled to that heading
     const byHash = () => { const id = decodeURIComponent(location.hash.slice(1)); if (!id) return; const el = document.getElementById(id), sec = el?.closest("section.panel"); if (sec) { open(sec); el.scrollIntoView({ block: "start" }); } };
-    byHash(); window.addEventListener("hashchange", byHash);
+    window.addEventListener("hashchange", byHash);
+    { const id = decodeURIComponent(location.hash.slice(1)), el = id && document.getElementById(id); if (el) setTimeout(() => el.closest("section.panel")?.scrollIntoView({ block: "start" }), 0); }
   });
 })();
 window.reserveMax = (els, states, restore) => {
@@ -854,6 +856,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T16:57Z">3 Nov 2026, 16:57 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
