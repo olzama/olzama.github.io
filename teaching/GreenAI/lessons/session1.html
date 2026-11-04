@@ -304,7 +304,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <body>
 
 <div class="top">
-  <div class="title"><b>Fundamentals of NLP</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña · updated <time datetime="2026-11-04T13:47Z">4 Nov 2026, 13:47 UTC</time></span></div>
+  <div class="title"><b>Fundamentals of NLP</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña · updated <time datetime="2026-11-04T13:55Z">4 Nov 2026, 13:55 UTC</time></span></div>
   <div class="road" id="topRoad" aria-label="The steps"></div>
   <div class="actions">
     <details class="toc"><summary>Contents</summary><nav id="tocNav"></nav></details>
@@ -3046,7 +3046,7 @@ print("they match" if count == expected else "they do not match: check the loop 
     </div>
     <ul class="points" style="max-width:none">
       <li><b>Control</b>: reads the next instruction and tells the arithmetic what to do. <b>Cache</b>: a small, fast memory. A GPU's cores share them, so the space goes to arithmetic; more CPUs would each bring their own</li>
-      <li>GPUs came before transformers. The innovation: the outputs of a layer do not depend on each other, so a layer is job 1, not job 2</li>
+      <li>A recurrent layer is like the running total: each output needs the one before. A transformer layer is like doubling: no output needs another. GPUs already existed; this change is what let models use all their cores</li>
     </ul>
     <p class="src">Simplified: one number per core per round. Core counts: Intel i7-9700K, NVIDIA T4. Measured on 4096 × 4096 matrices: 8 CPU cores 169 ms, an RTX 2080 Ti 13 ms. Sources: NVIDIA CUDA guides; Vaswani et al., NeurIPS 2017</p>
   </div>
@@ -3531,7 +3531,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   </ul>
   <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
   <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>, except the figures credited to others.</p>
-  <p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T13:47Z">4 Nov 2026, 13:47 UTC</time></p>
+  <p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T13:55Z">4 Nov 2026, 13:55 UTC</time></p>
 </footer>
 
 <div class="pbar" aria-label="Presentation controls">
