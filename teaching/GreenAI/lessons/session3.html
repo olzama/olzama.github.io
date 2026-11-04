@@ -345,9 +345,9 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   <header><h2>Where we left off</h2><p class="sub">Two sessions, two changes to the same pipeline</p></header>
   <div class="body">
     <div class="flow">
-      <div class="box">Session 1<br><b>baseline-fp16</b><br><span class="muted">reads all documents</span></div><span class="arr">→</span>
+      <div class="box">Session 2<br><b>baseline-fp16</b><br><span class="muted">reads all documents</span></div><span class="arr">→</span>
       <div class="box">Session 2<br><b>quantized</b><br><span class="muted">fewer bits per number</span></div><span class="arr">→</span>
-      <div class="box g">Today<br><b>retrieval</b><br><span class="muted">reads only the relevant documents</span></div>
+      <div class="box g">Session 3<br><b>retrieval</b><br><span class="muted">reads only the relevant documents</span></div>
     </div>
     <div class="cols">
       <div class="col">
@@ -1068,7 +1068,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
 <div class="part" id="part-step4"><h1>Step 4 · What retrieval saves</h1></div>
 
 <section class="screen" id="payoff" data-step="4">
-  <header><h2>Fewer tokens to read</h2><p class="sub">Today's 26 documents, cut into tokens the way Qwen2.5 cuts them, without the question; top 2 by the dense retriever: the average over the 26 questions (TF-IDF's: 311)</p></header>
+  <header><h2>Fewer tokens to read</h2><p class="sub">The 26 documents, cut into tokens the way Qwen2.5 cuts them, without the question; top 2 by the dense retriever: the average over the 26 questions (TF-IDF's: 311)</p></header>
   <div class="body cols wide-left">
     <div class="col">
       <div class="board">
@@ -1170,7 +1170,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       </ul>
     </div>
     <div class="col">
-      <p class="label">Today's quiz, top 2, computed with the notebook's models</p>
+      <p class="label">The quiz, top 2, computed with the notebook's models</p>
       <table class="plain">
         <thead><tr><th>retriever</th><th>right document found</th></tr></thead>
         <tbody>
@@ -1345,7 +1345,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
           <tr><td>retrieval</td><td>16 bits</td><td>the question + the top 2</td></tr>
         </tbody>
       </table>
-      <p class="muted">The same 26 questions, in one Colab session, on one GPU; the translation too. Unlike Session 1's baseline row, this baseline reads no documents.</p>
+      <p class="muted">The same 26 questions, in one Colab session, on one GPU; the translation too. Unlike the baseline row of Notebook 01a, this baseline reads no documents.</p>
     </div>
     <div class="col">
       <ul class="points">

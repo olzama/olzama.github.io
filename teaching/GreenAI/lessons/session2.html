@@ -327,12 +327,56 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
 </section>
 
+<section class="screen" id="qa" data-step="0">
+  <header><span class="kind">Before the activity</span><h2>The task: answering questions about documents</h2></header>
+  <div class="body">
+    <div class="flow"><div class="box">documents<br>+ question</div><span class="arr">→</span><div class="box">language<br>model</div><span class="arr">→</span><div class="box">answer</div><span class="arr">→</span><div class="box g">right or wrong?</div></div>
+    <div class="cols">
+    <div class="col">
+      <ul class="points">
+        <li><b>Input</b>: a few short documents about green AI, and a question. The model must answer from the documents, in one short sentence.</li>
+        <li><b>Model</b>: Qwen2.5-1.5B-Instruct, a small general-purpose language model</li>
+        <li><b>Score</b>: an answer is right if it contains the reference answer as whole words, ignoring capital letters. <b>Accuracy</b> = right answers ÷ all questions.</li>
+        <li>Two runs: with the documents, and without them. What do the documents add to accuracy, and to energy?</li>
+      </ul>
+    </div>
+    <div class="col">
+      <table class="plain">
+        <tr><th>question</th><td>What does the acronym PUE stand for?</td></tr>
+        <tr><th>reference</th><td class="mono">power usage effectiveness</td></tr>
+      </table>
+      <p class="muted">The check is simple and cheap. It also misses right answers that use other words.</p>
+    </div>
+  </div>
+  </div>
+</section>
+
+<section class="screen" id="act-nb1" data-step="0">
+  <header><span class="kind">Activity · 60–75 minutes, individual</span><h2>Notebook 01a: Baseline measurement</h2></header>
+  <div class="body">
+    <ul class="points">
+      <li>Answer questions about a small set of documents, measured with <b>CodeCarbon</b>: energy, CO₂eq and quality, as rows of your leaderboard</li>
+      <li>The same quiz with no documents: what does the model know on its own?</li>
+    </ul>
+    <div class="activity"><h3>Notebook 01a, in Colab, with a GPU</h3><div>
+      <ul class="points">
+        <li>In Colab: Runtime → Change runtime type → T4 GPU</li>
+        <li>Download <span class="mono">leaderboard.csv</span> at the end: the next notebooks add rows to it</li>
+      </ul>
+      <div class="links">
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01a_baseline_measurement-beginner.ipynb" target="_blank" rel="noopener">Open in Colab: beginner</a>
+        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01a_baseline_measurement-advanced.ipynb" target="_blank" rel="noopener">Open in Colab: advanced</a>
+      </div>
+    </div></div>
+  </div>
+</section>
+
 <section class="screen" id="recap" data-step="0">
-  <header><h2>Where we left off</h2><p class="sub">The same tasks, the same model, one change</p></header>
+  <header><h2>The plan</h2><p class="sub">The same tasks, the same model, one change</p></header>
   <div class="body">
     <div class="flow">
-      <div class="box">Session 1<br><b>baseline-fp16</b><br><span class="muted">16 bits per number</span></div><span class="arr">→</span>
-      <div class="box g">Today<br><b>gptq-int4</b> or <b>bnb-int8-fallback</b><br><span class="muted">4 or 8 bits per number</span></div>
+      <div class="box">Baseline<br><b>baseline-fp16</b><br><span class="muted">16 bits per number</span></div><span class="arr">→</span>
+      <div class="box g">Quantized<br><b>gptq-int4</b> or <b>bnb-int8-fallback</b><br><span class="muted">4 or 8 bits per number</span></div>
     </div>
     <div class="cols">
       <div class="col">
@@ -349,7 +393,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
           <tr><th>energy</th><td>kWh, measured by CodeCarbon</td></tr>
           <tr><th>carbon</th><td>g CO₂eq, from that energy</td></tr>
           <tr><th>time</th><td>seconds for the whole quiz</td></tr>
-          <tr><th>memory</th><td>peak GPU memory, GB (from today; Session 1's row has none)</td></tr>
+          <tr><th>memory</th><td>peak GPU memory, GB (in the quantized rows only)</td></tr>
         </table>
       </div>
     </div>
@@ -1497,7 +1541,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
     <div class="cols">
       <div class="col">
         <p class="label">Post-training quantization (PTQ)</p>
-        <ul class="points"><li>Train in full precision, quantize at the end</li><li>Cheap: minutes to hours</li><li>Today's GPTQ checkpoint is PTQ</li></ul>
+        <ul class="points"><li>Train in full precision, quantize at the end</li><li>Cheap: minutes to hours</li><li>The GPTQ checkpoint used here is PTQ</li></ul>
       </div>
       <div class="col">
         <p class="label">Quantization-aware training (QAT)</p>
@@ -1659,13 +1703,13 @@ for clip in [None, 10.0, 5.0, 2.5]:
 <div class="part" id="part-turn"><h1>Your turn</h1></div>
 
 <section class="screen" id="run" data-step="0">
-  <header><h2>What we run today</h2><p class="sub">The same model family, two ways to load it with fewer bits</p></header>
+  <header><h2>What we run</h2><p class="sub">The same model family, two ways to load it with fewer bits</p></header>
   <div class="body cols">
     <div class="col">
       <table class="plain">
         <thead><tr><th>config in the leaderboard</th><th>what is loaded</th></tr></thead>
         <tbody>
-          <tr><td class="mono">baseline-fp16</td><td>Session 1: Qwen2.5-1.5B-Instruct, 16 bits</td></tr>
+          <tr><td class="mono">baseline-fp16</td><td>Notebook 01a: Qwen2.5-1.5B-Instruct, 16 bits</td></tr>
           <tr><td class="mono">gptq-int4</td><td>first try: <span class="mono">Qwen/Qwen2.5-1.5B-Instruct-GPTQ-Int4</span>, quantized by the Qwen team with GPTQ</td></tr>
           <tr><td class="mono">bnb-int8-fallback</td><td>if GPTQ does not install: the 16-bit model, quantized to 8 bits as it loads, with the bitsandbytes library</td></tr>
         </tbody>
@@ -1691,7 +1735,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
   <header><span class="kind">Activity · 90–125 minutes, individual</span><h2>Notebook 02a: Quantized measurement</h2></header>
   <div class="body">
     <ol class="points">
-      <li>Upload your three CSV files from Session 1: <span class="mono">leaderboard.csv</span> (Notebook 01a), <span class="mono">mt_leaderboard.csv</span> and <span class="mono">mt_eval_leaderboard.csv</span> (Notebook 01e); without them, the notebook starts new ones</li>
+      <li>Upload your three CSV files: <span class="mono">leaderboard.csv</span> (Notebook 01a), <span class="mono">mt_leaderboard.csv</span> and <span class="mono">mt_eval_leaderboard.csv</span> (Notebook 01e); without them, the notebook starts new ones</li>
       <li>Load the quantized model: GPTQ first, then the fallback</li>
       <li>Run the same eight questions with CodeCarbon, and score them the same way</li>
       <li>Append a row to <span class="mono">leaderboard.csv</span> and compare it with your baseline</li>
@@ -1748,7 +1792,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
         <li>Which configuration loaded: gptq-int4 or bnb-int8-fallback?</li>
         <li>Accuracy: the same as the baseline?</li>
         <li>Energy and CO₂eq: lower, the same, higher?</li>
-        <li>Time? Peak memory (today's row only)?</li>
+        <li>Time? Peak memory (quantized rows only)?</li>
         <li>The translation: did it change in a way a reader would notice?</li>
       </ul>
     </div>
@@ -1771,7 +1815,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
 <div class="part" id="part-next"><h1>What comes next</h1></div>
 
 <section class="screen" id="wrap" data-step="0">
-  <header><h2>Today, and next session</h2></header>
+  <header><h2>Summary, and the next session</h2></header>
   <div class="body cols">
     <div class="col">
       <p class="label">Today</p>
@@ -1785,7 +1829,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
     <div class="col">
       <p class="label">Session 3: retrieval</p>
       <div class="flow">
-        <div class="box">Session 1<br>baseline</div><span class="arr">→</span>
+        <div class="box">Session 2<br>baseline</div><span class="arr">→</span>
         <div class="box">Session 2<br>fewer bits</div><span class="arr">→</span>
         <div class="box g">Session 3<br>less text</div>
       </div>
