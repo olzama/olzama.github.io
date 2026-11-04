@@ -304,7 +304,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <body>
 
 <div class="top">
-  <div class="title"><b>Fundamentals of NLP</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña · updated <time datetime="2026-11-04T11:51Z">4 Nov 2026, 11:51 UTC</time></span></div>
+  <div class="title"><b>Fundamentals of NLP</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña · updated <time datetime="2026-11-04T11:53Z">4 Nov 2026, 11:53 UTC</time></span></div>
   <div class="road" id="topRoad" aria-label="The steps"></div>
   <div class="actions">
     <details class="toc"><summary>Contents</summary><nav id="tocNav"></nav></details>
@@ -3029,33 +3029,6 @@ print("they match" if count == expected else "they do not match: check the loop 
   </div>
 </section>
 
-<section class="screen" id="stack" data-step="6">
-  <header><span class="kind">Transformers</span><h2>Inside a transformer: stacked blocks</h2></header>
-  <div class="body cols">
-    <div class="col">
-      <ul class="points">
-        <li>The same kind of block (attention + feed-forward), repeated many times</li>
-        <li>This picture is the classic translation shape: <b>encoders</b> on the left read the source sentence, <b>decoders</b> on the right write the output. The real model of the attention page has 6 blocks on each side: its 6 layers</li>
-      </ul>
-    </div>
-    <div class="col"><div class="fig"><img src="img/encoder-decoder-stack.png" alt="A stack of encoders feeding a stack of decoders"><span class="cap">Credit: jalammar.github.io/illustrated-transformer</span></div></div>
-  </div>
-</section>
-
-<section class="screen" id="block" data-step="6">
-  <header><span class="kind">Transformers</span><h2>Inside one block</h2></header>
-  <div class="body cols">
-    <div class="col">
-      <ul class="points">
-        <li>Two parts, always in this order: <b>self-attention</b>, then a <b>feed-forward network</b></li>
-        <li>Self-attention mixes information across words; the feed-forward network does not: it is the feed-forward step of the attention page (section 6, “one layer”), run on each word's vector separately</li>
-        <li>This shape is an <b>encoder</b> block. <b>Decoder</b> blocks add one more part: <b>cross-attention</b> into the encoder's output: the decoder's attention of the attention page, section 6</li>
-      </ul>
-    </div>
-    <div class="col"><div class="fig"><img src="img/encoder-block.png" alt="One encoder block: self-attention, then feed-forward"><span class="cap">Credit: jalammar.github.io/illustrated-transformer</span></div></div>
-  </div>
-</section>
-
 <section class="screen" id="shapes" data-step="6">
   <header><span class="kind">Transformers</span><h2>Three shapes, three training tasks</h2></header>
   <div class="body">
@@ -3467,7 +3440,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   </ul>
   <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
   <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>, except the figures credited to others.</p>
-  <p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T11:51Z">4 Nov 2026, 11:51 UTC</time></p>
+  <p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T11:53Z">4 Nov 2026, 11:53 UTC</time></p>
 </footer>
 
 <div class="pbar" aria-label="Presentation controls">
