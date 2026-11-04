@@ -304,7 +304,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <body>
 
 <div class="top">
-  <div class="title"><b>Fundamentals of NLP</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña · updated <time datetime="2026-11-04T14:43Z">4 Nov 2026, 14:43 UTC</time></span></div>
+  <div class="title"><b>Fundamentals of NLP</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña · updated <time datetime="2026-11-04T14:46Z">4 Nov 2026, 14:46 UTC</time></span></div>
   <div class="road" id="topRoad" aria-label="The steps"></div>
   <div class="actions">
     <details class="toc"><summary>Contents</summary><nav id="tocNav"></nav></details>
@@ -615,7 +615,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
           <tr><td>3 Encoder–decoder <span class="muted">(2014)</span></td><td>read a sentence into one vector, write the translation from it</td><td>one vector for a whole sentence: early words fade</td></tr>
           <tr><td>4 Attention <span class="muted">(2015)</span></td><td>the decoder looks back at every source word</td><td>the source is still read one word after another</td></tr>
           <tr><td>5 Self-attention <span class="muted">(2017)</span></td><td>every word looks at every word of its own sentence, all at once</td><td>one round of looking</td></tr>
-          <tr><td>6 Transformers <span class="muted">(2017–today)</span></td><td>many blocks of self-attention, stacked: today's LLMs</td><td>cost grows with size and length</td></tr>
+          <tr><td>6 Transformers <span class="muted">(2017 onward)</span></td><td>many blocks of self-attention, stacked: modern LLMs</td><td>cost grows with size and length</td></tr>
         </tbody>
       </table>
     </div>
@@ -2367,7 +2367,7 @@ print("they match" if count == expected else "they do not match: check the loop 
         <li>Bahdanau, Cho &amp; Bengio (2015): for every word it writes, the decoder <b>looks back</b> at every source word and computes how much to use each one: the <b>attention weights</b> (scores, then softmax, as for p)</li>
         <li>Computed anew for every word written, through learned tables that backpropagation trains (diagram, right; next screen: query, key and value)</li>
         <li>Which source word goes with which word written (<b>alignment</b>) comes out of the attention weights, with no hand-written rule</li>
-        <li>Invented for translation, years before today's LLMs</li>
+        <li>Invented for translation, years before modern LLMs</li>
       </ul>
       <!--LOOKBACK-->
 <svg class="svgfig" viewBox="0 0 617.2 182" role="img" aria-label="Writing zone, the decoder looks back at every English word; the line to Area is the thickest" style="max-width:560px">
@@ -3013,7 +3013,7 @@ print("they match" if count == expected else "they do not match: check the loop 
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
     <ul class="points" style="max-width:none">
-      <li>The decisive step of 2017: applying this to the tokens of a layer. Parallel training, and with it today's scale, follows from it</li>
+      <li>The decisive step of 2017: applying this to the tokens of a layer. Parallel training, and with it the scale of modern models, follows from it</li>
     </ul>
   </div>
 </section>
@@ -3182,10 +3182,10 @@ print("they match" if count == expected else "they do not match: check the loop 
   </div>
 </section>
 
-<div class="part" id="part-modern"><h1>From transformers to today's LLMs</h1></div>
+<div class="part" id="part-modern"><h1>From transformers to modern LLMs</h1></div>
 
 <section class="screen" id="modern" data-step="0">
-  <header><span class="kind">Today's LLMs</span><h2>Today's LLMs are still transformers: what changed?</h2></header>
+  <header><span class="kind">Modern LLMs</span><h2>Modern LLMs are still transformers: what changed?</h2></header>
   <div class="body cols">
     <div class="col"><p class="label">Parameters, drawn to size (area)</p><svg viewBox="0 0 650 314" style="width:100%;max-width:650px" role="img" aria-label="Three squares with areas in proportion to parameters: BERT-base is a dot, Qwen2.5-1.5B a small square, GPT-3 a large one"><rect x="10" y="263.73216829471994" width="6.267831705280087" height="6.267831705280087" style="fill:var(--blue-soft);stroke:var(--blue)"/><text x="10" y="290" font-size="13" style="fill:var(--fg)">BERT-base</text><text x="10" y="308" font-size="13" style="fill:var(--muted)">110 million</text><rect x="200" y="246.85449750568623" width="23.145502494313785" height="23.145502494313785" style="fill:var(--blue-soft);stroke:var(--blue)"/><text x="200" y="290" font-size="13" style="fill:var(--fg)">Qwen2.5-1.5B, your notebook</text><text x="200" y="308" font-size="13" style="fill:var(--muted)">1.5 billion</text><rect x="390" y="20.0" width="250.0" height="250.0" style="fill:var(--blue-soft);stroke:var(--blue)"/><text x="515.0" y="290" text-anchor="middle" font-size="13" style="fill:var(--fg)">GPT-3</text><text x="515.0" y="308" text-anchor="middle" font-size="13" style="fill:var(--muted)">175 billion</text></svg></div>
     <div class="col">
@@ -3200,7 +3200,7 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="stages" data-step="0">
-  <header><span class="kind">Today's LLMs</span><h2>From writing the next word to following instructions</h2></header>
+  <header><span class="kind">Modern LLMs</span><h2>From writing the next word to following instructions</h2></header>
   <div class="body">
     <div class="board">
       <svg viewBox="0 0 1000 314" role="img" aria-label="Three training stages, each with one training example: pretraining on the next token of raw text; instruction tuning on instructions with answers written by people; preference training on pairs of answers that people choose between. Given Name three colors, GPT-2 continues the text, while Qwen2.5-1.5B-Instruct answers.">
@@ -3216,10 +3216,10 @@ print("they match" if count == expected else "they do not match: check the loop 
 </section>
 
 <section class="screen" id="levers" data-step="0">
-  <header><span class="kind">Today's LLMs</span><h2>Cost levers in today's models</h2></header>
+  <header><span class="kind">Modern LLMs</span><h2>Cost levers in modern models</h2></header>
   <div class="body">
     <table class="plain">
-      <tr><th>lever</th><th>what today's models do</th><th>effect on the computation</th></tr>
+      <tr><th>lever</th><th>what modern models do</th><th>effect on the computation</th></tr>
       <tr><td><b>the parameters</b></td><td><b>Mixture of experts</b>: several feed-forward blocks per layer, each token uses only some. In Mixtral (from the company Mistral AI), 2 of the 8 blocks of a layer: about 13 of its 47 billion parameters for each token</td><td>down: only part of the parameters works on each token</td></tr>
       <tr><td><b>the input</b></td><td><b>Long context</b>: whole documents read at once</td><td>up: attention grows with the square of the length</td></tr>
       <tr><td><b>the output</b></td><td><b>Reasoning models</b>: hundreds to thousands of tokens written before the answer (DeepSeek-R1)</td><td>up: more steps, a bigger cache</td></tr>
@@ -3233,57 +3233,14 @@ print("they match" if count == expected else "they do not match: check the loop 
 
 <div class="part" id="part-turn"><h1>Your turn</h1></div>
 
-<section class="screen" id="qa" data-step="0">
-  <header><span class="kind">Before the activity</span><h2>The task: answering questions about documents</h2></header>
-  <div class="body">
-    <div class="flow"><div class="box">documents<br>+ question</div><span class="arr">→</span><div class="box">language<br>model</div><span class="arr">→</span><div class="box">answer</div><span class="arr">→</span><div class="box g">right or wrong?</div></div>
-    <div class="cols">
-    <div class="col">
-      <ul class="points">
-        <li><b>Input</b>: a few short documents about green AI, and a question. The model must answer from the documents, in one short sentence.</li>
-        <li><b>Model</b>: Qwen2.5-1.5B-Instruct, a small general-purpose language model</li>
-        <li><b>Score</b>: an answer is right if it contains the reference answer as whole words, ignoring capital letters. <b>Accuracy</b> = right answers ÷ all questions.</li>
-        <li>Two runs: with the documents, and without them. What do the documents add to accuracy, and to energy?</li>
-      </ul>
-    </div>
-    <div class="col">
-      <table class="plain">
-        <tr><th>question</th><td>What does the acronym PUE stand for?</td></tr>
-        <tr><th>reference</th><td class="mono">power usage effectiveness</td></tr>
-      </table>
-      <p class="muted">The check is simple and cheap. It also misses right answers that use other words.</p>
-    </div>
-  </div>
-  </div>
-</section>
 
 
 
-
-<section class="screen" id="act-nb1" data-step="0">
-  <header><span class="kind">Activity · 60–75 minutes, individual</span><h2>Notebook 01a: Baseline measurement</h2></header>
-  <div class="body">
-    <ul class="points">
-      <li>Answer questions about a small set of documents, measured with <b>CodeCarbon</b>: energy, CO₂eq and quality, as rows of your leaderboard</li>
-      <li>The same quiz with no documents: what does the model know on its own?</li>
-    </ul>
-    <div class="activity"><h3>Notebook 01a, in Colab, with a GPU</h3><div>
-      <ul class="points">
-        <li>In Colab: Runtime → Change runtime type → T4 GPU</li>
-        <li>Download <span class="mono">leaderboard.csv</span> at the end: Sessions 2 and 3 add rows to it</li>
-      </ul>
-      <div class="links">
-        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/beginner/01a_baseline_measurement-beginner.ipynb" target="_blank" rel="noopener">Open in Colab: beginner</a>
-        <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01a_baseline_measurement-advanced.ipynb" target="_blank" rel="noopener">Open in Colab: advanced</a>
-      </div>
-    </div></div>
-  </div>
-</section>
 <section class="screen" id="act-nb1e" data-step="0">
   <header><span class="kind">Activity · 40–60 minutes, individual, if time allows</span><h2>Notebook 01e: Translation and its evaluation</h2></header>
   <div class="body">
     <ul class="points">
-      <li>Part 1: a passage with today's sentence, through <b>rule-based</b>, <b>statistical</b>, <b>neural</b> and <b>LLM</b> translation, each one measured</li>
+      <li>Part 1: a passage with our sentence, through <b>rule-based</b>, <b>statistical</b>, <b>neural</b> and <b>LLM</b> translation, each one measured</li>
       <li>Part 2: <b>BLEU</b>, <b>BERTScore</b> and an <b>LLM-as-judge</b> grade the translations, and we measure what grading itself costs</li>
     </ul>
     <div class="activity"><h3>Notebook 01e, in Colab, with a GPU</h3><div>
@@ -3303,7 +3260,6 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">Wrap-up · with your neighbor</span><h2>Share-out</h2></header>
   <div class="body">
     <ul class="points">
-      <li>Notebook 01a: how much energy and CO₂eq did your run measure? Same model, different hardware: did it matter?</li>
       <li>Notebook 01d: per doubling of the input, how much did the whole encoder's time grow, and attention's alone?</li>
       <li>Notebook 01e: how many orders of magnitude separated your cheapest and priciest approach? Did the three metrics agree?</li>
     </ul>
@@ -3316,14 +3272,13 @@ print("they match" if count == expected else "they do not match: check the loop 
   <header><span class="kind">What comes next</span><h2>Next sessions: the same tasks, two changes</h2></header>
   <div class="body">
     <div class="flow">
-      <div class="box">Today<br><b>baseline</b></div><span class="arr">→</span>
-      <div class="box">Session 2<br><b>quantized</b></div><span class="arr">→</span>
+      <div class="box">Session 2<br><b>baseline</b>, then <b>quantized</b></div><span class="arr">→</span>
       <div class="box g">Session 3<br><b>retrieval</b> (RAG)</div>
     </div>
     <ul class="points">
-      <li>Session 2: the same model, with fewer bits for each number. Less memory, often less energy. Does the quality hold?</li>
+      <li>Session 2: answering questions about documents, first as a baseline, then the same model with fewer bits for each number. Less memory, often less energy. Does the quality hold?</li>
       <li>Session 3: retrieve the relevant passages of the documents first, and give the model only those. Less text to process for every question.</li>
-      <li>Both are measured against today's baseline, with the same method.</li>
+      <li>Both are measured against the baseline, with the same method.</li>
     </ul>
   </div>
 </section>
@@ -3449,7 +3404,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   </ul>
   <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
   <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>, except the figures credited to others.</p>
-  <p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T14:43Z">4 Nov 2026, 14:43 UTC</time></p>
+  <p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T14:46Z">4 Nov 2026, 14:46 UTC</time></p>
 </footer>
 
 <div class="pbar" aria-label="Presentation controls">
