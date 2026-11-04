@@ -304,7 +304,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <body>
 
 <div class="top">
-  <div class="title"><b>Fundamentals of NLP</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña · updated <time datetime="2026-11-04T14:12Z">4 Nov 2026, 14:12 UTC</time></span></div>
+  <div class="title"><b>Fundamentals of NLP</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña · updated <time datetime="2026-11-04T14:16Z">4 Nov 2026, 14:16 UTC</time></span></div>
   <div class="road" id="topRoad" aria-label="The steps"></div>
   <div class="actions">
     <details class="toc"><summary>Contents</summary><nav id="tocNav"></nav></details>
@@ -3134,6 +3134,22 @@ print("they match" if count == expected else "they do not match: check the loop 
   </div>
 </section>
 
+<section class="screen" id="kv" data-step="6">
+  <header><span class="kind">Transformers</span><h2>Training in parallel, writing in sequence</h2></header>
+  <div class="body">
+    <div class="board">
+      <svg viewBox="0 0 880 320" role="img" aria-label="In training the text is known, so all the positions are computed in one step. In writing, a, sister, of, mine appear one at a time, each going back in as input: 4 steps in order. Each token's key and value are kept in a cache that grows with every token.">
+<defs><marker id="kvO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" style="fill:var(--orange)"/></marker></defs>
+<text class="note" x="16" y="58" text-anchor="start" font-size="18" style="fill:currentColor;font-weight:700" >Training</text><rect x="140" y="32" width="262" height="40" rx="7" style="fill:var(--blue-soft);stroke:var(--blue)"/><text class="note" x="271" y="58" text-anchor="middle" font-size="15" style="fill:currentColor" >Galician: <tspan font-style="italic">unha tía miña</tspan> English:</text><g data-s="1" data-d="0.2" data-a="fade" data-t="0.3"><rect x="420" y="32" width="100" height="40" rx="7" style="fill:var(--green-soft);stroke:var(--green)"/><text class="note" x="470.0" y="58" text-anchor="middle" font-size="16" style="fill:currentColor" >an</text></g><g data-s="1" data-d="0.2" data-a="fade" data-t="0.3"><rect x="528" y="32" width="100" height="40" rx="7" style="fill:var(--green-soft);stroke:var(--green)"/><text class="note" x="578.0" y="58" text-anchor="middle" font-size="16" style="fill:currentColor" >aunt</text></g><g data-s="1" data-d="0.2" data-a="fade" data-t="0.3"><rect x="636" y="32" width="100" height="40" rx="7" style="fill:var(--green-soft);stroke:var(--green)"/><text class="note" x="686.0" y="58" text-anchor="middle" font-size="16" style="fill:currentColor" >of</text></g><g data-s="1" data-d="0.2" data-a="fade" data-t="0.3"><rect x="744" y="32" width="100" height="40" rx="7" style="fill:var(--green-soft);stroke:var(--green)"/><text class="note" x="794.0" y="58" text-anchor="middle" font-size="16" style="fill:currentColor" >mine</text></g><text class="note" x="140" y="96" text-anchor="start" font-size="16" style="fill:var(--green)" data-s="1" data-d="0.4">the text is known, the gold output included: all the positions in 1 step</text><g data-s="2" data-d="0" data-a="fade" data-t="0.3"><text class="note" x="16" y="168" text-anchor="start" font-size="18" style="fill:currentColor;font-weight:700" >Writing</text><rect x="140" y="142" width="262" height="40" rx="7" style="fill:var(--blue-soft);stroke:var(--blue)"/><text class="note" x="271" y="168" text-anchor="middle" font-size="15" style="fill:currentColor" >Galician: <tspan font-style="italic">unha tía miña</tspan> English:</text></g><rect x="420" y="142" width="100" height="40" rx="7" fill="none" style="stroke:var(--grid)" stroke-dasharray="4 3" data-s="2" data-d="0" data-a="fade" data-t="0.3"/><g data-s="2" data-d="0.4" data-a="fade" data-t="0.35"><rect x="420" y="142" width="100" height="40" rx="7" style="fill:var(--orange-soft);stroke:var(--orange)"/><text class="note" x="470.0" y="168" text-anchor="middle" font-size="16" style="fill:currentColor" >a</text></g><path d="M474.0 184 q50.0 26 100 0" fill="none" stroke="var(--orange)" stroke-width="2.5" marker-end="url(#kvO)" data-s="2" data-d="0.9500000000000001" data-a="fade" data-t="0.3"/><rect x="528" y="142" width="100" height="40" rx="7" fill="none" style="stroke:var(--grid)" stroke-dasharray="4 3" data-s="2" data-d="0" data-a="fade" data-t="0.3"/><g data-s="2" data-d="1.5" data-a="fade" data-t="0.35"><rect x="528" y="142" width="100" height="40" rx="7" style="fill:var(--orange-soft);stroke:var(--orange)"/><text class="note" x="578.0" y="168" text-anchor="middle" font-size="16" style="fill:currentColor" >sister</text></g><path d="M582.0 184 q50.0 26 100 0" fill="none" stroke="var(--orange)" stroke-width="2.5" marker-end="url(#kvO)" data-s="2" data-d="2.05" data-a="fade" data-t="0.3"/><rect x="636" y="142" width="100" height="40" rx="7" fill="none" style="stroke:var(--grid)" stroke-dasharray="4 3" data-s="2" data-d="0" data-a="fade" data-t="0.3"/><g data-s="2" data-d="2.6" data-a="fade" data-t="0.35"><rect x="636" y="142" width="100" height="40" rx="7" style="fill:var(--orange-soft);stroke:var(--orange)"/><text class="note" x="686.0" y="168" text-anchor="middle" font-size="16" style="fill:currentColor" >of</text></g><path d="M690.0 184 q50.0 26 100 0" fill="none" stroke="var(--orange)" stroke-width="2.5" marker-end="url(#kvO)" data-s="2" data-d="3.1500000000000004" data-a="fade" data-t="0.3"/><rect x="744" y="142" width="100" height="40" rx="7" fill="none" style="stroke:var(--grid)" stroke-dasharray="4 3" data-s="2" data-d="0" data-a="fade" data-t="0.3"/><g data-s="2" data-d="3.7" data-a="fade" data-t="0.35"><rect x="744" y="142" width="100" height="40" rx="7" style="fill:var(--orange-soft);stroke:var(--orange)"/><text class="note" x="794.0" y="168" text-anchor="middle" font-size="16" style="fill:currentColor" >mine</text></g><text class="note" x="140" y="220" text-anchor="start" font-size="16" style="fill:var(--orange)" data-s="2" data-d="4.8">the next token does not exist until this one is chosen: 4 steps, in order</text><g data-s="3" data-d="0" data-a="fade" data-t="0.3"><text class="note" x="16" y="268" text-anchor="start" font-size="18" style="fill:currentColor;font-weight:700" >The cache</text><rect x="140" y="242" width="262" height="40" rx="7" fill="var(--blue)" fill-opacity="0.35"/><text class="note" x="271" y="268" text-anchor="middle" font-size="14" style="fill:currentColor" >keys and values of the input</text></g><g data-s="3" data-d="0.3" data-a="fade" data-t="0.3"><rect x="420" y="242" width="100" height="40" rx="7" fill="var(--blue)" fill-opacity="0.45"/><text class="note" x="470.0" y="268" text-anchor="middle" font-size="14" style="fill:currentColor" >key, value</text></g><g data-s="3" data-d="0.8" data-a="fade" data-t="0.3"><rect x="528" y="242" width="100" height="40" rx="7" fill="var(--blue)" fill-opacity="0.58"/><text class="note" x="578.0" y="268" text-anchor="middle" font-size="14" style="fill:currentColor" >key, value</text></g><g data-s="3" data-d="1.3" data-a="fade" data-t="0.3"><rect x="636" y="242" width="100" height="40" rx="7" fill="var(--blue)" fill-opacity="0.71"/><text class="note" x="686.0" y="268" text-anchor="middle" font-size="14" style="fill:currentColor" >key, value</text></g><g data-s="3" data-d="1.8" data-a="fade" data-t="0.3"><rect x="744" y="242" width="100" height="40" rx="7" fill="var(--blue)" fill-opacity="0.84"/><text class="note" x="794.0" y="268" text-anchor="middle" font-size="14" style="fill:currentColor" >key, value</text></g><text class="note" x="140" y="306" text-anchor="start" font-size="16" style="fill:var(--blue)" data-s="3" data-d="2.4">each token's key and value are kept, not computed again: the KV cache grows with every token</text>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
+    </div>
+    <ul class="points" style="max-width:none">
+      <li>The parallel computation is what makes training fast. Using the model is another matter: every token written is one more pass through all the layers</li>
+    </ul>
+  </div>
+</section>
+
 <section class="screen" id="act-attn" data-step="6">
   <header><span class="kind">Activity · about 20 minutes, individual</span><h2>Attention playground</h2></header>
   <div class="body">
@@ -3147,24 +3163,6 @@ print("they match" if count == expected else "they do not match: check the loop 
         <a class="btn" href="https://colab.research.google.com/github/olzama/olzama.github.io/blob/master/teaching/GreenAI/notebooks/session1/advanced/01d_attention_playground-advanced.ipynb" target="_blank" rel="noopener">Open in Colab: advanced</a>
       </div>
     </div></div>
-  </div>
-</section>
-
-<section class="screen" id="kv" data-step="6">
-  <header><span class="kind">Transformers</span><h2>Generating text: why inference is sequential</h2></header>
-  <div class="body">
-    <div class="flow kvrow" style="gap:24px;align-items:center">
-      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i></div><span>word 1<br>(cache: 1 word)</span></div>
-      <span class="arr">→</span>
-      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i><i class="kvc" style="background:color-mix(in srgb, var(--muted) 45%, var(--panel))"></i></div><span>word 2<br>(cache: 2 words)</span></div>
-      <span class="arr">→</span>
-      <div class="fig"><div class="flow" style="gap:2px"><i class="kvc"></i><i class="kvc" style="background:color-mix(in srgb, var(--muted) 45%, var(--panel))"></i><i class="kvc" style="background:var(--muted)"></i></div><span>word 3<br>(cache: 3 words)</span></div>
-    </div>
-    <p class="cap">one box = the key and value of one written word, kept in the cache; darker = added later</p>
-    <ul class="points">
-      <li>One word at a time. Each word written gets its own key and value (the decoder's self-attention looks at the words written so far); the <b>KV cache</b> keeps them, so it grows with every word</li>
-      <li>Translating the rest of our story this way: the cache keeps growing the whole time</li>
-    </ul>
   </div>
 </section>
 
@@ -3486,7 +3484,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   </ul>
   <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
   <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>, except the figures credited to others.</p>
-  <p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T14:12Z">4 Nov 2026, 14:12 UTC</time></p>
+  <p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T14:16Z">4 Nov 2026, 14:16 UTC</time></p>
 </footer>
 
 <div class="pbar" aria-label="Presentation controls">
