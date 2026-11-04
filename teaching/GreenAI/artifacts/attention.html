@@ -861,7 +861,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T10:11Z">4 Nov 2026, 10:11 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T10:15Z">4 Nov 2026, 10:15 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -1297,7 +1297,7 @@ function renderSelf() {
   const hb = [["the token before it", habit(-1)], ["the token after it", habit(1)], ["itself", habit(0)]].sort((a, b) => b[1] - a[1])[0];
   $("selfNote").textContent = hb[1] > 0.45
     ? `Each token mostly looks at ${hb[0]} (${f2(hb[1])} of its weight on average).`
-    : "No simple habit of position: what it looks at depends on the tokens themselves (section 8).";
+    : "This head does not mostly look at one fixed position: not the token before it, not the token after it, not itself.";
 }
 $("selfLayer").addEventListener("change", () => { sLayer = +$("selfLayer").value; renderSelf(); });
 renderSelf();
