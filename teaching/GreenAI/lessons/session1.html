@@ -304,7 +304,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <body>
 
 <div class="top">
-  <div class="title"><b>Fundamentals of NLP</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña · updated <time datetime="2026-11-03T19:28Z">3 Nov 2026, 19:28 UTC</time></span></div>
+  <div class="title"><b>Fundamentals of NLP</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña · updated <time datetime="2026-11-04T10:11Z">4 Nov 2026, 10:11 UTC</time></span></div>
   <div class="road" id="topRoad" aria-label="The steps"></div>
   <div class="actions">
     <details class="toc"><summary>Contents</summary><nav id="tocNav"></nav></details>
@@ -2831,7 +2831,7 @@ print("they match" if count == expected else "they do not match: check the loop 
       </ul>
     </div>
     <div class="col">
-      <div class="fig"><img src="img/self-attention.png" alt="Self-attention from it to the animal"><span class="cap">Layer 5; coloured squares: its 8 heads (orange: the one drawn); right: “it”, left: where it looks, darker = more; “tire·d”: one word, two pieces. Illustration: jalammar.github.io/illustrated-transformer · Source: Vaswani et al., NeurIPS 2017 (arXiv:1706.03762)</span></div>
+      <div class="fig"><img src="img/self-attention.png" alt="Self-attention from it to the animal"><span class="cap">Layer 5; coloured squares: its 8 heads (orange: the one drawn); right: “it”, left: where it looks, darker = more; “tire·d”: one word, two tokens. Illustration: jalammar.github.io/illustrated-transformer · Source: Vaswani et al., NeurIPS 2017 (arXiv:1706.03762)</span></div>
     </div>
   </div>
 </section>
@@ -2855,7 +2855,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="body">
     <div class="tabs" role="group" aria-label="Go to a section">
       <button data-go="self" aria-pressed="true">7 Self-attention, many heads</button>
-      <button data-go="who" aria-pressed="false">8 Who decides what a head does?</button>
+      <button data-go="who" aria-pressed="false">8 How heads specialize</button>
       <a class="open" href="../artifacts/attention.html#self" target="_blank" rel="noopener">Open the full page</a>
     </div>
     <iframe class="frame" title="Self-attention heads" data-src="../artifacts/attention.html?embed=self,who"></iframe>
@@ -3025,7 +3025,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="body">
     <div class="activity"><h3>Notebook 01d, in Colab (CPU only, no GPU needed)</h3><div>
       <ul class="points">
-        <li>Part A: for each of the 48 heads of the real model's encoder (its self-attention), measure how much it looks at the previous, the same or the next piece, on a sentence you choose</li>
+        <li>Part A: for each of the 48 heads of the real model's encoder (its self-attention), measure how much it looks at the previous, the same or the next token, on a sentence you choose</li>
         <li>Part B: count the attention scores, then time the whole encoder as the text gets longer. Does the time grow like n²?</li>
       </ul>
       <div class="links">
@@ -3322,7 +3322,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   </ul>
   <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
   <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>, except the figures credited to others.</p>
-  <p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T19:28Z">3 Nov 2026, 19:28 UTC</time></p>
+  <p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T10:11Z">4 Nov 2026, 10:11 UTC</time></p>
 </footer>
 
 <div class="pbar" aria-label="Presentation controls">
