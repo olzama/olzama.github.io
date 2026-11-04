@@ -585,7 +585,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince), IBM Plex Mono (IBM) and IM FELL English (Igino Marini), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>. The Shakespeare text is in the public domain.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T16:57Z">3 Nov 2026, 16:57 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T13:21Z">4 Nov 2026, 13:21 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -1344,7 +1344,7 @@ function render() {
       g += `<rect x="${L}" y="${y - 11}" width="${X(perM(r.my)) - L}" height="10" rx="2" fill="${muted}" fill-opacity="0.6"><title>my ${r.noun}: ${perM(r.my).toFixed(2)} per million words</title></rect>`;
       g += `<rect x="${L}" y="${y + 1}" width="${Math.max(1.5, X(perM(r.of_mine)) - L)}" height="10" rx="2" fill="${r.noun === "aunt" ? orange : r.noun === "friend" ? green : blue}"><title>${art(r.noun)} ${r.noun} of mine: ${perM(r.of_mine).toFixed(3)} per million words</title></rect>`;
       g += `<text x="${X(perM(r.my)) + 6}" y="${y - 2}" fill="${muted}" font-size="11">${perM(r.my).toFixed(2)}</text><text x="${Math.max(X(perM(r.of_mine)), L + 1.5) + 6}" y="${y + 10}" fill="${fg}" font-size="11">${perM(r.of_mine).toFixed(3)}</text>`; });
-    g += `<text x="${L + W / 2}" y="${y0 + dy * R.length + 8}" text-anchor="middle">per million words: grey “my …”, colored “a … of mine”</text>`;
+    g += `<text x="${L + W / 2}" y="${y0 + dy * R.length + 8}" text-anchor="middle">per million words: gray “my …”, colored “a … of mine”</text>`;
     $("omNote").innerHTML = `The raw counts behind the bars, per million words of text. “my brother” is about as common as “my friend”, yet “a brother of mine” is almost never written, while “a friend of mine” is.`;
   }
   $("omSvg").innerHTML = g;

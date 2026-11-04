@@ -8,7 +8,7 @@
 <title>Attention, Step by Step</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <script>
-// weight labels on neighbouring columns: each one 12px lower than its neighbour on the left, so the numbers never overlap
+// weight labels on neighboring columns: each one 12px lower than its neighbor on the left, so the numbers never overlap
 function stagger(xs) { const o = xs.map((x, i) => i).sort((a, b) => xs[a] - xs[b]), dy = []; o.forEach((i, k) => { const p = o[k - 1]; dy[i] = k && xs[i] - xs[p] < 40 ? dy[p] + 12 : 0; }); return dy; }
 // ?embed=count,gen shows only those sections, for use inside a lesson page
 (() => {
@@ -639,7 +639,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     <h2><span class="n">4</span>The same steps in two trained models</h2>
     <p class="lead">Two new small models translate our whole sentence. Same data, same training; one difference: <b>without attention</b>, the decoder gets the summary for every English word; <b>with attention</b>, a new mix of all the encoder's vectors, as in section 2. Their vectors have 8 dimensions, all values learned in training.</p>
     <div class="legend"><span class="note">one square = one dimension of a vector; blue positive, pink negative (key in the strip below). Every number stays between −1 and +1.</span></div>
-    <div class="controls stick"><button id="wkBack">Back</button><button class="primary" id="wkNext">Next step</button><span class="pathstrip" id="wkSteps"></span><span class="legend" style="margin-left:auto">  <!-- in the sticky strip: the colour key stays in view at every step --><span class="lab">−1</span><span class="wkstrip h" id="wkLegend"></span><span class="lab">+1</span></span></div>
+    <div class="controls stick"><button id="wkBack">Back</button><button class="primary" id="wkNext">Next step</button><span class="pathstrip" id="wkSteps"></span><span class="legend" style="margin-left:auto">  <!-- in the sticky strip: the color key stays in view at every step --><span class="lab">−1</span><span class="wkstrip h" id="wkLegend"></span><span class="lab">+1</span></span></div>
     <div id="wkBody">
     <h3 class="wkh" id="wkTitle"></h3>
     <div class="cmprows" id="wkOut"></div>
@@ -836,7 +836,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T10:58Z">4 Nov 2026, 10:58 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T13:21Z">4 Nov 2026, 13:21 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -970,7 +970,7 @@ $("realTry").querySelectorAll("[data-try]").forEach(b => b.addEventListener("cli
 { let keep; reserveMax(["realWeights", "realNote", "realCandLab", "realCand"].map(id => $(id)), () => { keep = [$("realLayer").value, $("realHead").value];
     return [...$("realLayer").options].flatMap(L => [...$("realHead").options].map(H => () => { $("realLayer").value = L.value; $("realHead").value = H.value; renderReal(); })); },
   () => { [$("realLayer").value, $("realHead").value] = keep; renderReal(); }); }
-// as in section 5: one English token at a time; the tokens not yet written are greyed
+// as in section 5: one English token at a time; the tokens not yet written are grayed
 $("realNext").addEventListener("click", () => { if (realUpto === undefined) { tSel = 0; realUpto = 1; } else if (tSel < D.tgt.length - 1) { tSel++; realUpto = tSel + 1; } else realUpto = undefined; renderReal(); });
 $("realBack").addEventListener("click", () => { if (tSel > 0) { tSel--; realUpto = tSel + 1; } renderReal(); });
 $("realUnsure").textContent = `Dashed red outline: written with a probability below ${UNSURE} (the model was unsure).`;
@@ -1088,7 +1088,7 @@ const init6 = () => {
       <p class="label" style="margin-top:10px">the weights before each English word, one row each, stacked: this head's grid (read in the steps below)</p>`;
   };
   // part A, step 2: one decoder layer of opus-mt-gl-en, with the sizes from its configuration (d_model 512, 8 heads of 64, feed-forward 2048, swish).
-  // Vectors are drawn as grey strips whose width is in proportion to how many numbers they hold. The grids stay grey: they are read in part B.
+  // Vectors are drawn as gray strips whose width is in proportion to how many numbers they hold. The grids stay gray: they are read in part B.
   const SV = (cls = "") => { const tf = `font-family:var(--font-body);font-size:12px;fill:var(--fg)`;
     return { tf, tbl: "rgba(63,127,61,0.13)",
       bx: (x, y, wd, h, s, stroke = "var(--line)", fill = "var(--panel)", fs = 12, bold = false) => `<rect x="${x}" y="${y}" width="${wd}" height="${h}" rx="4" style="fill:${fill};stroke:${stroke}" stroke-width="1.3"/><text x="${x + wd / 2}" y="${y + h / 2 + fs * 0.36}" text-anchor="middle" style="${tf};font-size:${fs}px${bold ? ";font-weight:600" : ""}">${s}</text>`,
@@ -1123,7 +1123,7 @@ const init6 = () => {
     g += ar(cx0, s1 + 68, cx0, oY) + bx(cx0 - 140, oY, 280, 22, "decoder state for the next layer", "var(--fg)");
     g += `<rect x="4" y="${F0}" width="${W - 8}" height="${s1 + 80 - F0}" rx="8" fill="none" style="stroke:var(--fg)" stroke-width="2"/><rect x="${W - 100}" y="${F0 - 8}" width="86" height="16" style="fill:var(--panel)"/><text x="${W - 57}" y="${F0 + 4}" text-anchor="middle" style="${tf};font-weight:600">one layer</text>`;
     return `<svg viewBox="0 0 ${W} ${oY + 26}" style="max-width:${W}px" role="img" aria-label="one decoder layer: 8 heads, each with its own tables, grid and mix; the 8 mixes combined into one vector per English word; each word's vector reworked on its own">${g}</svg>
-      <p class="note" style="margin:2px 0 0">grey grids: each head's weights, read in the steps below · <span style="color:var(--green)">green</span>: learned</p>`;
+      <p class="note" style="margin:2px 0 0">gray grids: each head's weights, read in the steps below · <span style="color:var(--green)">green</span>: learned</p>`;
   };
   // the decoder: the English words written so far → 6 layers → a probability for each English word; the encoder vectors go into every layer
   const decoderHtml = () => {
@@ -1927,7 +1927,7 @@ const sideLines = (ls, d0 = 0) => ls.map((t, i) => `<span style="animation-delay
 const gCellCh = (o, v, cls, d) => `<div class="gc ch ${cls}" style="--d:${d}s"><span class="o${gLong(o)}" style="${gShade(o)}">${f(o)}</span><span class="n${gLong(v)}" style="${gShade(v)}">${f(v)}</span></div>`;
 const gSub = (v, cls = "") => `<div class="gs ${cls}">${v === undefined || v === 0 ? "" : f(v)}</div>`;
 // the score of one row on this row's own scale (−4 to 12, ticks every 4): one piece per part, each piece starting
-// where the one above it ended (blue: Σ first 3, green: Σ last 8, grey: bias); the mark and the number are the total
+// where the one above it ended (blue: Σ first 3, green: Σ last 8, gray: bias); the mark and the number are the total
 const G_U = 4.2, G_X0 = 4 + 4 * G_U;
 function gScore(v, win, anim, parts = {}) {
   const ticks = [-4, 0, 4, 8, 12].map(t => `<line x1="${G_X0 + t * G_U}" y1="${t ? 21 : 1}" x2="${G_X0 + t * G_U}" y2="25" class="${t ? "tk" : "z"}"/>`).join("");
@@ -2459,7 +2459,7 @@ function drawQ() {
   $("qkTip").textContent = cur === null ? `Your own query: ${qName(q)}.` : PRESETS[cur][2];
   // which parts this step shows
   [["qkKeys", "keys"], ["qkScores", "scores"], ["qkSm", "sm"], ["qkMix", "mix"], ["qkOut", "out"], ["qkWordsBox", "words"]].forEach(([id, part]) => { $(id).hidden = !show.has(part); });
-  // the rows above the picture never come and go (the picture would move): they show the current query and word, greyed out in steps that do not use them
+  // the rows above the picture never come and go (the picture would move): they show the current query and word, grayed out in steps that do not use them
   [["qkCtl", "ctl"], ["qkPosRow", "pos"]].forEach(([id, part]) => { const on = show.has(part); $(id).hidden = false; $(id).classList.toggle("inert", !on); $(id).querySelectorAll("input, button").forEach(e => { e.disabled = !on; }); });
   $("qkTip").style.visibility = show.has("ctl") ? "" : "hidden";   // the hint would give away what the step explains
   $("qkFig").hidden = false;
@@ -2483,7 +2483,7 @@ $("qkBack").addEventListener("click", () => goQ(qstep - 1));
 $("qkNext").addEventListener("click", () => { if (qstep < QSTEPS.length - 1) goQ(qstep + 1); });
 // the word to write: one button per position of the phrase
 PHR.forEach((w, i) => { const b = document.createElement("button"); b.textContent = `${i + 1}: ${w}`; b.addEventListener("click", () => { pos = i; drawQ(); }); $("qkPos").appendChild(b); });
-// the presets, in labelled groups
+// the presets, in labeled groups
 PRESETS.forEach(([g, v], i) => {
   let seg = [...$("qkPre").querySelectorAll(".qkg")].find(d => d.dataset.g === g)?.lastElementChild;
   if (!seg) { const d = document.createElement("div"); d.className = "qkg"; d.dataset.g = g; d.innerHTML = `<p class="label">${g}</p><div class="seg" role="group" aria-label="${g}"></div>`; $("qkPre").appendChild(d); seg = d.lastElementChild; }

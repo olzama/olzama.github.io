@@ -403,7 +403,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
             </div>
             <div class="tables3 two" id="trTab"></div>
             <p class="note" id="trTabNote" style="margin:0"></p>
-            <div class="legendrow compact" id="trLeg"><span class="note" style="margin:0;font-size:inherit">colours, in the tables and on the plane:</span><span><span class="sw" style="background:var(--blue)"></span>this pair's inputs</span><span><span class="sw" style="background:var(--green)"></span>its gold outputs</span><span><span class="sw" style="background:var(--orange)"></span><span id="trLegWin">the highest probability now</span></span><span><span class="sw" style="background:var(--hi);border:1px solid var(--line)"></span>second vectors mixed into the state</span><span><span class="sw" style="background:var(--orange);width:22px;height:4px"></span>the summary, then the state (- - - its direction: farther along = higher score)</span><span>faint: before the update · short dash: the direction of a move too small to see (zoom in; the rows pushed away move by η × p, about a tenth of the gold row's move)</span><span>gold k: gold output k · ↑ₖ ↓ₖ: from output k: its gold output up, the highest other down</span></div>
+            <div class="legendrow compact" id="trLeg"><span class="note" style="margin:0;font-size:inherit">colors, in the tables and on the plane:</span><span><span class="sw" style="background:var(--blue)"></span>this pair's inputs</span><span><span class="sw" style="background:var(--green)"></span>its gold outputs</span><span><span class="sw" style="background:var(--orange)"></span><span id="trLegWin">the highest probability now</span></span><span><span class="sw" style="background:var(--hi);border:1px solid var(--line)"></span>second vectors mixed into the state</span><span><span class="sw" style="background:var(--orange);width:22px;height:4px"></span>the summary, then the state (- - - its direction: farther along = higher score)</span><span>faint: before the update · short dash: the direction of a move too small to see (zoom in; the rows pushed away move by η × p, about a tenth of the gold row's move)</span><span>gold k: gold output k · ↑ₖ ↓ₖ: from output k: its gold output up, the highest other down</span></div>
           </div>
           <div class="col">
             <p class="label" id="trEncLbl">Encoding: the inputs are mixed, one by one, into one vector, the summary (new = ½ × old + ½ × vector of the input; section 2 shows the rule)</p>
@@ -474,7 +474,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
           <div class="col">
             <p class="label" id="tsSupplyLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
             <div class="ogrid one" id="tsSupply"></div>
-            <p class="note" style="margin:0;min-height:3.4em">each gold output filled by the probability the model gives it · <span style="color:var(--muted)">greyed, with a tag</span>: the development pair, held out of training</p>
+            <p class="note" style="margin:0;min-height:3.4em">each gold output filled by the probability the model gives it · <span style="color:var(--muted)">grayed, with a tag</span>: the development pair, held out of training</p>
           </div>
           <div class="col">
             <p class="label" id="tsAllLbl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none"></p>
@@ -691,7 +691,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-03T16:57Z">3 Nov 2026, 16:57 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T13:21Z">4 Nov 2026, 13:21 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -800,7 +800,7 @@ window.mtWhy = function (o) {
   const steps = run(sn), prevSteps = o.prev ? run(o.prev) : null;
   const k = Math.min(o.pos, steps.length - 1), s = steps[k], w = EN[s.j], want = tgt[k], wj = want === undefined ? -1 : EN.indexOf(want);
   const ps = prevSteps && prevSteps[k] ? prevSteps[k].p : null;
-  // at the ends of a pair, the buttons go on to the neighbouring pair
+  // at the ends of a pair, the buttons go on to the neighboring pair
   if ($(pre + "WhyPrev")) { const first = k <= 0; $(pre + "WhyPrev").disabled = first && !o.prevPair; $(pre + "WhyPrev").textContent = first && o.prevPair ? "← previous pair" : "← previous output"; $(pre + "WhyPrev").onclick = () => first ? o.prevPair() : o.pick(k - 1); }
   if ($(pre + "WhyNext")) { const lastK = k >= steps.length - 1; $(pre + "WhyNext").disabled = lastK && !o.nextPair; $(pre + "WhyNext").textContent = lastK && o.nextPair ? "next pair →" : "next output →"; $(pre + "WhyNext").onclick = () => lastK ? o.nextPair() : o.pick(k + 1); }
   const given = steps.slice(0, k).map(x => EN[x.fed]);
@@ -1289,7 +1289,7 @@ function renderAllPlane(RR, r, o = { svg: "trAllSvg", ghost: "trAllGhost", get: 
 const rightNow = sn => S2S.data.filter(([s2, t2]) => translate(sn, s2).steps.map(x => x.w).filter(w => w !== "‹end›").join(" ") === t2.filter(w => w !== "‹end›").join(" ")).length;
 let cntBy = "rounds";   // part B's curve: along rounds (passes over the 16 pairs) or along updates (changes of the tables)
 function renderRightCurve() {
-  // both procedures on one axis: the chosen one solid green, the other grey. One pair at a time makes 16 updates per round, all at once 1
+  // both procedures on one axis: the chosen one solid green, the other gray. One pair at a time makes 16 updates per round, all at once 1
   const other_ = trProc === "one" ? "all" : "one", mine = rightsOf(trProc), other = rightsOf(other_), NX = cntBy === "rounds" ? Math.max(ROUNDS, ROUNDS_B) : 5000;
   const upr = pr => cntBy === "rounds" ? 1 : pr === "one" ? NP : 1;   // how far one round moves along the axis
   const green = css("--green"), orange = css("--orange"), muted = css("--muted"), grid = css("--grid");
@@ -1302,7 +1302,7 @@ function renderRightCurve() {
   g += `<line class="axis" x1="${L}" y1="${B}" x2="${Rr}" y2="${B}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${B}"/>`;
   g += `<text x="${L}" y="${B + 16}" text-anchor="middle" font-size="10" fill="${muted}">${cntBy === "rounds" ? "round" : "update"} 0</text><text x="${L - 6}" y="${Y(0) + 4}" text-anchor="end" font-size="10" fill="${muted}">0</text><text x="${L - 6}" y="${Y(8) + 4}" text-anchor="end" font-size="10" fill="${muted}">8</text><text x="${L - 6}" y="${Y(16) + 4}" text-anchor="end" font-size="10" fill="${muted}">16</text>`;
   g += `<text x="${L - 30}" y="${T - 8}" font-size="10" fill="${muted}">inputs right</text>`;
-  // the count is a whole number, so its curve is a staircase: drawn smoothed (a centred average over 31 rounds); the dot shows the exact count now
+  // the count is a whole number, so its curve is a staircase: drawn smoothed (a centered average over 31 rounds); the dot shows the exact count now
   const W = 15, smooth = arr => arr.map((n, i) => { const a = Math.max(0, i - W), b = Math.min(arr.length - 1, i + W); let s = 0; for (let k = a; k <= b; k++) s += arr[k]; return s / (b - a + 1); });
   const line = (arr, pr) => smooth(arr).map((n, i) => [i * upr(pr), n]).filter(([c]) => c <= NX).map(([c, n]) => `${X(c).toFixed(1)},${Y(n).toFixed(1)}`).join(" ");
   g += `<polyline points="${line(other, other_)}" fill="none" stroke="${muted}" stroke-opacity="0.55" stroke-width="1.6" stroke-linejoin="round"/>`;
@@ -1314,10 +1314,10 @@ function renderRightCurve() {
   const now = ti * upr(trProc), mx = X(now), my = Y(mine[ti]), off = now > NX;
   if (!off) g += `<line x1="${mx}" y1="${T}" x2="${mx}" y2="${B}" stroke="${orange}" stroke-width="1.3" stroke-dasharray="4 3"/><circle cx="${mx}" cy="${my}" r="5" fill="${orange}" stroke="var(--panel)" stroke-width="1.5"/>`;
   const lbl = `${mine[ti]} of 16 · round ${ti}${cntBy === "updates" ? ` = update ${now}${off ? ", off this axis" : ""}` : ""}`;
-  g += `<text x="${Rr}" y="${B - 8}" text-anchor="end" font-size="11" fill="${orange}">${lbl}</text>`;   // one fixed corner: the colour ties it to the orange line
+  g += `<text x="${Rr}" y="${B - 8}" text-anchor="end" font-size="11" fill="${orange}">${lbl}</text>`;   // one fixed corner: the color ties it to the orange line
   $("trRightCurve").innerHTML = g;
   const f1 = firstAll(rightsOf("one")), fA = firstAll(rightsOf("all")), name = pr => pr === "one" ? "one pair at a time" : "all 16 at once";
-  $("trRightNote").innerHTML = `<span class="ok">green: ${name(trProc)}</span> (chosen above) · grey: ${name(other_)} · each curve: the number of inputs translated right, averaged over 31 rounds; the dot: the exact number now · a round is one pass over the 16 pairs: ${NP} updates one pair at a time, 1 update all at once · all 16 right for good: one pair at a time from round ${f1} (${f1 * NP} updates), all at once from round ${fA} (${fA} updates). Which is faster depends on what you count; on a GPU the 16 pushes of one update run in parallel, so time follows updates more than rounds`;
+  $("trRightNote").innerHTML = `<span class="ok">green: ${name(trProc)}</span> (chosen above) · gray: ${name(other_)} · each curve: the number of inputs translated right, averaged over 31 rounds; the dot: the exact number now · a round is one pass over the 16 pairs: ${NP} updates one pair at a time, 1 update all at once · all 16 right for good: one pair at a time from round ${f1} (${f1 * NP} updates), all at once from round ${fA} (${fA} updates). Which is faster depends on what you count; on a GPU the 16 pushes of one update run in parallel, so time follows updates more than rounds`;
 }
 function renderWhole() {
   const RR = procRun(), NR = procRounds(); ti = Math.min(ti, NR); const sn = RR[ti], one = trProc === "one";
