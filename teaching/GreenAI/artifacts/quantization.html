@@ -350,6 +350,7 @@ html.embed .fields { container-type: inline-size; }
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Topic 2. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T16:10Z">4 Nov 2026, 16:10 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -434,7 +435,7 @@ function showBits() {
   const mt = d.mb.map((x, i) => x ? `1/${2 ** (i + 1)}` : null).filter(Boolean);
   const lead = d.kind === "normal" ? "1" : "0";
   const mv = (d.kind === "normal" ? 1 : 0) + d.m / 2 ** F.M;
-  $("fMan").innerHTML = d.kind === "inf" || d.kind === "nan" ? "not used" :
+  $("fMan").innerHTML = d.kind === "inf" ? "all 0: with this exponent, that means infinity" : d.kind === "nan" ? "not all 0: with this exponent, that means NaN" :
     `${lead} + mantissa = ${lead}${mt.length ? " + " + mt.join(" + ") : " + 0"}<br>= <b>${+mv.toPrecision(10)}</b>`;
   const p = d.kind === "normal" ? d.e - F.bias : 1 - F.bias;
   const v = d.value;
