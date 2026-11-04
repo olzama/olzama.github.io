@@ -304,7 +304,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <body>
 
 <div class="top">
-  <div class="title"><b>Fundamentals of NLP</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña · updated <time datetime="2026-11-04T14:36Z">4 Nov 2026, 14:36 UTC</time></span></div>
+  <div class="title"><b>Fundamentals of NLP</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña · updated <time datetime="2026-11-04T14:39Z">4 Nov 2026, 14:39 UTC</time></span></div>
   <div class="road" id="topRoad" aria-label="The steps"></div>
   <div class="actions">
     <details class="toc"><summary>Contents</summary><nav id="tocNav"></nav></details>
@@ -3202,17 +3202,16 @@ print("they match" if count == expected else "they do not match: check the loop 
 <section class="screen" id="stages" data-step="0">
   <header><span class="kind">Today's LLMs</span><h2>From writing the next word to following instructions</h2></header>
   <div class="body">
-    <div class="flow">
-      <div class="box"><b>1. Next word</b><br>on raw text</div><span class="arr">→</span>
-      <div class="box"><b>2. Examples</b><br>answers written by people</div><span class="arr">→</span>
-      <div class="box o"><b>3. Preferences</b><br>people rank answers</div><span class="arr">→</span>
-      <div class="box g">follows instructions</div>
+    <div class="board">
+      <svg viewBox="0 0 1000 314" role="img" aria-label="Three training stages, each with one training example: pretraining on the next token of raw text; instruction tuning on instructions with answers written by people; preference training on pairs of answers that people choose between. Given Name three colors, GPT-2 continues the text, while Qwen2.5-1.5B-Instruct answers.">
+<text class="note" x="14" y="20" text-anchor="start" font-size="14" style="fill:var(--muted)">stage</text><text class="note" x="196" y="20" text-anchor="start" font-size="14" style="fill:var(--muted)">one training example</text><text class="note" x="700" y="20" text-anchor="start" font-size="14" style="fill:var(--muted)">what it teaches</text><line x1="14" y1="30" x2="986" y2="30" style="stroke:var(--grid)"/><g data-s="1" data-d="0" data-a="fade" data-t="0.45"><text class="note" x="14" y="58" text-anchor="start" font-size="17" style="fill:currentColor;font-weight:700">1. Pretraining</text><text class="note" x="196" y="50" text-anchor="start" font-size="16" style="fill:currentColor">text: <tspan font-style="italic">My aunt solved every</tspan></text><text class="note" x="196" y="74" text-anchor="start" font-size="16" style="fill:currentColor">gold output, the next token: <tspan font-weight="700">problem</tspan></text><text class="note" x="700" y="50" text-anchor="start" font-size="16" style="fill:currentColor">to continue any text</text><text class="note" x="700" y="74" text-anchor="start" font-size="14" style="fill:var(--muted)">(as on the slide on raw text)</text><line x1="14" y1="92" x2="986" y2="92" style="stroke:var(--grid)"/></g><g data-s="2" data-d="0" data-a="fade" data-t="0.45"><text class="note" x="14" y="112" text-anchor="start" font-size="17" style="fill:currentColor;font-weight:700">2. Instruction</text><text class="note" x="14" y="134" text-anchor="start" font-size="17" style="fill:currentColor;font-weight:700">tuning</text><text class="note" x="196" y="112" text-anchor="start" font-size="16" style="fill:currentColor">instruction: <tspan font-style="italic">Name three colors.</tspan></text><text class="note" x="196" y="136" text-anchor="start" font-size="16" style="fill:currentColor">gold output, written by a person: <tspan font-weight="700">Red, blue, green.</tspan></text><text class="note" x="700" y="112" text-anchor="start" font-size="16" style="fill:currentColor">to answer an instruction</text><text class="note" x="700" y="136" text-anchor="start" font-size="16" style="fill:currentColor">instead of continuing it</text><line x1="14" y1="154" x2="986" y2="154" style="stroke:var(--grid)"/></g><g data-s="3" data-d="0" data-a="fade" data-t="0.45"><text class="note" x="14" y="174" text-anchor="start" font-size="17" style="fill:currentColor;font-weight:700">3. Preference</text><text class="note" x="14" y="196" text-anchor="start" font-size="17" style="fill:currentColor;font-weight:700">training</text><text class="note" x="196" y="174" text-anchor="start" font-size="16" style="fill:currentColor">two answers from the model, and a person chooses:</text><text class="note" x="196" y="198" text-anchor="start" font-size="16" style="fill:var(--green)">✓ Red, blue, green.</text><text class="note" x="386" y="198" text-anchor="start" font-size="16" style="fill:var(--neg)">✗ Colors are nice.</text><text class="note" x="700" y="174" text-anchor="start" font-size="16" style="fill:currentColor">to give the answers</text><text class="note" x="700" y="198" text-anchor="start" font-size="16" style="fill:currentColor">people prefer</text><line x1="14" y1="216" x2="986" y2="216" style="stroke:var(--grid)"/></g><g data-s="4" data-d="0" data-a="fade" data-t="0.45"><text class="note" x="14" y="242" text-anchor="start" font-size="17" style="fill:currentColor;font-weight:700">The same instruction, real outputs: <tspan font-style="italic">Name three colors.</tspan></text><text class="note" x="14" y="272" text-anchor="start" font-size="15" style="fill:var(--muted)">after stage 1 only (GPT-2):</text><text class="note" x="224" y="272" text-anchor="start" font-size="15" style="fill:currentColor">“The first is the color of the first letter of the alphabet. The second is the color of the…”</text><text class="note" x="14" y="300" text-anchor="start" font-size="15" style="fill:var(--muted)">after all three (Qwen2.5-1.5B-Instruct):</text><text class="note" x="304" y="300" text-anchor="start" font-size="15" style="fill:currentColor">“Sure! Here are three common colors: 1. Red 2. Blue 3. Green”</text></g>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
-    <ul class="points">
-      <li>Stage 1 gives a model that continues text; stages 2 and 3 train that same model further</li>
-      <li>In Ouyang et al., people preferred the answers of a 1.3-billion-parameter model with these stages to those of the 175-billion-parameter GPT-3 without them: more training stages, 100 times fewer parameters</li>
+    <ul class="points" style="max-width:none">
+      <li>The same transformer all along: only the training data changes. In Ouyang et al., people preferred a 1.3-billion-parameter model with these stages to the 175-billion-parameter GPT-3 without them</li>
     </ul>
-    <p class="src">Source: Ouyang et al., “Training language models to follow instructions with human feedback,” NeurIPS 2022 (arXiv:2203.02155)</p>
+    <p class="src">The examples of stages 2 and 3 are illustrations. The two models also differ in size and date, so the outputs show the kind of change, not its exact cause. Source: Ouyang et al., NeurIPS 2022 (arXiv:2203.02155)</p>
   </div>
 </section>
 
@@ -3221,7 +3220,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   <div class="body">
     <table class="plain">
       <tr><th>lever</th><th>what today's models do</th><th>effect on the computation</th></tr>
-      <tr><td><b>the parameters</b></td><td><b>Mixture of experts</b>: several feed-forward blocks per layer, each token uses only some. Mixtral (from the company Mistral AI): 8 per layer, 2 used per token</td><td>down: 13 billion parameters used per token, of 47 billion</td></tr>
+      <tr><td><b>the parameters</b></td><td><b>Mixture of experts</b>: several feed-forward blocks per layer, each token uses only some. In Mixtral (from the company Mistral AI), 2 of the 8 blocks of a layer: about 13 of its 47 billion parameters for each token</td><td>down: only part of the parameters works on each token</td></tr>
       <tr><td><b>the input</b></td><td><b>Long context</b>: whole documents read at once</td><td>up: attention grows with the square of the length</td></tr>
       <tr><td><b>the output</b></td><td><b>Reasoning models</b>: hundreds to thousands of tokens written before the answer (DeepSeek-R1)</td><td>up: more steps, a bigger cache</td></tr>
     </table>
@@ -3480,7 +3479,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   </ul>
   <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
   <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>, except the figures credited to others.</p>
-  <p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T14:36Z">4 Nov 2026, 14:36 UTC</time></p>
+  <p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T14:39Z">4 Nov 2026, 14:39 UTC</time></p>
 </footer>
 
 <div class="pbar" aria-label="Presentation controls">
