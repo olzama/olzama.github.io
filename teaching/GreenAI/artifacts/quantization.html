@@ -24,9 +24,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Questrial&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Five stations, in the order of the Session 2 lesson: one number in bits, absmax rounding,
+/* Five stations, in the order of the Topic 2 lesson: one number in bits, absmax rounding,
    an outlier and clipping, the zero point, and one scale per block.
-   Colors and faces are the course's, shared with the Session 1 pages. */
+   Colors and faces are the course's, shared with the Topic 1 pages. */
 :root {
   --bg: #f6f7f9; --panel: #ffffff; --fg: #2b2d31; --muted: #6b7079; --line: #dde1e7; --grid: #e9ecf0;
   --blue: #4f74ad; --orange: #c96f1f; --green: #3f7f3d; --hi: #fff3c4; --neg: #b0466e;
@@ -92,7 +92,7 @@ table.t th, table.t td { padding: 4px 9px; text-align: right; border-bottom: 1px
 table.t th { color: var(--muted); font-weight: 400; font-family: var(--font-body); font-size: 0.8rem; }
 table.t tbody tr { cursor: pointer; }
 table.t tbody tr:hover td { color: var(--blue); }
-/* as on the Session 1 pages: the selected row is highlighted; a loss is red (a shared code here, a weight rounded to 0 in section 6) */
+/* as on the Topic 1 pages: the selected row is highlighted; a loss is red (a shared code here, a weight rounded to 0 in section 6) */
 table.t tr.sel td { background: var(--hi); }
 table.t td.hit { color: var(--neg); }
 .stats { display: flex; flex-wrap: wrap; gap: 8px 22px; font-family: var(--font-mono); font-size: 0.9rem; }
@@ -349,7 +349,7 @@ html.embed .fields { container-type: inline-size; }
       <li>Gerganov, G., et al. llama.cpp and the GGUF format. <a href="https://github.com/ggml-org/llama.cpp">github.com/ggml-org/llama.cpp</a></li>
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
-    <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 2. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
+    <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Topic 2. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
   </footer>
 </div>
 
@@ -742,7 +742,7 @@ window.__askState.push(() => `Section 5: ${bk} weights per block; ${$("bStats").
 </script>
 
 <script>
-const ASK_RULES = `You answer questions from students on an interactive teaching page, "Quantization, Step by Step", for Session 2 of a course on green NLP (Universidade da Coruña). Answer in plain, short sentences, at the level of a student who knows what a neural network weight is but not how numbers are stored. Use the page's own numbers and say which section you mean. If the question is not about this page or quantization, say so briefly.
+const ASK_RULES = `You answer questions from students on an interactive teaching page, "Quantization, Step by Step", for Topic 2 of a course on green NLP (Universidade da Coruña). Answer in plain, short sentences, at the level of a student who knows what a neural network weight is but not how numbers are stored. Use the page's own numbers and say which section you mean. If the question is not about this page or quantization, say so briefly.
 
 The page:
 - Section 1, one number in 16 bits: FP16 has 1 sign bit, 5 exponent bits (bias 15) and 10 mantissa bits; BF16 has 1, 8 (bias 127) and 7. Value = sign × (1 + mantissa bits read as halves, quarters, ...) × 2^(exponent − bias). All-zero exponent: subnormal numbers, no leading 1. All-one exponent: infinity or NaN. Typed numbers are rounded to the nearest representable number (0.1 becomes 0.0999755859375 in FP16).

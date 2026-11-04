@@ -24,7 +24,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Questrial&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Four stations, in the order of the Session 3 lesson: dense retrieval on toy vectors, TF-IDF on
+/* Four stations, in the order of the Topic 3 lesson: dense retrieval on toy vectors, TF-IDF on
    toy documents, both retrievers on the course quiz, and the embedding model's window.
    Colors and faces are the course's, shared with the other pages. */
 :root {
@@ -90,7 +90,7 @@ table.t th, table.t td { padding: 4px 9px; text-align: right; border-bottom: 1px
 table.t th { color: var(--muted); font-weight: 400; font-family: var(--font-body); font-size: 0.8rem; }
 table.t td.l, table.t th.l { text-align: left; }
 table.t tbody tr { cursor: pointer; }
-/* as on the Session 1 pages: the selected row is highlighted; the top k are blue, like their thick blue arrows and section 3's dark bars */
+/* as on the Topic 1 pages: the selected row is highlighted; the top k are blue, like their thick blue arrows and section 3's dark bars */
 table.t tr.sel td { background: var(--hi); }
 table.t tr.top td.l { color: var(--blue); }
 .stats { display: flex; flex-wrap: wrap; gap: 8px 22px; font-family: var(--font-mono); font-size: 0.9rem; }
@@ -281,7 +281,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
       <li>Spärck Jones, K. (1972). A statistical interpretation of term specificity and its application in retrieval. <i>Journal of Documentation</i>, 28(1), 11–21.</li>
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
-    <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 3. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
+    <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Topic 3. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
   </footer>
 </div>
 
@@ -344,7 +344,7 @@ const DVEC = Object.fromEntries(Object.entries(DOCS).map(([k, t]) => [k, textVec
 
 /* ================= 1. dense ================= */
 let dq = textVec($("dQ").value), dk = 2, dsel = "doc_energy", dshow = null;   // dshow: while playing, how many documents are scored
-// as in Session 1's attention picture: the vectors compared are blue (here the documents), the query is orange (here the question)
+// as in Topic 1's attention picture: the vectors compared are blue (here the documents), the query is orange (here the question)
 const COL = { doc_carbon: "var(--blue)", doc_energy: "var(--blue)", doc_water: "var(--blue)", doc_retrieval: "var(--blue)", doc_quantize: "var(--blue)" };
 function drawDense() {
   const svg = $("dFig"); svg.innerHTML = "";
@@ -538,7 +538,7 @@ if (document.documentElement.classList.contains("embed")) { const n = $("wFig").
 </script>
 
 <script>
-const ASK_RULES = `You answer questions from students on an interactive teaching page, "Retrieval, Step by Step", for Session 3 of a course on green NLP (Universidade da Coruña). Answer in plain, short sentences, at the level of a student who knows what an embedding and cosine similarity are. Use the page's own numbers and say which section you mean. If the question is not about this page or retrieval, say so briefly.
+const ASK_RULES = `You answer questions from students on an interactive teaching page, "Retrieval, Step by Step", for Topic 3 of a course on green NLP (Universidade da Coruña). Answer in plain, short sentences, at the level of a student who knows what an embedding and cosine similarity are. Use the page's own numbers and say which section you mean. If the question is not about this page or retrieval, say so briefly.
 
 The page:
 - Section 1, dense retrieval on toy vectors (Notebook 03b): word vectors energy (4,2), electricity (4,3), carbon (3,4), water (1,4), retriever (0,5), memory (2,−3); a text's vector is the average of its known words' vectors. Five documents: doc_carbon (3,4), doc_energy (4,2), doc_water (2.5,3.5), doc_retrieval (0,5), doc_quantize (2,−3). Ranking by cosine similarity, top k kept. Question B, "what does it cost in electricity to get an answer", has the vector (4,3): cosine 0.984 with doc_energy, 0.96 with doc_carbon, 0.953 with doc_water.

@@ -304,7 +304,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <body>
 
 <div class="top">
-  <div class="title"><b>Green NLP: Retrieval</b><span class="muted" style="font-size:0.85rem">Green AI, Session 3 · Universidade da Coruña</span></div>
+  <div class="title"><b>Green NLP: Retrieval</b><span class="muted" style="font-size:0.85rem">Green AI, Topic 3 · Universidade da Coruña</span></div>
   <div class="road" id="topRoad" aria-label="The steps"></div>
   <div class="actions">
     <details class="toc"><summary>Contents</summary><nav id="tocNav"></nav></details>
@@ -319,7 +319,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   <div class="logos"><img src="img/logo-inditexudc.png" alt="Cátedra Inditex–UDC de Algoritmos Verdes"></div>
   <p class="label">Microcredencial Algoritmos verdes para la IA: diseño e implementación</p>
   <h1>Green NLP: Retrieval</h1>
-  <p class="muted">Tema: Natural language processing · Sesión 3 · Ponente: Olga Zamaraeva</p>
+  <p class="muted">Natural language processing · Tema 3 · Ponente: Olga Zamaraeva</p>
   <div class="logos"><img src="img/logo-citicudc.png" alt="CITIC, Universidade da Coruña"><img src="img/logo-financiacion.png" alt="Funding"></div>
   </section>
 
@@ -335,12 +335,12 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </section>
 
 <section class="screen" id="recap" data-step="0">
-  <header><h2>Where we left off</h2><p class="sub">Two sessions, two changes to the same pipeline</p></header>
+  <header><h2>Where we left off</h2><p class="sub">Two topics, two changes to the same pipeline</p></header>
   <div class="body">
     <div class="flow">
-      <div class="box">Session 2<br><b>baseline-fp16</b><br><span class="muted">reads all documents</span></div><span class="arr">→</span>
-      <div class="box">Session 2<br><b>quantized</b><br><span class="muted">fewer bits per number</span></div><span class="arr">→</span>
-      <div class="box g">Session 3<br><b>retrieval</b><br><span class="muted">reads only the relevant documents</span></div>
+      <div class="box">Topic 2<br><b>baseline-fp16</b><br><span class="muted">reads all documents</span></div><span class="arr">→</span>
+      <div class="box">Topic 2<br><b>quantized</b><br><span class="muted">fewer bits per number</span></div><span class="arr">→</span>
+      <div class="box g">Topic 3<br><b>retrieval</b><br><span class="muted">reads only the relevant documents</span></div>
     </div>
     <div class="cols">
       <div class="col">
@@ -355,7 +355,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       </div>
       <div class="col">
         <ul class="points">
-          <li>Closed book, in our Session 1 test run: <b>2 of 8</b> right; with the documents, 8 of 8</li>
+          <li>Closed book, in our Topic 1 test run: <b>2 of 8</b> right; with the documents, 8 of 8</li>
           <li>Its wrong answers sounded just as sure: it called RAG (retrieval-augmented generation, next screen) “Retrieval-Augmented Learning”</li>
           <li>A small model alone is not a reliable source of facts. Documents supply the facts; retrieval chooses which.</li>
         </ul>
@@ -427,7 +427,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <div class="part" id="part-step2"><h1>Step 2 · Dense retrieval</h1></div>
 
 <section class="screen" id="howfind" data-step="2">
-  <header><h2>How a retriever finds documents</h2><p class="sub">The cosine similarity of Session 1, for whole texts</p></header>
+  <header><h2>How a retriever finds documents</h2><p class="sub">The cosine similarity of Topic 1, for whole texts</p></header>
   <div class="body cols">
     <div class="col">
       <ol class="points">
@@ -638,7 +638,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </section>
 
 <section class="screen" id="sparsedense" data-step="3">
-  <header><h2>Sparse and dense vectors</h2><p class="sub">The picture of Session 1, now for whole documents</p></header>
+  <header><h2>Sparse and dense vectors</h2><p class="sub">The picture of Topic 1, now for whole documents</p></header>
   <div class="body cols">
     <div class="col">
       <p class="label">Sparse: one value per word of the vocabulary (its tf-idf in the document), mostly 0</p>
@@ -994,7 +994,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
     </div>
     <div class="col">
       <ul class="points">
-        <li>Attention compares every token with every token: twice the tokens, four times the pairs (Session 1)</li>
+        <li>Attention compares every token with every token: twice the tokens, four times the pairs (Topic 1)</li>
         <li>The rest of the model grows in step with the tokens</li>
         <li>Writing the answer: one run of the model per written token, as many either way; only the attention to the input gets cheaper</li>
         <li>So expect an energy saving smaller than the token saving: the notebook measures it</li>
@@ -1081,7 +1081,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
   <div class="body cols">
     <div class="col">
       <table class="plain">
-        <thead><tr><th></th><th>Session 2: quantization</th><th>Session 3: retrieval</th></tr></thead>
+        <thead><tr><th></th><th>Topic 2: quantization</th><th>Topic 3: retrieval</th></tr></thead>
         <tbody>
           <tr><td>changes</td><td>bits per number</td><td>tokens to read</td></tr>
           <tr><td>keeps</td><td>the text</td><td>the precision</td></tr>
@@ -1143,12 +1143,12 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       <table class="plain">
         <thead><tr><th>In a real system</th><th>In Notebook 03a</th></tr></thead>
         <tbody>
-          <tr><td>knowledge base</td><td><span class="mono">CORPUS</span>: 26 documents, Session 1's eight plus 18 new</td></tr>
+          <tr><td>knowledge base</td><td><span class="mono">CORPUS</span>: 26 documents, Topic 1's eight plus 18 new</td></tr>
           <tr><td>embedding model</td><td>paraphrase-multilingual-MiniLM-L12-v2</td></tr>
           <tr><td>index</td><td><span class="mono">doc_embeddings</span>, computed once</td></tr>
           <tr><td>search</td><td><span class="mono">retrieve()</span>: cosine similarity, keep the top 2</td></tr>
           <tr><td>augmented prompt</td><td><span class="mono">build_prompt()</span>: the documents above the question</td></tr>
-          <tr><td>language model</td><td>Qwen2.5-1.5B-Instruct, 16 bits, as in Session 1</td></tr>
+          <tr><td>language model</td><td>Qwen2.5-1.5B-Instruct, 16 bits, as in Topic 1</td></tr>
         </tbody>
       </table>
     </div>
@@ -1178,7 +1178,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
     <div class="activity"><h3>Notebook 03a, in Colab, with a GPU</h3><div>
       <ul class="points">
         <li>In Colab: Runtime → Change runtime type → T4 GPU</li>
-        <li>Upload your three CSV files as saved at the end of Session 2 (<span class="mono">leaderboard.csv</span>, <span class="mono">mt_leaderboard.csv</span>, <span class="mono">mt_eval_leaderboard.csv</span>) before you start</li>
+        <li>Upload your three CSV files as saved at the end of Topic 2 (<span class="mono">leaderboard.csv</span>, <span class="mono">mt_leaderboard.csv</span>, <span class="mono">mt_eval_leaderboard.csv</span>) before you start</li>
         <li>Download them again at the end</li>
       </ul>
       <div class="links">
@@ -1240,12 +1240,12 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
 <div class="part" id="part-end"><h1>The course, in one screen</h1></div>
 
 <section class="screen" id="course" data-step="0">
-  <header><h2>Three sessions, one pipeline, one leaderboard</h2></header>
+  <header><h2>Three topics, one pipeline, one leaderboard</h2></header>
   <div class="body">
     <div class="flow">
-      <div class="box">Session 1<br><b>language models</b><br><span class="muted">measure the baseline</span></div><span class="arr">→</span>
-      <div class="box">Session 2<br><b>quantization</b><br><span class="muted">fewer bits per number</span></div><span class="arr">→</span>
-      <div class="box g">Session 3<br><b>retrieval</b><br><span class="muted">fewer tokens to read</span></div>
+      <div class="box">Topic 1<br><b>language models</b><br><span class="muted">measure the baseline</span></div><span class="arr">→</span>
+      <div class="box">Topic 2<br><b>quantization</b><br><span class="muted">fewer bits per number</span></div><span class="arr">→</span>
+      <div class="box g">Topic 3<br><b>retrieval</b><br><span class="muted">fewer tokens to read</span></div>
     </div>
     <ul class="points">
       <li>Measure first: energy, carbon, time and memory, always next to quality</li>
@@ -1281,7 +1281,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
     <li>Naseiro, P. <i>Speechwriter</i> (the translation examples).</li>
   </ul>
   <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
-  <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 3. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>, except the quoted sentences of <i>Speechwriter</i>.</p>
+  <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Topic 3. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>, except the quoted sentences of <i>Speechwriter</i>.</p>
 </footer>
 
 <div class="pbar" aria-label="Presentation controls">
