@@ -321,11 +321,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   <h1>Green NLP: Retrieval</h1>
   <p class="muted">Tema: Natural language processing · Sesión 3 · Ponente: Olga Zamaraeva</p>
   <div class="logos"><img src="img/logo-citicudc.png" alt="CITIC, Universidade da Coruña"><img src="img/logo-financiacion.png" alt="Funding"></div>
-  <div class="notes">
-    <p>This is the third and last session. Today's topic is retrieval.</p>
-    <p>As before, the whole session is on one web page: olzama.github.io, teaching, GreenAI, Session 3.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="warning" data-step="0">
   <header><h2>Content warning</h2></header>
@@ -336,10 +332,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <li>We keep them: translating swearing with the same strength is hard for translation systems</li>
     </ul>
   </div>
-  <div class="notes">
-    <p>One warning before we start. Later today we translate some sentences from the novel Speechwriter. Two of them contain strong swearing. We keep them as they are in the book. Swearing is hard to translate: the translator has to find an expression with the same strength in the other language. So these sentences are a useful test.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="recap" data-step="0">
   <header><h2>Where we left off</h2><p class="sub">Two sessions, two changes to the same pipeline</p></header>
@@ -369,13 +362,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       </div>
     </div>
   </div>
-  <div class="notes">
-    <p>Here is where we are. In Session 1, the model answered questions about a few documents. For every question, it read all of them. That is the baseline row in your leaderboard. In Session 2, we kept the documents and made the model's numbers smaller. Today we keep the model as it was in Session 1, and we change what it reads.</p>
-    <p>First, a distinction. When every prompt contains all the documents, and the documents contain every answer, the model does not need to know anything. It only needs to find the answer in the text. That task is called reading comprehension. When the model gets only the question, it must know the answer. That is closed-book question answering. Today we look at the case in between: the model gets the question, plus the documents that a program found for it. That is open-book question answering.</p>
-    <p>In Session 1 you also ran the quiz closed book. In our test run, the model got 2 of 8 right without the documents, and 8 of 8 with them. And the wrong answers sounded just as sure as the right ones. It even called today's technique Retrieval-Augmented Learning. A confident wrong answer like this is called a hallucination.</p>
-    <p>So a small model on its own is not a reliable source of facts. The documents supply the facts. Retrieval is how a system chooses which documents to give the model for each question.</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-step1"><h1>Step 1 · Retrieve, then read</h1></div>
 
@@ -396,13 +383,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     </ul>
     <p class="src">Lewis et al., “Retrieval-augmented generation for knowledge-intensive NLP tasks,” NeurIPS 2020</p>
   </div>
-  <div class="notes">
-    <p>This technique is called RAG. It stands for retrieval-augmented generation. The main paper is by Lewis and colleagues, from 2020.</p>
-    <p>It has two steps. First, a program called a retriever searches a collection of documents and finds the ones most related to the question. Then the text of those documents is put into the prompt, next to the question. The prompt is the only way to give the model anything. Then the model writes the answer.</p>
-    <p>The model uses the prompt, and it still uses what it learned in training. Retrieval adds facts to the prompt. It does not switch off what the model learned.</p>
-    <p>Why is this useful? The facts do not need to be inside the model. They only need to be in a document that the retriever can find. So a small model can answer questions about facts it never saw in training. The questions for today are how well the retriever finds the right document, and what this saves.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="phases" data-step="1">
   <header><h2>Where the documents come from</h2><p class="sub">The system builders choose the collection; the model never sees the search</p></header>
@@ -419,13 +400,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <li>The collection, the <b>knowledge base</b>: help-desk articles, contracts, regulations, …</li>
     </ul>
   </div>
-  <div class="notes">
-    <p>A natural question is: how does the model know where to search? The answer is that the model does not search at all. Retrieval is a separate program that runs before the model. The people who build the system decide which documents it can search.</p>
-    <p>This happens in two phases. Phase one happens once, before any user asks anything. The builders collect the documents. For example, a company's help-desk articles, a law firm's contracts, or a university's regulations. This collection is called the knowledge base. Long documents are cut into smaller parts, called chunks. Each chunk is turned into an embedding, a vector that represents its meaning. The embeddings are stored in an index, together with the text of each chunk.</p>
-    <p>Phase two happens every time a user asks a question. The question is turned into an embedding too. The index is searched for the chunks whose embeddings are closest to the question's. Those chunks are pasted into the prompt, above the question. Then the model reads the prompt and writes the answer.</p>
-    <p>The model never sees the search. From its side, it just receives a question with some text attached.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="assistant" data-step="1">
   <header><h2>The same idea in a chat assistant</h2><p class="sub">The question: “How much energy does one Gemini prompt use?”</p></header>
@@ -447,14 +422,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       </ul>
     </div>
   </div>
-  <div class="notes">
-    <p>Let's see the same idea in a chat assistant you know. Suppose you ask: how much energy does one Gemini prompt use? We saw the answer in Session 1, from Google's own measurement.</p>
-    <p>Step one. The model does not answer yet. It writes a search request, for example: Gemini prompt energy. Step two. The program around the model sends this request to a web search engine, and copies text from the top pages. Step three. That text is added to the prompt. Now the prompt holds the company's instructions, which you do not see, your question, and the text of the pages. Step four. The model reads this prompt and writes the answer, with links to the pages it used.</p>
-    <p>How does the model decide to search? The model can only write text. A search request is also text, in a special format that the program around it recognizes. During training, the model saw many examples where a question about a specific or recent fact was followed by a search request. So for a question like ours, the most likely thing to write first is a search request. For "write me a poem", it is the poem.</p>
-    <p>Uploaded files work the same way. A long contract is cut into chunks, the chunks are embedded, and the chunks closest to your question go into the prompt.</p>
-    <p>Real systems add a few things. With millions of chunks, comparing the question with every chunk is too slow, so the search is approximate: it checks only the most promising chunks, and can occasionally miss the best one. Many systems search by words and by embeddings together, and merge the results. And often a second, more careful model reorders the top twenty to fifty results, and only the best few go into the prompt.</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-step2"><h1>Step 2 · Dense retrieval</h1></div>
 
@@ -478,13 +446,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       </ul>
     </div>
   </div>
-  <div class="notes">
-    <p>How does the retriever decide which documents are relevant? It uses embeddings, which we saw in Session 1. An embedding is a vector, a list of values, that represents the meaning of a text. Texts with similar meanings get similar vectors.</p>
-    <p>The retriever computes one embedding for each document. This is done once, in advance. For each question, it computes the question's embedding, with the same embedding model. Ours is MiniLM, the multilingual model of Notebook 01c, trained so that texts with the same meaning get close vectors. Then it compares the question's vector with each document's vector.</p>
-    <p>The comparison is cosine similarity, the measure we used for aunt (4, 2) and uncle (3, 3) in Session 1. Multiply the matching values and add them up: that is the dot product. Then divide by the lengths of the two vectors. A value of 1 means the two vectors point in the same direction. A value of 0 means they are at a right angle: unrelated. Below 0, they point away from each other.</p>
-    <p>The retriever keeps the k documents with the highest values. In today's notebook, k is 2. The next screen works one example out.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="cosine" data-step="2">
   <header><h2>Ranking documents by cosine similarity</h2><p class="sub">Notebook 03b's toy vectors (a text's vector: the average of its known words'); the question “what does it cost in electricity to get an answer”, whose only known word is electricity</p></header>
@@ -538,15 +500,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
-  <div class="notes">
-    <p>Here is one example, worked out, on three of the five toy documents. The other two, retrieval and quantize, point away from the question; the next panel shows all five. Real embeddings have hundreds of dimensions. These have two, so we can draw them and do the arithmetic. They are the toy vectors of Notebook 03b.</p>
-    <p>Each document's vector is the average of the vectors of the words we know. The question is "what does it cost in electricity to get an answer". The only word with a vector is electricity, so the question's vector is 4, 3.</p>
-    <p>First the energy document, vector 4, 2. The dot product: 4 times 4 plus 3 times 2. That is 16 plus 6, which is 22. The length of the question: the square root of 4 squared plus 3 squared, the square root of 25, which is 5. The length of the document: the square root of 4 squared plus 2 squared, the square root of 20, about 4.47. So the cosine is 22 divided by 5 times 4.47. That is 22 divided by 22.35, about 0.98.</p>
-    <p>The carbon document, vector 3, 4: 4 times 3 plus 3 times 4 is 24. Its length is 5. 24 divided by 25 is 0.96.</p>
-    <p>The water document, vector 2.5, 3.5: 4 times 2.5 plus 3 times 3.5 is 10 plus 10.5, which is 20.5. Its length is about 4.30. 20.5 divided by 21.5 is about 0.95.</p>
-    <p>The energy document is first. With k equal to 1, the model reads only that document. Notice how close the three values are: 0.98, 0.96, 0.95. In two dimensions, many vectors point in similar directions. Real embeddings have hundreds of dimensions, so they can separate topics much better.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen fill" id="dense-i" data-step="2">
   <header><span class="kind">Interactive</span><h2>Move the question</h2></header>
@@ -556,14 +510,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     </div>
     <iframe class="frame" title="Retrieval, step by step: dense retrieval" data-src="../artifacts/retrieval.html?embed=dense"></iframe>
   </div>
-  <div class="notes">
-    <p>On this panel, the five toy documents are blue arrows. The orange arrow is the question, as the query was orange in Session 1.</p>
-    <p>Press Play. The retriever scores the documents one at a time: each document's arrow lights up, the orange arc shows its angle with the question, and its cosine appears in the table. When all five are scored, the table sorts itself, the top k are ticked, and the box at the bottom shows the prompt the model will get: the top documents, then the question.</p>
-    <p>Click a row of the table: the arithmetic below it changes to that document, and an orange arc shows the angle between the two arrows.</p>
-    <p>Now click anywhere on the plane to move the question. Move it up, toward the retrieval document, and watch the ranking change. Then press question A: its only known word is energy, so its vector is the energy document's vector, and the cosine is exactly 1.</p>
-    <p>Type a question with none of the six known words. The question gets no vector, and dense retrieval cannot rank anything. A real embedding model knows all words, so this cannot happen there.</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-step3"><h1>Step 3 · Sparse retrieval</h1></div>
 
@@ -583,13 +530,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <p class="muted">A document's score for a question: the sum of tf-idf over the question's words.</p>
     </div>
   </div>
-  <div class="notes">
-    <p>Before embeddings, retrieval worked by counting words. The best-known method is called TF-IDF. It is still widely used, often in an improved version called BM25.</p>
-    <p>The idea: look at which words the question shares with each document. But not every shared word is equally useful. Imagine you must find one person in a room, with one clue. If half the room has brown hair, "brown hair" does not help much. If only one person has a pet parrot, "pet parrot" finds them at once. Words work the same way. The word "the" is in almost every document, so it does not help us choose. A word that is in only one document points straight to it.</p>
-    <p>The score has two parts. TF, term frequency, counts how many times the word appears in one document. IDF, inverse document frequency, measures how rare the word is in the whole collection: the natural logarithm of the number of documents, divided by the number of documents that contain the word.</p>
-    <p>If the word is in every document, the fraction is 1, and the logarithm of 1 is 0. So a word that is everywhere adds nothing. If the word is in only one document, the fraction is large, and the score is high. The two parts are multiplied, so a word scores high only if it is in the document and rare in the collection.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="idf" data-step="3">
   <header><h2>TF-IDF, worked out</h2><p class="sub">The five toy documents of Notebook 03b</p></header>
@@ -671,14 +612,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
-  <div class="notes">
-    <p>Let's compute it on the five toy documents of Notebook 03b.</p>
-    <p>The word "model" is in three of the five documents: carbon, energy and retrieval. Its idf is the natural logarithm of 5 divided by 3. 5 divided by 3 is 1.67, and its logarithm is about 0.51.</p>
-    <p>The word "energy" is in only one document. Its idf is the logarithm of 5 divided by 1, the logarithm of 5, about 1.61.</p>
-    <p>Now look inside the energy document. Each of the two words appears there once, so tf is 1 for both. For "model": 1 times 0.51 is 0.51. For "energy": 1 times 1.61 is 1.61.</p>
-    <p>Both words appear once. But "energy" counts about three times more, because it is rare in the collection, and "model" is common.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="whylog" data-step="3">
   <header><h2>Why the logarithm?</h2><p class="sub">An imagined news archive with N = 1,000,000 articles</p></header>
@@ -701,14 +635,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       </ul>
     </div>
   </div>
-  <div class="notes">
-    <p>Why is there a logarithm in the formula? To see why, we need a large collection. So imagine one, a news archive with one million articles. These numbers are made up.</p>
-    <p>A word in only one article: the ratio is one million divided by one, a million. A word in a thousand articles: one million divided by a thousand, which is a thousand. A word in every article: the ratio is one.</p>
-    <p>If we used the ratio directly, the rarest word would count a thousand times more than a word in a thousand articles. A single rare word, even a typo, would decide which article comes first. The other words of the question would hardly matter.</p>
-    <p>Now the last column, with the logarithm. The rarest word gets 13.8. The word in a thousand articles gets 6.9. The rare word still counts more, but about twice as much. And a word in every article gets the logarithm of one, which is zero. So words like "the" add nothing.</p>
-    <p>In a small collection the logarithm makes little difference: with five documents, the ratio is never larger than five. It matters in large collections, which is where real search happens.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="sparsedense" data-step="3">
   <header><h2>Sparse and dense vectors</h2><p class="sub">The picture of Session 1, now for whole documents</p></header>
@@ -732,13 +659,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       </table>
     </div>
   </div>
-  <div class="notes">
-    <p>Here are the two kinds of document vectors side by side.</p>
-    <p>A sparse vector has one value for every word of the vocabulary. Most values are zero, because a document uses only a few of all possible words. Sparse retrieval can only match words that are exactly the same.</p>
-    <p>A dense vector has a few hundred values, and all of them are filled in. An embedding model learned these values from a large amount of text. Dense retrieval can match a question and a document that use different words for the same idea. The price is that it needs an embedding model to run. Sparse retrieval needs only counting.</p>
-    <p>The table shows the two questions of the notebook. Question A shares four words with the energy document, and both methods find it. Question B asks the same thing in other words. It shares only the word "it" with the energy document. Sparse retrieval ends in a tie between three documents. Dense retrieval still finds it, because electricity is close to energy.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen fill" id="sparse-i" data-step="3">
   <header><span class="kind">Interactive</span><h2>Shared words, weighted</h2></header>
@@ -748,12 +669,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     </div>
     <iframe class="frame" title="Retrieval, step by step: sparse retrieval" data-src="../artifacts/retrieval.html?embed=sparse"></iframe>
   </div>
-  <div class="notes">
-    <p>On this panel, the words the question shares with each document are highlighted. A word in only one document has an orange frame.</p>
-    <p>The table gives two scores: the number of shared words, and TF-IDF. Click a document: the box on the right adds up its TF-IDF, word by word, with tf times the logarithm of 5 over the number of documents.</p>
-    <p>Press question B. The energy document shares only "it". And on five documents, "it" happens to be in only one, so it counts as a rare word: three documents tie. This shows why idf needs a large collection to be reliable.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="tryRet" data-step="3">
   <header><span class="kind">Try it · about 20 minutes</span><h2>Build both retrievers</h2></header>
@@ -1041,13 +957,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
 </script>
     </div>
   </div>
-  <div class="notes">
-    <p>Now you build both retrievers, on the five toy documents.</p>
-    <p>Exercise 1 is the crudest retriever: count the words the question shares with each document. Question A finds the energy document. Look at what question B finds.</p>
-    <p>Exercise 2 adds TF-IDF. Complete idf and tf, and the score: the sum of tf times idf over the question's words. The cell prints the numbers from the board, 0.51 and 1.61.</p>
-    <p>Exercise 3 is dense retrieval with the toy vectors. Complete the cosine similarity and the text vector, the average of the known words' vectors. Question B now finds the energy document, with 0.984.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen fill" id="quiz-i" data-step="3">
   <header><span class="kind">Interactive</span><h2>Both retrievers on the course quiz</h2></header>
@@ -1057,13 +967,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
     </div>
     <iframe class="frame" title="Retrieval, step by step: the course quiz" data-src="../artifacts/retrieval.html?embed=quiz"></iframe>
   </div>
-  <div class="notes">
-    <p>Now the real thing: the 26 documents and 26 questions of today's notebook, with the notebook's own models. Each bar is one document's similarity to the question. The green bar is the document that holds the answer. The dark bars are the top k: the only documents the model will read.</p>
-    <p>The panel opens on the question: what does the acronym PUE stand for? With the dense retriever, the right document is ranked 16th. The model will not see it. An acronym is hard for an embedding model: PUE is just three letters to it. Now press sparse, TF-IDF. The word PUE is in one document only, so TF-IDF finds it at once. The second document scores 0: with k = 2 the model still gets two documents, related or not.</p>
-    <p>Look at the line above the chart: with k equal to 2, the dense retriever finds the right document for 23 of the 26 questions, and TF-IDF for all 26. On this small, clean collection, counting words works very well.</p>
-    <p>On the right: how many tokens the model reads with all 26 documents, and with the top k. Under it, the pairs that attention compares, drawn as a square whose side is the number of tokens: the gray square is all 26 documents, the blue one the top k. Press Play: k goes from 26 down to 2. The blue side shrinks in step with the tokens, and its area, the pairs, shrinks much faster.</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-step4"><h1>Step 4 · What retrieval saves</h1></div>
 
@@ -1097,13 +1001,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       </ul>
     </div>
   </div>
-  <div class="notes">
-    <p>Why does reading fewer tokens save energy? Recall attention from Session 1. Every token is compared with every other token. Twice the tokens means four times the pairs.</p>
-    <p>The board works it out for today's collection. All 26 documents together are 4,037 tokens. The two documents the retriever picks are, on average over the 26 questions, about 310 tokens. 4,037 divided by 310 is about 13: thirteen times fewer tokens. The panel before showed one question at a time, with the question's own tokens included, so its numbers were a little different: for the PUE question, 4,046 and 355.</p>
-    <p>The pairs: 4,037 squared is about 16.3 million. 310 squared is 96,100. 16.3 million divided by 96,100 is about 170. So attention compares about 170 times fewer pairs.</p>
-    <p>But attention is only part of the work. Other parts of the model do an amount of work that grows in step with the number of tokens, not with the square. And writing the answer takes one run of the model for every token written, and the answer is about as long in both cases. Only the attention part of each run gets cheaper, because there are fewer input tokens in the KV cache to look at. So the energy saving will be smaller than the token saving. You will measure how much smaller this afternoon.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="chunks" data-step="4">
   <header><h2>Long documents must be split</h2><p class="sub">The embedding model reads at most 128 tokens</p></header>
@@ -1114,12 +1012,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       <li>Real systems split long documents into <b>chunks</b>, embed each chunk, and retrieve chunks; the chunk size is a design decision</li>
     </ul>
   </div>
-  <div class="notes">
-    <p>One practical detail matters today. An embedding model can only read a limited number of tokens. Ours, MiniLM, reads at most 128. If a document is longer, the rest is cut off before the embedding is computed. So the embedding represents only the beginning of the document.</p>
-    <p>The chart shows our 26 documents. Press Play: MiniLM reads every document from its start, and where the 128-token window ends, the rest turns into hatching. The blue part of each bar is what MiniLM reads. The hatched red part is never seen. 23 of the 26 documents are longer than 128 tokens. For one of them, the answer to its quiz question is in the hatched part. You will see the retriever miss that question this afternoon.</p>
-    <p>Real systems solve this with chunking. They split each long document into chunks, the smaller parts of the earlier screen, embed each chunk, and retrieve chunks. Choosing the chunk size is a design decision of its own.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="evidence" data-step="4">
   <header><h2>Reading everything, or retrieving?</h2><p class="sub">Li et al. (2024): GPT-4o, GPT-3.5-Turbo and Gemini-1.5-Pro on long-document question answering</p></header>
@@ -1147,14 +1040,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
     </div>
   </div>
   <p class="src">Li, Li, Zhang, Mei &amp; Bendersky, “Retrieval augmented generation or long-context LLMs? A comprehensive study and hybrid approach,” EMNLP 2024 Industry Track</p>
-  <div class="notes">
-    <p>Now some published evidence. A 2024 study from Google DeepMind and the University of Michigan compared the two approaches on three strong models: GPT-4o, GPT-3.5-Turbo and Gemini-1.5-Pro. Each question is about one long source text, for example a whole book or a long report.</p>
-    <p>Long context puts the whole source text into the prompt. In their two benchmarks, that is on average 7,000 words in one, and 100,000 tokens in the other. RAG cuts the text into chunks of 300 words and puts only the 5 most relevant chunks into the prompt. 5 times 300 is 1,500 words.</p>
-    <p>For all three models, long context gave better answers on average. So retrieval can lose some quality. But for 63 percent of the questions, the two approaches gave exactly the same answer. For those questions, reading everything bought nothing.</p>
-    <p>The authors used this to build a combined method, called Self-Route. The model first tries RAG, and also says whether the retrieved chunks are enough to answer. If yes, the RAG answer is used. If no, the question goes to long context. With Gemini-1.5-Pro, this cut the cost, the number of tokens the model reads, by 61 percent; with GPT-4o, by 39 percent. In both cases, the quality stayed close to long context.</p>
-    <p>The lesson: use the cheap method when it is enough, and the expensive one only when needed.</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-step5"><h1>Step 5 · What can go wrong</h1></div>
 
@@ -1188,13 +1074,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       </table>
     </div>
   </div>
-  <div class="notes">
-    <p>Retrieval adds a new way to fail. The baseline read every document, so the document with the answer was always in the prompt. A retriever can choose the wrong documents. Then the answer is not in the prompt at all. The model may say that the documents do not contain the answer. Or it may answer from a wrong document, and sound sure about it.</p>
-    <p>So when an answer is wrong today, there are two possible causes: the retriever fetched the wrong documents, or the model misread the right ones. The notebook measures the two separately. Retrieval accuracy says how often the right document was in the top k. Answer accuracy says how often the final answer was right.</p>
-    <p>The table shows retrieval accuracy on today's quiz, with k equal to 2. We computed it with the notebook's own models. The dense retriever finds the right document for 23 of the 26 questions. TF-IDF finds it for all 26.</p>
-    <p>The dense retriever misses three. The PUE question: an acronym is hard for an embedding model. The question about training emissions: its answer is past the 128-token window, as we saw. And a question about RAG: two other documents about retrieval, the RAG paper and kNN-MT, rank higher. On a small collection of short, clean documents on clearly different topics, counting words works very well. Real collections are larger and messier.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="levers" data-step="5">
   <header><h2>Two levers, measured separately</h2></header>
@@ -1220,12 +1100,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       </div></div>
     </div>
   </div>
-  <div class="notes">
-    <p>Keep the two sessions apart. In Session 2 we changed precision: the model read the same text, but its numbers used fewer bits. Today we change how much text the model reads, and the precision stays the same as in the baseline. Each has its own risk: rounding error for quantization, a missed document for retrieval.</p>
-    <p>The two changes are independent. A real system can use a quantized model and retrieval at the same time. Notebook 03c runs them side by side on one GPU. Today we change only one thing at a time, so that we can measure the effect of each.</p>
-    <p>Now a short discussion, about ten minutes. First: when would you give the model everything, on purpose? Think about the type of task, the budget, and how costly a wrong answer is. Second: when would you trust the retriever's top document enough to show the model nothing else? Third: our documents are short, and each is about one topic. Real collections have duplicates, contradictions and very long documents. What goes wrong first? There is no single right answer. Collect the ideas from the room.</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-step6"><h1>Step 6 · Retrieval for translation</h1></div>
 
@@ -1257,13 +1132,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       <p class="muted">Similarity to our passage, with MiniLM. The top sentence and its English translation go into the prompt as an example.</p>
     </div>
   </div>
-  <div class="notes">
-    <p>Retrieval is also used in machine translation. One method is called kNN-MT. kNN means k nearest neighbors. It starts with a translation model that is already trained, and adds a large datastore built from earlier translations. The datastore keeps, for every word of the earlier translations, the decoder state just before that word was written, and the word itself. Each time the model writes a word, it compares its current decoder state with the stored states, takes the k closest, looks at which words were written after them, and mixes those words into its own probabilities. It is the same idea as RAG, but it looks things up at every word, not once per question.</p>
-    <p>Real kNN-MT needs millions of entries and a lookup at every word. That is too big for a Colab session. We do a small version of the same idea, called a translation memory. Our memory has six Galician sentences from Speechwriter, each with an English translation.</p>
-    <p>We compute the embedding of our Galician passage, the one with "unha tía miña", and compare it with the six sentences. The table shows the cosine similarities. The most similar is the sentence about the cousin Fernando, with 0.40. That sentence and its translation go into the prompt as an example. Then the model translates our passage.</p>
-    <p>We compare the translations with and without the example, with the four metrics from the earlier sessions: BLEU, BERTScore, Qwen as a judge, and ChatGPT as a judge.</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-turn"><h1>Your turn</h1></div>
 
@@ -1296,14 +1165,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       </ul>
     </div>
   </div>
-  <div class="notes">
-    <p>Before the notebook, here is how its parts match a real system.</p>
-    <p>The knowledge base is the variable CORPUS. It holds 26 documents: the eight from Session 1, plus 18 new ones. The embedding model is MiniLM, the small multilingual model from the Session 1 embeddings notebook. The index is the matrix doc_embeddings, computed once at the start. The search is the function retrieve: it computes the cosine similarity between the question and every document, and keeps the top two. The augmented prompt is built by build_prompt, which pastes the documents above the question. The language model is the same Qwen model as in Session 1, in 16 bits.</p>
-    <p>The same model answers the quiz three times. First closed book, with no documents: what the model knows on its own. Second with all 26 documents: the baseline method, on the bigger collection. Third with the two retrieved documents.</p>
-    <p>One difference from a chat assistant: our prompt tells the model to answer only from the documents. This is an instruction in the prompt. The model may or may not follow it.</p>
-    <p>Your earlier rows had eight questions, and today's have 26. So the notebook compares the cost per question.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="act-nb3" data-step="0">
   <header><span class="kind">Activity · 60–75 minutes for Part 1, +50–70 for Parts 2–3, individual</span><h2>Notebook 03a: Retrieval measurement</h2></header>
@@ -1325,13 +1187,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       </div>
     </div></div>
   </div>
-  <div class="notes">
-    <p>Now the main notebook. Part 1 runs the quiz three ways: closed book, all 26 documents, and the top 2 retrieved documents. CodeCarbon measures each run. You get two accuracies: how often the answer was right, and how often the retriever found the right document. All three runs go into your leaderboard.</p>
-    <p>Part 2 compares the dense retriever with TF-IDF on the same quiz, and prints the questions where they disagree. Look at those carefully: they show where matching words and matching meaning come apart.</p>
-    <p>Part 3 translates our Galician passage with and without the retrieved example from the translation memory, and grades both translations with the four metrics.</p>
-    <p>Choose the T4 GPU. Upload the three CSV files you saved in Sessions 1 and 2, so today's rows are added to them. And download them again at the end.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="act-nb3c" data-step="0">
   <header><span class="kind">Activity · 70–90 minutes, if time allows</span><h2>Notebook 03c: three levers, one run</h2></header>
@@ -1358,11 +1214,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       </div>
     </div>
   </div>
-  <div class="notes">
-    <p>Notebook 03c is an extra. It runs all three configurations of the course in one Colab session, on the same GPU, so the numbers are directly comparable.</p>
-    <p>The 16-bit baseline model and the quantized model answer closed book, with no documents. So this baseline row is not Session 1's, which read all the documents. So this shows what quantization does to what the model knows by itself. The retrieval run uses the 16-bit model with the two retrieved documents. So this shows what retrieval adds, and at what cost. The translation is run the same three ways.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="shareout" data-step="0">
   <header><h2>Share-out</h2></header>
@@ -1383,12 +1235,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       </ul>
     </div>
   </div>
-  <div class="notes">
-    <p>Time to compare, with your neighbor and then with the room.</p>
-    <p>Which questions did the model answer correctly closed book? Those are facts it knew from training. Compare retrieval with all 26 documents: accuracy, energy per question, and time. Was the energy saving as large as the token saving? And when an answer was wrong, look at retrieval accuracy: did the retriever miss, or did the model misread the right document?</p>
-    <p>For the translation: did the retrieved example change anything? Did it move toward "I had an aunt who", the translation we discussed in Session 1? And did the four metrics agree on whether it helped?</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-end"><h1>The course, in one screen</h1></div>
 
@@ -1406,12 +1253,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       <li>Savings and losses depend on the model, the task, the data and the hardware: published numbers are a starting point, your own are the answer</li>
     </ul>
   </div>
-  <div class="notes">
-    <p>To close the course, the three sessions in one picture.</p>
-    <p>In Session 1 we saw how language models work, from n-grams to transformers, and we measured a baseline: a small model, a question-answering task, and the energy and carbon of one run. In Session 2 we stored the same model's numbers with fewer bits. In Session 3 we gave the same model fewer tokens to read.</p>
-    <p>The method was the same every time. Measure first, and keep quality next to energy, carbon, time and memory. Change one thing at a time, on the same task, with the same check. And remember that the savings and the losses depend on the model, the task, the data and the hardware. Published numbers are a good starting point. Your own measurements are the answer for your system.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen titlescreen" id="thanks" data-step="0">
   <div class="cols" style="align-items:center;width:100%">
@@ -1422,10 +1264,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
       <a href="https://catedrainditexalgoritmosverdes.com/" class="mono">catedrainditexalgoritmosverdes.com</a>
     </div>
   </div>
-  <div class="notes">
-    <p>Thank you for your attention.</p>
-  </div>
-</section>
+  </section>
 
 </main>
 

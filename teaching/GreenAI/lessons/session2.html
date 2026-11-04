@@ -321,11 +321,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   <h1>Green NLP: Quantization</h1>
   <p class="muted">Tema: Natural language processing · Sesión 2 · Ponente: Olga Zamaraeva</p>
   <div class="logos"><img src="img/logo-citicudc.png" alt="CITIC, Universidade da Coruña"><img src="img/logo-financiacion.png" alt="Funding"></div>
-  <div class="notes">
-    <p>Welcome back. This is Session 2. Today's topic is quantization.</p>
-    <p>As in Session 1, the whole session is on one web page. You can follow it on your laptop or phone: olzama.github.io, teaching, GreenAI, Session 2.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="qa" data-step="0">
   <header><span class="kind">Before the activity</span><h2>The task: answering questions about documents</h2></header>
@@ -398,13 +394,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       </div>
     </div>
   </div>
-  <div class="notes">
-    <p>In Session 1 you measured a baseline. A small language model, Qwen 2.5 with 1.5 billion parameters, answered questions about a few documents. CodeCarbon measured the energy. You saved the result as one row of your leaderboard file. That row is called baseline-fp16.</p>
-    <p>Today we keep everything the same: the documents, the questions, the scoring rule, and the model. We change one thing: how many bits are used to store each of the model's numbers. This is called quantization. The two names on the right, gptq-int4 and bnb-int8-fallback, are today's two possible rows; the end of the session explains them.</p>
-    <p>Each run gives one row with five things: quality, energy, carbon, time and memory. There is no single number that says whether quantization worked. If accuracy stays the same and energy goes down, that is an easy case. But we may see a mix: a little less accuracy and a real energy saving, or less memory and the same energy. So we keep all five columns side by side.</p>
-    <p>To understand what quantization does, we first need to see how a computer stores a number.</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-step1"><h1>Step 1 · Numbers in bits</h1></div>
 
@@ -446,13 +436,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       </ul>
     </div>
   </div>
-  <div class="notes">
-    <p>A language model is a very large collection of numbers, its parameters. In a computer, every number is stored as a sequence of bits. A bit is 0 or 1.</p>
-    <p>Binary numbers work like decimal numbers. In decimal, each position is worth ten times the one to its right: ones, tens, hundreds. In binary, each position is worth twice the one to its right: 1, 2, 4, 8.</p>
-    <p>Let's read the binary number 1101. The small 2 after it says that it is written in binary. The board writes the place values above the digits: 8, 4, 2, 1. Then we multiply each digit by its place value. 1 times 8, plus 1 times 4, plus 0 times 2, plus 1 times 1. That is 8 plus 4 plus 0 plus 1, which is 13.</p>
-    <p>Whole numbers like this are called integers. But most of a model's numbers are not whole numbers. They are numbers like 0.37 or minus 1.85. For those, the computer uses a format called floating point.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="float" data-step="1">
   <header><h2>A floating-point number has three parts</h2><p class="sub">The IEEE 754 standard: sign, exponent, mantissa</p></header>
@@ -474,14 +458,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <li>The <b>bias</b> (15 in FP16) lets the exponent be negative as well, for very small numbers</li>
     </ul>
   </div>
-  <div class="notes">
-    <p>Here is how a floating-point number is stored. This is the FP16 format: a floating-point number in 16 bits. FP32 uses 32 bits in the same way.</p>
-    <p>The bits are split into three fields, and each field has a different job. The first bit is the sign: plus or minus. The next five bits are the exponent. The exponent sets the scale of the number: it multiplies the number by 2 to some power. The last ten bits are the mantissa, also called the fraction. The mantissa gives the detail inside that scale.</p>
-    <p>The formula combines the three: the sign, times one plus the mantissa, times 2 to the power of the exponent minus the bias.</p>
-    <p>What is the bias? The exponent bits are read as an ordinary positive number. But we also need negative exponents, for very small numbers. So the format subtracts a fixed number, the bias. In FP16 the bias is 15. Five bits can store 0 to 31, so after subtracting 15, the exponent can go from minus 14 to plus 15. The values 0 and 31 are kept for special cases, like zero and infinity.</p>
-    <p>The next screen decodes one real bit pattern, step by step.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="fp16" data-step="1">
   <header><h2>Decoding one FP16 number</h2></header>
@@ -553,15 +530,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
-  <div class="notes">
-    <p>Here are 16 bits. Let's decode them, one field at a time.</p>
-    <p>The sign bit is 0, so the number is positive.</p>
-    <p>The exponent bits are 0 1 1 1 1. We read them as a binary number, as on the first screen. 0 times 16, plus 1 times 8, plus 1 times 4, plus 1 times 2, plus 1 times 1. That is 15. Then we subtract the bias, 15. 15 minus 15 is 0. So the scale is 2 to the power 0, which is 1: no scaling up or down.</p>
-    <p>The mantissa bits are 1 followed by nine zeros. The mantissa is read as fractions after an implied leading 1. The leading 1 is not stored. The first mantissa bit is worth one half, the next one quarter, the next one eighth, and so on. Only the first bit is 1. So the mantissa is one half, and 1 plus the mantissa is 1.5.</p>
-    <p>Now we combine the three fields: plus 1, times 1.5, times 2 to the power 0. The number is 1.5.</p>
-    <p>It is the same place-value idea as before, used twice: once for the exponent bits, with 16, 8, 4, 2, 1, and once for the mantissa bits, with one half, one quarter, and so on.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen fill" id="bits-i" data-step="1">
   <header><span class="kind">Interactive</span><h2>Flip the bits</h2></header>
@@ -571,14 +540,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     </div>
     <iframe class="frame" title="Quantization, step by step: one number in 16 bits" data-src="../artifacts/quantization.html?embed=bits"></iframe>
   </div>
-  <div class="notes">
-    <p>On this panel you can click any bit to flip it, and the page decodes the number again, field by field.</p>
-    <p>First press Play: walk the exponent. The number starts at 1.5 and doubles, one exponent step at a time, then halves. Watch the chart under it: the orange dot is the space to the next number the format can store. It moves with the number, always ten powers of 2 below it. Large numbers are stored coarsely, small numbers finely.</p>
-    <p>Start from 1.5: its exponent bits are 0 1 1 1 1, which is 15. Click the last exponent bit, worth 1: the exponent becomes 0 1 1 1 0, which is 14, minus the bias 15 is minus 1. The number halves: 0.75. Click it again to go back. Now click the first exponent bit: all five bits are 1, one of the special cases, and the panel says NaN, not a number.</p>
-    <p>Now press the example 0.1. FP16 cannot store 0.1 exactly. The nearest number it can store is 0.0999755859375. Every stored number is rounded to the nearest value the format has. This is already a small rounding error, before any quantization.</p>
-    <p>Look at the line under the value: it says what the next number above it is. Nothing in between can be stored. Then switch the format to BF16 and compare: it has 8 exponent bits, so its bias is 127, and only 7 mantissa bits.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="formats" data-step="1">
   <header><h2>Exponent bits give range; mantissa bits give precision</h2></header>
@@ -605,14 +567,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       </ul>
     </div>
   </div>
-  <div class="notes">
-    <p>More bits give two different things.</p>
-    <p>The exponent bits give the range: how large, or how small, a number can be. FP32 has 8 exponent bits. Its largest number is about 3.4 times 10 to the 38. FP16 has only 5 exponent bits. Its largest number is 65,504. Anything larger becomes infinity, and the computation breaks.</p>
-    <p>The mantissa bits give the precision: how close two stored numbers can be. Look at the last column: the next number the format can store after 1. FP32 has 23 mantissa bits, so after 1 comes 1.00000012. FP16 has 10 mantissa bits, so after 1 comes 1.00098. Nothing in between can be stored.</p>
-    <p>BF16 is a third 16-bit format. BF stands for brain floating point. It was introduced by Google Brain, a team at Google. BF16 keeps the 8 exponent bits of FP32, so it has the same range. It has only 7 mantissa bits, so it is less precise: after 1 comes 1.0078. It loses detail, but it avoids the overflow problems of FP16. That is why it is often used for training.</p>
-    <p>Our baseline model in Session 1 used 16 bits for every number. Now let's see what that means for memory.</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-step2"><h1>Step 2 · Memory</h1></div>
 
@@ -650,14 +605,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
       <p class="muted">The weights only. Running the model also needs memory for its intermediate values.</p>
     </div>
   </div>
-  <div class="notes">
-    <p>Now the memory. Our model has 1.5 billion parameters. Each parameter is one number. In Session 1, each number used 16 bits.</p>
-    <p>From here on we also call the parameters the model's weights, as everyone in quantization does. These are not the attention weights of Session 1, which the model computes anew for every input. These weights are the learned values themselves, fixed after training.</p>
-    <p>The board multiplies. 1.5 times 10 to the 9 parameters, times 16 bits per parameter. The parameters cancel, and we get 24 times 10 to the 9 bits. A byte is 8 bits, so we multiply by one byte per 8 bits. The bits cancel: 3 times 10 to the 9 bytes. That is 3 gigabytes.</p>
-    <p>The bars on the right repeat this for other formats. With 32 bits per number, the weights take 6 gigabytes. With 16 bits, 3. With 8-bit integers, called INT8, 1.5. With 4-bit integers, INT4, 0.75 gigabytes. Each halving of the bits halves the memory.</p>
-    <p>This is only the memory for the weights. Running the model also needs memory for the intermediate values it computes, and for the software. But the weights are usually the largest part, and they decide whether a model fits on a GPU at all.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="tryMem" data-step="2">
   <header><span class="kind">Try it · about 10 minutes</span><h2>Which models fit on a 16 GB GPU?</h2></header>
@@ -733,13 +681,7 @@ for size in [7, 32, 70]:
 </script>
     </div>
   </div>
-  <div class="notes">
-    <p>Now a short exercise. You compute the same thing as on the last screen, in code, for bigger models.</p>
-    <p>Complete the function weight_memory_gb. It takes the number of parameters, in billions, and the number of bits per parameter. It returns gigabytes: parameters times bits, divided by 8 to get bytes, divided by 10 to the 9 to get gigabytes.</p>
-    <p>The loop then checks three model sizes, 7, 32 and 70 billion parameters, in three formats, against the 16 gigabytes of the GPU in Colab.</p>
-    <p>Press Run to see the output, and Run the tests to check your code. The next screen shows the results as a chart.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="fits" data-step="2">
   <header><h2>When quantization decides whether a model fits</h2><p class="sub">Weight memory, against the 16 GB of a Colab T4</p></header>
@@ -774,14 +716,7 @@ for size in [7, 32, 70]:
       </ul>
     </div>
   </div>
-  <div class="notes">
-    <p>Here are the results of the exercise as a chart. The red dashed line is 16 gigabytes, the memory of the GPU in Colab.</p>
-    <p>A 7 billion parameter model takes 14 gigabytes in FP16. That fits, but leaves almost no room for anything else. In INT8 it takes 7 gigabytes, and in INT4, 3.5. Both leave plenty of room.</p>
-    <p>A 32 billion parameter model takes 64 gigabytes in FP16 and 32 in INT8. Both are far over the line. In INT4 it takes 16 gigabytes: exactly the whole GPU, with nothing left for running it. In practice, it does not fit.</p>
-    <p>A 70 billion parameter model does not fit in any of the three. Even INT4 needs 35 gigabytes, more than twice the GPU.</p>
-    <p>So the role of quantization changes with the size of the model. For a small model, it saves memory and maybe energy. Past some size, it is the only way to run the model on this hardware at all. And past a larger size, quantization alone is not enough.</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-step3"><h1>Step 3 · Absmax quantization</h1></div>
 
@@ -811,13 +746,7 @@ for size in [7, 32, 70]:
       </svg>
     </div>
   </div>
-  <div class="notes">
-    <p>Now quantization itself. A 16-bit float can be one of many thousands of values. Quantization maps each one to a small integer, which we call a code. An 8-bit integer, INT8, has 256 possible codes. A 4-bit integer, INT4, has only 16. Absmax, the method on the next screens, uses only the symmetric codes, from minus 127 to 127: 255 of them, or 15 at 4 bits.</p>
-    <p>We store the codes, and one extra number per group of values, the scale, to get approximately back to the original values.</p>
-    <p>The mapping is lossy. Look at the picture. Ten values on the top line map to six codes on the bottom line. Values that are close to each other can get the same code. After that, they cannot be told apart.</p>
-    <p>The question for the whole session is whether the model still behaves well enough for the task when its numbers are this coarse.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="absmax" data-step="3">
   <header><h2>Absmax quantization, worked out</h2><p class="sub">The largest absolute value α gets the largest code, 127; zero stays zero</p></header>
@@ -863,16 +792,7 @@ for size in [7, 32, 70]:
     </div>
     <p class="src">Example values from Grootendorst, “A visual guide to quantization,” 2024</p>
   </div>
-  <div class="notes">
-    <p>The simplest method is called absmax, short for absolute maximum. It is symmetric: the range goes from minus alpha to plus alpha, centered on zero.</p>
-    <p>Here are nine values. First we find alpha, the largest absolute value. That is 10.8. Alpha is not learned or estimated. We simply look through the numbers and take the largest one, ignoring the sign.</p>
-    <p>Then the scale. In INT8 the largest positive code is 127: one of the 8 bits stores the sign, which leaves 7 bits, and 2 to the 7, minus 1, is 127. The scale s is 127 divided by alpha: 127 divided by 10.8, which is about 11.76. So alpha, 10.8, will become exactly 127.</p>
-    <p>Now take one value, 3.08. To quantize it, we multiply by the scale: 3.08 times 11.76 is 36.22. Then we round to the nearest integer: 36. The code 36 is what we store.</p>
-    <p>To get a number back, we divide the code by the same scale: 36 divided by 11.76 is about 3.06. This is called dequantization. The difference, 3.08 minus 3.06, is 0.02. That is the quantization error for this value.</p>
-    <p>Now the value 3.02. 3.02 times 11.76 is 35.52. It also rounds to 36. So 3.08 and 3.02 now have the same code. After quantization, there is no way to tell them apart.</p>
-    <p>That is all of absmax: compute one scale, multiply, round. Dequantize by dividing. All the difficult parts of quantization are about choosing the range well and keeping the error small.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen fill" id="round-i" data-step="3">
   <header><span class="kind">Interactive</span><h2>Fewer bits, fewer codes</h2></header>
@@ -882,13 +802,7 @@ for size in [7, 32, 70]:
     </div>
     <iframe class="frame" title="Quantization, step by step: absmax" data-src="../artifacts/quantization.html?embed=round"></iframe>
   </div>
-  <div class="notes">
-    <p>Here are the same nine values on a number line. Each value is joined to the code it gets. With 8 bits there are 255 codes, and the lines are almost vertical: every value lands close to a code. Only 3.08 and 3.02 share one. That shared code is red.</p>
-    <p>Click a row of the table to see its arithmetic: the scale, the multiplication, the rounding, the division back, and the error.</p>
-    <p>Now press Play. The lines move from their 8-bit codes to their 4-bit codes, then 3, then 2. Or press the bit widths one by one. At 4 bits there are 15 codes left. The lines lean more, and more values share a code. Press 3, then 2. With 2 bits there are only three codes: minus one, zero and one. Most values end up far from where they started. Watch the mean absolute error under the arithmetic grow.</p>
-    <p>This is why 8 bits is usually mild, while 4 bits and below need more careful methods.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="tryAbs" data-step="3">
   <header><span class="kind">Try it · about 15 minutes for both exercises</span><h2>Absmax from scratch</h2></header>
@@ -1060,12 +974,7 @@ for bits in [8, 4, 3, 2]:
 </script>
     </div>
   </div>
-  <div class="notes">
-    <p>Now you implement absmax yourself, with NumPy, in the browser.</p>
-    <p>Exercise 2: complete the two functions. The largest code is 2 to the power bits minus 1, minus 1. That is 127 for 8 bits. Alpha is the largest absolute value. The scale is the largest code divided by alpha. To quantize, multiply by the scale and round. To dequantize, divide by the scale. The output should match the board: 3.08 becomes 36, and so does 3.02.</p>
-    <p>Exercise 3: the same values with 8, 4, 3 and 2 bits. For each, count how many different codes are used, and compute the mean and the largest error. The tests check that the error grows as the bits go down.</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-step4"><h1>Step 4 · Choosing the range</h1></div>
 
@@ -1115,15 +1024,7 @@ for bits in [8, 4, 3, 2]:
       <p class="muted">Careful: here s is the step between two codes (a value per code), so a value is <i>divided</i> by s. In absmax, s was codes per unit (127 ÷ α), so a value was <i>multiplied</i> by it.</p>
     </div>
   </div>
-  <div class="notes">
-    <p>Absmax is symmetric: the range goes from minus alpha to plus alpha. That suits values that are spread around zero. Most weight matrices are like that.</p>
-    <p>Some values are one-sided. For example, a common step inside neural networks, called ReLU, replaces every negative value with zero. Its outputs are never negative. With a symmetric range, half the codes would be kept for negative values that never occur.</p>
-    <p>Asymmetric quantization maps the actual smallest value, beta, to code 0, and the largest value, alpha, to the last code. With 8 bits, that is 255. Because zero is no longer in the middle, we need one more number: the zero point, z. It is the code that stands for 0.0.</p>
-    <p>The board works through an example: values from minus 1 to 3. The scale is the width of the range, 3 minus minus 1, which is 4, divided by 255 steps. That is about 0.0157. The zero point is the code for 0: 0 minus minus 1, divided by 0.0157, which is 63.69. Rounded, 64. So 0.0 is stored as code 64.</p>
-    <p>Careful: this scale is the other way round from absmax's. Here it is the step between two codes, 4 divided by 255. In absmax it was codes per unit, 127 divided by alpha. So here we divide by the scale, where absmax multiplied. To quantize a value, divide it by the scale and add the zero point. 3 divided by 0.0157 is 191.08. Plus 64 is 255.08, which rounds to 255, the last code. Minus 1 divided by 0.0157 is minus 63.69. Plus 64 is 0.31, which rounds to code 0.</p>
-    <p>The table on the right compares the two methods. Symmetric is simpler, and zero stays exactly zero. Asymmetric uses the codes better for one-sided values, at the cost of one more stored number.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="outliers" data-step="4">
   <header><h2>One outlier stretches the range for everyone</h2><p class="sub">24 ordinary values between −2 and 2, and one value of 256</p></header>
@@ -1157,14 +1058,7 @@ for bits in [8, 4, 3, 2]:
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
   </div>
-  <div class="notes">
-    <p>Absmax has one weak point. The largest absolute value sets the range for every value.</p>
-    <p>Take 24 ordinary values between minus 2 and 2, and one outlier, 256. Absmax sets alpha to 256. The scale is 127 divided by 256, about 0.496.</p>
-    <p>Now quantize ordinary values. 1.98 times 0.496 is 0.98, which rounds to 1. 0.5 times 0.496 is 0.25, which rounds to 0. Minus 1.36 times 0.496 is minus 0.67, which rounds to minus 1. All 24 ordinary values get one of only three codes: minus 1, 0 or 1. The outlier is stored well, but the ordinary values lose almost all their detail.</p>
-    <p>The fix is called clipping. We choose a smaller range, here minus 2.5 to 2.5, and replace anything outside it by the edge of the range. Now the scale is 127 divided by 2.5, which is 50.8. 0.5 times 50.8 is 25.4, which rounds to 25. The ordinary values now use many codes. The outlier is stored as 2.5, an error of 253.5.</p>
-    <p>This happens in real neural networks. Large language models have a few values that are much larger than the rest, so practical methods have to deal with them.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen fill" id="outlier-i" data-step="4">
   <header><span class="kind">Interactive</span><h2>Clip the range</h2></header>
@@ -1176,13 +1070,7 @@ for bits in [8, 4, 3, 2]:
     </div>
     <iframe class="frame" title="Quantization, step by step: outliers, clipping and the zero point" data-src="../artifacts/quantization.html?embed=outlier,asym"></iframe>
   </div>
-  <div class="notes">
-    <p>This panel zooms in on the 24 ordinary values. The orange vertical ticks are the codes. With the outlier and no clipping, only three ticks fall in this window. Each value, the filled dot, is joined to what is stored, the open dot.</p>
-    <p>Press Play: shrink the range. The clipping range goes from 256 down to 2.5, and the codes crowd in around the ordinary values. Or move the clipping slider to the left yourself. The ticks move closer together, and the stored values move closer to the originals. Watch two numbers under the picture: the error of the ordinary values goes down, and the error of the outlier goes up.</p>
-    <p>Untick the outlier. Without it, absmax alone gives the ordinary values many codes.</p>
-    <p>The second tab, Zero point, shows nine one-sided values, from 0 to 2.8, at 4 bits: the idea of the board two screens back, with other values. Symmetric codes in the top row: the negative codes are never used. Asymmetric codes in the bottom row: all of them can be used. Move the slider to shift the values, and watch the zero point change.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="calib" data-step="4">
   <header><h2>Choosing the range is called calibration</h2></header>
@@ -1212,14 +1100,7 @@ for bits in [8, 4, 3, 2]:
       </table>
     </div>
   </div>
-  <div class="notes">
-    <p>Clipping is a deliberate trade. We store the outlier badly so that the many ordinary values are stored well. Choosing the range is called calibration. It is often done on a small sample of real inputs.</p>
-    <p>The table on the left lists three common rules. Percentile: keep all values except the rarest extremes, for example except the top 0.1 percent. Mean squared error: choose the range that makes the average squared error smallest. KL divergence: choose the range that keeps the shape of the distribution of values closest to the original.</p>
-    <p>There is one more distinction: weights and activations. Weights are the model's parameters. After training they are fixed. They do not depend on the input. So we can quantize them once, carefully, and save the result.</p>
-    <p>Activations are the intermediate values the model computes while it processes an input. Change the input, and the activations change. So their range is not known in advance.</p>
-    <p>Quantization applied after training is called post-training quantization, or PTQ. For activations there are two strategies, in the table on the right. Dynamic quantization computes the scale and zero point during each run, from the values it actually sees. It adapts to every input, but it costs extra work. Static quantization fixes them in advance, from calibration data. It is faster, but it only works well if the calibration data looks like the real inputs.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="tryRange" data-step="4">
   <header><span class="kind">Try it · about 20 minutes for both exercises</span><h2>The zero point and clipping</h2></header>
@@ -1401,13 +1282,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
 </script>
     </div>
   </div>
-  <div class="notes">
-    <p>Two more exercises. They use your functions from Exercise 2, so run that cell first.</p>
-    <p>Exercise 4 is asymmetric quantization. The scale is the width of the range divided by the number of steps. To quantize, divide by the scale and add the zero point. To dequantize, subtract the zero point and multiply by the scale. One of the tests checks the example from the board: minus 1 to 3 at 8 bits gives the zero point 64.</p>
-    <p>Exercise 5 is clipping. Complete one line: clip every value to the range from minus clip to clip. The loop then prints, for each clipping range, how many codes the ordinary values use, their mean error, and how the outlier is stored.</p>
-    <p>When you are done, think about one question: was clipping worth it? Answer twice. Once if the ordinary values matter most. Once if the outlier matters as much as every other value.</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-step5"><h1>Step 5 · Methods used in practice</h1></div>
 
@@ -1453,15 +1328,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
       <p class="src">Frantar et al., “GPTQ: Accurate post-training quantization for generative pre-trained transformers,” ICLR 2023</p>
     </div>
   </div>
-  <div class="notes">
-    <p>Absmax rounds every weight on its own. With 8 bits that is usually fine. With 4 bits the errors are large, and they add up. GPTQ is a method that makes 4 bits work much better. Today's notebook loads a model quantized with GPTQ.</p>
-    <p>The idea is that what matters is the output. The board shows one output of a learned table, as in Session 1: the dot product of the input with two weights. It computes y equals w1 times x1 plus w2 times x2. The input is 2 and 1. The weights are 0.37 and 0.52. We can only store weights in steps of 0.25.</p>
-    <p>First the original output: 0.37 times 2 plus 0.52 times 1. That is 0.74 plus 0.52, which is 1.26.</p>
-    <p>Now round each weight on its own. 0.37 becomes 0.25, and 0.52 becomes 0.5. The output is 0.25 times 2 plus 0.5 times 1. That is 0.5 plus 0.5, which is 1.0. The error is 0.26.</p>
-    <p>Now the GPTQ way. Round the first weight: 0.37 becomes 0.25. The output loses 0.12 times 2, which is 0.24. Before rounding the second weight, we make up for that loss in it: we add 0.24 divided by its input, 1. 0.52 plus 0.24 is 0.76. Now round it: 0.75. The output is 0.25 times 2 plus 0.75 times 1. That is 0.5 plus 0.75, which is 1.25. The error is only 0.01.</p>
-    <p>A real learned table has thousands of weights and sees many different inputs. GPTQ computes the corrections from a small set of real inputs, called calibration data, so that the output stays close on average. It does this layer by layer. The result is a model with 4 bits per weight, without any retraining. We will not run the calibration ourselves today. We load a checkpoint, a saved copy of a model's weights, that the Qwen team already quantized with GPTQ.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen fill" id="gptq-i" data-step="5">
   <header><span class="kind">Interactive</span><h2>Watch GPTQ correct the next weight</h2></header>
@@ -1471,13 +1338,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
     </div>
     <iframe class="frame" title="Quantization, step by step: GPTQ" data-src="../artifacts/quantization.html?embed=gptq"></iframe>
   </div>
-  <div class="notes">
-    <p>The same idea on six weights. Each bar is a weight, the gray outline is its original value, and the gray lines are the steps of 0.25 we can store. On the right is the output y: the outline is the original output, 0.79, and the bar is the output now.</p>
-    <p>First choose "round each on its own" and press Play. Each weight jumps to the nearest step, one after another, and the output bar drifts away from the outline. At the end the error is 0.54.</p>
-    <p>Now choose GPTQ and press Play. Each time a weight is rounded, the output changes a little, and the next weight makes up for that change, divided by its own input, before it is rounded: watch the next blue bar grow or shrink. The output stays on the outline the whole way. Only the last weight has nobody to correct it, so a small error remains, 0.165.</p>
-    <p>The box under the chart writes out each step: the rounding, the change in the output, and the correction.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="gguf" data-step="5">
   <header><h2>GGUF: one scale per block of weights</h2><p class="sub">The file format of llama.cpp, for running models on laptops and CPUs</p></header>
@@ -1506,12 +1367,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
     </div>
     </div>
   </div>
-  <div class="notes">
-    <p>The second method you will meet often is GGUF. GGUF is the file format of llama.cpp, a program for running language models on ordinary computers: laptops, and machines without a large GPU. Many models are shared in this format.</p>
-    <p>The idea to remember is block-wise quantization. With absmax over a whole matrix, the largest weights set the range for every weight, as with the outlier. Small weights then round to 0. GGUF splits the weights into small blocks, and each block gets its own scale. Each block's range fits its own weights.</p>
-    <p>The cost is that every block stores its scale. The board works this out for the GGUF type called Q4_0. A block has 32 weights of 4 bits: 32 times 4 is 128 bits. The scale is a 16-bit number. 128 plus 16 is 144 bits. 144 divided by 32 weights is 4.5 bits per weight.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen fill" id="blocks-i" data-step="5">
   <header><span class="kind">Interactive</span><h2>One scale, or one per block</h2></header>
@@ -1521,12 +1377,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
     </div>
     <iframe class="frame" title="Quantization, step by step: one scale per block" data-src="../artifacts/quantization.html?embed=blocks"></iframe>
   </div>
-  <div class="notes">
-    <p>Here is the same idea on sixteen weights, stored with 4 bits. The gray outline is each weight. The blue bar is what is stored after rounding.</p>
-    <p>With one scale for all sixteen, the large weights (2.00, −1.50, 1.80) set the range. Six small weights round to 0. They are red.</p>
-    <p>Press 8 weights per block: two scales, but each half still holds large weights, so the six small weights still round to 0. Press 4: now the four tiny weights have a block and a scale of their own, the red bars disappear, and the average error goes down. But look at the last number: the bits per weight go up, because every extra scale costs 16 bits. Real formats use blocks of about 32 weights, as a balance between the two.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="qat" data-step="5">
   <header><h2>Quantization-aware training</h2><p class="sub">Train with the rounding in place, so the model learns to live with it</p></header>
@@ -1549,12 +1400,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
       </div>
     </div>
   </div>
-  <div class="notes">
-    <p>Everything so far was post-training quantization: the model is trained in full precision, and quantized afterwards. That is cheap: it takes minutes or hours.</p>
-    <p>Quantization-aware training, or QAT, puts the rounding into training. Look at the loop. The model keeps a full-precision copy of each weight, in 16 or 32 bits. In every training step, the weight is quantized and dequantized, so the forward pass uses the rounded value and sees the rounding error. The loss is computed, and the update goes to the full-precision weight. Over many steps, the model learns weights that still work after rounding.</p>
-    <p>QAT is usually more accurate at low precision. But it needs training, or at least more training of an already trained model, so it costs much more than PTQ. It is not something we can do in a Colab session.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="bitnet" data-step="5">
   <header><h2>BitNet: weights of −1, 0 or +1</h2><p class="sub">A dot product of inputs and weights, with ordinary weights and with ternary weights (three possible values); inputs (2, 5, 3)</p></header>
@@ -1589,14 +1435,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
       <p class="src">Ma et al., “The era of 1-bit LLMs: all large language models are in 1.58 bits,” 2024</p>
     </div>
   </div>
-  <div class="notes">
-    <p>BitNet is at the extreme end. Its weights can only be minus 1, 0 or plus 1. Three values need about 1.58 bits, because 2 to the power 1.58 is about 3. That is why the paper speaks of 1.58-bit models.</p>
-    <p>Recall the dot product from Session 1: multiply each input number by its own weight, and add the results. Every learned table computes its outputs this way. The board shows it for the inputs 2, 5 and 3.</p>
-    <p>With ordinary weights, 0.4, minus 0.1 and 0.9: 0.4 times 2 is 0.8. Minus 0.1 times 5 is minus 0.5. 0.9 times 3 is 2.7. The sum is 0.8 minus 0.5 plus 2.7, which is 3.0.</p>
-    <p>With BitNet weights, plus 1, minus 1 and 0: plus 1 times 2 is 2. Minus 1 times 5 is minus 5. 0 times 3 is 0. The sum is minus 3. Look at what happened: there was no real multiplication. Times plus 1 keeps the input. Times minus 1 flips its sign. Times 0 skips it. Only additions are left, and in hardware an addition costs much less energy than a multiplication.</p>
-    <p>Can such coarse weights work? One weight is very coarse. But a learned table has thousands of weights, and the sum of thousands of them can still take very many different values. BitNet models are trained this way from the start, like QAT. You cannot take an ordinary trained model and force its weights to minus 1, 0 and 1: it would break. This is a research direction. Today we run GPTQ.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="which" data-step="5">
   <header><h2>Which method, when</h2></header>
@@ -1616,14 +1455,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
       </table>
     </div>
   </div>
-  <div class="notes">
-    <p>Here is a map of the methods we saw, from cheapest to most expensive.</p>
-    <p>Absmax and the zero point are the basic building blocks. On their own, they work well at 8 bits.</p>
-    <p>Dynamic and static post-training quantization are two ways to handle activations: compute the range in every run, or fix it in advance from calibration data.</p>
-    <p>GPTQ makes 4 bits work on a GPU without retraining. GGUF formats are for running models on laptops and CPUs. QAT gives the best accuracy at low precision, if you can afford training. BitNet is a different kind of model, trained from scratch for ternary weights.</p>
-    <p>None of these is best in general. The choice depends on the hardware, the task, how much accuracy you can lose, and what you can afford to compute.</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-step6"><h1>Step 6 · Does it pay off?</h1></div>
 
@@ -1644,13 +1476,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
     </div>
     <p class="src">Shi &amp; Ding, “Systematic characterization of LLM quantization: a performance, energy, and quality perspective,” arXiv:2508.16712; Husom et al., “Sustainable LLM inference for edge AI,” ACM Transactions on Internet of Things 6(4), 2025, doi:10.1145/3767742</p>
   </div>
-  <div class="notes">
-    <p>What do measurements show? Here are two recent studies, on very different hardware.</p>
-    <p>The first, by Shi and Ding, from 2025, tested 11 quantization methods on models from 7 to 70 billion parameters, on large data-center GPUs. Energy efficiency improved by up to 30 percent. The waiting time for the slowest responses went down by up to 70 percent. But quality can break. On a code-generation benchmark, the pass rate of the 13 billion parameter model dropped by up to 92 percent. And they found that smaller models lose more quality than larger ones. Our model is small, so we should not assume that its accuracy stays the same.</p>
-    <p>The second, by Husom and colleagues, also from 2025, tested 28 quantized models on a Raspberry Pi, a very small computer. The 3- and 4-bit models used up to 79 percent less energy than the 16-bit ones. But fewer bits did not always mean less energy. For Qwen 2.5 with 1.5 billion parameters, the model family we use, every 3-bit version used more energy per token than the 4-bit versions.</p>
-    <p>Note the words "up to". These are the best cases. The savings depend on the model, the task, the method and the hardware. That is why we measure our own.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="t4" data-step="6">
   <header><h2>The hardware has to support the format</h2><p class="sub">Peak throughput of the NVIDIA T4, the GPU in Colab, from its datasheet</p></header>
@@ -1672,13 +1498,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
       </ul>
     </div>
   </div>
-  <div class="notes">
-    <p>Quantization saves memory. Can it also make the computation faster? That depends on the hardware.</p>
-    <p>Here are the peak numbers for the NVIDIA T4, the GPU you get in Colab, from NVIDIA's datasheet. In 32-bit floating point it does 8.1 trillion operations per second. In 16-bit, 65 trillion. In 8-bit integers, 130 trillion. In 4-bit integers, 260 trillion. The T4 has special circuits, called tensor cores, for these lower precisions.</p>
-    <p>These are peak numbers. A real run is slower: often the limit is how fast the weights can be read from memory, not how fast they can be multiplied. Smaller weights help with that too.</p>
-    <p>But the hardware and the software have to support the format. If they cannot compute with 4-bit numbers directly, the numbers are first unpacked to 16 bits, and that costs time and energy. Then the model is smaller, but not faster. So quantization results from one machine do not always transfer to another.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="freelunch" data-step="6">
   <header><span class="kind">Discussion · 10–15 minutes</span><h2>Is quantization a free lunch?</h2></header>
@@ -1693,12 +1513,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
     </ul>
     <p class="center muted">Discuss with your neighbor, then with the room.</p>
   </div>
-  <div class="notes">
-    <p>Before the notebook, a short discussion, about ten to fifteen minutes. The question is: when is quantization not worth it?</p>
-    <p>Here are some directions. The hardware or the software may not compute in the lower precision, so nothing gets faster. Too few bits may break tasks that need exact details, like code or arithmetic. A small model may already be close to its quality limit. The calibration data may be unlike the real inputs. And the quality check may be too weak to notice what broke.</p>
-    <p>For our own experiment, keep two of these in mind. Our model is small. And our scoring rule is simple: it only checks if the answer contains a reference as whole words.</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-turn"><h1>Your turn</h1></div>
 
@@ -1723,13 +1538,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
       </ul>
     </div>
   </div>
-  <div class="notes">
-    <p>Here is what the notebook runs today.</p>
-    <p>First it tries a checkpoint that the Qwen team published: the same model, already quantized to 4 bits with GPTQ. In the leaderboard it is called gptq-int4.</p>
-    <p>GPTQ needs extra software, and on Colab it does not always install cleanly. If it fails, the notebook falls back to a second path: it loads the ordinary 16-bit model and quantizes it to 8 bits while loading, with a library called bitsandbytes. That row is called bnb-int8-fallback. Needing a fallback is a normal part of working with quantized models.</p>
-    <p>Is it the same model? The layers, the way text is cut into tokens, and the training are the same. Only the stored numbers change. But the software that computes with those numbers also changes. That is why every row records its configuration. GPTQ in 4 bits and bitsandbytes in 8 bits are two different configurations. When you compare with your neighbor, check first which one each of you got.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="act-nb2" data-step="0">
   <header><span class="kind">Activity · 90–125 minutes, individual</span><h2>Notebook 02a: Quantized measurement</h2></header>
@@ -1753,14 +1562,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
       </div>
     </div></div>
   </div>
-  <div class="notes">
-    <p>Now the main notebook. It repeats the Session 1 measurement with the quantized model. Nothing else changes.</p>
-    <p>First, upload the three CSV files you saved in Session 1: the quiz leaderboard from Notebook 01a and the two translation files from Notebook 01e, so today's rows are added next to your baseline. If you do not have them, the notebook starts new files, but then you have no baseline to compare with.</p>
-    <p>Then the notebook loads the quantized model, runs the same eight questions with CodeCarbon, scores them with the same rule, and adds a row to the leaderboard. A chart compares it with your baseline.</p>
-    <p>The second part translates our Galician passage again, with the quantized model, and grades the translation with the four methods from Session 1.</p>
-    <p>Choose the T4 GPU in Colab. After the install cell, restart the session once: the notebook explains why. And download your CSV files before you close Colab, because you need them in Session 3.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="act-hw" data-step="0">
   <header><span class="kind">Activity · about 40 minutes, if time allows</span><h2>Notebook 02c: Where does quantization pay off?</h2></header>
@@ -1777,11 +1579,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
       </div>
     </div></div>
   </div>
-  <div class="notes">
-    <p>If you finish Notebook 02a early, open Notebook 02c. It runs in its own Colab runtime, so it installs and loads the quantized model again, which takes a few minutes. If Colab will not give it a GPU while Notebook 02a still holds one, download 02a's CSV files and close its runtime first.</p>
-    <p>Part A measures the peak GPU memory for one question, with the quantized model and with the 16-bit model. Part B repeats this while the number of questions processed at once grows from 1 to 128. Part C tries to load a 7 billion parameter model on the same GPU, in 16 bits and in 4 bits. It is the chart from the memory screen, measured for real.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen" id="shareout" data-step="0">
   <header><h2>Share-out: what changed?</h2></header>
@@ -1804,13 +1602,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
       </ul>
     </div>
   </div>
-  <div class="notes">
-    <p>Time to compare. Look at your two rows: the baseline from Session 1 and today's.</p>
-    <p>First check which configuration loaded, GPTQ in 4 bits or bitsandbytes in 8 bits. Then compare accuracy, energy and carbon, and time. Peak memory is in today's row only: Session 1 did not record it. Do not reduce it to one sentence. Quantization can save memory and not energy, or energy and not accuracy.</p>
-    <p>For the translation, the scores are only a rough check. Read the two translations. Did anything change that a reader would notice? For example, does the aunt still come out as "my aunt"?</p>
-    <p>Then compare with your neighbor. If you got the same configuration, did you get the same numbers? Measurements vary from run to run. If there is time, run the quiz twice and see how much your own numbers move.</p>
-  </div>
-</section>
+  </section>
 
 <div class="part" id="part-next"><h1>What comes next</h1></div>
 
@@ -1838,12 +1630,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
       </ul>
     </div>
   </div>
-  <div class="notes">
-    <p>To close, what we did today.</p>
-    <p>A number is stored as bits, and fewer bits mean less memory. Quantization maps numbers to a few integer codes: compute a scale, multiply, round, store the codes. The rounding error is the price. How large it is depends on the range: outliers stretch it, clipping and block scales fix it, and the zero point handles one-sided values. And whether quantization saves energy without losing quality depends on the model, the task and the hardware. So we measure.</p>
-    <p>In Session 3 we change something else. We go back to the 16-bit model, and we change what it reads. Before each question, a retriever finds the relevant documents, and the model reads only those. Less text to process means less computation for each question. Bring your leaderboard file.</p>
-  </div>
-</section>
+  </section>
 
 <section class="screen titlescreen" id="thanks" data-step="0">
   <div class="cols" style="align-items:center;width:100%">
@@ -1854,10 +1641,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
       <a href="https://catedrainditexalgoritmosverdes.com/" class="mono">catedrainditexalgoritmosverdes.com</a>
     </div>
   </div>
-  <div class="notes">
-    <p>Thank you. See you in Session 3.</p>
-  </div>
-</section>
+  </section>
 
 </main>
 
