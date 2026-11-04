@@ -304,7 +304,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
 <body>
 
 <div class="top">
-  <div class="title"><b>Fundamentals of NLP</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña · updated <time datetime="2026-11-04T10:11Z">4 Nov 2026, 10:11 UTC</time></span></div>
+  <div class="title"><b>Fundamentals of NLP</b><span class="muted" style="font-size:0.85rem">Green AI, Session 1 · Universidade da Coruña · updated <time datetime="2026-11-04T11:33Z">4 Nov 2026, 11:33 UTC</time></span></div>
   <div class="road" id="topRoad" aria-label="The steps"></div>
   <div class="actions">
     <details class="toc"><summary>Contents</summary><nav id="tocNav"></nav></details>
@@ -2864,6 +2864,36 @@ print("they match" if count == expected else "they do not match: check the loop 
 
 <div class="part" id="part-step6"><h1>Step 6 · Transformers</h1></div>
 
+<section class="screen" id="seen" data-step="6">
+  <header><span class="kind">Transformers</span><h2>You have already seen a transformer</h2></header>
+  <div class="body">
+    <div class="flow">
+      <div class="box">tokens</div><div class="box">a position vector for each token</div><div class="box">self-attention</div><div class="box">several heads</div>
+      <div class="box">cross-attention</div><div class="box">feed-forward</div><div class="box">layers, one after the other</div>
+    </div>
+    <div class="flow"><span class="arr">↓</span></div>
+    <div class="flow"><div class="box g"><b>a transformer</b>: these parts, put together</div><span class="arr">=</span><div class="box o"><b>opus-mt-gl-en</b>, whose grids you read</div></div>
+    <ul class="points">
+      <li>All of these are on the attention page, sections 6 and 7</li>
+    </ul>
+  </div>
+</section>
+
+<section class="screen" id="nochain" data-step="6">
+  <header><span class="kind">Transformers</span><h2>What was new in 2017: no chain</h2></header>
+  <div class="body cols">
+    <div class="col"><svg viewBox="0 0 620 300" style="width:100%;max-width:620px" role="img" aria-label="Above, five words in a chain, five steps. Below, the same words all linked to each other, one step."><defs><marker id="ncA" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" style="fill:var(--muted)"/></marker></defs><text x="0" y="24" font-size="14" style="fill:var(--muted)">Before: a chain, each vector waits for the one before it</text><rect x="30" y="44" width="86" height="38" rx="7" style="fill:var(--blue-soft);stroke:var(--blue)"/><text x="73" y="69" text-anchor="middle" font-size="15" style="fill:var(--fg)">unha</text><text x="73" y="102" text-anchor="middle" font-size="13" style="fill:var(--muted)">step 1</text><rect x="148" y="44" width="86" height="38" rx="7" style="fill:var(--blue-soft);stroke:var(--blue)"/><text x="191" y="69" text-anchor="middle" font-size="15" style="fill:var(--fg)">tía</text><text x="191" y="102" text-anchor="middle" font-size="13" style="fill:var(--muted)">step 2</text><line x1="117" y1="63" x2="143" y2="63" style="stroke:var(--muted)" stroke-width="1.6" marker-end="url(#ncA)"/><rect x="266" y="44" width="86" height="38" rx="7" style="fill:var(--blue-soft);stroke:var(--blue)"/><text x="309" y="69" text-anchor="middle" font-size="15" style="fill:var(--fg)">miña</text><text x="309" y="102" text-anchor="middle" font-size="13" style="fill:var(--muted)">step 3</text><line x1="235" y1="63" x2="261" y2="63" style="stroke:var(--muted)" stroke-width="1.6" marker-end="url(#ncA)"/><rect x="384" y="44" width="86" height="38" rx="7" style="fill:var(--blue-soft);stroke:var(--blue)"/><text x="427" y="69" text-anchor="middle" font-size="15" style="fill:var(--fg)">que</text><text x="427" y="102" text-anchor="middle" font-size="13" style="fill:var(--muted)">step 4</text><line x1="353" y1="63" x2="379" y2="63" style="stroke:var(--muted)" stroke-width="1.6" marker-end="url(#ncA)"/><rect x="502" y="44" width="86" height="38" rx="7" style="fill:var(--blue-soft);stroke:var(--blue)"/><text x="545" y="69" text-anchor="middle" font-size="15" style="fill:var(--fg)">todo</text><text x="545" y="102" text-anchor="middle" font-size="13" style="fill:var(--muted)">step 5</text><line x1="471" y1="63" x2="497" y2="63" style="stroke:var(--muted)" stroke-width="1.6" marker-end="url(#ncA)"/><text x="0" y="146" font-size="14" style="fill:var(--muted)">A transformer: no chain, every word looks at every word</text><path d="M73 232 Q132.0 185.5 191 232" fill="none" style="stroke:var(--orange)" stroke-width="1.5" opacity="0.75"/><path d="M73 232 Q191.0 169.0 309 232" fill="none" style="stroke:var(--orange)" stroke-width="1.5" opacity="0.75"/><path d="M73 232 Q250.0 152.5 427 232" fill="none" style="stroke:var(--orange)" stroke-width="1.5" opacity="0.75"/><path d="M73 232 Q309.0 136.0 545 232" fill="none" style="stroke:var(--orange)" stroke-width="1.5" opacity="0.75"/><path d="M191 232 Q250.0 185.5 309 232" fill="none" style="stroke:var(--orange)" stroke-width="1.5" opacity="0.75"/><path d="M191 232 Q309.0 169.0 427 232" fill="none" style="stroke:var(--orange)" stroke-width="1.5" opacity="0.75"/><path d="M191 232 Q368.0 152.5 545 232" fill="none" style="stroke:var(--orange)" stroke-width="1.5" opacity="0.75"/><path d="M309 232 Q368.0 185.5 427 232" fill="none" style="stroke:var(--orange)" stroke-width="1.5" opacity="0.75"/><path d="M309 232 Q427.0 169.0 545 232" fill="none" style="stroke:var(--orange)" stroke-width="1.5" opacity="0.75"/><path d="M427 232 Q486.0 185.5 545 232" fill="none" style="stroke:var(--orange)" stroke-width="1.5" opacity="0.75"/><rect x="30" y="232" width="86" height="38" rx="7" style="fill:var(--orange-soft);stroke:var(--orange)"/><text x="73" y="257" text-anchor="middle" font-size="15" style="fill:var(--fg)">unha</text><rect x="148" y="232" width="86" height="38" rx="7" style="fill:var(--orange-soft);stroke:var(--orange)"/><text x="191" y="257" text-anchor="middle" font-size="15" style="fill:var(--fg)">tía</text><rect x="266" y="232" width="86" height="38" rx="7" style="fill:var(--orange-soft);stroke:var(--orange)"/><text x="309" y="257" text-anchor="middle" font-size="15" style="fill:var(--fg)">miña</text><rect x="384" y="232" width="86" height="38" rx="7" style="fill:var(--orange-soft);stroke:var(--orange)"/><text x="427" y="257" text-anchor="middle" font-size="15" style="fill:var(--fg)">que</text><rect x="502" y="232" width="86" height="38" rx="7" style="fill:var(--orange-soft);stroke:var(--orange)"/><text x="545" y="257" text-anchor="middle" font-size="15" style="fill:var(--fg)">todo</text><text x="309" y="292" text-anchor="middle" font-size="13" style="fill:var(--muted)">one step for all the words</text></svg></div>
+    <div class="col">
+      <div class="flow" style="flex-direction:column;align-items:stretch"><div class="box">no waiting: all the words computed at once</div><span class="arr" style="text-align:center">↓</span><div class="box">training runs in parallel, on GPUs</div><span class="arr" style="text-align:center">↓</span><div class="box g">much more data, much larger models</div></div>
+      <ul class="points" style="margin-top:14px">
+        <li>Attention dates from 2015; the 2017 step was to keep attention and drop the chain</li>
+        <li>This holds for reading and for training; writing is still one word at a time (later in this step)</li>
+      </ul>
+      <p class="src">Source: Vaswani et al., NeurIPS 2017 (arXiv:1706.03762)</p>
+    </div>
+  </div>
+</section>
+
 <section class="screen" id="stack" data-step="6">
   <header><span class="kind">Transformers</span><h2>Inside a transformer: stacked blocks</h2></header>
   <div class="body cols">
@@ -2871,7 +2901,6 @@ print("they match" if count == expected else "they do not match: check the loop 
       <ul class="points">
         <li>The same kind of block (attention + feed-forward), repeated many times</li>
         <li>This picture is the classic translation shape: <b>encoders</b> on the left read the source sentence, <b>decoders</b> on the right write the output. The real model of the attention page has 6 blocks on each side: its 6 layers</li>
-        <li>GPT-3 and most general-purpose LLMs use only the decoder side: 96 blocks deep, with no separate encoder</li>
       </ul>
     </div>
     <div class="col"><div class="fig"><img src="img/encoder-decoder-stack.png" alt="A stack of encoders feeding a stack of decoders"><span class="cap">Credit: jalammar.github.io/illustrated-transformer</span></div></div>
@@ -2889,6 +2918,49 @@ print("they match" if count == expected else "they do not match: check the loop 
       </ul>
     </div>
     <div class="col"><div class="fig"><img src="img/encoder-block.png" alt="One encoder block: self-attention, then feed-forward"><span class="cap">Credit: jalammar.github.io/illustrated-transformer</span></div></div>
+  </div>
+</section>
+
+<section class="screen" id="shapes" data-step="6">
+  <header><span class="kind">Transformers</span><h2>Three shapes, three training tasks</h2></header>
+  <div class="body">
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px">
+      <div class="col" style="display:grid;gap:10px;justify-items:center;align-content:start;text-align:center">
+        <div class="flow" style="min-height:64px"><div class="box">encoder</div><span class="arr">→</span><div class="box o">decoder</div></div>
+        <div><b>opus-mt-gl-en</b></div>
+        <table class="plain"><tr><th>trained to</th><td>translate</td></tr><tr><th>trained on</th><td>pairs of translated sentences</td></tr></table>
+        <p class="muted" style="margin:0">the original shape of 2017</p>
+      </div>
+      <div class="col" style="display:grid;gap:10px;justify-items:center;align-content:start;text-align:center">
+        <div class="flow" style="min-height:64px"><div class="box">encoder</div></div>
+        <div><b>BERT</b></div>
+        <table class="plain"><tr><th>trained to</th><td>fill in hidden words</td></tr><tr><th>trained on</th><td>raw text</td></tr></table>
+        <p class="muted" style="margin:0">section 8 of the attention page; reads text, does not write it; BERTScore in notebook 01e</p>
+      </div>
+      <div class="col" style="display:grid;gap:10px;justify-items:center;align-content:start;text-align:center">
+        <div class="flow" style="min-height:64px"><div class="box o">decoder</div></div>
+        <div><b>GPT-3, Qwen2.5</b></div>
+        <table class="plain"><tr><th>trained to</th><td>write the next word</td></tr><tr><th>trained on</th><td>raw text</td></tr></table>
+        <p class="muted" style="margin:0">GPT-3: 96 blocks; Qwen2.5-1.5B, the model of your notebook: 28 blocks</p>
+      </div>
+    </div>
+    <ul class="points">
+      <li>Raw text needs no one to prepare a gold output: the hidden word and the next word are already in the text. That is why these two models can train on so much more text</li>
+    </ul>
+  </div>
+</section>
+
+<section class="screen" id="lookahead" data-step="6">
+  <header><span class="kind">Transformers</span><h2>What a decoder may look at</h2></header>
+  <div class="body cols">
+    <div class="col"><p class="label">Encoder (BERT): every token looks at every token</p><svg viewBox="0 0 364 310" style="width:100%;max-width:364px" role="img" aria-label="a full grid: every row reaches every column"><text x="99.0" y="56" transform="rotate(-40 99.0 56)" font-size="14" style="fill:var(--fg)">my</text><text x="147.0" y="56" transform="rotate(-40 147.0 56)" font-size="14" style="fill:var(--fg)">aunt</text><text x="195.0" y="56" transform="rotate(-40 195.0 56)" font-size="14" style="fill:var(--fg)">solved</text><text x="243.0" y="56" transform="rotate(-40 243.0 56)" font-size="14" style="fill:var(--fg)">every</text><text x="291.0" y="56" transform="rotate(-40 291.0 56)" font-size="14" style="fill:var(--fg)">problem</text><text x="69" y="93.0" text-anchor="end" font-size="14" font-weight="600" style="fill:var(--fg)">my</text><rect x="80" y="66" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="128" y="66" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="176" y="66" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="224" y="66" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="272" y="66" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><text x="69" y="141.0" text-anchor="end" font-size="14" font-weight="600" style="fill:var(--fg)">aunt</text><rect x="80" y="114" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="128" y="114" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="176" y="114" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="224" y="114" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="272" y="114" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><text x="69" y="189.0" text-anchor="end" font-size="14" font-weight="600" style="fill:var(--fg)">solved</text><rect x="80" y="162" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="128" y="162" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="176" y="162" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="224" y="162" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="272" y="162" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><text x="69" y="237.0" text-anchor="end" font-size="14" font-weight="600" style="fill:var(--fg)">every</text><rect x="80" y="210" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="128" y="210" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="176" y="210" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="224" y="210" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="272" y="210" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><text x="69" y="285.0" text-anchor="end" font-size="14" font-weight="600" style="fill:var(--fg)">problem</text><rect x="80" y="258" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="128" y="258" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="176" y="258" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="224" y="258" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="272" y="258" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/></svg></div>
+    <div class="col"><p class="label">Decoder (GPT): only at itself and the tokens before it</p><svg viewBox="0 0 364 310" style="width:100%;max-width:364px" role="img" aria-label="a triangle: each row reaches only itself and the columns to its left"><text x="99.0" y="56" transform="rotate(-40 99.0 56)" font-size="14" style="fill:var(--fg)">my</text><text x="147.0" y="56" transform="rotate(-40 147.0 56)" font-size="14" style="fill:var(--fg)">aunt</text><text x="195.0" y="56" transform="rotate(-40 195.0 56)" font-size="14" style="fill:var(--fg)">solved</text><text x="243.0" y="56" transform="rotate(-40 243.0 56)" font-size="14" style="fill:var(--fg)">every</text><text x="291.0" y="56" transform="rotate(-40 291.0 56)" font-size="14" style="fill:var(--fg)">problem</text><text x="69" y="93.0" text-anchor="end" font-size="14" font-weight="600" style="fill:var(--fg)">my</text><rect x="80" y="66" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="128" y="66" width="44" height="44" rx="4" style="fill:none;stroke:var(--grid)"/><text x="150.0" y="93.0" text-anchor="middle" font-size="15" style="fill:var(--muted)">×</text><rect x="176" y="66" width="44" height="44" rx="4" style="fill:none;stroke:var(--grid)"/><text x="198.0" y="93.0" text-anchor="middle" font-size="15" style="fill:var(--muted)">×</text><rect x="224" y="66" width="44" height="44" rx="4" style="fill:none;stroke:var(--grid)"/><text x="246.0" y="93.0" text-anchor="middle" font-size="15" style="fill:var(--muted)">×</text><rect x="272" y="66" width="44" height="44" rx="4" style="fill:none;stroke:var(--grid)"/><text x="294.0" y="93.0" text-anchor="middle" font-size="15" style="fill:var(--muted)">×</text><text x="69" y="141.0" text-anchor="end" font-size="14" font-weight="600" style="fill:var(--fg)">aunt</text><rect x="80" y="114" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="128" y="114" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="176" y="114" width="44" height="44" rx="4" style="fill:none;stroke:var(--grid)"/><text x="198.0" y="141.0" text-anchor="middle" font-size="15" style="fill:var(--muted)">×</text><rect x="224" y="114" width="44" height="44" rx="4" style="fill:none;stroke:var(--grid)"/><text x="246.0" y="141.0" text-anchor="middle" font-size="15" style="fill:var(--muted)">×</text><rect x="272" y="114" width="44" height="44" rx="4" style="fill:none;stroke:var(--grid)"/><text x="294.0" y="141.0" text-anchor="middle" font-size="15" style="fill:var(--muted)">×</text><text x="69" y="189.0" text-anchor="end" font-size="14" font-weight="600" style="fill:var(--fg)">solved</text><rect x="80" y="162" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="128" y="162" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="176" y="162" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="224" y="162" width="44" height="44" rx="4" style="fill:none;stroke:var(--grid)"/><text x="246.0" y="189.0" text-anchor="middle" font-size="15" style="fill:var(--muted)">×</text><rect x="272" y="162" width="44" height="44" rx="4" style="fill:none;stroke:var(--grid)"/><text x="294.0" y="189.0" text-anchor="middle" font-size="15" style="fill:var(--muted)">×</text><text x="69" y="237.0" text-anchor="end" font-size="14" font-weight="600" style="fill:var(--fg)">every</text><rect x="80" y="210" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="128" y="210" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="176" y="210" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="224" y="210" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="272" y="210" width="44" height="44" rx="4" style="fill:none;stroke:var(--grid)"/><text x="294.0" y="237.0" text-anchor="middle" font-size="15" style="fill:var(--muted)">×</text><text x="69" y="285.0" text-anchor="end" font-size="14" font-weight="600" style="fill:var(--fg)">problem</text><rect x="80" y="258" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="128" y="258" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="176" y="258" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="224" y="258" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/><rect x="272" y="258" width="44" height="44" rx="4" style="fill:var(--blue-soft);stroke:var(--blue)"/></svg></div>
+  </div>
+  <div class="body">
+    <ul class="points">
+      <li>Rows look, columns are looked at, as in the grids you read. ×: the weight is forced to 0</li>
+      <li>The decoder's job is to write the next word: if it could see that word, there would be nothing to learn</li>
+    </ul>
   </div>
 </section>
 
@@ -3071,6 +3143,55 @@ print("they match" if count == expected else "they do not match: check the loop 
         <li>Model size and the length of the text read and written are <b>levers</b> with a real, computable energy cost</li>
       </ul>
     </div>
+  </div>
+</section>
+
+<div class="part" id="part-modern"><h1>From transformers to today's LLMs</h1></div>
+
+<section class="screen" id="modern" data-step="0">
+  <header><span class="kind">Today's LLMs</span><h2>Today's LLMs are still transformers: what changed?</h2></header>
+  <div class="body">
+    <div class="flow"><div class="box g">the architecture: a decoder-only transformer</div></div>
+    <div class="flow"><span class="arr">+</span></div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px" class="costs">
+      <div class="box"><b>Scale</b><span>BERT-base (2018): 110 million parameters<br>GPT-3 (2020): 175 billion</span></div>
+      <div class="box"><b>Training stages</b><span>after next-word training, more training to follow instructions</span></div>
+      <div class="box"><b>Refinements</b><span>for example, using only part of the model for each token</span></div>
+    </div>
+    <p class="src">Closed models do not publish their architecture; this holds for open ones such as Qwen2.5 and Mixtral.</p>
+  </div>
+</section>
+
+<section class="screen" id="stages" data-step="0">
+  <header><span class="kind">Today's LLMs</span><h2>From writing the next word to following instructions</h2></header>
+  <div class="body">
+    <div class="flow">
+      <div class="box"><b>1. Next word</b><br>on raw text</div><span class="arr">→</span>
+      <div class="box"><b>2. Examples</b><br>answers written by people</div><span class="arr">→</span>
+      <div class="box o"><b>3. Preferences</b><br>people rank answers</div><span class="arr">→</span>
+      <div class="box g">follows instructions</div>
+    </div>
+    <ul class="points">
+      <li>Stage 1 gives a model that continues text; stages 2 and 3 train that same model further</li>
+      <li>In Ouyang et al., people preferred the answers of a 1.3-billion-parameter model with these stages to those of the 175-billion-parameter GPT-3 without them: more training stages, 100 times fewer parameters</li>
+    </ul>
+    <p class="src">Source: Ouyang et al., “Training language models to follow instructions with human feedback,” NeurIPS 2022 (arXiv:2203.02155)</p>
+  </div>
+</section>
+
+<section class="screen" id="levers" data-step="0">
+  <header><span class="kind">Today's LLMs</span><h2>The same three levers, in today's models</h2></header>
+  <div class="body">
+    <table class="plain">
+      <tr><th>lever</th><th>what today's models do</th><th>effect on the computation</th></tr>
+      <tr><td><b>the parameters</b></td><td><b>Mixture of experts</b>: several feed-forward blocks per layer, each token uses only some. Mixtral: 8 per layer, 2 used per token</td><td>down: 13 billion parameters used per token, of 47 billion</td></tr>
+      <tr><td><b>the input</b></td><td><b>Long context</b>: whole documents read at once</td><td>up: attention grows with the square of the length</td></tr>
+      <tr><td><b>the output</b></td><td><b>Reasoning models</b>: hundreds to thousands of tokens written before the answer (DeepSeek-R1)</td><td>up: more steps, a bigger cache</td></tr>
+    </table>
+    <ul class="points">
+      <li>Sessions 2 and 3 cut costs on these models: fewer bits for each number, less text to read</li>
+    </ul>
+    <p class="src">Sources: Jiang et al., “Mixtral of Experts,” 2024 (arXiv:2401.04088); DeepSeek-AI, “DeepSeek-R1,” 2025 (arXiv:2501.12948)</p>
   </div>
 </section>
 
@@ -3322,7 +3443,7 @@ print("they match" if count == expected else "they do not match: check the loop 
   </ul>
   <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
   <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Session 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>, except the figures credited to others.</p>
-  <p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T10:11Z">4 Nov 2026, 10:11 UTC</time></p>
+  <p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T11:33Z">4 Nov 2026, 11:33 UTC</time></p>
 </footer>
 
 <div class="pbar" aria-label="Presentation controls">
