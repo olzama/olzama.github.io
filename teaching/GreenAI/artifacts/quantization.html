@@ -248,7 +248,7 @@ html.embed .fields { container-type: inline-size; }
   <!-- 3 -->
   <section class="panel" id="outlier">
     <h2><span class="n">3</span>One outlier stretches the range</h2>
-    <p class="lead">Twenty-four ordinary values between −2 and 2, and one value of 256. The picture zooms in on the ordinary values. The vertical ticks are the codes: with the outlier, absmax spreads the codes so far apart that only three of them fall here. Clipping caps the range, so the codes move closer together.</p>
+    <p class="lead">Twenty-four ordinary values between −2 and 2, and one value of 256. The picture zooms in on the ordinary values. The vertical ticks are the codes: with the outlier, absmax spreads the codes so far apart that very few of them fall here. Clipping caps the range, and the codes move closer together.</p>
     <div class="strip"><div class="controls">
       <label class="check"><input type="checkbox" id="oOut" checked> include the outlier, 256</label>
       <span class="note">Bits:</span>
@@ -271,7 +271,7 @@ html.embed .fields { container-type: inline-size; }
   <!-- 4 -->
   <section class="panel" id="gptq">
     <h2><span class="n">4</span>GPTQ: round one weight, then correct the next</h2>
-    <p class="lead">One output of a learned table: six weights (the model's learned values, its parameters), one input of six numbers x₁ … x₆, and one output, their dot product y = w₁x₁ + … + w₆x₆. The weights can only be stored in steps of 0.25 (the gray lines). Rounding each weight on its own lets the errors add up. GPTQ rounds the weights one at a time, and moves each rounding error into the next weight, before that one is rounded.</p>
+    <p class="lead">One output of a learned table: six weights (the model's learned values, its parameters), one input of six numbers x₁ … x₆, and one output, their dot product y = w₁x₁ + … + w₆x₆. The weights can only be stored at quantization levels 0.25 apart (the gray lines). Rounding each weight on its own lets the errors add up. GPTQ rounds the weights one at a time, and moves each rounding error into the next weight, before that one is rounded.</p>
     <div class="strip"><div class="controls">
       <div class="seg" role="group" aria-label="Method" id="gMode"><button data-m="naive" aria-pressed="false">round each on its own</button><button data-m="gptq" aria-pressed="true">GPTQ: correct the next weight</button></div>
       <button class="primary" id="gPlay">▶ Play</button><button id="gStep">One weight</button><button id="gReset">Start over</button>
@@ -332,7 +332,7 @@ html.embed .fields { container-type: inline-size; }
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Topic 2. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-05T15:23Z">5 Nov 2026, 15:23 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-05T16:17Z">5 Nov 2026, 16:17 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -474,6 +474,7 @@ function el(svg, tag, attrs, text) {
   if (text != null) e.textContent = text;
   svg.append(e); return e;
 }
+const SUB = "₀₁₂₃₄₅₆₇₈₉";
 function absmax(xs, b, clip) {
   const qmax = 2 ** (b - 1) - 1;
   const a = clip ?? Math.max(...xs.map(Math.abs));
@@ -609,7 +610,7 @@ function drawGptq(shown = gcur) {
     const v = gq[i] ?? shown[i];
     el(svg, "rect", { x: X(i), y: Math.min(Yv(v), y0), width: W, height: Math.abs(v) * H, fill: gq[i] != null ? "var(--orange)" : "var(--blue)", opacity: 0.85, rx: 3 });
     el(svg, "rect", { x: X(i) - 3, y: Math.min(Yv(w), y0), width: W + 6, height: Math.max(1, Math.abs(w) * H), fill: "none", stroke: "var(--muted)", "stroke-width": 2, rx: 3 });
-    el(svg, "text", { x: X(i) + W / 2, y: 282, "text-anchor": "middle", class: "lab" }, `w${i + 1}, x${i + 1} = ${GX[i]}`);
+    el(svg, "text", { x: X(i) + W / 2, y: 282, "text-anchor": "middle", class: "lab" }, `w${SUB[i + 1]}, x${SUB[i + 1]} = ${GX[i]}`);
     el(svg, "text", { x: X(i) + W / 2, y: v >= 0 ? Yv(v) - 6 : Yv(v) + 14, "text-anchor": "middle", fill: gq[i] != null ? "var(--orange)" : "var(--blue)" }, n2(v));
     if (i === gi && gi < GW.length) el(svg, "path", { d: `M${X(i) + W / 2 - 8} 296 L${X(i) + W / 2} 288 L${X(i) + W / 2 + 8} 296`, fill: "var(--orange)" });
   });
@@ -631,11 +632,11 @@ async function gStep(run) {
   const i = gi, w = gcur[i], r = grid(w), err = (w - r) * GX[i];
   gq[i] = r;
   const par = s => s.startsWith("−") ? `(${s})` : s;
-  let line = `w${i + 1}: ${n3(w)} → ${n2(r)}; the output changes by (${n2(r)} − ${par(n3(w))})·${GX[i]} = ${n3(-err)}`;
+  let line = `w${SUB[i + 1]}: ${n3(w)} → ${n2(r)}; the output changes by (${n2(r)} − ${par(n3(w))})·${GX[i]} = ${n3(-err)}`;
   if (gmode === "gptq" && i + 1 < GW.length) {
     const before = [...gcur], add = err / GX[i + 1];
     gcur[i + 1] = gcur[i + 1] + add;
-    line += `; make up for it in w${i + 2}: ${n3(before[i + 1])} ${err >= 0 ? "+" : "−"} ${n3(Math.abs(err))} ÷ ${GX[i + 1]} = ${n3(gcur[i + 1])}`;
+    line += `; make up for it in w${SUB[i + 2]}: ${n3(before[i + 1])} ${err >= 0 ? "+" : "−"} ${n3(Math.abs(err))} ÷ ${GX[i + 1]} = ${n3(gcur[i + 1])}`;
     glog.push(line); gi++;
     await tween(700, u => { if (!run.stop) drawGptq(before.map((v, k) => k === i + 1 ? v + add * u : v)); });
   } else { glog.push(line); gi++; drawGptq(); }
