@@ -248,7 +248,7 @@ html.embed .fields { container-type: inline-size; }
   <!-- 3 -->
   <section class="panel" id="outlier">
     <h2><span class="n">3</span>One outlier stretches the range</h2>
-    <p class="lead">Twenty-four ordinary values between −2 and 2, and one value of 256. The picture zooms in on the ordinary values. The vertical ticks are the codes: with the outlier, absmax spreads the codes so far apart that very few of them fall here. Clipping caps the range, and the codes move closer together.</p>
+    <p class="lead">Twenty-four ordinary values between −2 and 2, and one value of 256. The top number line shows all of them, with the range in orange. The lower one zooms in on the ordinary values, with the codes as orange ticks: with the outlier, absmax spreads the codes so far apart that very few of them fall there. Clipping shrinks the range, and the codes move closer together.</p>
     <div class="strip"><div class="controls">
       <label class="check"><input type="checkbox" id="oOut" checked> include the outlier, 256</label>
       <span class="note">Bits:</span>
@@ -263,7 +263,7 @@ html.embed .fields { container-type: inline-size; }
       <button data-clip="none">no clipping</button><button data-clip="10">10</button><button data-clip="5">5</button><button data-clip="2.5">2.5</button>
       <button class="primary" id="oPlay">▶ Play: shrink the range</button>
     </div></div>
-    <svg class="fig" id="oFig" viewBox="0 0 900 170" role="img" aria-label="The ordinary values and the codes near them"></svg>
+    <svg class="fig" id="oFig" viewBox="0 0 900 266" role="img" aria-label="All the values on a number line with the range marked, and below it the ordinary values and the codes near them"></svg>
     <div class="stats" id="oStats" aria-live="polite"></div>
     <p class="note">Clipping trades one error for many: the outlier is stored as the clipping value, and every ordinary value gets closer to a code. Which trade is right depends on how much the outlier matters.</p>
   </section>
@@ -332,7 +332,7 @@ html.embed .fields { container-type: inline-size; }
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Topic 2. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-05T16:17Z">5 Nov 2026, 16:17 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-05T16:33Z">5 Nov 2026, 16:33 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -554,7 +554,23 @@ function drawOut() {
   const { qmax, a, s, q, dq } = absmax(xs, ob, c);
   $("oClipVal").textContent = c == null ? "no clipping" : `[−${c}, ${c}]`;
   const svg = $("oFig"); svg.innerHTML = "";
-  const R = 2.6, X = v => 450 + v / R * 400, y = 70;
+  // top: every value and the range, at true scale; below: the same line zoomed in on the ordinary values
+  const R = 2.6, X = v => 450 + v / R * 400, y = 176, y0 = 52, X0 = v => 450 + v / OUT * 400, num = v => String(+v.toPrecision(4)).replace("-", "−");
+  el(svg, "text", { x: 50, y: 18, class: "lab" }, "all the values");
+  el(svg, "text", { x: 450, y: 30, "text-anchor": "middle", fill: "var(--orange)", "font-weight": 700 }, `the range: ${num(-a)} to ${num(a)}`);
+  el(svg, "rect", { x: X0(-a), y: y0 - 11, width: X0(a) - X0(-a), height: 22, fill: "var(--orange)", opacity: 0.25 });
+  el(svg, "line", { x1: 50, x2: 850, y1: y0, y2: y0, stroke: "var(--fg)" });
+  [-a, a].forEach(v => el(svg, "line", { x1: X0(v), x2: X0(v), y1: y0 - 11, y2: y0 + 11, stroke: "var(--orange)", "stroke-width": 2 }));
+  [-OUT, 0, OUT].forEach(v => el(svg, "text", { x: X0(v), y: y0 + 28, "text-anchor": "middle", class: "m" }, num(v)));
+  ORD.forEach(v => el(svg, "circle", { cx: X0(v), cy: y0, r: 2.5, fill: "var(--blue)" }));
+  if (withOut) {
+    const st = dq[ORD.length];
+    if (st < OUT - 0.5) { el(svg, "line", { x1: X0(OUT), x2: X0(st), y1: y0, y2: y0, stroke: "var(--neg)", "stroke-width": 2.5 }); el(svg, "circle", { cx: X0(st), cy: y0, r: 4, fill: "none", stroke: "var(--neg)", "stroke-width": 2 }); }
+    el(svg, "circle", { cx: X0(OUT), cy: y0, r: 4.5, fill: "var(--blue)" });
+  }
+  el(svg, "polygon", { points: `${X0(-R)},${y0 + 34} ${X0(R)},${y0 + 34} 850,${y - 44} 50,${y - 44}`, fill: "var(--grid)", opacity: 0.8 });
+  const ra = Math.min(a, R);
+  el(svg, "rect", { x: X(-ra), y: y - 28, width: X(ra) - X(-ra), height: 56, fill: "var(--orange)", opacity: 0.12 });
   el(svg, "line", { x1: 50, x2: 850, y1: y, y2: y, stroke: "var(--fg)" });
   for (let k = -qmax; k <= qmax; k++) {
     const v = k / s; if (Math.abs(v) > R) continue;
@@ -566,12 +582,12 @@ function drawOut() {
     el(svg, "circle", { cx: X(v), cy: y - 12, r: 3.5, fill: "var(--blue)" });
     el(svg, "circle", { cx: X(dq[i]), cy: y + 12, r: 3, fill: "none", stroke: "var(--blue)" });
   });
-  el(svg, "text", { x: 50, y: 14, class: "lab" }, "value (filled) → what is stored (open); orange ticks: the codes in this window");
+  el(svg, "text", { x: 50, y: y - 34, class: "lab" }, "zoomed in: value (filled) → what is stored (open); orange ticks: the codes");
   if (withOut) {
     el(svg, "text", { x: 858, y: y + 4, class: "lab" }, "→ 256");
-    el(svg, "text", { x: 850, y: 150, "text-anchor": "end", class: "lab" }, `the outlier is stored as ${+dq[ORD.length].toFixed(2)}`);
+    el(svg, "text", { x: 850, y: y + 80, "text-anchor": "end", class: "lab" }, `the outlier is stored as ${+dq[ORD.length].toFixed(2)}`);
   }
-  el(svg, "text", { x: 50, y: 150, class: "lab" }, `space between codes: 1 ÷ s = ${fx(1 / s, 3)}`);
+  el(svg, "text", { x: 50, y: y + 80, class: "lab" }, `space between codes: 1 ÷ s = ${fx(1 / s, 3)}`);
   const n = ORD.length, used = new Set(q.slice(0, n)).size, mae = ORD.reduce((t, v, i) => t + Math.abs(v - dq[i]), 0) / n;
   $("oStats").innerHTML = `<span>range: <b>±${+a.toPrecision(4)}</b></span><span>codes used by the 24 ordinary values: <b>${used}</b></span>` +
     `<span>their mean absolute error: <b>${mae.toFixed(3)}</b></span>` + `<span>outlier error: <b>${withOut ? (OUT - dq[n]).toFixed(2) : "none, no outlier"}</b></span>`;
