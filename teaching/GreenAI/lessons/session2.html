@@ -588,6 +588,18 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
 </section>
 
+<section class="screen" id="digits" data-step="1">
+  <header><h2>Precision is a number of digits</h2></header>
+  <div class="body">
+    <div class="board">
+      <svg viewBox="0 0 980 296" role="img" aria-label="With 3 digits, 1.23 times 10 to the minus 2 is 0.0123 and the next number is 0.0124, a distance of 0.0001. 1.23 times 10 to the 4 is 12,300 and the next number is 12,400, a distance of 100. FP16 keeps about 3 digits in the same way: after 0.0126953 the distance is 0.0000076, after 1,000 it is 0.5.">
+<g data-s="1" data-d="0" data-a="fade" data-t="0.4"><text class="note" x="14.0" y="22" text-anchor="start" font-size="15" style="fill:var(--muted)">3 digits, as in scientific notation</text><text class="note" x="420.0" y="22" text-anchor="start" font-size="15" style="fill:var(--muted)">the next number</text><text class="note" x="640.0" y="22" text-anchor="start" font-size="15" style="fill:var(--muted)">the distance: the last digit, + 1</text><rect x="14" y="42" width="30" height="34" rx="4" fill="none" stroke="var(--blue)" stroke-width="1.8"/><text class="note" x="29.0" y="66" text-anchor="middle" font-size="19" style="fill:currentColor">1</text><text class="note" x="49.0" y="66" text-anchor="start" font-size="19" style="fill:currentColor">.</text><rect x="58" y="42" width="30" height="34" rx="4" fill="none" stroke="var(--blue)" stroke-width="1.8"/><text class="note" x="73.0" y="66" text-anchor="middle" font-size="19" style="fill:currentColor">2</text><rect x="92" y="42" width="30" height="34" rx="4" fill="var(--orange)" fill-opacity="0.3" stroke="var(--blue)" stroke-width="1.8"/><text class="note" x="107.0" y="66" text-anchor="middle" font-size="19" style="fill:currentColor">3</text><text class="note" x="134.0" y="66" text-anchor="start" font-size="18" style="fill:currentColor">× 10⁻²</text><text class="note" x="226.0" y="66" text-anchor="start" font-size="18" style="fill:currentColor">= 0.0123</text><text class="note" x="420.0" y="66" text-anchor="start" font-size="18" style="fill:currentColor">0.0124</text><text class="note" x="640.0" y="66" text-anchor="start" font-size="19" style="fill:var(--orange);font-weight:700">0.0001</text></g><g data-s="2" data-d="0" data-a="fade" data-t="0.4"><rect x="14" y="92" width="30" height="34" rx="4" fill="none" stroke="var(--blue)" stroke-width="1.8"/><text class="note" x="29.0" y="116" text-anchor="middle" font-size="19" style="fill:currentColor">1</text><text class="note" x="49.0" y="116" text-anchor="start" font-size="19" style="fill:currentColor">.</text><rect x="58" y="92" width="30" height="34" rx="4" fill="none" stroke="var(--blue)" stroke-width="1.8"/><text class="note" x="73.0" y="116" text-anchor="middle" font-size="19" style="fill:currentColor">2</text><rect x="92" y="92" width="30" height="34" rx="4" fill="var(--orange)" fill-opacity="0.3" stroke="var(--blue)" stroke-width="1.8"/><text class="note" x="107.0" y="116" text-anchor="middle" font-size="19" style="fill:currentColor">3</text><text class="note" x="134.0" y="116" text-anchor="start" font-size="18" style="fill:currentColor">× 10⁴</text><text class="note" x="226.0" y="116" text-anchor="start" font-size="18" style="fill:currentColor">= 12,300</text><text class="note" x="420.0" y="116" text-anchor="start" font-size="18" style="fill:currentColor">12,400</text><text class="note" x="640.0" y="116" text-anchor="start" font-size="19" style="fill:var(--orange);font-weight:700">100</text></g><g data-s="3" data-d="0" data-a="fade" data-t="0.4"><text class="note" x="14.0" y="166" text-anchor="start" font-size="15" style="fill:var(--muted)">FP16 keeps about 3 digits in the same way</text><text class="note" x="226.0" y="200" text-anchor="start" font-size="18" style="fill:currentColor">0.0126953</text><text class="note" x="420.0" y="200" text-anchor="start" font-size="18" style="fill:currentColor">0.0127029</text><text class="note" x="640.0" y="200" text-anchor="start" font-size="19" style="fill:var(--orange);font-weight:700">0.0000076</text><text class="note" x="226.0" y="234" text-anchor="start" font-size="18" style="fill:currentColor">1,000</text><text class="note" x="420.0" y="234" text-anchor="start" font-size="18" style="fill:currentColor">1,000.5</text><text class="note" x="640.0" y="234" text-anchor="start" font-size="19" style="fill:var(--orange);font-weight:700">0.5</text></g><g data-s="4" data-d="0" data-a="fade" data-t="0.4"><text class="note" x="14.0" y="282" text-anchor="start" font-size="18" style="fill:var(--orange)">Precision is a number of digits, not a distance: the last digit of a small number is worth very little</text></g>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
+    </div>
+  </div>
+</section>
+
 <section class="screen" id="formats2" data-step="1">
   <header><h2>Formats side by side</h2></header>
   <div class="body">
@@ -599,7 +611,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
     </div>
     <ul class="points" style="max-width:none">
       <li>A scale of sizes: each gridline is × 10¹⁰. 1 is in the middle, and 0 is not on it. Each float format stores the same sizes with a minus sign too</li>
-      <li>Mantissa bits buy precision, how close two numbers can be: every doubling holds 8,388,608 values in FP32, 1,024 in FP16, 128 in BF16</li>
+      <li>Mantissa bits buy precision: about 7 digits in FP32, 3 in FP16, 2 in BF16</li>
     </ul>
   </div>
 </section>
@@ -1637,7 +1649,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
   </ul>
   <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
   <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Topic 2. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-    <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-05T14:14Z">5 Nov 2026, 14:14 UTC</time></p><!--/STAMP-->
+    <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-05T14:15Z">5 Nov 2026, 14:15 UTC</time></p><!--/STAMP-->
   </footer>
 
 <div class="pbar" aria-label="Presentation controls">
