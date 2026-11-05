@@ -1052,34 +1052,17 @@ for bits in [8, 4, 3, 2]:
 </section>
 
 <section class="screen" id="calib" data-step="4">
-  <header><h2>Choosing the range is called calibration</h2></header>
-  <div class="body cols">
-    <div class="col">
-      <ul class="points">
-        <li><b>Clipping</b> accepts a large error on a few weights, for a smaller error on all the others</li>
-        <li><b>Calibration</b>: choosing c, the edge of the range ±c, often on a sample of real inputs. x̂: the stored value of x</li>
-      </ul>
-      <table class="plain">
-        <thead><tr><th>Calibration rule</th><th>c is chosen by…</th></tr></thead>
-        <tbody>
-          <tr><td>percentile</td><td>the 99.9th percentile of |x|: only the top 0.1% are clipped</td></tr>
-          <tr><td>mean squared error</td><td>the smallest mean of (x − x̂)²</td></tr>
-          <tr><td>KL divergence</td><td>the smallest KL divergence between the histograms of x and x̂: the two shapes stay closest</td></tr>
-        </tbody>
-      </table>
+  <header><h2>Activations: dynamic and static quantization</h2></header>
+  <div class="body">
+    <div class="board">
+      <svg viewBox="0 0 980 332" role="img" aria-label="The largest activation entering one table of Qwen2.5-1.5B differs by input: 3.51, 3.61, 4.98, 6.92, 9.05. Dynamic quantization measures it during each run. Static quantization fixes it in advance at 4.98 from calibration data, and the last two inputs go past that range and are clipped.">
+<g data-s="1" data-d="0" data-a="fade" data-t="0.4"><text class="note" x="14.0" y="22" text-anchor="start" font-size="15" style="fill:currentColor">Weights never change after training: their range is known once. Activations are new for every input</text><text class="note" x="14.0" y="44" text-anchor="start" font-size="15" style="fill:var(--muted)">Below: the largest activation α entering one table (layer 15), for five inputs</text><text class="note" x="215.0" y="84" text-anchor="start" font-size="16" style="fill:var(--orange);font-weight:700">dynamic</text></g><g data-s="1" data-d="0.0" data-a="fade" data-t="0.4"><text class="note" x="14.0" y="119" text-anchor="start" font-size="14" style="fill:currentColor">The capital of Galicia is</text><rect x="215" y="104" width="105.3" height="20" fill="var(--blue)" fill-opacity="0.45"/><text class="note" x="326.3" y="119" text-anchor="start" font-size="13" style="fill:currentColor">3.51</text></g><g data-s="1" data-d="0.1" data-a="fade" data-t="0.4"><text class="note" x="14.0" y="153" text-anchor="start" font-size="14" style="fill:currentColor">What is the largest city…</text><rect x="215" y="138" width="108.3" height="20" fill="var(--blue)" fill-opacity="0.45"/><text class="note" x="329.3" y="153" text-anchor="start" font-size="13" style="fill:currentColor">3.61</text></g><g data-s="1" data-d="0.2" data-a="fade" data-t="0.4"><text class="note" x="14.0" y="187" text-anchor="start" font-size="14" style="fill:currentColor">The river flows through…</text><rect x="215" y="172" width="149.4" height="20" fill="var(--blue)" fill-opacity="0.45"/><text class="note" x="370.4" y="187" text-anchor="start" font-size="13" style="fill:currentColor">4.98</text></g><g data-s="1" data-d="0.30000000000000004" data-a="fade" data-t="0.4"><text class="note" x="14.0" y="235" text-anchor="start" font-size="14" style="fill:currentColor">for i in range(10): …</text><rect x="215" y="220" width="207.6" height="20" fill="var(--blue)" fill-opacity="0.45"/><text class="note" x="428.6" y="235" text-anchor="start" font-size="13" style="fill:currentColor">6.92</text></g><g data-s="1" data-d="0.4" data-a="fade" data-t="0.4"><text class="note" x="14.0" y="269" text-anchor="start" font-size="14" style="fill:currentColor">12 + 7 = 19, 3 × 8 = …</text><rect x="215" y="254" width="271.5" height="20" fill="var(--blue)" fill-opacity="0.45"/><text class="note" x="492.5" y="269" text-anchor="start" font-size="13" style="fill:currentColor">9.05</text></g><g data-s="2" data-d="0" data-a="fade" data-t="0.4"><line x1="320.3" y1="101" x2="320.3" y2="127" stroke="var(--orange)" stroke-width="3"/><line x1="323.3" y1="135" x2="323.3" y2="161" stroke="var(--orange)" stroke-width="3"/><line x1="364.4" y1="169" x2="364.4" y2="195" stroke="var(--orange)" stroke-width="3"/><line x1="422.6" y1="217" x2="422.6" y2="243" stroke="var(--orange)" stroke-width="3"/><line x1="486.5" y1="251" x2="486.5" y2="277" stroke="var(--orange)" stroke-width="3"/><text class="note" x="300.0" y="84" text-anchor="start" font-size="14" style="fill:var(--orange)">s = 7 ÷ α, computed for each input</text></g><g data-s="3" data-d="0" data-a="fade" data-t="0.4"><text class="note" x="600.0" y="84" text-anchor="start" font-size="16" style="fill:var(--neg);font-weight:700">static</text><text class="note" x="662.0" y="84" text-anchor="start" font-size="14" style="fill:var(--neg)">s = 7 ÷ 4.98, fixed in advance</text><rect x="600" y="104" width="105.3" height="20" fill="var(--blue)" fill-opacity="0.45"/><rect x="600" y="138" width="108.3" height="20" fill="var(--blue)" fill-opacity="0.45"/><rect x="600" y="172" width="149.4" height="20" fill="var(--blue)" fill-opacity="0.45"/><line x1="749.4" y1="96" x2="749.4" y2="280" stroke="var(--neg)" stroke-width="2.5"/><text class="note" x="757.4" y="187" text-anchor="start" font-size="14" style="fill:var(--neg);font-weight:700">α = 4.98</text><text class="note" x="757.4" y="119" text-anchor="start" font-size="13" style="fill:var(--neg)">calibration data: these three</text></g><g data-s="4" data-d="0" data-a="fade" data-t="0.4"><rect x="600" y="220" width="149.4" height="20" fill="var(--blue)" fill-opacity="0.45"/><rect x="749.4" y="220" width="58.2" height="20" fill="var(--neg)" fill-opacity="0.45"/><text class="note" x="813.6" y="235" text-anchor="start" font-size="13" style="fill:currentColor">6.92</text><rect x="600" y="254" width="149.4" height="20" fill="var(--blue)" fill-opacity="0.45"/><rect x="749.4" y="254" width="122.1" height="20" fill="var(--neg)" fill-opacity="0.45"/><text class="note" x="877.5" y="269" text-anchor="start" font-size="13" style="fill:currentColor">9.05</text><text class="note" x="757.4" y="290" text-anchor="start" font-size="13" style="fill:var(--neg)">clipped</text></g><g data-s="1" data-d="0" data-a="fade" data-t="0.4" data-until="2"><text class="note" x="14.0" y="318" text-anchor="start" font-size="18" style="fill:var(--orange)">Each input has its own α: the range of the activations is not known in advance</text></g><g data-s="2" data-d="0" data-a="fade" data-t="0.4" data-until="3"><text class="note" x="14.0" y="318" text-anchor="start" font-size="18" style="fill:var(--orange)">Dynamic: measure α during each run. The range always fits, and every run does extra work</text></g><g data-s="3" data-d="0" data-a="fade" data-t="0.4" data-until="4"><text class="note" x="14.0" y="318" text-anchor="start" font-size="18" style="fill:var(--orange)">Static: fix α in advance from sample inputs, called calibration data. The run does no extra work</text></g><g data-s="4" data-d="0" data-a="fade" data-t="0.4"><text class="note" x="14.0" y="318" text-anchor="start" font-size="18" style="fill:var(--orange)">Static: an input unlike the calibration data goes past the range, and its largest values are clipped</text></g>
+      </svg>
+      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
-    <div class="col">
-      <div class="flow" style="flex-wrap:nowrap;font-size:1em"><div class="box">input</div><span class="arr">×</span><div class="box">weights<br><span class="muted">fixed after training</span></div><span class="arr">→</span><div class="box g">activations<br><span class="muted">new for every input</span></div></div>
-      <table class="plain">
-        <thead><tr><th>Post-training quantization</th><th>scale and zero point</th><th>trade-off</th></tr></thead>
-        <tbody>
-          <tr><td>dynamic</td><td>computed during each run</td><td>adapts to every input; extra work</td></tr>
-          <tr><td>static</td><td>fixed in advance, from calibration data</td><td>faster; needs representative data</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <ul class="points" style="max-width:none"><li>Activations: the values flowing through the model, the outputs of each table</li></ul>
   </div>
-  </section>
+</section>
 
 <section class="screen" id="tryRange" data-step="4">
   <header><span class="kind">Try it · about 20 minutes for both exercises</span><h2>The zero point and clipping</h2></header>
@@ -1626,7 +1609,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
   </ul>
   <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
   <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Topic 2. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-    <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-05T15:26Z">5 Nov 2026, 15:26 UTC</time></p><!--/STAMP-->
+    <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-05T15:28Z">5 Nov 2026, 15:28 UTC</time></p><!--/STAMP-->
   </footer>
 
 <div class="pbar" aria-label="Presentation controls">
