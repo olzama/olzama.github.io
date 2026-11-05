@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Questrial&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Five stations, in the order of the Topic 2 lesson: one number in bits, absmax rounding,
-   an outlier and clipping, the zero point, and one scale per block.
+   an outlier and clipping, and one scale per block.
    Colors and faces are the course's, shared with the Topic 1 pages. */
 :root {
   --bg: #f6f7f9; --panel: #ffffff; --fg: #2b2d31; --muted: #6b7079; --line: #dde1e7; --grid: #e9ecf0;
@@ -92,7 +92,7 @@ table.t th, table.t td { padding: 4px 9px; text-align: right; border-bottom: 1px
 table.t th { color: var(--muted); font-weight: 400; font-family: var(--font-body); font-size: 0.8rem; }
 table.t tbody tr { cursor: pointer; }
 table.t tbody tr:hover td { color: var(--blue); }
-/* as on the Topic 1 pages: the selected row is highlighted; a loss is red (a shared code here, a weight rounded to 0 in section 6) */
+/* as on the Topic 1 pages: the selected row is highlighted; a loss is red (a shared code here, a weight rounded to 0 in section 5) */
 table.t tr.sel td { background: var(--hi); }
 table.t td.hit { color: var(--neg); }
 .stats { display: flex; flex-wrap: wrap; gap: 8px 22px; font-family: var(--font-mono); font-size: 0.9rem; }
@@ -158,13 +158,13 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
 #bitVal { min-height: 1.75em; white-space: nowrap; overflow-x: auto; overflow-y: hidden; }
 #bitNote { min-height: 4.5em; }
 #rTable th, #rTable td { width: 6.6em; }
-#rStats, #oStats, #aStats, #bStats, #gStats { min-height: calc(3em + 8px); align-content: flex-start; }
+#rStats, #oStats, #bStats, #gStats { min-height: calc(3em + 8px); align-content: flex-start; }
 #rStats { min-height: calc(4.5em + 16px); }
 #rCalc { min-height: calc(9em + 42px); align-content: start; }
 #oClipVal { display: inline-block; width: 11ch; text-align: left; }
 #gCalc { min-height: calc(9em + 30px); align-content: start; }
 /* inside a lesson: a control brings what it changes into view, below the sticky strip */
-html.embed #bitGap, html.embed #bitNote, html.embed #rStats, html.embed #oStats, html.embed #aCalc, html.embed #gStats, html.embed #bStats { scroll-margin-top: 96px; scroll-margin-bottom: 8px; }
+html.embed #bitGap, html.embed #bitNote, html.embed #rStats, html.embed #oStats, html.embed #gStats, html.embed #bStats { scroll-margin-top: 96px; scroll-margin-bottom: 8px; }
 /* inside a lesson, the bit fields reserve only their longest text at this width (measured: 6.6em from about 900px up) */
 html.embed .fields { container-type: inline-size; }
 @container (min-width: 900px) { html.embed .field .sum { min-height: 6.7em; } }
@@ -179,9 +179,9 @@ html.embed .fields { container-type: inline-size; }
 <div class="wrap">
   <header>
     <h1>Quantization, Step by Step</h1>
-    <p>A model is billions of numbers. Quantization stores each one with fewer bits. These six stations follow one number into its bits, then a few numbers into integer codes and back, and show what gets lost on the way, and one way to lose less.</p>
+    <p>A model is billions of numbers. Quantization stores each one with fewer bits. These five stations follow one number into its bits, then a few numbers into integer codes and back, and show what gets lost on the way, and one way to lose less.</p>
   </header>
-  <section class="learn" id="learn" aria-label="What you will learn"><p>What you will learn on this page</p><ol><li>A number in 16 bits is three fields read separately: a sign, an exponent (the scale) and a mantissa (the detail). FP16 and BF16 split the bits differently, and the space to the next number that can be stored grows with the number. <a href="#bits">→ section 1</a></li><li>Absmax: the largest absolute value sets one scale; every value is multiplied by it and rounded to an integer code. With fewer bits there are fewer codes, and different values start to share one. <a href="#round">→ section 2</a></li><li>One outlier stretches the range, so the ordinary values share a few codes. Clipping caps the range: one large error for the outlier, smaller errors for all the others. <a href="#outlier">→ section 3</a></li><li>When all values are 0 or more, symmetric codes for negative values go unused. Asymmetric quantization maps the smallest value to code 0, and the zero point is the code that stands for 0.0. <a href="#asym">→ section 4</a></li><li>GPTQ rounds the weights one at a time and moves each rounding error into the weights not yet rounded (here, simply the next one), so the output stays closer than when each weight is rounded on its own. <a href="#gptq">→ section 5</a></li><li>A scale for each block of weights keeps the small weights from rounding to 0; each extra scale costs 16 bits, as in GGUF files. <a href="#blocks">→ section 6</a></li></ol></section>
+  <section class="learn" id="learn" aria-label="What you will learn"><p>What you will learn on this page</p><ol><li>A number in 16 bits is three fields read separately: a sign, an exponent (the scale) and a mantissa (the detail). FP16 and BF16 split the bits differently, and the space to the next number that can be stored grows with the number. <a href="#bits">→ section 1</a></li><li>Absmax: the largest absolute value sets one scale; every value is multiplied by it and rounded to an integer code. With fewer bits there are fewer codes, and different values start to share one. <a href="#round">→ section 2</a></li><li>One outlier stretches the range, so the ordinary values share a few codes. Clipping caps the range: one large error for the outlier, smaller errors for all the others. <a href="#outlier">→ section 3</a></li><li>GPTQ rounds the weights one at a time and moves each rounding error into the weights not yet rounded (here, simply the next one), so the output stays closer than when each weight is rounded on its own. <a href="#gptq">→ section 4</a></li><li>A scale for each block of weights keeps the small weights from rounding to 0; each extra scale costs 16 bits, as in GGUF files. <a href="#blocks">→ section 5</a></li></ol></section>
 
   <!-- 1 -->
   <section class="panel" id="bits">
@@ -269,26 +269,8 @@ html.embed .fields { container-type: inline-size; }
   </section>
 
   <!-- 4 -->
-  <section class="panel" id="asym">
-    <h2><span class="n">4</span>Lopsided values: the zero point</h2>
-    <p class="lead">These nine values are all 0 or more, like the outputs of ReLU, a step inside networks that replaces every negative value with 0. Symmetric absmax keeps codes for negative values that never occur. Asymmetric quantization maps the smallest value to code 0 and the largest to the last code; the <b>zero point</b> z is the code that stands for 0.0.</p>
-    <div class="strip"><div class="controls">
-      <span class="note">Move all values by:</span>
-      <input type="range" id="aShift" min="-1" max="1" step="0.1" value="0" aria-label="Shift all values">
-      <span class="mono" id="aShiftVal"></span>
-      <span class="note">· 4 bits</span>
-    </div></div>
-    <svg class="fig" id="aFig" viewBox="0 0 900 230" role="img" aria-label="Symmetric and asymmetric codes for the same values"></svg>
-    <div class="cols">
-      <div class="calc" id="aCalc"></div>
-      <div class="stats" id="aStats"></div>
-    </div>
-    <p class="note">Careful with s: here it is the step between two neighboring codes (a value per code), so a value is divided by it. In section 2, s was codes per unit (127 ÷ 10.8), so a value was multiplied by it. The same name, inverse numbers.</p>
-  </section>
-
-  <!-- 5 -->
   <section class="panel" id="gptq">
-    <h2><span class="n">5</span>GPTQ: round one weight, then correct the next</h2>
+    <h2><span class="n">4</span>GPTQ: round one weight, then correct the next</h2>
     <p class="lead">One output of a learned table: six weights (the model's learned values, its parameters), one input of six numbers x₁ … x₆, and one output, their dot product y = w₁x₁ + … + w₆x₆. The weights can only be stored in steps of 0.25 (the gray lines). Rounding each weight on its own lets the errors add up. GPTQ rounds the weights one at a time, and moves each rounding error into the next weight, before that one is rounded.</p>
     <div class="strip"><div class="controls">
       <div class="seg" role="group" aria-label="Method" id="gMode"><button data-m="naive" aria-pressed="false">round each on its own</button><button data-m="gptq" aria-pressed="true">GPTQ: correct the next weight</button></div>
@@ -308,9 +290,9 @@ html.embed .fields { container-type: inline-size; }
     <p class="note">Real GPTQ computes the corrections for all the weights not yet rounded, from a small set of real inputs (calibration data), so that the output stays close on average over those inputs. Here there is one input, and the whole error goes into the next weight.</p>
   </section>
 
-  <!-- 6 -->
+  <!-- 5 -->
   <section class="panel" id="blocks">
-    <h2><span class="n">6</span>One scale per block</h2>
+    <h2><span class="n">5</span>One scale per block</h2>
     <p class="lead">Sixteen weights of very different sizes, stored with 4 bits. With one scale for all of them, the large weights set the range and the small ones round to 0. Give each block of weights its own scale, and the small ones keep their values. Each scale costs 16 more bits.</p>
     <div class="strip"><div class="controls">
       <span class="note">Weights per block:</span>
@@ -350,7 +332,7 @@ html.embed .fields { container-type: inline-size; }
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Topic 2. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T16:10Z">4 Nov 2026, 16:10 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-05T15:23Z">5 Nov 2026, 15:23 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -608,48 +590,7 @@ $("oBits").addEventListener("click", e => { const b = e.target.closest("button")
 drawOut();
 window.__askState.push(() => `Section 3: outlier ${$("oOut").checked ? "included" : "left out"}, ${ob} bits, clipping ${clip ?? "none"}; ${$("oStats").textContent}`);
 
-/* ================= 4. zero point ================= */
-const AV = [0.0, 0.1, 0.4, 0.9, 1.0, 1.4, 2.0, 2.2, 2.8];
-function drawAsym() {
-  const sh = +$("aShift").value, xs = AV.map(v => +(v + sh).toFixed(2));
-  $("aShiftVal").textContent = (sh >= 0 ? "+" : "−") + Math.abs(sh).toFixed(1);
-  const b = 4, sym = absmax(xs, b);
-  const lo = Math.min(...xs), hi = Math.max(...xs), qn = 2 ** b - 1;
-  const sa = (hi - lo) / qn, z = rhe(-lo / sa);
-  const qa = xs.map(x => Math.max(0, Math.min(qn, rhe(x / sa + z)))), dqa = qa.map(c => (c - z) * sa);
-  const svg = $("aFig"); svg.innerHTML = "";
-  const A = sym.a, X = v => 450 + v / A * 380;
-  const row = (y, name, codes, pos, used, deq) => {
-    el(svg, "line", { x1: 70, x2: 830, y1: y, y2: y, stroke: "var(--fg)" });
-    el(svg, "text", { x: 0, y: y + 4, class: "lab" }, name);
-    codes.forEach((c, k) => {
-      const x = X(pos[k]), u = used.has(c);
-      el(svg, "line", { x1: x, x2: x, y1: y - 9, y2: y + 9, stroke: u ? "var(--orange)" : "var(--line)", "stroke-width": u ? 2.5 : 1.5 });
-      el(svg, "text", { x, y: y + 24, "text-anchor": "middle", class: u ? "" : "m", "font-size": 10 }, String(c).replace("-", "−"));
-    });
-    xs.forEach((v, i) => el(svg, "line", { x1: X(v), x2: X(deq[i]), y1: 22, y2: y - 9, stroke: "var(--blue)", opacity: 0.5 }));
-  };
-  el(svg, "line", { x1: 70, x2: 830, y1: 22, y2: 22, stroke: "var(--muted)", "stroke-dasharray": "3 3" });
-  xs.forEach(v => el(svg, "circle", { cx: X(v), cy: 22, r: 4, fill: "var(--blue)" }));
-  el(svg, "text", { x: 0, y: 26, class: "lab" }, "values");
-  const sc = []; for (let c = -sym.qmax; c <= sym.qmax; c++) sc.push(c);
-  row(110, "symmetric", sc, sc.map(c => c / sym.s), new Set(sym.q), sym.dq);
-  const ac = []; for (let c = 0; c <= qn; c++) ac.push(c);
-  row(195, "asymmetric", ac, ac.map(c => (c - z) * sa), new Set(qa), dqa);
-  el(svg, "text", { x: X(0), y: 140, "text-anchor": "middle", class: "m" }, "");
-  const maeS = xs.reduce((t, v, i) => t + Math.abs(v - sym.dq[i]), 0) / xs.length, maeA = xs.reduce((t, v, i) => t + Math.abs(v - dqa[i]), 0) / xs.length;
-  $("aCalc").innerHTML = `<span><span class="k">scale</span> s = (${f2(hi)} − ${f2(lo).replace(/^(−.*)$/, "($1)")}) ÷ ${qn} = ${fx(sa, 4)}</span>` +
-    `<span><span class="k">zero point</span> z = round((0 − ${f2(lo).replace(/^(−.*)$/, "($1)")}) ÷ ${fx(sa, 4)}) = round(${f2(-lo / sa)}) = <span class="r">${z}</span></span>` +
-    `<span><span class="k">quantize</span> code = round(x ÷ s + z)</span><span><span class="k">dequantize</span> x ≈ (code − z) × s</span>`;
-  $("aStats").innerHTML = `<span>codes used, symmetric: <b>${new Set(sym.q).size} of ${2 * sym.qmax + 1}</b></span><span>asymmetric: <b>${new Set(qa).size} of ${qn + 1}</b></span>` +
-    `<span>mean absolute error, symmetric: <b>${maeS.toFixed(3)}</b></span><span>asymmetric: <b>${maeA.toFixed(3)}</b></span>`;
-}
-$("aShift").addEventListener("input", drawAsym);
-$("aShift").addEventListener("change", () => reveal("aCalc"));
-drawAsym();
-window.__askState.push(() => `Section 4: values shifted by ${$("aShift").value}; ${$("aStats").textContent}`);
-
-/* ================= 5. GPTQ ================= */
+/* ================= 4. GPTQ ================= */
 const GW = [0.37, 0.52, -0.18, 0.66, 0.29, -0.41], GX = [2, 1, 1.5, 0.5, 1, 2], STEP = 0.25;
 const grid = w => Math.round(w / STEP) * STEP;
 const Y0 = GW.reduce((s, w, i) => s + w * GX[i], 0);
@@ -706,7 +647,7 @@ $("gReset").onclick = () => { stopRun("gptq"); gReset(); drawGptq(); reveal("gSt
 $("gPlay").onclick = async () => { const run = newRun("gptq"); gReset(); drawGptq(); reveal("gStats"); await sleep(600); while (!run.stop && await gStep(run)) await sleep(900); };
 $("gMode").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; gmode = b.dataset.m; press($("gMode"), b); stopRun("gptq"); gReset(); drawGptq(); reveal("gStats"); });
 gReset(); drawGptq();
-window.__askState.push(() => `Section 5: mode ${gmode}; weights ${GW.join(", ")}, inputs ${GX.join(", ")}; ${gi} rounded; current ${gcur.map(n3).join(", ")}; output ${n3(gOut())} against ${n3(Y0)}`);
+window.__askState.push(() => `Section 4: mode ${gmode}; weights ${GW.join(", ")}, inputs ${GX.join(", ")}; ${gi} rounded; current ${gcur.map(n3).join(", ")}; output ${n3(gOut())} against ${n3(Y0)}`);
 
 /* ================= 5. block scales ================= */
 const BW = [0.1, -0.2, 0.15, 0.05, 2.0, -1.5, 1.8, 0.9, 0.02, -0.04, 0.03, -0.01, 0.6, -0.5, 0.4, 0.7];
@@ -749,9 +690,8 @@ The page:
 - Section 1, one number in 16 bits: FP16 has 1 sign bit, 5 exponent bits (bias 15) and 10 mantissa bits; BF16 has 1, 8 (bias 127) and 7. Value = sign × (1 + mantissa bits read as halves, quarters, ...) × 2^(exponent − bias). All-zero exponent: subnormal numbers, no leading 1. All-one exponent: infinity or NaN. Typed numbers are rounded to the nearest representable number (0.1 becomes 0.0999755859375 in FP16).
 - Section 2, absmax: values 5.47, 3.08, −7.59, 0, −1.85, −4.57, 10.8, 3.02, −1.92 (from Grootendorst's visual guide). α = 10.8; scale s = (2^(b−1) − 1) / α, e.g. 127 / 10.8 ≈ 11.76 at 8 bits; code = round(x · s); dequantized = code / s. At 8 bits 3.08 and 3.02 both get code 36.
 - Section 3, outliers: 24 ordinary values in [−2, 2] (Notebook 02b, NumPy seed 7) plus 256. Without clipping at 8 bits, s = 127/256 ≈ 0.50, so the ordinary values use only codes −1, 0, 1. Clipping to [−c, c] first gives them more codes; the outlier is stored as c.
-- Section 4, the zero point: nine values from 0 to 2.8 at 4 bits; symmetric codes −7..7 waste the negative half; asymmetric codes 0..15 with s = (max − min) / 15 and zero point z = round(−min / s). A slider shifts all values.
-- Section 5, GPTQ: weights 0.37, 0.52, −0.18, 0.66, 0.29, −0.41, inputs 2, 1, 1.5, 0.5, 1, 2, grid of 0.25. Rounding each weight on its own, or GPTQ-style: round weight i, then add its output error (w − rounded)·x_i, divided by x_(i+1), to weight i+1 before rounding it. Real GPTQ spreads the correction over all remaining weights, using calibration inputs.
-- Section 6, block scales: 16 weights of mixed sizes at 4 bits, one absmax scale per block of 16, 8 or 4; each scale costs 16 bits. GGUF type Q4_0 uses blocks of 32: 4.5 bits per weight.`;
+- Section 4, GPTQ: weights 0.37, 0.52, −0.18, 0.66, 0.29, −0.41, inputs 2, 1, 1.5, 0.5, 1, 2, grid of 0.25. Rounding each weight on its own, or GPTQ-style: round weight i, then add its output error (w − rounded)·x_i, divided by x_(i+1), to weight i+1 before rounding it. Real GPTQ spreads the correction over all remaining weights, using calibration inputs.
+- Section 5, block scales: 16 weights of mixed sizes at 4 bits, one absmax scale per block of 16, 8 or 4; each scale costs 16 bits. GGUF type Q4_0 uses blocks of 32: 4.5 bits per weight.`;
 (async () => {
   // window.claude exists only inside a Claude viewer; elsewhere the button stays hidden
   const sample = window.claude ? await window.claude.use("sample") : null;
