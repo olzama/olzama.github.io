@@ -477,19 +477,6 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
 </section>
 
-<section class="screen" id="whysmall" data-step="1">
-  <header><h2>What larger weights would do to attention</h2></header>
-  <div class="body">
-    <div class="board">
-      <svg viewBox="0 0 980 362" role="img" aria-label="Attention of the word is, in one head of the first layer. With the weights as trained it is shared by Gal, icia and is. With query and key weights times 3 it moves mostly to icia, and with weights times 10 all of it goes to icia.">
-<g data-s="1" data-d="0" data-a="fade" data-t="0.4"><text class="note" x="14.0" y="24" text-anchor="start" font-size="15" style="fill:var(--muted)">how much the word “is” attends to each word so far</text><text class="note" x="370.0" y="52" text-anchor="middle" font-size="16" style="fill:currentColor;font-weight:700">The</text><text class="note" x="466.0" y="52" text-anchor="middle" font-size="16" style="fill:currentColor;font-weight:700">capital</text><text class="note" x="562.0" y="52" text-anchor="middle" font-size="16" style="fill:currentColor;font-weight:700">of</text><text class="note" x="658.0" y="52" text-anchor="middle" font-size="16" style="fill:currentColor;font-weight:700">Gal</text><text class="note" x="754.0" y="52" text-anchor="middle" font-size="16" style="fill:currentColor;font-weight:700">icia</text><text class="note" x="850.0" y="52" text-anchor="middle" font-size="16" style="fill:currentColor;font-weight:700">is</text></g><g data-s="1" data-d="0" data-a="fade" data-t="0.4"><text class="note" x="14.0" y="104" text-anchor="start" font-size="16" style="fill:currentColor;font-weight:700">weights as trained</text><text class="note" x="14.0" y="126" text-anchor="start" font-size="15" style="fill:var(--orange)">scores as trained</text><line x1="326.0" y1="128" x2="894.0" y2="128" stroke="var(--muted)" stroke-width="1.6"/><rect x="634.0" y="116.1" width="48" height="11.9" fill="var(--blue)" fill-opacity="0.7"/><text class="note" x="658.0" y="110.0552" text-anchor="middle" font-size="14" style="fill:currentColor">21%</text><rect x="730.0" y="104.1" width="48" height="23.9" fill="var(--blue)" fill-opacity="0.7"/><text class="note" x="754.0" y="98.0824" text-anchor="middle" font-size="14" style="fill:currentColor">43%</text><rect x="826.0" y="107.9" width="48" height="20.1" fill="var(--blue)" fill-opacity="0.7"/><text class="note" x="850.0" y="101.896" text-anchor="middle" font-size="14" style="fill:currentColor">36%</text></g><g data-s="2" data-d="0" data-a="fade" data-t="0.4"><text class="note" x="14.0" y="188" text-anchor="start" font-size="16" style="fill:currentColor;font-weight:700">query and key weights × 3</text><text class="note" x="14.0" y="210" text-anchor="start" font-size="15" style="fill:var(--orange)">scores × 9</text><line x1="326.0" y1="212" x2="894.0" y2="212" stroke="var(--muted)" stroke-width="1.6"/><rect x="730.0" y="165.8" width="48" height="46.2" fill="var(--blue)" fill-opacity="0.7"/><text class="note" x="754.0" y="183.772" text-anchor="middle" font-size="14" style="fill:currentColor">83%</text><rect x="826.0" y="202.3" width="48" height="9.7" fill="var(--blue)" fill-opacity="0.7"/><text class="note" x="850.0" y="196.3176" text-anchor="middle" font-size="14" style="fill:currentColor">17%</text></g><g data-s="3" data-d="0" data-a="fade" data-t="0.4"><text class="note" x="14.0" y="272" text-anchor="start" font-size="16" style="fill:currentColor;font-weight:700">query and key weights × 10</text><text class="note" x="14.0" y="294" text-anchor="start" font-size="15" style="fill:var(--orange)">scores × 100</text><line x1="326.0" y1="296" x2="894.0" y2="296" stroke="var(--muted)" stroke-width="1.6"/><rect x="730.0" y="240.0" width="48" height="56.0" fill="var(--blue)" fill-opacity="0.7"/><text class="note" x="754.0" y="258.0" text-anchor="middle" font-size="14" style="fill:currentColor">100%</text></g><g data-s="4" data-d="0" data-a="fade" data-t="0.4"><text class="note" x="14.0" y="350" text-anchor="start" font-size="18" style="fill:var(--orange)">Larger weights make larger scores, and softmax then gives everything to one word</text></g>
-      </svg>
-      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
-    </div>
-    <ul class="points" style="max-width:none"><li>Real attention of Qwen2.5-1.5B, one head of the first layer, in “The capital of Galicia is Santiago de Compostela.”</li></ul>
-  </div>
-</section>
-
 <section class="screen" id="float" data-step="1">
   <header><h2>A floating-point number has three parts</h2><p class="sub">The IEEE 754 standard: sign, exponent, mantissa</p></header>
   <div class="body">
@@ -1638,7 +1625,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
   </ul>
   <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
   <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Topic 2. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-    <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-05T12:48Z">5 Nov 2026, 12:48 UTC</time></p><!--/STAMP-->
+    <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-05T12:50Z">5 Nov 2026, 12:50 UTC</time></p><!--/STAMP-->
   </footer>
 
 <div class="pbar" aria-label="Presentation controls">
