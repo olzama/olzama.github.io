@@ -364,7 +364,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
   </section>
 
-<div class="part" id="part-step1"><h1>Step 1 · Retrieve, then read</h1></div>
+<div class="part" id="part-step1"><h1>Retrieve, then read</h1></div>
 
 <section class="screen" id="rag" data-step="1">
   <header><h2>Retrieval-augmented generation (RAG)</h2></header>
@@ -424,7 +424,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
   </section>
 
-<div class="part" id="part-step2"><h1>Step 2 · Dense retrieval</h1></div>
+<div class="part" id="part-step2"><h1>Dense retrieval</h1></div>
 
 <section class="screen" id="howfind" data-step="2">
   <header><h2>How a retriever finds documents</h2><p class="sub">The cosine similarity of Topic 1, for whole texts</p></header>
@@ -512,7 +512,7 @@ body.notesview #nv { display: grid; gap: 14px; padding: 18px max(22px, env(safe-
   </div>
   </section>
 
-<div class="part" id="part-step3"><h1>Step 3 · Sparse retrieval</h1></div>
+<div class="part" id="part-step3"><h1>Sparse retrieval</h1></div>
 
 <section class="screen" id="tfidf" data-step="3">
   <header><h2>The older method: count shared words, weighted by rarity</h2><p class="sub">TF-IDF; an improved version, BM25, is still used in search engines</p></header>
@@ -969,7 +969,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
   </div>
   </section>
 
-<div class="part" id="part-step4"><h1>Step 4 · What retrieval saves</h1></div>
+<div class="part" id="part-step4"><h1>What retrieval saves</h1></div>
 
 <section class="screen" id="payoff" data-step="4">
   <header><h2>Fewer tokens to read</h2><p class="sub">The 26 documents, cut into tokens the way Qwen2.5 cuts them, without the question; top 2 by the dense retriever: the average over the 26 questions (TF-IDF's: 311)</p></header>
@@ -1042,7 +1042,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
   <p class="src">Li, Li, Zhang, Mei &amp; Bendersky, “Retrieval augmented generation or long-context LLMs? A comprehensive study and hybrid approach,” EMNLP 2024 Industry Track</p>
   </section>
 
-<div class="part" id="part-step5"><h1>Step 5 · What can go wrong</h1></div>
+<div class="part" id="part-step5"><h1>What can go wrong</h1></div>
 
 <section class="screen" id="misses" data-step="5">
   <header><h2>The retriever can miss</h2><p class="sub">Then the answer is not in the prompt at all</p></header>
@@ -1102,7 +1102,7 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
   </div>
   </section>
 
-<div class="part" id="part-step6"><h1>Step 6 · Retrieval for translation</h1></div>
+<div class="part" id="part-step6"><h1>Retrieval for translation</h1></div>
 
 <section class="screen" id="knnmt" data-step="6">
   <header><h2>Retrieval works for translation too</h2></header>
@@ -1282,7 +1282,8 @@ for name, vec in sorted(TOY_DOC_VECTORS.items(), key=lambda x: -cosine_sim(q, x[
   </ul>
   <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
   <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Topic 3. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>, except the quoted sentences of <i>Speechwriter</i>.</p>
-</footer>
+    <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-05T14:55Z">5 Nov 2026, 14:55 UTC</time></p><!--/STAMP-->
+  </footer>
 
 <div class="pbar" aria-label="Presentation controls">
   <span class="where" id="pWhere"></span>
@@ -1642,7 +1643,7 @@ function show(i, opts = {}) {
   const fs = frags(cur), n = opts.shown ?? (opts.back ? fs.length : 0);
   fs.forEach((f, k) => f.classList.toggle("hide", k >= n));
   const m = meta(cur);
-  $("pWhere").textContent = m.step ? `Step ${m.step} of ${STEPS.length} · ${STEPS[m.step - 1]}` : m.part;
+  $("pWhere").textContent = m.step ? STEPS[m.step - 1] : m.part;
   $("pCount").textContent = `${cur + 1} / ${screens.length}`;
   screens[cur].scrollTop = 0;
   try { history.replaceState(null, "", "#" + screens[cur].id); } catch (e) {}
