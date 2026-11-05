@@ -293,22 +293,19 @@ html.embed .fields { container-type: inline-size; }
   <!-- 5 -->
   <section class="panel" id="blocks">
     <h2><span class="n">5</span>One scale per block</h2>
-    <p class="lead">Sixteen weights of very different sizes, stored with 4 bits. With one scale for all of them, the large weights set the range and the small ones round to 0. Give each block of weights its own scale, and the small ones keep their values. Each scale costs 16 more bits.</p>
+    <p class="lead">The 96 neighboring weights from the slide, stored with 4 bits, with a scale for every block of weights. Each bar is the code a weight gets, from 0 to 7, and a block's largest weight always reaches code 7. Smaller blocks give more weights a code above 0, and every extra scale takes 16 more bits.</p>
     <div class="strip"><div class="controls">
       <span class="note">Weights per block:</span>
       <div class="seg" role="group" aria-label="Block size" id="bSize">
-        <button data-k="16" aria-pressed="true">16 (one scale)</button><button data-k="8" aria-pressed="false">8</button><button data-k="4" aria-pressed="false">4</button>
+        <button data-k="96" aria-pressed="true">96 (one scale)</button><button data-k="32" aria-pressed="false">32</button><button data-k="16" aria-pressed="false">16</button><button data-k="8" aria-pressed="false">8</button>
       </div>
     </div></div>
-    <svg class="fig" id="bFig" viewBox="0 0 900 240" role="img" aria-label="Each weight and its stored value"></svg>
+    <svg class="fig" id="bFig" viewBox="0 0 900 250" role="img" aria-label="The code of each of the 96 weights, block by block"></svg>
     <div class="legendrow">
-      <span><span class="sw" style="border:2px solid var(--muted)"></span>the weight</span>
-      <span><span class="sw" style="background:var(--blue)"></span>what is stored, after rounding</span>
-      <span><span class="sw" style="background:var(--neg)"></span>a weight rounded to 0</span>
-      <span>Bar heights: square root of the size, so the small weights stay visible.</span>
+      <span><span class="sw" style="background:var(--blue)"></span>the code of a weight, without its sign</span>
+      <span><span class="sw" style="background:var(--neg)"></span>a weight stored as code 0</span>
     </div>
     <div class="stats" id="bStats" aria-live="polite"></div>
-    <p class="note">Files in the GGUF format (llama.cpp) use this idea. Type Q4_0, for example, stores blocks of 32 weights at 4 bits, plus one 16-bit scale per block: 4 + 16 ÷ 32 = 4.5 bits per weight.</p>
   </section>
 
   <button id="askbtn" hidden>Ask Claude</button>
@@ -667,32 +664,33 @@ gReset(); drawGptq();
 window.__askState.push(() => `Section 4: mode ${gmode}; weights ${GW.join(", ")}, inputs ${GX.join(", ")}; ${gi} rounded; current ${gcur.map(n3).join(", ")}; output ${n3(gOut())} against ${n3(Y0)}`);
 
 /* ================= 5. block scales ================= */
-const BW = [0.1, -0.2, 0.15, 0.05, 2.0, -1.5, 1.8, 0.9, 0.02, -0.04, 0.03, -0.01, 0.6, -0.5, 0.4, 0.7];
-let bk = 16;
+const BW = [-0.127,-0.1226,-0.0605,-0.3809,-0.1943,0.2002,0.0874,0.04,0.1836,0.1787,-0.0054,0.0214,-0.1094,0.1846,0.1104,-0.2256,-0.0835,-0.5,-0.0928,-0.1406,0.0933,0.0625,0.05,0.0311,0.248,0.0996,0.0325,-0.1079,0.0586,0.1621,-0.0258,0.0094,-0.2715,-0.1777,-0.1895,0.0258,0.0415,-0.2969,0.0052,-0.0054,-0.2246,0.0388,0.0094,0.1035,0.0757,-0.0366,0.0243,-0.106,-0.1128,-0.006,-0.1338,0.2168,-0.125,-0.2031,0.0018,0.0037,-0.1011,3.0625,0.2754,-0.1133,-0.0898,0.0124,-0.2002,-0.2559,-0.1279,0.0547,-0.0204,-0.0148,-0.0825,0.1533,0.2148,0.1826,-0.0549,-0.0452,-0.293,0.0096,-0.1982,-0.127,0.0023,-0.168,-0.1406,-0.0869,-0.1504,-0.042,0.1079,0.0884,-0.0684,-0.0245,0.2715,0.124,-0.2129,0.1709,0.019,-0.252,0.1426,0.2695];  // Qwen2.5-1.5B, model.layers.15.self_attn.q_proj.weight, row 1023
+let bk = 96;
 function drawBlocks() {
   const b = 4, svg = $("bFig"); svg.innerHTML = "";
-  const stored = [], scales = [];
-  for (let i = 0; i < BW.length; i += bk) { const r = absmax(BW.slice(i, i + bk), b); scales.push(r.s); stored.push(...r.dq); }
-  const y0 = 120, H = 50, W = 50, X = i => 50 + i * W + (Math.floor(i / bk)) * 0;
-  for (let k = 0; k < BW.length / bk; k++) {
-    el(svg, "rect", { x: X(k * bk) - 4, y: 6, width: bk * W - 2, height: 228, rx: 8, fill: k % 2 ? "var(--grid)" : "none", stroke: "var(--line)" });
-    el(svg, "text", { x: X(k * bk) + 4, y: 22, class: "lab" }, `scale ${f2(scales[k])}`);
+  const codes = [], stored = [], alphas = [];
+  for (let i = 0; i < BW.length; i += bk) { const r = absmax(BW.slice(i, i + bk), b); alphas.push(r.a); codes.push(...r.q); stored.push(...r.dq); }
+  const y0 = 196, U = 20, BWD = 8.6, X0 = 56;
+  const left = k => X0 + k * bk * BWD, right = k => X0 + (k + 1) * bk * BWD - 2.6;
+  for (let c = 0; c <= 7; c++) {
+    el(svg, "line", { x1: 50, x2: 884, y1: y0 - c * U, y2: y0 - c * U, stroke: c ? "var(--grid)" : "var(--muted)", "stroke-width": c ? 1 : 2 });
+    el(svg, "text", { x: 42, y: y0 - c * U + 4, "text-anchor": "end", class: "lab" }, c);
   }
-  el(svg, "line", { x1: 40, x2: 860, y1: y0, y2: y0, stroke: "var(--muted)" });
-  el(svg, "text", { x: 44, y: 212, "text-anchor": "end", class: "lab" }, "stored");
-  el(svg, "text", { x: 44, y: 228, "text-anchor": "end", class: "lab" }, "weight");
+  el(svg, "text", { x: 42, y: y0 - 7 * U - 16, "text-anchor": "end", class: "lab" }, "code");
   BW.forEach((w, i) => {
-    const x = X(i) + 8, hw = W - 18, hs = v => Math.sign(v) * Math.sqrt(Math.abs(v) / 2) * H * 1.8;  // square-root heights, so small weights stay visible
-    const zero = stored[i] === 0;
-    if (!zero) el(svg, "rect", { x, y: stored[i] > 0 ? y0 - hs(stored[i]) : y0, width: hw, height: Math.abs(hs(stored[i])), fill: "var(--blue)", opacity: 0.85 });
-    el(svg, "rect", { x: x - 2, y: w > 0 ? y0 - hs(w) : y0, width: hw + 4, height: Math.max(1, Math.abs(hs(w))), fill: "none", stroke: zero ? "var(--neg)" : "var(--muted)", "stroke-width": 2 });
-    el(svg, "text", { x: x + hw / 2, y: 228, "text-anchor": "middle", "font-size": 10, fill: zero ? "var(--neg)" : "var(--fg)" }, f2(w));
-    el(svg, "text", { x: x + hw / 2, y: 212, "text-anchor": "middle", "font-size": 10, class: "m" }, zero ? "0" : f2(stored[i]));
+    const x = X0 + i * BWD, h = Math.abs(codes[i]) * U;
+    if (h) el(svg, "rect", { x, y: y0 - h, width: BWD - 2.6, height: h, fill: "var(--blue)", opacity: 0.85 });
+    else el(svg, "rect", { x, y: y0 + 3, width: BWD - 2.6, height: 5, fill: "var(--neg)" });
   });
-  const zeros = stored.filter((v, i) => v === 0 && BW[i] !== 0).length;
-  const rel = BW.reduce((t, w, i) => t + Math.abs(w - stored[i]) / Math.abs(w), 0) / BW.length;
-  $("bStats").innerHTML = `<span>scales: <b>${scales.length}</b></span><span>weights rounded to 0: <b>${zeros}</b></span>` +
-    `<span>average error, relative to each weight: <b>${Math.round(rel * 100)}%</b></span><span>bits per weight: 4 + 16 ÷ ${bk} = <b>${4 + 16 / bk}</b></span>`;
+  for (let k = 0; k < BW.length / bk; k++) {
+    const l = left(k), r = right(k);
+    el(svg, "path", { d: `M${l},${y0 + 14} v6 H${r} v-6`, fill: "none", stroke: "var(--orange)", "stroke-width": 2 });
+    el(svg, "text", { x: (l + r) / 2, y: y0 + 38, "text-anchor": "middle", class: "lab", style: "fill:var(--orange)" }, `α = ${f2(alphas[k])}`);
+  }
+  const zeros = codes.filter(c => c === 0).length;
+  const mae = BW.reduce((t, w, i) => t + Math.abs(w - stored[i]), 0) / BW.length;
+  $("bStats").innerHTML = `<span>scales: <b>${alphas.length}</b></span><span>weights stored as code 0: <b>${zeros}</b> of ${BW.length}</span>` +
+    `<span>mean absolute error: <b>${mae.toFixed(3)}</b></span><span>bits per weight: (${bk} × 4 + 16) ÷ ${bk} = <b>${f2((bk * 4 + 16) / bk)}</b></span>`;
 }
 $("bSize").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; bk = +b.dataset.k; press($("bSize"), b); drawBlocks(); reveal("bStats"); });
 drawBlocks();
@@ -708,7 +706,7 @@ The page:
 - Section 2, absmax: values 5.47, 3.08, −7.59, 0, −1.85, −4.57, 10.8, 3.02, −1.92 (from Grootendorst's visual guide). α = 10.8; scale s = (2^(b−1) − 1) / α, e.g. 127 / 10.8 ≈ 11.76 at 8 bits; code = round(x · s); dequantized = code / s. At 8 bits 3.08 and 3.02 both get code 36.
 - Section 3, outliers: 24 ordinary values in [−2, 2] (Notebook 02b, NumPy seed 7) plus 256. Without clipping at 8 bits, s = 127/256 ≈ 0.50, so the ordinary values use only codes −1, 0, 1. Clipping to [−c, c] first gives them more codes; the outlier is stored as c.
 - Section 4, GPTQ: weights 0.37, 0.52, −0.18, 0.66, 0.29, −0.41, inputs 2, 1, 1.5, 0.5, 1, 2, grid of 0.25. Rounding each weight on its own, or GPTQ-style: round weight i, then add its output error (w − rounded)·x_i, divided by x_(i+1), to weight i+1 before rounding it. Real GPTQ spreads the correction over all remaining weights, using calibration inputs.
-- Section 5, block scales: 16 weights of mixed sizes at 4 bits, one absmax scale per block of 16, 8 or 4; each scale costs 16 bits. GGUF type Q4_0 uses blocks of 32: 4.5 bits per weight.`;
+- Section 5, block scales: 96 neighboring weights of one row of a real model at 4 bits, one absmax scale per block of 96, 32, 16 or 8; each scale costs 16 bits. GGUF type Q4_0 uses blocks of 32: 4.5 bits per weight.`;
 (async () => {
   // window.claude exists only inside a Claude viewer; elsewhere the button stays hidden
   const sample = window.claude ? await window.claude.use("sample") : null;
