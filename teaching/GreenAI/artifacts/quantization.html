@@ -292,12 +292,12 @@ html.embed .fields { container-type: inline-size; }
 
   <!-- 5 -->
   <section class="panel" id="blocks">
-    <h2><span class="n">5</span>One scale per block</h2>
-    <p class="lead">The 96 neighboring weights from the slide, stored with 4 bits, with a scale for every block of weights. Each bar is the code a weight gets, from 0 to 7, and a block's largest weight always reaches code 7. Smaller blocks give more weights a code above 0, and every extra scale takes 16 more bits.</p>
+    <h2><span class="n">5</span>Smaller blocks: less error, more bits</h2>
+    <p class="lead">How large should a block be? These are the 96 weights of the GGUF slide, stored with 4 bits. Each bar is the code of a weight, from 0 to 7. Pick a block size and compare it with the others in the charts below: smaller blocks store the weights more exactly, and every block adds a 16-bit scale.</p>
     <div class="strip"><div class="controls">
       <span class="note">Weights per block:</span>
       <div class="seg" role="group" aria-label="Block size" id="bSize">
-        <button data-k="96" aria-pressed="true">96 (one scale)</button><button data-k="32" aria-pressed="false">32</button><button data-k="16" aria-pressed="false">16</button><button data-k="8" aria-pressed="false">8</button>
+        <button data-k="96" aria-pressed="true">96 (one scale)</button><button data-k="32" aria-pressed="false">32</button><button data-k="16" aria-pressed="false">16</button><button data-k="8" aria-pressed="false">8</button><button data-k="4" aria-pressed="false">4</button>
       </div>
     </div></div>
     <svg class="fig" id="bFig" viewBox="0 0 900 250" role="img" aria-label="The code of each of the 96 weights, block by block"></svg>
@@ -305,7 +305,9 @@ html.embed .fields { container-type: inline-size; }
       <span><span class="sw" style="background:var(--blue)"></span>the code of a weight, without its sign</span>
       <span><span class="sw" style="background:var(--neg)"></span>a weight stored as code 0</span>
     </div>
+    <svg class="fig" id="bTrade" viewBox="0 0 900 160" role="img" aria-label="For block sizes 96, 32, 16, 8 and 4: weights stored as code 0, average error of a weight, and bits per weight"></svg>
     <div class="stats" id="bStats" aria-live="polite"></div>
+    <p class="note">GGUF type Q4_0 uses blocks of 32 weights. At 4 weights per block, the file needs 8 bits per weight: as many as plain 8-bit quantization.</p>
   </section>
 
   <button id="askbtn" hidden>Ask Claude</button>
@@ -329,7 +331,7 @@ html.embed .fields { container-type: inline-size; }
     </ul>
     <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Topic 2. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-05T16:33Z">5 Nov 2026, 16:33 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-06T13:47Z">6 Nov 2026, 13:47 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -666,6 +668,26 @@ window.__askState.push(() => `Section 4: mode ${gmode}; weights ${GW.join(", ")}
 /* ================= 5. block scales ================= */
 const BW = [-0.127,-0.1226,-0.0605,-0.3809,-0.1943,0.2002,0.0874,0.04,0.1836,0.1787,-0.0054,0.0214,-0.1094,0.1846,0.1104,-0.2256,-0.0835,-0.5,-0.0928,-0.1406,0.0933,0.0625,0.05,0.0311,0.248,0.0996,0.0325,-0.1079,0.0586,0.1621,-0.0258,0.0094,-0.2715,-0.1777,-0.1895,0.0258,0.0415,-0.2969,0.0052,-0.0054,-0.2246,0.0388,0.0094,0.1035,0.0757,-0.0366,0.0243,-0.106,-0.1128,-0.006,-0.1338,0.2168,-0.125,-0.2031,0.0018,0.0037,-0.1011,3.0625,0.2754,-0.1133,-0.0898,0.0124,-0.2002,-0.2559,-0.1279,0.0547,-0.0204,-0.0148,-0.0825,0.1533,0.2148,0.1826,-0.0549,-0.0452,-0.293,0.0096,-0.1982,-0.127,0.0023,-0.168,-0.1406,-0.0869,-0.1504,-0.042,0.1079,0.0884,-0.0684,-0.0245,0.2715,0.124,-0.2129,0.1709,0.019,-0.252,0.1426,0.2695];  // Qwen2.5-1.5B, model.layers.15.self_attn.q_proj.weight, row 1023
 let bk = 96;
+const BK = [96, 32, 16, 8, 4];
+const bRow = k => { const cs = [], st = []; for (let i = 0; i < BW.length; i += k) { const r = absmax(BW.slice(i, i + k), 4); cs.push(...r.q); st.push(...r.dq); }
+  return { zeros: cs.filter(c => c === 0).length, err: BW.reduce((t, w, i) => t + Math.abs(w - st[i]), 0) / BW.length, bits: (k * 4 + 16) / k }; };
+const BROWS = BK.map(bRow);
+function drawTrade() {
+  const svg = $("bTrade"); svg.innerHTML = "";
+  const cols = [["weights stored as code 0", "zeros", v => v, "var(--neg)"], ["average error of a weight", "err", v => v.toFixed(3), "var(--neg)"], ["bits per weight", "bits", v => f2(v), "var(--blue)"]];
+  el(svg, "text", { x: 0, y: 16, class: "lab" }, "block size");
+  BK.forEach((k, i) => el(svg, "text", { x: 52, y: 42 + i * 25, "text-anchor": "end", class: "lab", style: k === bk ? "font-weight:700;fill:var(--fg)" : "" }, k));
+  cols.forEach(([title, key, fmt, col], c) => {
+    const x0 = 66 + c * 282, W = 200, mx = Math.max(...BROWS.map(r => r[key]));
+    el(svg, "text", { x: x0, y: 16, class: "lab" }, title);
+    el(svg, "line", { x1: x0, x2: x0, y1: 24, y2: 152, stroke: "var(--muted)" });
+    BROWS.forEach((r, i) => {
+      const w = Math.max(r[key] / mx * W, 1), on = BK[i] === bk;
+      el(svg, "rect", { x: x0, y: 29 + i * 25, width: w, height: 18, rx: 3, fill: col, opacity: on ? 0.9 : 0.3 });
+      el(svg, "text", { x: x0 + w + 6, y: 42 + i * 25, class: "lab", style: on ? "font-weight:700;fill:var(--fg)" : "" }, fmt(r[key]));
+    });
+  });
+}
 function drawBlocks() {
   const b = 4, svg = $("bFig"); svg.innerHTML = "";
   const codes = [], stored = [], alphas = [];
@@ -687,10 +709,9 @@ function drawBlocks() {
     el(svg, "path", { d: `M${l},${y0 + 14} v6 H${r} v-6`, fill: "none", stroke: "var(--orange)", "stroke-width": 2 });
     el(svg, "text", { x: (l + r) / 2, y: y0 + 38, "text-anchor": "middle", class: "lab", style: "fill:var(--orange)" }, `α = ${f2(alphas[k])}`);
   }
-  const zeros = codes.filter(c => c === 0).length;
-  const mae = BW.reduce((t, w, i) => t + Math.abs(w - stored[i]), 0) / BW.length;
-  $("bStats").innerHTML = `<span>scales: <b>${alphas.length}</b></span><span>weights stored as code 0: <b>${zeros}</b> of ${BW.length}</span>` +
-    `<span>mean absolute error: <b>${mae.toFixed(3)}</b></span><span>bits per weight: (${bk} × 4 + 16) ÷ ${bk} = <b>${f2((bk * 4 + 16) / bk)}</b></span>`;
+  const nb = BW.length / bk;
+  $("bStats").innerHTML = `<span>${nb === 1 ? "one block" : nb + " blocks"} of ${bk} weights: <b>${nb}</b> × 16 bits for the scales</span><span>bits per weight: (${bk} × 4 + 16) ÷ ${bk} = <b>${f2((bk * 4 + 16) / bk)}</b></span>`;
+  drawTrade();
 }
 $("bSize").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; bk = +b.dataset.k; press($("bSize"), b); drawBlocks(); reveal("bStats"); });
 drawBlocks();
@@ -706,7 +727,7 @@ The page:
 - Section 2, absmax: values 5.47, 3.08, −7.59, 0, −1.85, −4.57, 10.8, 3.02, −1.92 (from Grootendorst's visual guide). α = 10.8; scale s = (2^(b−1) − 1) / α, e.g. 127 / 10.8 ≈ 11.76 at 8 bits; code = round(x · s); dequantized = code / s. At 8 bits 3.08 and 3.02 both get code 36.
 - Section 3, outliers: 24 ordinary values in [−2, 2] (Notebook 02b, NumPy seed 7) plus 256. Without clipping at 8 bits, s = 127/256 ≈ 0.50, so the ordinary values use only codes −1, 0, 1. Clipping to [−c, c] first gives them more codes; the outlier is stored as c.
 - Section 4, GPTQ: weights 0.37, 0.52, −0.18, 0.66, 0.29, −0.41, inputs 2, 1, 1.5, 0.5, 1, 2, grid of 0.25. Rounding each weight on its own, or GPTQ-style: round weight i, then add its output error (w − rounded)·x_i, divided by x_(i+1), to weight i+1 before rounding it. Real GPTQ spreads the correction over all remaining weights, using calibration inputs.
-- Section 5, block scales: 96 neighboring weights of one row of a real model at 4 bits, one absmax scale per block of 96, 32, 16 or 8; each scale costs 16 bits. GGUF type Q4_0 uses blocks of 32: 4.5 bits per weight.`;
+- Section 5, block scales: 96 neighboring weights of one row of a real model at 4 bits, one absmax scale per block of 96, 32, 16, 8 or 4; each scale costs 16 bits. Charts compare weights stored as code 0, average error and bits per weight across the block sizes. GGUF type Q4_0 uses blocks of 32: 4.5 bits per weight.`;
 (async () => {
   // window.claude exists only inside a Claude viewer; elsewhere the button stays hidden
   const sample = window.claude ? await window.claude.use("sample") : null;
