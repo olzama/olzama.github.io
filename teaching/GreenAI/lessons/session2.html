@@ -1267,51 +1267,10 @@ for clip in [None, 10.0, 5.0, 2.5]:
       </svg>
       <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
     </div>
-    <ul class="points" style="max-width:none"><li>In a real table, each output has many weights, and the inputs change from run to run. GPTQ takes its x from the calibration data, and after each rounding it changes all the weights not yet rounded, to keep the outputs close on average over those inputs</li></ul>
+    <ul class="points" style="max-width:none"><li>In a real table, each output has many weights, and the inputs change from run to run. GPTQ takes its x from the calibration data, and after each rounding it changes all the weights not yet rounded, to keep the outputs close on average over those inputs</li><li>For two weights, the correction is w₂ + (w₁ − rounded w₁) × x₁ ÷ x₂. With it, GPTQ reaches 4 bits per weight with little loss, without retraining</li></ul>
+    <p class="src">Frantar et al., “GPTQ: Accurate post-training quantization for generative pre-trained transformers,” ICLR 2023</p>
   </div>
 </section>
-
-<section class="screen" id="gptq" data-step="5">
-  <header><h2>GPTQ: the calculation, for two weights</h2><p class="sub">One output of a learned table: the dot product of two weights with the input x = (2, 1); weights rounded to multiples of 0.25</p></header>
-  <div class="body cols wide-left">
-    <div class="col">
-      <div class="board">
-      <svg viewBox="0 0 640 520" role="img" aria-label="y = w1·2 + w2·1. Original 0.37·2 + 0.52·1 = 1.26. Rounded on their own to 0.25 and 0.50: 1.00, error 0.26. GPTQ: w1 0.37 → 0.25 loses 0.12·2 = 0.24; w2 0.52 + 0.24 ÷ 1 = 0.76 → 0.75; 0.25·2 + 0.75·1 = 1.25, error 0.01">
-<text y="36" font-size="24" style="fill:var(--muted)" data-s="1" data-d="0" data-line="F" data-x0="20">y = w<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan>·2 + w<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan>·1</text>
-<text y="96" font-size="24" style="fill:var(--blue)" data-s="2" data-d="0" data-line="O" data-x0="20" id="o0">original:</text>
-<text y="96" font-size="24" style="fill:currentColor" data-s="2" data-d="0.3" data-line="O">0.37·2 + 0.52·1</text>
-<text y="96" font-size="24" style="fill:currentColor" data-s="3" data-d="0" data-line="O">= 0.74 + 0.52</text>
-<text y="96" font-size="24" style="fill:var(--blue)" data-s="4" data-d="0" data-line="O">= 1.26</text>
-<text y="158" font-size="20" style="fill:var(--orange)" data-s="5" data-d="0" data-line="Nl" data-x0="20">round each weight on its own:</text>
-<text y="198" font-size="24" style="fill:currentColor" data-s="6" data-d="0" data-line="N" data-x0="40">0.37 → 0.25,</text>
-<text y="198" font-size="24" style="fill:currentColor" data-s="6" data-d="0.3" data-line="N">0.52 → 0.50</text>
-<text y="238" font-size="24" style="fill:currentColor" data-s="7" data-d="0" data-line="N2" data-x0="40">0.25·2 + 0.50·1</text>
-<text y="238" font-size="24" style="fill:currentColor" data-s="8" data-d="0" data-line="N2">= 0.50 + 0.50</text>
-<text y="238" font-size="24" style="fill:var(--orange)" data-s="9" data-d="0" data-line="N2">= 1.00</text>
-<text y="238" font-size="24" style="fill:var(--neg)" data-s="9" data-d="0.4" data-line="N2">error 0.26</text>
-<text y="300" font-size="20" style="fill:var(--green)" data-s="10" data-d="0" data-line="Gl" data-x0="20">GPTQ: round, then correct the next weight:</text>
-<text y="340" font-size="24" style="fill:currentColor" data-s="11" data-d="0" data-line="G1" data-x0="40">w<tspan dy="6" font-size="0.68em">1</tspan><tspan dy="-6">​</tspan>: 0.37 → 0.25</text>
-<text y="340" font-size="24" style="fill:var(--neg)" data-s="12" data-d="0" data-line="G1" data-gap="7">the output loses 0.12·2 = 0.24</text>
-<text y="385" font-size="24" style="fill:currentColor" data-s="13" data-d="0" data-line="G2" data-x0="40">w<tspan dy="6" font-size="0.68em">2</tspan><tspan dy="-6">​</tspan>: 0.52 + 0.24 ÷ 1</text>
-<text y="385" font-size="24" style="fill:currentColor" data-s="14" data-d="0" data-line="G2">= 0.76</text>
-<text y="385" font-size="24" style="fill:var(--green)" data-s="15" data-d="0" data-line="G2">→ 0.75</text>
-<text y="430" font-size="24" style="fill:currentColor" data-s="16" data-d="0" data-line="G3" data-x0="40">0.25·2 + 0.75·1</text>
-<text y="430" font-size="24" style="fill:currentColor" data-s="17" data-d="0" data-line="G3">= 0.50 + 0.75</text>
-<text y="475" font-size="24" style="fill:var(--green)" data-s="18" data-d="0" data-line="G4" data-x0="40">= 1.25</text>
-<text y="475" font-size="24" style="fill:var(--green)" data-s="18" data-d="0.4" data-line="G4">error 0.01</text>
-      </svg>
-      <div class="bctl"><button class="bstart">↺ Start</button><button class="bprev">◀ Back</button><button class="primary bnext">Next step ▶</button><button class="bplay">Play all</button><span class="bstep"></span></div>
-    </div>
-    </div>
-    <div class="col">
-      <ul class="points">
-                <li>GPTQ rounds the weights one at a time. After each, it changes the weights not yet rounded to make up for the error: w₂ becomes w₂ + (w₁ − rounded w₁) · x₁ ÷ x₂</li>
-                <li>4 bits per weight with little loss, without retraining</li>
-      </ul>
-      <p class="src">Frantar et al., “GPTQ: Accurate post-training quantization for generative pre-trained transformers,” ICLR 2023</p>
-    </div>
-  </div>
-  </section>
 
 <section class="screen fill" id="gptq-i" data-step="5">
   <header><span class="kind">Interactive</span><h2>Watch GPTQ correct the next weight</h2></header>
@@ -1655,7 +1614,7 @@ for clip in [None, 10.0, 5.0, 2.5]:
   </ul>
   <p>Fonts: Questrial (Joe Prince) and IBM Plex Mono (IBM), SIL Open Font License, served by Google Fonts. Pyodide, Mozilla Public License 2.0.</p>
   <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Topic 2. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
-    <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-06T11:13Z">6 Nov 2026, 11:13 UTC</time></p><!--/STAMP-->
+    <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-06T13:36Z">6 Nov 2026, 13:36 UTC</time></p><!--/STAMP-->
   </footer>
 
 <div class="pbar" aria-label="Presentation controls">
