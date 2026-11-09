@@ -585,7 +585,7 @@ footer .license { margin-top: 12px; padding-top: 10px; border-top: 1px solid var
     </ul>
     <p>Fonts: Questrial (Joe Prince), IBM Plex Mono (IBM) and IM FELL English (Igino Marini), SIL Open Font License, served by Google Fonts.</p>
     <p class="license">© 2026 Olga Zamaraeva, Universidade da Coruña. Green AI, Topic 1. Licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>. The Shakespeare text is in the public domain.</p>
-      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-04T15:07Z">4 Nov 2026, 15:07 UTC</time></p><!--/STAMP-->
+      <!--STAMP--><p class="stamp" id="pageStamp">Last updated <time datetime="2026-11-09T14:38Z">9 Nov 2026, 14:38 UTC</time></p><!--/STAMP-->
   </footer>
 </div>
 
@@ -1089,10 +1089,8 @@ for (let i = 0; i < L; i++) {
 const S = idOf.get("<s>");
 for (let i = L; i < L + PAD; i++) t[i] = S;
 const V = vocab.length;
-// char offset of each work, for naming the source of a quote
-const joined = " " + text + " ";
-const workChar = []; { let ti = 0, ch = 1; for (const [title, start] of SHK.works) { while (ti < start) { ch += words[ti].length + 1; ti++; } workChar.push([ch, title]); } }
-const workAt = ch => { let w = workChar[0][1]; for (const [c, title] of workChar) { if (c <= ch) w = title; else break; } return w; };
+// the work a token position falls in, for naming the source of a quote
+const workAt = p => { let w = SHK.works[0][0]; for (const [title, start] of SHK.works) { if (start <= p) w = title; else break; } return w; };
 const pretty = title => title.toLowerCase().replace(/(^|[\s;,(])([a-z’'])/g, (m, a, b) => a + b.toUpperCase()).replace(/ (Of|The|And|Or|In|To|A)\b/g, m => m.toLowerCase()).replace(/’S\b/g, "’s");
 
 // ---------- index: positions sorted by the 4 tokens that start there (LSD radix) ----------
@@ -1120,12 +1118,15 @@ const uni = new Int32Array(V); for (let i = 0; i < L; i++) uni[t[i]]++;
 const N = L - uni[S];
 const uniTop = [...uni.keys()].filter(v => v !== S).sort((a, b) => uni[b] - uni[a]).slice(0, 8);
 // continuations of ctx: within a sorted range they come in runs
+// (cached: the same contexts come up again and again; callers only read the result)
+const ncCache = new Map();
 function nextCounts(ctx) {
   if (!ctx.length) return { total: N, kinds: V - 1, list: uniTop.map(v => [v, uni[v]]) };
+  const key = ctx.join(","); if (ncCache.has(key)) return ncCache.get(key);
   const [a, b] = range(ctx), k = ctx.length, list = [];
   for (let i = a; i < b;) { const v = t[idx[i] + k]; let j = i; while (j < b && t[idx[j] + k] === v) j++; list.push([v, j - i]); i = j; }
   list.sort((x, y) => y[1] - x[1]);
-  return { total: b - a, kinds: list.length, list };
+  const r = { total: b - a, kinds: list.length, list }; ncCache.set(key, r); return r;
 }
 function sample(ctx) {
   if (!ctx.length) { let p; do p = Math.floor(Math.random() * L); while (t[p] === S); return t[p]; }
@@ -1173,11 +1174,25 @@ function generate(n, seed) {
   return steps;
 }
 const wordStr = st => typeof st.w === "number" ? vocab[st.w] : st.w;
+// first token position where the id sequence q occurs in the text, or -1
+function firstAt(q) {
+  if (q.includes(-1)) return -1;
+  const [a, b] = range(q.slice(0, 4));
+  let m = -1;
+  next: for (let i = a; i < b; i++) {
+    const p = idx[i]; if (m >= 0 && p >= m) continue;
+    for (let d = 4; d < q.length; d++) if (t[p + d] !== q[d]) continue next;
+    m = p;
+  }
+  return m;
+}
 function longestQuote(ws) {
   // two pointers: longest window ws[i..j) found verbatim in the text
+  // uses the 4-token index: positions starting with the first 4 words, checked for the rest; the earliest match wins
+  const q = ws.map(w => idOf.has(w) ? idOf.get(w) : -1);
   let best = [0, 0, -1], i = 0, j = 0;
   while (j < ws.length) {
-    const at = joined.indexOf(" " + ws.slice(i, j + 1).join(" ") + " ");
+    const at = firstAt(q.slice(i, j + 1));
     if (at >= 0) { j++; if (j - i > best[1] - best[0]) best = [i, j, at]; }
     else if (i < j) i++;
     else { i++; j++; }
@@ -1267,7 +1282,7 @@ const realLen = p => { let k = 0; while (t[p + k] !== S) k++; return k; };
 function realSentence() {
   for (;;) {
     const p = starts[Math.floor(Math.random() * starts.length)], k = realLen(p);
-    if (k >= 8 && k <= 22) return { ws: Array.from(t.subarray(p, p + k), v => vocab[v]), at: joined.indexOf(" " + Array.from(t.subarray(p, p + k), v => vocab[v]).join(" ") + " ") };
+    if (k >= 8 && k <= 22) return { ws: Array.from(t.subarray(p, p + k), v => vocab[v]), at: firstAt(Array.from(t.subarray(p, p + k))) };
   }
 }
 function fakeSentence(n) {
